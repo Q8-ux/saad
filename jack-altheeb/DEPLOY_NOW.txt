@@ -1,0 +1,4 @@
+Force deploy Jack Altheeb V3
+Commit trigger: 2026-07-16T21:50:00Z
+Expected endpoint: /version
+Expected UI badge: V3 LIVE
