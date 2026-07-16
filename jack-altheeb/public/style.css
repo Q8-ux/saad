@@ -14,9 +14,9 @@
   --purple: #9d5cff;
   --shadow: 0 28px 90px rgba(0,0,0,.48);
   --radius: 28px;
-  --hero-art: url("/assets/hero.svg");
-  --lobby-art: url("/assets/lobby.svg");
-  --board-art: url("/assets/board.svg");
+  --hero-art: url("/assets/art.svg");
+  --lobby-art: url("/assets/art.svg");
+  --board-art: url("/assets/art.svg");
 }
 
 * { box-sizing: border-box; }
