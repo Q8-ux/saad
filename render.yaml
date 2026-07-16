@@ -1,13 +1,17 @@
 services:
   - type: web
     name: jack-altheeb
+    repo: https://github.com/Q8-ux/saad
+    branch: main
     runtime: node
     plan: free
     rootDir: jack-altheeb
-    buildCommand: npm install
+    buildCommand: npm ci
     startCommand: npm start
-    healthCheckPath: /
-    autoDeploy: true
+    healthCheckPath: /version
+    autoDeployTrigger: commit
     envVars:
       - key: NODE_VERSION
-        value: 20
+        value: "20"
+      - key: APP_RELEASE
+        value: "jack-altheeb-v3-20260716"
