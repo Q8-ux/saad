@@ -3,8 +3,8 @@
   "version": "4.0.0",
   "private": true,
   "description": "جاك الذيب - لعبة خليجية أونلاين بحسابات دائمة",
-  "main": "server.js",
-  "scripts": { "start": "node server.js", "dev": "node --watch server.js" },
+  "main": "server-pro.js",
+  "scripts": { "start": "node server-pro.js", "dev": "node --watch server-pro.js" },
   "engines": { "node": ">=20" },
   "dependencies": {
     "bcryptjs": "^3.0.2",
