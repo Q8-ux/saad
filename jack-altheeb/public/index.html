@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#0b1020" />
+  <meta name="description" content="جاك الذيب - لعبة جماعية خليجية أونلاين" />
+  <title>جاك الذيب | لعبة جماعية أونلاين</title>
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <div class="ambient ambient-one"></div>
+  <div class="ambient ambient-two"></div>
+
+  <main class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="wolf-mark" aria-hidden="true">🐺</div>
+        <div>
+          <h1>جاك الذيب</h1>
+          <p>لفّها صح… وانحش قبل لا يصيدونك!</p>
+        </div>
+      </div>
+      <button id="soundBtn" class="icon-btn" type="button" aria-label="الصوت">🔊</button>
+    </header>
+
+    <section id="landingView" class="view active">
+      <div class="hero-grid">
+        <div class="hero-copy card">
+          <span class="eyebrow">WEB PARTY GAME</span>
+          <h2>تحدَّ ربعك في سباق سريع مليان صيد وضحك</h2>
+          <p>أنشئ غرفة، أرسل الرمز لأصدقائك، وابدأوا اللعب مباشرة من الجوال أو الكمبيوتر.</p>
+          <div class="feature-pills">
+            <span>2–4 لاعبين</span>
+            <span>غرف خاصة</span>
+            <span>موبايل أولًا</span>
+          </div>
+        </div>
+
+        <div class="join-card card">
+          <label for="playerName">اسم اللاعب</label>
+          <input id="playerName" maxlength="18" placeholder="مثال: سعد" autocomplete="nickname" />
+
+          <label>اختر شخصيتك</label>
+          <div id="avatarPicker" class="avatar-picker"></div>
+
+          <button id="createRoomBtn" class="primary-btn" type="button">إنشاء غرفة جديدة</button>
+
+          <div class="divider"><span>أو</span></div>
+
+          <div class="join-row">
+            <input id="roomCodeInput" maxlength="5" placeholder="رمز الغرفة" inputmode="text" />
+            <button id="joinRoomBtn" class="secondary-btn" type="button">دخول</button>
+          </div>
+          <p id="landingError" class="error-text" role="alert"></p>
+        </div>
+      </div>
+    </section>
+
+    <section id="lobbyView" class="view">
+      <div class="lobby-layout">
+        <div class="card room-card">
+          <span class="eyebrow">غرفة اللعب</span>
+          <h2>رمز الغرفة</h2>
+          <button id="copyCodeBtn" class="room-code" type="button" title="نسخ الرمز">-----</button>
+          <p>اضغط على الرمز لنسخه ثم أرسله للربع.</p>
+          <button id="shareBtn" class="secondary-btn wide" type="button">مشاركة الدعوة</button>
+        </div>
+
+        <div class="card players-card">
+          <div class="section-heading">
+            <div>
+              <span class="eyebrow">اللاعبون</span>
+              <h2>المتواجدون في الديوانية</h2>
+            </div>
+            <span id="playerCount" class="count-badge">0/4</span>
+          </div>
+          <div id="lobbyPlayers" class="lobby-players"></div>
+          <button id="startGameBtn" class="primary-btn wide" type="button">ابدأ اللعبة</button>
+          <p id="lobbyHint" class="muted">يحتاج لاعبين على الأقل.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="gameView" class="view">
+      <div class="game-layout">
+        <aside class="card side-panel">
+          <div class="room-mini">
+            <span>الغرفة</span>
+            <strong id="miniRoomCode">-----</strong>
+          </div>
+          <div id="gamePlayers" class="game-players"></div>
+          <div class="status-box">
+            <span>حالة الجولة</span>
+            <p id="gameMessage">بانتظار البداية...</p>
+          </div>
+        </aside>
+
+        <section class="board-wrap card">
+          <div id="board" class="board" aria-label="لوحة جاك الذيب">
+            <div class="board-center">
+              <div id="turnAvatar" class="turn-avatar">🐺</div>
+              <span id="turnLabel">الدور</span>
+              <strong id="turnName">—</strong>
+              <button id="rollBtn" class="dice-btn" type="button">
+                <span id="diceFace" class="dice-face">⚄</span>
+                <span>ارمِ النرد</span>
+              </button>
+            </div>
+          </div>
+          <div id="tokenChooser" class="token-chooser hidden"></div>
+        </section>
+
+        <aside class="card rules-panel">
+          <span class="eyebrow">قواعد سريعة</span>
+          <h3>شلون تلعب؟</h3>
+          <ol>
+            <li>تحتاج رقم 6 لإخراج الدبوس.</li>
+            <li>وصل كل دبابيسك للنهاية.</li>
+            <li>إذا وقفت على خصم تصيده.</li>
+            <li>الخانات المضيئة آمنة.</li>
+          </ol>
+          <button id="restartBtn" class="secondary-btn wide hidden" type="button">جولة جديدة</button>
+        </aside>
+      </div>
+    </section>
+
+    <div id="toast" class="toast" role="status"></div>
+  </main>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>
