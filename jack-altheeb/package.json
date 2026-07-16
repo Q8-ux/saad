@@ -1,8 +1,8 @@
 {
   "name": "jack-altheeb-online",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "private": true,
-  "description": "جاك الذيب - لعبة خليجية أونلاين بحسابات دائمة",
+  "description": "جاك الذيب - لعبة خليجية أونلاين بحسابات دائمة وواجهة لعب أفقية",
   "main": "server-pro.js",
   "scripts": { "start": "node server-pro.js", "dev": "node --watch server-pro.js" },
   "engines": { "node": ">=20" },
