@@ -26,8 +26,8 @@
     document.querySelectorAll('.auth-form').forEach(f=>f.classList.toggle('active',f.id===btn.dataset.target));
     showMessage('');
   }));
-  $('registerForm').addEventListener('submit',async e=>{e.preventDefault();showMessage('جاري إنشاء الحساب...',true);try{const data=await api('/api/auth/register',{method:'POST',body:JSON.stringify({username:$('regUsername').value,email:$('regEmail').value,password:$('regPassword').value})});setUser(data.user);}catch(err){showMessage(err.message);}});
-  $('loginForm').addEventListener('submit',async e=>{e.preventDefault();showMessage('جاري تسجيل الدخول...',true);try{const data=await api('/api/auth/login',{method:'POST',body:JSON.stringify({login:$('loginId').value,password:$('loginPassword').value})});setUser(data.user);}catch(err){showMessage(err.message);}});
+  $('registerForm').addEventListener('submit',async e=>{e.preventDefault();showMessage('جاري إنشاء الحساب...',true);try{await api('/api/auth/register',{method:'POST',body:JSON.stringify({username:$('regUsername').value,email:$('regEmail').value,password:$('regPassword').value})});location.reload();}catch(err){showMessage(err.message);}});
+  $('loginForm').addEventListener('submit',async e=>{e.preventDefault();showMessage('جاري تسجيل الدخول...',true);try{await api('/api/auth/login',{method:'POST',body:JSON.stringify({login:$('loginId').value,password:$('loginPassword').value})});location.reload();}catch(err){showMessage(err.message);}});
   $('logoutBtn').addEventListener('click',async()=>{await api('/api/auth/logout',{method:'POST'}).catch(()=>{});location.reload();});
   window.refreshJackProfile=async()=>{try{const data=await api('/api/me');setUser(data.user);}catch{}};
   boot();
