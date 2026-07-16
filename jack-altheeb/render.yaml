@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: jack-altheeb
+    runtime: node
+    plan: free
+    rootDir: jack-altheeb
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /
+    envVars:
+      - key: NODE_VERSION
+        value: 20
