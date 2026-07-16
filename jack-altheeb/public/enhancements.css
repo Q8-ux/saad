@@ -1,1 +1,51 @@
 .top-actions{display:flex;gap:8px}.language-btn{font-weight:900;min-width:52px}.tutorial-start{margin-top:10px}.mode-card .secondary-btn{position:relative;z-index:2}html[dir="ltr"] body{text-align:left}html[dir="ltr"] .brand,html[dir="ltr"] .player-card,html[dir="ltr"] .game-player{text-align:left}html[dir="ltr"] .hero-content{direction:ltr}html[dir="ltr"] .learning-switch{direction:ltr}
+
+/* Landscape-first gameplay */
+#gameView.active{min-height:calc(100dvh - 88px)}
+#gameView .game-layout{display:grid;grid-template-columns:minmax(190px,23vw) minmax(430px,1fr) minmax(190px,23vw);gap:14px;align-items:stretch;max-width:1450px;margin:0 auto}
+#gameView .side-panel,#gameView .rules-panel{height:calc(100dvh - 112px);max-height:780px;overflow:auto;position:sticky;top:12px}
+#gameView .board-wrap{min-height:calc(100dvh - 112px);display:flex;flex-direction:column;justify-content:center;overflow:hidden;padding:10px}
+#gameView .board{width:min(74vh,100%);max-width:760px;margin:auto}
+#gameView .board-center{padding:12px}
+#gameView .dice-btn{min-width:128px;padding:10px 15px;border-radius:18px}
+#gameView .dice-face{font-size:2.35rem}
+#gameView .game-player{min-height:66px}
+#gameView .rules-panel ol{padding-inline-start:22px;line-height:1.65}
+#gameView .token-chooser{position:sticky;bottom:0;z-index:20;margin-top:8px;padding:8px;background:rgba(5,10,26,.92);backdrop-filter:blur(12px);border-radius:18px}
+
+@media (orientation:landscape) and (max-height:700px){
+  .app-shell{padding:8px 12px}
+  .topbar{margin-bottom:8px;min-height:48px}
+  .brand p{display:none}.wolf-mark{width:44px;height:44px;border-radius:14px;font-size:1.5rem}
+  #gameView.active{min-height:calc(100dvh - 60px)}
+  #gameView .game-layout{grid-template-columns:minmax(170px,22vw) minmax(390px,1fr) minmax(165px,21vw);gap:8px}
+  #gameView .side-panel,#gameView .rules-panel{height:calc(100dvh - 72px);padding:10px;border-radius:20px;position:static}
+  #gameView .board-wrap{height:calc(100dvh - 72px);min-height:0;padding:6px;border-radius:20px}
+  #gameView .board{width:min(78vh,100%);max-height:calc(100dvh - 86px)}
+  #gameView .game-players{gap:6px;margin:8px 0}
+  #gameView .game-player{min-height:50px;padding:7px;font-size:.82rem}
+  #gameView .game-player .avatar{font-size:1.35rem}
+  #gameView .status-box{padding-top:8px;font-size:.82rem}
+  #gameView .status-box p{line-height:1.45}
+  #gameView .rules-panel h3{margin:3px 0 6px;font-size:1rem}
+  #gameView .rules-panel ol{font-size:.78rem;line-height:1.45;margin:4px 0 8px}
+  #gameView .tutorial-panel{padding:9px;margin-bottom:8px;font-size:.76rem}
+  #gameView .turn-avatar{font-size:2rem}
+  #gameView .board-center strong{font-size:1rem;margin:0 0 7px}
+  #gameView .dice-btn{min-width:105px;padding:7px 12px;border-radius:15px;font-size:.8rem}
+  #gameView .dice-face{font-size:1.9rem}
+}
+
+@media (orientation:landscape) and (max-width:950px){
+  .app-shell{width:100%;padding:6px}
+  #gameView .game-layout{grid-template-columns:155px minmax(360px,1fr) 150px;gap:6px}
+  #gameView .room-mini{font-size:.72rem}
+  #gameView .token-count{font-size:.62rem}
+}
+
+/* Portrait blocker shown only while an actual match is open */
+@media (orientation:portrait) and (max-width:900px){
+  body:has(#gameView.active){overflow:hidden}
+  body:has(#gameView.active)::before{content:"↻  دوّر جهازك بالعرض\A\A لعبة جاك الذيب مصممة للعب الأفقي";white-space:pre-wrap;position:fixed;inset:0;z-index:99999;display:grid;place-items:center;text-align:center;padding:40px;font-family:"Cairo",system-ui,sans-serif;font-size:clamp(1.45rem,7vw,2.3rem);font-weight:900;line-height:1.6;color:#fff;background:radial-gradient(circle at 50% 30%,rgba(8,228,255,.18),transparent 35%),radial-gradient(circle at 20% 80%,rgba(204,255,0,.15),transparent 35%),#050a1a}
+  body:has(#gameView.active)::after{content:"🐺";position:fixed;z-index:100000;top:16%;left:50%;transform:translateX(-50%);font-size:5rem;filter:drop-shadow(0 0 22px rgba(204,255,0,.35))}
+}
