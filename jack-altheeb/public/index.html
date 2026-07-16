@@ -10,107 +10,25 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900;1000&display=swap" rel="stylesheet" />
   <link rel="manifest" href="/manifest.webmanifest" />
-  <link rel="stylesheet" href="/art-wolf.css" />
-  <link rel="stylesheet" href="/art-crew.css" />
   <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="/enhancements.css" />
 </head>
 <body>
-  <div class="ambient ambient-one"></div>
-  <div class="ambient ambient-two"></div>
-
+  <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
   <main class="app-shell">
-    <header class="topbar">
-      <div class="brand">
-        <div class="wolf-mark" aria-hidden="true">🐺</div>
-        <div><h1>جاك الذيب</h1><p>لعبة حماس، صيد، وضحك خليجي</p></div>
-      </div>
-      <div class="top-actions"><button id="languageBtn" class="icon-btn language-btn" type="button">EN</button><button id="soundBtn" class="icon-btn" type="button" aria-label="الصوت">🔊</button></div>
-    </header>
-
+    <header class="topbar"><div class="brand"><div class="wolf-mark" aria-hidden="true">🐺</div><div><h1>جاك الذيب</h1><p>لعبة حماس، صيد، وضحك خليجي</p></div></div><div class="top-actions"><button id="languageBtn" class="icon-btn language-btn" type="button">EN</button><button id="soundBtn" class="icon-btn" type="button" aria-label="الصوت">🔊</button></div></header>
     <section id="landingView" class="view active">
-      <div class="hero-stage card">
-        <div class="hero-shade"></div>
-        <div class="hero-content">
-          <span class="eyebrow">ONLINE • SOLO • TUTORIAL</span>
-          <h2>ادخل التحدي… قبل لا يصيدك الذيب</h2>
-          <p>العب بروحك ضد الذيب الآلي، تعلّم خطوة بخطوة، أو اجمع ربعك في غرفة خاصة.</p>
-          <div class="feature-pills"><span>🎮 لعب فردي</span><span>🧠 وضع تعليمي</span><span>🌐 2–4 أونلاين</span></div>
-        </div>
-      </div>
-
+      <div class="hero-stage card"><div class="hero-shade"></div><div class="hero-content"><span class="eyebrow">ONLINE • SOLO • TUTORIAL</span><h2>ادخل التحدي… قبل لا يصيدك الذيب</h2><p>العب بروحك ضد الذيب الآلي، تعلّم خطوة بخطوة، أو اجمع ربعك في غرفة خاصة.</p><div class="feature-pills"><span>🎮 لعب فردي</span><span>🧠 وضع تعليمي</span><span>🌐 2–4 أونلاين</span></div></div></div>
       <div class="start-grid">
-        <section class="join-card card">
-          <div class="section-heading compact"><div><span class="eyebrow">جهّز شخصيتك</span><h3>منو داخل التحدي؟</h3></div></div>
-          <label for="playerName">اسم اللاعب</label>
-          <input id="playerName" maxlength="18" placeholder="مثال: سعد" autocomplete="nickname" />
-          <label>اختر شخصيتك</label>
-          <div id="avatarPicker" class="avatar-picker"></div>
-
-          <label class="learning-switch" for="tutorialToggle">
-            <input id="tutorialToggle" type="checkbox" />
-            <span class="switch-ui"></span>
-            <span><strong>الوضع التعليمي</strong><small>يرشدك أثناء الرمية والحركة والصيد</small></span>
-          </label>
-        </section>
-
-        <section class="mode-card card solo-mode">
-          <span class="mode-icon">🐺</span>
-          <span class="eyebrow">SOLO MODE</span>
-          <h3>العب بروحك</h3>
-          <p>واجه الذيب الآلي في جولة كاملة بدون انتظار أي لاعب.</p>
-          <button id="soloBtn" class="primary-btn" type="button">ابدأ ضد الذيب الآلي</button>
-          <button id="tutorialBtn" class="secondary-btn wide tutorial-start" type="button">ابدأ اللعب التعليمي</button>
-        </section>
-
-        <section class="mode-card card online-mode">
-          <span class="mode-icon">⚡</span>
-          <span class="eyebrow">ONLINE ROOM</span>
-          <h3>العب مع الربع</h3>
-          <p>أنشئ غرفة خاصة أو ادخل برمز من خمس خانات.</p>
-          <button id="createRoomBtn" class="secondary-btn wide" type="button">إنشاء غرفة جديدة</button>
-          <div class="divider"><span>أو ادخل غرفة</span></div>
-          <div class="join-row"><input id="roomCodeInput" maxlength="5" placeholder="رمز الغرفة" /><button id="joinRoomBtn" class="secondary-btn" type="button">دخول</button></div>
-          <p id="landingError" class="error-text" role="alert"></p>
-        </section>
+        <section class="join-card card"><div class="section-heading compact"><div><span class="eyebrow">جهّز شخصيتك</span><h3>منو داخل التحدي؟</h3></div></div><label for="playerName">اسم اللاعب</label><input id="playerName" maxlength="18" placeholder="مثال: سعد" autocomplete="nickname" /><label>اختر شخصيتك</label><div id="avatarPicker" class="avatar-picker"></div><label class="learning-switch" for="tutorialToggle"><input id="tutorialToggle" type="checkbox" /><span class="switch-ui"></span><span><strong>الوضع التعليمي</strong><small>يرشدك أثناء الرمية والحركة والصيد</small></span></label></section>
+        <section class="mode-card card solo-mode"><span class="mode-icon">🐺</span><span class="eyebrow">SOLO MODE</span><h3>العب بروحك</h3><p>واجه الذيب الآلي في جولة كاملة بدون انتظار أي لاعب.</p><button id="soloBtn" class="primary-btn" type="button">ابدأ ضد الذيب الآلي</button><button id="tutorialBtn" class="secondary-btn wide tutorial-start" type="button">ابدأ اللعب التعليمي</button></section>
+        <section class="mode-card card online-mode"><span class="mode-icon">⚡</span><span class="eyebrow">ONLINE ROOM</span><h3>العب مع الربع</h3><p>أنشئ غرفة خاصة أو ادخل برمز من خمس خانات.</p><button id="createRoomBtn" class="secondary-btn wide" type="button">إنشاء غرفة جديدة</button><div class="divider"><span>أو ادخل غرفة</span></div><div class="join-row"><input id="roomCodeInput" maxlength="5" placeholder="رمز الغرفة" /><button id="joinRoomBtn" class="secondary-btn" type="button">دخول</button></div><p id="landingError" class="error-text" role="alert"></p></section>
       </div>
     </section>
-
-    <section id="lobbyView" class="view">
-      <div class="lobby-banner card"><div><span class="eyebrow">غرفة خاصة</span><h2>اجمع الربع وابدأ التحدي</h2></div></div>
-      <div class="lobby-layout">
-        <div class="card room-card"><span class="eyebrow">رمز الغرفة</span><button id="copyCodeBtn" class="room-code" type="button">-----</button><p>اضغط الرمز لنسخه وإرساله للربع.</p><button id="shareBtn" class="secondary-btn wide" type="button">مشاركة الدعوة</button></div>
-        <div class="card players-card"><div class="section-heading"><div><span class="eyebrow">اللاعبون</span><h2>المتواجدون في الديوانية</h2></div><span id="playerCount" class="count-badge">0/4</span></div><div id="lobbyPlayers" class="lobby-players"></div><button id="startGameBtn" class="primary-btn wide" type="button">ابدأ اللعبة</button><p id="lobbyHint" class="muted">يحتاج لاعبين على الأقل.</p></div>
-      </div>
-    </section>
-
-    <section id="gameView" class="view">
-      <div class="game-layout">
-        <aside class="card side-panel">
-          <div class="room-mini"><span id="modeLabel">الغرفة</span><strong id="miniRoomCode">-----</strong></div>
-          <div id="gamePlayers" class="game-players"></div>
-          <div class="status-box"><span>حالة الجولة</span><p id="gameMessage">بانتظار البداية...</p></div>
-        </aside>
-
-        <section class="board-wrap card">
-          <div class="board-art"></div>
-          <div id="board" class="board" aria-label="لوحة جاك الذيب">
-            <div class="board-center"><div id="turnAvatar" class="turn-avatar">🐺</div><span id="turnLabel">الدور</span><strong id="turnName">—</strong><button id="rollBtn" class="dice-btn" type="button"><span id="diceFace" class="dice-face">⚄</span><span>ارمِ النرد</span></button></div>
-          </div>
-          <div id="tokenChooser" class="token-chooser hidden"></div>
-        </section>
-
-        <aside class="card rules-panel">
-          <div id="tutorialPanel" class="tutorial-panel hidden"><span class="eyebrow">المدرب الذكي</span><div class="coach-head"><span>🧠</span><strong>تلميح الجولة</strong></div><p id="tutorialText"></p></div>
-          <div class="quick-rules"><span class="eyebrow">قواعد سريعة</span><h3>شلون تلعب؟</h3><ol><li>تحتاج 6 لإخراج الدبوس.</li><li>الخانات المضيئة آمنة.</li><li>الوقوف على خصم يعني صيده.</li><li>أدخل دبابيسك الأربعة للنهاية.</li></ol></div>
-          <button id="restartBtn" class="secondary-btn wide hidden" type="button">جولة جديدة</button>
-        </aside>
-      </div>
-    </section>
-
+    <section id="lobbyView" class="view"><div class="lobby-banner card"><div><span class="eyebrow">غرفة خاصة</span><h2>اجمع الربع وابدأ التحدي</h2></div></div><div class="lobby-layout"><div class="card room-card"><span class="eyebrow">رمز الغرفة</span><button id="copyCodeBtn" class="room-code" type="button">-----</button><p>اضغط الرمز لنسخه وإرساله للربع.</p><button id="shareBtn" class="secondary-btn wide" type="button">مشاركة الدعوة</button></div><div class="card players-card"><div class="section-heading"><div><span class="eyebrow">اللاعبون</span><h2>المتواجدون في الديوانية</h2></div><span id="playerCount" class="count-badge">0/4</span></div><div id="lobbyPlayers" class="lobby-players"></div><button id="startGameBtn" class="primary-btn wide" type="button">ابدأ اللعبة</button><p id="lobbyHint" class="muted">يحتاج لاعبين على الأقل.</p></div></div></section>
+    <section id="gameView" class="view"><div class="game-layout"><aside class="card side-panel"><div class="room-mini"><span id="modeLabel">الغرفة</span><strong id="miniRoomCode">-----</strong></div><div id="gamePlayers" class="game-players"></div><div class="status-box"><span>حالة الجولة</span><p id="gameMessage">بانتظار البداية...</p></div></aside><section class="board-wrap card"><div class="board-art"></div><div id="board" class="board" aria-label="لوحة جاك الذيب"><div class="board-center"><div id="turnAvatar" class="turn-avatar">🐺</div><span id="turnLabel">الدور</span><strong id="turnName">—</strong><button id="rollBtn" class="dice-btn" type="button"><span id="diceFace" class="dice-face">⚄</span><span>ارمِ النرد</span></button></div></div><div id="tokenChooser" class="token-chooser hidden"></div></section><aside class="card rules-panel"><div id="tutorialPanel" class="tutorial-panel hidden"><span class="eyebrow">المدرب الذكي</span><div class="coach-head"><span>🧠</span><strong>تلميح الجولة</strong></div><p id="tutorialText"></p></div><div class="quick-rules"><span class="eyebrow">قواعد سريعة</span><h3>شلون تلعب؟</h3><ol><li>تحتاج 6 لإخراج الدبوس.</li><li>الخانات المضيئة آمنة.</li><li>الوقوف على خصم يعني صيده.</li><li>أدخل دبابيسك الأربعة للنهاية.</li></ol></div><button id="restartBtn" class="secondary-btn wide hidden" type="button">جولة جديدة</button></aside></div></section>
     <div id="toast" class="toast" role="status"></div>
   </main>
-  <script src="/socket.io/socket.io.js"></script>
-  <script src="/app.js"></script>
-  <script src="/i18n.js"></script>
+  <script src="/socket.io/socket.io.js"></script><script src="/app.js"></script><script src="/i18n.js"></script>
 </body>
 </html>
