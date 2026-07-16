@@ -1,6 +1,6 @@
 {
   "name": "jack-altheeb-online",
-  "version": "1.0.0",
+  "version": "3.0.2",
   "private": true,
   "description": "لعبة جاك الذيب الجماعية أونلاين",
   "main": "server.js",
