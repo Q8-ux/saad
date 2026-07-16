@@ -6,7 +6,12 @@
   <meta name="theme-color" content="#070d22" />
   <meta name="description" content="جاك الذيب - لعبة خليجية حماسية فردية وجماعية أونلاين" />
   <title>جاك الذيب | العب بروحك أو مع الربع</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900;1000&display=swap" rel="stylesheet" />
   <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="stylesheet" href="/art-wolf.css" />
+  <link rel="stylesheet" href="/art-crew.css" />
   <link rel="stylesheet" href="/style.css" />
 </head>
 <body>
@@ -19,7 +24,7 @@
         <div class="wolf-mark" aria-hidden="true">🐺</div>
         <div><h1>جاك الذيب</h1><p>لعبة حماس، صيد، وضحك خليجي</p></div>
       </div>
-      <button id="soundBtn" class="icon-btn" type="button" aria-label="الصوت">🔊</button>
+      <div class="top-actions"><button id="languageBtn" class="icon-btn language-btn" type="button">EN</button><button id="soundBtn" class="icon-btn" type="button" aria-label="الصوت">🔊</button></div>
     </header>
 
     <section id="landingView" class="view active">
@@ -42,7 +47,7 @@
           <div id="avatarPicker" class="avatar-picker"></div>
 
           <label class="learning-switch" for="tutorialToggle">
-            <input id="tutorialToggle" type="checkbox" checked />
+            <input id="tutorialToggle" type="checkbox" />
             <span class="switch-ui"></span>
             <span><strong>الوضع التعليمي</strong><small>يرشدك أثناء الرمية والحركة والصيد</small></span>
           </label>
@@ -54,6 +59,7 @@
           <h3>العب بروحك</h3>
           <p>واجه الذيب الآلي في جولة كاملة بدون انتظار أي لاعب.</p>
           <button id="soloBtn" class="primary-btn" type="button">ابدأ ضد الذيب الآلي</button>
+          <button id="tutorialBtn" class="secondary-btn wide tutorial-start" type="button">ابدأ اللعب التعليمي</button>
         </section>
 
         <section class="mode-card card online-mode">
@@ -105,5 +111,6 @@
   </main>
   <script src="/socket.io/socket.io.js"></script>
   <script src="/app.js"></script>
+  <script src="/i18n.js"></script>
 </body>
 </html>
