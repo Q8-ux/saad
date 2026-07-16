@@ -1,0 +1,11 @@
+{
+  "name": "جاك الذيب",
+  "short_name": "جاك الذيب",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#070b17",
+  "theme_color": "#0b1020",
+  "lang": "ar",
+  "dir": "rtl",
+  "icons": []
+}
