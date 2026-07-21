@@ -1,41 +1,9 @@
-databases:
-  - name: jack-altheeb-db
-    plan: free
-    databaseName: jack_altheeb
-    user: jack_altheeb
-
 services:
-  - type: web
-    name: jack-altheeb
-    repo: https://github.com/Q8-ux/saad
-    branch: main
-    runtime: node
-    plan: free
-    rootDir: jack-altheeb
-    buildCommand: npm install
-    startCommand: npm start
-    healthCheckPath: /version
-    autoDeployTrigger: commit
-    envVars:
-      - key: NODE_VERSION
-        value: "20"
-      - key: NODE_ENV
-        value: production
-      - key: APP_RELEASE
-        value: jack-altheeb-v4-auth
-      - key: JWT_SECRET
-        generateValue: true
-      - key: DATABASE_URL
-        fromDatabase:
-          name: jack-altheeb-db
-          property: connectionString
-
   - type: web
     name: shatranj-game
     repo: https://github.com/Q8-ux/saad
     branch: main
     runtime: static
-    plan: free
     buildCommand: echo "Shatranj static site ready"
     staticPublishPath: shatranj-game
     autoDeployTrigger: commit
