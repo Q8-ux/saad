@@ -11,21 +11,18 @@
   const startBtn = document.getElementById('startBtn');
 
   if (!cfg.SUPABASE_URL || !cfg.SUPABASE_ANON_KEY) {
-    statusAuth.textContent = 'إعدادات Supabase غير مكتملة.';
+    statusAuth.textContent = 'إعدادات الاتصال غير مكتملة.';
     statusAuth.className = 'status bad';
     return;
   }
 
-  const db = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
+  const db = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY, {
+    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false }
+  });
   const chess = new Chess();
   const glyphs = { p:'♟',r:'♜',n:'♞',b:'♝',q:'♛',k:'♚',P:'♙',R:'♖',N:'♘',B:'♗',Q:'♕',K:'♔' };
-  let user = null;
-  let profile = null;
-  let room = null;
-  let seat = null;
-  let selected = null;
-  let lastMove = null;
-  let channel = null;
+  let user = null, profile = null, room = null, seat = null, selected = null, lastMove = null, channel = null;
+  let authReady = null;
 
   const setStatus = (el, text, good = false, bad = false) => {
     el.textContent = text;
@@ -48,63 +45,75 @@
 
   async function ensureProfile() {
     const code = getPlayerCode();
-    const { data: existing } = await db.from('profiles').select('*').eq('id', user.id).maybeSingle();
-    if (existing) {
-      profile = existing;
-      if (profile.username !== code) {
-        const { data, error } = await db.from('profiles').update({ username: code }).eq('id', user.id).select().single();
-        if (!error && data) profile = data;
+    profile = { username: code, rating: 1200 };
+    document.getElementById('userName').textContent = `${code} (1200)`;
+    try {
+      const { data: existing, error: readError } = await db.from('profiles').select('*').eq('id', user.id).maybeSingle();
+      if (readError) throw readError;
+      if (existing) {
+        profile = existing;
+        if (existing.username !== code) {
+          const { data } = await db.from('profiles').update({ username: code }).eq('id', user.id).select().maybeSingle();
+          if (data) profile = data;
+        }
+      } else {
+        const { data, error } = await db.from('profiles').insert({ id: user.id, username: code, rating: 1200 }).select().maybeSingle();
+        if (error) throw error;
+        if (data) profile = data;
       }
-    } else {
-      const { data, error } = await db.from('profiles').insert({ id: user.id, username: code, rating: 1200 }).select().single();
-      if (error) throw error;
-      profile = data;
+    } catch (e) {
+      console.warn('Profile sync skipped:', e);
     }
-    document.getElementById('userName').textContent = `${profile.username} (${profile.rating || 1200})`;
+    document.getElementById('userName').textContent = `${profile.username || code} (${profile.rating || 1200})`;
   }
 
   async function automaticLogin() {
-    show(authView);
-    setStatus(statusAuth, 'جاري الدخول تلقائيًا…');
+    const code = getPlayerCode();
+    document.getElementById('userName').textContent = `${code} (1200)`;
+    show(lobbyView);
+    setStatus(statusLobby, 'جاري تجهيز الاتصال تلقائيًا…');
+
     try {
-      let { data: sessionData } = await db.auth.getSession();
-      let session = sessionData.session;
+      const { data: sessionData, error: sessionError } = await db.auth.getSession();
+      if (sessionError) throw sessionError;
+      let session = sessionData?.session || null;
       if (!session) {
-        const code = getPlayerCode();
-        const { data, error } = await db.auth.signInAnonymously({ options: { data: { username: code } } });
+        const { data, error } = await db.auth.signInAnonymously({ options: { data: { player_code: code } } });
         if (error) throw error;
-        session = data.session;
+        session = data?.session || null;
       }
-      if (!session?.user) throw new Error('تعذر إنشاء جلسة اللاعب.');
+      if (!session?.user) throw new Error('لم يتم إنشاء جلسة تلقائية.');
       user = session.user;
       await ensureProfile();
-      show(lobbyView);
-      setStatus(statusLobby, `تم الدخول تلقائيًا برقم ${profile.username}`, true);
+      setStatus(statusLobby, `تم الدخول تلقائيًا برقم ${code}`, true);
+      return user;
     } catch (e) {
       console.error(e);
-      const message = String(e?.message || e || 'خطأ غير معروف');
-      if (/anonymous|disabled|provider/i.test(message)) {
-        setStatus(statusAuth, 'يلزم تفعيل Anonymous Sign-ins من Supabase Auth ثم تحديث الصفحة.', false, true);
-      } else {
-        setStatus(statusAuth, `تعذر الدخول التلقائي: ${message}`, false, true);
-      }
+      setStatus(statusLobby, 'تعذر الاتصال التلقائي. تأكد من تفعيل Anonymous Sign-ins في Supabase.', false, true);
+      throw e;
     }
+  }
+
+  async function requireUser() {
+    if (user) return user;
+    if (!authReady) authReady = automaticLogin();
+    return authReady;
   }
 
   document.getElementById('logoutBtn').onclick = async () => {
     await cleanupChannel();
-    await db.auth.signOut();
+    try { await db.auth.signOut(); } catch (_) {}
     localStorage.removeItem('shatranj_player_code');
     user = profile = room = null;
-    await automaticLogin();
+    authReady = automaticLogin();
+    await authReady.catch(() => {});
   };
 
-  function makeCode() {
-    return Math.random().toString(36).slice(2, 8).toUpperCase();
-  }
+  function makeCode() { return Math.random().toString(36).slice(2, 8).toUpperCase(); }
 
   document.getElementById('createRoomBtn').onclick = async () => {
     try {
+      await requireUser();
       setStatus(statusLobby, 'جاري إنشاء الغرفة…');
       const code = makeCode();
       const { data: created, error } = await db.from('rooms').insert({ code, host_id: user.id }).select().single();
@@ -117,6 +126,7 @@
 
   document.getElementById('joinRoomBtn').onclick = async () => {
     try {
+      await requireUser();
       const code = document.getElementById('joinCode').value.trim().toUpperCase();
       if (code.length !== 6) throw new Error('أدخل رمز الغرفة المكوّن من 6 خانات.');
       setStatus(statusLobby, 'جاري الانضمام…');
@@ -136,17 +146,9 @@
   };
 
   async function enterRoom(roomData, mySeat) {
-    room = roomData;
-    seat = mySeat;
-    chess.reset();
-    selected = null;
-    lastMove = null;
+    room = roomData; seat = mySeat; chess.reset(); selected = null; lastMove = null;
     document.getElementById('roomCode').textContent = room.code;
-    show(gameView);
-    await loadMoves();
-    await refreshRoom();
-    await subscribeRoom();
-    renderBoard();
+    show(gameView); await loadMoves(); await refreshRoom(); await subscribeRoom(); renderBoard();
   }
 
   async function loadMoves() {
@@ -184,11 +186,7 @@
     await refreshRoom();
   };
 
-  document.getElementById('leaveBtn').onclick = async () => {
-    await cleanupChannel();
-    room = null;
-    show(lobbyView);
-  };
+  document.getElementById('leaveBtn').onclick = async () => { await cleanupChannel(); room = null; show(lobbyView); };
 
   async function subscribeRoom() {
     await cleanupChannel();
@@ -199,30 +197,23 @@
       .subscribe();
   }
 
-  async function cleanupChannel() {
-    if (channel) { await db.removeChannel(channel); channel = null; }
-  }
+  async function cleanupChannel() { if (channel) { await db.removeChannel(channel); channel = null; } }
 
   function renderBoard() {
     boardEl.innerHTML = '';
     const board = chess.board();
     const ranks = seat === 'black' ? [...Array(8).keys()] : [...Array(8).keys()].reverse();
     const files = seat === 'black' ? [...Array(8).keys()].reverse() : [...Array(8).keys()];
-    for (const r of ranks) {
-      for (const f of files) {
-        const square = 'abcdefgh'[f] + (r + 1);
-        const piece = board[7 - r][f];
-        const el = document.createElement('div');
-        el.className = `sq ${(r + f) % 2 ? 'dark' : 'light'}`;
-        if (selected === square) el.classList.add('sel');
-        if (lastMove?.includes(square)) el.classList.add('last');
-        if (piece) {
-          const key = piece.color === 'w' ? piece.type.toUpperCase() : piece.type;
-          el.textContent = glyphs[key];
-        }
-        el.onclick = () => handleSquare(square, piece);
-        boardEl.appendChild(el);
-      }
+    for (const r of ranks) for (const f of files) {
+      const square = 'abcdefgh'[f] + (r + 1);
+      const piece = board[7-r][f];
+      const el = document.createElement('div');
+      el.className = `sq ${(r+f)%2 ? 'dark' : 'light'}`;
+      if (selected === square) el.classList.add('sel');
+      if (lastMove?.includes(square)) el.classList.add('last');
+      if (piece) el.textContent = glyphs[piece.color === 'w' ? piece.type.toUpperCase() : piece.type];
+      el.onclick = () => handleSquare(square, piece);
+      boardEl.appendChild(el);
     }
   }
 
@@ -230,35 +221,16 @@
     if (!room || room.status !== 'playing') return;
     const myColor = seat === 'white' ? 'w' : 'b';
     if (chess.turn() !== myColor) return setStatus(turnStatus, 'انتظر دور الخصم.');
-    if (!selected) {
-      if (!piece || piece.color !== myColor) return;
-      selected = square;
-      return renderBoard();
-    }
-    if (piece && piece.color === myColor) {
-      selected = square;
-      return renderBoard();
-    }
+    if (!selected) { if (!piece || piece.color !== myColor) return; selected = square; return renderBoard(); }
+    if (piece && piece.color === myColor) { selected = square; return renderBoard(); }
     const move = chess.move({ from: selected, to: square, promotion: 'q' });
-    if (!move) {
-      selected = null;
-      renderBoard();
-      return setStatus(turnStatus, 'نقلة غير قانونية.');
-    }
-    const from = selected;
-    selected = null;
-    const moveNumber = chess.history().length;
+    if (!move) { selected = null; renderBoard(); return setStatus(turnStatus, 'نقلة غير قانونية.'); }
+    const from = selected; selected = null;
     const payload = { from, to: square, promotion: move.promotion || null, san: move.san };
-    const { error } = await db.from('game_moves').insert({ room_code: room.code, user_id: user.id, move_number: moveNumber, move: payload });
-    if (error) {
-      await loadMoves();
-      renderBoard();
-      return setStatus(turnStatus, error.message, false, true);
-    }
-    lastMove = [from, square];
-    renderBoard();
-    if (chess.game_over()) await finishGame();
-    else updateTurnText();
+    const { error } = await db.from('game_moves').insert({ room_code: room.code, user_id: user.id, move_number: chess.history().length, move: payload });
+    if (error) { await loadMoves(); renderBoard(); return setStatus(turnStatus, error.message, false, true); }
+    lastMove = [from, square]; renderBoard();
+    if (chess.game_over()) await finishGame(); else updateTurnText();
   }
 
   function gameResultText() {
@@ -279,9 +251,7 @@
     updateTurnText();
   }
 
-  db.auth.onAuthStateChange((_event, session) => {
-    if (session?.user) user = session.user;
-  });
-
-  automaticLogin();
+  db.auth.onAuthStateChange((_event, session) => { if (session?.user) user = session.user; });
+  authReady = automaticLogin();
+  authReady.catch(() => {});
 })();
