@@ -10,7 +10,7 @@
   const playersEl = document.getElementById('players');
   const startBtn = document.getElementById('startBtn');
 
-  if (!cfg.SUPABASE_URL || !cfg.SUPABASE_ANON_KEY || cfg.SUPABASE_URL.includes('YOUR_PROJECT')) {
+  if (!cfg.SUPABASE_URL || !cfg.SUPABASE_ANON_KEY) {
     statusAuth.textContent = 'إعدادات Supabase غير مكتملة.';
     statusAuth.className = 'status bad';
     return;
@@ -27,9 +27,9 @@
   let lastMove = null;
   let channel = null;
 
-  const setStatus = (el, text, good = false) => {
+  const setStatus = (el, text, good = false, bad = false) => {
     el.textContent = text;
-    el.className = 'status ' + (good ? 'ok' : '');
+    el.className = 'status ' + (good ? 'ok' : bad ? 'bad' : '');
   };
 
   function show(view) {
@@ -37,52 +37,66 @@
     view.classList.remove('hidden');
   }
 
-  async function loadProfile() {
-    const { data, error } = await db.from('profiles').select('*').eq('id', user.id).single();
-    if (error) throw error;
-    profile = data;
-    document.getElementById('userName').textContent = `${profile.username} (${profile.rating})`;
+  function getPlayerCode() {
+    let code = localStorage.getItem('shatranj_player_code');
+    if (!/^P\d{6}$/.test(code || '')) {
+      code = 'P' + Math.floor(100000 + Math.random() * 900000);
+      localStorage.setItem('shatranj_player_code', code);
+    }
+    return code;
   }
 
-  async function refreshSession() {
-    const { data } = await db.auth.getSession();
-    user = data.session?.user || null;
-    if (!user) return show(authView);
+  async function ensureProfile() {
+    const code = getPlayerCode();
+    const { data: existing } = await db.from('profiles').select('*').eq('id', user.id).maybeSingle();
+    if (existing) {
+      profile = existing;
+      if (profile.username !== code) {
+        const { data, error } = await db.from('profiles').update({ username: code }).eq('id', user.id).select().single();
+        if (!error && data) profile = data;
+      }
+    } else {
+      const { data, error } = await db.from('profiles').insert({ id: user.id, username: code, rating: 1200 }).select().single();
+      if (error) throw error;
+      profile = data;
+    }
+    document.getElementById('userName').textContent = `${profile.username} (${profile.rating || 1200})`;
+  }
+
+  async function automaticLogin() {
+    show(authView);
+    setStatus(statusAuth, 'جاري الدخول تلقائيًا…');
     try {
-      await loadProfile();
+      let { data: sessionData } = await db.auth.getSession();
+      let session = sessionData.session;
+      if (!session) {
+        const code = getPlayerCode();
+        const { data, error } = await db.auth.signInAnonymously({ options: { data: { username: code } } });
+        if (error) throw error;
+        session = data.session;
+      }
+      if (!session?.user) throw new Error('تعذر إنشاء جلسة اللاعب.');
+      user = session.user;
+      await ensureProfile();
       show(lobbyView);
+      setStatus(statusLobby, `تم الدخول تلقائيًا برقم ${profile.username}`, true);
     } catch (e) {
-      setStatus(statusLobby, e.message);
+      console.error(e);
+      const message = String(e?.message || e || 'خطأ غير معروف');
+      if (/anonymous|disabled|provider/i.test(message)) {
+        setStatus(statusAuth, 'يلزم تفعيل Anonymous Sign-ins من Supabase Auth ثم تحديث الصفحة.', false, true);
+      } else {
+        setStatus(statusAuth, `تعذر الدخول التلقائي: ${message}`, false, true);
+      }
     }
   }
-
-  document.getElementById('signupBtn').onclick = async () => {
-    const username = document.getElementById('signupName').value.trim();
-    const email = document.getElementById('signupEmail').value.trim();
-    const password = document.getElementById('signupPassword').value;
-    if (!username || !email || password.length < 6) return setStatus(statusAuth, 'أدخل اسمًا وبريدًا وكلمة مرور من 6 أحرف على الأقل.');
-    setStatus(statusAuth, 'جاري إنشاء الحساب…');
-    const { error } = await db.auth.signUp({ email, password, options: { data: { username } } });
-    if (error) return setStatus(statusAuth, error.message);
-    setStatus(statusAuth, 'تم إنشاء الحساب. تحقق من البريد إذا كان تأكيد البريد مفعّلًا.', true);
-  };
-
-  document.getElementById('loginBtn').onclick = async () => {
-    const email = document.getElementById('loginEmail').value.trim();
-    const password = document.getElementById('loginPassword').value;
-    setStatus(statusAuth, 'جاري تسجيل الدخول…');
-    const { data, error } = await db.auth.signInWithPassword({ email, password });
-    if (error) return setStatus(statusAuth, error.message);
-    user = data.user;
-    await loadProfile();
-    show(lobbyView);
-  };
 
   document.getElementById('logoutBtn').onclick = async () => {
     await cleanupChannel();
     await db.auth.signOut();
+    localStorage.removeItem('shatranj_player_code');
     user = profile = room = null;
-    show(authView);
+    await automaticLogin();
   };
 
   function makeCode() {
@@ -98,7 +112,7 @@
       const { error: joinError } = await db.from('room_players').insert({ room_code: code, user_id: user.id, seat: 'white', ready: true });
       if (joinError) throw joinError;
       await enterRoom(created, 'white');
-    } catch (e) { setStatus(statusLobby, e.message); }
+    } catch (e) { setStatus(statusLobby, String(e?.message || e), false, true); }
   };
 
   document.getElementById('joinRoomBtn').onclick = async () => {
@@ -118,7 +132,7 @@
         seat = 'black';
       } else seat = existing.seat;
       await enterRoom(found, seat);
-    } catch (e) { setStatus(statusLobby, e.message); }
+    } catch (e) { setStatus(statusLobby, String(e?.message || e), false, true); }
   };
 
   async function enterRoom(roomData, mySeat) {
@@ -166,7 +180,7 @@
 
   startBtn.onclick = async () => {
     const { error } = await db.from('rooms').update({ status: 'playing', started_at: new Date().toISOString(), current_turn: 'white' }).eq('code', room.code);
-    if (error) return setStatus(turnStatus, error.message);
+    if (error) return setStatus(turnStatus, error.message, false, true);
     await refreshRoom();
   };
 
@@ -239,7 +253,7 @@
     if (error) {
       await loadMoves();
       renderBoard();
-      return setStatus(turnStatus, error.message);
+      return setStatus(turnStatus, error.message, false, true);
     }
     lastMove = [from, square];
     renderBoard();
@@ -266,8 +280,8 @@
   }
 
   db.auth.onAuthStateChange((_event, session) => {
-    if (!session) show(authView);
+    if (session?.user) user = session.user;
   });
 
-  refreshSession();
+  automaticLogin();
 })();
