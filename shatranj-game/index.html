@@ -3,6 +3,9 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <title>شطرنج النخبة</title>
   <style>
     :root{--bg:#0b1220;--panel:#111a2d;--line:#263551;--gold:#d6ad60;--text:#f6f2e8;--muted:#a8b2c5;--danger:#ef6b73;--ok:#5fd39b}
@@ -25,7 +28,7 @@
   <section id="authView" class="panel grid auth-grid">
     <div><h2>تسجيل الدخول</h2><input id="loginEmail" type="email" placeholder="البريد الإلكتروني"><input id="loginPassword" type="password" placeholder="كلمة المرور"><button id="loginBtn">دخول</button></div>
     <div><h2>حساب جديد</h2><input id="signupName" placeholder="اسم اللاعب"><input id="signupEmail" type="email" placeholder="البريد الإلكتروني"><input id="signupPassword" type="password" placeholder="كلمة المرور"><button id="signupBtn">إنشاء الحساب</button></div>
-    <div id="authStatus" class="status">أدخل بياناتك للبدء.</div>
+    <div id="authStatus" class="status">جاري تحميل نظام التسجيل…</div>
   </section>
 
   <section id="lobbyView" class="panel hidden">
@@ -49,10 +52,36 @@
     </aside>
   </section>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
-<script src="config.js"></script>
-<script src="app.js"></script>
-<script src="auth-fix.js"></script>
+<script>
+(function loadSupabase(){
+  const status=document.getElementById('authStatus');
+  const primary=document.createElement('script');
+  primary.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js';
+  primary.onload=loadGame;
+  primary.onerror=function(){
+    const fallback=document.createElement('script');
+    fallback.src='https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.min.js';
+    fallback.onload=loadGame;
+    fallback.onerror=function(){status.textContent='تعذر تحميل نظام التسجيل. تحقق من الإنترنت ثم حدّث الصفحة.';status.className='status bad';};
+    document.head.appendChild(fallback);
+  };
+  document.head.appendChild(primary);
+  function loadGame(){
+    const chess=document.createElement('script');
+    chess.src='https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js';
+    chess.onload=function(){
+      const config=document.createElement('script');config.src='config.js?v=20260721-2';
+      config.onload=function(){
+        const app=document.createElement('script');app.src='app.js?v=20260721-2';
+        app.onload=function(){const auth=document.createElement('script');auth.src='auth-fix.js?v=20260721-2';document.body.appendChild(auth);};
+        document.body.appendChild(app);
+      };
+      document.body.appendChild(config);
+    };
+    chess.onerror=function(){status.textContent='تعذر تحميل محرك اللعبة.';status.className='status bad';};
+    document.body.appendChild(chess);
+  }
+})();
+</script>
 </body>
 </html>
