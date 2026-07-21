@@ -8,22 +8,23 @@
   <meta http-equiv="Expires" content="0" />
   <title>شطرنج النخبة</title>
   <style>
-    :root{--bg:#020813;--panel:#06111fdd;--cyan:#00d9ff;--lime:#cfff00;--red:#ff4b55;--text:#f8fbff;--muted:#91a5b9;--line:#0e3850}
+    :root{--bg:#020813;--panel:#06111fdd;--blue:#12bfff;--red:#ff3d49;--lime:#cfff00;--text:#f8fbff;--muted:#91a5b9;--line:#0e3850}
     *{box-sizing:border-box}
     body{margin:0;min-height:100vh;color:var(--text);font-family:'Noor','Cairo','Tahoma',sans-serif;background:radial-gradient(circle at 18% 15%,#07324966,transparent 28%),radial-gradient(circle at 82% 8%,#4b0b1660,transparent 28%),linear-gradient(135deg,#01050c,#041322 55%,#020710);overflow-x:hidden}
     body:before{content:"";position:fixed;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 0 44%,#00d9ff0d 45% 46%,transparent 47% 100%),repeating-linear-gradient(90deg,transparent 0 79px,#00d9ff08 80px)}
     .wrap{width:min(1220px,94%);margin:auto;padding:24px 0 36px;position:relative;z-index:1}
-    .brand{text-align:center;margin-bottom:24px}.brand h1{margin:0;font-size:clamp(42px,7vw,88px);line-height:.95;text-shadow:0 0 24px #00d9ff70}.brand h1 span{display:block;color:var(--lime);text-shadow:0 0 25px #bfff0070}.brand p{color:#fff;font-size:18px}
-    .panel{background:linear-gradient(180deg,#071524ee,#030b15ee);border:1px solid var(--cyan);border-radius:22px;padding:20px;box-shadow:0 0 24px #00d9ff20,inset 0 0 22px #00d9ff0b}.hidden{display:none!important}
+    .brand{text-align:center;margin-bottom:24px}.brand h1{margin:0;font-size:clamp(42px,7vw,88px);line-height:.95;text-shadow:0 0 24px #12bfff70}.brand h1 span{display:block;color:var(--lime);text-shadow:0 0 25px #bfff0070}.brand p{color:#fff;font-size:18px}
+    .panel{background:linear-gradient(180deg,#071524ee,#030b15ee);border:1px solid var(--blue);border-radius:22px;padding:20px;box-shadow:0 0 24px #12bfff20,inset 0 0 22px #12bfff0b}.hidden{display:none!important}
     .grid{display:grid;gap:18px}.auth-grid{grid-template-columns:repeat(3,minmax(230px,1fr))}.game-grid{grid-template-columns:minmax(320px,720px) minmax(280px,1fr);align-items:start}
-    .mode-card{position:relative;overflow:hidden;min-height:235px;display:flex;flex-direction:column;justify-content:space-between;border-radius:20px;padding:22px;background:#06101ddd;border:1px solid var(--cyan);box-shadow:0 0 20px #00d9ff24}.mode-card:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 75% 20%,#00d9ff18,transparent 42%);pointer-events:none}.mode-card.lime{border-color:var(--lime);box-shadow:0 0 22px #cfff0030}.mode-card.lime:before{background:radial-gradient(circle at 75% 20%,#cfff0020,transparent 42%)}.mode-card.red{border-color:var(--red);box-shadow:0 0 22px #ff4b5530}.mode-card.red:before{background:radial-gradient(circle at 75% 20%,#ff4b5520,transparent 42%)}
-    .mode-icon{font-size:54px;filter:drop-shadow(0 0 12px currentColor)}.mode-card h2{font-size:28px;margin:6px 0;color:var(--cyan)}.mode-card.lime h2{color:var(--lime)}.mode-card.red h2{color:var(--red)}
-    input,button{width:100%;border-radius:999px;border:1px solid var(--cyan);padding:13px 16px;font-size:17px;font-family:inherit}input{background:#020a13;color:#fff;margin:6px 0 12px;text-align:center;letter-spacing:4px}button{background:#00131d;color:var(--cyan);font-weight:800;cursor:pointer;margin-top:10px;box-shadow:0 0 16px #00d9ff22;transition:.2s}button:hover{transform:translateY(-2px);box-shadow:0 0 24px #00d9ff55}.lime button,#aiBtn{border-color:var(--lime);color:var(--lime);box-shadow:0 0 16px #cfff0030}.red button{border-color:var(--red);color:var(--red)}button.secondary{border-color:#7890a6;color:#dce8f5}button.danger{border-color:var(--red);color:var(--red)}
+    .mode-card{position:relative;overflow:hidden;min-height:235px;display:flex;flex-direction:column;justify-content:space-between;border-radius:20px;padding:22px;background:#06101ddd;border:1px solid var(--blue);box-shadow:0 0 20px #12bfff24}.mode-card:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 75% 20%,#12bfff18,transparent 42%);pointer-events:none}.mode-card.lime{border-color:var(--lime);box-shadow:0 0 22px #cfff0030}.mode-card.red{border-color:var(--red);box-shadow:0 0 22px #ff3d4930}
+    .mode-icon{font-size:54px;filter:drop-shadow(0 0 12px currentColor)}.mode-card h2{font-size:28px;margin:6px 0;color:var(--blue)}.mode-card.lime h2{color:var(--lime)}.mode-card.red h2{color:var(--red)}
+    input,button{width:100%;border-radius:999px;border:1px solid var(--blue);padding:13px 16px;font-size:17px;font-family:inherit}input{background:#020a13;color:#fff;margin:6px 0 12px;text-align:center;letter-spacing:4px}button{background:#00131d;color:var(--blue);font-weight:800;cursor:pointer;margin-top:10px;box-shadow:0 0 16px #12bfff22;transition:.2s}button:hover{transform:translateY(-2px);box-shadow:0 0 24px #12bfff55}.lime button,#aiBtn{border-color:var(--lime);color:var(--lime)}.red button,button.danger{border-color:var(--red);color:var(--red)}button.secondary{border-color:#7890a6;color:#dce8f5}
     .status{margin:16px 0 0;padding:14px;border-radius:14px;background:#020b14;border:1px solid #13364d;color:var(--muted);min-height:50px;text-align:center}.ok{color:var(--lime)}.bad{color:var(--red)}
     .topbar{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:18px}.user{color:var(--lime);font-size:22px}
-    .board-shell{padding:14px;border:1px solid var(--cyan);border-radius:24px;background:linear-gradient(145deg,#061522,#01070d);box-shadow:0 0 34px #00d9ff35}.board{display:grid;grid-template-columns:repeat(8,1fr);aspect-ratio:1;border:3px solid #0bcde8;border-radius:14px;overflow:hidden;direction:ltr;box-shadow:0 0 30px #00d9ff35}.sq{display:grid;place-items:center;font-size:clamp(28px,5.6vw,62px);user-select:none;cursor:pointer;text-shadow:0 0 9px currentColor}.light{background:#0d2734}.dark{background:#03111b}.sq:nth-child(-n+16),.sq:nth-last-child(-n+16){color:var(--lime)}.sq.sel{outline:5px solid var(--lime);outline-offset:-5px;background:#395000}.sq.last{box-shadow:inset 0 0 0 5px #00d9ffbb}
-    .room-code{font-size:34px;letter-spacing:6px;color:var(--lime);font-weight:800;text-align:center;background:#020b14;padding:14px;border-radius:14px;border:1px solid var(--lime);box-shadow:0 0 18px #cfff0024}.players{display:grid;gap:10px;margin:14px 0}.player{padding:13px;border:1px solid #17425b;border-radius:14px;background:#030d17}.small{font-size:14px;color:var(--muted)}.version{position:fixed;left:10px;bottom:8px;color:#00d9ff99;font-size:11px}
-    .sound-btn{position:fixed;top:18px;left:18px;z-index:20;width:54px;height:54px;padding:0;margin:0;border-radius:50%;display:grid;place-items:center;font-size:24px;background:#03101cdd;border:1px solid var(--cyan);color:var(--cyan);box-shadow:0 0 20px #00d9ff45;backdrop-filter:blur(10px)}.sound-btn.muted{border-color:var(--red);color:var(--red);box-shadow:0 0 20px #ff4b5545}.sound-btn:hover{transform:scale(1.06)}
+    .board-shell{padding:14px;border:1px solid var(--blue);border-radius:24px;background:linear-gradient(145deg,#061522,#01070d);box-shadow:0 0 34px #12bfff35,0 0 20px #ff3d4922 inset}.board{display:grid;grid-template-columns:repeat(8,1fr);aspect-ratio:1;border:3px solid var(--blue);border-radius:14px;overflow:hidden;direction:ltr;box-shadow:0 0 30px #12bfff35,0 0 22px #ff3d4920}
+    .sq{display:grid;place-items:center;font-size:clamp(28px,5.6vw,62px);user-select:none;cursor:pointer;transition:.15s}.light{background:#0c2230}.dark{background:#020b13}.sq.blue-piece{color:var(--blue);text-shadow:0 0 7px #fff,0 0 14px var(--blue),0 0 28px var(--blue);filter:drop-shadow(0 0 8px var(--blue))}.sq.red-piece{color:var(--red);text-shadow:0 0 7px #fff,0 0 14px var(--red),0 0 28px var(--red);filter:drop-shadow(0 0 8px var(--red))}.sq.sel{outline:5px solid var(--lime);outline-offset:-5px;background:#284000}.sq.last{box-shadow:inset 0 0 0 5px #cfff00aa}.board.turn-blue{border-color:var(--blue);box-shadow:0 0 38px #12bfff70}.board.turn-red{border-color:var(--red);box-shadow:0 0 38px #ff3d4970}
+    .room-code{font-size:34px;letter-spacing:6px;color:var(--lime);font-weight:800;text-align:center;background:#020b14;padding:14px;border-radius:14px;border:1px solid var(--lime);box-shadow:0 0 18px #cfff0024}.players{display:grid;gap:10px;margin:14px 0}.player{padding:13px;border:1px solid #17425b;border-radius:14px;background:#030d17}.player:first-child{border-color:var(--blue);box-shadow:0 0 16px #12bfff24}.player:last-child{border-color:var(--red);box-shadow:0 0 16px #ff3d4924}.small{font-size:14px;color:var(--muted)}.version{position:fixed;left:10px;bottom:8px;color:#12bfff99;font-size:11px}
+    .sound-btn{position:fixed;top:18px;left:18px;z-index:20;width:54px;height:54px;padding:0;margin:0;border-radius:50%;display:grid;place-items:center;font-size:24px;background:#03101cdd;border:1px solid var(--blue);color:var(--blue);box-shadow:0 0 20px #12bfff45}.sound-btn.muted{border-color:var(--red);color:var(--red);box-shadow:0 0 20px #ff3d4945}
     @media(max-width:900px){.auth-grid{grid-template-columns:1fr}.game-grid{grid-template-columns:1fr}.topbar{align-items:stretch;flex-direction:column}.brand h1{font-size:52px}.sound-btn{top:10px;left:10px;width:48px;height:48px}}
   </style>
   <script>if('serviceWorker'in navigator)navigator.serviceWorker.getRegistrations().then(x=>x.forEach(r=>r.unregister()));if('caches'in window)caches.keys().then(x=>x.forEach(k=>caches.delete(k)));</script>
@@ -43,11 +44,11 @@
     <div id="lobbyStatus" class="status">جاري الدخول تلقائيًا…</div>
   </section>
   <section id="gameView" class="hidden grid game-grid">
-    <div class="board-shell"><div id="board" class="board"></div></div>
-    <aside class="panel"><h2 id="gameTitle">الغرفة</h2><div id="roomCode" class="room-code">------</div><div id="players" class="players"></div><div id="turnStatus" class="status">في انتظار اللاعبين…</div><button id="startBtn" class="hidden">بدء المباراة</button><button id="leaveBtn" class="secondary">العودة للرئيسية</button><p class="small">اختر القطعة ثم المربع المطلوب. النقلات القانونية فقط مسموحة.</p></aside>
+    <div class="board-shell"><div id="board" class="board turn-blue"></div></div>
+    <aside class="panel"><h2 id="gameTitle">الغرفة</h2><div id="roomCode" class="room-code">------</div><div id="players" class="players"></div><div id="turnStatus" class="status">في انتظار اللاعبين…</div><button id="startBtn" class="hidden">بدء المباراة</button><button id="leaveBtn" class="secondary">العودة للرئيسية</button><p class="small">الأزرق أنت، والأحمر الخصم. اختر القطعة ثم المربع المطلوب.</p></aside>
   </section>
 </div>
-<div class="version">NOOR + AI + SOUND BUILD 11</div>
+<div class="version">RED + BLUE NEON BUILD 12</div>
 <script>
 (function(){
   const status=document.getElementById('lobbyStatus');
@@ -55,79 +56,23 @@
   function load(src,ok,bad){const s=document.createElement('script');s.src=src;s.onload=ok;s.onerror=bad;document.body.appendChild(s)}
   load('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js',afterSupabase,()=>fail('تعذر تحميل خدمة الاتصال.'));
   function afterSupabase(){load('https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js',afterChess,()=>fail('تعذر تحميل محرك الشطرنج.'))}
-  function afterChess(){load('config.js?v=11',()=>load('app.js?v=11',initSound,()=>fail('تعذر تحميل ملفات اللعبة.')),()=>fail('تعذر تحميل إعدادات اللعبة.'))}
-
-  function initSound(){
-    const toggle=document.getElementById('soundToggle');
-    const board=document.getElementById('board');
-    const turn=document.getElementById('turnStatus');
-    let muted=localStorage.getItem('shatranj_muted')==='1';
-    let ctx=null,previousPieces=32,lastBoardChange=0,lastEndText='';
-
-    function updateToggle(){
-      toggle.textContent=muted?'🔇':'🔊';
-      toggle.classList.toggle('muted',muted);
-      toggle.title=muted?'تشغيل الصوت':'كتم الصوت';
-      toggle.setAttribute('aria-label',toggle.title);
+  function afterChess(){load('config.js?v=12',()=>load('app.js?v=12',initEnhancements,()=>fail('تعذر تحميل ملفات اللعبة.')),()=>fail('تعذر تحميل إعدادات اللعبة.'))}
+  function initEnhancements(){
+    const toggle=document.getElementById('soundToggle'),board=document.getElementById('board'),turn=document.getElementById('turnStatus');
+    let muted=localStorage.getItem('shatranj_muted')==='1',ctx=null,previousPieces=32,lastText='';
+    function updateToggle(){toggle.textContent=muted?'🔇':'🔊';toggle.classList.toggle('muted',muted);toggle.title=muted?'تشغيل الصوت':'كتم الصوت'}
+    function tone(freq,duration,type='sine',volume=.1,delay=0){if(muted)return;if(!ctx)ctx=new(window.AudioContext||window.webkitAudioContext)();if(ctx.state==='suspended')ctx.resume();const o=ctx.createOscillator(),g=ctx.createGain();o.type=type;o.frequency.setValueAtTime(freq,ctx.currentTime+delay);g.gain.setValueAtTime(.0001,ctx.currentTime+delay);g.gain.exponentialRampToValueAtTime(volume,ctx.currentTime+delay+.01);g.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+delay+duration);o.connect(g);g.connect(ctx.destination);o.start(ctx.currentTime+delay);o.stop(ctx.currentTime+delay+duration+.03)}
+    const sounds={click(){tone(540,.06,'square',.04)},move(){tone(235,.08,'triangle',.09)},capture(){tone(145,.14,'sawtooth',.1);tone(90,.16,'square',.07,.04)},check(){tone(760,.1,'square',.08);tone(920,.12,'square',.07,.08)},win(){tone(523,.13,'triangle',.1);tone(659,.13,'triangle',.1,.12);tone(784,.22,'triangle',.1,.24)},lose(){tone(330,.15,'sawtooth',.08);tone(247,.2,'sawtooth',.07,.13)},draw(){tone(392,.18,'sine',.08)}};
+    toggle.onclick=()=>{muted=!muted;localStorage.setItem('shatranj_muted',muted?'1':'0');updateToggle();if(!muted)sounds.click()};updateToggle();
+    document.addEventListener('click',e=>{if(e.target.closest('button')&&!e.target.closest('#soundToggle'))sounds.click()},true);
+    function classifyPieces(){
+      const blue='♙♖♘♗♕♔',red='♟♜♞♝♛♚';
+      board.querySelectorAll('.sq').forEach(s=>{s.classList.remove('blue-piece','red-piece');const t=s.textContent.trim();if(blue.includes(t))s.classList.add('blue-piece');if(red.includes(t))s.classList.add('red-piece')});
+      const text=turn.textContent||'';board.classList.toggle('turn-blue',/دورك|الأبيض/.test(text));board.classList.toggle('turn-red',/AI يفكر|الخصم|الأسود/.test(text));
     }
-    function audio(){
-      if(!ctx) ctx=new (window.AudioContext||window.webkitAudioContext)();
-      if(ctx.state==='suspended') ctx.resume();
-      return ctx;
-    }
-    function tone(freq,duration,type='sine',volume=.12,delay=0){
-      if(muted) return;
-      const c=audio(),o=c.createOscillator(),g=c.createGain();
-      o.type=type;o.frequency.setValueAtTime(freq,c.currentTime+delay);
-      g.gain.setValueAtTime(0.0001,c.currentTime+delay);
-      g.gain.exponentialRampToValueAtTime(volume,c.currentTime+delay+.01);
-      g.gain.exponentialRampToValueAtTime(0.0001,c.currentTime+delay+duration);
-      o.connect(g);g.connect(c.destination);o.start(c.currentTime+delay);o.stop(c.currentTime+delay+duration+.03);
-    }
-    const sounds={
-      click(){tone(540,.06,'square',.045)},
-      start(){tone(440,.12,'triangle',.09);tone(660,.16,'triangle',.08,.11)},
-      move(){tone(235,.075,'triangle',.10);tone(170,.06,'sine',.055,.045)},
-      capture(){tone(150,.12,'sawtooth',.10);tone(90,.16,'square',.075,.035)},
-      check(){tone(740,.09,'square',.09);tone(880,.12,'square',.075,.09)},
-      win(){tone(523,.13,'triangle',.10);tone(659,.13,'triangle',.10,.12);tone(784,.24,'triangle',.11,.24)},
-      lose(){tone(330,.15,'sawtooth',.085);tone(247,.18,'sawtooth',.075,.12);tone(196,.28,'sawtooth',.065,.27)},
-      draw(){tone(392,.14,'sine',.08);tone(392,.22,'sine',.06,.15)}
-    };
-
-    toggle.onclick=()=>{muted=!muted;localStorage.setItem('shatranj_muted',muted?'1':'0');updateToggle();if(!muted)sounds.click()};
-    updateToggle();
-
-    document.addEventListener('click',e=>{
-      if(e.target.closest('button')&&!e.target.closest('#soundToggle')) sounds.click();
-      if(e.target.closest('#aiBtn,#createRoomBtn,#joinRoomBtn,#startBtn')) setTimeout(sounds.start,80);
-    },true);
-
-    if(board){
-      const observer=new MutationObserver(()=>{
-        const now=Date.now();
-        if(now-lastBoardChange<120) return;
-        lastBoardChange=now;
-        const pieces=[...board.querySelectorAll('.sq')].filter(x=>x.textContent.trim()).length;
-        if(previousPieces&&pieces<previousPieces) sounds.capture();
-        else if(previousPieces&&pieces===previousPieces) sounds.move();
-        previousPieces=pieces||previousPieces;
-      });
-      observer.observe(board,{childList:true,subtree:true,characterData:true});
-    }
-
-    if(turn){
-      const observer=new MutationObserver(()=>{
-        const text=turn.textContent.trim();
-        if(!text||text===lastEndText) return;
-        if(/كش مات|فاز الأبيض/.test(text)) sounds.win();
-        else if(/فاز الأسود/.test(text)) sounds.lose();
-        else if(/تعادل/.test(text)) sounds.draw();
-        else if(/كش/.test(text)) sounds.check();
-        lastEndText=text;
-      });
-      observer.observe(turn,{childList:true,subtree:true,characterData:true});
-    }
+    const observer=new MutationObserver(()=>{classifyPieces();const pieces=[...board.querySelectorAll('.sq')].filter(x=>x.textContent.trim()).length;if(pieces<previousPieces)sounds.capture();else if(previousPieces&&pieces===previousPieces)sounds.move();previousPieces=pieces||previousPieces});observer.observe(board,{childList:true,subtree:true,characterData:true});
+    const turnObserver=new MutationObserver(()=>{classifyPieces();const text=turn.textContent.trim();if(!text||text===lastText)return;if(/كش مات|فاز الأبيض/.test(text))sounds.win();else if(/فاز الأسود/.test(text))sounds.lose();else if(/تعادل/.test(text))sounds.draw();else if(/كش/.test(text))sounds.check();lastText=text});turnObserver.observe(turn,{childList:true,subtree:true,characterData:true});
+    setTimeout(classifyPieces,250);
   }
 })();
 </script>
