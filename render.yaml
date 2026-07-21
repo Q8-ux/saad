@@ -4,6 +4,6 @@ services:
     repo: https://github.com/Q8-ux/saad
     branch: main
     runtime: static
-    buildCommand: echo "Shatranj static site ready"
+    buildCommand: echo "Shatranj Auto Login v3 ready"
     staticPublishPath: shatranj-game
     autoDeployTrigger: commit
