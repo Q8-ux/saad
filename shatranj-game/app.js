@@ -9,20 +9,15 @@
   const boardEl = document.getElementById('board');
   const playersEl = document.getElementById('players');
   const startBtn = document.getElementById('startBtn');
+  const gameTitle = document.getElementById('gameTitle');
 
-  if (!cfg.SUPABASE_URL || !cfg.SUPABASE_ANON_KEY) {
-    statusAuth.textContent = 'إعدادات الاتصال غير مكتملة.';
-    statusAuth.className = 'status bad';
-    return;
-  }
-
-  const db = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY, {
-    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false }
-  });
   const chess = new Chess();
   const glyphs = { p:'♟',r:'♜',n:'♞',b:'♝',q:'♛',k:'♚',P:'♙',R:'♖',N:'♘',B:'♗',Q:'♕',K:'♔' };
+  let db = null;
   let user = null, profile = null, room = null, seat = null, selected = null, lastMove = null, channel = null;
   let authReady = null;
+  let gameMode = 'online';
+  let aiThinking = false;
 
   const setStatus = (el, text, good = false, bad = false) => {
     el.textContent = text;
@@ -43,22 +38,22 @@
     return code;
   }
 
+  if (cfg.SUPABASE_URL && cfg.SUPABASE_ANON_KEY && window.supabase) {
+    db = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY, {
+      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false }
+    });
+  }
+
   async function ensureProfile() {
     const code = getPlayerCode();
     profile = { username: code, rating: 1200 };
     document.getElementById('userName').textContent = `${code} (1200)`;
+    if (!db || !user) return;
     try {
-      const { data: existing, error: readError } = await db.from('profiles').select('*').eq('id', user.id).maybeSingle();
-      if (readError) throw readError;
-      if (existing) {
-        profile = existing;
-        if (existing.username !== code) {
-          const { data } = await db.from('profiles').update({ username: code }).eq('id', user.id).select().maybeSingle();
-          if (data) profile = data;
-        }
-      } else {
-        const { data, error } = await db.from('profiles').insert({ id: user.id, username: code, rating: 1200 }).select().maybeSingle();
-        if (error) throw error;
+      const { data: existing } = await db.from('profiles').select('*').eq('id', user.id).maybeSingle();
+      if (existing) profile = existing;
+      else {
+        const { data } = await db.from('profiles').insert({ id: user.id, username: code, rating: 1200 }).select().maybeSingle();
         if (data) profile = data;
       }
     } catch (e) {
@@ -71,48 +66,68 @@
     const code = getPlayerCode();
     document.getElementById('userName').textContent = `${code} (1200)`;
     show(lobbyView);
+    if (!db) {
+      setStatus(statusLobby, 'يمكنك اللعب مع AI الآن. اللعب أونلاين يحتاج الاتصال بالخادم.', true);
+      return null;
+    }
     setStatus(statusLobby, 'جاري تجهيز الاتصال تلقائيًا…');
-
     try {
-      const { data: sessionData, error: sessionError } = await db.auth.getSession();
-      if (sessionError) throw sessionError;
+      const { data: sessionData } = await db.auth.getSession();
       let session = sessionData?.session || null;
       if (!session) {
         const { data, error } = await db.auth.signInAnonymously({ options: { data: { player_code: code } } });
         if (error) throw error;
         session = data?.session || null;
       }
-      if (!session?.user) throw new Error('لم يتم إنشاء جلسة تلقائية.');
-      user = session.user;
-      await ensureProfile();
+      user = session?.user || null;
+      if (user) await ensureProfile();
       setStatus(statusLobby, `تم الدخول تلقائيًا برقم ${code}`, true);
       return user;
     } catch (e) {
       console.error(e);
-      setStatus(statusLobby, 'تعذر الاتصال التلقائي. تأكد من تفعيل Anonymous Sign-ins في Supabase.', false, true);
-      throw e;
+      setStatus(statusLobby, 'يمكنك اللعب مع AI. تعذر الاتصال باللعب أونلاين حاليًا.', false, true);
+      return null;
     }
   }
 
   async function requireUser() {
     if (user) return user;
     if (!authReady) authReady = automaticLogin();
-    return authReady;
+    const result = await authReady;
+    if (!result) throw new Error('اللعب أونلاين غير متاح حاليًا. استخدم وضع AI.');
+    return result;
   }
 
   document.getElementById('logoutBtn').onclick = async () => {
     await cleanupChannel();
-    try { await db.auth.signOut(); } catch (_) {}
+    if (db) try { await db.auth.signOut(); } catch (_) {}
     localStorage.removeItem('shatranj_player_code');
     user = profile = room = null;
     authReady = automaticLogin();
-    await authReady.catch(() => {});
+    await authReady;
+  };
+
+  document.getElementById('aiBtn').onclick = () => {
+    gameMode = 'ai';
+    room = { code: 'AI', status: 'playing', host_id: 'local' };
+    seat = 'white';
+    selected = null;
+    lastMove = null;
+    chess.reset();
+    gameTitle.textContent = 'مباراة ضد AI';
+    document.getElementById('roomCode').textContent = 'AI';
+    playersEl.innerHTML = '<div class="player"><strong>⚪ أنت</strong><br>' + getPlayerCode() + ' <span class="small">(1200)</span></div><div class="player"><strong>⚫ الخصم</strong><br>AI Elite <span class="small">(1200)</span></div>';
+    startBtn.classList.add('hidden');
+    show(gameView);
+    setStatus(turnStatus, 'دورك الآن.', true);
+    renderBoard();
   };
 
   function makeCode() { return Math.random().toString(36).slice(2, 8).toUpperCase(); }
 
   document.getElementById('createRoomBtn').onclick = async () => {
     try {
+      gameMode = 'online';
       await requireUser();
       setStatus(statusLobby, 'جاري إنشاء الغرفة…');
       const code = makeCode();
@@ -126,6 +141,7 @@
 
   document.getElementById('joinRoomBtn').onclick = async () => {
     try {
+      gameMode = 'online';
       await requireUser();
       const code = document.getElementById('joinCode').value.trim().toUpperCase();
       if (code.length !== 6) throw new Error('أدخل رمز الغرفة المكوّن من 6 خانات.');
@@ -146,7 +162,9 @@
   };
 
   async function enterRoom(roomData, mySeat) {
+    gameMode = 'online';
     room = roomData; seat = mySeat; chess.reset(); selected = null; lastMove = null;
+    gameTitle.textContent = 'الغرفة';
     document.getElementById('roomCode').textContent = room.code;
     show(gameView); await loadMoves(); await refreshRoom(); await subscribeRoom(); renderBoard();
   }
@@ -163,6 +181,7 @@
   }
 
   async function refreshRoom() {
+    if (gameMode === 'ai') return;
     const { data: roomData } = await db.from('rooms').select('*').eq('code', room.code).single();
     if (roomData) room = roomData;
     const { data: members } = await db.from('room_players').select('seat,ready,user_id,profiles(username,rating)').eq('room_code', room.code).order('seat', { ascending: false });
@@ -173,6 +192,10 @@
   }
 
   function updateTurnText(playerCount = 2) {
+    if (gameMode === 'ai') {
+      if (chess.game_over()) return setStatus(turnStatus, gameResultText(), true);
+      return setStatus(turnStatus, chess.turn() === 'w' ? 'دورك الآن.' : 'AI يفكر…', chess.turn() === 'w');
+    }
     if (playerCount < 2) return setStatus(turnStatus, 'في انتظار اللاعب الثاني…');
     if (room.status === 'waiting') return setStatus(turnStatus, 'اللاعبان جاهزان. صاحب الغرفة يبدأ المباراة.');
     if (room.status === 'finished' || chess.game_over()) return setStatus(turnStatus, gameResultText(), true);
@@ -181,23 +204,26 @@
   }
 
   startBtn.onclick = async () => {
+    if (gameMode === 'ai') return;
     const { error } = await db.from('rooms').update({ status: 'playing', started_at: new Date().toISOString(), current_turn: 'white' }).eq('code', room.code);
     if (error) return setStatus(turnStatus, error.message, false, true);
     await refreshRoom();
   };
 
-  document.getElementById('leaveBtn').onclick = async () => { await cleanupChannel(); room = null; show(lobbyView); };
+  document.getElementById('leaveBtn').onclick = async () => {
+    await cleanupChannel(); room = null; gameMode = 'online'; aiThinking = false; show(lobbyView);
+  };
 
   async function subscribeRoom() {
     await cleanupChannel();
     channel = db.channel(`room-${room.code}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'room_players', filter: `room_code=eq.${room.code}` }, refreshRoom)
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'rooms', filter: `code=eq.${room.code}` }, payload => { room = payload.new; refreshRoom(); })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'rooms', filter: `room_code=eq.${room.code}` }, payload => { room = payload.new; refreshRoom(); })
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'game_moves', filter: `room_code=eq.${room.code}` }, async () => { await loadMoves(); renderBoard(); updateTurnText(); })
       .subscribe();
   }
 
-  async function cleanupChannel() { if (channel) { await db.removeChannel(channel); channel = null; } }
+  async function cleanupChannel() { if (channel && db) { await db.removeChannel(channel); channel = null; } }
 
   function renderBoard() {
     boardEl.innerHTML = '';
@@ -219,18 +245,42 @@
 
   async function handleSquare(square, piece) {
     if (!room || room.status !== 'playing') return;
+    if (gameMode === 'ai' && (aiThinking || chess.turn() !== 'w')) return;
     const myColor = seat === 'white' ? 'w' : 'b';
     if (chess.turn() !== myColor) return setStatus(turnStatus, 'انتظر دور الخصم.');
     if (!selected) { if (!piece || piece.color !== myColor) return; selected = square; return renderBoard(); }
     if (piece && piece.color === myColor) { selected = square; return renderBoard(); }
     const move = chess.move({ from: selected, to: square, promotion: 'q' });
     if (!move) { selected = null; renderBoard(); return setStatus(turnStatus, 'نقلة غير قانونية.'); }
-    const from = selected; selected = null;
+    const from = selected; selected = null; lastMove = [from, square]; renderBoard();
+
+    if (gameMode === 'ai') {
+      if (chess.game_over()) return updateTurnText();
+      updateTurnText();
+      aiThinking = true;
+      setTimeout(makeAiMove, 550);
+      return;
+    }
+
     const payload = { from, to: square, promotion: move.promotion || null, san: move.san };
     const { error } = await db.from('game_moves').insert({ room_code: room.code, user_id: user.id, move_number: chess.history().length, move: payload });
     if (error) { await loadMoves(); renderBoard(); return setStatus(turnStatus, error.message, false, true); }
-    lastMove = [from, square]; renderBoard();
     if (chess.game_over()) await finishGame(); else updateTurnText();
+  }
+
+  function makeAiMove() {
+    if (gameMode !== 'ai' || chess.game_over()) { aiThinking = false; return updateTurnText(); }
+    const moves = chess.moves({ verbose: true });
+    if (!moves.length) { aiThinking = false; return updateTurnText(); }
+    const values = { p:100, n:320, b:330, r:500, q:900, k:20000 };
+    moves.sort((a,b) => (values[b.captured] || 0) - (values[a.captured] || 0));
+    const shortlist = moves.slice(0, Math.min(5, moves.length));
+    const chosen = shortlist[Math.floor(Math.random() * shortlist.length)];
+    chess.move(chosen);
+    lastMove = [chosen.from, chosen.to];
+    aiThinking = false;
+    renderBoard();
+    updateTurnText();
   }
 
   function gameResultText() {
@@ -240,7 +290,7 @@
   }
 
   async function finishGame() {
-    if (room.host_id !== user.id) return updateTurnText();
+    if (gameMode === 'ai' || room.host_id !== user.id) return updateTurnText();
     const winnerSeat = chess.in_draw() ? null : (chess.turn() === 'w' ? 'black' : 'white');
     const { data: members } = await db.from('room_players').select('user_id,seat').eq('room_code', room.code);
     const winner = members?.find(m => m.seat === winnerSeat)?.user_id || null;
@@ -251,7 +301,6 @@
     updateTurnText();
   }
 
-  db.auth.onAuthStateChange((_event, session) => { if (session?.user) user = session.user; });
+  if (db) db.auth.onAuthStateChange((_event, session) => { if (session?.user) user = session.user; });
   authReady = automaticLogin();
-  authReady.catch(() => {});
 })();
