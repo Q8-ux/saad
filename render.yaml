@@ -4,6 +4,6 @@ services:
     repo: https://github.com/Q8-ux/saad
     branch: main
     runtime: static
-    buildCommand: echo "Shatranj direct guest login ready"
+    buildCommand: echo "DIRECT-GUEST-BUILD-7"
     staticPublishPath: .
     autoDeployTrigger: commit
