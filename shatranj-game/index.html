@@ -10,7 +10,7 @@
     .wrap{width:min(1120px,94%);margin:auto;padding:28px 0}.brand{text-align:center;margin-bottom:22px}.brand h1{margin:0;color:var(--gold);font-size:clamp(28px,5vw,48px)}.brand p{color:var(--muted)}
     .panel{background:rgba(17,26,45,.96);border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:0 20px 60px #0006}.hidden{display:none!important}
     .grid{display:grid;gap:18px}.auth-grid{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}.game-grid{grid-template-columns:minmax(300px,620px) minmax(270px,1fr);align-items:start}
-    input,button{width:100%;border-radius:12px;border:1px solid var(--line);padding:13px 14px;font-size:16px}input{background:#0b1324;color:#fff;margin:6px 0 12px}button{background:var(--gold);color:#17120a;font-weight:700;cursor:pointer;margin-top:8px}button.secondary{background:#1a2944;color:#fff}button.danger{background:var(--danger);color:#fff}.row{display:flex;gap:10px}.row>*{flex:1}
+    input,button{width:100%;border-radius:12px;border:1px solid var(--line);padding:13px 14px;font-size:16px}input{background:#0b1324;color:#fff;margin:6px 0 12px}button{background:var(--gold);color:#17120a;font-weight:700;cursor:pointer;margin-top:8px}button.secondary{background:#1a2944;color:#fff}button.danger{background:var(--danger);color:#fff}button:disabled{opacity:.65;cursor:wait}.row{display:flex;gap:10px}.row>*{flex:1}
     .status{margin:12px 0;padding:10px 12px;border-radius:10px;background:#0a1324;color:var(--muted);min-height:42px}.ok{color:var(--ok)}.bad{color:var(--danger)}
     .topbar{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:18px}.user{color:var(--gold)}
     .board{display:grid;grid-template-columns:repeat(8,1fr);aspect-ratio:1;border:8px solid #382b1c;border-radius:12px;overflow:hidden;direction:ltr}.sq{display:grid;place-items:center;font-size:clamp(28px,6vw,58px);user-select:none;cursor:pointer}.light{background:#ead7b0}.dark{background:#8d5f3c}.sq.sel{outline:5px solid #f3c552;outline-offset:-5px}.sq.last{box-shadow:inset 0 0 0 5px #5fd39b99}
@@ -53,5 +53,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
 <script src="config.js"></script>
 <script src="app.js"></script>
+<script src="auth-fix.js"></script>
 </body>
 </html>
