@@ -29,3 +29,13 @@ services:
         fromDatabase:
           name: jack-altheeb-db
           property: connectionString
+
+  - type: web
+    name: shatranj-game
+    repo: https://github.com/Q8-ux/saad
+    branch: main
+    runtime: static
+    plan: free
+    buildCommand: echo "Shatranj static site ready"
+    staticPublishPath: shatranj-game
+    autoDeployTrigger: commit
