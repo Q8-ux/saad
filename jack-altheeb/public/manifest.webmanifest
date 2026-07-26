@@ -1,10 +1,41 @@
 {
-  "name": "جاك الذيب V3",
-  "short_name": "جاك الذيب V3",
-  "start_url": "/?v=7",
+  "id": "/",
+  "name": "جاك الذيب — لعبة الطاولة الخليجية",
+  "short_name": "جاك الذيب",
+  "description": "لعبة طاولة خليجية حماسية: غرف خاصة، لعب فردي، صيد وتحدٍ.",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#050a1a",
-  "theme_color": "#070d22",
+  "orientation": "landscape",
+  "background_color": "#04142e",
+  "theme_color": "#04142e",
   "lang": "ar",
-  "dir": "rtl"
+  "dir": "rtl",
+  "icons": [
+    {
+      "src": "/assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "لعب فردي",
+      "short_name": "فردي",
+      "url": "/?mode=solo",
+      "icons": [
+        {
+          "src": "/assets/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
 }
