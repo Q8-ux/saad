@@ -1,62 +1,640 @@
-const path = require('path');
-const express = require('express');
-const helmet = require('helmet');
-const http = require('http');
-const { Server } = require('socket.io');
-const { setupAuth, initDatabase, authenticateSocket, recordResult } = require('./auth');
+const path = require("path");
+const { randomInt, randomUUID } = require("crypto");
+const express = require("express");
+const helmet = require("helmet");
+const http = require("http");
+const { Server } = require("socket.io");
+const { setupAuth, initDatabase, authenticateSocket, recordResult } = require("./auth");
+const {
+  MAX_PLAYERS,
+  TOKENS_PER_PLAYER,
+  TRACK_LENGTH,
+  FINISH_PROGRESS,
+  SAFE_CELLS,
+  rollDie,
+  validMoves,
+  advanceTurn,
+  resetRoom,
+  chooseBestMove,
+  applyMove
+} = require("./game-core");
 
-const PORT = process.env.PORT || 3000;
-const RELEASE = process.env.APP_RELEASE || 'jack-altheeb-v4-auth';
-const MAX_PLAYERS = 4;
-const TOKENS_PER_PLAYER = 4;
-const TRACK_LENGTH = 40;
-const FINISH_PROGRESS = 44;
-const SAFE_CELLS = new Set([0,5,10,15,20,25,30,35]);
+const PORT = Number(process.env.PORT) || 3000;
+const RELEASE = process.env.APP_RELEASE || "jack-altheeb-v5-premium";
+const ROOM_IDLE_TTL = 30 * 60 * 1000;
+const PLAYER_RECONNECT_GRACE = 5 * 60 * 1000;
+const ACTION_COOLDOWN = 220;
 
 const app = express();
-app.set('trust proxy', 1);
-app.use(helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false }));
-app.use((req,res,next)=>{
-  res.setHeader('X-Jack-Altheeb-Version', RELEASE);
-  if (/\.(?:html|css|js|json|webmanifest|svg)$/.test(req.path) || req.path === '/') res.setHeader('Cache-Control','no-store');
+app.disable("x-powered-by");
+app.set("trust proxy", 1);
+app.use(helmet({
+  crossOriginEmbedderPolicy: false,
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
+      imgSrc: ["'self'", "data:"],
+      connectSrc: ["'self'"],
+      objectSrc: ["'none'"],
+      baseUri: ["'self'"],
+      frameAncestors: ["'none'"]
+    }
+  }
+}));
+app.use((req, res, next) => {
+  res.setHeader("X-Jack-Altheeb-Version", RELEASE);
+  if (req.path === "/" || req.path.endsWith(".html") || req.path.startsWith("/api/")) {
+    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
+  }
   next();
 });
+
 setupAuth(app);
-app.get('/version', (_req,res)=>res.json({ app:'jack-altheeb', release:RELEASE, commit:process.env.RENDER_GIT_COMMIT||null }));
-app.use(express.static(path.join(__dirname,'public'), { etag:false, lastModified:false, maxAge:0 }));
+app.get("/version", (_req, res) => {
+  res.setHeader("Cache-Control", "no-store");
+  res.json({
+    app: "jack-altheeb",
+    release: RELEASE,
+    version: "5.0.0",
+    commit: process.env.RENDER_GIT_COMMIT || null
+  });
+});
+app.get("/healthz", (_req, res) => res.json({ ok: true, release: RELEASE }));
+app.use(express.static(path.join(__dirname, "public"), {
+  etag: true,
+  lastModified: true,
+  maxAge: "7d",
+  setHeaders(res, filePath) {
+    if (filePath.endsWith(".html") || filePath.endsWith("sw.js")) {
+      res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
+    }
+  }
+}));
 
 const server = http.createServer(app);
-const io = new Server(server, { cors:{ origin:true, credentials:true } });
+const io = new Server(server, {
+  transports: ["websocket", "polling"],
+  maxHttpBufferSize: 100_000,
+  pingInterval: 20_000,
+  pingTimeout: 15_000
+});
 io.use(authenticateSocket);
+
 const rooms = new Map();
 
-function roomCode(){ const a='ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let c; do{ c=Array.from({length:5},()=>a[Math.floor(Math.random()*a.length)]).join(''); }while(rooms.has(c)); return c; }
-function player(socket, avatarIndex=0, bot=false){
-  const u = socket?.data?.user;
-  return { id: bot?`BOT:${Date.now()}`:socket.id, userId: bot?null:u.id, name: bot?'الذيب الآلي':u.username, avatarIndex:bot?4:Math.max(0,Math.min(3,Number(avatarIndex)||u.avatarIndex||0)), tokens:Array(TOKENS_PER_PLAYER).fill(-1), connected:true, isBot:bot };
+function createRoomCode() {
+  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let code = "";
+  do {
+    code = Array.from({ length: 5 }, () => alphabet[randomInt(0, alphabet.length)]).join("");
+  } while (rooms.has(code));
+  return code;
 }
-function current(r){ return r.players[r.turnIndex]||null; }
-function validMoves(p,roll){ return p.tokens.map((v,i)=>({v,i})).filter(({v})=>v!==FINISH_PROGRESS && ((v===-1&&roll===6)||(v>=0&&v+roll<=FINISH_PROGRESS))).map(x=>x.i); }
-function cell(pi,progress){ return progress<0||progress>=TRACK_LENGTH?null:(pi*10+progress)%TRACK_LENGTH; }
-function publicRoom(r){ return { code:r.code,mode:r.mode,tutorial:r.tutorial,status:r.status,hostId:r.hostId,players:r.players.map(({userId,...p})=>p),turnIndex:r.turnIndex,lastRoll:r.lastRoll,pendingRoll:r.pendingRoll,availableMoves:r.availableMoves,message:r.message,winnerId:r.winnerId,safeCells:[...SAFE_CELLS],trackLength:TRACK_LENGTH,finishProgress:FINISH_PROGRESS }; }
-function emit(r){ io.to(r.code).emit('room_state',publicRoom(r)); }
-function nextTurn(r){ r.turnIndex=(r.turnIndex+1)%r.players.length; r.lastRoll=null; r.pendingRoll=false; r.availableMoves=[]; }
-function reset(r){ r.players.forEach(p=>{p.tokens=Array(TOKENS_PER_PLAYER).fill(-1);p.connected=true;}); r.turnIndex=0;r.lastRoll=null;r.pendingRoll=false;r.availableMoves=[];r.winnerId=null;r.settled=false; }
-function bestBotMove(r,moves){ const p=current(r),pi=r.turnIndex; return moves.map(i=>{const old=p.tokens[i],np=old===-1?0:old+r.lastRoll,landing=cell(pi,np);let s=np;if(np===FINISH_PROGRESS)s+=10000;if(old===-1)s+=1200;if(landing!==null&&SAFE_CELLS.has(landing))s+=350;if(landing!==null&&!SAFE_CELLS.has(landing))r.players.forEach((o,oi)=>{if(oi!==pi&&o.tokens.some(v=>cell(oi,v)===landing))s+=5000;});return{i,s};}).sort((a,b)=>b.s-a.s)[0].i; }
-async function settle(r,winner){ if(r.settled)return;r.settled=true; await Promise.all(r.players.filter(p=>!p.isBot&&p.userId).map(p=>recordResult(p.userId,p.id===winner.id).catch(console.error))); }
-function move(r,index){ const p=current(r),roll=r.lastRoll,m=validMoves(p,roll); if(!m.includes(index))return{ok:false,error:'هذه الحركة غير مسموحة.'}; const old=p.tokens[index],np=old===-1?0:old+roll;p.tokens[index]=np;const pi=r.turnIndex,landing=cell(pi,np);let captured=0;if(landing!==null&&!SAFE_CELLS.has(landing))r.players.forEach((o,oi)=>{if(oi!==pi)o.tokens=o.tokens.map(v=>cell(oi,v)===landing?(captured++,-1):v);});r.pendingRoll=false;r.availableMoves=[];if(p.tokens.every(v=>v===FINISH_PROGRESS)){r.status='finished';r.winnerId=p.id;r.message=`🏆 ${p.name} فاز بلقب جاك الذيب!`;void settle(r,p);return{ok:true,won:true,captured};}if(captured){r.lastRoll=null;r.message=`🐺 ${p.name} صاد ${captured} دبوس وحصل على رمية إضافية!`;}else if(roll===6){r.lastRoll=null;r.message=`🎲 ${p.name} رمى 6 وله رمية إضافية.`;}else{r.message=`${p.name} تحرك ${roll} خانات.`;nextTurn(r);}return{ok:true,won:false,captured}; }
-function scheduleBot(r){ clearTimeout(r.botTimer);const b=current(r);if(r.status!=='playing'||!b?.isBot)return;r.message='🐺 الذيب الآلي يفكّر...';emit(r);r.botTimer=setTimeout(()=>{if(!rooms.has(r.code)||current(r)?.id!==b.id)return;const roll=Math.floor(Math.random()*6)+1,m=validMoves(b,roll);r.lastRoll=roll;r.availableMoves=m;if(!m.length){r.message=`الذيب الآلي رمى ${roll} ولا توجد له حركة.`;nextTurn(r);emit(r);return scheduleBot(r);}r.pendingRoll=true;r.message=`الذيب الآلي رمى ${roll} ويختار حركته...`;emit(r);r.botTimer=setTimeout(()=>{move(r,bestBotMove(r,m));emit(r);scheduleBot(r);},600);},800); }
 
-io.on('connection',socket=>{
-  socket.emit('auth_user',socket.data.user);
-  socket.on('create_room',({avatarIndex,tutorial}={},reply=()=>{})=>{const code=roomCode(),r={code,mode:'online',tutorial:!!tutorial,status:'lobby',hostId:socket.id,players:[player(socket,avatarIndex)],turnIndex:0,lastRoll:null,pendingRoll:false,availableMoves:[],message:'تم إنشاء الغرفة. شارك الرمز مع أصدقائك.',winnerId:null,botTimer:null,settled:false};rooms.set(code,r);socket.join(code);socket.data.roomCode=code;reply({ok:true,code,playerId:socket.id});emit(r);});
-  socket.on('create_solo',({avatarIndex,tutorial}={},reply=()=>{})=>{const code=roomCode(),r={code,mode:'solo',tutorial:!!tutorial,status:'playing',hostId:socket.id,players:[player(socket,avatarIndex),player(null,4,true)],turnIndex:0,lastRoll:null,pendingRoll:false,availableMoves:[],message:'بدأ التحدي الفردي. أنت تبدأ أولًا!',winnerId:null,botTimer:null,settled:false};rooms.set(code,r);socket.join(code);socket.data.roomCode=code;reply({ok:true,code,playerId:socket.id});emit(r);});
-  socket.on('join_room',({code,avatarIndex}={},reply=()=>{})=>{const c=String(code||'').trim().toUpperCase(),r=rooms.get(c);if(!r)return reply({ok:false,error:'الغرفة غير موجودة.'});if(r.mode!=='online'||r.status!=='lobby')return reply({ok:false,error:'لا يمكن الانضمام لهذه الجولة.'});if(r.players.length>=MAX_PLAYERS)return reply({ok:false,error:'الغرفة مكتملة.'});if(r.players.some(p=>p.userId===socket.data.user.id))return reply({ok:false,error:'أنت داخل الغرفة بالفعل.'});r.players.push(player(socket,avatarIndex));socket.join(c);socket.data.roomCode=c;r.message=`${socket.data.user.username} انضم إلى الغرفة.`;reply({ok:true,code:c,playerId:socket.id});emit(r);});
-  socket.on('start_game',({code}={},reply=()=>{})=>{const r=rooms.get(String(code||'').toUpperCase());if(!r)return reply({ok:false,error:'الغرفة غير موجودة.'});if(r.hostId!==socket.id)return reply({ok:false,error:'فقط مدير الغرفة يبدأ اللعبة.'});if(r.players.length<2)return reply({ok:false,error:'تحتاج لاعبين على الأقل.'});reset(r);r.status='playing';r.turnIndex=Math.floor(Math.random()*r.players.length);r.message=`بدأت اللعبة. الدور على ${current(r).name}.`;reply({ok:true});emit(r);});
-  socket.on('roll_dice',({code}={},reply=()=>{})=>{const r=rooms.get(String(code||'').toUpperCase()),p=r&&current(r);if(!r||r.status!=='playing')return reply({ok:false,error:'اللعبة غير متاحة.'});if(!p||p.id!==socket.id)return reply({ok:false,error:'ليس دورك.'});if(r.pendingRoll)return reply({ok:false,error:'اختر دبوسًا أولًا.'});const roll=Math.floor(Math.random()*6)+1,m=validMoves(p,roll);r.lastRoll=roll;r.availableMoves=m;if(!m.length){r.message=`${p.name} رمى ${roll} ولا توجد حركة متاحة.`;nextTurn(r);}else{r.pendingRoll=true;r.message=`${p.name} رمى ${roll}. اختر أحد الدبابيس المتاحة.`;}reply({ok:true,roll,validMoves:m});emit(r);scheduleBot(r);});
-  socket.on('move_token',({code,tokenIndex}={},reply=()=>{})=>{const r=rooms.get(String(code||'').toUpperCase()),p=r&&current(r);if(!r||r.status!=='playing')return reply({ok:false,error:'اللعبة غير متاحة.'});if(!p||p.id!==socket.id)return reply({ok:false,error:'ليس دورك.'});const result=move(r,Number(tokenIndex));reply(result);emit(r);scheduleBot(r);});
-  socket.on('restart_game',({code}={},reply=()=>{})=>{const r=rooms.get(String(code||'').toUpperCase());if(!r)return reply({ok:false,error:'الغرفة غير موجودة.'});if(r.hostId!==socket.id)return reply({ok:false,error:'فقط مدير الغرفة يعيد اللعب.'});reset(r);r.status=r.mode==='solo'?'playing':'lobby';r.message=r.mode==='solo'?'بدأت جولة فردية جديدة. أنت تبدأ أولًا!':'الكل جاهز لجولة جديدة.';reply({ok:true});emit(r);});
-  socket.on('disconnect',()=>{const r=rooms.get(socket.data.roomCode);if(!r)return;const i=r.players.findIndex(p=>p.id===socket.id);if(i<0)return;if(r.mode==='solo'){clearTimeout(r.botTimer);rooms.delete(r.code);return;}if(r.status==='playing'){r.players[i].connected=false;}else r.players.splice(i,1);if(!r.players.length)rooms.delete(r.code);else{if(r.hostId===socket.id)r.hostId=r.players[0].id;emit(r);}});
+function normalizeRoomCode(value) {
+  const code = String(value || "").trim().toUpperCase();
+  return /^[A-Z2-9]{5}$/.test(code) ? code : "";
+}
+
+function safeAvatar(value, fallback = 0) {
+  const avatarIndex = Number(value);
+  return Number.isInteger(avatarIndex) && avatarIndex >= 0 && avatarIndex <= 3
+    ? avatarIndex
+    : fallback;
+}
+
+function createPlayer(socket, avatarIndex = 0, isBot = false) {
+  if (isBot) {
+    return {
+      id: `BOT:${randomUUID()}`,
+      userId: null,
+      name: "الذيب الآلي",
+      avatarIndex: 4,
+      tokens: Array(TOKENS_PER_PLAYER).fill(-1),
+      connected: true,
+      disconnectedAt: null,
+      isBot: true
+    };
+  }
+
+  const user = socket.data.user;
+  return {
+    id: socket.id,
+    userId: user.id,
+    name: user.username,
+    avatarIndex: safeAvatar(avatarIndex, user.avatarIndex || 0),
+    tokens: Array(TOKENS_PER_PLAYER).fill(-1),
+    connected: true,
+    disconnectedAt: null,
+    isBot: false
+  };
+}
+
+function currentPlayer(room) {
+  return room.players[room.turnIndex] || null;
+}
+
+function touch(room) {
+  room.updatedAt = Date.now();
+}
+
+function createRoom({ code, mode, tutorial, host, players, status }) {
+  const now = Date.now();
+  return {
+    code,
+    mode,
+    tutorial: Boolean(tutorial),
+    status,
+    hostId: host.id,
+    players,
+    turnIndex: 0,
+    lastRoll: null,
+    pendingRoll: false,
+    availableMoves: [],
+    message: mode === "solo"
+      ? "بدأ التحدي الفردي. أنت تبدأ أولًا!"
+      : "تم إنشاء الغرفة. شارك الرمز مع أصدقائك.",
+    winnerId: null,
+    lastAction: null,
+    botTimer: null,
+    settled: false,
+    revision: 0,
+    createdAt: now,
+    updatedAt: now
+  };
+}
+
+function publicPlayer(player) {
+  const { userId, disconnectedAt, ...safePlayer } = player;
+  return safePlayer;
+}
+
+function publicRoom(room) {
+  return {
+    code: room.code,
+    mode: room.mode,
+    tutorial: room.tutorial,
+    status: room.status,
+    hostId: room.hostId,
+    players: room.players.map(publicPlayer),
+    turnIndex: room.turnIndex,
+    lastRoll: room.lastRoll,
+    pendingRoll: room.pendingRoll,
+    availableMoves: room.availableMoves,
+    message: room.message,
+    winnerId: room.winnerId,
+    lastAction: room.lastAction,
+    safeCells: [...SAFE_CELLS],
+    trackLength: TRACK_LENGTH,
+    finishProgress: FINISH_PROGRESS,
+    revision: room.revision,
+    serverTime: Date.now()
+  };
+}
+
+function emitRoom(room) {
+  room.revision += 1;
+  touch(room);
+  io.to(room.code).emit("room_state", publicRoom(room));
+}
+
+function clearRoom(room) {
+  clearTimeout(room.botTimer);
+  rooms.delete(room.code);
+}
+
+function findRoomForUser(userId) {
+  if (!userId) return null;
+  return [...rooms.values()].find(room =>
+    room.players.some(player => !player.isBot && String(player.userId) === String(userId))
+  ) || null;
+}
+
+function removeDisconnectedLobbyPlayers(room) {
+  room.players = room.players.filter(player => player.isBot || player.connected);
+  if (room.turnIndex >= room.players.length) room.turnIndex = 0;
+}
+
+function migrateHost(room) {
+  const hostStillPresent = room.players.some(player => player.id === room.hostId && player.connected);
+  if (hostStillPresent) return;
+  const nextHost = room.players.find(player => !player.isBot && player.connected);
+  if (nextHost) room.hostId = nextHost.id;
+}
+
+async function settleRoom(room, winner) {
+  if (room.settled) return;
+  room.settled = true;
+  await Promise.all(room.players
+    .filter(player => !player.isBot && player.userId)
+    .map(player => recordResult(player.userId, player.id === winner.id).catch(error => {
+      console.error("record result failed", error);
+    })));
+}
+
+function finishMove(room, tokenIndex) {
+  const result = applyMove(room, tokenIndex);
+  if (!result.ok) return result;
+
+  const { player, roll, captured, won, extraTurn } = result;
+  if (won) {
+    room.status = "finished";
+    room.winnerId = player.id;
+    room.message = `🏆 ${player.name} فاز بلقب جاك الذيب!`;
+    void settleRoom(room, player);
+    return result;
+  }
+
+  if (captured > 0) {
+    room.lastRoll = null;
+    room.message = `🐺 ${player.name} صاد ${captured} دبوس وحصل على رمية إضافية!`;
+  } else if (extraTurn && roll === 6) {
+    room.lastRoll = null;
+    room.message = `🎲 ${player.name} رمى 6 وله رمية إضافية.`;
+  } else {
+    room.message = `${player.name} تحرك ${roll} خانات.`;
+    advanceTurn(room);
+  }
+  return result;
+}
+
+function scheduleBot(room) {
+  clearTimeout(room.botTimer);
+  const bot = currentPlayer(room);
+  if (room.status !== "playing" || !bot?.isBot) return;
+
+  room.message = "🐺 الذيب الآلي يحلل المسار...";
+  emitRoom(room);
+
+  room.botTimer = setTimeout(() => {
+    if (!rooms.has(room.code) || room.status !== "playing" || currentPlayer(room)?.id !== bot.id) return;
+
+    const roll = rollDie();
+    const moves = validMoves(bot, roll);
+    room.lastRoll = roll;
+    room.availableMoves = moves;
+    room.lastAction = { type: "roll", playerId: bot.id, roll, validMoves: moves };
+
+    if (!moves.length) {
+      room.message = `الذيب الآلي رمى ${roll} ولا توجد له حركة.`;
+      advanceTurn(room);
+      emitRoom(room);
+      scheduleBot(room);
+      return;
+    }
+
+    room.pendingRoll = true;
+    room.message = `الذيب الآلي رمى ${roll} ويختار أفضل حركة...`;
+    emitRoom(room);
+
+    room.botTimer = setTimeout(() => {
+      if (!rooms.has(room.code) || room.status !== "playing" || currentPlayer(room)?.id !== bot.id) return;
+      const tokenIndex = chooseBestMove(room, moves);
+      finishMove(room, tokenIndex);
+      emitRoom(room);
+      scheduleBot(room);
+    }, 850);
+  }, 950);
+}
+
+function actionAllowed(socket, action) {
+  const now = Date.now();
+  const previous = socket.data.lastAction || {};
+  const elapsed = now - (previous.at || 0);
+  if (previous.type !== action) {
+    socket.data.lastAction = { type: action, at: now };
+    return true;
+  }
+  if (elapsed < ACTION_COOLDOWN) return false;
+  socket.data.lastAction = { type: action, at: now };
+  return true;
+}
+
+function activeRoomFor(socket) {
+  const code = socket.data.roomCode;
+  return code ? rooms.get(code) : null;
+}
+
+function attachPlayerToSocket(socket, room, player) {
+  const oldId = player.id;
+  player.id = socket.id;
+  player.connected = true;
+  player.disconnectedAt = null;
+  player.avatarIndex = safeAvatar(player.avatarIndex, socket.data.user.avatarIndex || 0);
+
+  if (room.hostId === oldId) room.hostId = socket.id;
+  if (room.winnerId === oldId) room.winnerId = socket.id;
+  if (room.lastAction?.playerId === oldId) room.lastAction.playerId = socket.id;
+
+  socket.join(room.code);
+  socket.data.roomCode = room.code;
+  socket.emit("session_resume", {
+    ok: true,
+    code: room.code,
+    playerId: socket.id,
+    room: publicRoom(room)
+  });
+  room.message = `${player.name} عاد إلى الجولة.`;
+  emitRoom(room);
+}
+
+function tryResume(socket) {
+  const room = findRoomForUser(socket.data.user.id);
+  if (!room) return false;
+  const player = room.players.find(item =>
+    !item.isBot && String(item.userId) === String(socket.data.user.id)
+  );
+  if (!player) return false;
+
+  const oldSocket = io.sockets.sockets.get(player.id);
+  attachPlayerToSocket(socket, room, player);
+  if (oldSocket && oldSocket.id !== socket.id) oldSocket.disconnect(true);
+  return true;
+}
+
+io.on("connection", socket => {
+  socket.emit("auth_user", socket.data.user);
+  tryResume(socket);
+
+  socket.on("create_room", ({ avatarIndex, tutorial } = {}, reply = () => {}) => {
+    if (findRoomForUser(socket.data.user.id)) {
+      return reply({ ok: false, error: "أنت داخل غرفة حالياً. غادرها أولاً." });
+    }
+
+    const code = createRoomCode();
+    const host = createPlayer(socket, avatarIndex);
+    const room = createRoom({
+      code,
+      mode: "online",
+      tutorial,
+      host,
+      players: [host],
+      status: "lobby"
+    });
+    rooms.set(code, room);
+    socket.join(code);
+    socket.data.roomCode = code;
+    reply({ ok: true, code, playerId: socket.id });
+    emitRoom(room);
+  });
+
+  socket.on("create_solo", ({ avatarIndex, tutorial } = {}, reply = () => {}) => {
+    if (findRoomForUser(socket.data.user.id)) {
+      return reply({ ok: false, error: "لديك جولة مفتوحة بالفعل." });
+    }
+
+    const code = createRoomCode();
+    const host = createPlayer(socket, avatarIndex);
+    const room = createRoom({
+      code,
+      mode: "solo",
+      tutorial,
+      host,
+      players: [host, createPlayer(null, 4, true)],
+      status: "playing"
+    });
+    rooms.set(code, room);
+    socket.join(code);
+    socket.data.roomCode = code;
+    reply({ ok: true, code, playerId: socket.id });
+    emitRoom(room);
+  });
+
+  socket.on("join_room", ({ code, avatarIndex } = {}, reply = () => {}) => {
+    const normalizedCode = normalizeRoomCode(code);
+    const room = rooms.get(normalizedCode);
+    if (!normalizedCode || !room) return reply({ ok: false, error: "الغرفة غير موجودة." });
+    if (room.mode !== "online" || room.status !== "lobby") {
+      return reply({ ok: false, error: "لا يمكن الانضمام لهذه الجولة الآن." });
+    }
+
+    const existing = findRoomForUser(socket.data.user.id);
+    if (existing && existing.code !== room.code) {
+      return reply({ ok: false, error: "أنت داخل غرفة أخرى حالياً." });
+    }
+
+    const returningPlayer = room.players.find(player =>
+      !player.isBot && String(player.userId) === String(socket.data.user.id)
+    );
+    if (returningPlayer) {
+      attachPlayerToSocket(socket, room, returningPlayer);
+      return reply({ ok: true, code: room.code, playerId: socket.id, resumed: true });
+    }
+
+    removeDisconnectedLobbyPlayers(room);
+    if (room.players.length >= MAX_PLAYERS) return reply({ ok: false, error: "الغرفة مكتملة." });
+
+    const joinedPlayer = createPlayer(socket, avatarIndex);
+    room.players.push(joinedPlayer);
+    socket.join(room.code);
+    socket.data.roomCode = room.code;
+    room.message = `${joinedPlayer.name} انضم إلى الغرفة.`;
+    reply({ ok: true, code: room.code, playerId: socket.id });
+    emitRoom(room);
+  });
+
+  socket.on("start_game", ({ code } = {}, reply = () => {}) => {
+    const room = rooms.get(normalizeRoomCode(code));
+    if (!room) return reply({ ok: false, error: "الغرفة غير موجودة." });
+    if (room.hostId !== socket.id) return reply({ ok: false, error: "فقط مدير الغرفة يبدأ اللعبة." });
+    if (room.mode !== "online" || room.status !== "lobby") {
+      return reply({ ok: false, error: "لا يمكن بدء هذه الجولة الآن." });
+    }
+
+    removeDisconnectedLobbyPlayers(room);
+    if (room.players.filter(player => player.connected).length < 2) {
+      return reply({ ok: false, error: "تحتاج لاعبين متصلين على الأقل." });
+    }
+
+    resetRoom(room);
+    room.status = "playing";
+    room.turnIndex = randomInt(0, room.players.length);
+    room.message = `بدأت اللعبة. الدور على ${currentPlayer(room).name}.`;
+    reply({ ok: true });
+    emitRoom(room);
+    scheduleBot(room);
+  });
+
+  socket.on("roll_dice", ({ code } = {}, reply = () => {}) => {
+    if (!actionAllowed(socket, "roll")) return reply({ ok: false, error: "تمهل لحظة قبل الرمية التالية." });
+    const room = rooms.get(normalizeRoomCode(code));
+    const player = room && currentPlayer(room);
+    if (!room || room.status !== "playing") return reply({ ok: false, error: "اللعبة غير متاحة." });
+    if (!player || player.id !== socket.id) return reply({ ok: false, error: "ليس دورك." });
+    if (room.pendingRoll) return reply({ ok: false, error: "اختر دبوساً أولاً." });
+
+    const roll = rollDie();
+    const moves = validMoves(player, roll);
+    room.lastRoll = roll;
+    room.availableMoves = moves;
+    room.lastAction = { type: "roll", playerId: player.id, roll, validMoves: moves };
+
+    if (!moves.length) {
+      room.message = `${player.name} رمى ${roll} ولا توجد حركة متاحة.`;
+      advanceTurn(room);
+    } else {
+      room.pendingRoll = true;
+      room.message = `${player.name} رمى ${roll}. اختر أحد الدبابيس المتاحة.`;
+    }
+
+    reply({ ok: true, roll, validMoves: moves });
+    emitRoom(room);
+    scheduleBot(room);
+  });
+
+  socket.on("move_token", ({ code, tokenIndex } = {}, reply = () => {}) => {
+    if (!actionAllowed(socket, "move")) return reply({ ok: false, error: "تمهل لحظة قبل الحركة التالية." });
+    const room = rooms.get(normalizeRoomCode(code));
+    const player = room && currentPlayer(room);
+    if (!room || room.status !== "playing") return reply({ ok: false, error: "اللعبة غير متاحة." });
+    if (!player || player.id !== socket.id) return reply({ ok: false, error: "ليس دورك." });
+
+    const result = finishMove(room, Number(tokenIndex));
+    reply(result.ok ? {
+      ok: true,
+      won: result.won,
+      captured: result.captured,
+      extraTurn: result.extraTurn
+    } : result);
+    if (!result.ok) return;
+
+    emitRoom(room);
+    scheduleBot(room);
+  });
+
+  socket.on("restart_game", ({ code } = {}, reply = () => {}) => {
+    const room = rooms.get(normalizeRoomCode(code));
+    if (!room) return reply({ ok: false, error: "الغرفة غير موجودة." });
+    if (room.hostId !== socket.id) return reply({ ok: false, error: "فقط مدير الغرفة يعيد اللعب." });
+    if (room.status !== "finished") {
+      return reply({ ok: false, error: "يمكن بدء جولة جديدة بعد انتهاء الجولة الحالية." });
+    }
+
+    resetRoom(room);
+    if (room.mode === "solo") {
+      room.status = "playing";
+      room.turnIndex = 0;
+      room.message = "بدأت جولة فردية جديدة. أنت تبدأ أولاً!";
+    } else {
+      removeDisconnectedLobbyPlayers(room);
+      room.status = "lobby";
+      room.message = "الكل جاهز لجولة جديدة.";
+    }
+    reply({ ok: true });
+    emitRoom(room);
+  });
+
+  socket.on("leave_room", (_payload = {}, reply = () => {}) => {
+    const room = activeRoomFor(socket);
+    if (!room) return reply({ ok: true });
+
+    if (room.mode === "solo") {
+      clearRoom(room);
+      socket.leave(room.code);
+      socket.data.roomCode = null;
+    } else if (room.status === "lobby") {
+      room.players = room.players.filter(player => player.id !== socket.id);
+      socket.leave(room.code);
+      socket.data.roomCode = null;
+      if (!room.players.length) {
+        clearRoom(room);
+      } else {
+        migrateHost(room);
+        if (room.turnIndex >= room.players.length) room.turnIndex = 0;
+        room.message = `${socket.data.user.username} غادر الغرفة.`;
+        emitRoom(room);
+      }
+    } else {
+      const player = room.players.find(item => item.id === socket.id);
+      if (player) {
+        player.connected = false;
+        player.disconnectedAt = Date.now();
+        player.userId = null;
+      }
+      socket.leave(room.code);
+      socket.data.roomCode = null;
+      const connectedHumans = room.players.filter(item => !item.isBot && item.connected);
+      if (!connectedHumans.length) {
+        clearRoom(room);
+      } else {
+        if (currentPlayer(room)?.id === socket.id) advanceTurn(room);
+        migrateHost(room);
+        room.message = `${socket.data.user.username} غادر الغرفة.`;
+        emitRoom(room);
+        scheduleBot(room);
+      }
+    }
+    reply({ ok: true });
+  });
+
+  socket.on("disconnect", () => {
+    const room = activeRoomFor(socket);
+    if (!room) return;
+
+    const playerIndex = room.players.findIndex(player => player.id === socket.id);
+    if (playerIndex < 0) return;
+    const player = room.players[playerIndex];
+
+    if (room.mode === "solo") {
+      player.connected = false;
+      player.disconnectedAt = Date.now();
+      touch(room);
+      return;
+    }
+
+    player.connected = false;
+    player.disconnectedAt = Date.now();
+    if (room.status === "playing" && currentPlayer(room)?.id === socket.id) {
+      advanceTurn(room);
+    }
+    migrateHost(room);
+    room.message = `${player.name} انقطع اتصاله، ويمكنه العودة خلال دقائق.`;
+    emitRoom(room);
+    scheduleBot(room);
+  });
 });
 
-initDatabase().then(()=>server.listen(PORT,()=>console.log(`Jack Altheeb ${RELEASE} on ${PORT}`))).catch(err=>{console.error('Database init failed',err);process.exit(1);});
+const cleanupTimer = setInterval(() => {
+  const now = Date.now();
+  rooms.forEach(room => {
+    const connectedHumans = room.players.filter(player => !player.isBot && player.connected);
+    if (!connectedHumans.length && now - room.updatedAt > PLAYER_RECONNECT_GRACE) {
+      clearRoom(room);
+      return;
+    }
+
+    if (room.status === "lobby") {
+      room.players = room.players.filter(player =>
+        player.isBot || player.connected || now - (player.disconnectedAt || now) <= PLAYER_RECONNECT_GRACE
+      );
+      migrateHost(room);
+    }
+
+    if (now - room.updatedAt > ROOM_IDLE_TTL) clearRoom(room);
+  });
+}, 60_000);
+cleanupTimer.unref();
+
+initDatabase()
+  .then(() => {
+    server.listen(PORT, () => {
+      console.log(`Jack Altheeb ${RELEASE} listening on ${PORT}`);
+    });
+  })
+  .catch(error => {
+    console.error("Database initialization failed", error);
+    process.exit(1);
+  });
+
+function shutdown() {
+  clearInterval(cleanupTimer);
+  rooms.forEach(clearRoom);
+  io.close(() => server.close(() => process.exit(0)));
+  setTimeout(() => process.exit(1), 8_000).unref();
+}
+
+process.on("SIGTERM", shutdown);
+process.on("SIGINT", shutdown);

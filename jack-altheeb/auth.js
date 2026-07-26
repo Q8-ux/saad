@@ -8,7 +8,21 @@ const { z } = require('zod');
 const COOKIE_NAME = 'jack_session';
 const JWT_SECRET = process.env.JWT_SECRET || '';
 const DATABASE_URL = process.env.DATABASE_URL || '';
+const DEV_AUTH_BYPASS = process.env.DEV_AUTH_BYPASS === '1' && process.env.NODE_ENV !== 'production';
 const pool = DATABASE_URL ? new Pool({ connectionString: DATABASE_URL, ssl: DATABASE_URL.includes('localhost') ? false : { rejectUnauthorized: false } }) : null;
+const demoUser = {
+  id: 'local-demo',
+  username: 'سعد التجريبي',
+  email: 'demo@local.invalid',
+  avatarIndex: 0,
+  level: 7,
+  xp: 3260,
+  coins: 1820,
+  wins: 18,
+  losses: 9,
+  gamesPlayed: 27,
+  createdAt: new Date().toISOString()
+};
 
 const usernameSchema = z.string().trim().min(3).max(18).regex(/^[\p{L}\p{N}_]+$/u);
 const emailSchema = z.string().trim().toLowerCase().email().max(120);
@@ -19,19 +33,28 @@ function publicUser(row) {
     id: row.id,
     username: row.username,
     email: row.email,
-    avatarIndex: row.avatar_index,
+    avatarIndex: row.avatarIndex ?? row.avatar_index,
     level: row.level,
     xp: row.xp,
     coins: row.coins,
     wins: row.wins,
     losses: row.losses,
-    gamesPlayed: row.games_played,
-    createdAt: row.created_at
+    gamesPlayed: row.gamesPlayed ?? row.games_played,
+    createdAt: row.createdAt ?? row.created_at
   };
 }
 
+function leaderboardUser(row) {
+  const user = publicUser(row);
+  const { email, createdAt, ...publicProfile } = user;
+  return publicProfile;
+}
+
 async function initDatabase() {
-  if (!pool) return;
+  if (!pool) {
+    if (DEV_AUTH_BYPASS) console.warn('Development authentication bypass is enabled.');
+    return;
+  }
   await pool.query(`
     CREATE TABLE IF NOT EXISTS users (
       id BIGSERIAL PRIMARY KEY,
@@ -82,6 +105,10 @@ async function findUserById(id) {
 }
 
 async function requireUser(req, res, next) {
+  if (DEV_AUTH_BYPASS) {
+    req.user = demoUser;
+    return next();
+  }
   try {
     const token = req.cookies?.[COOKIE_NAME];
     if (!token || !JWT_SECRET) return res.status(401).json({ ok: false, error: 'سجّل الدخول أولًا.' });
@@ -101,7 +128,12 @@ function setupAuth(app) {
   const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, limit: 30, standardHeaders: true, legacyHeaders: false });
 
   app.get('/api/auth/status', async (_req, res) => {
-    res.json({ ok: true, ready: Boolean(pool && JWT_SECRET), database: Boolean(pool) });
+    res.json({
+      ok: true,
+      ready: Boolean((pool && JWT_SECRET) || DEV_AUTH_BYPASS),
+      database: Boolean(pool),
+      mode: DEV_AUTH_BYPASS ? 'development' : 'production'
+    });
   });
 
   app.post('/api/auth/register', authLimiter, async (req, res) => {
@@ -134,11 +166,18 @@ function setupAuth(app) {
     const login = String(req.body?.login || '').trim().toLowerCase();
     const password = String(req.body?.password || '');
     if (!login || !password) return res.status(400).json({ ok: false, error: 'أدخل اسم المستخدم أو البريد وكلمة المرور.' });
-    const { rows } = await pool.query('SELECT * FROM users WHERE username_key = $1 OR email = $1 LIMIT 1', [login]);
-    const user = rows[0];
-    if (!user || !(await bcrypt.compare(password, user.password_hash))) return res.status(401).json({ ok: false, error: 'بيانات الدخول غير صحيحة.' });
-    setSession(res, signToken(user));
-    res.json({ ok: true, user: publicUser(user) });
+    try {
+      const { rows } = await pool.query('SELECT * FROM users WHERE username_key = $1 OR email = $1 LIMIT 1', [login]);
+      const user = rows[0];
+      if (!user || !(await bcrypt.compare(password, user.password_hash))) {
+        return res.status(401).json({ ok: false, error: 'بيانات الدخول غير صحيحة.' });
+      }
+      setSession(res, signToken(user));
+      res.json({ ok: true, user: publicUser(user) });
+    } catch (error) {
+      console.error('login error', error);
+      res.status(500).json({ ok: false, error: 'تعذر تسجيل الدخول الآن.' });
+    }
   });
 
   app.post('/api/auth/logout', (_req, res) => {
@@ -151,17 +190,40 @@ function setupAuth(app) {
   app.patch('/api/me/avatar', requireUser, async (req, res) => {
     const avatarIndex = Number(req.body?.avatarIndex);
     if (!Number.isInteger(avatarIndex) || avatarIndex < 0 || avatarIndex > 3) return res.status(400).json({ ok: false, error: 'الصورة غير صحيحة.' });
+    if (DEV_AUTH_BYPASS) {
+      demoUser.avatarIndex = avatarIndex;
+      return res.json({ ok: true, user: demoUser });
+    }
     const { rows } = await pool.query('UPDATE users SET avatar_index=$1, updated_at=NOW() WHERE id=$2 RETURNING *', [avatarIndex, req.user.id]);
     res.json({ ok: true, user: publicUser(rows[0]) });
   });
 
   app.get('/api/leaderboard', requireUser, async (_req, res) => {
+    if (DEV_AUTH_BYPASS) {
+      return res.json({ ok: true, players: [leaderboardUser({
+        id: demoUser.id,
+        username: demoUser.username,
+        email: demoUser.email,
+        avatar_index: demoUser.avatarIndex,
+        level: demoUser.level,
+        xp: demoUser.xp,
+        coins: demoUser.coins,
+        wins: demoUser.wins,
+        losses: demoUser.losses,
+        games_played: demoUser.gamesPlayed,
+        created_at: demoUser.createdAt
+      })] });
+    }
     const { rows } = await pool.query('SELECT * FROM users ORDER BY wins DESC, xp DESC LIMIT 50');
-    res.json({ ok: true, players: rows.map(publicUser) });
+    res.json({ ok: true, players: rows.map(leaderboardUser) });
   });
 }
 
 async function authenticateSocket(socket, next) {
+  if (DEV_AUTH_BYPASS) {
+    socket.data.user = demoUser;
+    return next();
+  }
   try {
     if (!pool || !JWT_SECRET) return next(new Error('نظام الحسابات غير مربوط.'));
     const cookies = parseCookies(socket.handshake.headers.cookie || '');

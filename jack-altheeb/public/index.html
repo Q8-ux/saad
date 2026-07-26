@@ -1,7 +1,360 @@
-<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#070d22"><title>جاك الذيب | حسابات ولعب أونلاين</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"><link rel="manifest" href="/manifest.webmanifest?v=10"><link rel="stylesheet" href="/style.css?v=10"><link rel="stylesheet" href="/enhancements.css?v=10"><link rel="stylesheet" href="/auth.css?v=10"><link rel="stylesheet" href="/dice-reveal.css?v=10"></head><body>
-<div id="authGate" class="auth-gate"><div class="auth-card"><section class="auth-art"><span class="eyebrow">JACK ALTHEEB ACCOUNT</span><h2>اسمك محجوز.<br>إنجازاتك محفوظة.</h2><p>أنشئ حسابًا دائمًا وادخل تحديات جاك الذيب مع إحصائيات وXP وعملات.</p></section><section class="auth-panel"><div class="auth-tabs"><button class="auth-tab active" data-target="loginForm">تسجيل الدخول</button><button class="auth-tab" data-target="registerForm">حساب جديد</button></div><form id="loginForm" class="auth-form active"><label>اسم المستخدم أو البريد</label><input id="loginId" autocomplete="username" required><label>كلمة المرور</label><input id="loginPassword" type="password" autocomplete="current-password" minlength="8" required><button class="primary-btn" type="submit">دخول إلى اللعبة</button></form><form id="registerForm" class="auth-form"><label>اسم مستخدم فريد</label><input id="regUsername" minlength="3" maxlength="18" required><label>البريد الإلكتروني</label><input id="regEmail" type="email" autocomplete="email" required><label>كلمة المرور</label><input id="regPassword" type="password" minlength="8" autocomplete="new-password" required><button class="primary-btn" type="submit">إنشاء وحجز الاسم</button></form><p id="authMessage" class="auth-message"></p></section></div></div>
-<div class="ambient ambient-one"></div><div class="ambient ambient-two"></div><main class="app-shell"><header class="topbar"><div class="brand"><div class="wolf-mark">🐺</div><div><h1>جاك الذيب <small style="font-size:.5em;color:#ccff00">PRO</small></h1><p>حساب دائم • لعب فردي • غرف أونلاين</p></div></div><div style="display:flex;gap:10px;align-items:center"><div id="accountBar" class="account-bar hidden"><span id="accountAvatar" class="account-avatar">🐺</span><div class="account-info"><strong id="accountName">—</strong><small id="accountLevel">المستوى 1</small><div id="accountStats" class="profile-stats"></div></div><button id="logoutBtn" class="logout-btn">خروج</button></div><button id="languageBtn" class="icon-btn">EN</button><button id="soundBtn" class="icon-btn">🔊</button></div></header>
-<section id="landingView" class="view active"><div class="hero-stage card"><div class="hero-shade"></div><div class="hero-content"><span class="eyebrow">ONLINE • SOLO • TUTORIAL</span><h2>ادخل التحدي… قبل لا يصيدك الذيب</h2><p>حسابك يحفظ انتصاراتك وعملاتك ومستواك في كل جولة.</p><div class="feature-pills"><span>👤 حساب دائم</span><span>🎮 لعب فردي</span><span>🌐 2–4 أونلاين</span></div></div></div><div class="start-grid"><section class="join-card card"><span class="eyebrow">ملف اللاعب</span><h3>جهّز شخصيتك</h3><label>اسم المستخدم</label><input id="playerName" readonly><label>اختر شخصيتك</label><div id="avatarPicker" class="avatar-picker"></div><label class="learning-switch" for="tutorialToggle"><input id="tutorialToggle" type="checkbox"><span class="switch-ui"></span><span><strong>الوضع التعليمي</strong><small>يرشدك أثناء اللعب</small></span></label></section><section class="mode-card card solo-mode"><span class="mode-icon">🐺</span><h3>العب بروحك</h3><p>واجه الذيب الآلي.</p><button id="soloBtn" class="primary-btn">ابدأ ضد الذيب</button><button id="tutorialBtn" class="secondary-btn wide tutorial-start">ابدأ اللعب التعليمي</button></section><section class="mode-card card online-mode"><span class="mode-icon">⚡</span><h3>العب مع الربع</h3><button id="createRoomBtn" class="secondary-btn wide">إنشاء غرفة</button><div class="divider"><span>أو ادخل غرفة</span></div><div class="join-row"><input id="roomCodeInput" maxlength="5" placeholder="رمز الغرفة"><button id="joinRoomBtn" class="secondary-btn">دخول</button></div><p id="landingError" class="error-text"></p></section></div></section>
-<section id="lobbyView" class="view"><div class="lobby-layout"><div class="card room-card"><span class="eyebrow">رمز الغرفة</span><button id="copyCodeBtn" class="room-code">-----</button><p>شارك الرمز مع أصدقائك.</p><button id="shareBtn" class="secondary-btn wide">مشاركة الدعوة</button></div><div class="card players-card"><div class="section-heading"><div><span class="eyebrow">اللاعبون</span><h2>المتواجدون</h2></div><span id="playerCount" class="count-badge">0/4</span></div><div id="lobbyPlayers" class="lobby-players"></div><button id="startGameBtn" class="primary-btn wide">ابدأ اللعبة</button><p id="lobbyHint" class="muted"></p></div></div></section>
-<section id="gameView" class="view"><div class="game-layout"><aside class="card side-panel"><div class="room-mini"><span id="modeLabel">الغرفة</span><strong id="miniRoomCode">-----</strong></div><div id="gamePlayers" class="game-players"></div><div class="status-box"><span>حالة الجولة</span><p id="gameMessage"></p></div></aside><section class="board-wrap card"><div class="board-art"></div><div id="board" class="board"><div class="board-center"><div id="turnAvatar" class="turn-avatar">🐺</div><span id="turnLabel">الدور</span><strong id="turnName">—</strong><button id="rollBtn" class="dice-btn"><span id="diceFace" class="dice-face">⚄</span><span>ارمِ النرد</span></button></div></div><div id="tokenChooser" class="token-chooser hidden"></div></section><aside class="card rules-panel"><div id="tutorialPanel" class="tutorial-panel hidden"><span class="eyebrow">المدرب الذكي</span><div class="coach-head"><span>🧠</span><strong>تلميح الجولة</strong></div><p id="tutorialText"></p></div><div class="quick-rules"><h3>شلون تلعب؟</h3><ol><li>تحتاج 6 لإخراج الدبوس.</li><li>الخانات المضيئة آمنة.</li><li>اصطد خصمك بالوقوف عليه.</li><li>أدخل دبابيسك الأربعة للنهاية.</li></ol></div><button id="restartBtn" class="secondary-btn wide hidden">جولة جديدة</button></aside></div></section><div id="toast" class="toast"></div></main>
-<script src="/socket.io/socket.io.js"></script><script src="/app.js?v=10"></script><script src="/i18n.js?v=10"></script><script src="/auth-client.js?v=10"></script><script src="/dice-reveal.js?v=10"></script></body></html>
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#07141a">
+  <meta name="description" content="جاك الذيب — لعبة لوحية خليجية فردية وجماعية أونلاين">
+  <title>جاك الذيب | اللعبة الخليجية الجماعية</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Changa:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="manifest" href="/manifest.webmanifest?v=5">
+  <link rel="icon" type="image/png" sizes="192x192" href="/assets/icon-192.png?v=5">
+  <link rel="apple-touch-icon" href="/assets/icon-192.png?v=5">
+  <link rel="stylesheet" href="/style.css?v=5">
+</head>
+<body>
+  <div id="authGate" class="auth-gate">
+    <button id="authLanguageBtn" class="floating-language" type="button" aria-label="Change language">EN</button>
+    <div class="auth-shell">
+      <section class="auth-visual" aria-label="جاك الذيب">
+        <div class="auth-visual-shade"></div>
+        <div class="auth-brand">
+          <img src="/assets/avatar-wolf.webp?v=5" alt="" width="56" height="56">
+          <div>
+            <span>JACK ALTHEEB</span>
+            <strong data-i18n="brand">جاك الذيب</strong>
+          </div>
+        </div>
+        <div class="auth-story">
+          <span class="eyebrow" data-i18n="authEyebrow">حساب واحد • تحديات مستمرة</span>
+          <h1 data-i18n="authTitle">اسمك محفوظ.<br>إنجازاتك تكبر معك.</h1>
+          <p data-i18n="authCopy">ادخل الديوانية الرقمية، نافس ربعك، واصعد في لوحة الصدارة جولة بعد جولة.</p>
+          <div class="auth-proof">
+            <span><b>2–4</b><small data-i18n="onlinePlayers">لاعبين أونلاين</small></span>
+            <span><b>AI</b><small data-i18n="smartOpponent">خصم ذكي</small></span>
+            <span><b>XP</b><small data-i18n="savedProgress">تقدم محفوظ</small></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="auth-panel">
+        <div class="auth-panel-head">
+          <span class="eyebrow">PLAYER ACCESS</span>
+          <h2 data-i18n="welcome">حيّاك في التحدي</h2>
+          <p data-i18n="authHint">سجّل دخولك أو أنشئ حسابك خلال لحظات.</p>
+        </div>
+
+        <div class="auth-tabs" role="tablist" aria-label="الحساب">
+          <button class="auth-tab active" data-target="loginForm" type="button" role="tab" aria-selected="true" data-i18n="login">تسجيل الدخول</button>
+          <button class="auth-tab" data-target="registerForm" type="button" role="tab" aria-selected="false" data-i18n="register">حساب جديد</button>
+        </div>
+
+        <form id="loginForm" class="auth-form active">
+          <label for="loginId" data-i18n="loginId">اسم المستخدم أو البريد</label>
+          <div class="field-shell">
+            <span aria-hidden="true">＠</span>
+            <input id="loginId" autocomplete="username" required>
+          </div>
+          <label for="loginPassword" data-i18n="password">كلمة المرور</label>
+          <div class="field-shell">
+            <span aria-hidden="true">••</span>
+            <input id="loginPassword" type="password" autocomplete="current-password" minlength="8" required>
+          </div>
+          <button class="primary-btn auth-submit" type="submit">
+            <span data-i18n="enterGame">دخول إلى اللعبة</span>
+            <i aria-hidden="true">←</i>
+          </button>
+        </form>
+
+        <form id="registerForm" class="auth-form">
+          <label for="regUsername" data-i18n="username">اسم مستخدم فريد</label>
+          <div class="field-shell">
+            <span aria-hidden="true">＠</span>
+            <input id="regUsername" minlength="3" maxlength="18" autocomplete="username" required>
+          </div>
+          <label for="regEmail" data-i18n="email">البريد الإلكتروني</label>
+          <div class="field-shell">
+            <span aria-hidden="true">✉</span>
+            <input id="regEmail" type="email" autocomplete="email" required>
+          </div>
+          <label for="regPassword" data-i18n="password">كلمة المرور</label>
+          <div class="field-shell">
+            <span aria-hidden="true">••</span>
+            <input id="regPassword" type="password" minlength="8" maxlength="72" autocomplete="new-password" required>
+          </div>
+          <button class="primary-btn auth-submit" type="submit">
+            <span data-i18n="createAccount">إنشاء الحساب</span>
+            <i aria-hidden="true">＋</i>
+          </button>
+        </form>
+
+        <p id="authMessage" class="auth-message" aria-live="polite"></p>
+        <div class="auth-security">
+          <span class="status-dot"></span>
+          <span data-i18n="secureAccount">حساب آمن وجلسة مشفّرة</span>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div id="orientationHint" class="orientation-hint" aria-live="polite">
+    <span class="rotate-phone" aria-hidden="true">▯</span>
+    <strong data-i18n="rotateTitle">لفّ جهازك بالعرض</strong>
+    <small data-i18n="rotateCopy">لوحة اللعب أوضح وأسرع بالوضع الأفقي.</small>
+  </div>
+
+  <div class="ambient ambient-one"></div>
+  <div class="ambient ambient-two"></div>
+
+  <main class="app-shell">
+    <header class="topbar">
+      <button id="brandHomeBtn" class="brand" type="button" aria-label="الصفحة الرئيسية">
+        <span class="brand-mark"><img src="/assets/avatar-wolf.webp?v=5" alt="" width="44" height="44"></span>
+        <span class="brand-copy">
+          <strong data-i18n="brand">جاك الذيب</strong>
+          <small data-i18n="brandLine">اللعبة الخليجية الجماعية</small>
+        </span>
+        <em>V5</em>
+      </button>
+
+      <div class="top-actions">
+        <span id="connectionBadge" class="connection-badge connecting">
+          <i></i><span data-i18n="connecting">جاري الاتصال</span>
+        </span>
+        <button id="leaderboardBtn" class="icon-btn labelled" type="button" title="لوحة الصدارة">
+          <span aria-hidden="true">🏆</span><b data-i18n="leaders">الصدارة</b>
+        </button>
+        <div id="accountBar" class="account-bar hidden">
+          <img id="accountAvatar" src="/assets/avatar-mishal.webp?v=5" alt="" width="40" height="40">
+          <div class="account-info">
+            <strong id="accountName">—</strong>
+            <small id="accountLevel">المستوى 1</small>
+            <div id="accountStats" class="profile-stats"></div>
+          </div>
+          <button id="logoutBtn" class="logout-btn" type="button" data-i18n-title="logout" title="خروج">↪</button>
+        </div>
+        <button id="languageBtn" class="icon-btn" type="button" aria-label="Change language">EN</button>
+        <button id="soundBtn" class="icon-btn" type="button" aria-label="كتم الصوت">🔊</button>
+      </div>
+    </header>
+
+    <section id="landingView" class="view active">
+      <div class="hero-stage card">
+        <div class="hero-shade"></div>
+        <div class="hero-content">
+          <span class="eyebrow" data-i18n="heroEyebrow">ONLINE • SOLO • TUTORIAL</span>
+          <div class="game-lockup">
+            <h1 aria-label="جاك الذيب">
+              <span data-i18n="heroJack">جاك</span>
+              <strong data-i18n="heroWolf">الذيب</strong>
+            </h1>
+            <img src="/assets/wolf-mark-v5.webp?v=5" alt="" width="168" height="168">
+          </div>
+          <p data-i18n="heroCopy">لعبة استراتيجية خليجية تجمع الرمية الذكية، الصيد، وضحكة الربع في تجربة واحدة.</p>
+          <div class="feature-pills">
+            <span data-i18n="featureSolo">🎮 لعب فردي</span>
+            <span data-i18n="featureTutorial">🧠 تدريب تفاعلي</span>
+            <span data-i18n="featureOnline">🌐 غرف خاصة</span>
+          </div>
+          <button id="heroStartBtn" class="primary-btn hero-cta" type="button" data-i18n="chooseMode">اختر طريقة اللعب</button>
+        </div>
+        <div class="hero-bubbles" aria-hidden="true">
+          <span class="bubble-lime">🐾 أنت مشعل!</span>
+          <span class="bubble-cyan">🐾 كن ذيب!</span>
+          <span class="bubble-coral">🐾 الصيدة لك!</span>
+        </div>
+      </div>
+
+      <div id="startGrid" class="start-grid">
+        <section class="profile-card card">
+          <div class="section-heading">
+            <div>
+              <span class="eyebrow" data-i18n="playerProfile">ملف اللاعب</span>
+              <h2 data-i18n="chooseCharacter">اختر شخصيتك</h2>
+            </div>
+            <span class="mini-badge" data-i18n="saved">محفوظ</span>
+          </div>
+          <label for="playerName" data-i18n="displayName">اسم اللاعب</label>
+          <input id="playerName" readonly>
+          <div id="avatarPicker" class="avatar-picker" role="list" aria-label="الشخصيات"></div>
+          <label class="learning-switch" for="tutorialToggle">
+            <input id="tutorialToggle" type="checkbox">
+            <span class="switch-ui"></span>
+            <span>
+              <strong data-i18n="coachMode">المدرب الذكي</strong>
+              <small data-i18n="coachHint">يقترح أفضل حركة أثناء الجولة</small>
+            </span>
+          </label>
+        </section>
+
+        <section class="mode-card card solo-mode">
+          <div class="mode-visual wolf-visual">
+            <img src="/assets/avatar-wolf.webp?v=5" alt="" width="112" height="112">
+            <span class="mode-tag">SOLO + AI</span>
+          </div>
+          <div class="mode-copy">
+            <span class="eyebrow" data-i18n="instantMatch">مواجهة فورية</span>
+            <h2 data-i18n="playSolo">واجه الذيب</h2>
+            <p data-i18n="soloCopy">جولة كاملة ضد خصم آلي يقرأ الخطر ويفضّل الصيد.</p>
+          </div>
+          <button id="soloBtn" class="primary-btn wide" type="button" data-i18n="startSolo">ابدأ التحدي الفردي</button>
+          <button id="tutorialBtn" class="secondary-btn wide" type="button" data-i18n="startTutorial">ابدأ جولة تعليمية</button>
+        </section>
+
+        <section class="mode-card card online-mode">
+          <div class="mode-visual online-visual">
+            <div class="online-faces">
+              <img src="/assets/avatar-mishal.webp?v=5" alt="">
+              <img src="/assets/avatar-turki.webp?v=5" alt="">
+              <img src="/assets/avatar-bunasser.webp?v=5" alt="">
+            </div>
+            <span class="mode-tag">2–4 ONLINE</span>
+          </div>
+          <div class="mode-copy">
+            <span class="eyebrow" data-i18n="privateRoom">غرفة خاصة</span>
+            <h2 data-i18n="playFriends">اجمع الربع</h2>
+            <p data-i18n="onlineCopy">أنشئ غرفة خاصة أو ادخل برمز من خمس خانات.</p>
+          </div>
+          <button id="createRoomBtn" class="primary-btn wide" type="button" data-i18n="createRoom">إنشاء غرفة جديدة</button>
+          <div class="divider"><span data-i18n="orJoin">أو ادخل غرفة</span></div>
+          <div class="join-row">
+            <input id="roomCodeInput" maxlength="5" inputmode="text" autocomplete="off" placeholder="رمز الغرفة" aria-label="رمز الغرفة">
+            <button id="joinRoomBtn" class="secondary-btn" type="button" data-i18n="join">دخول</button>
+          </div>
+          <p id="landingError" class="error-text" aria-live="polite"></p>
+        </section>
+      </div>
+    </section>
+
+    <section id="lobbyView" class="view">
+      <div class="lobby-banner card">
+        <div>
+          <span class="eyebrow" data-i18n="privateRoom">غرفة خاصة</span>
+          <h1 data-i18n="lobbyTitle">الديوانية جاهزة</h1>
+          <p data-i18n="lobbyCopy">شارك الرمز، جهّز الربع، ومدير الغرفة يبدأ الجولة.</p>
+        </div>
+        <div class="lobby-art">
+          <img src="/assets/avatar-mishal.webp?v=5" alt="">
+          <img src="/assets/avatar-turki.webp?v=5" alt="">
+          <img src="/assets/avatar-bunasser.webp?v=5" alt="">
+          <img src="/assets/avatar-dahim.webp?v=5" alt="">
+        </div>
+      </div>
+      <div class="lobby-layout">
+        <section class="card room-card">
+          <span class="eyebrow" data-i18n="roomCode">رمز الغرفة</span>
+          <button id="copyCodeBtn" class="room-code" type="button" aria-label="نسخ رمز الغرفة">-----</button>
+          <p data-i18n="copyHint">اضغط على الرمز لنسخه.</p>
+          <button id="shareBtn" class="secondary-btn wide" type="button" data-i18n="shareInvite">مشاركة الدعوة</button>
+        </section>
+        <section class="card players-card">
+          <div class="section-heading">
+            <div>
+              <span class="eyebrow" data-i18n="players">اللاعبون</span>
+              <h2 data-i18n="readyPlayers">المتواجدون في الديوانية</h2>
+            </div>
+            <span id="playerCount" class="count-badge">0/4</span>
+          </div>
+          <div id="lobbyPlayers" class="lobby-players"></div>
+          <button id="startGameBtn" class="primary-btn wide" type="button" data-i18n="startGame">ابدأ اللعبة</button>
+          <p id="lobbyHint" class="muted"></p>
+        </section>
+      </div>
+    </section>
+
+    <section id="gameView" class="view">
+      <div class="game-toolbar card">
+        <div class="room-mini">
+          <span id="modeLabel" data-i18n="room">الغرفة</span>
+          <strong id="miniRoomCode">-----</strong>
+        </div>
+        <div class="round-status">
+          <i></i>
+          <span id="gameMessage" aria-live="polite">جاري تجهيز الجولة...</span>
+        </div>
+        <button id="leaveRoomBtn" class="secondary-btn compact" type="button" data-i18n="leave">مغادرة</button>
+      </div>
+
+      <div class="game-layout">
+        <aside class="card side-panel">
+          <div class="panel-title">
+            <span class="eyebrow" data-i18n="players">اللاعبون</span>
+            <strong data-i18n="liveRound">الجولة المباشرة</strong>
+          </div>
+          <div id="gamePlayers" class="game-players"></div>
+        </aside>
+
+        <section class="board-wrap card">
+          <div class="board-frame">
+            <div id="board" class="board" aria-label="لوحة جاك الذيب">
+              <div class="board-center">
+                <span id="turnAvatar" class="turn-avatar">
+                  <img src="/assets/avatar-wolf.webp?v=5" alt="">
+                </span>
+                <span id="turnLabel" data-i18n="turn">الدور على</span>
+                <strong id="turnName">—</strong>
+                <button id="rollBtn" class="dice-btn" type="button">
+                  <span id="diceFace" class="dice-face" aria-hidden="true">⚄</span>
+                  <span data-i18n="rollDice">ارمِ النرد</span>
+                  <span id="diceResult" class="dice-result" aria-live="polite">
+                    <small data-i18n="result">النتيجة</small><strong>—</strong>
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div id="tokenChooser" class="token-chooser hidden" aria-live="polite"></div>
+        </section>
+
+        <aside class="card rules-panel">
+          <div id="tutorialPanel" class="tutorial-panel hidden">
+            <span class="eyebrow" data-i18n="smartCoach">المدرب الذكي</span>
+            <div class="coach-head">
+              <span aria-hidden="true">✦</span>
+              <strong data-i18n="roundHint">تلميح الجولة</strong>
+            </div>
+            <p id="tutorialText"></p>
+          </div>
+          <div class="quick-rules">
+            <span class="eyebrow" data-i18n="quickRules">قواعد سريعة</span>
+            <h3 data-i18n="howToPlay">شلون تلعب؟</h3>
+            <ol>
+              <li><b>6</b><span data-i18n="ruleOne">يخرج الدبوس من القاعدة.</span></li>
+              <li><b>✦</b><span data-i18n="ruleTwo">الخانات المضيئة آمنة.</span></li>
+              <li><b>🐺</b><span data-i18n="ruleThree">قف على الخصم لتصيده.</span></li>
+              <li><b>4</b><span data-i18n="ruleFour">أدخل كل دبابيسك للنهاية.</span></li>
+            </ol>
+          </div>
+          <button id="restartBtn" class="primary-btn wide hidden" type="button" data-i18n="newRound">جولة جديدة</button>
+        </aside>
+      </div>
+    </section>
+
+    <footer class="app-footer">
+      <span>© 2026 JACK ALTHEEB</span>
+      <span data-i18n="footerLine">تجربة خليجية أصلية • لعب مسؤول • منافسة عادلة</span>
+    </footer>
+  </main>
+
+  <dialog id="leaderboardDialog" class="leaderboard-dialog">
+    <div class="dialog-head">
+      <div>
+        <span class="eyebrow">LEADERBOARD</span>
+        <h2 data-i18n="leadersTitle">ذئاب الصدارة</h2>
+      </div>
+      <button id="closeLeaderboardBtn" class="icon-btn" type="button" aria-label="إغلاق">×</button>
+    </div>
+    <div id="leaderboardList" class="leaderboard-list">
+      <p class="muted" data-i18n="loadingLeaders">جاري تحميل الترتيب...</p>
+    </div>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/auth-client.js?v=5"></script>
+  <script src="/app.js?v=5"></script>
+</body>
+</html>
