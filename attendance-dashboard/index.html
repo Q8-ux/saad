@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>لوحة الحضور والانصراف</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#07111f;--surface:#101d30;--surface2:#17263d;--text:#f8fafc;--muted:#93a4ba;--border:#263750;--accent:#32d296}
+.light{--bg:#f3f7fb;--surface:#fff;--surface2:#f8fafc;--text:#102033;--muted:#64748b;--border:#dbe4ef}
+body{font-family:Cairo,sans-serif;background:var(--bg);color:var(--text);transition:.25s}.surface{background:var(--surface)}.surface2{background:var(--surface2)}.muted{color:var(--muted)}.borderx{border-color:var(--border)}
+.badge{padding:.3rem .65rem;border-radius:999px;font-size:.75rem;font-weight:700}.present{background:#0f513240;color:#65f2b3}.late{background:#7c4a0345;color:#ffd27a}.absent{background:#7f1d1d45;color:#ff9b9b}
+</style>
+</head>
+<body class="min-h-screen">
+<header class="border-b borderx px-5 py-4"><div class="max-w-6xl mx-auto flex items-center justify-between gap-4"><div><h1 id="title" class="text-2xl font-extrabold">لوحة الحضور والانصراف</h1><p id="subtitle" class="muted text-sm mt-1">متابعة فورية لحالة الموظفين والموقع</p></div><div class="flex gap-2"><button id="lang" class="surface border borderx rounded-lg px-3 py-2 font-bold">EN</button><button id="theme" class="surface border borderx rounded-lg px-3 py-2">☀️</button></div></div></header>
+<main class="max-w-6xl mx-auto p-5 md:p-7">
+<section class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-7">
+<div class="surface border borderx rounded-2xl p-5"><p id="p1" class="muted text-sm">الحاضرون</p><div class="flex items-end justify-between mt-2"><strong class="text-4xl">128</strong><span class="badge present">+8 اليوم</span></div></div>
+<div class="surface border borderx rounded-2xl p-5"><p id="p2" class="muted text-sm">المتأخرون</p><div class="flex items-end justify-between mt-2"><strong class="text-4xl">7</strong><span class="badge late">5.2%</span></div></div>
+<div class="surface border borderx rounded-2xl p-5"><p id="p3" class="muted text-sm">الغائبون</p><div class="flex items-end justify-between mt-2"><strong class="text-4xl">12</strong><span class="badge absent">8.1%</span></div></div>
+</section>
+<section class="surface border borderx rounded-2xl p-5 mb-7 grid md:grid-cols-[180px_1fr] gap-6 items-center"><div class="text-center"><div class="surface2 border borderx rounded-xl w-36 h-36 mx-auto grid place-items-center text-6xl">▦</div><p id="qr" class="muted text-sm mt-2">رمز تسجيل الحضور</p></div><div><h2 id="locTitle" class="text-xl font-bold">الموقع المعتمد</h2><p id="locText" class="muted mt-2">الكويت — المقر الرئيسي</p><div class="surface2 border borderx rounded-xl h-32 mt-4 grid place-items-center"><span id="mapText">خريطة الموقع الجغرافي</span></div></div></section>
+<section class="surface border borderx rounded-2xl overflow-hidden"><div class="p-5 border-b borderx flex justify-between items-center"><h2 id="tableTitle" class="font-bold text-lg">سجل الحضور اليومي</h2><span class="muted text-sm">28 يوليو 2026</span></div><div class="overflow-x-auto"><table class="w-full text-sm"><thead class="surface2"><tr><th id="h1" class="p-4 text-start">الموظف</th><th id="h2" class="p-4 text-start">القسم</th><th id="h3" class="p-4 text-start">الحالة</th><th id="h4" class="p-4 text-start">الوقت</th></tr></thead><tbody>
+<tr class="border-t borderx"><td class="p-4 font-bold">أحمد العتيبي</td><td class="p-4 muted">التشغيل</td><td class="p-4"><span class="badge present status-present">حاضر</span></td><td class="p-4">07:41</td></tr>
+<tr class="border-t borderx"><td class="p-4 font-bold">سارة القحطاني</td><td class="p-4 muted">الموارد البشرية</td><td class="p-4"><span class="badge late status-late">متأخر</span></td><td class="p-4">08:17</td></tr>
+<tr class="border-t borderx"><td class="p-4 font-bold">محمد العنزي</td><td class="p-4 muted">الأمن والسلامة</td><td class="p-4"><span class="badge present status-present">حاضر</span></td><td class="p-4">07:53</td></tr>
+<tr class="border-t borderx"><td class="p-4 font-bold">نورة الشمري</td><td class="p-4 muted">المالية</td><td class="p-4"><span class="badge absent status-absent">غائب</span></td><td class="p-4">—</td></tr>
+</tbody></table></div></section>
+</main>
+<script>
+let ar=true,dark=true;const $=id=>document.getElementById(id);$('theme').onclick=()=>{dark=!dark;document.body.classList.toggle('light',!dark);$('theme').textContent=dark?'☀️':'🌙'};$('lang').onclick=()=>{ar=!ar;document.documentElement.lang=ar?'ar':'en';document.documentElement.dir=ar?'rtl':'ltr';$('lang').textContent=ar?'EN':'عربي';const t=ar?['لوحة الحضور والانصراف','متابعة فورية لحالة الموظفين والموقع','الحاضرون','المتأخرون','الغائبون','رمز تسجيل الحضور','الموقع المعتمد','الكويت — المقر الرئيسي','خريطة الموقع الجغرافي','سجل الحضور اليومي','الموظف','القسم','الحالة','الوقت']:['Attendance Dashboard','Real-time employee and location monitoring','Present','Late','Absent','Attendance QR code','Approved Location','Kuwait — Head Office','Geolocation Map','Daily Attendance Log','Employee','Department','Status','Time'];['title','subtitle','p1','p2','p3','qr','locTitle','locText','mapText','tableTitle','h1','h2','h3','h4'].forEach((id,i)=>$(id).textContent=t[i]);document.querySelectorAll('.status-present').forEach(x=>x.textContent=ar?'حاضر':'Present');document.querySelectorAll('.status-late').forEach(x=>x.textContent=ar?'متأخر':'Late');document.querySelectorAll('.status-absent').forEach(x=>x.textContent=ar?'غائب':'Absent')};
+</script>
+</body></html>
