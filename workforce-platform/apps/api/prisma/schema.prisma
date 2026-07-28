@@ -1,0 +1,67 @@
+generator client { provider = "prisma-client-js" }
+datasource db { provider = "postgresql" url = env("DATABASE_URL") }
+
+enum Role { SUPER_ADMIN COMPANY_ADMIN HR_MANAGER SUPERVISOR EMPLOYEE AUDITOR }
+enum AttendanceType { CHECK_IN CHECK_OUT }
+
+model Company {
+  id          String       @id @default(uuid())
+  nameAr      String
+  nameEn      String?
+  users       User[]
+  employees   Employee[]
+  attendances Attendance[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model User {
+  id           String   @id @default(uuid())
+  companyId    String
+  company      Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  email        String
+  passwordHash String
+  role         Role     @default(EMPLOYEE)
+  employee     Employee?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  @@unique([companyId, email])
+}
+
+model Employee {
+  id           String       @id @default(uuid())
+  companyId    String
+  company      Company      @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  userId       String?      @unique
+  user         User?        @relation(fields: [userId], references: [id])
+  employeeNo   String
+  fullNameAr   String
+  fullNameEn   String?
+  department   String?
+  jobTitle     String?
+  isActive     Boolean      @default(true)
+  attendances  Attendance[]
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  @@unique([companyId, employeeNo])
+  @@index([companyId, fullNameAr])
+}
+
+model Attendance {
+  id          String         @id @default(uuid())
+  companyId   String
+  company     Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  employeeId  String
+  employee    Employee       @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  type        AttendanceType
+  recordedAt  DateTime       @default(now())
+  latitude    Decimal?       @db.Decimal(10, 7)
+  longitude   Decimal?       @db.Decimal(10, 7)
+  accuracyM   Decimal?       @db.Decimal(8, 2)
+  deviceId    String?
+  source      String         @default("MOBILE")
+  createdAt   DateTime       @default(now())
+  @@index([companyId, recordedAt])
+  @@index([employeeId, recordedAt])
+}
