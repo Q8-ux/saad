@@ -7,3 +7,42 @@ services:
     buildCommand: echo "DIRECT-GUEST-BUILD-7"
     staticPublishPath: .
     autoDeployTrigger: commit
+
+  - type: web
+    name: workforce-api
+    repo: https://github.com/Q8-ux/saad
+    branch: main
+    runtime: docker
+    rootDir: workforce-platform/apps/api
+    dockerfilePath: ./Dockerfile
+    autoDeployTrigger: commit
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 4000
+      - key: DATABASE_URL
+        fromDatabase:
+          name: workforce-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+
+  - type: web
+    name: workforce-web
+    repo: https://github.com/Q8-ux/saad
+    branch: main
+    runtime: docker
+    rootDir: workforce-platform/apps/web
+    dockerfilePath: ./Dockerfile
+    autoDeployTrigger: commit
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_PUBLIC_API_URL
+        value: https://workforce-api.onrender.com/api
+
+databases:
+  - name: workforce-db
+    databaseName: workforce
+    user: workforce
