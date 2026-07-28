@@ -52,3 +52,15 @@ jack-altheeb/
 - Start Command: `npm start`
 
 يوجد ملف `render.yaml` في جذر المستودع لتسهيل إنشاء خدمة Render وربط النشر التلقائي بتحديثات GitHub.
+
+---
+
+## مشروع نطاق العمل
+
+تمت إضافة لوحة متابعة الحضور والانضباط داخل المجلد:
+
+```text
+nitaq-al-amal-dashboard/
+```
+
+افتح ملف `nitaq-al-amal-dashboard/index.html` لتشغيل الواجهة التجريبية.
