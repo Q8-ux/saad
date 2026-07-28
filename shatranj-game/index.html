@@ -26,8 +26,16 @@
     input,button{width:100%;border-radius:999px;border:1px solid var(--blue);padding:13px 16px;font-size:17px;font-family:inherit}input{background:#020a13;color:#fff;margin:6px 0 12px;text-align:center;letter-spacing:4px}button{background:#00131d;color:var(--blue);font-weight:700;cursor:pointer;margin-top:10px;box-shadow:0 0 16px #12bfff22;text-shadow:0 0 10px currentColor;transition:.2s}button:hover{transform:translateY(-2px);box-shadow:0 0 24px #12bfff70}.lime button,#aiBtn{border-color:var(--lime);color:var(--lime)}.red button,button.danger{border-color:var(--red);color:var(--red)}button.secondary{border-color:#7890a6;color:#dce8f5}
     .status{margin:16px 0 0;padding:14px;border-radius:14px;background:#020b14;border:1px solid #13364d;color:var(--muted);min-height:50px;text-align:center}.ok{color:var(--lime);text-shadow:0 0 10px var(--lime)}.bad{color:var(--red);text-shadow:0 0 10px var(--red)}
     .topbar{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:18px}.user{color:var(--lime);font-size:22px;text-shadow:0 0 12px var(--lime)}
-    .board-shell{padding:14px;border:1px solid var(--blue);border-radius:24px;background:linear-gradient(145deg,#061522,#01070d);box-shadow:0 0 34px #12bfff35,0 0 20px #ff3d4922 inset}.board{display:grid;grid-template-columns:repeat(8,1fr);aspect-ratio:1;border:3px solid var(--blue);border-radius:14px;overflow:hidden;direction:ltr;box-shadow:0 0 30px #12bfff35,0 0 22px #ff3d4920}
-    .sq{display:grid;place-items:center;font-size:clamp(28px,5.6vw,62px);user-select:none;cursor:pointer;transition:.15s}.light{background:#0c2230}.dark{background:#020b13}.sq.blue-piece{color:var(--blue);text-shadow:0 0 7px #fff,0 0 14px var(--blue),0 0 28px var(--blue);filter:drop-shadow(0 0 8px var(--blue))}.sq.red-piece{color:var(--red);text-shadow:0 0 7px #fff,0 0 14px var(--red),0 0 28px var(--red);filter:drop-shadow(0 0 8px var(--red))}.sq.sel{outline:5px solid var(--lime);outline-offset:-5px;background:#284000}.sq.last{box-shadow:inset 0 0 0 5px #cfff00aa}.board.turn-blue{border-color:var(--blue);box-shadow:0 0 38px #12bfff70}.board.turn-red{border-color:var(--red);box-shadow:0 0 38px #ff3d4970}
+    .board-shell{padding:14px;border:1px solid var(--blue);border-radius:24px;background:linear-gradient(145deg,#061522,#01070d);box-shadow:0 0 34px #12bfff35,0 0 20px #ff3d4922 inset}
+    .board{display:grid;grid-template-columns:repeat(8,1fr);aspect-ratio:1;border:3px solid var(--blue);border-radius:14px;overflow:hidden;direction:ltr;box-shadow:0 0 30px #12bfff35,0 0 22px #ff3d4920}
+    .sq{display:grid;place-items:center;font-size:clamp(28px,5.6vw,62px);user-select:none;cursor:pointer;transition:.15s}.light{background:#0c2230}.dark{background:#020b13}.sq.blue-piece{color:var(--blue);text-shadow:0 0 7px #fff,0 0 14px var(--blue),0 0 28px var(--blue)}.sq.red-piece{color:var(--red);text-shadow:0 0 7px #fff,0 0 14px var(--red),0 0 28px var(--red)}.sq.sel{outline:5px solid var(--lime);outline-offset:-5px;background:#284000}.sq.last{box-shadow:inset 0 0 0 5px #cfff00aa}.board.turn-blue{border-color:var(--blue);box-shadow:0 0 38px #12bfff70}.board.turn-red{border-color:var(--red);box-shadow:0 0 38px #ff3d4970}
+    .board-3d-shell{position:relative;aspect-ratio:1;overflow:hidden;background:radial-gradient(circle at 50% 35%,#163044,#01040a 70%)}
+    #board3d{position:absolute;inset:0;z-index:1;border-radius:22px;overflow:hidden;pointer-events:none}
+    #board3d canvas{width:100%;height:100%;display:block;filter:saturate(1.13) contrast(1.05)}
+    .board-3d-shell .board{position:absolute;inset:14px;z-index:3;width:auto;height:auto;background:transparent;box-shadow:none}
+    .board-3d-shell .sq{color:transparent!important;text-shadow:none!important;background:transparent!important;filter:none!important}
+    .board-3d-shell .sq.sel{outline:4px solid var(--lime);background:#cfff0024!important;box-shadow:inset 0 0 24px #cfff0066}
+    .board-3d-shell .sq.last{box-shadow:inset 0 0 0 4px #fff7, inset 0 0 20px #12bfff66}
     .room-code{font-size:34px;letter-spacing:6px;color:var(--lime);font-weight:700;text-align:center;background:#020b14;padding:14px;border-radius:14px;border:1px solid var(--lime);box-shadow:0 0 18px #cfff0024;text-shadow:0 0 14px var(--lime)}.players{display:grid;gap:10px;margin:14px 0}.player{padding:13px;border:1px solid #17425b;border-radius:14px;background:#030d17}.player:first-child{border-color:var(--blue);box-shadow:0 0 16px #12bfff24}.player:last-child{border-color:var(--red);box-shadow:0 0 16px #ff3d4924}.small{font-size:14px;color:var(--muted)}.version{position:fixed;left:10px;bottom:8px;color:#12bfff99;font-size:11px}
     .sound-btn{position:fixed;top:18px;left:18px;z-index:20;width:54px;height:54px;padding:0;margin:0;border-radius:50%;display:grid;place-items:center;font-size:24px;background:#03101cdd;border:1px solid var(--blue);color:var(--blue);box-shadow:0 0 20px #12bfff45}.sound-btn.muted{border-color:var(--red);color:var(--red);box-shadow:0 0 20px #ff3d4945}
     .designer-footer{position:fixed;right:50%;transform:translateX(50%);bottom:12px;z-index:30;background:#020b14e8;border:1px solid #25d366;border-radius:999px;padding:9px 18px;box-shadow:0 0 18px #25d36655;backdrop-filter:blur(10px);font-size:15px;white-space:nowrap}.designer-footer a{color:#fff;text-decoration:none;display:flex;align-items:center;gap:8px;text-shadow:0 0 8px #25d366}.designer-footer .wa{color:#25d366;font-size:20px;filter:drop-shadow(0 0 7px #25d366)}.designer-footer a:hover{color:#25d366}
@@ -54,7 +62,7 @@
     <aside class="panel"><h2 id="gameTitle">الغرفة</h2><div id="roomCode" class="room-code">------</div><div id="players" class="players"></div><div id="turnStatus" class="status">في انتظار اللاعبين…</div><button id="startBtn" class="hidden">بدء المباراة</button><button id="leaveBtn" class="secondary">العودة للرئيسية</button><p class="small">الأزرق أنت، والأحمر الخصم. اختر القطعة ثم المربع المطلوب.</p></aside>
   </section>
 </div>
-<div class="version">CARDO NEON BUILD 13</div>
+<div class="version">REALISTIC 3D BUILD 14</div>
 <footer class="designer-footer"><a href="https://wa.me/96551231313" target="_blank" rel="noopener noreferrer" aria-label="مراسلة saad.alnbhan على واتساب"><span>برمجة وتصميم</span><span class="wa">◉</span><strong dir="ltr">saad.alnbhan</strong></a></footer>
 <script>
 (function(){
@@ -63,7 +71,7 @@
   function load(src,ok,bad){const s=document.createElement('script');s.src=src;s.onload=ok;s.onerror=bad;document.body.appendChild(s)}
   load('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js',afterSupabase,()=>fail('تعذر تحميل خدمة الاتصال.'));
   function afterSupabase(){load('https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js',afterChess,()=>fail('تعذر تحميل محرك الشطرنج.'))}
-  function afterChess(){load('config.js?v=13',()=>load('app.js?v=13',initEnhancements,()=>fail('تعذر تحميل ملفات اللعبة.')),()=>fail('تعذر تحميل إعدادات اللعبة.'))}
+  function afterChess(){load('config.js?v=14',()=>load('app.js?v=14',initEnhancements,()=>fail('تعذر تحميل ملفات اللعبة.')),()=>fail('تعذر تحميل إعدادات اللعبة.'))}
   function initEnhancements(){
     const toggle=document.getElementById('soundToggle'),board=document.getElementById('board'),turn=document.getElementById('turnStatus');
     let muted=localStorage.getItem('shatranj_muted')==='1',ctx=null,previousPieces=32,lastText='';
@@ -83,5 +91,6 @@
   }
 })();
 </script>
+<script src="realistic3d.js?v=14"></script>
 </body>
 </html>
