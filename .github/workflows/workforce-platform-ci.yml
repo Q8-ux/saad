@@ -1,0 +1,37 @@
+name: Workforce Platform CI
+
+on:
+  pull_request:
+    paths:
+      - 'workforce-platform/**'
+      - '.github/workflows/workforce-platform-ci.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'workforce-platform/**'
+      - '.github/workflows/workforce-platform-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        app: [api, web]
+    defaults:
+      run:
+        working-directory: workforce-platform/apps/${{ matrix.app }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: workforce-platform/apps/${{ matrix.app }}/package.json
+      - run: npm install
+      - if: matrix.app == 'api'
+        run: npx prisma generate
+      - run: npm run build
