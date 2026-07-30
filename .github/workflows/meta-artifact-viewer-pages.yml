@@ -26,11 +26,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-          cache: npm
-          cache-dependency-path: meta-artifact-viewer/package-lock.json
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
         working-directory: meta-artifact-viewer
 
       - name: Build application
