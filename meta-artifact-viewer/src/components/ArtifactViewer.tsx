@@ -1,19 +1,14 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 
-const DEFAULT_ARTIFACT_URL =
+const ARTIFACT_SHARE_URL =
   'https://www.meta.ai/share/a/052ed18b-db2d-48ab-add5-f171461a73ca'
 
 export function ArtifactViewer() {
   const [copied, setCopied] = useState(false)
 
-  const artifactUrl = useMemo(
-    () => import.meta.env.VITE_ARTIFACT_URL || DEFAULT_ARTIFACT_URL,
-    [],
-  )
-
   const copyLink = async () => {
     try {
-      await navigator.clipboard.writeText(artifactUrl)
+      await navigator.clipboard.writeText(ARTIFACT_SHARE_URL)
       setCopied(true)
       window.setTimeout(() => setCopied(false), 1800)
     } catch {
@@ -42,12 +37,12 @@ export function ArtifactViewer() {
           <h1 className="mt-6 text-2xl font-bold text-zinc-950">فتح المحتوى المشترك</h1>
 
           <p className="mt-3 text-sm leading-7 text-zinc-600">
-            اضغط الزر لفتح صفحة المشاركة الرسمية في Meta AI. تم إلغاء استخدام رابط الخادم الداخلي لأنه لا يسمح بالفتح المباشر.
+            اضغط الزر لفتح رابط المشاركة الرسمي في Meta AI. لا يستخدم هذا الإصدار أي رابط داخلي من metaaiusercontent.
           </p>
 
           <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
             <a
-              href={artifactUrl}
+              href={ARTIFACT_SHARE_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center rounded-xl bg-zinc-950 px-6 py-3 text-sm font-semibold text-white transition hover:bg-zinc-800"
@@ -65,7 +60,7 @@ export function ArtifactViewer() {
           </div>
 
           <p className="mt-6 text-xs leading-6 text-zinc-500">
-            إذا ظهرت رسالة أن الصفحة غير متاحة، فهذا يعني أن رابط المشاركة حُذف أو تغيّرت خصوصيته من داخل Meta AI.
+            إذا ظهرت رسالة أن الصفحة غير متاحة، فهذا يعني أن رابط المشاركة نفسه حُذف أو تغيّرت خصوصيته داخل Meta AI.
           </p>
         </div>
       </div>
