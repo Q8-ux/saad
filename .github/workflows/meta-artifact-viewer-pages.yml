@@ -50,7 +50,15 @@ jobs:
           for (const asset of ['nitaq-data.js', 'nitaq-enhancements.js', 'nitaq-enhancements.css']) {
             if (!html.includes(asset)) throw new Error(`index.html does not load ${asset}`);
           }
-          console.log('Validated 9 generation sites, 32 substations and 2 monitoring and control sites.');
+          const css = fs.readFileSync(`${root}/nitaq-enhancements.css`, 'utf8');
+          for (const rule of [
+            'html[dir=ltr] aside.fixed.translate-x-full',
+            'translateX(-100%)',
+            'html[dir=rtl] #language-switcher'
+          ]) {
+            if (!css.includes(rule)) throw new Error(`Missing mobile layout rule: ${rule}`);
+          }
+          console.log('Validated locations, bilingual assets and mobile sidebar behavior.');
           NODE
 
       - name: Configure GitHub Pages
