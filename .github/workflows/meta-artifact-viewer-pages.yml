@@ -24,28 +24,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-          cache-dependency-path: meta-artifact-viewer/package-lock.json
-
-      - name: Install dependencies
-        working-directory: meta-artifact-viewer
-        run: npm ci
-
-      - name: Build dashboard
-        working-directory: meta-artifact-viewer
-        run: npm run build
-
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
 
-      - name: Upload built dashboard
+      - name: Upload dashboard
         uses: actions/upload-pages-artifact@v3
         with:
-          path: meta-artifact-viewer/dist
+          path: meta-artifact-viewer
 
   deploy:
     environment:
