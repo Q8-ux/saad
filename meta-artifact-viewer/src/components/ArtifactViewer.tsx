@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 
 const DEFAULT_ARTIFACT_URL =
-  'https://976879275378787.a.metaaiusercontent.com/html?artifact_uuid=052ed18b-db2d-48ab-add5-f171461a73ca&ext=1785502800&hash=Q5fpDAF5ELMDMdNfq9kESeHIheW2'
+  'https://www.meta.ai/share/a/052ed18b-db2d-48ab-add5-f171461a73ca'
 
 export function ArtifactViewer() {
   const [copied, setCopied] = useState(false)
@@ -42,7 +42,7 @@ export function ArtifactViewer() {
           <h1 className="mt-6 text-2xl font-bold text-zinc-950">فتح المحتوى المشترك</h1>
 
           <p className="mt-3 text-sm leading-7 text-zinc-600">
-            خوادم Meta تمنع عرض هذا المحتوى داخل إطار مضمّن على GitHub Pages، لذلك تم تحويل الصفحة إلى فتح مباشر وآمن في نافذة جديدة.
+            اضغط الزر لفتح صفحة المشاركة الرسمية في Meta AI. تم إلغاء استخدام رابط الخادم الداخلي لأنه لا يسمح بالفتح المباشر.
           </p>
 
           <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
@@ -52,7 +52,7 @@ export function ArtifactViewer() {
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center rounded-xl bg-zinc-950 px-6 py-3 text-sm font-semibold text-white transition hover:bg-zinc-800"
             >
-              فتح المحتوى الآن
+              فتح المحتوى في Meta AI
             </a>
 
             <button
@@ -60,12 +60,12 @@ export function ArtifactViewer() {
               onClick={copyLink}
               className="inline-flex items-center justify-center rounded-xl border border-zinc-300 bg-white px-6 py-3 text-sm font-semibold text-zinc-900 transition hover:bg-zinc-50"
             >
-              {copied ? 'تم نسخ الرابط' : 'نسخ الرابط'}
+              {copied ? 'تم نسخ الرابط' : 'نسخ رابط المشاركة'}
             </button>
           </div>
 
           <p className="mt-6 text-xs leading-6 text-zinc-500">
-            إذا لم يفتح الرابط، فقد تكون صلاحيته انتهت أو تغيّرت خصوصية المحتوى في Meta AI.
+            إذا ظهرت رسالة أن الصفحة غير متاحة، فهذا يعني أن رابط المشاركة حُذف أو تغيّرت خصوصيته من داخل Meta AI.
           </p>
         </div>
       </div>
