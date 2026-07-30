@@ -24,6 +24,35 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Validate bilingual dashboard
+        run: |
+          node --check meta-artifact-viewer/nitaq-data.js
+          node --check meta-artifact-viewer/nitaq-enhancements.js
+          node <<'NODE'
+          const fs = require('fs');
+          const vm = require('vm');
+          const root = 'meta-artifact-viewer';
+          const required = ['index.html', 'nitaq-data.js', 'nitaq-enhancements.js', 'nitaq-enhancements.css'];
+          for (const file of required) {
+            if (!fs.existsSync(`${root}/${file}`)) throw new Error(`Missing required asset: ${file}`);
+          }
+          const sandbox = { window: {} };
+          vm.runInNewContext(fs.readFileSync(`${root}/nitaq-data.js`, 'utf8'), sandbox);
+          const sites = sandbox.window.NITAQ_DATA?.sites || [];
+          const counts = sites.reduce((result, site) => {
+            result[site.type] = (result[site.type] || 0) + 1;
+            return result;
+          }, {});
+          if (counts.generation !== 9 || counts.substation !== 32 || counts.monitoring !== 1) {
+            throw new Error(`Unexpected site totals: ${JSON.stringify(counts)}`);
+          }
+          const html = fs.readFileSync(`${root}/index.html`, 'utf8');
+          for (const asset of ['nitaq-data.js', 'nitaq-enhancements.js', 'nitaq-enhancements.css']) {
+            if (!html.includes(asset)) throw new Error(`index.html does not load ${asset}`);
+          }
+          console.log('Validated 9 generation sites, 32 substations and 1 main monitoring site.');
+          NODE
+
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
 
