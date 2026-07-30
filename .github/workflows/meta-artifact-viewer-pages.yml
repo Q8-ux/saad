@@ -43,14 +43,14 @@ jobs:
             result[site.type] = (result[site.type] || 0) + 1;
             return result;
           }, {});
-          if (counts.generation !== 9 || counts.substation !== 32 || counts.monitoring !== 1) {
+          if (counts.generation !== 9 || counts.substation !== 32 || counts.monitoring !== 2) {
             throw new Error(`Unexpected site totals: ${JSON.stringify(counts)}`);
           }
           const html = fs.readFileSync(`${root}/index.html`, 'utf8');
           for (const asset of ['nitaq-data.js', 'nitaq-enhancements.js', 'nitaq-enhancements.css']) {
             if (!html.includes(asset)) throw new Error(`index.html does not load ${asset}`);
           }
-          console.log('Validated 9 generation sites, 32 substations and 1 main monitoring site.');
+          console.log('Validated 9 generation sites, 32 substations and 2 monitoring and control sites.');
           NODE
 
       - name: Configure GitHub Pages
