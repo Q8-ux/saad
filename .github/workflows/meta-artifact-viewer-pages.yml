@@ -1,4 +1,4 @@
-name: Deploy Meta Artifact Viewer
+name: Deploy Nitaq Al Amal Dashboard
 
 on:
   push:
@@ -23,25 +23,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
-
-      - name: Install dependencies
-        run: npm install
-        working-directory: meta-artifact-viewer
-
-      - name: Build application
-        run: npm run build
-        working-directory: meta-artifact-viewer
-
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
 
-      - name: Upload Pages artifact
+      - name: Upload dashboard
         uses: actions/upload-pages-artifact@v3
         with:
-          path: meta-artifact-viewer/dist
+          path: meta-artifact-viewer
 
   deploy:
     environment:
@@ -53,5 +41,3 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-
-# Triggered after manual GitHub Pages activation.
