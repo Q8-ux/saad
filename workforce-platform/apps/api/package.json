@@ -11,7 +11,9 @@
     "start:prod": "node dist/main.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "prisma:seed": "tsx prisma/seed.ts"
+    "prisma:migrate:deploy": "prisma migrate deploy",
+    "prisma:seed": "tsx prisma/seed.ts",
+    "render-build": "npm install && npm run prisma:generate && npm run prisma:migrate:deploy && npm run build"
   },
   "dependencies": {
     "@nestjs/cli": "^11.0.0",
