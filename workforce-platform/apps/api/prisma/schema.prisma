@@ -62,6 +62,43 @@ enum TransferLocationEventType {
   LOCATION_ANOMALY
 }
 
+enum EmergencyType {
+  FIRE
+  EXPLOSION
+  FUEL_LEAK
+  HAZARDOUS_MATERIAL
+  MEDICAL
+  POWER_FAILURE
+  OPERATIONAL_FAILURE
+  SECURITY
+  NATURAL_DISASTER
+  EVACUATION
+  OTHER
+}
+
+enum EmergencyStatus {
+  DRAFT
+  ACTIVE
+  CONTAINED
+  CLOSED
+  CANCELLED
+}
+
+enum SafeLocationType {
+  ASSEMBLY_POINT
+  SHELTER
+}
+
+enum EvacuationStatus {
+  NOT_CONFIRMED
+  DIRECTED
+  IN_TRANSIT
+  SAFE
+  MISSING
+  INJURED
+  EXEMPT
+}
+
 enum AuditAction {
   CREATE
   UPDATE
@@ -75,58 +112,61 @@ enum AuditAction {
 }
 
 model Company {
-  id              String           @id @default(uuid())
-  nameAr          String
-  nameEn          String?
-  users           User[]
-  employees       Employee[]
-  attendances     Attendance[]
-  stations        Station[]
-  transferPermits TransferPermit[]
-  auditLogs       AuditLog[]
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
+  id                 String                 @id @default(uuid())
+  nameAr             String
+  nameEn             String?
+  users              User[]
+  employees          Employee[]
+  attendances        Attendance[]
+  stations           Station[]
+  transferPermits    TransferPermit[]
+  emergencyIncidents EmergencyIncident[]
+  auditLogs          AuditLog[]
+  createdAt          DateTime               @default(now())
+  updatedAt          DateTime               @updatedAt
 }
 
 model User {
-  id                String        @id @default(uuid())
+  id                String           @id @default(uuid())
   companyId         String
-  company           Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  company           Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
   email             String
   passwordHash      String
-  role              Role          @default(EMPLOYEE)
+  role              Role             @default(EMPLOYEE)
   employee          Employee?
   stationAccess     UserStation[]
   approvedTransfers TransferPermit[] @relation("TransferApprover")
+  emergencyCreated  EmergencyIncident[] @relation("EmergencyCreator")
   auditLogs         AuditLog[]
-  isActive          Boolean       @default(true)
-  failedAttempts    Int           @default(0)
+  isActive          Boolean          @default(true)
+  failedAttempts    Int              @default(0)
   lockedUntil       DateTime?
   lastLoginAt       DateTime?
-  passwordChangedAt DateTime      @default(now())
-  createdAt         DateTime      @default(now())
-  updatedAt         DateTime      @updatedAt
+  passwordChangedAt DateTime         @default(now())
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
 
   @@unique([companyId, email])
   @@index([companyId, role, isActive])
 }
 
 model Employee {
-  id              String           @id @default(uuid())
-  companyId       String
-  company         Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  userId          String?          @unique
-  user            User?            @relation(fields: [userId], references: [id])
-  employeeNo      String
-  fullNameAr      String
-  fullNameEn      String?
-  department      String?
-  jobTitle        String?
-  isActive        Boolean          @default(true)
-  attendances     Attendance[]
-  transferPermits TransferPermit[]
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
+  id                 String                @id @default(uuid())
+  companyId          String
+  company            Company               @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  userId             String?               @unique
+  user               User?                 @relation(fields: [userId], references: [id])
+  employeeNo         String
+  fullNameAr         String
+  fullNameEn         String?
+  department         String?
+  jobTitle           String?
+  isActive           Boolean               @default(true)
+  attendances        Attendance[]
+  transferPermits    TransferPermit[]
+  emergencyStatuses EmergencyEvacuation[]
+  createdAt          DateTime              @default(now())
+  updatedAt          DateTime              @updatedAt
 
   @@unique([companyId, employeeNo])
   @@index([companyId, fullNameAr])
@@ -152,6 +192,10 @@ model Station {
   attendances          Attendance[]
   originTransfers      TransferPermit[] @relation("TransferOrigin")
   destinationTransfers TransferPermit[] @relation("TransferDestination")
+  assemblyPoints       AssemblyPoint[]
+  shelters             Shelter[]
+  criticalAssets       CriticalAsset[]
+  emergencyIncidents   EmergencyIncident[]
   createdAt            DateTime         @default(now())
   updatedAt            DateTime         @updatedAt
 
@@ -254,6 +298,125 @@ model TransferLocationEvent {
 
   @@index([permitId, recordedAt])
   @@index([eventType, recordedAt])
+}
+
+model AssemblyPoint {
+  id             String                @id @default(uuid())
+  stationId      String
+  station        Station               @relation(fields: [stationId], references: [id], onDelete: Cascade)
+  code           String
+  nameAr         String
+  nameEn         String?
+  latitude       Decimal               @db.Decimal(10, 7)
+  longitude      Decimal               @db.Decimal(10, 7)
+  geofenceM      Int                   @default(50)
+  capacity       Int?
+  targetMinutes  Int?
+  readiness      String                @default("READY")
+  isActive       Boolean               @default(true)
+  evacuations    EmergencyEvacuation[] @relation("AssemblyDestination")
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+
+  @@unique([stationId, code])
+  @@index([stationId, isActive])
+}
+
+model Shelter {
+  id             String                @id @default(uuid())
+  stationId      String
+  station        Station               @relation(fields: [stationId], references: [id], onDelete: Cascade)
+  code           String
+  nameAr         String
+  nameEn         String?
+  latitude       Decimal               @db.Decimal(10, 7)
+  longitude      Decimal               @db.Decimal(10, 7)
+  geofenceM      Int                   @default(40)
+  capacity       Int?
+  shelterType    String
+  equipment      Json?
+  readiness      String                @default("READY")
+  isActive       Boolean               @default(true)
+  evacuations    EmergencyEvacuation[] @relation("ShelterDestination")
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+
+  @@unique([stationId, code])
+  @@index([stationId, isActive])
+}
+
+model CriticalAsset {
+  id          String   @id @default(uuid())
+  stationId   String
+  station     Station  @relation(fields: [stationId], references: [id], onDelete: Cascade)
+  code        String
+  nameAr      String
+  nameEn      String?
+  assetType   String
+  riskLevel   Int      @default(1)
+  latitude    Decimal? @db.Decimal(10, 7)
+  longitude   Decimal? @db.Decimal(10, 7)
+  responsePlan Json?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([stationId, code])
+  @@index([stationId, riskLevel, isActive])
+}
+
+model EmergencyIncident {
+  id              String                @id @default(uuid())
+  companyId       String
+  company         Company               @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  stationId       String
+  station         Station               @relation(fields: [stationId], references: [id], onDelete: Cascade)
+  createdByUserId String?
+  createdBy       User?                 @relation("EmergencyCreator", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  type            EmergencyType
+  status          EmergencyStatus       @default(ACTIVE)
+  severity        Int                   @default(1)
+  titleAr         String
+  description     String?
+  latitude        Decimal?              @db.Decimal(10, 7)
+  longitude       Decimal?              @db.Decimal(10, 7)
+  instructions    Json?
+  activatedAt     DateTime              @default(now())
+  containedAt     DateTime?
+  closedAt        DateTime?
+  evacuations     EmergencyEvacuation[]
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+
+  @@index([companyId, status, activatedAt])
+  @@index([stationId, status])
+}
+
+model EmergencyEvacuation {
+  id                String             @id @default(uuid())
+  incidentId        String
+  incident          EmergencyIncident  @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+  employeeId        String
+  employee          Employee           @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  destinationType   SafeLocationType?
+  assemblyPointId   String?
+  assemblyPoint     AssemblyPoint?     @relation("AssemblyDestination", fields: [assemblyPointId], references: [id], onDelete: SetNull)
+  shelterId         String?
+  shelter           Shelter?           @relation("ShelterDestination", fields: [shelterId], references: [id], onDelete: SetNull)
+  status            EvacuationStatus   @default(NOT_CONFIRMED)
+  directedAt        DateTime?
+  arrivedAt         DateTime?
+  lastLatitude      Decimal?           @db.Decimal(10, 7)
+  lastLongitude     Decimal?           @db.Decimal(10, 7)
+  lastAccuracyM     Decimal?           @db.Decimal(8, 2)
+  riskScore         Int                @default(0)
+  notes             String?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  @@unique([incidentId, employeeId])
+  @@index([incidentId, status])
+  @@index([employeeId, createdAt])
 }
 
 model AuditLog {
