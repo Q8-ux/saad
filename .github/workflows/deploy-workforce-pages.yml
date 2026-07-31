@@ -25,7 +25,7 @@ jobs:
         working-directory: workforce-platform/apps/web
     env:
       GITHUB_PAGES: 'true'
-      NEXT_PUBLIC_API_URL: 'https://workforce-platform-api.onrender.com'
+      NEXT_PUBLIC_API_URL: 'https://workforce-platform-api.onrender.com/api'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -40,8 +40,13 @@ jobs:
       - name: Verify exported files
         run: |
           test -f out/index.html
+          test -f out/dashboard/index.html
           test -f out/attendance-smart/index.html
+          test -f out/transfers/index.html
           test -f out/emergency/index.html
+          test -f out/ai-tools/index.html
+          test -f out/notifications/index.html
+          test -f out/profile/index.html
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
