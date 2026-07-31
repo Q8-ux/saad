@@ -50,20 +50,36 @@ export default function SmartAttendancePage(){
 
   useEffect(()=>{load();readLocation()},[]);
   const selectedStation=stations.find(s=>s.id===stationId);
+  const selectedEmployee=employees.find(e=>e.id===employeeId);
 
-  return <main>
-    <div className="topbar"><div><h1>📍 الحضور والانصراف الذكي</h1><p className="muted">التحقق من موقع الجهاز والنطاق الجغرافي ودقة GPS قبل اعتماد العملية.</p></div><Link href="/dashboard" className="secondaryButton">العودة إلى لوحة التحكم</Link></div>
-    <div className="grid twoCols">
-      <section className="card"><h2>تنفيذ العملية</h2>
+  return <main className="appMain">
+    <section className="innerHero attendanceHero">
+      <div><span className="eyebrow">منصة نطاق العمل</span><h1>الحضور والانصراف الذكي</h1><p>تحقق جغرافي فوري قبل اعتماد الحركة</p></div>
+      <div className={`locationPill ${position?'ready':'pending'}`}><span>{position?'●':'○'}</span>{position?'الموقع جاهز':'جارٍ تحديد الموقع'}</div>
+    </section>
+
+    <section className="operationSummary">
+      <div><small>الموظف</small><strong>{selectedEmployee?shortName(selectedEmployee.fullNameAr):'—'}</strong></div>
+      <div><small>المنشأة</small><strong>{selectedStation?.nameAr||'—'}</strong></div>
+      <div><small>النطاق</small><strong>{selectedStation?.geofenceM??'—'} م</strong></div>
+    </section>
+
+    <div className="grid twoCols serviceLayout">
+      <section className="card serviceCard">
+        <div className="cardTitleRow"><div className="serviceIcon">📍</div><div><h2>تنفيذ العملية</h2><p className="muted">حدد البيانات ثم اضغط زر التنفيذ</p></div></div>
         <label>الموظف</label><select value={employeeId} onChange={e=>setEmployeeId(e.target.value)}>{employees.map(e=><option key={e.id} value={e.id}>{e.employeeNo} — {shortName(e.fullNameAr)}</option>)}</select>
         <label>المنشأة</label><select value={stationId} onChange={e=>setStationId(e.target.value)}>{stations.map(s=><option key={s.id} value={s.id}>{s.nameAr}</option>)}</select>
-        <label>نوع العملية</label><select value={type} onChange={e=>setType(e.target.value as 'CHECK_IN'|'CHECK_OUT')}><option value="CHECK_IN">تسجيل حضور</option><option value="CHECK_OUT">تسجيل انصراف</option></select>
+        <label>نوع العملية</label><div className="segmentedControl"><button type="button" className={type==='CHECK_IN'?'active':''} onClick={()=>setType('CHECK_IN')}>حضور</button><button type="button" className={type==='CHECK_OUT'?'active':''} onClick={()=>setType('CHECK_OUT')}>انصراف</button></div>
         <div className="locationBox"><strong>حالة الموقع</strong>{position?<><div>تم الحصول على الموقع ✅</div><div>دقة القراءة: {Math.round(position.coords.accuracy)} متر</div><div className="muted">النطاق المعتمد: {selectedStation?.geofenceM??'—'} متر</div></>:<div>{locationError||'لم يتم تحديد الموقع بعد'}</div>}</div>
-        <button type="button" className="secondaryButton fullWidth" onClick={readLocation}>تحديث الموقع</button><button type="button" onClick={submit} disabled={loading}>{loading?'جارٍ التحقق...':type==='CHECK_IN'?'تسجيل الحضور الذكي':'تسجيل الانصراف الذكي'}</button>{message&&<p className="notice">{message}</p>}
+        <div className="buttonRow"><button type="button" className="secondaryButton" onClick={readLocation}>تحديث الموقع</button><button type="button" className="primaryOperation" onClick={submit} disabled={loading}>{loading?'جارٍ التحقق...':type==='CHECK_IN'?'تسجيل الحضور':'تسجيل الانصراف'}</button></div>
+        {message&&<p className="notice">{message}</p>}
       </section>
-      <section className="card"><h2>نتيجة التحقق</h2>{!result&&<p className="muted">ستظهر هنا نتيجة المسافة ودرجة المخاطر وقرار النظام.</p>}{result&&<div className={`decisionBox ${result.decision==='REJECTED'?'dangerBox':result.decision==='REVIEW_REQUIRED'?'warningBox':'successBox'}`}><div className="metric smallMetric">{decisionLabel[result.decision]||result.decision}</div><p>درجة المخاطر: <strong>{result.riskScore??0}/100</strong></p>{result.distanceFromStationM&&<p>المسافة عن المنشأة: <strong>{Math.round(Number(result.distanceFromStationM))} متر</strong></p>}{result.rejectionReason&&<p>{result.rejectionReason}</p>}</div>}
-        <h3>ضوابط الاعتماد</h3><ul className="compactList"><li>الموقع داخل النطاق الجغرافي.</li><li>دقة GPS ضمن الحد المعتمد.</li><li>قراءة الموقع حديثة.</li><li>المحاولات المرفوضة تحفظ للمراجعة.</li></ul>
+
+      <section className="card serviceCard resultCard"><div className="cardTitleRow"><div className="serviceIcon">🛡️</div><div><h2>نتيجة التحقق</h2><p className="muted">قرار النظام ودرجة المخاطر</p></div></div>{!result&&<div className="emptyState"><span>◎</span><p>لم تُنفذ أي عملية بعد</p><small>ستظهر هنا نتيجة المسافة ودرجة المخاطر</small></div>}{result&&<div className={`decisionBox ${result.decision==='REJECTED'?'dangerBox':result.decision==='REVIEW_REQUIRED'?'warningBox':'successBox'}`}><div className="metric smallMetric">{decisionLabel[result.decision]||result.decision}</div><p>درجة المخاطر: <strong>{result.riskScore??0}/100</strong></p>{result.distanceFromStationM&&<p>المسافة عن المنشأة: <strong>{Math.round(Number(result.distanceFromStationM))} متر</strong></p>}{result.rejectionReason&&<p>{result.rejectionReason}</p>}</div>}
+        <div className="rulesBox"><h3>ضوابط الاعتماد</h3><ul className="compactList"><li>الموقع داخل النطاق الجغرافي.</li><li>دقة GPS ضمن الحد المعتمد.</li><li>قراءة الموقع حديثة.</li><li>المحاولات المرفوضة تحفظ للمراجعة.</li></ul></div>
       </section>
     </div>
+
+    <nav className="mobileNav"><Link href="/dashboard">⌂<span>الرئيسية</span></Link><Link href="/attendance-smart">📍<span>الحضور</span></Link><Link href="/emergency">🚨<span>الطوارئ</span></Link><a href="#">🔔<span>التنبيهات</span></a><a href="#">👤<span>حسابي</span></a></nav>
   </main>
 }
