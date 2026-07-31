@@ -33,12 +33,15 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-          cache-dependency-path: workforce-platform/apps/web/package-lock.json
       - name: Install dependencies
         run: npm install
       - name: Build static site
         run: npm run build
+      - name: Verify exported files
+        run: |
+          test -f out/index.html
+          test -f out/attendance-smart/index.html
+          test -f out/emergency/index.html
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
