@@ -13,13 +13,15 @@ export default function Dashboard(){
   const last=attendance[0];
   return <main className="appMain">
     <section className="sahelHero">
-      <div><span className="eyebrow">منصة نطاق العمل</span><h1>مرحبًا بك</h1><p>إدارة الحضور الذكي والانتقالات والطوارئ من مكان واحد.</p></div>
+      <div><span className="eyebrow">منصة نطاق العمل</span><h1>مرحبًا بك</h1><p>إدارة الحضور والانتقالات والطوارئ والتحليل الذكي من مكان واحد.</p></div>
       <div className="heroStatus"><span>الحالة الحالية</span><strong>{last?.type==='CHECK_IN'?'داخل المنشأة':'غير مسجل حاليًا'}</strong><small>{last?.station?.nameAr||'—'}</small></div>
     </section>
 
     <section className="quickActions">
       <Link href="/attendance-smart" className="quickAction primaryAction"><span className="quickIcon">📍</span><div><b>الحضور الذكي</b><small>تسجيل دخول أو خروج بالنطاق الجغرافي</small></div></Link>
+      <Link href="/transfers" className="quickAction"><span className="quickIcon">🚗</span><div><b>الانتقالات</b><small>طلب ومتابعة تصاريح الانتقال</small></div></Link>
       <Link href="/emergency" className="quickAction"><span className="quickIcon">🚨</span><div><b>الطوارئ</b><small>نقاط التجمع والملاجئ والحوادث</small></div></Link>
+      <Link href="/ai-tools" className="quickAction aiQuickAction"><span className="quickIcon">🤖</span><div><b>مركز الذكاء الاصطناعي</b><small>أدوات متخصصة لكل قسم</small></div></Link>
     </section>
 
     <section className="sectionBlock"><div className="sectionHeading"><h2>نظرة سريعة</h2><span>مباشر</span></div><div className="grid statsGrid">
@@ -30,6 +32,6 @@ export default function Dashboard(){
 
     <section className="card movementsCard sectionBlock"><div className="sectionHeading"><h2>آخر الحركات</h2><span>{attendance.length} حركة</span></div><table><thead><tr><th>الموظف</th><th>المنشأة</th><th>الحركة</th><th>القرار</th><th>المخاطر</th><th>التوقيت</th></tr></thead><tbody>{attendance.slice(0,20).map(x=><tr key={x.id}><td>{shortName(x.employee.fullNameAr)}</td><td>{x.station?.nameAr||'—'}</td><td>{x.type==='CHECK_IN'?'دخول':'خروج'}</td><td>{x.decision==='ACCEPTED'?'معتمد':x.decision==='ACCEPTED_WITH_WARNING'?'معتمد مع تنبيه':x.decision==='REVIEW_REQUIRED'?'للمراجعة':x.decision==='REJECTED'?'مرفوض':'—'}</td><td>{x.riskScore??0}/100</td><td>{new Date(x.recordedAt).toLocaleString('ar-KW')}</td></tr>)}</tbody></table></section>
 
-    <nav className="mobileNav"><Link href="/dashboard">⌂<span>الرئيسية</span></Link><Link href="/attendance-smart">📍<span>الحضور</span></Link><Link href="/emergency">🚨<span>الطوارئ</span></Link><a href="#">🔔<span>التنبيهات</span></a><a href="#">👤<span>حسابي</span></a></nav>
+    <nav className="mobileNav"><Link href="/dashboard">⌂<span>الرئيسية</span></Link><Link href="/attendance-smart">📍<span>الحضور</span></Link><Link href="/transfers">🚗<span>الانتقال</span></Link><Link href="/ai-tools">🤖<span>الذكاء</span></Link><Link href="/profile">👤<span>حسابي</span></Link></nav>
   </main>
 }
