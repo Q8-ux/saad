@@ -13,14 +13,14 @@ html[data-theme='dark']{
 }
 
 html[data-theme='light']{
-  --theme-bg:#f4f7fb;
+  --theme-bg:#f5f8fc;
   --theme-panel:#ffffff;
-  --theme-panel-2:#f8fafc;
-  --theme-line:#cfd9e5;
-  --theme-text:#10233c;
-  --theme-muted:#516276;
-  --theme-accent:#176fd1;
-  --theme-accent-soft:#e8f2ff;
+  --theme-panel-2:#f7f9fc;
+  --theme-line:#c9d4e2;
+  --theme-text:#0b1f3a;
+  --theme-muted:#42566f;
+  --theme-accent:#0d63d8;
+  --theme-accent-soft:#e6f0ff;
   --theme-sidebar:#ffffff;
   --theme-header:#ffffff;
 }
@@ -46,10 +46,7 @@ body,
   color:var(--theme-text)!important;
 }
 
-.approvedNav a{
-  color:var(--theme-text)!important;
-}
-
+.approvedNav a{color:var(--theme-text)!important}
 .approvedNav a.active{
   background:var(--theme-accent-soft)!important;
   color:var(--theme-accent)!important;
@@ -58,7 +55,6 @@ body,
 
 .approvedCard,
 .approvedKpis article,
-.commandHero,
 .commandStat,
 .darkOpsSearch,
 .demoDataNotice{
@@ -71,13 +67,11 @@ body,
 .approvedCard th,
 .approvedCard td,
 .approvedAlertRows>div,
-.summaryRows>div{
-  border-color:var(--theme-line)!important;
-}
+.summaryRows>div{border-color:var(--theme-line)!important}
 
 .approvedCard th{
   background:var(--theme-panel-2)!important;
-  color:var(--theme-muted)!important;
+  color:var(--theme-text)!important;
 }
 
 .approvedCard h2,
@@ -86,9 +80,7 @@ body,
 .darkOpsTitle,
 .darkOpsDate,
 .approvedUser,
-.approvedUser b{
-  color:var(--theme-text)!important;
-}
+.approvedUser b{color:var(--theme-text)!important}
 
 .approvedKpis small,
 .approvedAlertRows span,
@@ -98,6 +90,7 @@ body,
 .darkOpsDate span,
 .darkOpsSearch input::placeholder{
   color:var(--theme-muted)!important;
+  opacity:1!important;
 }
 
 .darkOpsSearch input{
@@ -105,17 +98,13 @@ body,
   background:transparent!important;
 }
 
-.headerSwitches{
-  display:flex;
-  align-items:center;
-  gap:7px;
-}
-
+.headerSwitches{display:flex;align-items:center;gap:6px}
 .themeSwitcher,
 .languageSwitcher{
-  min-width:40px;
-  height:36px;
-  padding:0 10px;
+  width:38px;
+  min-width:38px;
+  height:38px;
+  padding:0;
   border:1px solid var(--theme-line)!important;
   border-radius:8px;
   background:var(--theme-panel-2)!important;
@@ -124,66 +113,100 @@ body,
   align-items:center;
   justify-content:center;
   cursor:pointer;
+  font-size:13px!important;
+  line-height:1;
 }
+.languageSwitcher{width:auto;min-width:52px;padding:0 9px}
+.themeSwitcher:hover,.languageSwitcher:hover{border-color:var(--theme-accent)!important;color:var(--theme-accent)!important}
 
-.themeSwitcher:hover,
-.languageSwitcher:hover{
-  border-color:var(--theme-accent)!important;
-  color:var(--theme-accent)!important;
+html[data-theme='light'] .approvedAvatar{background:#e8f2ff!important;color:#176fd1!important}
+html[data-theme='light'] .approvedTool{color:#17324f!important;border-color:var(--theme-line)!important}
+html[data-theme='light'] .approvedWideLink{background:#fff!important}
+html[data-theme='light'] .googleInfrastructureMap{background:#eef3f8!important}
+
+/* Keep the main hero high-contrast in both themes */
+.commandHero{
+  background:linear-gradient(125deg,#082f60 0%,#0a4f9d 58%,#0d69c8 100%)!important;
+  border:1px solid #1d70c9!important;
+  color:#ffffff!important;
 }
+.commandHero h1,
+.commandHero h2,
+.commandHero h3,
+.commandHero p,
+.commandHero span,
+.commandHero small,
+.commandHero b,
+.commandHero strong{color:#ffffff!important;opacity:1!important}
+.commandHero p,.commandClock span,.commandMeta span{color:#e6f1ff!important}
+.commandEyebrow{color:#bcdcff!important}
+.commandStatusPanel{background:rgba(3,24,50,.68)!important;border-color:rgba(255,255,255,.3)!important;color:#fff!important}
+.commandPrimary{background:#fff!important;color:#074a95!important}
+.commandSecondary{background:rgba(255,255,255,.12)!important;color:#fff!important;border-color:rgba(255,255,255,.45)!important}
 
-html[data-theme='light'] .approvedAvatar{
-  background:#e8f2ff!important;
-  color:#176fd1!important;
-}
+/* Light theme: never use pale gray text on white */
+html[data-theme='light'] body,
+html[data-theme='light'] .approvedContent,
+html[data-theme='light'] .approvedCard,
+html[data-theme='light'] .approvedKpis article,
+html[data-theme='light'] .commandStat,
+html[data-theme='light'] .demoDataNotice{color:#0b1f3a!important}
+html[data-theme='light'] .commandSectionIntro h2,
+html[data-theme='light'] .commandCardHead h2,
+html[data-theme='light'] .approvedCard h2,
+html[data-theme='light'] .approvedKpis span,
+html[data-theme='light'] .approvedKpis strong,
+html[data-theme='light'] .approvedCard td,
+html[data-theme='light'] .approvedCard th,
+html[data-theme='light'] .approvedAlertRows b,
+html[data-theme='light'] .summaryRows b,
+html[data-theme='light'] label,
+html[data-theme='light'] select,
+html[data-theme='light'] input,
+html[data-theme='light'] button{color:#0b1f3a!important;opacity:1!important}
+html[data-theme='light'] .commandSectionIntro small,
+html[data-theme='light'] .commandCardHead small,
+html[data-theme='light'] .approvedKpis small,
+html[data-theme='light'] .approvedAlertRows span,
+html[data-theme='light'] .approvedAlertRows time,
+html[data-theme='light'] .summaryRows span,
+html[data-theme='light'] .demoDataNotice span,
+html[data-theme='light'] .approvedUser small,
+html[data-theme='light'] .darkOpsDate span{color:#42566f!important;opacity:1!important}
+html[data-theme='light'] .commandSectionIntro span,
+html[data-theme='light'] .commandCardHead>div>span,
+html[data-theme='light'] .approvedWideLink,
+html[data-theme='light'] a{color:#0d63d8!important}
+html[data-theme='light'] .demoDataNotice{background:#edf5ff!important;border-color:#7faee8!important}
+html[data-theme='light'] .demoDataNotice strong{color:#0b1f3a!important}
+html[data-theme='light'] .approvedCard,
+html[data-theme='light'] .approvedKpis article,
+html[data-theme='light'] .commandStat,
+html[data-theme='light'] .darkOpsSearch{box-shadow:0 2px 8px rgba(18,45,78,.07)!important}
+html[data-theme='light'] .darkOpsSearch input::placeholder{color:#536981!important;opacity:1!important}
+html[data-theme='light'] .themeSwitcher,
+html[data-theme='light'] .languageSwitcher{background:#ffffff!important;color:#0b1f3a!important}
 
-html[data-theme='light'] .approvedTool{
-  color:#294866!important;
-  border-color:var(--theme-line)!important;
-}
-
-html[data-theme='light'] .approvedWideLink{
-  background:#fff!important;
-}
-
-html[data-theme='light'] .googleInfrastructureMap{
-  background:#eef3f8!important;
-}
-
-/* Desktop readability */
-@media(min-width:761px){
-  html{font-size:17px}
-  .darkOpsTitle,.approvedMobileBrand strong{font-size:2rem!important;font-weight:800!important}
-  .darkOpsDate,.approvedUser,.approvedNav a,.darkOpsSearch input{font-size:1rem!important}
-  .approvedNav a{padding:14px 16px!important;gap:13px!important}
-  .approvedKpis span{font-size:1rem!important;font-weight:700!important}
-  .approvedKpis strong{font-size:2.35rem!important;line-height:1.05!important}
-  .approvedKpis small{font-size:.9rem!important;line-height:1.55!important}
-  .approvedCardHead{min-height:58px!important;height:auto!important;padding:10px 18px!important}
-  .approvedCardHead h2{font-size:1.15rem!important;font-weight:800!important}
-  .approvedCardHead a,.approvedWideLink{font-size:.95rem!important}
-  .approvedAlertRows b,.summaryRows b{font-size:1rem!important}
-  .approvedAlertRows span,.approvedAlertRows time,.summaryRows span{font-size:.9rem!important;line-height:1.6!important}
-  .approvedCard th{font-size:.95rem!important;font-weight:800!important}
-  .approvedCard td{font-size:.95rem!important;line-height:1.55!important}
-  .barRow,.barRow b{font-size:.95rem!important}
-  .themeSwitcher,.languageSwitcher{font-size:1rem!important;min-width:46px;height:42px!important}
-}
-
-/* Strong contrast for dark mode */
+/* Dark theme: no dark text on dark backgrounds */
 html[data-theme='dark'] body,
 html[data-theme='dark'] .approvedContent,
 html[data-theme='dark'] .approvedCard,
-html[data-theme='dark'] .approvedCard *:not(.green):not(.redText):not(.running):not(.done),
-html[data-theme='dark'] .commandHero,
-html[data-theme='dark'] .commandHero *:not(.green):not(.redText),
+html[data-theme='dark'] .commandStat,
 html[data-theme='dark'] .approvedKpis article,
-html[data-theme='dark'] .approvedKpis article *:not(.green),
-html[data-theme='dark'] .demoDataNotice,
-html[data-theme='dark'] .demoDataNotice *{
-  color:#fff!important;
-}
-
+html[data-theme='dark'] .demoDataNotice{color:#ffffff!important}
+html[data-theme='dark'] .commandSectionIntro h2,
+html[data-theme='dark'] .commandCardHead h2,
+html[data-theme='dark'] .approvedCard h2,
+html[data-theme='dark'] .approvedKpis span,
+html[data-theme='dark'] .approvedKpis strong,
+html[data-theme='dark'] .approvedCard td,
+html[data-theme='dark'] .approvedCard th,
+html[data-theme='dark'] .approvedAlertRows b,
+html[data-theme='dark'] .summaryRows b,
+html[data-theme='dark'] label,
+html[data-theme='dark'] select,
+html[data-theme='dark'] input,
+html[data-theme='dark'] button{color:#ffffff!important;opacity:1!important}
 html[data-theme='dark'] .approvedKpis small,
 html[data-theme='dark'] .approvedAlertRows span,
 html[data-theme='dark'] .approvedAlertRows time,
@@ -191,38 +214,48 @@ html[data-theme='dark'] .summaryRows span,
 html[data-theme='dark'] .approvedUser small,
 html[data-theme='dark'] .darkOpsDate span,
 html[data-theme='dark'] .darkOpsSearch input::placeholder,
-html[data-theme='dark'] .commandHero p,
-html[data-theme='dark'] .commandMeta span{
-  color:#d7e2ee!important;
-  opacity:1!important;
-}
-
+html[data-theme='dark'] .commandSectionIntro small,
+html[data-theme='dark'] .commandCardHead small,
+html[data-theme='dark'] .demoDataNotice span{color:#d7e2ee!important;opacity:1!important}
+html[data-theme='dark'] .commandSectionIntro h2{color:#ffffff!important}
+html[data-theme='dark'] .commandSectionIntro span,
+html[data-theme='dark'] .commandCardHead>div>span,
+html[data-theme='dark'] .approvedWideLink{color:#79b7ff!important}
 html[data-theme='dark'] .approvedCard,
 html[data-theme='dark'] .approvedKpis article,
-html[data-theme='dark'] .commandHero,
 html[data-theme='dark'] .commandStat,
-html[data-theme='dark'] .darkOpsSearch{
-  border-color:#2b5b86!important;
-}
+html[data-theme='dark'] .darkOpsSearch{border-color:#2b5b86!important}
+html[data-theme='dark'] .approvedCard th{color:#ffffff!important;background:#102842!important}
+html[data-theme='dark'] .approvedWideLink{border-color:#3c6f9e!important;background:#0d2239!important}
+html[data-theme='dark'] .demoDataNotice{background:#0d2239!important;border-color:#3c6f9e!important}
+html[data-theme='dark'] select,
+html[data-theme='dark'] input{background:#0d2239!important;border-color:#315b82!important}
 
-html[data-theme='dark'] .approvedCard th{
-  color:#eaf2fa!important;
-  background:#102842!important;
-}
-
-html[data-theme='dark'] .approvedWideLink{
-  color:#7db8ff!important;
-  border-color:#3c6f9e!important;
-  background:#0d2239!important;
-}
-
-html[data-theme='dark'] .darkOpsSearch input,
-html[data-theme='dark'] .languageSwitcher,
-html[data-theme='dark'] .themeSwitcher{
-  color:#fff!important;
+/* Desktop readability */
+@media(min-width:761px){
+  html{font-size:17px}
+  .darkOpsTitle,.approvedMobileBrand strong{font-size:2rem!important;font-weight:800!important}
+  .darkOpsDate,.approvedUser,.approvedNav a,.darkOpsSearch input{font-size:1rem!important}
+  .approvedNav a{padding:14px 16px!important;gap:13px!important}
+  .approvedKpis span{font-size:1rem!important;font-weight:800!important}
+  .approvedKpis strong{font-size:2.35rem!important;line-height:1.05!important}
+  .approvedKpis small{font-size:.94rem!important;line-height:1.55!important}
+  .approvedCardHead{min-height:58px!important;height:auto!important;padding:10px 18px!important}
+  .approvedCardHead h2{font-size:1.15rem!important;font-weight:800!important}
+  .approvedCardHead a,.approvedWideLink{font-size:.95rem!important}
+  .approvedAlertRows b,.summaryRows b{font-size:1rem!important}
+  .approvedAlertRows span,.approvedAlertRows time,.summaryRows span{font-size:.92rem!important;line-height:1.6!important}
+  .approvedCard th{font-size:.95rem!important;font-weight:800!important}
+  .approvedCard td{font-size:.95rem!important;line-height:1.55!important}
+  .barRow,.barRow b{font-size:.95rem!important}
+  .commandSectionIntro h2{font-size:1.55rem!important;font-weight:800!important}
+  .commandSectionIntro small{font-size:.95rem!important}
+  .commandCardHead h2{font-size:1.1rem!important}
+  .commandCardHead small{font-size:.9rem!important}
 }
 
 @media(max-width:760px){
   .headerSwitches{gap:5px}
-  .themeSwitcher,.languageSwitcher{height:34px;min-width:36px;padding:0 8px}
+  .themeSwitcher{width:34px;min-width:34px;height:34px}
+  .languageSwitcher{height:34px;min-width:48px;padding:0 7px}
 }
