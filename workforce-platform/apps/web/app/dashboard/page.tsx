@@ -14,12 +14,13 @@ export default function Dashboard(){
     [t('موقع المشروع رقم 3','Project Site 3'),t('انتهاء صلاحية مطفأة حريق','Fire extinguisher expired'),'08:47'],
   ];
   const transfers=[
-    [t('موقع المشروع 1','Project Site 1'),t('مستودع رئيسي','Main Warehouse'),t('أحمد العتيبي','Ahmed Alotaibi'),'10:30'],
-    [t('المستودع الغربي','West Warehouse'),t('موقع المشروع 2','Project Site 2'),t('محمد الحربي','Mohammed Alharbi'),'10:15'],
-    [t('مبنى الإدارة','Administration Building'),t('موقع المشروع 3','Project Site 3'),t('موقع الكندري 3','Kandari Site 3'),'09:50'],
-    [t('المستودع الشمالي','North Warehouse'),t('مبنى الإدارة','Administration Building'),t('خالد الشمري','Khaled Alshammari'),'09:20'],
+    [t('موقع المشروع 1','Project Site 1'),t('مستودع رئيسي','Main Warehouse'),t('أحمد محمد','Ahmed Mohammed'),'10:30'],
+    [t('المستودع الغربي','West Warehouse'),t('موقع المشروع 2','Project Site 2'),t('محمد علي','Mohammed Ali'),'10:15'],
+    [t('مبنى الإدارة','Administration Building'),t('موقع المشروع 3','Project Site 3'),t('يوسف خالد','Yousef Khaled'),'09:50'],
+    [t('المستودع الشمالي','North Warehouse'),t('مبنى الإدارة','Administration Building'),t('خالد ناصر','Khaled Nasser'),'09:20'],
   ];
   return <main className="approvedDashboard">
+    <div className="demoDataNotice">{t('بيانات تجريبية للعرض فقط','Demo data for preview only')}</div>
     <h1>{t('لوحة التحكم','Dashboard')}</h1>
 
     <section className="approvedKpis">
@@ -67,7 +68,7 @@ export default function Dashboard(){
 
     <section className="approvedCard recentOps">
       <div className="approvedCardHead"><h2>{t('آخر العمليات','Recent Activity')}</h2><Link href="/attendance-smart">{t('عرض الكل','View All')}</Link></div>
-      <table><thead><tr><th>{t('النوع','Type')}</th><th>{t('الوصف','Description')}</th><th>{t('المستخدم','User')}</th><th>{t('الوقت','Time')}</th><th>{t('التاريخ','Date')}</th></tr></thead><tbody><tr><td>{t('حضور','Attendance')}</td><td>{t('تم تسجيل حضور الموظف أحمد العتيبي في مبنى الإدارة الرئيسي','Ahmed Alotaibi checked in at the main administration building')}</td><td>{t('أحمد العتيبي','Ahmed Alotaibi')}</td><td>08:01</td><td>2024-05-20</td></tr><tr><td>{t('انتقال','Transfer')}</td><td>{t('تم بدء انتقال من مستودع المنطقة الشمالية إلى موقع المشروع 1','A transfer started from the northern warehouse to Project Site 1')}</td><td>{t('محمد الحربي','Mohammed Alharbi')}</td><td>08:15</td><td>2024-05-20</td></tr><tr><td className="redText">{t('تنبيه','Alert')}</td><td>{t('تجاوز درجة الحرارة الحد المسموح في مستودع المنطقة الشمالية','Temperature exceeded the allowed limit in the northern warehouse')}</td><td>{t('النظام','System')}</td><td>09:30</td><td>2024-05-20</td></tr><tr><td>{t('انصراف','Check-out')}</td><td>{t('تم تسجيل انصراف الموظفة سارة الكندري من مبنى الإدارة الرئيسي','Sara Alkandari checked out from the main administration building')}</td><td>{t('سارة الكندري','Sara Alkandari')}</td><td>17:05</td><td>2024-05-19</td></tr></tbody></table>
+      <table><thead><tr><th>{t('النوع','Type')}</th><th>{t('الوصف','Description')}</th><th>{t('المستخدم','User')}</th><th>{t('الوقت','Time')}</th><th>{t('التاريخ','Date')}</th></tr></thead><tbody><tr><td>{t('حضور','Attendance')}</td><td>{t('تم تسجيل حضور الموظف أحمد محمد في مبنى الإدارة الرئيسي','Ahmed Mohammed checked in at the main administration building')}</td><td>{t('أحمد محمد','Ahmed Mohammed')}</td><td>08:01</td><td>2026-08-01</td></tr><tr><td>{t('انتقال','Transfer')}</td><td>{t('تم بدء انتقال من مستودع المنطقة الشمالية إلى موقع المشروع 1','A transfer started from the northern warehouse to Project Site 1')}</td><td>{t('محمد علي','Mohammed Ali')}</td><td>08:15</td><td>2026-08-01</td></tr><tr><td className="redText">{t('تنبيه','Alert')}</td><td>{t('تجاوز درجة الحرارة الحد المسموح في مستودع المنطقة الشمالية','Temperature exceeded the allowed limit in the northern warehouse')}</td><td>{t('النظام','System')}</td><td>09:30</td><td>2026-08-01</td></tr><tr><td>{t('انصراف','Check-out')}</td><td>{t('تم تسجيل انصراف الموظفة سارة ناصر من مبنى الإدارة الرئيسي','Sara Nasser checked out from the main administration building')}</td><td>{t('سارة ناصر','Sara Nasser')}</td><td>17:05</td><td>2026-07-31</td></tr></tbody></table>
     </section>
 
     <nav className="approvedBottomNav"><Link href="/dashboard" className="active"><AppIcon name="home"/><span>{t('الرئيسية','Home')}</span></Link><Link href="/attendance-smart"><AppIcon name="check"/><span>{t('الحضور','Attendance')}</span></Link><Link href="/notifications"><AppIcon name="notification"/><span>{t('التنبيهات','Alerts')}</span></Link><Link href="/transfers"><AppIcon name="transfer"/><span>{t('الانتقالات','Transfers')}</span></Link><Link href="/dashboard#more"><AppIcon name="menu"/><span>{t('المزيد','More')}</span></Link></nav>
