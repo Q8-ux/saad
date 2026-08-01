@@ -24,6 +24,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: workforce-platform
+          fetch-depth: 1
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
@@ -32,12 +33,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-          cache-dependency-path: workforce-platform/apps/web/package.json
 
       - name: Install dependencies
         working-directory: workforce-platform/apps/web
-        run: npm install
+        run: npm install --no-audit --no-fund
+
+      - name: Clean previous build
+        working-directory: workforce-platform/apps/web
+        run: rm -rf .next out
 
       - name: Build current workforce interface
         working-directory: workforce-platform/apps/web
@@ -46,7 +49,7 @@ jobs:
           NEXT_PUBLIC_API_URL: 'https://workforce-platform-api.onrender.com/api'
         run: npm run build
 
-      - name: Verify required pages
+      - name: Verify required pages and new enterprise shell
         run: |
           test -f workforce-platform/apps/web/out/index.html
           test -f workforce-platform/apps/web/out/dashboard/index.html
@@ -56,6 +59,7 @@ jobs:
           test -f workforce-platform/apps/web/out/ai-tools/index.html
           test -f workforce-platform/apps/web/out/notifications/index.html
           test -f workforce-platform/apps/web/out/profile/index.html
+          grep -R "enterpriseShell" workforce-platform/apps/web/out/_next/static >/dev/null
 
       - name: Disable Jekyll processing
         run: touch workforce-platform/apps/web/out/.nojekyll
