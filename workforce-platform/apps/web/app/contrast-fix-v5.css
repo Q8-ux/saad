@@ -1,0 +1,266 @@
+/* Final government UI contrast layer — loaded last */
+:root{
+  --hc-light-bg:#f4f7fb;
+  --hc-light-panel:#ffffff;
+  --hc-light-text:#071a33;
+  --hc-light-muted:#354a63;
+  --hc-light-line:#b9c8d9;
+  --hc-dark-bg:#0b1f33;
+  --hc-dark-panel:#132b44;
+  --hc-dark-panel-2:#183650;
+  --hc-dark-text:#ffffff;
+  --hc-dark-muted:#d3dfeb;
+  --hc-dark-line:#3e6486;
+}
+
+/* Never inherit fading from old layouts */
+.commandDashboard,
+.commandDashboard *,
+.approvedTopbar,
+.approvedTopbar *,
+.approvedSidebar,
+.approvedSidebar *{
+  opacity:1!important;
+  filter:none!important;
+}
+
+/* ---------- LIGHT MODE ---------- */
+html[data-theme='light'] body,
+html[data-theme='light'] .darkOpsShell,
+html[data-theme='light'] .approvedWorkspace,
+html[data-theme='light'] .approvedContent{
+  background:var(--hc-light-bg)!important;
+  color:var(--hc-light-text)!important;
+}
+
+html[data-theme='light'] .darkOpsTopbar,
+html[data-theme='light'] .approvedSidebar,
+html[data-theme='light'] .approvedCard,
+html[data-theme='light'] .approvedKpis article,
+html[data-theme='light'] .commandFeatureCard,
+html[data-theme='light'] .commandStat,
+html[data-theme='light'] .darkOpsSearch,
+html[data-theme='light'] .demoDataNotice{
+  background:var(--hc-light-panel)!important;
+  border-color:var(--hc-light-line)!important;
+  color:var(--hc-light-text)!important;
+}
+
+html[data-theme='light'] .commandDashboard :is(h1,h2,h3,h4,p,strong,b,label,td,th),
+html[data-theme='light'] .approvedTopbar :is(b,strong,span),
+html[data-theme='light'] .approvedSidebar a,
+html[data-theme='light'] .approvedKpis :is(span,strong),
+html[data-theme='light'] .approvedAlertRows b,
+html[data-theme='light'] .summaryRows b,
+html[data-theme='light'] .barRow :is(span,b){
+  color:var(--hc-light-text)!important;
+  opacity:1!important;
+}
+
+html[data-theme='light'] .commandDashboard :is(small,time),
+html[data-theme='light'] .approvedKpis small,
+html[data-theme='light'] .approvedAlertRows span,
+html[data-theme='light'] .summaryRows span,
+html[data-theme='light'] .commandCardHead small,
+html[data-theme='light'] .commandSectionIntro small,
+html[data-theme='light'] .approvedUser small,
+html[data-theme='light'] .darkOpsDate span{
+  color:var(--hc-light-muted)!important;
+  opacity:1!important;
+}
+
+html[data-theme='light'] .commandSectionIntro>div>span,
+html[data-theme='light'] .commandCardHead>div>span,
+html[data-theme='light'] .approvedCardHead a,
+html[data-theme='light'] .approvedWideLink{
+  color:#075fc8!important;
+  opacity:1!important;
+}
+
+html[data-theme='light'] input,
+html[data-theme='light'] select,
+html[data-theme='light'] textarea{
+  background:#ffffff!important;
+  color:var(--hc-light-text)!important;
+  border-color:#9eb1c5!important;
+}
+html[data-theme='light'] input::placeholder,
+html[data-theme='light'] textarea::placeholder{
+  color:#40566f!important;
+  opacity:1!important;
+}
+
+html[data-theme='light'] .demoDataNotice{
+  background:#eef6ff!important;
+  border:1px solid #7da7d5!important;
+}
+html[data-theme='light'] .demoDataNotice strong{color:#071a33!important}
+html[data-theme='light'] .demoDataNotice span{color:#29435f!important}
+
+/* ---------- DARK MODE (navy, never black) ---------- */
+html[data-theme='dark'] body,
+html[data-theme='dark'] .darkOpsShell,
+html[data-theme='dark'] .approvedWorkspace,
+html[data-theme='dark'] .approvedContent{
+  background:var(--hc-dark-bg)!important;
+  color:var(--hc-dark-text)!important;
+}
+
+html[data-theme='dark'] .darkOpsTopbar{
+  background:#10243a!important;
+  border-color:var(--hc-dark-line)!important;
+}
+html[data-theme='dark'] .approvedSidebar{
+  background:#102b48!important;
+  border-color:var(--hc-dark-line)!important;
+}
+html[data-theme='dark'] .approvedCard,
+html[data-theme='dark'] .approvedKpis article,
+html[data-theme='dark'] .commandFeatureCard,
+html[data-theme='dark'] .commandStat,
+html[data-theme='dark'] .darkOpsSearch,
+html[data-theme='dark'] .demoDataNotice{
+  background:var(--hc-dark-panel)!important;
+  border-color:var(--hc-dark-line)!important;
+  color:var(--hc-dark-text)!important;
+}
+
+html[data-theme='dark'] .commandDashboard :is(h1,h2,h3,h4,p,strong,b,label,td,th),
+html[data-theme='dark'] .approvedTopbar :is(b,strong,span),
+html[data-theme='dark'] .approvedSidebar a,
+html[data-theme='dark'] .approvedKpis :is(span,strong),
+html[data-theme='dark'] .approvedAlertRows b,
+html[data-theme='dark'] .summaryRows b,
+html[data-theme='dark'] .barRow :is(span,b){
+  color:#ffffff!important;
+  opacity:1!important;
+}
+
+html[data-theme='dark'] .commandDashboard :is(small,time),
+html[data-theme='dark'] .approvedKpis small,
+html[data-theme='dark'] .approvedAlertRows span,
+html[data-theme='dark'] .summaryRows span,
+html[data-theme='dark'] .commandCardHead small,
+html[data-theme='dark'] .commandSectionIntro small,
+html[data-theme='dark'] .approvedUser small,
+html[data-theme='dark'] .darkOpsDate span{
+  color:var(--hc-dark-muted)!important;
+  opacity:1!important;
+}
+
+html[data-theme='dark'] .commandSectionIntro>div>span,
+html[data-theme='dark'] .commandCardHead>div>span,
+html[data-theme='dark'] .approvedCardHead a,
+html[data-theme='dark'] .approvedWideLink{
+  color:#80beff!important;
+  opacity:1!important;
+}
+
+html[data-theme='dark'] input,
+html[data-theme='dark'] select,
+html[data-theme='dark'] textarea{
+  background:#183650!important;
+  color:#ffffff!important;
+  border-color:#5c7e9e!important;
+}
+html[data-theme='dark'] input::placeholder,
+html[data-theme='dark'] textarea::placeholder{
+  color:#d3dfeb!important;
+  opacity:1!important;
+}
+
+html[data-theme='dark'] .approvedCard th{
+  background:var(--hc-dark-panel-2)!important;
+  color:#ffffff!important;
+}
+html[data-theme='dark'] .approvedWideLink{
+  background:#183650!important;
+  border-color:#587da0!important;
+}
+html[data-theme='dark'] .demoDataNotice{
+  background:#183650!important;
+  border:1px solid #6687a6!important;
+}
+html[data-theme='dark'] .demoDataNotice strong{color:#ffffff!important}
+html[data-theme='dark'] .demoDataNotice span{color:#d3dfeb!important}
+
+/* Hero must remain a high-contrast government navy panel in BOTH modes */
+html[data-theme] .commandHero{
+  background:linear-gradient(125deg,#062a52 0%,#0a477f 58%,#0b63a9 100%)!important;
+  border:1px solid #2b82cf!important;
+  color:#ffffff!important;
+  box-shadow:0 10px 26px rgba(7,31,58,.18)!important;
+}
+html[data-theme] .commandHero :is(h1,h2,h3,p,span,small,strong,b,a){
+  color:#ffffff!important;
+  opacity:1!important;
+}
+html[data-theme] .commandHero .commandEyebrow{color:#c6e4ff!important}
+html[data-theme] .commandHero .commandStatusPanel{
+  background:#092a4e!important;
+  border:1px solid rgba(255,255,255,.45)!important;
+  color:#ffffff!important;
+}
+html[data-theme] .commandHero .commandStatusPanel *{
+  color:#ffffff!important;
+  opacity:1!important;
+}
+html[data-theme] .commandHero .commandClock,
+html[data-theme] .commandHero .commandMeta{
+  border-color:rgba(255,255,255,.42)!important;
+}
+html[data-theme] .commandHero .commandPrimary{
+  background:#ffffff!important;
+  color:#063a70!important;
+}
+html[data-theme] .commandHero .commandPrimary *{color:#063a70!important}
+html[data-theme] .commandHero .commandSecondary{
+  background:#154f82!important;
+  border-color:#a9d4fa!important;
+  color:#ffffff!important;
+}
+
+/* Preserve semantic status colors */
+.commandDashboard .green{color:#0a9f63!important}
+html[data-theme='dark'] .commandDashboard .green{color:#51e59b!important}
+.commandDashboard .redText,
+.commandDashboard .danger strong,
+.commandDashboard .danger small{color:#d92f3c!important}
+html[data-theme='dark'] .commandDashboard .redText,
+html[data-theme='dark'] .commandDashboard .danger strong,
+html[data-theme='dark'] .commandDashboard .danger small{color:#ff727c!important}
+
+/* Compact language/theme controls: same visual size as settings */
+.headerSwitches{gap:7px!important}
+.themeSwitcher,
+.languageSwitcher{
+  width:36px!important;
+  min-width:36px!important;
+  height:36px!important;
+  padding:0!important;
+  border-radius:8px!important;
+  font-size:12px!important;
+  font-weight:800!important;
+  line-height:1!important;
+}
+
+/* Desktop legibility */
+@media(min-width:761px){
+  .commandHero h1{font-size:36px!important}
+  .commandHero p{font-size:16px!important;line-height:1.9!important}
+  .commandStatusTop{font-size:15px!important}
+  .commandClock b{font-size:38px!important}
+  .commandClock span{font-size:14px!important}
+  .commandMeta span{font-size:13px!important}
+  .commandMeta b{font-size:18px!important}
+  .commandSectionIntro h2{font-size:28px!important}
+  .commandSectionIntro small{font-size:15px!important}
+  .approvedKpis span{font-size:17px!important}
+  .approvedKpis strong{font-size:40px!important}
+  .approvedKpis small{font-size:15px!important}
+  .approvedCardHead h2{font-size:19px!important}
+  .approvedCardHead small{font-size:14px!important}
+  .approvedAlertRows b,.summaryRows b{font-size:16px!important}
+  .approvedAlertRows span,.approvedAlertRows time,.summaryRows span{font-size:14px!important}
+  .approvedCard th,.approvedCard td{font-size:14px!important}
+}
