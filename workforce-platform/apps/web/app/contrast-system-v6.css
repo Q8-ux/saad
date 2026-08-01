@@ -1,0 +1,485 @@
+/* Complete bilingual contrast system — loaded last.
+   Covers cards, chips, badges, buttons, notices, forms and status panels
+   across dashboard, attendance, transfers, emergency, notifications,
+   profile and AI tools in both Arabic and English directions. */
+
+:root{
+  --c6-light-page:#f4f7fb;
+  --c6-light-surface:#ffffff;
+  --c6-light-surface-alt:#eef3f8;
+  --c6-light-text:#081b33;
+  --c6-light-muted:#344b64;
+  --c6-light-border:#aebfd1;
+  --c6-dark-page:#0b1f33;
+  --c6-dark-surface:#132b44;
+  --c6-dark-surface-alt:#1a3a57;
+  --c6-dark-text:#ffffff;
+  --c6-dark-muted:#d4e1ed;
+  --c6-dark-border:#53789a;
+  --c6-blue:#0d63d8;
+  --c6-blue-bright:#4da3ff;
+  --c6-green:#087a4d;
+  --c6-red:#a51624;
+  --c6-amber:#7a4700;
+}
+
+/* Remove inherited fading and low-contrast filters from legacy pages. */
+.appMain,
+.appMain *,
+.approvedContent,
+.approvedContent *{
+  opacity:1!important;
+  filter:none!important;
+  text-shadow:none!important;
+}
+
+/* Header: duplicate date/time removed from markup; use two clear columns. */
+@media(min-width:761px){
+  .approvedTopbar{
+    grid-template-columns:auto minmax(420px,1fr)!important;
+  }
+  .darkOpsHeaderCenter{
+    width:100%!important;
+    max-width:none!important;
+  }
+}
+
+/* Shared high-contrast page heroes in both themes. */
+html[data-theme] .appMain :is(.pageHero,.innerHero,.sahelHero){
+  background:linear-gradient(135deg,#062a52 0%,#0a477f 62%,#0b63a9 100%)!important;
+  border:1px solid #2e83ce!important;
+  color:#ffffff!important;
+  box-shadow:0 10px 26px rgba(7,31,58,.16)!important;
+}
+html[data-theme] .appMain :is(.pageHero,.innerHero,.sahelHero) :is(h1,h2,h3,p,b,strong,span,small,a){
+  color:#ffffff!important;
+  opacity:1!important;
+}
+html[data-theme] .appMain :is(.pageHero,.innerHero,.sahelHero) .eyebrow{
+  color:#cce7ff!important;
+}
+html[data-theme] .appMain .heroBack{
+  background:#154f82!important;
+  border:1px solid #b8dcff!important;
+  color:#ffffff!important;
+}
+html[data-theme] .appMain .heroStatus{
+  background:#092a4e!important;
+  border:1px solid rgba(255,255,255,.48)!important;
+  color:#ffffff!important;
+}
+html[data-theme] .appMain .locationPill.ready{
+  background:#0b633f!important;
+  border-color:#79e5ae!important;
+  color:#ffffff!important;
+}
+html[data-theme] .appMain .locationPill.pending{
+  background:#83510a!important;
+  border-color:#ffd279!important;
+  color:#ffffff!important;
+}
+
+/* ---------------- LIGHT MODE ---------------- */
+html[data-theme='light'] body,
+html[data-theme='light'] .appMain{
+  background:var(--c6-light-page)!important;
+  color:var(--c6-light-text)!important;
+}
+
+html[data-theme='light'] .appMain :is(
+  .card,
+  .quickAction,
+  .statCard,
+  .serviceCard,
+  .permitCard,
+  .incident,
+  .operationSummary>div,
+  .mini,
+  .locationBox,
+  .rulesBox,
+  .aiInlinePanel,
+  .aiResultBox,
+  .aiResult,
+  .decisionBox
+){
+  background:var(--c6-light-surface)!important;
+  border-color:var(--c6-light-border)!important;
+  color:var(--c6-light-text)!important;
+}
+
+html[data-theme='light'] .appMain :is(
+  h1,h2,h3,h4,h5,h6,p,li,label,strong,b,td,th,
+  .metric,.smallMetric,.row span,.row b,.permitMeta
+){
+  color:var(--c6-light-text)!important;
+}
+
+html[data-theme='light'] .appMain :is(
+  .muted,small,.emptyState,.emptyState small,
+  .quickAction small,.operationSummary small,
+  .incident .muted,.permitCard .muted
+){
+  color:var(--c6-light-muted)!important;
+  opacity:1!important;
+}
+
+html[data-theme='light'] .appMain :is(input,select,textarea){
+  background:#ffffff!important;
+  color:var(--c6-light-text)!important;
+  border:1px solid #91a7bd!important;
+  caret-color:var(--c6-light-text)!important;
+}
+html[data-theme='light'] .appMain :is(input,textarea)::placeholder{
+  color:#405973!important;
+  opacity:1!important;
+}
+html[data-theme='light'] .appMain option{
+  background:#ffffff!important;
+  color:var(--c6-light-text)!important;
+}
+
+/* Primary buttons always use white text on blue. */
+html[data-theme='light'] .appMain button,
+html[data-theme='light'] .appMain .linkButton,
+html[data-theme='light'] .appMain .primaryOperation{
+  background:var(--c6-blue)!important;
+  color:#ffffff!important;
+  border-color:var(--c6-blue)!important;
+}
+html[data-theme='light'] .appMain button :is(span,b,strong,small),
+html[data-theme='light'] .appMain .linkButton :is(span,b,strong,small){
+  color:inherit!important;
+}
+html[data-theme='light'] .appMain .secondaryButton{
+  background:#ffffff!important;
+  color:var(--c6-light-text)!important;
+  border:1px solid #8299b1!important;
+}
+
+/* Segmented controls: inactive = dark text on pale surface; active = white on blue. */
+html[data-theme='light'] .appMain .segmentedControl{
+  background:#e7edf4!important;
+  border:1px solid #b2c1d0!important;
+}
+html[data-theme='light'] .appMain .segmentedControl button{
+  background:transparent!important;
+  border-color:transparent!important;
+  color:#263f59!important;
+}
+html[data-theme='light'] .appMain .segmentedControl button.active{
+  background:var(--c6-blue)!important;
+  color:#ffffff!important;
+  box-shadow:0 3px 10px rgba(13,99,216,.22)!important;
+}
+
+/* AI tool cards: no blue-on-blue text. */
+html[data-theme='light'] .appMain .aiToolCard{
+  background:#ffffff!important;
+  border:1px solid #93aac0!important;
+  color:var(--c6-light-text)!important;
+  text-align:start!important;
+}
+html[data-theme='light'] .appMain .aiToolCard :is(b,small){
+  color:inherit!important;
+}
+html[data-theme='light'] .appMain .aiToolCard small{
+  color:var(--c6-light-muted)!important;
+}
+html[data-theme='light'] .appMain .aiToolCard.activeAiTool{
+  background:var(--c6-blue)!important;
+  border-color:var(--c6-blue)!important;
+  color:#ffffff!important;
+}
+html[data-theme='light'] .appMain .aiToolCard.activeAiTool :is(b,small){
+  color:#ffffff!important;
+}
+
+/* Notices and neutral information panels. */
+html[data-theme='light'] .appMain .notice{
+  background:#e5f1ff!important;
+  border:1px solid #76a6db!important;
+  color:#0b315c!important;
+}
+html[data-theme='light'] .appMain .notice *{color:#0b315c!important}
+html[data-theme='light'] .appMain :is(.locationBox,.rulesBox,.mini,.aiResultBox){
+  background:#f1f5f9!important;
+}
+html[data-theme='light'] .appMain .aiInlinePanel{
+  background:#eef6ff!important;
+  border-color:#7ca8d8!important;
+}
+html[data-theme='light'] .appMain .serviceIcon,
+html[data-theme='light'] .appMain .quickIcon{
+  background:#e3efff!important;
+  color:#075fc8!important;
+}
+
+/* Accessible status badges and chips. */
+html[data-theme='light'] .appMain .badgeGray{
+  background:#dbe4ee!important;
+  color:#172b42!important;
+  border:1px solid #9cafc1!important;
+}
+html[data-theme='light'] .appMain .badgeRed{
+  background:#ffdadd!important;
+  color:#7d101b!important;
+  border:1px solid #e78e96!important;
+}
+html[data-theme='light'] .appMain .successBox{
+  background:#d9f6e6!important;
+  color:#075b38!important;
+  border-color:#65be8d!important;
+}
+html[data-theme='light'] .appMain .warningBox{
+  background:#fff0c9!important;
+  color:#6b3d00!important;
+  border-color:#d5a33e!important;
+}
+html[data-theme='light'] .appMain .dangerBox{
+  background:#ffdadd!important;
+  color:#76121c!important;
+  border-color:#df7f88!important;
+}
+html[data-theme='light'] .appMain :is(.successBox,.warningBox,.dangerBox) *{
+  color:inherit!important;
+}
+
+html[data-theme='light'] .appMain .emptyState p{
+  color:var(--c6-light-text)!important;
+}
+html[data-theme='light'] .appMain .emptyState span{
+  color:#526c86!important;
+}
+html[data-theme='light'] .appMain .permitMeta{
+  color:#075fc8!important;
+}
+html[data-theme='light'] .appMain table{
+  background:#ffffff!important;
+}
+html[data-theme='light'] .appMain th{
+  background:#eaf0f6!important;
+  color:#1e3852!important;
+}
+html[data-theme='light'] .appMain td{
+  color:var(--c6-light-text)!important;
+}
+html[data-theme='light'] .mobileNav{
+  background:#ffffff!important;
+  border-color:#aebfd1!important;
+}
+html[data-theme='light'] .mobileNav a{
+  color:#314b65!important;
+}
+
+/* ---------------- DARK MODE ---------------- */
+html[data-theme='dark'] body,
+html[data-theme='dark'] .appMain{
+  background:var(--c6-dark-page)!important;
+  color:var(--c6-dark-text)!important;
+}
+
+html[data-theme='dark'] .appMain :is(
+  .card,
+  .quickAction,
+  .statCard,
+  .serviceCard,
+  .permitCard,
+  .incident,
+  .operationSummary>div,
+  .mini,
+  .locationBox,
+  .rulesBox,
+  .aiInlinePanel,
+  .aiResultBox,
+  .aiResult,
+  .decisionBox
+){
+  background:var(--c6-dark-surface)!important;
+  border-color:var(--c6-dark-border)!important;
+  color:var(--c6-dark-text)!important;
+}
+
+html[data-theme='dark'] .appMain :is(
+  h1,h2,h3,h4,h5,h6,p,li,label,strong,b,td,th,
+  .metric,.smallMetric,.row span,.row b,.permitMeta
+){
+  color:#ffffff!important;
+}
+
+html[data-theme='dark'] .appMain :is(
+  .muted,small,.emptyState,.emptyState small,
+  .quickAction small,.operationSummary small,
+  .incident .muted,.permitCard .muted
+){
+  color:var(--c6-dark-muted)!important;
+  opacity:1!important;
+}
+
+html[data-theme='dark'] .appMain :is(input,select,textarea){
+  background:var(--c6-dark-surface-alt)!important;
+  color:#ffffff!important;
+  border:1px solid #6d8daa!important;
+  caret-color:#ffffff!important;
+}
+html[data-theme='dark'] .appMain :is(input,textarea)::placeholder{
+  color:#d1dfeb!important;
+  opacity:1!important;
+}
+html[data-theme='dark'] .appMain option{
+  background:#17334e!important;
+  color:#ffffff!important;
+}
+
+html[data-theme='dark'] .appMain button,
+html[data-theme='dark'] .appMain .linkButton,
+html[data-theme='dark'] .appMain .primaryOperation{
+  background:#176fd1!important;
+  color:#ffffff!important;
+  border-color:#66adf1!important;
+}
+html[data-theme='dark'] .appMain button :is(span,b,strong,small),
+html[data-theme='dark'] .appMain .linkButton :is(span,b,strong,small){
+  color:inherit!important;
+}
+html[data-theme='dark'] .appMain .secondaryButton{
+  background:#254965!important;
+  color:#ffffff!important;
+  border:1px solid #7898b4!important;
+}
+
+html[data-theme='dark'] .appMain .segmentedControl{
+  background:#0d2238!important;
+  border:1px solid #53789a!important;
+}
+html[data-theme='dark'] .appMain .segmentedControl button{
+  background:transparent!important;
+  border-color:transparent!important;
+  color:#dce8f3!important;
+}
+html[data-theme='dark'] .appMain .segmentedControl button.active{
+  background:#2581df!important;
+  color:#ffffff!important;
+  box-shadow:0 3px 12px rgba(37,129,223,.28)!important;
+}
+
+html[data-theme='dark'] .appMain .aiToolCard{
+  background:var(--c6-dark-surface)!important;
+  border:1px solid #6485a2!important;
+  color:#ffffff!important;
+  text-align:start!important;
+}
+html[data-theme='dark'] .appMain .aiToolCard :is(b,small){
+  color:inherit!important;
+}
+html[data-theme='dark'] .appMain .aiToolCard small{
+  color:var(--c6-dark-muted)!important;
+}
+html[data-theme='dark'] .appMain .aiToolCard.activeAiTool{
+  background:#176fd1!important;
+  border-color:#7bb9f5!important;
+  color:#ffffff!important;
+}
+html[data-theme='dark'] .appMain .aiToolCard.activeAiTool :is(b,small){
+  color:#ffffff!important;
+}
+
+html[data-theme='dark'] .appMain .notice{
+  background:#183e61!important;
+  border:1px solid #6e9bc2!important;
+  color:#ffffff!important;
+}
+html[data-theme='dark'] .appMain .notice *{color:#ffffff!important}
+html[data-theme='dark'] .appMain :is(.locationBox,.rulesBox,.mini,.aiResultBox){
+  background:#183650!important;
+}
+html[data-theme='dark'] .appMain .aiInlinePanel{
+  background:#163b5e!important;
+  border-color:#6796bd!important;
+}
+html[data-theme='dark'] .appMain .serviceIcon,
+html[data-theme='dark'] .appMain .quickIcon{
+  background:#254d70!important;
+  color:#9ed0ff!important;
+}
+
+html[data-theme='dark'] .appMain .badgeGray{
+  background:#39536d!important;
+  color:#ffffff!important;
+  border:1px solid #86a3bd!important;
+}
+html[data-theme='dark'] .appMain .badgeRed{
+  background:#7f1f2a!important;
+  color:#ffffff!important;
+  border:1px solid #e37882!important;
+}
+html[data-theme='dark'] .appMain .successBox{
+  background:#145139!important;
+  color:#ffffff!important;
+  border-color:#55bd89!important;
+}
+html[data-theme='dark'] .appMain .warningBox{
+  background:#66440d!important;
+  color:#ffffff!important;
+  border-color:#d5aa56!important;
+}
+html[data-theme='dark'] .appMain .dangerBox{
+  background:#70232c!important;
+  color:#ffffff!important;
+  border-color:#dc7c85!important;
+}
+html[data-theme='dark'] .appMain :is(.successBox,.warningBox,.dangerBox) *{
+  color:#ffffff!important;
+}
+
+html[data-theme='dark'] .appMain .emptyState p{
+  color:#ffffff!important;
+}
+html[data-theme='dark'] .appMain .emptyState span{
+  color:#a9c8e4!important;
+}
+html[data-theme='dark'] .appMain .permitMeta{
+  color:#8bc5ff!important;
+}
+html[data-theme='dark'] .appMain table{
+  background:var(--c6-dark-surface)!important;
+}
+html[data-theme='dark'] .appMain th{
+  background:#1a3a57!important;
+  color:#ffffff!important;
+}
+html[data-theme='dark'] .appMain td{
+  color:#ffffff!important;
+}
+html[data-theme='dark'] .mobileNav{
+  background:#10283f!important;
+  border-color:#53789a!important;
+}
+html[data-theme='dark'] .mobileNav a{
+  color:#e1edf7!important;
+}
+
+/* Semantic emphasis remains readable in both themes. */
+html[data-theme='light'] .appMain .green{color:#087a4d!important}
+html[data-theme='dark'] .appMain .green{color:#66e3a6!important}
+html[data-theme='light'] .appMain .redText{color:#a51624!important}
+html[data-theme='dark'] .appMain .redText{color:#ff8a94!important}
+
+/* Direction-independent text alignment for bilingual cards. */
+html[dir='rtl'] .appMain :is(.aiToolCard,.card,.incident,.permitCard){text-align:right}
+html[dir='ltr'] .appMain :is(.aiToolCard,.card,.incident,.permitCard){text-align:left}
+
+/* Desktop legibility across all internal pages. */
+@media(min-width:761px){
+  .appMain{font-size:17px!important}
+  .appMain :is(.pageHero,.innerHero) h1{font-size:34px!important}
+  .appMain :is(.pageHero,.innerHero) p{font-size:16px!important}
+  .appMain .card h2{font-size:22px!important}
+  .appMain .card h3{font-size:19px!important}
+  .appMain label{font-size:16px!important;font-weight:700!important}
+  .appMain :is(input,select,textarea,button){font-size:16px!important}
+  .appMain .aiToolCard b{font-size:17px!important}
+  .appMain .aiToolCard small{font-size:14px!important;line-height:1.65!important}
+  .appMain .badge{font-size:14px!important}
+  .appMain .notice{font-size:15px!important;line-height:1.65!important}
+  .appMain .row{font-size:15px!important}
+}
