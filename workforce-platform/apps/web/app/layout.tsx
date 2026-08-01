@@ -7,6 +7,7 @@ import './ui-enhancements.css';
 import './approved-dashboard.css';
 import './google-map.css';
 import './command-center.css';
+import './theme-mode.css';
 
 export const metadata: Metadata = {
   title: 'منصة نطاق العمل | Work Scope Platform',
@@ -15,7 +16,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="ar" dir="rtl">
+    <html lang="ar" dir="rtl" data-theme="dark">
       <body>
         <LanguageProvider>
           <EmojiSanitizer />
