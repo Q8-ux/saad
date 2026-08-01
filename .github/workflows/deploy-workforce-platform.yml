@@ -14,15 +14,18 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages
+  group: workforce-pages-production
   cancel-in-progress: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout current main branch
+      - name: Checkout latest main
         uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
@@ -32,23 +35,24 @@ jobs:
         with:
           node-version: 22
 
-      - name: Clean previous output
+      - name: Remove every previous build artifact
         working-directory: workforce-platform/apps/web
-        run: rm -rf .next out
+        run: rm -rf .next out node_modules
 
-      - name: Install dependencies
+      - name: Install clean dependencies
         working-directory: workforce-platform/apps/web
         run: npm install
 
-      - name: Build current workforce interface
+      - name: Build the new operations center interface
         working-directory: workforce-platform/apps/web
         env:
           GITHUB_PAGES: 'true'
           NEXT_PUBLIC_API_URL: 'https://workforce-platform-api.onrender.com/api'
           NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+          NEXT_PUBLIC_INTERFACE_VERSION: 'operations-center-2026-08-01'
         run: npm run build
 
-      - name: Verify current approved interface
+      - name: Verify only the new interface is present
         run: |
           test -f workforce-platform/apps/web/out/index.html
           test -f workforce-platform/apps/web/out/dashboard/index.html
@@ -58,13 +62,16 @@ jobs:
           test -f workforce-platform/apps/web/out/ai-tools/index.html
           test -f workforce-platform/apps/web/out/notifications/index.html
           test -f workforce-platform/apps/web/out/profile/index.html
+          grep -R "operationsHero" workforce-platform/apps/web/out/_next/static >/dev/null
           grep -R "approvedDashboard" workforce-platform/apps/web/out/_next/static >/dev/null
-          grep -R "GoogleInfrastructureMap" workforce-platform/apps/web/.next/server >/dev/null || true
+          ! grep -R "enterpriseShell" workforce-platform/apps/web/out/_next/static >/dev/null
 
-      - name: Disable Jekyll processing
-        run: touch workforce-platform/apps/web/out/.nojekyll
+      - name: Add deployment version and disable Jekyll
+        run: |
+          echo 'operations-center-2026-08-01' > workforce-platform/apps/web/out/interface-version.txt
+          touch workforce-platform/apps/web/out/.nojekyll
 
-      - name: Upload current platform only
+      - name: Upload new interface only
         uses: actions/upload-pages-artifact@v3
         with:
           path: workforce-platform/apps/web/out
@@ -76,6 +83,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     steps:
-      - name: Replace previous GitHub Pages site
+      - name: Replace the entire previous site
         id: deployment
         uses: actions/deploy-pages@v4
