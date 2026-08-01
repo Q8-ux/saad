@@ -43,16 +43,16 @@ jobs:
         working-directory: workforce-platform/apps/web
         run: npm install
 
-      - name: Build the new operations center interface
+      - name: Build current government dashboard
         working-directory: workforce-platform/apps/web
         env:
           GITHUB_PAGES: 'true'
           NEXT_PUBLIC_API_URL: 'https://workforce-platform-api.onrender.com/api'
           NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
-          NEXT_PUBLIC_INTERFACE_VERSION: 'operations-center-2026-08-01'
+          NEXT_PUBLIC_INTERFACE_VERSION: 'government-dashboard-live-clock-v2'
         run: npm run build
 
-      - name: Verify only the new interface is present
+      - name: Verify the current dashboard build
         run: |
           test -f workforce-platform/apps/web/out/index.html
           test -f workforce-platform/apps/web/out/dashboard/index.html
@@ -62,16 +62,16 @@ jobs:
           test -f workforce-platform/apps/web/out/ai-tools/index.html
           test -f workforce-platform/apps/web/out/notifications/index.html
           test -f workforce-platform/apps/web/out/profile/index.html
-          grep -R "operationsHero" workforce-platform/apps/web/out/_next/static >/dev/null
+          grep -R "government-dashboard-live-clock-v2" workforce-platform/apps/web/out/_next/static >/dev/null
+          grep -R "liveClock" workforce-platform/apps/web/out/_next/static >/dev/null
           grep -R "approvedDashboard" workforce-platform/apps/web/out/_next/static >/dev/null
-          ! grep -R "enterpriseShell" workforce-platform/apps/web/out/_next/static >/dev/null
 
       - name: Add deployment version and disable Jekyll
         run: |
-          echo 'operations-center-2026-08-01' > workforce-platform/apps/web/out/interface-version.txt
+          echo 'government-dashboard-live-clock-v2' > workforce-platform/apps/web/out/interface-version.txt
           touch workforce-platform/apps/web/out/.nojekyll
 
-      - name: Upload new interface only
+      - name: Upload current interface only
         uses: actions/upload-pages-artifact@v3
         with:
           path: workforce-platform/apps/web/out
