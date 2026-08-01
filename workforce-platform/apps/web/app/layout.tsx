@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Cairo } from 'next/font/google';
 import { LanguageProvider } from './components/LanguageProvider';
+import LegacyShell from './components/LegacyShell';
 import './globals.css';
 import './ui-enhancements.css';
 
@@ -20,7 +21,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="ar" dir="rtl" className={cairo.variable}>
       <body>
-        <LanguageProvider>{children}</LanguageProvider>
+        <LanguageProvider><LegacyShell>{children}</LegacyShell></LanguageProvider>
       </body>
     </html>
   );
