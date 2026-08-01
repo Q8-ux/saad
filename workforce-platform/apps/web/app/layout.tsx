@@ -1,16 +1,11 @@
 import type { Metadata } from 'next';
 import { Cairo } from 'next/font/google';
 import { LanguageProvider } from './components/LanguageProvider';
-import LegacyShell from './components/LegacyShell';
+import EnterpriseShell from './components/EnterpriseShell';
 import './globals.css';
 import './ui-enhancements.css';
 
-const cairo = Cairo({
-  subsets: ['arabic', 'latin'],
-  variable: '--font-cairo',
-  display: 'swap',
-  weight: ['400', '500', '600', '700', '800'],
-});
+const cairo = Cairo({ subsets: ['arabic', 'latin'], variable: '--font-cairo', display: 'swap', weight: ['400', '500', '600', '700', '800'] });
 
 export const metadata: Metadata = {
   title: 'منصة نطاق العمل | Work Scope Platform',
@@ -21,7 +16,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="ar" dir="rtl" className={cairo.variable}>
       <body>
-        <LanguageProvider><LegacyShell>{children}</LegacyShell></LanguageProvider>
+        <LanguageProvider><EnterpriseShell>{children}</EnterpriseShell></LanguageProvider>
       </body>
     </html>
   );
