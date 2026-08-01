@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Cairo } from 'next/font/google';
 import { LanguageProvider } from './components/LanguageProvider';
 import './globals.css';
+import './ui-enhancements.css';
 
 const cairo = Cairo({
   subsets: ['arabic', 'latin'],
