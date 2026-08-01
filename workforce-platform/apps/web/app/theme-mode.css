@@ -3,10 +3,10 @@ html[data-theme='dark']{
   --theme-bg:#071525;
   --theme-panel:#0b1e33;
   --theme-panel-2:#102842;
-  --theme-line:#1f456b;
-  --theme-text:#f4f8fc;
-  --theme-muted:#9fb2c7;
-  --theme-accent:#2f8cff;
+  --theme-line:#2b5b86;
+  --theme-text:#ffffff;
+  --theme-muted:#d7e2ee;
+  --theme-accent:#4da3ff;
   --theme-accent-soft:#123e70;
   --theme-sidebar:#081a2e;
   --theme-header:#071626;
@@ -16,9 +16,9 @@ html[data-theme='light']{
   --theme-bg:#f4f7fb;
   --theme-panel:#ffffff;
   --theme-panel-2:#f8fafc;
-  --theme-line:#d7e0ea;
-  --theme-text:#142c49;
-  --theme-muted:#6e7d8f;
+  --theme-line:#cfd9e5;
+  --theme-text:#10233c;
+  --theme-muted:#516276;
   --theme-accent:#176fd1;
   --theme-accent-soft:#e8f2ff;
   --theme-sidebar:#ffffff;
@@ -148,6 +148,78 @@ html[data-theme='light'] .approvedWideLink{
 
 html[data-theme='light'] .googleInfrastructureMap{
   background:#eef3f8!important;
+}
+
+/* Desktop readability */
+@media(min-width:761px){
+  html{font-size:17px}
+  .darkOpsTitle,.approvedMobileBrand strong{font-size:2rem!important;font-weight:800!important}
+  .darkOpsDate,.approvedUser,.approvedNav a,.darkOpsSearch input{font-size:1rem!important}
+  .approvedNav a{padding:14px 16px!important;gap:13px!important}
+  .approvedKpis span{font-size:1rem!important;font-weight:700!important}
+  .approvedKpis strong{font-size:2.35rem!important;line-height:1.05!important}
+  .approvedKpis small{font-size:.9rem!important;line-height:1.55!important}
+  .approvedCardHead{min-height:58px!important;height:auto!important;padding:10px 18px!important}
+  .approvedCardHead h2{font-size:1.15rem!important;font-weight:800!important}
+  .approvedCardHead a,.approvedWideLink{font-size:.95rem!important}
+  .approvedAlertRows b,.summaryRows b{font-size:1rem!important}
+  .approvedAlertRows span,.approvedAlertRows time,.summaryRows span{font-size:.9rem!important;line-height:1.6!important}
+  .approvedCard th{font-size:.95rem!important;font-weight:800!important}
+  .approvedCard td{font-size:.95rem!important;line-height:1.55!important}
+  .barRow,.barRow b{font-size:.95rem!important}
+  .themeSwitcher,.languageSwitcher{font-size:1rem!important;min-width:46px;height:42px!important}
+}
+
+/* Strong contrast for dark mode */
+html[data-theme='dark'] body,
+html[data-theme='dark'] .approvedContent,
+html[data-theme='dark'] .approvedCard,
+html[data-theme='dark'] .approvedCard *:not(.green):not(.redText):not(.running):not(.done),
+html[data-theme='dark'] .commandHero,
+html[data-theme='dark'] .commandHero *:not(.green):not(.redText),
+html[data-theme='dark'] .approvedKpis article,
+html[data-theme='dark'] .approvedKpis article *:not(.green),
+html[data-theme='dark'] .demoDataNotice,
+html[data-theme='dark'] .demoDataNotice *{
+  color:#fff!important;
+}
+
+html[data-theme='dark'] .approvedKpis small,
+html[data-theme='dark'] .approvedAlertRows span,
+html[data-theme='dark'] .approvedAlertRows time,
+html[data-theme='dark'] .summaryRows span,
+html[data-theme='dark'] .approvedUser small,
+html[data-theme='dark'] .darkOpsDate span,
+html[data-theme='dark'] .darkOpsSearch input::placeholder,
+html[data-theme='dark'] .commandHero p,
+html[data-theme='dark'] .commandMeta span{
+  color:#d7e2ee!important;
+  opacity:1!important;
+}
+
+html[data-theme='dark'] .approvedCard,
+html[data-theme='dark'] .approvedKpis article,
+html[data-theme='dark'] .commandHero,
+html[data-theme='dark'] .commandStat,
+html[data-theme='dark'] .darkOpsSearch{
+  border-color:#2b5b86!important;
+}
+
+html[data-theme='dark'] .approvedCard th{
+  color:#eaf2fa!important;
+  background:#102842!important;
+}
+
+html[data-theme='dark'] .approvedWideLink{
+  color:#7db8ff!important;
+  border-color:#3c6f9e!important;
+  background:#0d2239!important;
+}
+
+html[data-theme='dark'] .darkOpsSearch input,
+html[data-theme='dark'] .languageSwitcher,
+html[data-theme='dark'] .themeSwitcher{
+  color:#fff!important;
 }
 
 @media(max-width:760px){
