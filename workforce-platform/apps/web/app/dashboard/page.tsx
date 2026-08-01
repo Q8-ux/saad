@@ -2,25 +2,26 @@
 
 import Link from 'next/link';
 import AppIcon from '../components/AppIcon';
+import GoogleInfrastructureMap from '../components/GoogleInfrastructureMap';
 import { useLanguage } from '../components/LanguageProvider';
 
 export default function Dashboard(){
   const {language}=useLanguage();
   const t=(ar:string,en:string)=>language==='ar'?ar:en;
   const alerts=[
-    [t('مستودع المنطقة الشمالية','Northern Area Warehouse'),t('تجاوز درجة الحرارة الحد المسموح','Temperature exceeded the allowed limit'),'10:24'],
-    [t('مبنى الإدارة الرئيسي','Main Administration Building'),t('عطل في نظام التحكم بالدخول','Access control system fault'),'09:58'],
-    [t('مستودع المنطقة الغربية','Western Area Warehouse'),t('تسريب محتمل في نظام المياه','Potential water system leak'),'09:15'],
-    [t('موقع المشروع رقم 3','Project Site 3'),t('انتهاء صلاحية مطفأة حريق','Fire extinguisher expired'),'08:47'],
+    [t('محطة الصبية','Subiya Power Station'),t('تنبيه تشغيلي تجريبي يحتاج مراجعة','Demo operational alert requires review'),'10:24'],
+    [t('مركز التحكم الوطني','National Control Center'),t('تحديث حالة شبكة التحكم','Control network status updated'),'09:58'],
+    [t('محطة الدوحة الغربية','Doha West Power Station'),t('بلاغ صيانة تجريبي','Demo maintenance notice'),'09:15'],
+    [t('محولات منطقة السرة','Surra Area Substations'),t('فحص دوري للمحولات','Scheduled substation inspection'),'08:47'],
   ];
   const transfers=[
-    [t('موقع المشروع 1','Project Site 1'),t('مستودع رئيسي','Main Warehouse'),t('أحمد محمد','Ahmed Mohammed'),'10:30'],
-    [t('المستودع الغربي','West Warehouse'),t('موقع المشروع 2','Project Site 2'),t('محمد علي','Mohammed Ali'),'10:15'],
-    [t('مبنى الإدارة','Administration Building'),t('موقع المشروع 3','Project Site 3'),t('يوسف خالد','Yousef Khaled'),'09:50'],
-    [t('المستودع الشمالي','North Warehouse'),t('مبنى الإدارة','Administration Building'),t('خالد ناصر','Khaled Nasser'),'09:20'],
+    [t('محطة الصبية','Subiya Station'),t('مركز التحكم الوطني','National Control Center'),t('أحمد محمد','Ahmed Mohammed'),'10:30'],
+    [t('محطة الدوحة الغربية','Doha West Station'),t('الوزارة','Ministry HQ'),t('محمد علي','Mohammed Ali'),'10:15'],
+    [t('مركز التحكم الوطني','National Control Center'),t('محطة الزور الجنوبية','Az Zour South'),t('يوسف خالد','Yousef Khaled'),'09:50'],
+    [t('محولات الجهراء','Jahra Substations'),t('مركز تحكم الجهراء','Jahra Control Center'),t('خالد ناصر','Khaled Nasser'),'09:20'],
   ];
   return <main className="approvedDashboard">
-    <div className="demoDataNotice">{t('بيانات تجريبية للعرض فقط','Demo data for preview only')}</div>
+    <div className="demoDataNotice"><strong>{t('بيانات تجريبية','Demo Data')}</strong><span>{t('هذه البيانات مخصصة لعرض طريقة عمل النظام فقط','These records are for demonstrating system behavior only')}</span></div>
     <h1>{t('لوحة التحكم','Dashboard')}</h1>
 
     <section className="approvedKpis">
@@ -32,11 +33,8 @@ export default function Dashboard(){
 
     <section className="approvedUpperGrid">
       <article className="approvedCard mapCard">
-        <div className="approvedCardHead"><h2>{t('خريطة المنشآت','Facilities Map')}</h2><Link href="/transfers">{t('عرض الكل','View All')}</Link></div>
-        <div className="approvedRealMap">
-          <div className="mapZoom"><button>+</button><button>−</button><button><AppIcon name="location" size={16}/></button></div>
-          <span className="mapPin p1"><AppIcon name="building"/></span><span className="mapPin p2"><AppIcon name="building"/></span><span className="mapPin p3"><AppIcon name="building"/></span><span className="mapPin p4 greenPin"><AppIcon name="building"/></span><span className="mapPin p5"><AppIcon name="building"/></span>
-        </div>
+        <div className="approvedCardHead"><div><h2>{t('خريطة شبكة الكهرباء في الكويت','Kuwait Electricity Network Map')}</h2><small>{t('محطات التوليد والوزارة ومراكز التحكم ومحولات المناطق السكنية','Power stations, ministry, control centers and residential-area substations')}</small></div><a href="https://www.google.com/maps/search/electricity+substation+Kuwait" target="_blank" rel="noreferrer">{t('فتح في Google Maps','Open in Google Maps')}</a></div>
+        <GoogleInfrastructureMap />
       </article>
 
       <article className="approvedCard alertsCard">
@@ -61,14 +59,14 @@ export default function Dashboard(){
 
       <article className="approvedCard attendanceBars" id="facilities">
         <div className="approvedCardHead"><h2>{t('الحضور الحالي حسب المنشأة','Current Attendance by Facility')}</h2><Link href="/attendance-smart">{t('عرض الكل','View All')}</Link></div>
-        {[['92%',t('مبنى الإدارة الرئيسي','Main Administration Building')],['180',t('مستودع المنطقة الشمالية','Northern Area Warehouse')],['156',t('مستودع المنطقة الغربية','Western Area Warehouse')],['132',t('موقع المشروع رقم 1','Project Site 1')],['98',t('موقع المشروع رقم 2','Project Site 2')]].map((r,i)=><div className="barRow" key={i}><span>{r[1]}</span><div><i style={{width:[92,76,66,56,42][i]+'%'}}/></div><b>{r[0]}</b></div>)}
+        {[['92%',t('محطة الصبية','Subiya Power Station')],['180',t('محطة الدوحة الغربية','Doha West Power Station')],['156',t('مركز التحكم الوطني','National Control Center')],['132',t('محطة الزور الجنوبية','Az Zour South Power Station')],['98',t('مبنى الوزارة','Ministry Headquarters')]].map((r,i)=><div className="barRow" key={i}><span>{r[1]}</span><div><i style={{width:[92,76,66,56,42][i]+'%'}}/></div><b>{r[0]}</b></div>)}
         <Link className="approvedWideLink" href="/attendance-smart">{t('عرض تقرير الحضور','View Attendance Report')}</Link>
       </article>
     </section>
 
     <section className="approvedCard recentOps">
       <div className="approvedCardHead"><h2>{t('آخر العمليات','Recent Activity')}</h2><Link href="/attendance-smart">{t('عرض الكل','View All')}</Link></div>
-      <table><thead><tr><th>{t('النوع','Type')}</th><th>{t('الوصف','Description')}</th><th>{t('المستخدم','User')}</th><th>{t('الوقت','Time')}</th><th>{t('التاريخ','Date')}</th></tr></thead><tbody><tr><td>{t('حضور','Attendance')}</td><td>{t('تم تسجيل حضور الموظف أحمد محمد في مبنى الإدارة الرئيسي','Ahmed Mohammed checked in at the main administration building')}</td><td>{t('أحمد محمد','Ahmed Mohammed')}</td><td>08:01</td><td>2026-08-01</td></tr><tr><td>{t('انتقال','Transfer')}</td><td>{t('تم بدء انتقال من مستودع المنطقة الشمالية إلى موقع المشروع 1','A transfer started from the northern warehouse to Project Site 1')}</td><td>{t('محمد علي','Mohammed Ali')}</td><td>08:15</td><td>2026-08-01</td></tr><tr><td className="redText">{t('تنبيه','Alert')}</td><td>{t('تجاوز درجة الحرارة الحد المسموح في مستودع المنطقة الشمالية','Temperature exceeded the allowed limit in the northern warehouse')}</td><td>{t('النظام','System')}</td><td>09:30</td><td>2026-08-01</td></tr><tr><td>{t('انصراف','Check-out')}</td><td>{t('تم تسجيل انصراف الموظفة سارة ناصر من مبنى الإدارة الرئيسي','Sara Nasser checked out from the main administration building')}</td><td>{t('سارة ناصر','Sara Nasser')}</td><td>17:05</td><td>2026-07-31</td></tr></tbody></table>
+      <table><thead><tr><th>{t('النوع','Type')}</th><th>{t('الوصف','Description')}</th><th>{t('المستخدم','User')}</th><th>{t('الوقت','Time')}</th><th>{t('التاريخ','Date')}</th></tr></thead><tbody><tr><td>{t('حضور','Attendance')}</td><td>{t('تم تسجيل حضور أحمد محمد في محطة الصبية','Ahmed Mohammed checked in at Subiya Station')}</td><td>{t('أحمد محمد','Ahmed Mohammed')}</td><td>08:01</td><td>2026-08-01</td></tr><tr><td>{t('انتقال','Transfer')}</td><td>{t('بدأ انتقال من محطة الدوحة الغربية إلى الوزارة','A transfer started from Doha West Station to the ministry')}</td><td>{t('محمد علي','Mohammed Ali')}</td><td>08:15</td><td>2026-08-01</td></tr><tr><td className="redText">{t('تنبيه','Alert')}</td><td>{t('تنبيه تشغيلي تجريبي في محولات منطقة السرة','Demo operational alert at Surra area substations')}</td><td>{t('النظام','System')}</td><td>09:30</td><td>2026-08-01</td></tr><tr><td>{t('انصراف','Check-out')}</td><td>{t('تم تسجيل انصراف سارة ناصر من مركز التحكم الوطني','Sara Nasser checked out from the National Control Center')}</td><td>{t('سارة ناصر','Sara Nasser')}</td><td>17:05</td><td>2026-07-31</td></tr></tbody></table>
     </section>
 
     <nav className="approvedBottomNav"><Link href="/dashboard" className="active"><AppIcon name="home"/><span>{t('الرئيسية','Home')}</span></Link><Link href="/attendance-smart"><AppIcon name="check"/><span>{t('الحضور','Attendance')}</span></Link><Link href="/notifications"><AppIcon name="notification"/><span>{t('التنبيهات','Alerts')}</span></Link><Link href="/transfers"><AppIcon name="transfer"/><span>{t('الانتقالات','Transfers')}</span></Link><Link href="/dashboard#more"><AppIcon name="menu"/><span>{t('المزيد','More')}</span></Link></nav>
