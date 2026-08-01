@@ -1,7 +1,6 @@
-status=build_failed
-version=government-dashboard-full-contrast-v6
-run_id=30707328392
-commit=cf1c2c5bf01f0047ea22deb0928def37da1c5fee
-time=2026-08-01T16:04:50Z
-log_tail_begin
-log_tail_end
+status=deployed
+version=government-dashboard-bilingual-light-audit-v7
+run_id=30707343466
+commit=2defd3e941f7da451716ab5fa39dee058a36c448
+page_url=https://q8-ux.github.io/saad/
+time=2026-08-01T16:05:52Z
