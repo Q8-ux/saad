@@ -50,7 +50,7 @@ jobs:
           GITHUB_PAGES: 'true'
           NEXT_PUBLIC_API_URL: 'https://workforce-platform-api.onrender.com/api'
           NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
-          NEXT_PUBLIC_INTERFACE_VERSION: 'government-dashboard-high-contrast-v4'
+          NEXT_PUBLIC_INTERFACE_VERSION: 'government-dashboard-high-contrast-v5'
         shell: bash
         run: |
           set -o pipefail
@@ -61,7 +61,7 @@ jobs:
           test -f workforce-platform/apps/web/out/index.html
           test -f workforce-platform/apps/web/out/dashboard/index.html
           test -d workforce-platform/apps/web/out/_next
-          echo 'government-dashboard-high-contrast-v4' > workforce-platform/apps/web/out/interface-version.txt
+          echo 'government-dashboard-high-contrast-v5' > workforce-platform/apps/web/out/interface-version.txt
           touch workforce-platform/apps/web/out/.nojekyll
 
       - name: Upload current interface
@@ -75,7 +75,7 @@ jobs:
         run: |
           {
             echo "status=build_failed"
-            echo "version=government-dashboard-high-contrast-v4"
+            echo "version=government-dashboard-high-contrast-v5"
             echo "run_id=${GITHUB_RUN_ID}"
             echo "commit=${GITHUB_SHA}"
             echo "time=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
@@ -111,7 +111,7 @@ jobs:
         run: |
           {
             echo "status=deployed"
-            echo "version=government-dashboard-high-contrast-v4"
+            echo "version=government-dashboard-high-contrast-v5"
             echo "run_id=${GITHUB_RUN_ID}"
             echo "commit=${GITHUB_SHA}"
             echo "page_url=${{ steps.deployment.outputs.page_url }}"
