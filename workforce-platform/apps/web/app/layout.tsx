@@ -8,6 +8,7 @@ import './approved-dashboard.css';
 import './google-map.css';
 import './command-center.css';
 import './theme-mode.css';
+import './contrast-fix-v5.css';
 
 export const metadata: Metadata = {
   title: 'منصة نطاق العمل | Work Scope Platform',
