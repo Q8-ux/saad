@@ -2,11 +2,12 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import AppIcon, { AppIconName } from './AppIcon';
 import { LanguageSwitcher, useLanguage } from './LanguageProvider';
 
 type NavItem = { href: string; icon: AppIconName; ar: string; en: string };
+type ThemeMode = 'dark' | 'light';
 
 const items: NavItem[] = [
   { href: '/dashboard', icon: 'home', ar: 'لوحة التحكم', en: 'Dashboard' },
@@ -21,11 +22,39 @@ const items: NavItem[] = [
   { href: '/profile#settings', icon: 'settings', ar: 'الإعدادات', en: 'Settings' },
 ];
 
+function ThemeIcon({ mode }: { mode: ThemeMode }) {
+  return mode === 'dark' ? (
+    <svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20.5 15.2A8 8 0 0 1 8.8 3.5 8.3 8.3 0 1 0 20.5 15.2Z" />
+    </svg>
+  ) : (
+    <svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
+    </svg>
+  );
+}
+
 export default function EnterpriseShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { language } = useLanguage();
   const [open, setOpen] = useState(false);
+  const [theme, setTheme] = useState<ThemeMode>('dark');
   const text = (ar: string, en: string) => language === 'ar' ? ar : en;
+
+  useEffect(() => {
+    const saved = window.localStorage.getItem('platform-theme');
+    const initial: ThemeMode = saved === 'light' ? 'light' : 'dark';
+    setTheme(initial);
+    document.documentElement.dataset.theme = initial;
+  }, []);
+
+  const toggleTheme = () => {
+    const next: ThemeMode = theme === 'dark' ? 'light' : 'dark';
+    setTheme(next);
+    document.documentElement.dataset.theme = next;
+    window.localStorage.setItem('platform-theme', next);
+  };
 
   return (
     <div className="approvedShell darkOpsShell">
@@ -54,7 +83,12 @@ export default function EnterpriseShell({ children }: { children: React.ReactNod
             <Link href="/profile" className="approvedUser"><span className="approvedAvatar"><AppIcon name="profile" size={17}/></span><span><b>{text('أحمد محمد','Ahmed Mohammed')}</b><small>{text('مدير النظام','System Admin')}</small></span></Link>
             <Link href="/notifications" className="approvedTool"><AppIcon name="notification" size={19}/></Link>
             <Link href="/profile#settings" className="approvedTool"><AppIcon name="settings" size={19}/></Link>
-            <LanguageSwitcher/>
+            <div className="headerSwitches">
+              <LanguageSwitcher/>
+              <button type="button" className="themeSwitcher" onClick={toggleTheme} aria-label={theme === 'dark' ? text('تفعيل الوضع النهاري','Enable light mode') : text('تفعيل الوضع الليلي','Enable dark mode')} title={theme === 'dark' ? text('الوضع النهاري','Light mode') : text('الوضع الليلي','Dark mode')}>
+                <ThemeIcon mode={theme} />
+              </button>
+            </div>
           </div>
 
           <div className="darkOpsHeaderCenter">
