@@ -1,0 +1,55 @@
+name: Deploy Workforce Platform
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        working-directory: workforce-platform/apps/web
+        run: npm install
+      - name: Build
+        working-directory: workforce-platform/apps/web
+        env:
+          GITHUB_PAGES: 'true'
+          NEXT_PUBLIC_API_URL: 'https://workforce-platform-api.onrender.com/api'
+        run: |
+          rm -rf .next out
+          npm run build
+      - name: Verify enterprise interface
+        run: |
+          test -f workforce-platform/apps/web/out/index.html
+          test -f workforce-platform/apps/web/out/dashboard/index.html
+          grep -R "enterpriseShell" workforce-platform/apps/web/out/_next/static || true
+          touch workforce-platform/apps/web/out/.nojekyll
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: workforce-platform/apps/web/out
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
