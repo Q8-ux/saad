@@ -5,6 +5,7 @@ import EmojiSanitizer from './components/EmojiSanitizer';
 import './globals.css';
 import './ui-enhancements.css';
 import './approved-dashboard.css';
+import './google-map.css';
 
 export const metadata: Metadata = {
   title: 'منصة نطاق العمل | Work Scope Platform',
