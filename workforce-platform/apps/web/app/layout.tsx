@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Cairo } from 'next/font/google';
+import { LanguageProvider } from './components/LanguageProvider';
 import './globals.css';
 
 const cairo = Cairo({
@@ -10,14 +11,16 @@ const cairo = Cairo({
 });
 
 export const metadata: Metadata = {
-  title: 'منصة نطاق العمل',
-  description: 'منصة الحضور الذكي والانتقالات والطوارئ والتشغيل المؤسسي',
+  title: 'منصة نطاق العمل | Work Scope Platform',
+  description: 'منصة ثنائية اللغة للحضور الذكي والانتقالات والطوارئ والتشغيل المؤسسي',
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="ar" dir="rtl" className={cairo.variable}>
-      <body>{children}</body>
+      <body>
+        <LanguageProvider>{children}</LanguageProvider>
+      </body>
     </html>
   );
 }
