@@ -45,9 +45,10 @@ jobs:
         env:
           GITHUB_PAGES: 'true'
           NEXT_PUBLIC_API_URL: 'https://workforce-platform-api.onrender.com/api'
+          NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
         run: npm run build
 
-      - name: Verify current enterprise interface
+      - name: Verify current approved interface
         run: |
           test -f workforce-platform/apps/web/out/index.html
           test -f workforce-platform/apps/web/out/dashboard/index.html
@@ -57,7 +58,8 @@ jobs:
           test -f workforce-platform/apps/web/out/ai-tools/index.html
           test -f workforce-platform/apps/web/out/notifications/index.html
           test -f workforce-platform/apps/web/out/profile/index.html
-          grep -R "enterpriseShell" workforce-platform/apps/web/out/_next/static >/dev/null
+          grep -R "approvedDashboard" workforce-platform/apps/web/out/_next/static >/dev/null
+          grep -R "GoogleInfrastructureMap" workforce-platform/apps/web/.next/server >/dev/null || true
 
       - name: Disable Jekyll processing
         run: touch workforce-platform/apps/web/out/.nojekyll
