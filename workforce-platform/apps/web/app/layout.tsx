@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { LanguageProvider } from './components/LanguageProvider';
 import EnterpriseShell from './components/EnterpriseShell';
+import EmojiSanitizer from './components/EmojiSanitizer';
 import './globals.css';
 import './ui-enhancements.css';
 import './approved-dashboard.css';
@@ -14,7 +15,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="ar" dir="rtl">
       <body>
-        <LanguageProvider><EnterpriseShell>{children}</EnterpriseShell></LanguageProvider>
+        <LanguageProvider>
+          <EmojiSanitizer />
+          <EnterpriseShell>{children}</EnterpriseShell>
+        </LanguageProvider>
       </body>
     </html>
   );
