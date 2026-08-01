@@ -13,8 +13,6 @@ permissions:
   pages: write
   id-token: write
 
-actions:
-
 concurrency:
   group: workforce-pages-production
   cancel-in-progress: true
@@ -36,12 +34,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-          cache-dependency-path: workforce-platform/apps/web/package-lock.json
 
       - name: Remove previous output
         working-directory: workforce-platform/apps/web
-        run: rm -rf .next out
+        run: rm -rf .next out node_modules
 
       - name: Install dependencies
         working-directory: workforce-platform/apps/web
