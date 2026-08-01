@@ -3,6 +3,7 @@ import { LanguageProvider } from './components/LanguageProvider';
 import EnterpriseShell from './components/EnterpriseShell';
 import './globals.css';
 import './ui-enhancements.css';
+import './approved-dashboard.css';
 
 export const metadata: Metadata = {
   title: 'منصة نطاق العمل | Work Scope Platform',
