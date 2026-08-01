@@ -22,45 +22,50 @@ export default function EnterpriseShell({ children }: { children: React.ReactNod
   const pathname = usePathname();
   const { language } = useLanguage();
   const [open, setOpen] = useState(false);
-  const label = (item: NavItem) => language === 'ar' ? item.ar : item.en;
+  const text = (ar: string, en: string) => language === 'ar' ? ar : en;
 
   return (
-    <div className="enterpriseShell">
-      <aside className={`enterpriseSidebar ${open ? 'isOpen' : ''}`}>
-        <div className="brandBlock">
-          <div className="brandMark"><AppIcon name="activity" size={27}/></div>
+    <div className="v4Shell">
+      <aside className={`v4Sidebar ${open ? 'isOpen' : ''}`}>
+        <div className="v4Brand">
+          <div className="v4BrandMark"><AppIcon name="activity" size={24}/></div>
           <div>
-            <strong>{language === 'ar' ? 'نطاق العمل' : 'Work Scope'}</strong>
-            <span>{language === 'ar' ? 'منصة التشغيل المؤسسي' : 'Enterprise Operations Platform'}</span>
+            <strong>{text('منصة نطاق العمل', 'Work Scope Platform')}</strong>
+            <span>{text('إدارة القوى العاملة الذكية', 'Smart Workforce Management')}</span>
           </div>
         </div>
-        <nav className="enterpriseNav" aria-label="Main navigation">
+
+        <nav className="v4Nav" aria-label={text('التنقل الرئيسي', 'Main navigation')}>
           {items.map(item => {
             const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
             return (
               <Link key={item.href} href={item.href} className={active ? 'active' : ''} onClick={() => setOpen(false)}>
-                <AppIcon name={item.icon} size={21}/>
-                <span>{label(item)}</span>
+                <AppIcon name={item.icon} size={20}/>
+                <span>{text(item.ar, item.en)}</span>
               </Link>
             );
           })}
         </nav>
-        <div className="sidebarFooter">
-          <div className="systemState"><span className="stateDot"/><div><b>{language === 'ar' ? 'النظام متصل' : 'System online'}</b><small>{language === 'ar' ? 'آخر مزامنة الآن' : 'Synced just now'}</small></div></div>
+
+        <div className="v4SidebarFooter">
+          <div className="v4SystemStatus"><span/><div><b>{text('النظام يعمل', 'System online')}</b><small>{text('آخر مزامنة الآن', 'Synced just now')}</small></div></div>
+          <Link href="/profile"><AppIcon name="settings" size={19}/><span>{text('الإعدادات', 'Settings')}</span></Link>
         </div>
       </aside>
-      {open && <button className="shellOverlay" aria-label="Close menu" onClick={() => setOpen(false)}/>} 
-      <div className="enterpriseWorkspace">
-        <header className="enterpriseTopbar">
-          <button className="menuButton" type="button" onClick={() => setOpen(true)} aria-label="Open menu"><AppIcon name="menu" size={22}/></button>
-          <div className="globalSearch"><AppIcon name="search" size={19}/><input aria-label="Search" placeholder={language === 'ar' ? 'بحث في المنصة' : 'Search platform'}/></div>
-          <div className="topbarActions">
+
+      {open && <button className="v4Overlay" aria-label={text('إغلاق القائمة', 'Close menu')} onClick={() => setOpen(false)}/>} 
+
+      <div className="v4Workspace">
+        <header className="v4Topbar">
+          <button className="v4MenuButton" type="button" onClick={() => setOpen(true)} aria-label={text('فتح القائمة', 'Open menu')}><AppIcon name="menu" size={22}/></button>
+          <div className="v4Search"><AppIcon name="search" size={18}/><input aria-label={text('بحث', 'Search')} placeholder={text('بحث في المنصة', 'Search platform')}/></div>
+          <div className="v4TopActions">
             <LanguageSwitcher/>
-            <Link href="/notifications" className="iconButton" aria-label="Notifications"><AppIcon name="notification" size={20}/><span className="notificationDot"/></Link>
-            <Link href="/profile" className="profileChip"><span className="profileAvatar"><AppIcon name="profile" size={18}/></span><span>{language === 'ar' ? 'حساب المستخدم' : 'User account'}</span></Link>
+            <Link href="/notifications" className="v4IconButton" aria-label={text('التنبيهات', 'Notifications')}><AppIcon name="notification" size={19}/><span/></Link>
+            <Link href="/profile" className="v4Profile"><div><b>{text('مستخدم النظام', 'System user')}</b><small>{text('مسؤول تشغيل', 'Operations admin')}</small></div><span><AppIcon name="profile" size={18}/></span></Link>
           </div>
         </header>
-        <div className="enterpriseContent">{children}</div>
+        <div className="v4Content">{children}</div>
       </div>
     </div>
   );
