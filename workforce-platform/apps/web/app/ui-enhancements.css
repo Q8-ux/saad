@@ -1,10 +1,10 @@
 html,body,input,button,select,textarea{font-family:var(--font-cairo),Cairo,Arial,sans-serif}
-body{font-feature-settings:"kern" 1,"liga" 1}
+body{font-feature-settings:"kern" 1,"liga" 1;background:#eef2f7}
 .pageUtilityBar{display:flex;justify-content:flex-end;margin-bottom:12px}
-.languageSwitcher{width:auto;min-width:96px;margin:0;padding:9px 15px;border-radius:999px;background:#fff;color:var(--navy);border:1px solid var(--line);box-shadow:0 5px 18px rgba(13,42,73,.07);font-weight:700}
-.languageSwitcher:hover{background:var(--sky);border-color:#9fc4ef}
+.languageSwitcher{width:auto;min-width:96px;margin:0;padding:9px 15px;border-radius:10px;background:#fff;color:#12304e;border:1px solid #d8e0ea;box-shadow:none;font-weight:700}
+.languageSwitcher:hover{background:#f4f7fb;border-color:#9fb1c7}
 .titleWithIcon{display:flex;align-items:center;gap:10px}
-.quickIcon svg,.serviceIcon svg{color:var(--blue)}
+.quickIcon svg,.serviceIcon svg{color:#1c6bc7}
 button svg,.linkButton svg,.secondaryButton svg{flex:0 0 auto}
 button:has(svg){gap:8px}
 .mobileNav a svg{width:22px;height:22px;margin-inline:auto}
@@ -14,4 +14,30 @@ html[dir="ltr"] .kpis .success{border-left:5px solid #16a34a}
 html[dir="ltr"] .kpis .warning{border-left:5px solid #f59e0b}
 html[dir="ltr"] .kpis .danger{border-left:5px solid #dc2626}
 html[dir="ltr"] .compactList{padding-right:0;padding-left:22px}
-@media(max-width:760px){.pageUtilityBar{position:relative;z-index:2}.languageSwitcher{min-width:88px;padding:8px 13px}.titleWithIcon{font-size:24px}}
+
+/* Restored original enterprise dashboard identity */
+.legacyAppShell{min-height:100vh;display:grid;grid-template-columns:280px minmax(0,1fr);background:#eef2f7}
+.legacySidebar{position:sticky;top:0;height:100vh;background:linear-gradient(180deg,#102a43 0%,#0b2034 100%);color:#fff;padding:22px 16px;display:flex;flex-direction:column;z-index:80;box-shadow:0 0 30px rgba(6,24,40,.16)}
+.legacyBrand{display:flex;align-items:center;gap:12px;padding:4px 8px 22px;border-bottom:1px solid rgba(255,255,255,.1)}
+.legacyBrandMark{width:46px;height:46px;border-radius:12px;display:grid;place-items:center;background:#1d6fcb;color:#fff;box-shadow:0 8px 20px rgba(29,111,203,.28)}
+.legacyBrand strong,.legacyBrand small{display:block}.legacyBrand strong{font-size:18px}.legacyBrand small{font-size:10px;color:#a8bdd0;margin-top:3px}
+.legacyNav{display:flex;flex-direction:column;gap:6px;padding:20px 0;overflow:auto}
+.legacyNav a{display:flex;align-items:center;gap:12px;color:#cad7e4;text-decoration:none;padding:12px 13px;border-radius:10px;font-size:14px;font-weight:600;transition:.18s ease}
+.legacyNav a:hover{background:rgba(255,255,255,.09);color:#fff;transform:translateX(-2px)}
+html[dir="ltr"] .legacyNav a:hover{transform:translateX(2px)}
+.legacyNav a:first-child{background:#176dc5;color:#fff;box-shadow:0 8px 18px rgba(23,109,197,.25)}
+.legacySidebarFooter{margin-top:auto;border-top:1px solid rgba(255,255,255,.1);padding-top:16px;display:grid;gap:10px}.legacySidebarFooter small{color:#8fa7bc;text-align:center}
+.legacyWorkspace{min-width:0}.legacyTopbar{height:76px;background:#fff;border-bottom:1px solid #dfe6ee;display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:50;box-shadow:0 3px 12px rgba(26,48,73,.04)}
+.legacyTopbar strong,.legacyTopbar small{display:block}.legacyTopbar strong{font-size:17px;color:#142d46}.legacyTopbar small{font-size:11px;color:#7c8b9c;margin-top:2px}.legacyTopActions{display:flex;align-items:center;gap:8px;color:#526579;font-size:12px;font-weight:700}.legacyOnlineDot{width:8px;height:8px;background:#20b26b;border-radius:50%;box-shadow:0 0 0 4px rgba(32,178,107,.12)}
+.legacyContent{padding:24px}.legacyContent>main,.legacyContent .appMain{max-width:none;margin:0;padding:0 0 40px}
+.legacyContent .mobileNav{display:none!important}
+.legacyContent .sahelHero,.legacyContent .innerHero,.legacyContent .pageHero{background:#fff;color:#162a3d;border:1px solid #dce4ed;border-radius:14px;box-shadow:0 5px 18px rgba(21,45,70,.05);padding:22px 24px}
+.legacyContent .sahelHero p,.legacyContent .innerHero p,.legacyContent .pageHero p{color:#718096}.legacyContent .eyebrow{color:#1c6bc7;font-weight:800}.legacyContent .heroStatus{background:#f4f7fb;border:1px solid #dce4ed;color:#16314c;border-radius:10px}.legacyContent .heroStatus span,.legacyContent .heroStatus small{color:#718096}
+.legacyContent .card,.legacyContent .quickAction{border-radius:12px;border:1px solid #dce4ed;box-shadow:0 4px 14px rgba(21,45,70,.045)}
+.legacyContent .quickActions{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.legacyContent .quickAction{padding:17px}.legacyContent .quickAction.primaryAction{background:#fff;border:1px solid #dce4ed}.legacyContent .quickIcon,.legacyContent .serviceIcon{border-radius:10px;background:#edf4fc}
+.legacyContent .metric{color:#14304d}.legacyContent table{background:#fff}.legacyContent th{background:#f7f9fc;color:#65778a}.legacyContent button,.legacyContent .linkButton{border-radius:9px}
+.legacyContent .sectionHeading h2,.legacyContent h1,.legacyContent h2{color:#142d46}
+.legacyContent .locationPill.ready{background:#e8f8ef;color:#187849;border:1px solid #b9e8ce}.legacyContent .locationPill.pending{background:#fff5df;color:#94620b;border:1px solid #f0d69a}
+
+@media(max-width:1000px){.legacyAppShell{grid-template-columns:220px minmax(0,1fr)}.legacySidebar{padding-inline:12px}.legacyContent .quickActions{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){.legacyAppShell{display:block}.legacySidebar{position:relative;height:auto;padding:12px 14px;display:block}.legacyBrand{padding-bottom:12px}.legacyBrand small,.legacySidebarFooter{display:none}.legacyNav{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;padding:11px 0 0;overflow:visible}.legacyNav a{padding:9px 5px;display:flex;flex-direction:column;gap:4px;text-align:center;font-size:9px}.legacyNav a:nth-child(n+5){display:none}.legacyNav a:hover{transform:none}.legacyTopbar{height:60px;padding:0 14px}.legacyTopbar small,.legacyTopActions{display:none}.legacyContent{padding:12px}.legacyContent .quickActions{grid-template-columns:1fr}.legacyContent .sahelHero,.legacyContent .innerHero,.legacyContent .pageHero{margin:0;border-radius:12px;padding:18px}.pageUtilityBar{position:relative;z-index:2}.languageSwitcher{min-width:88px;padding:8px 13px}.titleWithIcon{font-size:24px}}
