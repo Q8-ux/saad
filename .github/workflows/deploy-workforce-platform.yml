@@ -13,7 +13,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: workforce-platform-pages
+  group: pages
   cancel-in-progress: true
 
 jobs:
@@ -39,7 +39,7 @@ jobs:
         working-directory: workforce-platform/apps/web
         run: npm install
 
-      - name: Build static site
+      - name: Build current workforce interface
         working-directory: workforce-platform/apps/web
         env:
           GITHUB_PAGES: 'true'
@@ -60,7 +60,7 @@ jobs:
       - name: Disable Jekyll processing
         run: touch workforce-platform/apps/web/out/.nojekyll
 
-      - name: Upload Pages artifact
+      - name: Upload only the current workforce platform
         uses: actions/upload-pages-artifact@v3
         with:
           path: workforce-platform/apps/web/out
@@ -72,6 +72,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     steps:
-      - name: Deploy to GitHub Pages
+      - name: Replace the previous GitHub Pages site
         id: deployment
         uses: actions/deploy-pages@v4
