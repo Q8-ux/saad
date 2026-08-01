@@ -9,9 +9,11 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
+
+actions:
 
 concurrency:
   group: workforce-pages-production
@@ -34,47 +36,61 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: npm
+          cache-dependency-path: workforce-platform/apps/web/package-lock.json
 
-      - name: Remove every previous build artifact
+      - name: Remove previous output
         working-directory: workforce-platform/apps/web
-        run: rm -rf .next out node_modules
+        run: rm -rf .next out
 
-      - name: Install clean dependencies
+      - name: Install dependencies
         working-directory: workforce-platform/apps/web
-        run: npm install
+        run: npm install --no-audit --no-fund
 
-      - name: Build current government dashboard
+      - name: Build current dashboard
+        id: app_build
         working-directory: workforce-platform/apps/web
         env:
           GITHUB_PAGES: 'true'
           NEXT_PUBLIC_API_URL: 'https://workforce-platform-api.onrender.com/api'
           NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
-          NEXT_PUBLIC_INTERFACE_VERSION: 'government-dashboard-live-clock-v2'
-        run: npm run build
+          NEXT_PUBLIC_INTERFACE_VERSION: 'government-dashboard-live-clock-v3'
+        shell: bash
+        run: |
+          set -o pipefail
+          npm run build 2>&1 | tee ../../../pages-build.log
 
-      - name: Verify the current dashboard build
+      - name: Verify exported website
         run: |
           test -f workforce-platform/apps/web/out/index.html
           test -f workforce-platform/apps/web/out/dashboard/index.html
-          test -f workforce-platform/apps/web/out/attendance-smart/index.html
-          test -f workforce-platform/apps/web/out/transfers/index.html
-          test -f workforce-platform/apps/web/out/emergency/index.html
-          test -f workforce-platform/apps/web/out/ai-tools/index.html
-          test -f workforce-platform/apps/web/out/notifications/index.html
-          test -f workforce-platform/apps/web/out/profile/index.html
-          grep -R "government-dashboard-live-clock-v2" workforce-platform/apps/web/out/_next/static >/dev/null
-          grep -R "liveClock" workforce-platform/apps/web/out/_next/static >/dev/null
-          grep -R "approvedDashboard" workforce-platform/apps/web/out/_next/static >/dev/null
-
-      - name: Add deployment version and disable Jekyll
-        run: |
-          echo 'government-dashboard-live-clock-v2' > workforce-platform/apps/web/out/interface-version.txt
+          test -d workforce-platform/apps/web/out/_next
+          echo 'government-dashboard-live-clock-v3' > workforce-platform/apps/web/out/interface-version.txt
           touch workforce-platform/apps/web/out/.nojekyll
 
-      - name: Upload current interface only
+      - name: Upload current interface
         uses: actions/upload-pages-artifact@v3
         with:
           path: workforce-platform/apps/web/out
+
+      - name: Record build failure
+        if: failure()
+        shell: bash
+        run: |
+          {
+            echo "status=build_failed"
+            echo "run_id=${GITHUB_RUN_ID}"
+            echo "commit=${GITHUB_SHA}"
+            echo "time=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "log_tail_begin"
+            tail -n 120 pages-build.log 2>/dev/null || true
+            echo "log_tail_end"
+          } > deployment-status.txt
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add deployment-status.txt
+          git commit -m "Record Pages build failure ${GITHUB_RUN_ID}" || true
+          git push || true
 
   deploy:
     environment:
@@ -83,6 +99,29 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     steps:
-      - name: Replace the entire previous site
+      - name: Deploy and replace previous site
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Checkout main for status update
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+
+      - name: Record successful deployment
+        shell: bash
+        run: |
+          {
+            echo "status=deployed"
+            echo "version=government-dashboard-live-clock-v3"
+            echo "run_id=${GITHUB_RUN_ID}"
+            echo "commit=${GITHUB_SHA}"
+            echo "page_url=${{ steps.deployment.outputs.page_url }}"
+            echo "time=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          } > deployment-status.txt
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add deployment-status.txt
+          git commit -m "Record successful Pages deployment ${GITHUB_RUN_ID}" || true
+          git push || true
