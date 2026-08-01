@@ -1,6 +1,6 @@
 'use client';
 
-import {useMemo,useState} from 'react';
+import {useEffect,useState} from 'react';
 import Link from 'next/link';
 import AppIcon from '../components/AppIcon';
 import {useLanguage} from '../components/LanguageProvider';
@@ -23,13 +23,18 @@ export default function AiToolsPage(){
  const {language}=useLanguage();
  const t=(ar:string,en:string)=>language==='ar'?ar:en;
  const api=process.env.NEXT_PUBLIC_API_URL!;
- const defaultTask=useMemo(()=>t('حلل البيانات وحدد أهم المخاطر والإجراءات المقترحة.','Analyze the data and identify the most important risks and recommended actions.'),[language]);
  const [section,setSection]=useState('ATTENDANCE');
- const [task,setTask]=useState(defaultTask);
+ const [task,setTask]=useState('حلل البيانات وحدد أهم المخاطر والإجراءات المقترحة.');
  const [data,setData]=useState('{}');
  const [result,setResult]=useState<Result|null>(null);
  const [message,setMessage]=useState('');
  const [loading,setLoading]=useState(false);
+
+ useEffect(()=>{
+  setTask(language==='ar'?'حلل البيانات وحدد أهم المخاطر والإجراءات المقترحة.':'Analyze the data and identify the most important risks and recommended actions.');
+  setMessage('');
+  setResult(null);
+ },[language]);
 
  async function run(){
   let parsed:unknown;
