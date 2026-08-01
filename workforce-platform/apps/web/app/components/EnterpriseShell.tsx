@@ -35,11 +35,32 @@ function ThemeIcon({ mode }: { mode: ThemeMode }) {
   );
 }
 
+function formatKuwaitDate(now: Date, language: 'ar' | 'en') {
+  return new Intl.DateTimeFormat(language === 'ar' ? 'ar-KW' : 'en-GB', {
+    timeZone: 'Asia/Kuwait',
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  }).format(now);
+}
+
+function formatKuwaitTime(now: Date, language: 'ar' | 'en') {
+  return new Intl.DateTimeFormat(language === 'ar' ? 'ar-KW' : 'en-US', {
+    timeZone: 'Asia/Kuwait',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: true,
+  }).format(now);
+}
+
 export default function EnterpriseShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { language } = useLanguage();
   const [open, setOpen] = useState(false);
   const [theme, setTheme] = useState<ThemeMode>('dark');
+  const [now, setNow] = useState<Date | null>(null);
   const text = (ar: string, en: string) => language === 'ar' ? ar : en;
 
   useEffect(() => {
@@ -47,6 +68,12 @@ export default function EnterpriseShell({ children }: { children: React.ReactNod
     const initial: ThemeMode = saved === 'light' ? 'light' : 'dark';
     setTheme(initial);
     document.documentElement.dataset.theme = initial;
+  }, []);
+
+  useEffect(() => {
+    setNow(new Date());
+    const timer = window.setInterval(() => setNow(new Date()), 1000);
+    return () => window.clearInterval(timer);
   }, []);
 
   const toggleTheme = () => {
@@ -57,7 +84,7 @@ export default function EnterpriseShell({ children }: { children: React.ReactNod
   };
 
   return (
-    <div className="approvedShell darkOpsShell">
+    <div className="approvedShell darkOpsShell" data-ui-version="government-dashboard-live-clock-v2">
       <aside className={`approvedSidebar ${open ? 'isOpen' : ''}`}>
         <nav className="approvedNav" aria-label={text('التنقل الرئيسي', 'Main navigation')}>
           {items.map(item => {
@@ -96,7 +123,10 @@ export default function EnterpriseShell({ children }: { children: React.ReactNod
             <div className="approvedSearch darkOpsSearch"><AppIcon name="search" size={20}/><input aria-label={text('بحث', 'Search')} placeholder={text('ابحث عن موظف، موقع، تصريح، أو أي بيانات...','Search employees, sites, permits, or any data...')}/></div>
           </div>
 
-          <div className="darkOpsDate"><b>{text('السبت 1 أغسطس 2026','Saturday, 1 August 2026')}</b><span>04:21 PM</span></div>
+          <div className="darkOpsDate" aria-live="polite">
+            <b>{now ? formatKuwaitDate(now, language) : text('جارٍ تحميل التاريخ','Loading date')}</b>
+            <span className="liveClock">{now ? formatKuwaitTime(now, language) : '--:--:--'}</span>
+          </div>
         </header>
         <div className="approvedContent">{children}</div>
       </div>
