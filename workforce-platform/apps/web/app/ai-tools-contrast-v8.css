@@ -1,147 +1,80 @@
-/* AI tools and operational forms contrast fix v8 — loaded last. */
+/* AI tools and operational forms contrast fix v9 — loaded last. */
 
-/* AI tools hero: always high contrast. */
 .aiToolsPage .pageHero{
   background:linear-gradient(135deg,#082f60 0%,#0b55a7 100%)!important;
   border:1px solid #2c78c7!important;
   color:#ffffff!important;
 }
-.aiToolsPage .pageHero :is(h1,h2,h3,p,b,strong,span,small,a){
-  color:#ffffff!important;
-  opacity:1!important;
-  text-shadow:none!important;
-}
+.aiToolsPage .pageHero :is(h1,h2,h3,p,b,strong,span,small,a){color:#ffffff!important;opacity:1!important;text-shadow:none!important}
 .aiToolsPage .pageHero .eyebrow{color:#d4eaff!important}
-.aiToolsPage .pageHero .heroBack{
-  background:#ffffff!important;
-  color:#073f80!important;
-  border:1px solid #ffffff!important;
-}
+.aiToolsPage .pageHero .heroBack{background:#ffffff!important;color:#073f80!important;border:1px solid #ffffff!important}
 
-/* Light mode: inactive cards are white with dark text; selected card is blue with white text. */
-html[data-theme='light'] .aiToolsPage .aiToolCard{
-  background:#ffffff!important;
-  border:1px solid #8fa7bf!important;
-  color:#071a31!important;
-  box-shadow:0 2px 7px rgba(15,42,73,.08)!important;
+/* AI cards: force a readable scheme in every browser and theme. */
+.aiToolsPage .aiToolGrid{gap:12px!important}
+.aiToolsPage .aiToolCard{
+  min-height:72px!important;
+  padding:15px 18px!important;
+  border-radius:9px!important;
   opacity:1!important;
   filter:none!important;
   text-align:start!important;
+  transition:none!important;
 }
-html[data-theme='light'] .aiToolsPage .aiToolCard b{
-  color:#071a31!important;
-  font-weight:800!important;
-  opacity:1!important;
+.aiToolsPage .aiToolCard b,
+.aiToolsPage .aiToolCard small{display:block!important;opacity:1!important;text-shadow:none!important}
+.aiToolsPage .aiToolCard b{font-size:17px!important;font-weight:800!important;line-height:1.45!important}
+.aiToolsPage .aiToolCard small{font-size:14px!important;font-weight:600!important;line-height:1.7!important;margin-top:3px!important}
+
+html[data-theme='light'] .aiToolsPage .aiToolCard{
+  background:#ffffff!important;
+  border:2px solid #8aa2ba!important;
+  color:#06182e!important;
+  box-shadow:0 2px 8px rgba(15,42,73,.10)!important;
 }
-html[data-theme='light'] .aiToolsPage .aiToolCard small{
-  color:#344b63!important;
-  font-weight:600!important;
-  opacity:1!important;
-}
+html[data-theme='light'] .aiToolsPage .aiToolCard b{color:#06182e!important}
+html[data-theme='light'] .aiToolsPage .aiToolCard small{color:#30475f!important}
 html[data-theme='light'] .aiToolsPage .aiToolCard.activeAiTool{
-  background:#0b63d8!important;
-  border-color:#064b9e!important;
+  background:#075fcb!important;
+  border-color:#06488f!important;
   color:#ffffff!important;
 }
 html[data-theme='light'] .aiToolsPage .aiToolCard.activeAiTool :is(b,small){color:#ffffff!important}
 
-/* Dark mode: navy cards with white text; selected card uses a brighter government blue. */
 html[data-theme='dark'] .aiToolsPage .aiToolCard{
-  background:#10263f!important;
-  border:1px solid #47739d!important;
+  background:#132b46!important;
+  border:2px solid #5c83a8!important;
   color:#ffffff!important;
   box-shadow:none!important;
-  opacity:1!important;
-  filter:none!important;
-  text-align:start!important;
 }
-html[data-theme='dark'] .aiToolsPage .aiToolCard b{
-  color:#ffffff!important;
-  font-weight:800!important;
-  opacity:1!important;
-}
-html[data-theme='dark'] .aiToolsPage .aiToolCard small{
-  color:#d8e5f1!important;
-  font-weight:600!important;
-  opacity:1!important;
-}
+html[data-theme='dark'] .aiToolsPage .aiToolCard b{color:#ffffff!important}
+html[data-theme='dark'] .aiToolsPage .aiToolCard small{color:#e2edf7!important}
 html[data-theme='dark'] .aiToolsPage .aiToolCard.activeAiTool{
   background:#176fd1!important;
-  border-color:#7bb7f7!important;
+  border-color:#9acbff!important;
 }
 html[data-theme='dark'] .aiToolsPage .aiToolCard.activeAiTool :is(b,small){color:#ffffff!important}
 
 /* Form and result panels. */
-html[data-theme='light'] .aiToolsPage .servicePanel{
-  background:#ffffff!important;
-  border:1px solid #9aacbf!important;
-  color:#071a31!important;
-}
-html[data-theme='light'] .aiToolsPage .servicePanel :is(h2,h3,p,label,b,strong,li,span){
-  color:#071a31!important;
-  opacity:1!important;
-}
+html[data-theme='light'] .aiToolsPage .servicePanel{background:#ffffff!important;border:2px solid #9aacbf!important;color:#071a31!important}
+html[data-theme='light'] .aiToolsPage .servicePanel :is(h2,h3,p,label,b,strong,li,span){color:#071a31!important;opacity:1!important}
 html[data-theme='light'] .aiToolsPage .servicePanel .muted{color:#344b63!important}
-html[data-theme='light'] .aiToolsPage :is(textarea,input,select){
-  background:#ffffff!important;
-  color:#071a31!important;
-  border:1px solid #8098b0!important;
-}
-html[data-theme='light'] .aiToolsPage .servicePanel>button{
-  background:#0b63d8!important;
-  color:#ffffff!important;
-  border:1px solid #064b9e!important;
-}
+html[data-theme='light'] .aiToolsPage :is(textarea,input,select){background:#ffffff!important;color:#071a31!important;border:1px solid #8098b0!important}
+html[data-theme='light'] .aiToolsPage .servicePanel>button{background:#0b63d8!important;color:#ffffff!important;border:1px solid #064b9e!important}
 
-html[data-theme='dark'] .aiToolsPage .servicePanel{
-  background:#10263f!important;
-  border:1px solid #47739d!important;
-  color:#ffffff!important;
-}
-html[data-theme='dark'] .aiToolsPage .servicePanel :is(h2,h3,p,label,b,strong,li,span){
-  color:#ffffff!important;
-  opacity:1!important;
-}
+html[data-theme='dark'] .aiToolsPage .servicePanel{background:#10263f!important;border:2px solid #5b82a8!important;color:#ffffff!important}
+html[data-theme='dark'] .aiToolsPage .servicePanel :is(h2,h3,p,label,b,strong,li,span){color:#ffffff!important;opacity:1!important}
 html[data-theme='dark'] .aiToolsPage .servicePanel .muted{color:#d8e5f1!important}
-html[data-theme='dark'] .aiToolsPage :is(textarea,input,select){
-  background:#0a1c30!important;
-  color:#ffffff!important;
-  border:1px solid #5b82a8!important;
-}
-html[data-theme='dark'] .aiToolsPage .servicePanel>button{
-  background:#2683e8!important;
-  color:#ffffff!important;
-  border:1px solid #79baff!important;
-}
+html[data-theme='dark'] .aiToolsPage :is(textarea,input,select){background:#0a1c30!important;color:#ffffff!important;border:1px solid #5b82a8!important}
+html[data-theme='dark'] .aiToolsPage .servicePanel>button{background:#2683e8!important;color:#ffffff!important;border:1px solid #79baff!important}
 
-.aiToolsPage .notice,
-.aiToolsPage .decisionBox{
-  opacity:1!important;
-  filter:none!important;
-}
-html[data-theme='light'] .aiToolsPage .notice{
-  background:#e6f2ff!important;
-  color:#082f59!important;
-  border:1px solid #70a0d2!important;
-}
-html[data-theme='dark'] .aiToolsPage .notice{
-  background:#12365a!important;
-  color:#ffffff!important;
-  border:1px solid #5e91c1!important;
-}
-html[data-theme='dark'] .aiToolsPage .decisionBox{
-  background:#0a1c30!important;
-  color:#ffffff!important;
-  border:1px solid #5b82a8!important;
-}
+.aiToolsPage .notice,.aiToolsPage .decisionBox{opacity:1!important;filter:none!important}
+html[data-theme='light'] .aiToolsPage .notice{background:#e6f2ff!important;color:#082f59!important;border:1px solid #70a0d2!important}
+html[data-theme='dark'] .aiToolsPage .notice{background:#12365a!important;color:#ffffff!important;border:1px solid #5e91c1!important}
+html[data-theme='light'] .aiToolsPage .decisionBox{background:#eef6ff!important;color:#071a31!important;border:1px solid #7da7d2!important}
+html[data-theme='dark'] .aiToolsPage .decisionBox{background:#0a1c30!important;color:#ffffff!important;border:1px solid #5b82a8!important}
 
 /* Header after removing duplicate date/time. */
 @media(min-width:761px){
-  .darkOpsTopbar{
-    grid-template-columns:auto minmax(360px,1fr)!important;
-  }
-  .darkOpsHeaderCenter{
-    width:min(760px,100%)!important;
-    justify-self:center!important;
-  }
+  .darkOpsTopbar{grid-template-columns:auto minmax(360px,1fr)!important}
+  .darkOpsHeaderCenter{width:min(760px,100%)!important;justify-self:center!important}
 }
