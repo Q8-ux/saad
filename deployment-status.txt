@@ -1,6 +1,7 @@
-status=deployed
+status=build_failed
 version=government-dashboard-ai-contrast-v8
-run_id=30746357229
-commit=c9aa912b855d1287aa3e214cb30c38abcf2a7fb8
-page_url=https://q8-ux.github.io/saad/
-time=2026-08-02T11:45:12Z
+run_id=30765415853
+commit=8d23acf52e224fa05418e977c5e76e594f4799eb
+time=2026-08-02T20:21:18Z
+log_tail_begin
+log_tail_end
