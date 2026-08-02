@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: legal-memo-platform
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_MODEL
+        value: gpt-4.1-mini
+      - key: SESSION_SECRET
+        generateValue: true
+    disk:
+      name: legal-memo-data
+      mountPath: /var/data
+      sizeGB: 5
