@@ -12,6 +12,7 @@ import './contrast-fix-v5.css';
 import './compact-language.css';
 import './contrast-system-v6.css';
 import './light-mode-audit-v7.css';
+import './ai-tools-contrast-v8.css';
 
 export const metadata: Metadata = {
   title: 'منصة نطاق العمل | Work Scope Platform',
