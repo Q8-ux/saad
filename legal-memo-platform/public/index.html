@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>دُفوع | منصة توليد المذكرات القانونية</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div id="toast"></div>
+  <section id="authView" class="auth-shell">
+    <div class="brand-panel"><div class="mark">⚖️</div><h1>دُفوع</h1><p>منصة مهنية لتنظيم القضايا وصياغة مسودات المذكرات القانونية.</p><div class="trust">قاعدة بيانات فعلية · ملفات خاصة · توليد آمن</div></div>
+    <div class="auth-card">
+      <div class="tabs"><button class="active" data-tab="login">تسجيل الدخول</button><button data-tab="register">حساب جديد</button></div>
+      <form id="loginForm"><label>البريد الإلكتروني<input name="email" type="email" required></label><label>كلمة المرور<input name="password" type="password" required></label><button class="primary">دخول آمن</button></form>
+      <form id="registerForm" hidden><label>الاسم<input name="name" required minlength="2"></label><label>البريد الإلكتروني<input name="email" type="email" required></label><label>كلمة المرور<input name="password" type="password" minlength="8" required></label><button class="primary">إنشاء الحساب</button></form>
+      <p class="hint">لا تشارك بيانات القضايا شديدة الحساسية قبل مراجعة سياسة مكتبك.</p>
+    </div>
+  </section>
+  <section id="appView" hidden>
+    <header><div class="logo"><span>⚖️</span><div><b>دُفوع</b><small>منصة المذكرات القانونية</small></div></div><div class="user"><span id="userName"></span><button id="logoutBtn" class="ghost">تسجيل الخروج</button></div></header>
+    <main>
+      <aside><button id="newCaseBtn" class="primary">+ قضية جديدة</button><h3>ملفاتي</h3><div id="caseList"></div></aside>
+      <section class="workspace">
+        <div id="emptyState" class="empty"><div>⚖️</div><h2>ابدأ ملف قضية جديد</h2><p>أدخل الوقائع والطلبات، ثم ارفع المستندات وولّد مسودة مذكرة منظمة.</p><button class="primary" onclick="openCaseForm()">إنشاء قضية</button></div>
+        <form id="caseForm" class="panel" hidden><div class="panel-head"><div><span class="eyebrow">ملف جديد</span><h2>بيانات القضية</h2></div><button type="button" class="ghost" onclick="closeCaseForm()">إلغاء</button></div>
+          <div class="grid"><label>عنوان الملف<input name="title" required placeholder="مثال: مطالبة تجارية"></label><label>نوع القضية<select name="caseType" required><option>تجاري</option><option>مدني</option><option>جزائي</option><option>إداري</option><option>عمالي</option><option>أحوال شخصية</option><option>عسكري</option></select></label><label>المحكمة<input name="court" placeholder="الدائرة والمحكمة"></label><label>رقم القضية<input name="caseNumber" placeholder="إن وجد"></label><label>صفة الموكل<select name="clientRole"><option>مدعى عليه</option><option>مدعٍ</option><option>مستأنف</option><option>مستأنف ضده</option><option>طاعن</option><option>مطعون ضده</option></select></label></div>
+          <label>الوقائع<textarea name="facts" required rows="7" placeholder="اكتب الوقائع بتسلسل زمني واضح..."></textarea></label><label>طلبات الخصم أو موضوع المطالبة<textarea name="claims" required rows="4"></textarea></label><label>دفوع أو مستندات الخصم<textarea name="opponentArguments" rows="4"></textarea></label><button class="primary">حفظ والانتقال للمستندات</button>
+        </form>
+        <div id="caseView" hidden></div>
+      </section>
+    </main>
+  </section>
+  <script src="/app.js"></script>
+</body></html>
