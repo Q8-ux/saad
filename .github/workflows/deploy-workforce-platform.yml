@@ -35,11 +35,11 @@ jobs:
         with:
           node-version: 22
 
-      - name: Verify AI contrast v8 source
+      - name: Verify AI contrast v9 source
         run: |
           test -f workforce-platform/apps/web/app/ai-tools-contrast-v8.css
           grep -q "ai-tools-contrast-v8.css" workforce-platform/apps/web/app/layout.tsx
-          grep -q "government-dashboard-ai-contrast-v8" workforce-platform/apps/web/app/components/EnterpriseShell.tsx
+          grep -q "government-dashboard-ai-contrast-v9" workforce-platform/apps/web/app/components/EnterpriseShell.tsx
           grep -q "AI Center" workforce-platform/apps/web/app/ai-tools/page.tsx
 
       - name: Remove previous output
@@ -57,7 +57,7 @@ jobs:
           GITHUB_PAGES: 'true'
           NEXT_PUBLIC_API_URL: 'https://workforce-platform-api.onrender.com/api'
           NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
-          NEXT_PUBLIC_INTERFACE_VERSION: 'government-dashboard-ai-contrast-v8'
+          NEXT_PUBLIC_INTERFACE_VERSION: 'government-dashboard-ai-contrast-v9'
         shell: bash
         run: |
           set -o pipefail
@@ -74,7 +74,7 @@ jobs:
           test -f workforce-platform/apps/web/out/notifications/index.html
           test -f workforce-platform/apps/web/out/profile/index.html
           test -d workforce-platform/apps/web/out/_next
-          echo 'government-dashboard-ai-contrast-v8' > workforce-platform/apps/web/out/interface-version.txt
+          echo 'government-dashboard-ai-contrast-v9' > workforce-platform/apps/web/out/interface-version.txt
           touch workforce-platform/apps/web/out/.nojekyll
 
       - name: Upload current interface
@@ -88,7 +88,7 @@ jobs:
         run: |
           {
             echo "status=build_failed"
-            echo "version=government-dashboard-ai-contrast-v8"
+            echo "version=government-dashboard-ai-contrast-v9"
             echo "run_id=${GITHUB_RUN_ID}"
             echo "commit=${GITHUB_SHA}"
             echo "time=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
@@ -124,7 +124,7 @@ jobs:
         run: |
           {
             echo "status=deployed"
-            echo "version=government-dashboard-ai-contrast-v8"
+            echo "version=government-dashboard-ai-contrast-v9"
             echo "run_id=${GITHUB_RUN_ID}"
             echo "commit=${GITHUB_SHA}"
             echo "page_url=${{ steps.deployment.outputs.page_url }}"
