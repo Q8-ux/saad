@@ -57,7 +57,7 @@ export default function EnterpriseShell({ children }: { children: React.ReactNod
   };
 
   return (
-    <div className="approvedShell darkOpsShell" data-ui-version="government-dashboard-bilingual-light-audit-v7">
+    <div className="approvedShell darkOpsShell" data-ui-version="government-dashboard-ai-contrast-v8">
       <aside className={`approvedSidebar ${open ? 'isOpen' : ''}`}>
         <nav className="approvedNav" aria-label={text('التنقل الرئيسي', 'Main navigation')}>
           {items.map(item => {
