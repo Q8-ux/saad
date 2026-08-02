@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import { LanguageProvider } from './components/LanguageProvider';
 import EnterpriseShell from './components/EnterpriseShell';
 import EmojiSanitizer from './components/EmojiSanitizer';
-import DatabaseConnectionStatus from './components/DatabaseConnectionStatus';
 import './globals.css';
 import './ui-enhancements.css';
 import './approved-dashboard.css';
@@ -14,7 +13,6 @@ import './compact-language.css';
 import './contrast-system-v6.css';
 import './light-mode-audit-v7.css';
 import './ai-tools-contrast-v8.css';
-import './supabase-status.css';
 
 export const metadata: Metadata = {
   title: 'منصة نطاق العمل | Work Scope Platform',
@@ -27,10 +25,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body>
         <LanguageProvider>
           <EmojiSanitizer />
-          <EnterpriseShell>
-            <DatabaseConnectionStatus />
-            {children}
-          </EnterpriseShell>
+          <EnterpriseShell>{children}</EnterpriseShell>
         </LanguageProvider>
       </body>
     </html>
