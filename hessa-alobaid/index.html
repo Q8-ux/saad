@@ -3,260 +3,99 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#0b2f2b" />
-  <meta name="description" content="الموقع الرسمي للمحامية حصة العبيد — استشارات قانونية ومولد مذكرات قانونية ذكي." />
-  <title>المحامية حصة العبيد | خدمات قانونية</title>
+  <meta name="theme-color" content="#0b302c" />
+  <meta name="description" content="نظام إدارة مكتب المحامية حصة العبيد للقضايا والعملاء والجلسات والأرشفة والمراسلات والمذكرات القانونية." />
+  <title>نظام مكتب المحامية حصة العبيد</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=20260806-1" />
+  <link rel="stylesheet" href="styles.css?v=lms-20260806-1" />
 </head>
 <body>
-  <div class="app-shell">
-    <aside class="sidebar" id="sidebar" aria-label="القائمة الرئيسية">
+  <section class="login-screen" id="loginScreen">
+    <div class="login-card">
+      <div class="legal-logo legal-logo-lg" aria-hidden="true"><span>ح ع</span><small>⚖</small></div>
+      <p class="eyebrow" data-i18n="internalSystem">النظام الداخلي</p>
+      <h1 data-i18n="loginTitle">إدارة مكتب المحامية حصة العبيد</h1>
+      <p class="muted" data-i18n="loginSubtitle">منصة موحدة لإدارة القضايا والعملاء والجلسات والمستندات والمراسلات والشؤون المالية.</p>
+      <form id="loginForm" class="login-form">
+        <label><span data-i18n="username">اسم المستخدم</span><input id="loginUser" required autocomplete="username" value="admin" /></label>
+        <label><span data-i18n="password">كلمة المرور</span><input id="loginPassword" required type="password" autocomplete="current-password" value="admin123" /></label>
+        <button class="btn btn-primary full" type="submit" data-i18n="login">تسجيل الدخول</button>
+        <small data-i18n="demoCredentials">الدخول التجريبي: admin / admin123</small>
+      </form>
+    </div>
+  </section>
+
+  <div class="app-shell hidden" id="appShell">
+    <aside class="sidebar" id="sidebar">
       <div class="sidebar-head">
-        <a class="brand" href="#home" aria-label="الصفحة الرئيسية">
-          <span class="brand-mark" aria-hidden="true">ح ع</span>
-          <span class="brand-copy">
-            <strong data-i18n="brandName">المحامية حصة العبيد</strong>
-            <small data-i18n="brandSub">محاماة واستشارات قانونية</small>
-          </span>
-        </a>
-        <button class="icon-btn close-drawer" id="closeDrawer" type="button" aria-label="إغلاق القائمة">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
-        </button>
+        <div class="legal-logo" aria-hidden="true"><span>ح ع</span><small>⚖</small></div>
+        <div class="brand-copy"><strong data-i18n="officeName">مكتب المحامية حصة العبيد</strong><small data-i18n="lawManagementSystem">نظام إدارة أعمال المحاماة</small></div>
+        <button class="icon-btn close-sidebar" id="closeSidebar" type="button" aria-label="إغلاق">×</button>
       </div>
 
-      <nav class="side-nav" aria-label="التنقل">
-        <a class="active" href="#home" data-section="home"><span class="nav-number">01</span><span data-i18n="navHome">الرئيسية</span></a>
-        <a href="#about" data-section="about"><span class="nav-number">02</span><span data-i18n="navAbout">عن المحامية</span></a>
-        <a href="#services" data-section="services"><span class="nav-number">03</span><span data-i18n="navServices">مجالات الممارسة</span></a>
-        <a href="#process" data-section="process"><span class="nav-number">04</span><span data-i18n="navProcess">طريقة العمل</span></a>
-        <a href="#memo" data-section="memo"><span class="nav-number">05</span><span data-i18n="navMemo">مولد المذكرات</span></a>
-        <a href="#insights" data-section="insights"><span class="nav-number">06</span><span data-i18n="navInsights">المعرفة القانونية</span></a>
-        <a href="#contact" data-section="contact"><span class="nav-number">07</span><span data-i18n="navContact">التواصل</span></a>
+      <nav class="sidebar-nav" id="sidebarNav">
+        <p class="nav-label" data-i18n="mainOperations">العمليات الرئيسية</p>
+        <button class="nav-item active" data-view="dashboard"><span>⌂</span><b data-i18n="dashboard">لوحة التحكم</b></button>
+        <button class="nav-item" data-view="clients"><span>◎</span><b data-i18n="clients">العملاء والموكلون</b></button>
+        <button class="nav-item" data-view="cases"><span>▣</span><b data-i18n="cases">القضايا والملفات</b></button>
+        <button class="nav-item" data-view="sessions"><span>◷</span><b data-i18n="sessions">الجلسات والمواعيد</b></button>
+        <button class="nav-item" data-view="tasks"><span>✓</span><b data-i18n="tasks">المهام والتنبيهات</b></button>
+
+        <p class="nav-label" data-i18n="documentsComms">المستندات والمراسلات</p>
+        <button class="nav-item" data-view="archive"><span>▤</span><b data-i18n="archive">الأرشيف الإلكتروني</b></button>
+        <button class="nav-item" data-view="incoming"><span>↓</span><b data-i18n="incoming">الوارد</b></button>
+        <button class="nav-item" data-view="outgoing"><span>↑</span><b data-i18n="outgoing">الصادر</b></button>
+        <button class="nav-item" data-view="correspondence"><span>✉</span><b data-i18n="correspondence">المراسلات الداخلية</b></button>
+        <button class="nav-item" data-view="whatsapp"><span>◉</span><b data-i18n="whatsapp">واتساب العملاء</b></button>
+
+        <p class="nav-label" data-i18n="legalFinancial">القانوني والمالي</p>
+        <button class="nav-item" data-view="memo"><span>✎</span><b data-i18n="memoGenerator">مولد المذكرات</b></button>
+        <button class="nav-item" data-view="assistant"><span>✦</span><b data-i18n="smartAssistant">المساعد الذكي</b></button>
+        <button class="nav-item" data-view="contracts"><span>◇</span><b data-i18n="contracts">العقود والأتعاب</b></button>
+        <button class="nav-item" data-view="finance"><span>د.ك</span><b data-i18n="finance">الفواتير والمصروفات</b></button>
+        <button class="nav-item" data-view="reports"><span>▥</span><b data-i18n="reports">التقارير والتحليلات</b></button>
+
+        <p class="nav-label" data-i18n="administration">الإدارة</p>
+        <button class="nav-item" data-view="users"><span>♙</span><b data-i18n="usersPermissions">المستخدمون والصلاحيات</b></button>
+        <button class="nav-item" data-view="settings"><span>⚙</span><b data-i18n="settings">الإعدادات</b></button>
       </nav>
 
-      <div class="sidebar-actions">
-        <a class="primary-cta" href="#consultation" data-i18n="bookConsultation">طلب استشارة</a>
-        <div class="quick-controls">
-          <button class="control-btn" id="langToggle" type="button" aria-label="تغيير اللغة">
-            <span class="control-icon">EN</span><span id="langLabel">English</span>
-          </button>
-          <button class="control-btn" id="themeToggle" type="button" aria-label="تغيير المظهر">
-            <svg class="sun-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.66 6.34l1.41-1.41"/></svg>
-            <svg class="moon-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A9 9 0 1111.2 3 7 7 0 0021 12.8z"/></svg>
-            <span data-i18n="themeLabel">المظهر</span>
-          </button>
-        </div>
+      <div class="sidebar-foot">
+        <div class="user-chip"><span class="avatar">ح</span><div><strong id="sidebarUsername">مدير النظام</strong><small data-i18n="administrator">مدير النظام</small></div></div>
+        <button class="logout-btn" id="logoutBtn" type="button" data-i18n="logout">تسجيل الخروج</button>
       </div>
     </aside>
 
-    <div class="drawer-overlay" id="drawerOverlay" hidden></div>
+    <div class="sidebar-overlay" id="sidebarOverlay" hidden></div>
 
-    <div class="page-column">
-      <header class="mobile-header">
-        <button class="icon-btn" id="openDrawer" type="button" aria-label="فتح القائمة">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
-        </button>
-        <a class="mobile-brand" href="#home">
-          <span class="brand-mark small">ح ع</span>
-          <strong data-i18n="brandName">المحامية حصة العبيد</strong>
-        </a>
-        <button class="icon-btn mobile-theme" id="mobileThemeToggle" type="button" aria-label="تغيير المظهر">
-          <svg class="sun-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.66 6.34l1.41-1.41"/></svg>
-          <svg class="moon-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A9 9 0 1111.2 3 7 7 0 0021 12.8z"/></svg>
-        </button>
+    <main class="workspace">
+      <header class="topbar">
+        <div class="topbar-title">
+          <button class="icon-btn mobile-menu" id="openSidebar" type="button" aria-label="فتح القائمة">☰</button>
+          <div><p id="breadcrumb" class="breadcrumb" data-i18n="dashboard">لوحة التحكم</p><h2 id="pageTitle" data-i18n="welcomeAdmin">مرحبًا، مدير النظام</h2></div>
+        </div>
+        <div class="topbar-actions">
+          <label class="search-box"><span>⌕</span><input id="globalSearch" data-i18n-placeholder="searchSystem" placeholder="بحث في النظام" /></label>
+          <button class="icon-btn" id="langToggle" type="button" aria-label="اللغة">EN</button>
+          <button class="icon-btn" id="themeToggle" type="button" aria-label="المظهر">☾</button>
+          <button class="icon-btn notification-btn" id="notificationsBtn" type="button" aria-label="الإشعارات">⌁<em id="notificationCount">3</em></button>
+        </div>
       </header>
 
-      <main>
-        <section class="hero section-anchor" id="home">
-          <div class="hero-grid">
-            <div class="hero-copy reveal">
-              <div class="section-kicker"><span></span><b data-i18n="heroKicker">مكتب محاماة شخصي ومستقل</b></div>
-              <h1 data-i18n="heroTitle">حماية قانونية تبدأ بفهم دقيق لقضيتك</h1>
-              <p class="lead" data-i18n="heroText">متابعة مباشرة وسرية للملفات والاستشارات، مع تحليل واضح للوقائع والمستندات وبناء مسار قانوني عملي لكل حالة.</p>
-              <div class="hero-actions">
-                <a class="button button-primary" href="#consultation" data-i18n="heroPrimary">ابدأ طلب الاستشارة</a>
-                <a class="button button-ghost" href="#memo" data-i18n="heroSecondary">مولد المذكرات الذكي</a>
-              </div>
-              <div class="trust-strip">
-                <div><strong>01</strong><span data-i18n="trustOne">سرية مهنية</span></div>
-                <div><strong>02</strong><span data-i18n="trustTwo">متابعة مباشرة</span></div>
-                <div><strong>03</strong><span data-i18n="trustThree">وضوح الإجراءات</span></div>
-              </div>
-            </div>
-
-            <div class="profile-panel reveal">
-              <div class="portrait-frame">
-                <div class="portrait-monogram">ح ع</div>
-                <span data-i18n="photoPlaceholder">تُضاف الصورة الرسمية للمحامية هنا</span>
-              </div>
-              <div class="profile-caption">
-                <div>
-                  <strong data-i18n="profileName">المحامية حصة العبيد</strong>
-                  <small data-i18n="profileRole">محامية ومستشارة قانونية</small>
-                </div>
-                <span class="status-dot" title="Available"></span>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section class="section section-anchor" id="about">
-          <div class="section-grid intro-grid">
-            <div class="section-heading reveal">
-              <div class="section-kicker"><span></span><b data-i18n="aboutKicker">عن المكتب</b></div>
-              <h2 data-i18n="aboutTitle">عناية شخصية بكل ملف، من أول تواصل حتى اكتمال الإجراء</h2>
-            </div>
-            <div class="editorial-copy reveal">
-              <p data-i18n="aboutTextOne">يرتكز العمل على الاستماع الدقيق، مراجعة المستندات، تحديد المركز القانوني، ثم شرح الخيارات المتاحة بلغة واضحة دون تعقيد أو وعود غير واقعية.</p>
-              <p data-i18n="aboutTextTwo">سيتم تحديث هذه الصفحة بعد اعتماد المؤهلات الرسمية والعضويات وسنوات الخبرة والتخصصات الفعلية للمحامية.</p>
-              <div class="signature-line"><span></span><b data-i18n="directHandling">متابعة الملف بواسطة المحامية مباشرة</b></div>
-            </div>
-          </div>
-        </section>
-
-        <section class="section section-soft section-anchor" id="services">
-          <div class="section-heading centered reveal">
-            <div class="section-kicker centered"><span></span><b data-i18n="servicesKicker">مجالات الممارسة</b><span></span></div>
-            <h2 data-i18n="servicesTitle">خدمات قانونية مركزة وواضحة</h2>
-            <p data-i18n="servicesText">تُعدّل القائمة وفق مجالات الممارسة الفعلية قبل الإطلاق الرسمي.</p>
-          </div>
-          <div class="practice-grid">
-            <article class="practice-card reveal"><span>01</span><h3 data-i18n="serviceCivil">القضايا المدنية</h3><p data-i18n="serviceCivilText">المطالبات والتعويضات والمنازعات العقدية والحقوق المدنية.</p></article>
-            <article class="practice-card reveal"><span>02</span><h3 data-i18n="serviceCommercial">القضايا التجارية</h3><p data-i18n="serviceCommercialText">منازعات الشركات والعقود التجارية والمطالبات المالية.</p></article>
-            <article class="practice-card reveal"><span>03</span><h3 data-i18n="serviceFamily">الأحوال الشخصية</h3><p data-i18n="serviceFamilyText">قضايا الأسرة والنفقة والحضانة والحقوق المرتبطة بها.</p></article>
-            <article class="practice-card reveal"><span>04</span><h3 data-i18n="serviceLabor">القضايا العمالية</h3><p data-i18n="serviceLaborText">المستحقات العمالية والفصل وإنهاء العلاقة التعاقدية.</p></article>
-            <article class="practice-card reveal"><span>05</span><h3 data-i18n="serviceContracts">العقود والاتفاقيات</h3><p data-i18n="serviceContractsText">إعداد ومراجعة العقود والاتفاقيات والمذكرات القانونية.</p></article>
-            <article class="practice-card reveal"><span>06</span><h3 data-i18n="serviceConsulting">الاستشارات القانونية</h3><p data-i18n="serviceConsultingText">تحليل قانوني واضح يساعد على اتخاذ القرار المناسب.</p></article>
-          </div>
-        </section>
-
-        <section class="section section-dark section-anchor" id="process">
-          <div class="section-heading centered reveal">
-            <div class="section-kicker centered light"><span></span><b data-i18n="processKicker">منهجية العمل</b><span></span></div>
-            <h2 data-i18n="processTitle">مسار منظم من أول تواصل إلى الإجراء القانوني</h2>
-          </div>
-          <div class="process-line">
-            <article class="process-step reveal"><b>01</b><h3 data-i18n="stepOne">استلام الطلب</h3><p data-i18n="stepOneText">تسجيل الموضوع والمستندات الأساسية.</p></article>
-            <article class="process-step reveal"><b>02</b><h3 data-i18n="stepTwo">التحليل القانوني</h3><p data-i18n="stepTwoText">مراجعة الوقائع وتحديد المركز القانوني.</p></article>
-            <article class="process-step reveal"><b>03</b><h3 data-i18n="stepThree">عرض الخيارات</h3><p data-i18n="stepThreeText">شرح المسارات الممكنة ومخاطر كل خيار.</p></article>
-            <article class="process-step reveal"><b>04</b><h3 data-i18n="stepFour">البدء والمتابعة</h3><p data-i18n="stepFourText">تنفيذ الإجراء المتفق عليه وتحديث العميل.</p></article>
-          </div>
-        </section>
-
-        <section class="section section-anchor" id="memo">
-          <div class="memo-layout">
-            <div class="memo-intro reveal">
-              <div class="section-kicker"><span></span><b data-i18n="memoKicker">مولد المذكرات الذكي</b></div>
-              <h2 data-i18n="memoTitle">أنشئ مسودة أولية منظمة من بيانات قضيتك</h2>
-              <p data-i18n="memoText">أدخل المعلومات الأساسية، وسيقوم النظام بتكوين مسودة أولية قابلة للمراجعة والنسخ والطباعة.</p>
-              <div class="legal-notice" data-i18n="memoNotice">المسودة الناتجة أولية ولا تُعد استشارة أو مذكرة نهائية قبل مراجعتها من محامٍ مختص.</div>
-            </div>
-
-            <div class="memo-card reveal">
-              <form id="memoForm">
-                <div class="form-grid">
-                  <label><span data-i18n="memoTypeLabel">نوع المذكرة</span>
-                    <select id="memoType" required>
-                      <option value="" data-i18n="chooseOption">اختر</option>
-                      <option value="defense" data-i18n="memoDefense">مذكرة دفاع</option>
-                      <option value="claim" data-i18n="memoClaim">صحيفة دعوى</option>
-                      <option value="reply" data-i18n="memoReply">مذكرة رد</option>
-                      <option value="expert" data-i18n="memoExpert">طلب خبير</option>
-                      <option value="appeal" data-i18n="memoAppeal">مذكرة استئناف</option>
-                    </select>
-                  </label>
-                  <label><span data-i18n="caseTypeLabel">نوع القضية</span>
-                    <select id="caseType" required>
-                      <option value="" data-i18n="chooseOption">اختر</option>
-                      <option value="civil" data-i18n="caseCivil">مدني</option>
-                      <option value="commercial" data-i18n="caseCommercial">تجاري</option>
-                      <option value="labor" data-i18n="caseLabor">عمالي</option>
-                      <option value="family" data-i18n="caseFamily">أحوال شخصية</option>
-                      <option value="criminal" data-i18n="caseCriminal">جزائي</option>
-                      <option value="administrative" data-i18n="caseAdministrative">إداري</option>
-                    </select>
-                  </label>
-                  <label><span data-i18n="courtLabel">المحكمة أو الجهة</span><input id="court" data-i18n-placeholder="courtPlaceholder" placeholder="مثال: المحكمة الكلية" /></label>
-                  <label><span data-i18n="roleLabel">صفة مقدم المذكرة</span><input id="role" data-i18n-placeholder="rolePlaceholder" placeholder="مدعٍ / مدعى عليه / مستأنف" /></label>
-                </div>
-                <label><span data-i18n="partiesLabel">أطراف القضية</span><textarea id="parties" rows="3" data-i18n-placeholder="partiesPlaceholder" placeholder="اكتب أسماء أو صفات الأطراف"></textarea></label>
-                <label><span data-i18n="factsLabel">الوقائع</span><textarea id="facts" rows="6" required data-i18n-placeholder="factsPlaceholder" placeholder="اكتب الوقائع بالتسلسل الزمني"></textarea></label>
-                <label><span data-i18n="claimsLabel">الطلبات</span><textarea id="claims" rows="4" required data-i18n-placeholder="claimsPlaceholder" placeholder="اكتب الطلبات النهائية بوضوح"></textarea></label>
-                <label><span data-i18n="defensesLabel">الدفوع أو الملاحظات القانونية</span><textarea id="defenses" rows="4" data-i18n-placeholder="defensesPlaceholder" placeholder="أدخل الدفوع أو النقاط المطلوب تضمينها"></textarea></label>
-                <button class="button button-primary full" type="submit" data-i18n="generateDraft">توليد المسودة</button>
-              </form>
-
-              <div class="memo-result hidden" id="memoResult">
-                <div class="result-head"><h3 data-i18n="draftTitle">المسودة القانونية</h3><div><button class="text-btn" id="copyMemo" type="button" data-i18n="copy">نسخ</button><button class="text-btn" id="printMemo" type="button" data-i18n="print">طباعة</button></div></div>
-                <pre id="memoText"></pre>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section class="section section-soft section-anchor" id="insights">
-          <div class="section-heading centered reveal">
-            <div class="section-kicker centered"><span></span><b data-i18n="insightsKicker">المعرفة القانونية</b><span></span></div>
-            <h2 data-i18n="insightsTitle">محتوى مبسط يساعدك على فهم خطوتك التالية</h2>
-          </div>
-          <div class="insights-grid">
-            <article class="insight-card reveal"><small data-i18n="articleCategoryOne">العقود</small><h3 data-i18n="articleOne">خمسة بنود يجب مراجعتها قبل توقيع أي عقد</h3><a href="#consultation" data-i18n="readMore">اقرأ المزيد</a></article>
-            <article class="insight-card reveal"><small data-i18n="articleCategoryTwo">المطالبات</small><h3 data-i18n="articleTwo">متى تبدأ المطالبة الودية ومتى تنتقل إلى القضاء؟</h3><a href="#consultation" data-i18n="readMore">اقرأ المزيد</a></article>
-            <article class="insight-card reveal"><small data-i18n="articleCategoryThree">الأدلة الرقمية</small><h3 data-i18n="articleThree">كيف تحفظ المراسلات الإلكترونية بطريقة صحيحة؟</h3><a href="#consultation" data-i18n="readMore">اقرأ المزيد</a></article>
-          </div>
-        </section>
-
-        <section class="section consultation-section section-anchor" id="consultation">
-          <div class="consultation-grid">
-            <div class="section-heading reveal">
-              <div class="section-kicker light"><span></span><b data-i18n="consultKicker">طلب استشارة</b></div>
-              <h2 data-i18n="consultTitle">ابدأ بخطوة واضحة ومدروسة</h2>
-              <p data-i18n="consultText">أرسل بياناتك وملخص الموضوع، وسيتم التواصل معك بعد مراجعة الطلب الأولي.</p>
-            </div>
-            <form class="consultation-form reveal" id="consultationForm">
-              <input required data-i18n-placeholder="namePlaceholder" placeholder="الاسم الكامل" />
-              <input required data-i18n-placeholder="phonePlaceholder" placeholder="رقم الهاتف" />
-              <input type="email" data-i18n-placeholder="emailPlaceholder" placeholder="البريد الإلكتروني — اختياري" />
-              <select required><option value="" data-i18n="chooseCaseType">اختر نوع القضية</option><option data-i18n="caseCivil">مدني</option><option data-i18n="caseCommercial">تجاري</option><option data-i18n="caseLabor">عمالي</option><option data-i18n="caseFamily">أحوال شخصية</option><option data-i18n="caseCriminal">جزائي</option></select>
-              <textarea rows="5" required data-i18n-placeholder="summaryPlaceholder" placeholder="اكتب ملخص الموضوع"></textarea>
-              <button class="button button-light full" type="submit" data-i18n="sendRequest">إرسال الطلب</button>
-              <small data-i18n="relationshipNotice">إرسال الطلب لا ينشئ علاقة محامٍ وموكل قبل الاتفاق الرسمي.</small>
-            </form>
-          </div>
-        </section>
-
-        <section class="section section-anchor" id="contact">
-          <div class="contact-grid">
-            <div class="section-heading reveal">
-              <div class="section-kicker"><span></span><b data-i18n="contactKicker">التواصل</b></div>
-              <h2 data-i18n="contactTitle">بيانات المكتب</h2>
-              <p data-i18n="contactText">البيانات أدناه تجريبية وتحتاج الاستبدال قبل الإطلاق الرسمي.</p>
-            </div>
-            <div class="contact-panel reveal">
-              <div><span data-i18n="phoneLabel">الهاتف</span><strong>+965 0000 0000</strong></div>
-              <div><span data-i18n="whatsappLabel">واتساب</span><strong>+965 0000 0000</strong></div>
-              <div><span data-i18n="emailLabel">البريد الإلكتروني</span><strong>info@example.com</strong></div>
-              <div><span data-i18n="addressLabel">العنوان</span><strong data-i18n="addressValue">الكويت — يضاف العنوان الفعلي لاحقًا</strong></div>
-              <div><span data-i18n="hoursLabel">ساعات العمل</span><strong data-i18n="hoursValue">الأحد إلى الخميس، 9 صباحًا – 5 مساءً</strong></div>
-            </div>
-          </div>
-        </section>
-      </main>
-
-      <footer>
-        <div class="footer-inner">
-          <div><strong data-i18n="brandName">المحامية حصة العبيد</strong><p data-i18n="footerText">خدمات قانونية واستشارات مهنية بسرية ووضوح.</p></div>
-          <div class="footer-links"><a href="#about" data-i18n="navAbout">عن المحامية</a><a href="#services" data-i18n="navServices">مجالات الممارسة</a><a href="#memo" data-i18n="navMemo">مولد المذكرات</a><a href="#contact" data-i18n="navContact">التواصل</a></div>
-        </div>
-        <div class="footer-bottom" data-i18n="developedBy">تم التطوير بواسطة شركة ديجي زون لخدمات الاتصالات</div>
-      </footer>
-    </div>
+      <div class="content" id="appContent"></div>
+    </main>
   </div>
 
-  <button class="floating-lang" id="mobileLangToggle" type="button" aria-label="تغيير اللغة">EN</button>
-  <script src="app.js?v=20260806-1"></script>
+  <div class="modal-backdrop hidden" id="modalBackdrop">
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <header><div><p class="eyebrow" id="modalKicker"></p><h3 id="modalTitle"></h3></div><button class="icon-btn" id="closeModal" type="button">×</button></header>
+      <div id="modalBody"></div>
+    </section>
+  </div>
+
+  <div class="toast" id="toast" role="status"></div>
+  <script src="app.js?v=lms-20260806-1"></script>
 </body>
 </html>
