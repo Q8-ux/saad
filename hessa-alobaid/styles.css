@@ -73,6 +73,11 @@
 .portrait-monogram::before { inset: 12px; }
 .portrait-monogram::after { bottom: 12px; font-size: 23px; }
 
+/* Remove the hero descriptor in both Arabic and English. */
+.hero-copy > .section-kicker {
+  display: none !important;
+}
+
 /* Functional icon-only mobile navigation. */
 @media (max-width: 820px) {
   #openDrawer {
