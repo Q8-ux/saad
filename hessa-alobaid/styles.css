@@ -212,8 +212,7 @@ footer { padding: 50px clamp(28px, 6vw, 90px) 0; background: #050d0c; color: var
 .footer-links a { color: rgba(255,255,255,.72); text-decoration: none; font-size: 12px; }
 .footer-bottom { padding: 18px 0; border-top: 1px solid rgba(255,255,255,.1); text-align: center; color: rgba(255,255,255,.45); font-size: 10px; }
 
-.reveal { opacity: 0; transform: translateY(18px); transition: opacity .65s ease, transform .65s ease; }
-.reveal.visible { opacity: 1; transform: translateY(0); }
+.reveal, .reveal.visible { opacity: 1; transform: none; transition: none; }
 
 @media (max-width: 1080px) {
   :root { --sidebar-width: 268px; }
