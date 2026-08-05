@@ -73,27 +73,7 @@
 .portrait-monogram::before { inset: 12px; }
 .portrait-monogram::after { bottom: 12px; font-size: 23px; }
 
-/* Mobile menu trigger: remove the three horizontal lines while preserving access to navigation. */
-@media (max-width: 820px) {
-  #openDrawer svg {
-    display: none !important;
-  }
-
-  #openDrawer {
-    width: auto;
-    min-width: 70px;
-    padding: 0 12px;
-    font-size: 12px;
-    font-weight: 800;
-    letter-spacing: 0;
-    white-space: nowrap;
-  }
-
-  html[dir="rtl"] #openDrawer::after {
-    content: "القائمة";
-  }
-
-  html[dir="ltr"] #openDrawer::after {
-    content: "Menu";
-  }
+/* The mobile menu trigger and its label are intentionally removed. */
+#openDrawer {
+  display: none !important;
 }
