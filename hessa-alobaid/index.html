@@ -8,11 +8,14 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css?v=20260805-3" />
+  <link rel="stylesheet" href="mobile-menu.css?v=20260805-3" />
 </head>
 <body>
   <header class="site-header">
     <div class="container nav-wrap">
+      <input class="mobile-menu-toggle" type="checkbox" id="mobileMenuToggle" aria-hidden="true" />
+
       <a href="#home" class="brand">
         <span class="brand-mark">ح ع</span>
         <span>
@@ -20,8 +23,10 @@
           <small>مكتب محاماة واستشارات قانونية</small>
         </span>
       </a>
-      <button class="menu-btn" aria-label="فتح القائمة">☰</button>
-      <nav class="main-nav">
+
+      <label for="mobileMenuToggle" class="menu-btn" aria-label="فتح القائمة" role="button" tabindex="0">☰</label>
+
+      <nav class="main-nav" aria-label="القائمة الرئيسية">
         <a href="#about">عن المحامية</a>
         <a href="#services">التخصصات</a>
         <a href="#process">طريقة العمل</a>
@@ -29,7 +34,31 @@
         <a href="#articles">المقالات</a>
         <a href="#contact">التواصل</a>
       </nav>
+
       <a href="#consultation" class="btn btn-primary nav-cta">طلب استشارة</a>
+
+      <label for="mobileMenuToggle" class="mobile-menu-backdrop" aria-label="إغلاق القائمة"></label>
+
+      <aside class="mobile-drawer" aria-label="القائمة الجانبية">
+        <div class="mobile-drawer-head">
+          <div class="mobile-drawer-title">
+            <strong>المحامية حصة العبيد</strong>
+            <small>القائمة الرئيسية</small>
+          </div>
+          <label for="mobileMenuToggle" class="mobile-drawer-close" aria-label="إغلاق القائمة" role="button" tabindex="0">×</label>
+        </div>
+
+        <nav class="mobile-drawer-links" aria-label="التنقل عبر الموقع">
+          <a href="#about">عن المحامية</a>
+          <a href="#services">التخصصات</a>
+          <a href="#process">طريقة العمل</a>
+          <a href="#memo">مولد المذكرات</a>
+          <a href="#articles">المقالات</a>
+          <a href="#contact">التواصل</a>
+        </nav>
+
+        <a class="mobile-drawer-cta" href="#consultation">طلب استشارة</a>
+      </aside>
     </div>
   </header>
 
@@ -233,6 +262,6 @@
   </footer>
 
   <a class="whatsapp" href="#contact" aria-label="واتساب">واتساب</a>
-  <script src="app.js"></script>
+  <script src="app.js?v=20260805-3"></script>
 </body>
 </html>
