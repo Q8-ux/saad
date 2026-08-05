@@ -1,4 +1,4 @@
-name: Deploy Workforce Platform
+name: Deploy GitHub Pages Sites
 
 on:
   push:
@@ -23,10 +23,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Install dependencies
+
+      - name: Install workforce dependencies
         working-directory: workforce-platform/apps/web
         run: npm install
-      - name: Build
+
+      - name: Build workforce platform
         working-directory: workforce-platform/apps/web
         env:
           GITHUB_PAGES: 'true'
@@ -34,12 +36,21 @@ jobs:
         run: |
           rm -rf .next out
           npm run build
-      - name: Verify enterprise interface
+
+      - name: Add Hessa Al-Obaid website
+        run: |
+          test -f hessa-alobaid/index.html
+          mkdir -p workforce-platform/apps/web/out/hessa-alobaid
+          cp -R hessa-alobaid/. workforce-platform/apps/web/out/hessa-alobaid/
+          touch workforce-platform/apps/web/out/.nojekyll
+
+      - name: Verify published files
         run: |
           test -f workforce-platform/apps/web/out/index.html
-          test -f workforce-platform/apps/web/out/dashboard/index.html
-          grep -R "enterpriseShell" workforce-platform/apps/web/out/_next/static || true
-          touch workforce-platform/apps/web/out/.nojekyll
+          test -f workforce-platform/apps/web/out/hessa-alobaid/index.html
+          test -f workforce-platform/apps/web/out/hessa-alobaid/styles.css
+          test -f workforce-platform/apps/web/out/hessa-alobaid/app.js
+
       - uses: actions/upload-pages-artifact@v3
         with:
           path: workforce-platform/apps/web/out
