@@ -9,11 +9,12 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=lms-20260806-voice1" />
-  <link rel="stylesheet" href="mobile.css?v=lms-20260806-voice1" />
-  <link rel="stylesheet" href="brand-system.css?v=lms-20260806-voice1" />
-  <link rel="stylesheet" href="dashboard-system.css?v=lms-20260806-voice1" />
-  <link rel="stylesheet" href="legal-assistant-bot.css?v=lms-20260806-voice1" />
+  <link rel="stylesheet" href="styles.css?v=20260806-home1" />
+  <link rel="stylesheet" href="mobile.css?v=20260806-home1" />
+  <link rel="stylesheet" href="brand-system.css?v=20260806-home1" />
+  <link rel="stylesheet" href="dashboard-system.css?v=20260806-home1" />
+  <link rel="stylesheet" href="legal-assistant-bot.css?v=20260806-home1" />
+  <link rel="stylesheet" href="home-controls.css?v=20260806-home1" />
 </head>
 <body>
   <section class="login-screen" id="loginScreen">
@@ -82,6 +83,9 @@
           <button class="icon-btn mobile-menu" id="openSidebar" type="button" aria-label="فتح القائمة" aria-controls="sidebar" aria-expanded="false">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M5 12h14M5 17h14"/></svg>
           </button>
+          <button class="icon-btn home-button" id="homeButton" type="button" aria-label="الرجوع إلى الرئيسية" title="الرجوع إلى الرئيسية">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 11.2 12 4l8.5 7.2"/><path d="M5.5 10.3V20h13v-9.7"/><path d="M9.5 20v-5.5h5V20"/></svg>
+          </button>
           <div><p id="breadcrumb" class="breadcrumb" data-i18n="dashboard">لوحة التحكم</p><h2 id="pageTitle" data-i18n="welcomeAdmin">مرحبًا، مدير النظام</h2></div>
         </div>
         <div class="topbar-actions">
@@ -104,9 +108,10 @@
   </div>
 
   <div class="toast" id="toast" role="status"></div>
-  <script src="navigation.js?v=lms-20260806-voice1"></script>
-  <script src="app.js?v=lms-20260806-voice1"></script>
-  <script src="dashboard-system.js?v=lms-20260806-voice1"></script>
-  <script src="legal-assistant-bot.js?v=lms-20260806-voice1"></script>
+  <script src="navigation.js?v=20260806-home1"></script>
+  <script src="app.js?v=20260806-home1"></script>
+  <script src="dashboard-system.js?v=20260806-home1"></script>
+  <script src="legal-assistant-bot.js?v=20260806-home1"></script>
+  <script src="home-controls.js?v=20260806-home1"></script>
 </body>
 </html>
