@@ -24,7 +24,9 @@
     };
 
     const goDashboard = () => {
-      if (typeof switchView === 'function') {
+      if (window.HessaInternal && typeof window.HessaInternal.home === 'function') {
+        window.HessaInternal.home();
+      } else if (typeof switchView === 'function') {
         switchView('dashboard');
       } else {
         window.location.reload();
@@ -61,15 +63,29 @@
         return;
       }
 
-      const officeTool = event.target.closest('[data-office-view]');
+      const sabeqItem = event.target.closest('#sidebarNav [data-sabeq-view]');
+      if (sabeqItem) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        const view = sabeqItem.dataset.sabeqView;
+        setMenu(false);
+        if (window.HessaInternal && typeof window.HessaInternal.open === 'function') {
+          window.HessaInternal.open(view);
+        } else if (typeof switchView === 'function') {
+          switchView(view);
+        }
+        return;
+      }
+
+      const officeTool = event.target.closest('#sidebarNav [data-office-view]');
       if (officeTool) {
         event.preventDefault();
         event.stopImmediatePropagation();
         const view = officeTool.dataset.officeView;
+        setMenu(false);
         if (window.HessaOfficeTools && typeof window.HessaOfficeTools.open === 'function') {
           window.HessaOfficeTools.open(view);
         }
-        setMenu(false);
         return;
       }
 
@@ -77,8 +93,9 @@
       if (menuItem) {
         event.preventDefault();
         event.stopImmediatePropagation();
-        if (typeof switchView === 'function') switchView(menuItem.dataset.view);
+        const view = menuItem.dataset.view;
         setMenu(false);
+        if (typeof switchView === 'function') switchView(view);
       }
     }, true);
 
