@@ -9,8 +9,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=lms-20260806-mobile1" />
-  <link rel="stylesheet" href="mobile.css?v=lms-20260806-mobile1" />
+  <link rel="stylesheet" href="styles.css?v=lms-20260806-brand2" />
+  <link rel="stylesheet" href="mobile.css?v=lms-20260806-brand2" />
+  <link rel="stylesheet" href="brand-system.css?v=lms-20260806-brand2" />
 </head>
 <body>
   <section class="login-screen" id="loginScreen">
@@ -33,7 +34,9 @@
       <div class="sidebar-head">
         <div class="legal-logo" aria-hidden="true"><span>ح ع</span><small>⚖</small></div>
         <div class="brand-copy"><strong data-i18n="officeName">مكتب المحامية حصة العبيد</strong><small data-i18n="lawManagementSystem">نظام إدارة أعمال المحاماة</small></div>
-        <button class="icon-btn close-sidebar" id="closeSidebar" type="button" aria-label="إغلاق">×</button>
+        <button class="icon-btn close-sidebar" id="closeSidebar" type="button" aria-label="إغلاق القائمة">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
       </div>
 
       <nav class="sidebar-nav" id="sidebarNav">
@@ -74,7 +77,9 @@
     <main class="workspace">
       <header class="topbar">
         <div class="topbar-title">
-          <button class="icon-btn mobile-menu" id="openSidebar" type="button" aria-label="فتح القائمة">☰</button>
+          <button class="icon-btn mobile-menu" id="openSidebar" type="button" aria-label="فتح القائمة" aria-controls="sidebar" aria-expanded="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M5 12h14M5 17h14"/></svg>
+          </button>
           <div><p id="breadcrumb" class="breadcrumb" data-i18n="dashboard">لوحة التحكم</p><h2 id="pageTitle" data-i18n="welcomeAdmin">مرحبًا، مدير النظام</h2></div>
         </div>
         <div class="topbar-actions">
@@ -97,6 +102,7 @@
   </div>
 
   <div class="toast" id="toast" role="status"></div>
-  <script src="app.js?v=lms-20260806-mobile1"></script>
+  <script src="navigation.js?v=lms-20260806-brand2"></script>
+  <script src="app.js?v=lms-20260806-brand2"></script>
 </body>
 </html>
