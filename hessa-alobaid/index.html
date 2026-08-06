@@ -4,18 +4,19 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#0b302c" />
-  <meta name="description" content="نظام إدارة مكتب المحامية حصة العبيد للقضايا والعملاء والجلسات والأرشفة والمراسلات والمذكرات القانونية." />
-  <title>نظام مكتب المحامية حصة العبيد</title>
+  <meta name="description" content="النظام الداخلي لمكتب المحامية حصة العبيد لإدارة القضايا والعملاء والجلسات والأرشفة والمراسلات والمذكرات القانونية." />
+  <title>النظام الداخلي | مكتب المحامية حصة العبيد</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=20260806-tools2" />
-  <link rel="stylesheet" href="mobile.css?v=20260806-tools2" />
-  <link rel="stylesheet" href="brand-system.css?v=20260806-tools2" />
-  <link rel="stylesheet" href="dashboard-system.css?v=20260806-tools2" />
-  <link rel="stylesheet" href="legal-assistant-bot.css?v=20260806-tools2" />
-  <link rel="stylesheet" href="home-controls.css?v=20260806-tools2" />
-  <link rel="stylesheet" href="office-tools.css?v=20260806-tools2" />
+  <link rel="stylesheet" href="styles.css?v=20260806-sabeq1" />
+  <link rel="stylesheet" href="mobile.css?v=20260806-sabeq1" />
+  <link rel="stylesheet" href="brand-system.css?v=20260806-sabeq1" />
+  <link rel="stylesheet" href="dashboard-system.css?v=20260806-sabeq1" />
+  <link rel="stylesheet" href="legal-assistant-bot.css?v=20260806-sabeq1" />
+  <link rel="stylesheet" href="home-controls.css?v=20260806-sabeq1" />
+  <link rel="stylesheet" href="office-tools.css?v=20260806-sabeq1" />
+  <link rel="stylesheet" href="sabeq-internal.css?v=20260806-sabeq1" />
 </head>
 <body>
   <section class="login-screen" id="loginScreen">
@@ -37,48 +38,15 @@
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-head">
         <div class="legal-logo" aria-hidden="true"><span>ح ع</span><small>⚖</small></div>
-        <div class="brand-copy"><strong data-i18n="officeName">مكتب المحامية حصة العبيد</strong><small data-i18n="lawManagementSystem">نظام إدارة أعمال المحاماة</small></div>
+        <div class="brand-copy"><strong data-i18n="officeName">مكتب المحامية حصة العبيد</strong><small data-i18n="lawManagementSystem">النظام الداخلي لإدارة المكتب</small></div>
         <button class="icon-btn close-sidebar" id="closeSidebar" type="button" aria-label="إغلاق القائمة">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
         </button>
       </div>
 
       <nav class="sidebar-nav" id="sidebarNav">
-        <p class="nav-label" data-i18n="mainOperations">العمليات الرئيسية</p>
-        <button class="nav-item active" data-view="dashboard"><span>⌂</span><b data-i18n="dashboard">لوحة التحكم</b></button>
-        <button class="nav-item" data-view="clients"><span>◎</span><b data-i18n="clients">العملاء والموكلون</b></button>
-        <button class="nav-item" data-view="cases"><span>▣</span><b data-i18n="cases">القضايا والملفات</b></button>
-        <button class="nav-item" data-view="sessions"><span>◷</span><b data-i18n="sessions">الجلسات والمواعيد</b></button>
-        <button class="nav-item" data-view="tasks"><span>✓</span><b data-i18n="tasks">المهام والتنبيهات</b></button>
-
-        <p class="nav-label" data-i18n="documentsComms">المستندات والمراسلات</p>
-        <button class="nav-item" data-view="archive"><span>▤</span><b data-i18n="archive">الأرشيف الإلكتروني</b></button>
-        <button class="nav-item" data-view="incoming"><span>↓</span><b data-i18n="incoming">الوارد</b></button>
-        <button class="nav-item" data-view="outgoing"><span>↑</span><b data-i18n="outgoing">الصادر</b></button>
-        <button class="nav-item" data-view="correspondence"><span>✉</span><b data-i18n="correspondence">المراسلات الداخلية</b></button>
-        <button class="nav-item" data-view="whatsapp"><span>◉</span><b data-i18n="whatsapp">واتساب العملاء</b></button>
-
-        <p class="nav-label" data-i18n="legalFinancial">القانوني والمالي</p>
-        <button class="nav-item" data-view="memo"><span>✎</span><b data-i18n="memoGenerator">مولد المذكرات</b></button>
-        <button class="nav-item" data-view="assistant"><span>✦</span><b data-i18n="smartAssistant">المساعد الذكي</b></button>
-        <button class="nav-item" data-view="contracts"><span>◇</span><b data-i18n="contracts">العقود والأتعاب</b></button>
-        <button class="nav-item" data-view="finance"><span>د.ك</span><b data-i18n="finance">الفواتير والمصروفات</b></button>
-        <button class="nav-item" data-view="reports"><span>▥</span><b data-i18n="reports">التقارير والتحليلات</b></button>
-
-        <div data-office-tools-section>
-          <p class="nav-label">أدوات إدارة المكتب</p>
-          <button class="nav-item" type="button" data-office-view="calendar"><span>▦</span><b>التقويم الموحد</b></button>
-          <button class="nav-item" type="button" data-office-view="time"><span>◷</span><b>سجل الوقت</b></button>
-          <button class="nav-item" type="button" data-office-view="templates"><span>▤</span><b>قوالب المستندات</b></button>
-          <button class="nav-item" type="button" data-office-view="workflow"><span>✓</span><b>سير العمل والموافقات</b></button>
-          <button class="nav-item" type="button" data-office-view="portal"><span>◎</span><b>بوابة العملاء</b></button>
-          <button class="nav-item" type="button" data-office-view="knowledge"><span>◇</span><b>قاعدة المعرفة</b></button>
-          <button class="nav-item" type="button" data-office-view="audit"><span>⌁</span><b>سجل التدقيق</b></button>
-        </div>
-
-        <p class="nav-label" data-i18n="administration">الإدارة</p>
-        <button class="nav-item" data-view="users"><span>♙</span><b data-i18n="usersPermissions">المستخدمون والصلاحيات</b></button>
-        <button class="nav-item" data-view="settings"><span>⚙</span><b data-i18n="settings">الإعدادات</b></button>
+        <p class="nav-label">الرئيسية</p>
+        <button class="nav-item active" data-view="dashboard"><span>⌂</span><b>لوحة التحكم</b></button>
       </nav>
 
       <div class="sidebar-foot">
@@ -98,7 +66,7 @@
           <button class="icon-btn home-button" id="homeButton" type="button" aria-label="الرجوع إلى الرئيسية" title="الرجوع إلى الرئيسية">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 11.2 12 4l8.5 7.2"/><path d="M5.5 10.3V20h13v-9.7"/><path d="M9.5 20v-5.5h5V20"/></svg>
           </button>
-          <div><p id="breadcrumb" class="breadcrumb" data-i18n="dashboard">لوحة التحكم</p><h2 id="pageTitle" data-i18n="welcomeAdmin">مرحبًا، مدير النظام</h2></div>
+          <div><p id="breadcrumb" class="breadcrumb">لوحة التحكم</p><h2 id="pageTitle">الرئيسية</h2></div>
         </div>
         <div class="topbar-actions">
           <label class="search-box"><span>⌕</span><input id="globalSearch" data-i18n-placeholder="searchSystem" placeholder="بحث في النظام" /></label>
@@ -120,11 +88,12 @@
   </div>
 
   <div class="toast" id="toast" role="status"></div>
-  <script src="navigation.js?v=20260806-tools2"></script>
-  <script src="app.js?v=20260806-tools2"></script>
-  <script src="dashboard-system.js?v=20260806-tools2"></script>
-  <script src="legal-assistant-bot.js?v=20260806-tools2"></script>
-  <script src="home-controls.js?v=20260806-tools2"></script>
-  <script src="office-tools.js?v=20260806-tools2"></script>
+  <script src="navigation.js?v=20260806-sabeq1"></script>
+  <script src="app.js?v=20260806-sabeq1"></script>
+  <script src="dashboard-system.js?v=20260806-sabeq1"></script>
+  <script src="legal-assistant-bot.js?v=20260806-sabeq1"></script>
+  <script src="home-controls.js?v=20260806-sabeq1"></script>
+  <script src="office-tools.js?v=20260806-sabeq1"></script>
+  <script src="sabeq-internal.js?v=20260806-sabeq1"></script>
 </body>
 </html>
