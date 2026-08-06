@@ -9,13 +9,13 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=20260806-tools1" />
-  <link rel="stylesheet" href="mobile.css?v=20260806-tools1" />
-  <link rel="stylesheet" href="brand-system.css?v=20260806-tools1" />
-  <link rel="stylesheet" href="dashboard-system.css?v=20260806-tools1" />
-  <link rel="stylesheet" href="legal-assistant-bot.css?v=20260806-tools1" />
-  <link rel="stylesheet" href="home-controls.css?v=20260806-tools1" />
-  <link rel="stylesheet" href="office-tools.css?v=20260806-tools1" />
+  <link rel="stylesheet" href="styles.css?v=20260806-tools2" />
+  <link rel="stylesheet" href="mobile.css?v=20260806-tools2" />
+  <link rel="stylesheet" href="brand-system.css?v=20260806-tools2" />
+  <link rel="stylesheet" href="dashboard-system.css?v=20260806-tools2" />
+  <link rel="stylesheet" href="legal-assistant-bot.css?v=20260806-tools2" />
+  <link rel="stylesheet" href="home-controls.css?v=20260806-tools2" />
+  <link rel="stylesheet" href="office-tools.css?v=20260806-tools2" />
 </head>
 <body>
   <section class="login-screen" id="loginScreen">
@@ -65,6 +65,17 @@
         <button class="nav-item" data-view="finance"><span>د.ك</span><b data-i18n="finance">الفواتير والمصروفات</b></button>
         <button class="nav-item" data-view="reports"><span>▥</span><b data-i18n="reports">التقارير والتحليلات</b></button>
 
+        <div data-office-tools-section>
+          <p class="nav-label">أدوات إدارة المكتب</p>
+          <button class="nav-item" type="button" data-office-view="calendar"><span>▦</span><b>التقويم الموحد</b></button>
+          <button class="nav-item" type="button" data-office-view="time"><span>◷</span><b>سجل الوقت</b></button>
+          <button class="nav-item" type="button" data-office-view="templates"><span>▤</span><b>قوالب المستندات</b></button>
+          <button class="nav-item" type="button" data-office-view="workflow"><span>✓</span><b>سير العمل والموافقات</b></button>
+          <button class="nav-item" type="button" data-office-view="portal"><span>◎</span><b>بوابة العملاء</b></button>
+          <button class="nav-item" type="button" data-office-view="knowledge"><span>◇</span><b>قاعدة المعرفة</b></button>
+          <button class="nav-item" type="button" data-office-view="audit"><span>⌁</span><b>سجل التدقيق</b></button>
+        </div>
+
         <p class="nav-label" data-i18n="administration">الإدارة</p>
         <button class="nav-item" data-view="users"><span>♙</span><b data-i18n="usersPermissions">المستخدمون والصلاحيات</b></button>
         <button class="nav-item" data-view="settings"><span>⚙</span><b data-i18n="settings">الإعدادات</b></button>
@@ -109,11 +120,11 @@
   </div>
 
   <div class="toast" id="toast" role="status"></div>
-  <script src="navigation.js?v=20260806-tools1"></script>
-  <script src="app.js?v=20260806-tools1"></script>
-  <script src="dashboard-system.js?v=20260806-tools1"></script>
-  <script src="legal-assistant-bot.js?v=20260806-tools1"></script>
-  <script src="home-controls.js?v=20260806-tools1"></script>
-  <script src="office-tools.js?v=20260806-tools1"></script>
+  <script src="navigation.js?v=20260806-tools2"></script>
+  <script src="app.js?v=20260806-tools2"></script>
+  <script src="dashboard-system.js?v=20260806-tools2"></script>
+  <script src="legal-assistant-bot.js?v=20260806-tools2"></script>
+  <script src="home-controls.js?v=20260806-tools2"></script>
+  <script src="office-tools.js?v=20260806-tools2"></script>
 </body>
 </html>
