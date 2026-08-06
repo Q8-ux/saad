@@ -37,6 +37,18 @@ jobs:
           rm -rf .next out
           npm run build
 
+      - name: Validate Hessa system scripts
+        run: |
+          node --check hessa-alobaid/app.js
+          node --check hessa-alobaid/navigation.js
+          node --check hessa-alobaid/dashboard-system.js
+          node --check hessa-alobaid/legal-assistant-bot.js
+          node --check hessa-alobaid/home-controls.js
+          node --check hessa-alobaid/office-tools.js
+          node --check hessa-alobaid/sabeq-internal.js
+          node --check hessa-alobaid/full-i18n.js
+          node --check hessa-alobaid/language-polish.js
+
       - name: Add Hessa Al-Obaid website
         run: |
           test -f hessa-alobaid/index.html
@@ -50,6 +62,8 @@ jobs:
           test -f workforce-platform/apps/web/out/hessa-alobaid/index.html
           test -f workforce-platform/apps/web/out/hessa-alobaid/styles.css
           test -f workforce-platform/apps/web/out/hessa-alobaid/app.js
+          test -f workforce-platform/apps/web/out/hessa-alobaid/full-i18n.js
+          test -f workforce-platform/apps/web/out/hessa-alobaid/language-polish.js
 
       - uses: actions/upload-pages-artifact@v3
         with:
