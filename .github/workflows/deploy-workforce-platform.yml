@@ -1,54 +1,25 @@
-name: Deploy Workforce Platform
+name: Workforce Platform Build Check
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'workforce-platform/apps/web/**'
-      - '.github/workflows/deploy-workforce-platform.yml'
   workflow_dispatch:
 
 permissions:
-  contents: write
-  pages: write
-  id-token: write
-
-concurrency:
-  group: workforce-pages-production
-  cancel-in-progress: true
+  contents: read
 
 jobs:
-  build:
+  build-check:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout latest main
+      - name: Checkout
         uses: actions/checkout@v4
-        with:
-          ref: main
-          fetch-depth: 1
-
-      - name: Configure GitHub Pages
-        uses: actions/configure-pages@v5
-
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 22
-
-      - name: Verify sources
-        run: |
-          test -f workforce-platform/apps/web/app/dashboard/page.tsx
-          test -f workforce-platform/apps/web/app/lib/supabase.ts
-
-      - name: Remove previous output
-        working-directory: workforce-platform/apps/web
-        run: rm -rf .next out node_modules
-
       - name: Install dependencies
         working-directory: workforce-platform/apps/web
         run: npm install --no-audit --no-fund
-
-      - name: Build current dashboard
+      - name: Build workforce platform
         working-directory: workforce-platform/apps/web
         env:
           GITHUB_PAGES: 'true'
@@ -56,51 +27,6 @@ jobs:
           NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
           NEXT_PUBLIC_SUPABASE_URL: 'https://onefbrycdifaqghkzneh.supabase.co'
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_M_L4mOwYjcAMbM5QXj2Nzw_4yXmrdXR'
-          NEXT_PUBLIC_INTERFACE_VERSION: 'government-dashboard-pages-repair-v11'
         run: npm run build
-
-      - name: Verify exported dashboard
-        run: |
-          test -f workforce-platform/apps/web/out/index.html
-          test -f workforce-platform/apps/web/out/dashboard/index.html
-          test -d workforce-platform/apps/web/out/_next
-          echo 'government-dashboard-pages-repair-v11' > workforce-platform/apps/web/out/interface-version.txt
-          touch workforce-platform/apps/web/out/.nojekyll
-
-      - name: Upload current interface
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: workforce-platform/apps/web/out
-
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Deploy and replace previous site
-        id: deployment
-        uses: actions/deploy-pages@v4
-
-      - name: Checkout main for status update
-        uses: actions/checkout@v4
-        with:
-          ref: main
-          fetch-depth: 1
-
-      - name: Record successful deployment
-        run: |
-          {
-            echo "status=deployed"
-            echo "version=government-dashboard-pages-repair-v11"
-            echo "run_id=${GITHUB_RUN_ID}"
-            echo "commit=${GITHUB_SHA}"
-            echo "page_url=${{ steps.deployment.outputs.page_url }}"
-            echo "time=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-          } > deployment-status.txt
-          git config user.name github-actions[bot]
-          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add deployment-status.txt
-          git commit -m "Record successful Pages deployment ${GITHUB_RUN_ID}" || true
-          git push || true
+      - name: Verify dashboard export
+        run: test -s workforce-platform/apps/web/out/dashboard/index.html
