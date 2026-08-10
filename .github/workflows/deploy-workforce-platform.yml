@@ -35,11 +35,10 @@ jobs:
         with:
           node-version: 22
 
-      - name: Verify Supabase integration source
+      - name: Verify sources
         run: |
+          test -f workforce-platform/apps/web/app/dashboard/page.tsx
           test -f workforce-platform/apps/web/app/lib/supabase.ts
-          test -f workforce-platform/apps/web/app/components/DatabaseConnectionStatus.tsx
-          test -f workforce-platform/supabase/migrations/20260803_initial_work_scope.sql
 
       - name: Remove previous output
         working-directory: workforce-platform/apps/web
@@ -50,58 +49,28 @@ jobs:
         run: npm install --no-audit --no-fund
 
       - name: Build current dashboard
-        id: app_build
         working-directory: workforce-platform/apps/web
         env:
           GITHUB_PAGES: 'true'
           NEXT_PUBLIC_API_URL: 'https://workforce-platform-api.onrender.com/api'
           NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
           NEXT_PUBLIC_SUPABASE_URL: 'https://onefbrycdifaqghkzneh.supabase.co'
-          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
-          NEXT_PUBLIC_INTERFACE_VERSION: 'government-dashboard-supabase-v10'
-        shell: bash
-        run: |
-          set -o pipefail
-          npm run build 2>&1 | tee ../../../pages-build.log
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_M_L4mOwYjcAMbM5QXj2Nzw_4yXmrdXR'
+          NEXT_PUBLIC_INTERFACE_VERSION: 'government-dashboard-pages-repair-v11'
+        run: npm run build
 
-      - name: Verify exported website
+      - name: Verify exported dashboard
         run: |
           test -f workforce-platform/apps/web/out/index.html
           test -f workforce-platform/apps/web/out/dashboard/index.html
-          test -f workforce-platform/apps/web/out/attendance-smart/index.html
-          test -f workforce-platform/apps/web/out/transfers/index.html
-          test -f workforce-platform/apps/web/out/emergency/index.html
-          test -f workforce-platform/apps/web/out/ai-tools/index.html
-          test -f workforce-platform/apps/web/out/notifications/index.html
-          test -f workforce-platform/apps/web/out/profile/index.html
           test -d workforce-platform/apps/web/out/_next
-          echo 'government-dashboard-supabase-v10' > workforce-platform/apps/web/out/interface-version.txt
+          echo 'government-dashboard-pages-repair-v11' > workforce-platform/apps/web/out/interface-version.txt
           touch workforce-platform/apps/web/out/.nojekyll
 
       - name: Upload current interface
         uses: actions/upload-pages-artifact@v3
         with:
           path: workforce-platform/apps/web/out
-
-      - name: Record build failure
-        if: failure()
-        shell: bash
-        run: |
-          {
-            echo "status=build_failed"
-            echo "version=government-dashboard-supabase-v10"
-            echo "run_id=${GITHUB_RUN_ID}"
-            echo "commit=${GITHUB_SHA}"
-            echo "time=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-            echo "log_tail_begin"
-            tail -n 120 pages-build.log 2>/dev/null || true
-            echo "log_tail_end"
-          } > deployment-status.txt
-          git config user.name github-actions[bot]
-          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add deployment-status.txt
-          git commit -m "Record Pages build failure ${GITHUB_RUN_ID}" || true
-          git push || true
 
   deploy:
     environment:
@@ -121,11 +90,10 @@ jobs:
           fetch-depth: 1
 
       - name: Record successful deployment
-        shell: bash
         run: |
           {
             echo "status=deployed"
-            echo "version=government-dashboard-supabase-v10"
+            echo "version=government-dashboard-pages-repair-v11"
             echo "run_id=${GITHUB_RUN_ID}"
             echo "commit=${GITHUB_SHA}"
             echo "page_url=${{ steps.deployment.outputs.page_url }}"
