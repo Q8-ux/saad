@@ -15,7 +15,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -32,6 +32,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
@@ -53,7 +56,7 @@ jobs:
           NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
           NEXT_PUBLIC_SUPABASE_URL: 'https://onefbrycdifaqghkzneh.supabase.co'
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_M_L4mOwYjcAMbM5QXj2Nzw_4yXmrdXR'
-          NEXT_PUBLIC_INTERFACE_VERSION: 'government-dashboard-pages-repair-v12'
+          NEXT_PUBLIC_INTERFACE_VERSION: 'government-dashboard-pages-repair-v13'
         run: |
           rm -rf .next out
           npm run build
@@ -72,6 +75,7 @@ jobs:
           cp -R workforce-platform/apps/web/out/ai-tools _site/ai-tools
           cp -R workforce-platform/apps/web/out/notifications _site/notifications
           cp -R workforce-platform/apps/web/out/profile _site/profile
+          echo 'government-dashboard-pages-repair-v13' > _site/interface-version.txt
           touch _site/.nojekyll
 
       - name: Validate combined site
@@ -91,3 +95,19 @@ jobs:
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Record successful unified deployment
+        run: |
+          {
+            echo "status=deployed"
+            echo "version=government-dashboard-pages-repair-v13"
+            echo "run_id=${GITHUB_RUN_ID}"
+            echo "commit=${GITHUB_SHA}"
+            echo "page_url=${{ steps.deployment.outputs.page_url }}"
+            echo "time=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          } > unified-pages-status.txt
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add unified-pages-status.txt
+          git commit -m "Record unified Pages deployment ${GITHUB_RUN_ID}" || true
+          git push || true
