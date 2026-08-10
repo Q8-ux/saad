@@ -56,10 +56,17 @@ jobs:
           cp -R hessa-alobaid/. workforce-platform/apps/web/out/hessa-alobaid/
           touch workforce-platform/apps/web/out/.nojekyll
 
+      - name: Add Sabeq legal system portal
+        run: |
+          test -f sabeq-legal-system/index.html
+          mkdir -p workforce-platform/apps/web/out/sabeq-legal-system
+          cp -R sabeq-legal-system/. workforce-platform/apps/web/out/sabeq-legal-system/
+
       - name: Verify published files
         run: |
           test -f workforce-platform/apps/web/out/index.html
           test -f workforce-platform/apps/web/out/hessa-alobaid/index.html
+          test -f workforce-platform/apps/web/out/sabeq-legal-system/index.html
           test -f workforce-platform/apps/web/out/hessa-alobaid/styles.css
           test -f workforce-platform/apps/web/out/hessa-alobaid/app.js
           test -f workforce-platform/apps/web/out/hessa-alobaid/full-i18n.js
