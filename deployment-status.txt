@@ -1,6 +1,6 @@
 status=deployed
-version=government-dashboard-supabase-v10
-run_id=30771948141
-commit=19cf09826f2678fbab502023dd995f744c31fcb7
+version=government-dashboard-pages-repair-v11
+run_id=31395064802
+commit=f93083754eb826d328efd63805aaf12fa18ffb0f
 page_url=https://q8-ux.github.io/saad/
-time=2026-08-02T23:18:17Z
+time=2026-08-10T13:53:10Z
