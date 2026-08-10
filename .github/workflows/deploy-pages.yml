@@ -1,4 +1,4 @@
-name: Deploy Cyber Case Archive
+name: Deploy All GitHub Pages Sites
 
 on:
   push:
@@ -10,7 +10,8 @@ on:
       - cyber-data.js
       - sabeq.html
       - 'sabeq-legal-system/**'
-      - .github/workflows/deploy-pages.yml
+      - 'workforce-platform/apps/web/**'
+      - '.github/workflows/deploy-pages.yml'
   workflow_dispatch:
 
 permissions:
@@ -23,7 +24,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  deploy:
+  build-and-deploy:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -35,24 +36,52 @@ jobs:
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
 
-      - name: Prepare static archive
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install workforce dependencies
+        working-directory: workforce-platform/apps/web
+        run: npm install --no-audit --no-fund
+
+      - name: Build workforce platform
+        working-directory: workforce-platform/apps/web
+        env:
+          GITHUB_PAGES: 'true'
+          NEXT_PUBLIC_API_URL: 'https://workforce-platform-api.onrender.com/api'
+          NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+          NEXT_PUBLIC_SUPABASE_URL: 'https://onefbrycdifaqghkzneh.supabase.co'
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_M_L4mOwYjcAMbM5QXj2Nzw_4yXmrdXR'
+          NEXT_PUBLIC_INTERFACE_VERSION: 'government-dashboard-pages-repair-v12'
         run: |
+          rm -rf .next out
+          npm run build
+
+      - name: Prepare combined site
+        run: |
+          rm -rf _site
           mkdir -p _site
           cp index.html cyber-archive.css cyber-archive.js cyber-data.js sabeq.html _site/
           cp -R sabeq-legal-system _site/sabeq-legal-system
+          cp -R workforce-platform/apps/web/out/_next _site/_next
+          cp -R workforce-platform/apps/web/out/dashboard _site/dashboard
+          cp -R workforce-platform/apps/web/out/attendance-smart _site/attendance-smart
+          cp -R workforce-platform/apps/web/out/transfers _site/transfers
+          cp -R workforce-platform/apps/web/out/emergency _site/emergency
+          cp -R workforce-platform/apps/web/out/ai-tools _site/ai-tools
+          cp -R workforce-platform/apps/web/out/notifications _site/notifications
+          cp -R workforce-platform/apps/web/out/profile _site/profile
           touch _site/.nojekyll
 
-      - name: Validate archive files
+      - name: Validate combined site
         run: |
           test -s _site/index.html
-          test -s _site/cyber-archive.css
-          test -s _site/cyber-archive.js
-          test -s _site/cyber-data.js
-          grep -q 'cyber-data.js' _site/index.html
-          grep -q 'CYBER_DATA' _site/cyber-data.js
-          test -s _site/sabeq.html
+          test -s _site/dashboard/index.html
+          test -s _site/attendance-smart/index.html
+          test -s _site/ai-tools/index.html
+          test -d _site/_next
           test -s _site/sabeq-legal-system/index.html
-          grep -q 'نظام سابق الداخلي' _site/sabeq-legal-system/index.html
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
