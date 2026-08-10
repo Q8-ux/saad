@@ -8,6 +8,7 @@ on:
       - cyber-archive.css
       - cyber-archive.js
       - cyber-data.js
+      - sabeq.html
       - 'sabeq-legal-system/**'
       - .github/workflows/deploy-pages.yml
   workflow_dispatch:
@@ -37,7 +38,7 @@ jobs:
       - name: Prepare static archive
         run: |
           mkdir -p _site
-          cp index.html cyber-archive.css cyber-archive.js cyber-data.js _site/
+          cp index.html cyber-archive.css cyber-archive.js cyber-data.js sabeq.html _site/
           cp -R sabeq-legal-system _site/sabeq-legal-system
           touch _site/.nojekyll
 
@@ -49,6 +50,7 @@ jobs:
           test -s _site/cyber-data.js
           grep -q 'cyber-data.js' _site/index.html
           grep -q 'CYBER_DATA' _site/cyber-data.js
+          test -s _site/sabeq.html
           test -s _site/sabeq-legal-system/index.html
           grep -q 'نظام سابق الداخلي' _site/sabeq-legal-system/index.html
 
