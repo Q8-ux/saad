@@ -1,8 +1,14 @@
-name: Deploy GitHub Pages Sites
+name: Deploy Cyber Case Archive
 
 on:
   push:
     branches: [main]
+    paths:
+      - index.html
+      - cyber-archive.css
+      - cyber-archive.js
+      - cyber-data.js
+      - .github/workflows/deploy-pages.yml
   workflow_dispatch:
 
 permissions:
@@ -15,73 +21,38 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/configure-pages@v5
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
-      - name: Install workforce dependencies
-        working-directory: workforce-platform/apps/web
-        run: npm install
-
-      - name: Build workforce platform
-        working-directory: workforce-platform/apps/web
-        env:
-          GITHUB_PAGES: 'true'
-          NEXT_PUBLIC_API_URL: 'https://workforce-platform-api.onrender.com/api'
-        run: |
-          rm -rf .next out
-          npm run build
-
-      - name: Validate Hessa system scripts
-        run: |
-          node --check hessa-alobaid/app.js
-          node --check hessa-alobaid/navigation.js
-          node --check hessa-alobaid/dashboard-system.js
-          node --check hessa-alobaid/legal-assistant-bot.js
-          node --check hessa-alobaid/home-controls.js
-          node --check hessa-alobaid/office-tools.js
-          node --check hessa-alobaid/sabeq-internal.js
-          node --check hessa-alobaid/full-i18n.js
-          node --check hessa-alobaid/language-polish.js
-
-      - name: Add Hessa Al-Obaid website
-        run: |
-          test -f hessa-alobaid/index.html
-          mkdir -p workforce-platform/apps/web/out/hessa-alobaid
-          cp -R hessa-alobaid/. workforce-platform/apps/web/out/hessa-alobaid/
-          touch workforce-platform/apps/web/out/.nojekyll
-
-      - name: Add Sabeq legal system portal
-        run: |
-          test -f sabeq-legal-system/index.html
-          mkdir -p workforce-platform/apps/web/out/sabeq-legal-system
-          cp -R sabeq-legal-system/. workforce-platform/apps/web/out/sabeq-legal-system/
-
-      - name: Verify published files
-        run: |
-          test -f workforce-platform/apps/web/out/index.html
-          test -f workforce-platform/apps/web/out/hessa-alobaid/index.html
-          test -f workforce-platform/apps/web/out/sabeq-legal-system/index.html
-          test -f workforce-platform/apps/web/out/hessa-alobaid/styles.css
-          test -f workforce-platform/apps/web/out/hessa-alobaid/app.js
-          test -f workforce-platform/apps/web/out/hessa-alobaid/full-i18n.js
-          test -f workforce-platform/apps/web/out/hessa-alobaid/language-polish.js
-
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: workforce-platform/apps/web/out
-
   deploy:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-    needs: build
     steps:
-      - id: deployment
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Prepare static archive
+        run: |
+          mkdir -p _site
+          cp index.html cyber-archive.css cyber-archive.js cyber-data.js _site/
+          touch _site/.nojekyll
+
+      - name: Validate archive files
+        run: |
+          test -s _site/index.html
+          test -s _site/cyber-archive.css
+          test -s _site/cyber-archive.js
+          test -s _site/cyber-data.js
+          grep -q 'cyber-data.js' _site/index.html
+          grep -q 'CYBER_DATA' _site/cyber-data.js
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: Deploy
+        id: deployment
         uses: actions/deploy-pages@v4
