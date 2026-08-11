@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#083d3b">
+  <meta name="description" content="شاليهنا — دليل مستقل للبحث عن شاليهات الكويت والتواصل المباشر مع جهة الحجز.">
+  <title>شاليهنا | شاليهات الكويت</title>
+  <link rel="stylesheet" href="./styles.css?v=1">
+</head>
+<body>
+  <a class="skip-link" href="#listings">انتقل إلى الشاليهات</a>
+
+  <header class="site-header">
+    <div class="shell header-inner">
+      <a class="brand" href="#top" aria-label="شاليهنا — الصفحة الرئيسية">
+        <span class="brand-mark" aria-hidden="true">ش</span>
+        <span class="brand-copy">
+          <strong data-i18n="brand">شاليهنا</strong>
+          <small data-i18n="independent">دليل مستقل لشاليهات الكويت</small>
+        </span>
+      </a>
+
+      <nav class="main-nav" aria-label="التنقل الرئيسي">
+        <a href="#listings" data-i18n="navChalets">الشاليهات</a>
+        <a href="#how" data-i18n="navHow">طريقة الحجز</a>
+        <a href="#safety" data-i18n="navSafety">إرشادات الأمان</a>
+      </nav>
+
+      <button class="language-button" id="languageToggle" type="button" aria-label="Switch language">
+        <span aria-hidden="true">◎</span>
+        <b id="languageLabel">EN</b>
+      </button>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="shell hero-grid">
+        <div class="hero-copy">
+          <p class="eyebrow" data-i18n="eyebrow">دليل الشاليهات في الكويت</p>
+          <h1 data-i18n="heroTitle">اختر شاليهك، وتواصل مع جهة الحجز مباشرة.</h1>
+          <p class="hero-lead" data-i18n="heroLead">بيانات اتصال عامة جُمعت من مصادر الأعمال والإعلانات المفتوحة، مع توضيح مستوى التحقق ومصدر كل معلومة.</p>
+          <div class="hero-actions">
+            <a class="button primary" href="#listings" data-i18n="browse">تصفح الشاليهات</a>
+            <a class="button secondary" href="#how" data-i18n="howBooking">كيف يعمل الحجز؟</a>
+          </div>
+          <div class="hero-stats" aria-label="إحصاءات الدليل">
+            <div><strong id="totalStat">40</strong><span data-i18n="listedChalets">شاليهًا مدرجًا</span></div>
+            <div><strong id="instagramStat">16</strong><span data-i18n="instagramAccounts">حساب إنستغرام</span></div>
+            <div><strong>100%</strong><span data-i18n="publicSources">مصادر عامة</span></div>
+          </div>
+        </div>
+
+        <div class="hero-media" aria-label="صورة توضيحية لشاليه ساحلي">
+          <img src="./assets/hero-chalet.webp" alt="تصوّر توضيحي لشاليه ساحلي فاخر في الكويت">
+          <span class="illustration-badge" data-i18n="illustrative">صورة توضيحية — ليست صورة عقار مدرج</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="search-section" aria-label="بحث الشاليهات">
+      <div class="shell search-card">
+        <label class="search-field wide">
+          <span data-i18n="searchLabel">ابحث بالاسم أو المنطقة</span>
+          <div><span aria-hidden="true">⌕</span><input id="searchInput" type="search" autocomplete="off" data-i18n-placeholder="searchPlaceholder" placeholder="مثال: الخيران أو دار ساره"></div>
+        </label>
+
+        <label class="search-field">
+          <span data-i18n="areaLabel">المنطقة</span>
+          <select id="areaFilter"></select>
+        </label>
+
+        <label class="search-field">
+          <span data-i18n="sourceLabel">نوع جهة الاتصال</span>
+          <select id="typeFilter"></select>
+        </label>
+
+        <label class="instagram-filter">
+          <input id="instagramFilter" type="checkbox">
+          <span class="checkmark" aria-hidden="true">✓</span>
+          <span data-i18n="instagramOnly">لديه إنستغرام فقط</span>
+        </label>
+      </div>
+    </section>
+
+    <section class="listings shell" id="listings">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow" data-i18n="directoryEyebrow">قاعدة البيانات العامة</p>
+          <h2 data-i18n="directoryTitle">شاليهات يمكنك التواصل معها</h2>
+        </div>
+        <p class="results-count" id="resultsCount"></p>
+      </div>
+
+      <div class="rights-notice">
+        <span aria-hidden="true">ⓘ</span>
+        <p data-i18n="rightsNotice">الصور داخل البطاقات توضيحية وليست للشاليه نفسه. افتح حساب إنستغرام لمشاهدة الصور الأصلية، ولا تُنسخ إلى أي منصة قبل موافقة صاحبها.</p>
+      </div>
+
+      <div class="chalet-grid" id="chaletGrid" aria-live="polite"></div>
+
+      <div class="empty-state" id="emptyState" hidden>
+        <strong aria-hidden="true">⌕</strong>
+        <h3 data-i18n="emptyTitle">لم نجد نتيجة مطابقة</h3>
+        <p data-i18n="emptyText">غيّر البحث أو أزل أحد الفلاتر.</p>
+        <button class="button secondary" id="clearFilters" type="button" data-i18n="clearFilters">مسح الفلاتر</button>
+      </div>
+    </section>
+
+    <section class="how-section" id="how">
+      <div class="shell">
+        <div class="section-heading compact">
+          <div><p class="eyebrow" data-i18n="howEyebrow">خطوات واضحة</p><h2 data-i18n="howTitle">الحجز في ثلاث خطوات</h2></div>
+        </div>
+        <div class="steps">
+          <article><span>1</span><h3 data-i18n="step1Title">اختر الشاليه</h3><p data-i18n="step1Text">استخدم البحث والفلاتر، ثم راجع المصدر ومستوى التحقق.</p></article>
+          <article><span>2</span><h3 data-i18n="step2Title">أرسل طلبك</h3><p data-i18n="step2Text">املأ التاريخ وعدد الضيوف، وسنجهز رسالة واتساب لجهة الحجز.</p></article>
+          <article><span>3</span><h3 data-i18n="step3Title">تحقق قبل الدفع</h3><p data-i18n="step3Text">اطلب إثبات الصفة، عقد الحجز، وسياسة الإلغاء قبل تحويل أي مبلغ.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="safety shell" id="safety">
+      <div class="safety-card">
+        <div>
+          <p class="eyebrow" data-i18n="safetyEyebrow">احجز بوعي</p>
+          <h2 data-i18n="safetyTitle">الدليل لا يضمن الملكية أو التوافر</h2>
+        </div>
+        <ul>
+          <li data-i18n="safety1">تأكد أن المتحدث مالك أو مدير مفوّض، وليس وسيطًا غير معلن.</li>
+          <li data-i18n="safety2">لا تحول العربون قبل استلام عقد أو سند واضح.</li>
+          <li data-i18n="safety3">الأسعار والتوافر تتغير؛ احصل على تأكيد مكتوب من جهة الحجز.</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="shell footer-inner">
+      <div><strong data-i18n="brand">شاليهنا</strong><p data-i18n="footerText">دليل مستقل يجمع بيانات أعمال منشورة للعامة لتسهيل الوصول إلى جهة الحجز.</p></div>
+      <p data-i18n="footerRights">لا توجد علاقة رسمية مع الشاليهات أو المنصات المذكورة ما لم يُعلن خلاف ذلك.</p>
+    </div>
+  </footer>
+
+  <dialog class="chalet-dialog" id="chaletDialog">
+    <button class="dialog-close" id="dialogClose" type="button" aria-label="إغلاق">×</button>
+    <div id="dialogContent"></div>
+  </dialog>
+
+  <script src="./data.js?v=1"></script>
+  <script src="./app.js?v=1"></script>
+</body>
+</html>
