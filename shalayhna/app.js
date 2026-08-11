@@ -79,6 +79,8 @@
       callToBook: "الاتصال للحجز",
       openBooking: "فتح صفحة الحجز",
       formNote: "الطلب لا يؤكد الحجز ولا يحفظ بياناتك داخل الموقع؛ يُفتح في واتساب عند الإرسال.",
+      callBookingNote: "رقم الحجز المعلن هاتف أرضي؛ اتصل مباشرة واطلب تأكيد السعر والتوافر وسياسة الإلغاء قبل الدفع.",
+      sourceBookingNote: "جهة الاتصال المباشرة غير ظاهرة للعامة في المصدر؛ أكمل طلب الحجز من صفحة الإعلان الأصلية.",
       bookingMessage: "السلام عليكم، أرغب في الاستفسار عن حجز {chalet}.\nالاسم: {name}\nالدخول: {checkin}\nالخروج: {checkout}\nعدد الضيوف: {guests}\nملاحظات: {notes}\nأرجو تأكيد السعر والتوافر وسياسة الإلغاء وصفة جهة الحجز قبل الدفع.",
       noNotes: "لا توجد",
       favoriteAdd: "إضافة إلى المفضلة",
@@ -161,6 +163,8 @@
       callToBook: "Call to book",
       openBooking: "Open booking page",
       formNote: "This request does not confirm a booking and is not stored on this website; it opens in WhatsApp when submitted.",
+      callBookingNote: "The published booking number is a landline. Call directly and confirm the price, availability, and cancellation terms before paying.",
+      sourceBookingNote: "A direct contact is not publicly visible in the source. Continue the booking request on the original listing page.",
       bookingMessage: "Hello, I would like to ask about booking {chalet}.\nName: {name}\nCheck-in: {checkin}\nCheck-out: {checkout}\nGuests: {guests}\nNotes: {notes}\nPlease confirm the price, availability, cancellation terms, and your authority to manage the booking before payment.",
       noNotes: "None",
       favoriteAdd: "Add to favorites",
@@ -285,6 +289,9 @@
     const name = displayName(item);
     const facts = displayFacts(item).slice(0, 3);
     const favorite = state.favorites.has(item.id);
+    const whatsapp = isWhatsAppNumber(item.phone);
+    const contactLabel = !item.phone ? t("openBooking") : whatsapp ? "WhatsApp" : t("callToBook");
+    const contactIcon = !item.phone ? "↗" : whatsapp ? "WA" : "☎";
     return '<article class="chalet-card" data-id="' + escapeHtml(item.id) + '">' +
       '<div class="card-media">' +
         '<img src="./assets/' + escapeHtml(item.image) + '" alt="' + escapeHtml(t("illustrativeShort") + " — " + name) + '">' +
@@ -299,7 +306,7 @@
         '<ul class="feature-list">' + facts.map(function (fact) { return "<li>" + escapeHtml(fact) + "</li>"; }).join("") + "</ul>" +
         '<div class="contact-row"><span class="phone-block"><small>' + escapeHtml(t(item.phone ? "bookingPhone" : "bookingChannel")) + '</small>' +
         (item.phone ? '<a href="tel:+' + item.phone + '">' + escapeHtml(phoneDisplay(item.phone)) + '</a>' : '<a href="' + escapeHtml(item.bookingUrl || item.source) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(t("viaSource")) + '</a>') + '</span>' +
-        '<span class="contact-icons"><a class="wa" href="' + escapeHtml(contactLink(item)) + '" target="_blank" rel="noopener noreferrer" aria-label="' + escapeHtml(item.phone ? "WhatsApp" : t("openBooking")) + '">' + (item.phone ? "WA" : "↗") + '</a>' +
+        '<span class="contact-icons"><a class="wa" href="' + escapeHtml(contactLink(item)) + '" target="_blank" rel="noopener noreferrer" aria-label="' + escapeHtml(contactLabel) + '">' + contactIcon + '</a>' +
         (item.instagram ? '<a class="ig" href="' + escapeHtml(item.instagram) + '" target="_blank" rel="noopener noreferrer" aria-label="Instagram">IG</a>' : "") + "</span></div>" +
         '<div class="card-actions"><button class="button secondary" type="button" data-action="details">' + escapeHtml(t("viewDetails")) + '</button>' +
         '<button class="button primary" type="button" data-action="book">' + escapeHtml(t("bookNow")) + "</button></div>" +
@@ -329,6 +336,20 @@
     const facts = displayFacts(item);
     const bookingIsWhatsapp = isWhatsAppNumber(item.phone);
     const minDate = new Date().toISOString().slice(0, 10);
+    const bookingPanel = bookingIsWhatsapp
+      ? '<section class="dialog-panel"><h3>' + escapeHtml(t("bookingRequest")) + '</h3>' +
+          '<form class="booking-form" id="bookingForm">' +
+            '<label><span>' + escapeHtml(t("checkin")) + '</span><input name="checkin" type="date" min="' + minDate + '" required></label>' +
+            '<label><span>' + escapeHtml(t("checkout")) + '</span><input name="checkout" type="date" min="' + minDate + '" required></label>' +
+            '<label><span>' + escapeHtml(t("guests")) + '</span><input name="guests" type="number" min="1" max="50" value="2" required></label>' +
+            '<label><span>' + escapeHtml(t("fullName")) + '</span><input name="name" type="text" maxlength="80" required></label>' +
+            '<label class="full"><span>' + escapeHtml(t("notes")) + '</span><textarea name="notes" maxlength="300"></textarea></label>' +
+            '<button class="button whatsapp" type="submit">' + escapeHtml(t("sendWhatsApp")) + "</button>" +
+            '<p class="form-note">' + escapeHtml(t("formNote")) + "</p>" +
+          "</form></section>"
+      : item.phone
+        ? '<section class="dialog-panel direct-booking"><h3>' + escapeHtml(t("bookingRequest")) + '</h3><p>' + escapeHtml(t("callBookingNote")) + '</p><a class="button primary" href="tel:+' + item.phone + '">' + escapeHtml(t("callToBook")) + "</a></section>"
+        : '<section class="dialog-panel direct-booking"><h3>' + escapeHtml(t("bookingRequest")) + '</h3><p>' + escapeHtml(t("sourceBookingNote")) + '</p><a class="button primary" href="' + escapeHtml(item.bookingUrl || item.source) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(t("openBooking")) + "</a></section>";
 
     els.dialogContent.innerHTML =
       '<div class="dialog-hero"><img src="./assets/' + escapeHtml(item.image) + '" alt="' + escapeHtml(t("illustrativeShort") + " — " + name) + '"><div class="dialog-title"><p>' + escapeHtml(t("illustrative")) + '</p><h2>' + escapeHtml(name) + '</h2><small>' + escapeHtml(state.lang === "ar" ? item.nameEn : item.nameAr) + "</small></div></div>" +
@@ -349,39 +370,23 @@
             (item.instagram ? '<a class="button instagram" href="' + escapeHtml(item.instagram) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(t("instagram")) + "</a>" : "") +
             '<a class="button source" href="' + escapeHtml(mapLink(item)) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(t("map")) + "</a>" +
           "</div>" +
-        "</section>" +
-        '<section class="dialog-panel"><h3>' + escapeHtml(t("bookingRequest")) + '</h3>' +
-          '<form class="booking-form" id="bookingForm">' +
-            '<label><span>' + escapeHtml(t("checkin")) + '</span><input name="checkin" type="date" min="' + minDate + '" required></label>' +
-            '<label><span>' + escapeHtml(t("checkout")) + '</span><input name="checkout" type="date" min="' + minDate + '" required></label>' +
-            '<label><span>' + escapeHtml(t("guests")) + '</span><input name="guests" type="number" min="1" max="50" value="2" required></label>' +
-            '<label><span>' + escapeHtml(t("fullName")) + '</span><input name="name" type="text" maxlength="80" required></label>' +
-            '<label class="full"><span>' + escapeHtml(t("notes")) + '</span><textarea name="notes" maxlength="300"></textarea></label>' +
-            '<button class="button ' + (bookingIsWhatsapp ? "whatsapp" : "primary") + '" type="submit">' + escapeHtml(t(bookingIsWhatsapp ? "sendWhatsApp" : item.phone ? "callToBook" : "openBooking")) + "</button>" +
-            '<p class="form-note">' + escapeHtml(t("formNote")) + "</p>" +
-          "</form>" +
-        "</section>" +
+        "</section>" + bookingPanel +
       "</div>";
 
-    document.getElementById("bookingForm").addEventListener("submit", function (event) {
+    const bookingForm = document.getElementById("bookingForm");
+    if (bookingForm) bookingForm.addEventListener("submit", function (event) {
       event.preventDefault();
       const form = new FormData(event.currentTarget);
       const values = Object.fromEntries(form.entries());
-      if (bookingIsWhatsapp) {
-        const message = t("bookingMessage", {
-          chalet: name,
-          name: values.name,
-          checkin: values.checkin,
-          checkout: values.checkout,
-          guests: values.guests,
-          notes: values.notes || t("noNotes")
-        });
-        window.open("https://wa.me/" + item.phone + "?text=" + encodeURIComponent(message), "_blank", "noopener,noreferrer");
-      } else if (item.phone) {
-        window.location.href = "tel:+" + item.phone;
-      } else {
-        window.open(item.bookingUrl || item.source, "_blank", "noopener,noreferrer");
-      }
+      const message = t("bookingMessage", {
+        chalet: name,
+        name: values.name,
+        checkin: values.checkin,
+        checkout: values.checkout,
+        guests: values.guests,
+        notes: values.notes || t("noNotes")
+      });
+      window.open("https://wa.me/" + item.phone + "?text=" + encodeURIComponent(message), "_blank", "noopener,noreferrer");
     });
 
     if (!refreshOnly && !els.dialog.open) {
