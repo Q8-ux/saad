@@ -217,14 +217,6 @@
       factsAr: ["مصدر ثانوي", "يلزم تأكيد النشاط"], factsEn: ["Secondary source", "Business needs confirmation"]
     },
     {
-      id: "wooden-cottage", nameAr: "شاليه الكوخ الخشبي", nameEn: "The Wooden Cottage Chalet", areaAr: "صباح الأحمد البحرية", areaEn: "Sabah Al Ahmad Sea City",
-      phone: "", bookingUrl: "https://sakan.co/ar/holiday/details/1384-%D8%B4%D8%A7%D9%84%D9%8A%D9%87-%D8%A7%D9%84%D9%83%D9%88%D8%AE-%D8%A7%D9%84%D8%AE%D8%B4%D8%A8%D9%8A-%D8%A7%D9%84%D8%AE%D9%8A%D8%B1%D8%A7%D9%86", type: "classified", confidence: "high",
-      source: "https://sakan.co/ar/holiday/details/1384-%D8%B4%D8%A7%D9%84%D9%8A%D9%87-%D8%A7%D9%84%D9%83%D9%88%D8%AE-%D8%A7%D9%84%D8%AE%D8%B4%D8%A8%D9%8A-%D8%A7%D9%84%D8%AE%D9%8A%D8%B1%D8%A7%D9%86", image: "hero-chalet.webp",
-      factsAr: ["غرفتان وحمامان", "100 م²", "مسبح خارجي", "حتى 7 بالغين و4 أطفال"], factsEn: ["2 rooms & 2 bathrooms", "100 m²", "Outdoor pool", "Up to 7 adults & 4 children"],
-      descriptionAr: "شاليه الكوخ الخشبي (Seaside) في صباح الأحمد البحرية؛ يعلن غرفتين وحمامين ومطبخًا صغيرًا وسينما خارجية ومسبحًا دائريًا، والحجز متاح عبر منصة سكن.",
-      descriptionEn: "The Wooden Cottage (Seaside) in Sabah Al Ahmad Sea City advertises 2 rooms, 2 bathrooms, a kitchenette, outdoor cinema, and a circular pool; booking is available through Sakan."
-    },
-    {
       id: "bali", nameAr: "شاليه بالي", nameEn: "Bali Chalet", areaAr: "الخيران", areaEn: "Al Khiran",
       phone: "96596776005", type: "classified", confidence: "high",
       source: "https://www.q84sale.com/ar/listing/chalet-for-rent-20704927", image: "terrace-chalet.webp",
