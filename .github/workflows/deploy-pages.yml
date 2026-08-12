@@ -12,6 +12,7 @@ on:
       - 'sabeq-legal-system/**'
       - 'shalayhna/**'
       - 'zad-restaurants/**'
+      - 'rattil/**'
       - 'workforce-platform/apps/web/**'
       - '.github/workflows/deploy-pages.yml'
   workflow_dispatch:
@@ -71,6 +72,7 @@ jobs:
           cp -R sabeq-legal-system _site/sabeq-legal-system
           cp -R shalayhna _site/shalayhna
           cp -R zad-restaurants _site/zad-restaurants
+          cp -R rattil _site/rattil
           cp -R workforce-platform/apps/web/out/_next _site/_next
           cp -R workforce-platform/apps/web/out/dashboard _site/dashboard
           cp -R workforce-platform/apps/web/out/attendance-smart _site/attendance-smart
@@ -92,6 +94,7 @@ jobs:
           test -s _site/sabeq-legal-system/index.html
           test -s _site/shalayhna/index.html
           test -s _site/zad-restaurants/index.html
+          test -s _site/rattil/index.html
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
