@@ -9,11 +9,8 @@ const CHILD_PORT = 10001;
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin';
 const JWT_SECRET = process.env.JWT_SECRET || 'tamweenat-dev-secret';
 const OVERRIDE_FILE = '/tmp/tamweenat-admin-password.sha256';
-let adminPasswordHash = process.env.ADMIN_PASSWORD_SHA256 || '';
-try {
-  const saved = fs.readFileSync(OVERRIDE_FILE, 'utf8').trim();
-  if (/^[a-f0-9]{64}$/i.test(saved)) adminPasswordHash = saved;
-} catch {}
+const DEFAULT_ADMIN_PASSWORD_SHA256 = '4d53f2adf1af3e62be12816c438594b8a01f326b9c9440a99d05d020511ce47a';
+let adminPasswordHash = process.env.ADMIN_PASSWORD_SHA256 || DEFAULT_ADMIN_PASSWORD_SHA256;
 
 const child = spawn(process.execPath, ['server.js'], {
   cwd: process.cwd(),
@@ -92,12 +89,11 @@ function verifyAdminToken(req) {
 
 async function handleAdminLogin(req, res) {
   const headers = corsHeaders(req);
-  if (!adminPasswordHash) return json(res, 503, { error: 'admin_password_not_configured' }, headers);
   try {
     const raw = await readBody(req);
     const body = JSON.parse(raw.toString('utf8') || '{}');
-    const username = String(body.username || '');
-    const passwordHash = sha256(body.password || '');
+    const username = String(body.username || '').trim();
+    const passwordHash = sha256(String(body.password || '').trim());
     if (username !== ADMIN_USERNAME || !safeEqualHex(passwordHash, adminPasswordHash)) {
       return json(res, 401, { error: 'invalid_credentials' }, headers);
     }
@@ -115,8 +111,8 @@ async function handleAdminPasswordChange(req, res) {
   try {
     const raw = await readBody(req);
     const body = JSON.parse(raw.toString('utf8') || '{}');
-    const currentPassword = String(body.currentPassword || '');
-    const newPassword = String(body.newPassword || '');
+    const currentPassword = String(body.currentPassword || '').trim();
+    const newPassword = String(body.newPassword || '').trim();
     if (!safeEqualHex(sha256(currentPassword), adminPasswordHash)) {
       return json(res, 400, { error: 'current_password_incorrect' }, headers);
     }
