@@ -1,7 +1,10 @@
 (()=>{
 const API='https://cfauiqcvhioxpjlbvsgx.supabase.co/functions/v1/tamweenat-api';
+const BACKEND_KEY='tamweenatBackend';
+const BACKEND_VERSION='supabase-v2';
+if(sessionStorage.getItem(BACKEND_KEY)!==BACKEND_VERSION){sessionStorage.removeItem('tamweenatAdminToken');sessionStorage.removeItem('tamweenatAdminUser');sessionStorage.setItem(BACKEND_KEY,BACKEND_VERSION);}
 const existing=sessionStorage.getItem('tamweenatAdminToken');
-if(existing){location.replace('../zad-restaurants/admin.html');return;}
+if(existing){location.replace('../zad-restaurants/admin.html?v=20260814-0915');return;}
 let ready=false;
 const form=document.getElementById('adminLoginForm');
 const button=form.querySelector('button[type="submit"]');
@@ -20,9 +23,8 @@ form.addEventListener('submit',async e=>{
    clearTimeout(timer);
    const data=await r.json().catch(()=>({}));
    if(!r.ok) throw new Error(r.status===401?'اسم المستخدم أو كلمة المرور غير صحيحة.':'تعذر تسجيل الدخول حالياً.');
-   sessionStorage.setItem('tamweenatAdminToken',data.token);
-   sessionStorage.setItem('tamweenatAdminUser',JSON.stringify(data.user||{}));
-   location.replace('../zad-restaurants/admin.html');
+   sessionStorage.setItem(BACKEND_KEY,BACKEND_VERSION);sessionStorage.setItem('tamweenatAdminToken',data.token);sessionStorage.setItem('tamweenatAdminUser',JSON.stringify(data.user||{}));
+   location.replace('../zad-restaurants/admin.html?v=20260814-0915');
  }catch(err){error.textContent=err.name==='AbortError'?'تعذر الاتصال بالخدمة. حاول مرة أخرى.':(err.message||'تعذر تسجيل الدخول');error.classList.add('show');}
  finally{button.disabled=false;button.textContent='دخول لوحة الإدارة';}
 });
