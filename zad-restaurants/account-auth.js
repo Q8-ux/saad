@@ -36,9 +36,8 @@
   };
   setTimeout(()=>prefetched.clear(),15000);
 
-  const advancedStyle=document.createElement('link');advancedStyle.rel='stylesheet';advancedStyle.href='./account-advanced.css';document.head.appendChild(advancedStyle);
-
   document.addEventListener('DOMContentLoaded',()=>{
+    document.querySelectorAll('[data-section="assistant"],#assistant,.voice-panel,.voice-console,.voice-orb').forEach(el=>el.remove());
     const logout=document.getElementById('logoutBtn');
     if(logout)logout.addEventListener('click',()=>{
       sessionStorage.removeItem(SESSION_KEY);
@@ -57,7 +56,7 @@
       const l=document.createElement('link');l.rel='stylesheet';l.href=href;l.dataset[key]='1';document.head.appendChild(l);
     };
 
-    loadScript('./account-advanced.js','accountAdvanced');
+    loadScript('./account-live.js?v=20260814-1316','accountLive');
 
     document.addEventListener('click',e=>{
       const b=e.target.closest('[data-section]');
@@ -66,7 +65,6 @@
         loadStyle('./supplies.css','suppliesCss');
         loadScript('./supplies.js','suppliesCatalog');
       }
-      if(b.dataset.section==='assistant')loadScript('./account-voice-fallback.js','voiceFallback');
     },{passive:true});
   });
 })();
