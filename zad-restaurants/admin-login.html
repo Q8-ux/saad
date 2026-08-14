@@ -3,8 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>دخول إدارة تموينات</title>
-<link rel="stylesheet" href="./login.css">
+<link rel="stylesheet" href="./login.css?v=20260814-0809">
 </head>
 <body>
 <main class="login-shell">
@@ -14,14 +17,14 @@
 </section>
 <section class="form-panel"><div class="login-card">
 <p class="eyebrow">الإدارة</p><h2>تسجيل الدخول</h2>
-<form id="adminLoginForm">
-<label>اسم المستخدم<input id="adminUsername" required></label>
-<label>كلمة المرور<input id="adminPassword" type="password" required></label>
-<div id="adminLoginError" class="error"></div>
+<form id="adminLoginForm" autocomplete="on">
+<label>اسم المستخدم<input id="adminUsername" name="username" value="admin" autocomplete="username" required></label>
+<label>كلمة المرور<input id="adminPassword" name="password" type="password" inputmode="numeric" autocomplete="current-password" required></label>
+<div id="adminLoginError" class="error" role="alert"></div>
 <button class="primary-btn" type="submit">دخول لوحة الإدارة</button>
 </form>
 <a class="back-link" href="./index.html">العودة إلى تموينات</a>
 </div></section>
 </main>
-<script src="./admin-login.js"></script>
+<script src="./admin-login.js?v=20260814-0809"></script>
 </body></html>
