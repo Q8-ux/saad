@@ -1,6 +1,6 @@
 (()=>{
   const BRAND_AR='تموينات',BRAND_EN='Tamweenat';
-  const API='https://tamweenat-api.onrender.com';
+  const API='https://cfauiqcvhioxpjlbvsgx.supabase.co/functions/v1/tamweenat-api';
   const replaceText=node=>{
     if(!node)return;
     if(node.nodeType===Node.TEXT_NODE){
@@ -47,11 +47,7 @@
     if(admin.parentElement!==slot)slot.appendChild(admin);
     return true;
   };
-  const warmBackend=()=>{
-    const c=new AbortController();
-    const t=setTimeout(()=>c.abort(),12000);
-    fetch(`${API}/health`,{cache:'no-store',signal:c.signal,mode:'cors'}).catch(()=>{}).finally(()=>clearTimeout(t));
-  };
+  const warmBackend=()=>fetch(`${API}/health`,{cache:'no-store',mode:'cors'}).catch(()=>{});
   const init=()=>{
     warmBackend();
     applyBrandOnce();
@@ -62,7 +58,7 @@
       if(!scheduled){scheduled=true;requestAnimationFrame(()=>{scheduled=false;addEntries()});}
     });
     observer.observe(document.body,{childList:true,subtree:true});
-    setTimeout(()=>observer.disconnect(),12000);
+    setTimeout(()=>observer.disconnect(),8000);
   };
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
