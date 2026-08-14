@@ -1,0 +1,1 @@
+(()=>{const remove=()=>document.querySelectorAll('footer .signature').forEach(el=>el.remove());if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',remove,{once:true});else remove();const observer=new MutationObserver(remove);observer.observe(document.documentElement,{childList:true,subtree:true});setTimeout(()=>observer.disconnect(),10000);})();
