@@ -2,6 +2,25 @@
   const BRAND_AR='تموينات',BRAND_EN='Tamweenat';
   const API='https://cfauiqcvhioxpjlbvsgx.supabase.co/functions/v1/tamweenat-api';
   const LOGO=`<svg viewBox="0 0 64 64" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="tg2" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#0b6b43"/><stop offset="1" stop-color="#063d29"/></linearGradient><linearGradient id="gold2" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f4d66a"/><stop offset="1" stop-color="#c99519"/></linearGradient></defs><circle cx="32" cy="32" r="30" fill="#f7fbf8" stroke="#d9b348" stroke-width="2"/><path d="M12 17h7l4 25h25l6-18H22" fill="none" stroke="url(#tg2)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M25 25h24l-4 12H27z" fill="url(#tg2)"/><circle cx="29" cy="48" r="4" fill="url(#gold2)" stroke="#0b5a3a" stroke-width="2"/><circle cx="46" cy="48" r="4" fill="url(#gold2)" stroke="#0b5a3a" stroke-width="2"/><path d="M47 17c5 2 7 7 5 12-5 0-9-2-11-7 1-3 3-4 6-5z" fill="#2f9b59"/><path d="M51 13c1 3 1 7-1 11M54 18l4-3M53 22l5 1M51 17l-3-4" fill="none" stroke="url(#gold2)" stroke-width="2.3" stroke-linecap="round"/></svg>`;
+
+  const removeLegacyZLogo=root=>{
+    const scope=root?.querySelectorAll?root:document;
+    const candidates=[...scope.querySelectorAll('header *,nav *,[class*="brand"],[class*="logo"],[class*="mark"]')];
+    for(const el of candidates){
+      if(el.id==='tamweenat-logo-entry'||el.closest?.('#tamweenat-logo-entry'))continue;
+      const ownText=[...el.childNodes].filter(n=>n.nodeType===Node.TEXT_NODE).map(n=>n.nodeValue||'').join('').trim();
+      const allText=(el.textContent||'').trim();
+      const aria=(el.getAttribute?.('aria-label')||'').trim();
+      const title=(el.getAttribute?.('title')||'').trim();
+      const alt=(el.getAttribute?.('alt')||'').trim();
+      const looksLegacyName=/^(ز|زاد|Z|ZAD)$/i.test(ownText)||/^(ز|زاد|Z|ZAD)$/i.test(allText)||/زاد|ZAD/i.test(aria+' '+title+' '+alt);
+      if(!looksLegacyName)continue;
+      const inHeader=Boolean(el.closest?.('header,nav'));
+      const classHint=/(brand|logo|mark|identity|emblem)/i.test(String(el.className||''));
+      if(inHeader||classHint)el.remove();
+    }
+  };
+
   const replaceText=node=>{
     if(!node)return;
     if(node.nodeType===Node.TEXT_NODE){
@@ -20,6 +39,7 @@
   const applyBrandOnce=()=>{
     document.title=document.title.replace(/زاد المطاعم/g,BRAND_AR).replace(/زاد/g,BRAND_AR).replace(/ZAD/gi,BRAND_EN);
     replaceText(document.body);
+    removeLegacyZLogo(document);
   };
   const ensureStyles=()=>{
     if(document.getElementById('tamweenat-login-nav-style'))return;
@@ -35,6 +55,7 @@
   };
   const addLogo=()=>{
     const target=findTopContainer(); if(!target)return false;
+    removeLegacyZLogo(target);
     let logo=document.getElementById('tamweenat-logo-entry');
     if(!logo){logo=document.createElement('a');logo.id='tamweenat-logo-entry';logo.href='/saad/tamweenat/';logo.innerHTML=`${LOGO}<b>تموينات</b>`;target.prepend(logo)}
     return true;
@@ -43,6 +64,7 @@
     ensureStyles();
     const target=findTopContainer();
     if(!target)return false;
+    removeLegacyZLogo(target);
     addLogo();
     let slot=document.getElementById('tamweenat-login-slot');
     if(!slot){slot=document.createElement('span');slot.id='tamweenat-login-slot';slot.className='tamweenat-login-slot'}
@@ -62,11 +84,11 @@
     addEntries();
     let scheduled=false;
     const observer=new MutationObserver(records=>{
-      for(const r of records)for(const n of r.addedNodes)replaceText(n);
-      if(!scheduled){scheduled=true;requestAnimationFrame(()=>{scheduled=false;addEntries()});}
+      for(const r of records)for(const n of r.addedNodes){replaceText(n);if(n.nodeType===Node.ELEMENT_NODE)removeLegacyZLogo(n)}
+      if(!scheduled){scheduled=true;requestAnimationFrame(()=>{scheduled=false;removeLegacyZLogo(document);addEntries()});}
     });
     observer.observe(document.body,{childList:true,subtree:true});
-    setTimeout(()=>observer.disconnect(),8000);
+    setTimeout(()=>observer.disconnect(),10000);
   };
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
