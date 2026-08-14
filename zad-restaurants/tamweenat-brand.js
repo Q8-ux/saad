@@ -24,9 +24,9 @@
     if(document.getElementById('tamweenat-account-entry'))return;
     const a=document.createElement('a');
     a.id='tamweenat-account-entry';
-    a.href='./account.html';
-    a.textContent='حساب المطعم';
-    a.setAttribute('aria-label','فتح حساب المطعم والمشتريات والكريدت');
+    a.href='./login.html';
+    a.textContent='دخول المطعم';
+    a.setAttribute('aria-label','تسجيل دخول المطعم إلى المشتريات والكريدت والفواتير');
     document.body.appendChild(a);
     const style=document.createElement('style');
     style.textContent=`#tamweenat-account-entry{position:fixed;left:18px;bottom:18px;z-index:9999;background:#163d30;color:#fff;text-decoration:none;padding:12px 18px;border-radius:14px;font-family:inherit;font-weight:700;box-shadow:0 10px 28px rgba(22,61,48,.28);border:1px solid rgba(255,255,255,.18)}#tamweenat-account-entry:hover{background:#235f49}@media(max-width:640px){#tamweenat-account-entry{left:12px;bottom:12px;padding:11px 15px}}`;
