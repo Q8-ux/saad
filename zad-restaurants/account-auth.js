@@ -18,8 +18,9 @@
     });
     const userLabel=document.getElementById('loggedInUser');
     if(userLabel)userLabel.textContent=`${session.restaurantName||'المطعم'} — ${session.name||session.username||''}`;
-    const load=(src,key)=>{if(document.querySelector(`script[data-${key}]`))return;const s=document.createElement('script');s.src=src;s.dataset[key]='1';document.body.appendChild(s)};
+    const load=(src,key,delay=0)=>setTimeout(()=>{if(document.querySelector(`script[data-${key}]`))return;const s=document.createElement('script');s.src=src;s.dataset[key]='1';document.body.appendChild(s)},delay);
     load('./supplies.js','suppliesCatalog');
-    setTimeout(()=>load('./account-advanced.js','accountAdvanced'),30);
+    load('./account-advanced.js','accountAdvanced',30);
+    load('./account-voice-fallback.js','voiceFallback',90);
   });
 })();
