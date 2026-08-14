@@ -1,5 +1,6 @@
 (()=>{
   const BRAND_AR='تموينات',BRAND_EN='Tamweenat';
+  const API='https://tamweenat-api.onrender.com';
   const replaceText=node=>{
     if(!node)return;
     if(node.nodeType===Node.TEXT_NODE){
@@ -46,18 +47,19 @@
     if(admin.parentElement!==slot)slot.appendChild(admin);
     return true;
   };
+  const warmBackend=()=>{
+    const c=new AbortController();
+    const t=setTimeout(()=>c.abort(),12000);
+    fetch(`${API}/health`,{cache:'no-store',signal:c.signal,mode:'cors'}).catch(()=>{}).finally(()=>clearTimeout(t));
+  };
   const init=()=>{
+    warmBackend();
     applyBrandOnce();
     addEntries();
     let scheduled=false;
     const observer=new MutationObserver(records=>{
-      for(const r of records){
-        for(const n of r.addedNodes)replaceText(n);
-      }
-      if(!scheduled){
-        scheduled=true;
-        requestAnimationFrame(()=>{scheduled=false;addEntries()});
-      }
+      for(const r of records)for(const n of r.addedNodes)replaceText(n);
+      if(!scheduled){scheduled=true;requestAnimationFrame(()=>{scheduled=false;addEntries()});}
     });
     observer.observe(document.body,{childList:true,subtree:true});
     setTimeout(()=>observer.disconnect(),12000);
