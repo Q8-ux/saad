@@ -2,13 +2,20 @@
   const SESSION_KEY='tamweenatRestaurantSession';
   const TOKEN_KEY='tamweenatRestaurantToken';
   const HOME='../tamweenat/';
-  const API='https://tamweenat-api.onrender.com';
+  const API='https://cfauiqcvhioxpjlbvsgx.supabase.co/functions/v1/tamweenat-api';
+  const LEGACY_API='https://tamweenat-api.onrender.com';
   const raw=sessionStorage.getItem(SESSION_KEY),token=sessionStorage.getItem(TOKEN_KEY);
   if(!raw||!token){location.replace('./login.html');return}
   let session={};
   try{session=JSON.parse(raw)||{}}catch{sessionStorage.removeItem(SESSION_KEY);sessionStorage.removeItem(TOKEN_KEY);location.replace('./login.html');return}
 
-  const nativeFetch=window.fetch.bind(window);
+  const originalFetch=window.fetch.bind(window);
+  const normalizeInput=input=>{
+    if(typeof input==='string')return input.startsWith(LEGACY_API)?API+input.slice(LEGACY_API.length):input;
+    if(input instanceof Request&&input.url.startsWith(LEGACY_API))return new Request(API+input.url.slice(LEGACY_API.length),input);
+    return input;
+  };
+  const nativeFetch=(input,opts={})=>originalFetch(normalizeInput(input),opts);
   const authHeaders={Authorization:`Bearer ${token}`,'Content-Type':'application/json'};
   const prefetched=new Map();
   const prefetch=(url,opts={})=>{
@@ -18,15 +25,16 @@
   prefetch(`${API}/health`);
   prefetch(`${API}/api/me`,{headers:authHeaders});
   window.fetch=(input,opts={})=>{
-    const url=typeof input==='string'?input:input?.url;
-    const method=String(opts.method||'GET').toUpperCase();
+    const normalized=normalizeInput(input);
+    const url=typeof normalized==='string'?normalized:normalized?.url;
+    const method=String(opts.method||normalized?.method||'GET').toUpperCase();
     if(method==='GET'&&prefetched.has(url)){
       const p=prefetched.get(url);prefetched.delete(url);
-      return p.then(r=>r?r.clone():nativeFetch(input,opts));
+      return p.then(r=>r?r.clone():originalFetch(normalized,opts));
     }
-    return nativeFetch(input,opts);
+    return originalFetch(normalized,opts);
   };
-  setTimeout(()=>{prefetched.clear();window.fetch=nativeFetch},15000);
+  setTimeout(()=>prefetched.clear(),15000);
 
   const advancedStyle=document.createElement('link');advancedStyle.rel='stylesheet';advancedStyle.href='./account-advanced.css';document.head.appendChild(advancedStyle);
 
@@ -49,10 +57,8 @@
       const l=document.createElement('link');l.rel='stylesheet';l.href=href;l.dataset[key]='1';document.head.appendChild(l);
     };
 
-    // Core account data first.
     loadScript('./account-advanced.js','accountAdvanced');
 
-    // Heavy catalog and voice helpers load only when the user opens those sections.
     document.addEventListener('click',e=>{
       const b=e.target.closest('[data-section]');
       if(!b)return;
