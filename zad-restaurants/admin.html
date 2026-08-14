@@ -1,10 +1,18 @@
 <!doctype html>
-<html lang="ar" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>لوحة إدارة تموينات</title><link rel="stylesheet" href="./admin.css?v=20260814-0933"></head><body>
+<html lang="ar" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>لوحة إدارة تموينات</title><link rel="stylesheet" href="./admin.css?v=20260814-0938"><style>
+/* Fail-safe admin navigation: every section remains in the document and sidebar links jump to it even if JS fails. */
+.admin-page{display:block!important;scroll-margin-top:18px;margin-bottom:28px}
+.admin-sidebar nav{display:grid;gap:7px}
+.admin-sidebar nav a{display:block;color:#dce9e3;text-decoration:none;text-align:right;padding:12px;border-radius:11px;font-family:inherit;font-size:15px;white-space:nowrap}
+.admin-sidebar nav a:hover,.admin-sidebar nav a:focus,.admin-sidebar nav a.active{background:rgba(255,255,255,.12);color:#fff;outline:none}
+.admin-page:not(:first-of-type){padding-top:8px;border-top:1px solid #e7ede9}
+@media(max-width:760px){.admin-sidebar nav{display:flex;overflow:auto;-webkit-overflow-scrolling:touch}.admin-sidebar nav a{flex:0 0 auto}.admin-page{scroll-margin-top:12px}}
+</style></head><body>
 <div class="admin-shell">
 <aside class="admin-sidebar"><a class="admin-brand" href="../tamweenat/"><span>ت</span><div><strong>تموينات</strong><small>لوحة الإدارة</small></div></a><nav id="adminNav">
-<button class="active" data-page="dashboard">لوحة المؤشرات</button><button data-page="restaurants">المطاعم</button><button data-page="orders">الطلبات والتتبع</button><button data-page="credit">الكريدت والتحصيل</button><button data-page="messages">خدمة العملاء</button><button data-page="ai">المساعد الصوتي</button><button data-page="audit">سجل التدقيق</button><button data-page="settings">الإعدادات</button></nav><button id="adminLogout" class="logout">تسجيل الخروج</button></aside>
+<a class="active" data-page="dashboard" href="#dashboard">لوحة المؤشرات</a><a data-page="restaurants" href="#restaurants">المطاعم</a><a data-page="orders" href="#orders">الطلبات والتتبع</a><a data-page="credit" href="#credit">الكريدت والتحصيل</a><a data-page="messages" href="#messages">خدمة العملاء</a><a data-page="ai" href="#ai">المساعد الصوتي</a><a data-page="audit" href="#audit">سجل التدقيق</a><a data-page="settings" href="#settings">الإعدادات</a></nav><button id="adminLogout" class="logout">تسجيل الخروج</button></aside>
 <main class="admin-main"><header class="admin-top"><div><p>مركز التشغيل</p><h1 id="pageTitle">لوحة المؤشرات</h1></div><div class="top-status"><span id="apiStatus">النظام</span><span id="aiStatus">الخدمة الصوتية</span><button id="refreshAdmin">تحديث</button></div></header>
-<section id="dashboard" class="admin-page active"><div id="adminKpis" class="kpis"></div><div class="two-col"><article class="panel"><div class="panel-head"><h2>حالة المطاعم</h2><button data-jump="restaurants">عرض الكل</button></div><div id="riskRestaurants"></div></article><article class="panel"><div class="panel-head"><h2>آخر الطلبات</h2><button data-jump="orders">إدارة الطلبات</button></div><div id="recentOrders"></div></article></div><article class="panel"><div class="panel-head"><h2>الاستفسارات المفتوحة</h2><button data-jump="messages">فتح المركز</button></div><div id="openMessages"></div></article></section>
+<section id="dashboard" class="admin-page active"><div id="adminKpis" class="kpis"></div><div class="two-col"><article class="panel"><div class="panel-head"><h2>حالة المطاعم</h2><a href="#restaurants" data-jump="restaurants">عرض الكل</a></div><div id="riskRestaurants"></div></article><article class="panel"><div class="panel-head"><h2>آخر الطلبات</h2><a href="#orders" data-jump="orders">إدارة الطلبات</a></div><div id="recentOrders"></div></article></div><article class="panel"><div class="panel-head"><h2>الاستفسارات المفتوحة</h2><a href="#messages" data-jump="messages">فتح المركز</a></div><div id="openMessages"></div></article></section>
 <section id="restaurants" class="admin-page"><div class="section-head"><div><p>إدارة العملاء</p><h2>المطاعم المشتركة</h2></div><button id="addRestaurant" class="primary">إضافة مطعم</button></div><div class="panel"><input id="restaurantSearch" class="search" placeholder="ابحث باسم المطعم أو الكود أو الهاتف"><div class="table-wrap"><table><thead><tr><th>المطعم</th><th>الحالة</th><th>الكريدت</th><th>المديونية</th><th>المتأخر</th><th>المتاح</th><th>المستخدمون</th><th>إجراءات</th></tr></thead><tbody id="restaurantsBody"></tbody></table></div></div></section>
 <section id="orders" class="admin-page"><div class="section-head"><div><p>التشغيل</p><h2>الطلبات والتتبع</h2></div></div><div id="ordersGrid" class="cards"></div></section>
 <section id="credit" class="admin-page"><div class="section-head"><div><p>المالية</p><h2>الكريدت والمديونيات والتحصيل</h2></div></div><div id="creditSummary" class="kpis"></div><div class="panel"><div class="table-wrap"><table><thead><tr><th>المطعم</th><th>الحد</th><th>المستخدم</th><th>المتاح</th><th>المتأخر</th><th>الصحة</th><th>الحالة</th></tr></thead><tbody id="creditBody"></tbody></table></div></div></section>
@@ -14,4 +22,15 @@
 <section id="settings" class="admin-page"><div class="section-head"><div><p>النظام</p><h2>الإعدادات</h2></div></div><div id="settingsPanel" class="panel"></div></section>
 </main></div>
 <div id="adminModal" class="modal"><div class="modal-box"><button id="closeAdminModal" class="close">×</button><div id="adminModalContent"></div></div></div><div id="adminToast" class="toast"></div>
-<script src="./admin-nav-fix.js?v=20260814-0933"></script><script src="./admin-exit.js?v=20260814-0933"></script><script src="./admin-performance.js?v=20260814-0933"></script><script src="./admin.js?v=20260814-0933"></script><script src="./admin-passwords.js?v=20260814-0933"></script><script src="./admin-private-label.js?v=20260814-0933"></script></body></html>
+<script>
+(function(){
+  function sync(){
+    const id=(location.hash||'#dashboard').slice(1);
+    document.querySelectorAll('#adminNav a[data-page]').forEach(a=>a.classList.toggle('active',a.dataset.page===id));
+    const a=document.querySelector('#adminNav a[data-page="'+id+'"]');
+    const t=document.getElementById('pageTitle'); if(t&&a)t.textContent=a.textContent.trim();
+  }
+  addEventListener('hashchange',sync); if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',sync);else sync();
+})();
+</script>
+<script src="./admin-exit.js?v=20260814-0938"></script><script src="./admin-performance.js?v=20260814-0938"></script><script src="./admin.js?v=20260814-0938"></script><script src="./admin-passwords.js?v=20260814-0938"></script><script src="./admin-private-label.js?v=20260814-0938"></script></body></html>
