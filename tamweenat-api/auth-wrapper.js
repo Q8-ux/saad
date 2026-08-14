@@ -166,13 +166,45 @@ const server = http.createServer(async (req, res) => {
   return proxy(req, res);
 });
 
-server.listen(PORT, '0.0.0.0', () => {
-  console.log(`Tamweenat secure gateway listening on ${PORT}`);
-});
+function childHealthCheck() {
+  return new Promise((resolve) => {
+    const req = http.get({ hostname: '127.0.0.1', port: CHILD_PORT, path: '/health', timeout: 700 }, (res) => {
+      res.resume();
+      resolve((res.statusCode || 500) < 500);
+    });
+    req.on('timeout', () => { req.destroy(); resolve(false); });
+    req.on('error', () => resolve(false));
+  });
+}
+
+async function waitForChildReady(timeoutMs = 15000) {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    if (await childHealthCheck()) return true;
+    await new Promise(resolve => setTimeout(resolve, 150));
+  }
+  return false;
+}
+
+async function start() {
+  const ready = await waitForChildReady();
+  if (!ready) {
+    console.error('Tamweenat core API did not become ready in time');
+    try { child.kill('SIGTERM'); } catch {}
+    process.exit(1);
+    return;
+  }
+  server.listen(PORT, '0.0.0.0', () => {
+    console.log(`Tamweenat secure gateway listening on ${PORT} after core readiness check`);
+  });
+}
+
+start();
 
 function shutdown() {
   try { child.kill('SIGTERM'); } catch {}
-  server.close(() => process.exit(0));
+  if (server.listening) server.close(() => process.exit(0));
+  else process.exit(0);
   setTimeout(() => process.exit(0), 5000).unref();
 }
 
