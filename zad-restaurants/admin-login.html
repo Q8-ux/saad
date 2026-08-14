@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>دخول إدارة تموينات</title>
+<link rel="stylesheet" href="./login.css">
+</head>
+<body>
+<main class="login-shell">
+<section class="brand-panel">
+<a href="./index.html" class="brand"><span class="brand-mark">ت</span><span><strong>تموينات</strong><small>لوحة تشغيل المطاعم</small></span></a>
+<div class="brand-copy"><p class="eyebrow">لوحة الإدارة</p><h1>مركز تشغيل تموينات</h1><p>إدارة المطاعم والمستخدمين والكريدت والمديونيات والطلبات والفواتير والتواصل من مكان واحد.</p></div>
+</section>
+<section class="form-panel"><div class="login-card">
+<p class="eyebrow">الإدارة</p><h2>تسجيل الدخول</h2>
+<form id="adminLoginForm">
+<label>اسم المستخدم<input id="adminUsername" required></label>
+<label>كلمة المرور<input id="adminPassword" type="password" required></label>
+<div id="adminLoginError" class="error"></div>
+<button class="primary-btn" type="submit">دخول لوحة الإدارة</button>
+</form>
+<a class="back-link" href="./index.html">العودة إلى تموينات</a>
+</div></section>
+</main>
+<script src="./admin-login.js"></script>
+</body></html>
