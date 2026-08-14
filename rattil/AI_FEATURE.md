@@ -22,9 +22,9 @@ https://q8-ux.github.io/saad/rattil/
 - الضغط على أي آية ضمن نتائج الكلمة يفتح موضعها في المصحف ويشغّلها بالقارئ المختار.
 
 حزمة المصدر الكاملة:
-`source/rattil-source-v10.tar.gz`
+`source/rattil-source-v11.tar.gz`
 
 SHA-256:
-`c079ab822543ffa8a505b8054df2880d9d210f54151531298067c9283155d58b`
+`2df637df9203142c9f65c17ad120bad8720e68c99fe2cac3f21cfdd4a8817c59`
 
 اللغات: العربية، English، Français، Español، Türkçe، اردو.
