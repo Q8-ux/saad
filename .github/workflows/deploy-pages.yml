@@ -19,7 +19,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
   pages: write
   id-token: write
 
@@ -107,19 +107,3 @@ jobs:
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
-
-      - name: Record successful unified deployment
-        run: |
-          {
-            echo "status=deployed"
-            echo "version=government-dashboard-pages-repair-v13"
-            echo "run_id=${GITHUB_RUN_ID}"
-            echo "commit=${GITHUB_SHA}"
-            echo "page_url=${{ steps.deployment.outputs.page_url }}"
-            echo "time=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-          } > unified-pages-status.txt
-          git config user.name github-actions[bot]
-          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add unified-pages-status.txt
-          git commit -m "Record unified Pages deployment ${GITHUB_RUN_ID}" || true
-          git push || true
