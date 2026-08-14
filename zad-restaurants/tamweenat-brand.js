@@ -1,86 +1,9 @@
 (()=>{
-  const BRAND_AR='تموينات';
-  const BRAND_EN='Tamweenat';
-
-  const replaceText=node=>{
-    if(node.nodeType===Node.TEXT_NODE){
-      let v=node.nodeValue||'';
-      v=v.replace(/زاد المطاعم/g,'تموينات').replace(/زاد/g,'تموينات').replace(/ZAD RESTAURANTS/gi,'TAMWEENAT').replace(/ZAD/gi,'TAMWEENAT');
-      node.nodeValue=v;
-      return;
-    }
-    if(node.nodeType!==Node.ELEMENT_NODE)return;
-    if(['SCRIPT','STYLE','NOSCRIPT'].includes(node.tagName))return;
-    [...node.childNodes].forEach(replaceText);
-    ['aria-label','title','alt','placeholder'].forEach(a=>{
-      const v=node.getAttribute?.(a);
-      if(v)node.setAttribute(a,v.replace(/زاد المطاعم/g,'تموينات').replace(/زاد/g,'تموينات').replace(/ZAD RESTAURANTS/gi,'TAMWEENAT').replace(/ZAD/gi,'TAMWEENAT'));
-    });
-  };
-
-  const applyBrand=()=>{
-    document.title=document.title.replace(/زاد المطاعم/g,BRAND_AR).replace(/زاد/g,BRAND_AR).replace(/ZAD/gi,BRAND_EN);
-    replaceText(document.body);
-  };
-
-  const ensureStyles=()=>{
-    if(document.getElementById('tamweenat-login-nav-style'))return;
-    const style=document.createElement('style');
-    style.id='tamweenat-login-nav-style';
-    style.textContent=`
-      #tamweenat-account-entry{display:inline-flex!important;align-items:center;justify-content:center;gap:7px;background:#163d30;color:#fff!important;text-decoration:none!important;padding:10px 16px;border-radius:11px;font-family:inherit;font-weight:800;white-space:nowrap;border:1px solid #163d30;box-shadow:none;position:static!important;inset:auto!important;margin-inline-start:10px}
-      #tamweenat-account-entry:hover{background:#235f49;border-color:#235f49}
-      #tamweenat-account-entry::before{content:'◉';font-size:14px}
-      .tamweenat-login-slot{display:flex;align-items:center;margin-inline-start:auto}
-      @media(max-width:760px){#tamweenat-account-entry{padding:9px 12px;font-size:14px;margin-inline-start:6px}.tamweenat-login-slot{width:auto}}
-    `;
-    document.head.appendChild(style);
-  };
-
-  const findTopContainer=()=>{
-    const headers=[...document.querySelectorAll('header')].filter(el=>el.offsetParent!==null || el.getClientRects().length);
-    for(const header of headers){
-      const nav=header.querySelector('nav');
-      if(nav)return nav;
-      const row=header.querySelector('[class*="nav"],[class*="menu"],[class*="header"],[class*="actions"]');
-      if(row)return row;
-      return header;
-    }
-    const nav=document.querySelector('nav');
-    return nav||null;
-  };
-
-  const addAccountEntry=()=>{
-    ensureStyles();
-    let a=document.getElementById('tamweenat-account-entry');
-    if(!a){
-      a=document.createElement('a');
-      a.id='tamweenat-account-entry';
-      a.href='./login.html';
-      a.textContent='دخول المطعم';
-      a.setAttribute('aria-label','تسجيل دخول المطعم إلى المشتريات والكريدت والفواتير');
-    }
-
-    const target=findTopContainer();
-    if(!target)return;
-    let slot=document.getElementById('tamweenat-login-slot');
-    if(!slot){
-      slot=document.createElement('span');
-      slot.id='tamweenat-login-slot';
-      slot.className='tamweenat-login-slot';
-    }
-    if(slot.parentElement!==target)target.appendChild(slot);
-    if(a.parentElement!==slot)slot.appendChild(a);
-  };
-
-  const removeOldFloatingArtifacts=()=>{
-    const entry=document.getElementById('tamweenat-account-entry');
-    if(entry){entry.style.position='static';entry.style.left='';entry.style.bottom='';}
-  };
-
-  const run=()=>{applyBrand();removeOldFloatingArtifacts();addAccountEntry();};
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',run);else run();
-  let queued=false;
-  const observer=new MutationObserver(()=>{if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;run();});});
-  observer.observe(document.documentElement,{childList:true,subtree:true});
+  const BRAND_AR='تموينات',BRAND_EN='Tamweenat';
+  const replaceText=node=>{if(node.nodeType===Node.TEXT_NODE){node.nodeValue=(node.nodeValue||'').replace(/زاد المطاعم/g,'تموينات').replace(/زاد/g,'تموينات').replace(/ZAD RESTAURANTS/gi,'TAMWEENAT').replace(/ZAD/gi,'TAMWEENAT');return}if(node.nodeType!==Node.ELEMENT_NODE||['SCRIPT','STYLE','NOSCRIPT'].includes(node.tagName))return;[...node.childNodes].forEach(replaceText)};
+  const applyBrand=()=>{document.title=document.title.replace(/زاد المطاعم/g,BRAND_AR).replace(/زاد/g,BRAND_AR).replace(/ZAD/gi,BRAND_EN);replaceText(document.body)};
+  const ensureStyles=()=>{if(document.getElementById('tamweenat-login-nav-style'))return;const s=document.createElement('style');s.id='tamweenat-login-nav-style';s.textContent=`#tamweenat-account-entry,#tamweenat-admin-entry{display:inline-flex!important;align-items:center;justify-content:center;gap:7px;text-decoration:none!important;padding:10px 15px;border-radius:11px;font-family:inherit;font-weight:800;white-space:nowrap;position:static!important;inset:auto!important}#tamweenat-account-entry{background:#163d30;color:#fff!important;border:1px solid #163d30}#tamweenat-account-entry:hover{background:#235f49}#tamweenat-admin-entry{background:#fff;color:#163d30!important;border:1px solid #cfdcd5;margin-inline-start:6px}#tamweenat-account-entry::before{content:'◉';font-size:14px}#tamweenat-admin-entry::before{content:'⚙';font-size:13px}.tamweenat-login-slot{display:flex;align-items:center;margin-inline-start:auto;gap:4px}@media(max-width:760px){#tamweenat-account-entry,#tamweenat-admin-entry{padding:9px 11px;font-size:13px}.tamweenat-login-slot{width:auto}}`;document.head.appendChild(s)};
+  const findTopContainer=()=>{const headers=[...document.querySelectorAll('header')].filter(el=>el.offsetParent!==null||el.getClientRects().length);for(const h of headers){return h.querySelector('nav')||h.querySelector('[class*="nav"],[class*="menu"],[class*="actions"]')||h}return document.querySelector('nav')};
+  const addEntries=()=>{ensureStyles();const target=findTopContainer();if(!target)return;let slot=document.getElementById('tamweenat-login-slot');if(!slot){slot=document.createElement('span');slot.id='tamweenat-login-slot';slot.className='tamweenat-login-slot'}if(slot.parentElement!==target)target.appendChild(slot);let user=document.getElementById('tamweenat-account-entry');if(!user){user=document.createElement('a');user.id='tamweenat-account-entry';user.href='./login.html';user.textContent='دخول المطعم'}let admin=document.getElementById('tamweenat-admin-entry');if(!admin){admin=document.createElement('a');admin.id='tamweenat-admin-entry';admin.href='./admin-login.html';admin.textContent='الإدارة'}if(user.parentElement!==slot)slot.appendChild(user);if(admin.parentElement!==slot)slot.appendChild(admin)};
+  const run=()=>{applyBrand();addEntries()};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',run);else run();let queued=false;new MutationObserver(()=>{if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;run()})}).observe(document.documentElement,{childList:true,subtree:true});
 })();
