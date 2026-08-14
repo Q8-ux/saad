@@ -1,5 +1,5 @@
 (()=>{
-const API='https://tamweenat-api.onrender.com';
+const API='https://cfauiqcvhioxpjlbvsgx.supabase.co/functions/v1/tamweenat-api';
 const existing=sessionStorage.getItem('tamweenatAdminToken');
 if(existing){location.replace('../zad-restaurants/admin.html');return;}
 let ready=false;
@@ -8,14 +8,14 @@ const button=form.querySelector('button[type="submit"]');
 const error=document.getElementById('adminLoginError');
 const note=document.createElement('div');
 note.style.cssText='margin-top:10px;font-size:13px;opacity:.72;min-height:20px';
-note.textContent='جاري تجهيز النظام...';
+note.textContent='جاري التحقق من النظام...';
 form.appendChild(note);
-fetch(`${API}/health`,{cache:'no-store'}).then(r=>{ready=r.ok;note.textContent=ready?'النظام جاهز للدخول.':'يتم تجهيز النظام عند الدخول.'}).catch(()=>{note.textContent='يتم تجهيز النظام عند الدخول.'});
+fetch(`${API}/health`,{cache:'no-store'}).then(r=>{ready=r.ok;note.textContent=ready?'النظام جاهز للدخول.':'تعذر التحقق من الخدمة.'}).catch(()=>{note.textContent='تعذر التحقق من الخدمة.'});
 form.addEventListener('submit',async e=>{
  e.preventDefault(); error.textContent=''; error.classList.remove('show');
- button.disabled=true; button.textContent=ready?'جاري الدخول...':'جاري تشغيل النظام والدخول...';
+ button.disabled=true; button.textContent='جاري الدخول...';
  try{
-   const controller=new AbortController(); const timer=setTimeout(()=>controller.abort(),75000);
+   const controller=new AbortController(); const timer=setTimeout(()=>controller.abort(),20000);
    const r=await fetch(`${API}/api/auth/admin`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:document.getElementById('adminUsername').value.trim(),password:document.getElementById('adminPassword').value}),signal:controller.signal,cache:'no-store'});
    clearTimeout(timer);
    const data=await r.json().catch(()=>({}));
@@ -23,7 +23,7 @@ form.addEventListener('submit',async e=>{
    sessionStorage.setItem('tamweenatAdminToken',data.token);
    sessionStorage.setItem('tamweenatAdminUser',JSON.stringify(data.user||{}));
    location.replace('../zad-restaurants/admin.html');
- }catch(err){error.textContent=err.name==='AbortError'?'استغرق تشغيل النظام وقتاً أطول من المعتاد. أعد المحاولة الآن.':(err.message||'تعذر تسجيل الدخول');error.classList.add('show');}
+ }catch(err){error.textContent=err.name==='AbortError'?'تعذر الاتصال بالخدمة. حاول مرة أخرى.':(err.message||'تعذر تسجيل الدخول');error.classList.add('show');}
  finally{button.disabled=false;button.textContent='دخول لوحة الإدارة';}
 });
 })();
