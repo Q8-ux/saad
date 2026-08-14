@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#163d30" />
+  <meta name="description" content="حساب المطعم — المشتريات، الفواتير، الميزانية، الكريدت والمديونية." />
+  <title>حساب المطعم | زاد المطاعم</title>
+  <link rel="stylesheet" href="./account.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="القائمة الرئيسية">
+      <a class="brand" href="./index.html" aria-label="زاد المطاعم">
+        <span class="brand-mark">ز</span>
+        <span><strong>زاد المطاعم</strong><small data-i18n="b2bSupply">منصة التوريد للمطاعم</small></span>
+      </a>
+      <nav>
+        <button class="nav-item active" data-section="overview"><span>⌂</span><b data-i18n="overview">نظرة عامة</b></button>
+        <button class="nav-item" data-section="credit"><span>◉</span><b data-i18n="creditAccount">الحساب والكريدت</b></button>
+        <button class="nav-item" data-section="purchases"><span>▦</span><b data-i18n="purchases">المشتريات</b></button>
+        <button class="nav-item" data-section="invoices"><span>▤</span><b data-i18n="invoices">الفواتير</b></button>
+        <button class="nav-item" data-section="budget"><span>◫</span><b data-i18n="budget">الميزانية</b></button>
+        <button class="nav-item" data-section="scheduled"><span>◷</span><b data-i18n="scheduledOrders">الطلبات المجدولة</b></button>
+      </nav>
+      <div class="side-foot">
+        <a class="outline-btn" href="./index.html" data-i18n="backToStore">العودة للمتجر</a>
+        <small>WhatsApp: +965 5016 8888</small>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow" data-i18n="restaurantPortal">بوابة المطعم</p>
+          <h1 id="restaurantName">حساب المطعم</h1>
+        </div>
+        <div class="top-actions">
+          <select id="languageSelect" aria-label="Language">
+            <option value="ar">العربية</option>
+            <option value="en">English</option>
+            <option value="hi">हिन्दी</option>
+            <option value="ur">اردو</option>
+          </select>
+          <button id="notificationBtn" class="icon-btn" aria-label="التنبيهات">🔔 <span id="notificationCount">2</span></button>
+        </div>
+      </header>
+
+      <section id="overview" class="page-section active-section">
+        <div id="creditAlert" class="credit-alert" role="status"></div>
+
+        <div class="hero-grid">
+          <article class="credit-card panel">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow" data-i18n="creditStatus">حالة الحساب الائتماني</p>
+                <h2 id="creditStatusText">آمن</h2>
+              </div>
+              <span id="creditStatusBadge" class="status-pill safe">آمن</span>
+            </div>
+            <div class="credit-meter-wrap">
+              <div class="meter-labels"><span data-i18n="creditUsed">المستخدم</span><strong id="creditPercent">0%</strong></div>
+              <div class="credit-meter"><span id="creditMeterFill"></span></div>
+            </div>
+            <div class="money-grid">
+              <div><span data-i18n="creditLimit">حد الكريدت</span><strong id="creditLimit">0.000 د.ك</strong></div>
+              <div><span data-i18n="usedCredit">المستخدم</span><strong id="creditUsed">0.000 د.ك</strong></div>
+              <div><span data-i18n="availableCredit">المتاح</span><strong id="creditAvailable">0.000 د.ك</strong></div>
+              <div><span data-i18n="totalDebt">إجمالي المديونية</span><strong id="totalDebt">0.000 د.ك</strong></div>
+            </div>
+            <div class="credit-actions">
+              <button id="creditOrderBtn" class="primary-btn" data-i18n="orderOnCredit">طلب بالكريدت</button>
+              <a id="directOrderBtn" class="secondary-btn" href="./index.html?payment=direct" data-i18n="directOrder">طلب بالدفع المباشر</a>
+            </div>
+          </article>
+
+          <article class="panel health-card">
+            <p class="eyebrow" data-i18n="accountHealth">مؤشر صحة الحساب</p>
+            <div class="health-score"><strong id="healthScore">82</strong><span>/100</span></div>
+            <div class="health-ring"><span id="healthRingText">جيد</span></div>
+            <p id="healthNote" class="muted">السداد منتظم ولا توجد مبالغ متأخرة.</p>
+          </article>
+        </div>
+
+        <div class="kpi-grid">
+          <article class="kpi"><span data-i18n="monthCreditSpend">إنفاق الكريدت هذا الشهر</span><strong id="monthCreditSpend">0.000 د.ك</strong><small id="monthSpendTrend">+0%</small></article>
+          <article class="kpi"><span data-i18n="dueNow">مستحق حالياً</span><strong id="dueNow">0.000 د.ك</strong><small id="nextDueDate">—</small></article>
+          <article class="kpi danger-kpi"><span data-i18n="overdue">متأخر عن السداد</span><strong id="overdueAmount">0.000 د.ك</strong><small id="overdueDays">0 يوم</small></article>
+          <article class="kpi"><span data-i18n="monthlyBudget">ميزانية الشهر</span><strong id="monthlyBudget">0.000 د.ك</strong><small id="budgetRemaining">—</small></article>
+        </div>
+
+        <div class="split-grid">
+          <article class="panel">
+            <div class="panel-head"><div><p class="eyebrow" data-i18n="creditSpendBreakdown">أين أنفقت الكريدت؟</p><h3 data-i18n="spendByCategory">الإنفاق حسب التصنيف</h3></div></div>
+            <div id="spendBars" class="bars"></div>
+          </article>
+          <article class="panel">
+            <div class="panel-head"><div><p class="eyebrow" data-i18n="paymentReminder">تذكير السداد</p><h3 data-i18n="upcomingDues">الاستحقاقات القادمة</h3></div><button id="payNowBtn" class="small-btn" data-i18n="payNow">الدفع الآن</button></div>
+            <div id="reminderList" class="reminder-list"></div>
+          </article>
+        </div>
+
+        <article class="panel">
+          <div class="panel-head"><div><p class="eyebrow" data-i18n="latestActivity">آخر النشاط</p><h3 data-i18n="latestPurchases">آخر المشتريات</h3></div><button class="text-btn" data-go="purchases" data-i18n="viewAll">عرض الكل</button></div>
+          <div class="table-wrap"><table><thead><tr><th data-i18n="date">التاريخ</th><th data-i18n="order">الطلب</th><th data-i18n="category">التصنيف</th><th data-i18n="paymentMethod">طريقة الدفع</th><th data-i18n="amount">القيمة</th></tr></thead><tbody id="recentPurchasesBody"></tbody></table></div>
+        </article>
+      </section>
+
+      <section id="credit" class="page-section">
+        <div class="section-title"><div><p class="eyebrow" data-i18n="creditManagement">إدارة الائتمان</p><h2 data-i18n="creditAndDebt">الكريدت والمديونية</h2></div></div>
+        <div class="kpi-grid">
+          <article class="kpi"><span data-i18n="creditLimit">حد الكريدت</span><strong id="creditLimit2">0.000 د.ك</strong></article>
+          <article class="kpi"><span data-i18n="outstandingBalance">الرصيد غير المسدد</span><strong id="outstanding2">0.000 د.ك</strong></article>
+          <article class="kpi"><span data-i18n="availableCredit">المتاح</span><strong id="available2">0.000 د.ك</strong></article>
+          <article class="kpi"><span data-i18n="overdue">متأخر عن السداد</span><strong id="overdue2">0.000 د.ك</strong></article>
+        </div>
+        <article class="panel rule-panel">
+          <h3 data-i18n="creditRules">قواعد الكريدت الحالية</h3>
+          <ul>
+            <li data-i18n="rule1">عند وصول الاستخدام إلى 100% يتوقف الشراء بالكريدت تلقائياً.</li>
+            <li data-i18n="rule2">عند إيقاف الكريدت يبقى الحساب فعالاً وتتحول الطلبات الجديدة للدفع المباشر.</li>
+            <li data-i18n="rule3">إعادة التفعيل تتم بعد السداد إذا لم توجد فواتير متأخرة تمنع ذلك.</li>
+          </ul>
+          <div id="creditGateStatus" class="gate-status"></div>
+        </article>
+      </section>
+
+      <section id="purchases" class="page-section">
+        <div class="section-title"><div><p class="eyebrow" data-i18n="analytics">التحليلات</p><h2 data-i18n="purchaseAnalysis">تحليل المشتريات</h2></div></div>
+        <div class="split-grid">
+          <article class="panel"><h3 data-i18n="topProducts">أكثر المواد شراءً</h3><div id="topProducts" class="rank-list"></div></article>
+          <article class="panel"><h3 data-i18n="monthlySpend">الإنفاق الشهري</h3><div id="monthlySpendChart" class="mini-chart"></div></article>
+        </div>
+        <article class="panel"><div class="table-wrap"><table><thead><tr><th data-i18n="date">التاريخ</th><th data-i18n="order">الطلب</th><th data-i18n="items">المواد</th><th data-i18n="paymentMethod">طريقة الدفع</th><th data-i18n="amount">القيمة</th></tr></thead><tbody id="allPurchasesBody"></tbody></table></div></article>
+      </section>
+
+      <section id="invoices" class="page-section">
+        <div class="section-title"><div><p class="eyebrow" data-i18n="statements">كشوف الحساب</p><h2 data-i18n="invoicesAndDues">الفواتير والاستحقاقات</h2></div><button id="statementBtn" class="secondary-btn" data-i18n="downloadStatement">تنزيل كشف الحساب</button></div>
+        <article class="panel"><div class="table-wrap"><table><thead><tr><th data-i18n="invoice">الفاتورة</th><th data-i18n="date">التاريخ</th><th data-i18n="dueDate">الاستحقاق</th><th data-i18n="amount">القيمة</th><th data-i18n="status">الحالة</th></tr></thead><tbody id="invoicesBody"></tbody></table></div></article>
+      </section>
+
+      <section id="budget" class="page-section">
+        <div class="section-title"><div><p class="eyebrow" data-i18n="planning">التخطيط</p><h2 data-i18n="purchaseBudget">ميزانية المشتريات</h2></div></div>
+        <article class="panel budget-panel">
+          <div class="budget-total"><span data-i18n="monthlyBudget">ميزانية الشهر</span><strong id="budgetTotal2">0.000 د.ك</strong><small id="budgetUsage2">0%</small></div>
+          <div id="budgetCategories" class="budget-categories"></div>
+        </article>
+      </section>
+
+      <section id="scheduled" class="page-section">
+        <div class="section-title"><div><p class="eyebrow" data-i18n="preorder">الطلب المسبق</p><h2 data-i18n="scheduledOrders">الطلبات المجدولة</h2></div></div>
+        <div id="scheduledList" class="scheduled-list"></div>
+      </section>
+    </main>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <div id="paymentModal" class="modal" aria-hidden="true">
+    <div class="modal-card">
+      <button id="closeModal" class="modal-close">×</button>
+      <p class="eyebrow" data-i18n="directPaymentRequired">الدفع المباشر مطلوب</p>
+      <h3 data-i18n="creditUnavailable">الكريدت غير متاح حالياً</h3>
+      <p id="modalReason" class="muted"></p>
+      <a class="primary-btn full" href="./index.html?payment=direct" data-i18n="continueDirect">متابعة الطلب بالدفع المباشر</a>
+    </div>
+  </div>
+
+  <script src="./account.js"></script>
+</body>
+</html>
