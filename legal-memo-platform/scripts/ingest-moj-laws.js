@@ -30,6 +30,7 @@ const limit = limitArg ? Math.max(1, Number(limitArg.split('=')[1])) : Infinity;
 const requestDelayMs = Math.max(0, Number(process.env.MOJ_REQUEST_DELAY_MS || 800));
 const maximumBytes = Math.max(1, Number(process.env.MOJ_MAX_PDF_MB || 250)) * 1024 * 1024;
 const concurrency = Math.max(1, Math.min(4, Number(process.env.MOJ_CONCURRENCY || 1)));
+const ocrPageConcurrency = Math.max(1, Math.min(8, Number(process.env.MOJ_OCR_PAGE_CONCURRENCY || 1)));
 
 function log(message, extra) {
   const suffix = extra ? ` ${JSON.stringify(extra)}` : '';
@@ -129,28 +130,43 @@ async function pdftotext(pdfPath, textPath) {
   }
 }
 
-async function ocrPdf(pdfPath, workDir, pageCount) {
+async function ocrPdf(pdfPath, workDir, pageCount, rotation = 0) {
   if (noOcr || !pageCount) return '';
   const maximumPages = Math.max(1, Number(process.env.MOJ_OCR_MAX_PAGES || 1000));
   if (pageCount > maximumPages) {
     log('OCR skipped because document is too long', { pageCount, maximumPages });
     return '';
   }
-  const output = [];
-  for (let page = 1; page <= pageCount; page += 1) {
-    const prefix = path.join(workDir, `page-${String(page).padStart(4, '0')}`);
-    const imagePath = `${prefix}.png`;
-    await run('pdftoppm', ['-f', String(page), '-l', String(page), '-singlefile', '-r', '160', '-png', pdfPath, prefix]);
-    try {
-      const result = await run('tesseract', [imagePath, 'stdout', '-l', 'ara+eng', '--psm', '6']);
-      output.push(result.stdout);
-    } catch (error) {
-      log('OCR skipped an unreadable page', { page, pageCount, error: error.message.slice(0, 180) });
+  const output = new Array(pageCount);
+  let nextPage = 1;
+  let completedPages = 0;
+  const processPage = async () => {
+    while (true) {
+      const page = nextPage;
+      nextPage += 1;
+      if (page > pageCount) return;
+      const prefix = path.join(workDir, `page-${String(page).padStart(4, '0')}`);
+      const imagePath = `${prefix}.png`;
+      const rotatedImagePath = rotation ? `${prefix}-rotate-${rotation}.png` : imagePath;
+      try {
+        await run('pdftoppm', ['-f', String(page), '-l', String(page), '-singlefile', '-r', '160', '-png', pdfPath, prefix]);
+        if (rotation) await run('convert', [imagePath, '-rotate', String(rotation), rotatedImagePath]);
+        const result = await run('tesseract', [rotatedImagePath, 'stdout', '-l', 'ara+eng', '--psm', '6']);
+        output[page - 1] = result.stdout;
+      } catch (error) {
+        log('OCR skipped an unreadable page', { page, pageCount, rotation, error: error.message.slice(0, 180) });
+      } finally {
+        await fsp.rm(imagePath, { force: true });
+        if (rotation) await fsp.rm(rotatedImagePath, { force: true });
+        completedPages += 1;
+        if (completedPages % 25 === 0 || completedPages === pageCount) {
+          log('OCR progress', { completedPages, pageCount, workers: Math.min(ocrPageConcurrency, pageCount) });
+        }
+      }
     }
-    await fsp.rm(imagePath, { force: true });
-    if (page % 25 === 0) log('OCR progress', { page, pageCount });
-  }
-  return output.join('\n\n');
+  };
+  await Promise.all(Array.from({ length: Math.min(ocrPageConcurrency, pageCount) }, () => processPage()));
+  return output.filter(Boolean).join('\n\n');
 }
 
 async function extractPdfText(pdfPath, workDir) {
@@ -161,8 +177,19 @@ async function extractPdfText(pdfPath, workDir) {
   const expectedFloor = Math.min(2000, Math.max(300, Number(pageCount || 1) * 80));
   const extractedTextIsSearchable = hasSearchableArabicText(text);
   if (usefulCharacters < expectedFloor || !extractedTextIsSearchable) {
-    const ocrText = await ocrPdf(pdfPath, workDir, pageCount);
-    const ocrIsSearchable = hasSearchableArabicText(ocrText);
+    let ocrText = await ocrPdf(pdfPath, workDir, pageCount);
+    let ocrIsSearchable = hasSearchableArabicText(ocrText);
+    if (!ocrIsSearchable) {
+      for (const rotation of [-90, 90]) {
+        const rotatedText = await ocrPdf(pdfPath, workDir, pageCount, rotation);
+        if (hasSearchableArabicText(rotatedText)) {
+          ocrText = rotatedText;
+          ocrIsSearchable = true;
+          log('OCR recovered rotated PDF pages', { rotation, pageCount });
+          break;
+        }
+      }
+    }
     if (ocrIsSearchable && (!extractedTextIsSearchable || ocrText.replace(/\s/g, '').length > usefulCharacters)) text = ocrText;
   }
   return { text, pageCount };
