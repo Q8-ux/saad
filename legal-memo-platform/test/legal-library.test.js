@@ -51,6 +51,12 @@ test('classifies the identity and amendment risk without inventing a legal concl
   assert.match(result.summary, /يجب ربطه بالنص الأصلي قبل الاعتماد/);
 });
 
+test('does not confuse a constitutional-court law with the Constitution itself', () => {
+  const result = analyseLegalDocument({ title: 'قانون رقم 14 لسنة 1973 بشأن إنشاء المحكمة الدستورية' }, '');
+  assert.equal(result.document_type, 'قانون');
+  assert.equal(result.category, 'دستوري وقضائي');
+});
+
 test('chunks legal text into ordered searchable segments', () => {
   const body = `${'مقدمة القانون '.repeat(100)}\nالمادة 1\n${'نص المادة الأولى '.repeat(300)}\nالمادة 2\n${'نص المادة الثانية '.repeat(300)}`;
   const chunks = chunkLegalText(body, 1500, 150);
