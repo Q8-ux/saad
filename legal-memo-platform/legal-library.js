@@ -84,7 +84,7 @@ function extractIdentity(title = '') {
   const yearMatch = compact.match(/(?:لسنة|لسنه|سنة)\s*([0-9٠-٩]{4})/);
   const numberMatch = compact.match(/(?:رقم|قانون|مرسوم بقانون|قرار(?: وزاري)?|تعميم(?: إداري)?)\s*(?:رقم\s*)?([0-9٠-٩]{1,5})(?=\s*(?:لسنة|لسنه|سنة))/);
   let documentType = 'مستند تشريعي';
-  if (/الدستور/.test(compact)) documentType = 'دستور';
+  if (/^(?:دستور|الدستور)(?:\s|$)/.test(compact)) documentType = 'دستور';
   else if (/مرسوم\s+بقانون/.test(compact)) documentType = 'مرسوم بقانون';
   else if (/مرسوم/.test(compact)) documentType = 'مرسوم';
   else if (/قرار\s+وزاري/.test(compact)) documentType = 'قرار وزاري';
