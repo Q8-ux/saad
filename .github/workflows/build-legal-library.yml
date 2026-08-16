@@ -9,6 +9,7 @@ on:
       - '.github/workflows/build-legal-library.yml'
 
 permissions:
+  actions: read
   contents: write
 
 concurrency:
@@ -46,6 +47,25 @@ jobs:
       - name: Verify the legal-library implementation
         run: npm test
 
+      - name: Download the verified legal-library checkpoint
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          run-id: 31949686941
+          name: ministry-legal-library
+          path: legal-memo-platform/checkpoint
+
+      - name: Restore the legal-library checkpoint
+        run: |
+          mkdir -p generated
+          if [ -f checkpoint/generated/legal-memo.db ]; then
+            cp checkpoint/generated/legal-memo.db generated/legal-memo.db
+          elif [ -f seed/legal-library.sqlite.gz ]; then
+            gzip -cd seed/legal-library.sqlite.gz > generated/legal-memo.db
+          fi
+
       - name: Extract and analyse official Ministry PDFs
         env:
           DATA_DIR: ${{ github.workspace }}/legal-memo-platform/generated
@@ -56,6 +76,7 @@ jobs:
           MOJ_REQUEST_ATTEMPTS: '2'
           MOJ_COMMAND_TIMEOUT_MS: '120000'
           MOJ_MAX_PDF_MB: '250'
+          MOJ_CONCURRENCY: '2'
         run: npm run ingest:moj
 
       - name: Compress the indexed legal database
@@ -70,6 +91,7 @@ jobs:
           name: ministry-legal-library
           path: |
             legal-memo-platform/generated/legal-memo.db
+            legal-memo-platform/generated/legal-memo.db-wal
             legal-memo-platform/seed/legal-library.sqlite.gz
           if-no-files-found: warn
           retention-days: 90

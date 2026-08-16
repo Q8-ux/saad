@@ -28,6 +28,7 @@ const limitArg = process.argv.find(arg => arg.startsWith('--limit='));
 const limit = limitArg ? Math.max(1, Number(limitArg.split('=')[1])) : Infinity;
 const requestDelayMs = Math.max(0, Number(process.env.MOJ_REQUEST_DELAY_MS || 800));
 const maximumBytes = Math.max(1, Number(process.env.MOJ_MAX_PDF_MB || 250)) * 1024 * 1024;
+const concurrency = Math.max(1, Math.min(4, Number(process.env.MOJ_CONCURRENCY || 1)));
 
 function log(message, extra) {
   const suffix = extra ? ` ${JSON.stringify(extra)}` : '';
@@ -219,13 +220,21 @@ async function main() {
     db.prepare('UPDATE legal_ingestion_runs SET documents_found=? WHERE id=?').run(parsed.length, runId);
     log('Official manifest saved', { found: parsed.length, selected: documents.length, metadataOnly });
     if (!metadataOnly) {
-      for (let index = 0; index < documents.length; index += 1) {
-        const status = await processDocument(db, documents[index], index + 1, documents.length);
-        counters[status] = (counters[status] || 0) + 1;
-        db.prepare('UPDATE legal_ingestion_runs SET documents_ready=?,documents_failed=?,details_json=? WHERE id=?')
-          .run(counters.ready, counters.failed, JSON.stringify(counters), runId);
-        if (index + 1 < documents.length) await sleep(requestDelayMs);
-      }
+      let nextIndex = 0;
+      const processNext = async () => {
+        while (true) {
+          const index = nextIndex;
+          nextIndex += 1;
+          if (index >= documents.length) return;
+          const status = await processDocument(db, documents[index], index + 1, documents.length);
+          counters[status] = (counters[status] || 0) + 1;
+          db.prepare('UPDATE legal_ingestion_runs SET documents_ready=?,documents_failed=?,details_json=? WHERE id=?')
+            .run(counters.ready, counters.failed, JSON.stringify(counters), runId);
+          if (nextIndex < documents.length) await sleep(requestDelayMs);
+        }
+      };
+      log('Starting document extraction workers', { concurrency });
+      await Promise.all(Array.from({ length: Math.min(concurrency, documents.length) }, () => processNext()));
     }
     db.prepare("UPDATE legal_ingestion_runs SET status='completed',documents_ready=?,documents_failed=?,details_json=?,completed_at=CURRENT_TIMESTAMP WHERE id=?")
       .run(counters.ready, counters.failed, JSON.stringify(counters), runId);
