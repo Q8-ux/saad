@@ -12,6 +12,14 @@ const bcrypt = require('bcryptjs');
 const multer = require('multer');
 const { DatabaseSync } = require('node:sqlite');
 const OpenAI = require('openai');
+const { spawn } = require('child_process');
+const {
+  ensureLegalSchema,
+  findRelevantLegalContext,
+  getLegalDocument,
+  getLegalStats,
+  searchLegalDocuments,
+} = require('./legal-library');
 
 const app = express();
 const port = Number(process.env.PORT || 3000);
@@ -70,6 +78,7 @@ db.exec(`
     FOREIGN KEY (user_id) REFERENCES users(id)
   );
 `);
+ensureLegalSchema(db);
 
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(express.json({ limit: '2mb' }));
@@ -167,6 +176,26 @@ app.get('/api/documents/:id/download', auth, (req, res) => {
   if (!doc) return res.status(404).json({ error: 'المستند غير موجود' });
   res.download(path.join(uploadDir, doc.stored_name), doc.original_name);
 });
+app.get('/api/legal-library/stats', auth, (_req, res) => {
+  res.json(getLegalStats(db));
+});
+app.get('/api/legal-library', auth, (req, res) => {
+  res.json(searchLegalDocuments(db, {
+    query: req.query.q || '',
+    category: req.query.category || '',
+    year: req.query.year || '',
+    documentType: req.query.type || '',
+    status: req.query.status || '',
+    page: req.query.page || 1,
+    limit: req.query.limit || 20,
+  }));
+});
+app.get('/api/legal-library/:id', auth, (req, res) => {
+  const document = getLegalDocument(db, Number(req.params.id));
+  if (!document) return res.status(404).json({ error: 'المستند القانوني غير موجود' });
+  res.json({ document });
+});
+
 app.post('/api/cases/:id/generate', auth, async (req, res) => {
   const item = ownedCase(req.params.id, req.session.userId);
   if (!item) return res.status(404).json({ error: 'القضية غير موجودة' });
@@ -174,8 +203,14 @@ app.post('/api/cases/:id/generate', auth, async (req, res) => {
   const docs = db.prepare('SELECT original_name FROM documents WHERE case_id=? AND user_id=?').all(item.id, req.session.userId).map(x => x.original_name);
   const model = process.env.OPENAI_MODEL || 'gpt-4.1-mini';
   const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  const instructions = String(req.body.instructions || 'حلل نقاط القوة والضعف وصغ مذكرة متوازنة وقوية.');
+  const legalQuery = [item.case_type, item.facts, item.claims, item.opponent_arguments, instructions].filter(Boolean).join(' ');
+  const legalSources = findRelevantLegalContext(db, legalQuery, 10);
+  const legalContext = legalSources.length
+    ? legalSources.map((source, index) => `[مصدر ${index + 1}] ${source.title}${source.reference ? ` - ${source.reference}` : ''}\n${source.excerpt}\nالرابط الرسمي: ${source.source_url}`).join('\n\n')
+    : 'لا توجد مقتطفات مسترجعة من المكتبة القانونية بعد.';
   const system = `أنت مساعد صياغة قانونية كويتي. اكتب مسودة مذكرة دفاع مهنية بالعربية الفصحى، ولا تختلق مواد أو أحكاماً أو وقائع. ميّز بوضوح بين الوقائع المقدمة والاستنتاج القانوني. إذا نقصت معلومة مؤثرة فاذكرها في قسم مستقل بعنوان البيانات المطلوب استكمالها. استخدم الهيكل: الديباجة، الموضوع، موجز الوقائع، نقاط النزاع، الدفوع مرتبة، مناقشة مستندات الخصم، الطلبات، التحفظات. لا تدّع أن المسودة بديل عن مراجعة محامٍ مرخص.`;
-  const prompt = `عنوان القضية: ${item.title}\nالمحكمة: ${item.court || 'غير محددة'}\nرقم القضية: ${item.case_number || 'غير محدد'}\nالنوع: ${item.case_type}\nصفة العميل: ${item.client_role}\nالوقائع: ${item.facts}\nالطلبات: ${item.claims}\nدفوع الخصم: ${item.opponent_arguments || 'غير مدخلة'}\nأسماء المرفقات المتاحة: ${docs.join('، ') || 'لا يوجد'}\nتعليمات إضافية: ${String(req.body.instructions || 'حلل نقاط القوة والضعف وصغ مذكرة متوازنة وقوية.')}`;
+  const prompt = `عنوان القضية: ${item.title}\nالمحكمة: ${item.court || 'غير محددة'}\nرقم القضية: ${item.case_number || 'غير محدد'}\nالنوع: ${item.case_type}\nصفة العميل: ${item.client_role}\nالوقائع: ${item.facts}\nالطلبات: ${item.claims}\nدفوع الخصم: ${item.opponent_arguments || 'غير مدخلة'}\nأسماء المرفقات المتاحة: ${docs.join('، ') || 'لا يوجد'}\nتعليمات إضافية: ${instructions}\n\nمقتطفات من مكتبة وزارة العدل المفهرسة آلياً:\n${legalContext}\n\nتعليمات الاستشهاد: لا تنسب مادة أو حكمًا إلا إذا ورد نصه في المقتطفات أعلاه، واذكر اسم المصدر الرسمي ورابطه، ونبّه إلى ضرورة التحقق من النفاذ وآخر التعديلات قبل الإيداع.`;
   try {
     const response = await client.responses.create({ model, instructions: system, input: prompt, temperature: 0.2 });
     const content = response.output_text?.trim();
@@ -190,4 +225,15 @@ app.post('/api/cases/:id/generate', auth, async (req, res) => {
 });
 
 app.use((err, _req, res, _next) => res.status(400).json({ error: err.message || 'تعذر تنفيذ الطلب' }));
-app.listen(port, () => console.log(`Legal Memo Platform running on http://localhost:${port}`));
+app.listen(port, () => {
+  console.log(`Legal Memo Platform running on http://localhost:${port}`);
+  if (process.env.MOJ_AUTO_SYNC === 'true') {
+    const ingest = spawn(process.execPath, [path.join(__dirname, 'scripts', 'ingest-moj-laws.js')], {
+      cwd: __dirname,
+      env: process.env,
+      stdio: 'inherit',
+    });
+    ingest.on('error', error => console.error('MOJ legal library sync could not start:', error.message));
+    ingest.on('exit', code => console.log(`MOJ legal library sync finished with code ${code}`));
+  }
+});
