@@ -19,6 +19,7 @@ const {
   getLegalDocument,
   getLegalStats,
   searchLegalDocuments,
+  upsertManifest,
 } = require('./legal-library');
 
 const app = express();
@@ -79,6 +80,15 @@ db.exec(`
   );
 `);
 ensureLegalSchema(db);
+try {
+  const seedPath = path.join(__dirname, 'seed', 'moj-laws-manifest.json');
+  const seed = JSON.parse(fs.readFileSync(seedPath, 'utf8'));
+  if (Array.isArray(seed.documents) && seed.documents.length) {
+    upsertManifest(db, seed.documents, seed.source_page);
+  }
+} catch (error) {
+  console.error('MOJ legal manifest seed could not be loaded:', error.message);
+}
 
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(express.json({ limit: '2mb' }));
