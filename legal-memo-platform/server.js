@@ -1,5 +1,6 @@
 const path = require('path');
 const fs = require('fs');
+const zlib = require('zlib');
 const crypto = require('crypto');
 require('dotenv').config({ path: path.join(__dirname, '.env.local') });
 require('dotenv').config({ path: path.join(__dirname, '..', '.env.local') });
@@ -29,7 +30,22 @@ const uploadDir = path.resolve(__dirname, process.env.UPLOAD_DIR || 'uploads');
 fs.mkdirSync(dataDir, { recursive: true });
 fs.mkdirSync(uploadDir, { recursive: true });
 
-const db = new DatabaseSync(path.join(dataDir, 'legal-memo.db'));
+const databasePath = path.join(dataDir, 'legal-memo.db');
+const compressedLibrarySeed = path.join(__dirname, 'seed', 'legal-library.sqlite.gz');
+if (!fs.existsSync(databasePath) && fs.existsSync(compressedLibrarySeed)) {
+  try {
+    const seed = zlib.gunzipSync(fs.readFileSync(compressedLibrarySeed));
+    if (!seed.subarray(0, 16).toString('utf8').startsWith('SQLite format 3')) {
+      throw new Error('seed is not a SQLite database');
+    }
+    fs.writeFileSync(databasePath, seed, { mode: 0o600 });
+    console.log('Loaded the Ministry legal library seed database.');
+  } catch (error) {
+    console.error('Legal library seed could not be loaded:', error.message);
+  }
+}
+
+const db = new DatabaseSync(databasePath);
 db.exec('PRAGMA journal_mode = WAL');
 db.exec(`
   CREATE TABLE IF NOT EXISTS users (
