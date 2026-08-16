@@ -12,7 +12,7 @@ permissions:
 
 concurrency:
   group: ministry-legal-library
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   extract-and-index:
@@ -51,7 +51,9 @@ jobs:
           MOJ_OCR_ENABLED: 'true'
           MOJ_OCR_MAX_PAGES: '1200'
           MOJ_REQUEST_DELAY_MS: '350'
-          MOJ_REQUEST_TIMEOUT_MS: '120000'
+          MOJ_REQUEST_TIMEOUT_MS: '45000'
+          MOJ_REQUEST_ATTEMPTS: '2'
+          MOJ_COMMAND_TIMEOUT_MS: '120000'
           MOJ_MAX_PDF_MB: '250'
         run: npm run ingest:moj
 
