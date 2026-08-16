@@ -20,6 +20,7 @@ const {
 const sourcePage = process.env.MOJ_LAWS_URL || DEFAULT_SOURCE_PAGE;
 const dataDir = path.resolve(__dirname, '..', process.env.DATA_DIR || 'data');
 const dbPath = path.join(dataDir, 'legal-memo.db');
+const seedManifestPath = path.join(__dirname, '..', 'seed', 'moj-laws-manifest.json');
 const force = process.argv.includes('--force');
 const metadataOnly = process.argv.includes('--metadata-only');
 const noOcr = process.argv.includes('--no-ocr') || process.env.MOJ_OCR_ENABLED === 'false';
@@ -182,11 +183,19 @@ async function main() {
   const runId = Number(runResult.lastInsertRowid);
   const counters = { found: 0, ready: 0, skipped: 0, text_unavailable: 0, failed: 0 };
   try {
-    log('Fetching Ministry of Justice law index', { sourcePage });
-    const response = await fetchWithRetry(sourcePage, { headers: { accept: 'text/html,application/xhtml+xml' } });
-    const html = await response.text();
-    const parsed = parseMojLawsHtml(html, sourcePage);
-    if (!parsed.length) throw new Error('No official PDF links were found on the Ministry page');
+    let parsed;
+    try {
+      log('Fetching Ministry of Justice law index', { sourcePage });
+      const response = await fetchWithRetry(sourcePage, { headers: { accept: 'text/html,application/xhtml+xml' } });
+      const html = await response.text();
+      parsed = parseMojLawsHtml(html, sourcePage);
+      if (!parsed.length) throw new Error('No official PDF links were found on the Ministry page');
+    } catch (error) {
+      const seed = JSON.parse(await fsp.readFile(seedManifestPath, 'utf8'));
+      parsed = Array.isArray(seed.documents) ? seed.documents : [];
+      if (!parsed.length) throw error;
+      log('Live index unavailable; using the verified Ministry manifest snapshot', { reason: error.message, found: parsed.length, capturedAt: seed.captured_at });
+    }
     const documents = upsertManifest(db, parsed, sourcePage).slice(0, limit);
     counters.found = parsed.length;
     db.prepare('UPDATE legal_ingestion_runs SET documents_found=? WHERE id=?').run(parsed.length, runId);
