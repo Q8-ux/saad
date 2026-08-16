@@ -7,9 +7,11 @@ const test = require('node:test');
 const { DatabaseSync } = require('node:sqlite');
 const {
   analyseLegalDocument,
+  attachLegalDocumentSource,
   chunkLegalText,
   ensureLegalSchema,
   getLegalStats,
+  hasSearchableArabicText,
   parseMojLawsHtml,
   saveLegalDocumentText,
   searchLegalDocuments,
@@ -53,9 +55,14 @@ test('classifies the identity and amendment risk without inventing a legal concl
 });
 
 test('does not confuse a constitutional-court law with the Constitution itself', () => {
-  const result = analyseLegalDocument({ title: 'قانون رقم 14 لسنة 1973 بشأن إنشاء المحكمة الدستورية' }, '');
+  const result = analyseLegalDocument({ title: 'قانون رقم 14 لسنة 1973 بشأن إنشاء المحكمة الدستورية' }, 'ينظم هذا العمل إجراءات المحكمة.');
   assert.equal(result.document_type, 'قانون');
   assert.equal(result.category, 'دستوري وقضائي');
+});
+
+test('flags text extracted with an unusable Arabic character map', () => {
+  assert.equal(hasSearchableArabicText('المادة 1\nتسري أحكام هذا القانون. '.repeat(10)), true);
+  assert.equal(hasSearchableArabicText('qWErty '.repeat(200)), false);
 });
 
 test('chunks legal text into ordered searchable segments', () => {
@@ -85,9 +92,16 @@ test('adds a non-destructive legal library schema and supports retrieval', () =>
   const results = searchLegalDocuments(db, { query: 'العقد المتعاقدين' });
   assert.equal(results.items.length, 1);
   assert.equal(results.items[0].law_number, 67);
+  attachLegalDocumentSource(db, document.id, {
+    source_url: 'library://laws/civil-law-upload',
+    source_label: 'ملف قوانين المرفوع',
+    source_type: 'user_library',
+  });
+  assert.equal(db.prepare('SELECT COUNT(*) count FROM legal_document_sources WHERE document_id=?').get(document.id).count, 2);
   const stats = getLegalStats(db);
   assert.equal(stats.total, 1);
   assert.equal(stats.ready, 1);
+  assert.equal(stats.sources, 2);
   db.close();
 });
 

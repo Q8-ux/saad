@@ -29,12 +29,31 @@ function cleanTitle(value = '') {
 
 function normalizeArabicText(value = '') {
   return String(value)
+    .normalize('NFKC')
     .replace(/\r/g, '')
     .replace(/[\u200B-\u200F\u202A-\u202E\u2060\uFEFF]/g, '')
     .replace(/[ \t]+/g, ' ')
     .replace(/\n[ \t]+/g, '\n')
     .replace(/\n{3,}/g, '\n\n')
     .trim();
+}
+
+function getArabicTextQuality(value = '') {
+  const text = normalizeArabicText(value);
+  const arabicCharacters = (text.match(/[\u0600-\u06FF]/g) || []).length;
+  const latinCharacters = (text.match(/[A-Za-z]/g) || []).length;
+  const letterCharacters = arabicCharacters + latinCharacters;
+  return {
+    text_length: text.length,
+    arabic_characters: arabicCharacters,
+    latin_characters: latinCharacters,
+    arabic_ratio: letterCharacters ? arabicCharacters / letterCharacters : 0,
+  };
+}
+
+function hasSearchableArabicText(value = '') {
+  const quality = getArabicTextQuality(value);
+  return quality.arabic_characters >= 80 && quality.arabic_ratio >= 0.35;
 }
 
 function fileTitleFromUrl(url) {
@@ -100,22 +119,24 @@ function extractIdentity(title = '') {
 }
 
 const CATEGORY_RULES = [
-  ['مكافحة غسل الأموال والإرهاب', /غسل الأموال|تمويل الإرهاب|مكافحة الإرهاب|أسلحة الدمار|مجلس الأمن/],
-  ['أحوال شخصية', /الأحوال الشخصية|الجعفرية|الزواج|الطلاق|الحضانة|المواريث/],
+  ['مكافحة غسل الأموال والإرهاب', /غسل الأموال|غسل الاموال|تمويل الإرهاب|تمويل الارهاب|مكافحة الإرهاب|مكافحة الارهاب|أسلحة الدمار|اسلحة الدمار|مجلس الأمن|مجلس الامن/],
+  ['أحوال شخصية', /الأحوال الشخصية|الاحوال الشخصية|الجعفرية|الزواج|الطلاق|الحضانة|المواريث/],
   ['جزائي', /الجزاء|الجريمة|المخدرات|المؤثرات العقلية|الاتجار بالأشخاص|تهريب المهاجرين|الفساد|المحكوم عليهم|المجرمين/],
   ['مرافعات وتنفيذ', /المرافعات|الإعلان الإلكتروني|الدعاوي قليلة القيمة|التنفيذ|الإثبات/],
   ['عقاري وتوثيق', /العقار|العقارية|التسجيل العقاري|التوثيق|الوكالات العقارية/],
   ['مالي ومصرفي', /الإفلاس|الائتمانية|التأمين|المصرفي|الأوراق المالية|أسواق المال|الذمة المالية/],
-  ['عمالي', /العمل|العمالة|الخدمة المدنية|التأمينات الاجتماعية/],
+  ['دستوري وقضائي', /الدستور|المحكمة الدستورية|القضاء|الفتوى والتشريع/],
+  ['عمالي', /قانون العمل|العمل في القطاع|العمالة|الخدمة المدنية|التأمينات الاجتماعية/],
   ['إعلام وتقنية', /المطبوعات|النشر|الإعلام|الاتصالات|تقنية المعلومات|المعلومات الإلكترونية/],
   ['دولي واتفاقيات', /اتفاقية|بروتوكول|العهد الدولي|الأمم المتحدة|دول مجلس التعاون|التعاون بين|وثائق ختامية/],
-  ['دستوري وقضائي', /الدستور|المحكمة الدستورية|القضاء|الفتوى والتشريع/],
   ['مدني وتجاري', /القانون المدني|التجارة|التجارية|البحرية|الشركات|الوكالة التجارية/],
   ['إداري', /الجهاز الإداري|الهيئة العامة|إنشاء هيئة|وزارة|حوكمة|المساعدات العامة/],
 ];
 
 function classifyLegalDocument(title = '', text = '') {
-  const sample = `${title} ${String(text).slice(0, 12000)}`;
+  const titleCategory = CATEGORY_RULES.find(([, matcher]) => matcher.test(cleanTitle(title)))?.[0];
+  if (titleCategory) return titleCategory;
+  const sample = String(text).slice(0, 12000);
   return CATEGORY_RULES.find(([, matcher]) => matcher.test(sample))?.[0] || 'تشريعات عامة';
 }
 
@@ -236,10 +257,21 @@ function ensureLegalSchema(db) {
       started_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
       completed_at TEXT
     );
+    CREATE TABLE IF NOT EXISTS legal_document_sources (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      document_id INTEGER NOT NULL,
+      source_url TEXT NOT NULL UNIQUE,
+      source_label TEXT NOT NULL,
+      source_type TEXT NOT NULL DEFAULT 'official',
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (document_id) REFERENCES legal_documents(id) ON DELETE CASCADE
+    );
     CREATE INDEX IF NOT EXISTS idx_legal_documents_year ON legal_documents(law_year);
     CREATE INDEX IF NOT EXISTS idx_legal_documents_category ON legal_documents(category);
     CREATE INDEX IF NOT EXISTS idx_legal_documents_status ON legal_documents(status);
     CREATE INDEX IF NOT EXISTS idx_legal_chunks_document ON legal_chunks(document_id, chunk_index);
+    CREATE INDEX IF NOT EXISTS idx_legal_document_sources_document ON legal_document_sources(document_id);
   `);
   try {
     db.exec(`CREATE VIRTUAL TABLE IF NOT EXISTS legal_chunks_fts USING fts5(
@@ -249,6 +281,18 @@ function ensureLegalSchema(db) {
   } catch (error) {
     console.warn('SQLite FTS5 is unavailable; legal search will use LIKE:', error.message);
   }
+}
+
+function attachLegalDocumentSource(db, documentId, document) {
+  const sourceLabel = document.source_label || document.official_source || OFFICIAL_SOURCE;
+  const sourceType = document.source_type || (sourceLabel === OFFICIAL_SOURCE ? 'official_moj' : 'uploaded');
+  db.prepare(`INSERT INTO legal_document_sources (document_id,source_url,source_label,source_type)
+    VALUES (?,?,?,?)
+    ON CONFLICT(source_url) DO UPDATE SET
+      document_id=excluded.document_id,
+      source_label=excluded.source_label,
+      source_type=excluded.source_type,
+      updated_at=CURRENT_TIMESTAMP`).run(documentId, document.source_url, sourceLabel, sourceType);
 }
 
 function upsertManifest(db, documents, sourcePage = DEFAULT_SOURCE_PAGE) {
@@ -262,14 +306,18 @@ function upsertManifest(db, documents, sourcePage = DEFAULT_SOURCE_PAGE) {
   try {
     for (const document of documents) {
       const analysis = analyseLegalDocument(document, '');
-      const values = [document.title, sourcePage, OFFICIAL_SOURCE, analysis.document_type, analysis.law_number, analysis.law_year, analysis.category, analysis.summary, JSON.stringify(analysis.keywords)];
+      const sourceLabel = document.official_source || document.source_label || OFFICIAL_SOURCE;
+      const values = [document.title, sourcePage, sourceLabel, analysis.document_type, analysis.law_number, analysis.law_year, analysis.category, analysis.summary, JSON.stringify(analysis.keywords)];
       const existing = select.get(document.source_url);
       if (existing) {
         update.run(...values, document.source_url);
+        attachLegalDocumentSource(db, existing.id, document);
         output.push({ ...document, id: existing.id });
       } else {
-        const result = insert.run(document.title, document.source_url, sourcePage, OFFICIAL_SOURCE, analysis.document_type, analysis.law_number, analysis.law_year, analysis.category, analysis.summary, JSON.stringify(analysis.keywords), 'pending');
-        output.push({ ...document, id: Number(result.lastInsertRowid) });
+        const result = insert.run(document.title, document.source_url, sourcePage, sourceLabel, analysis.document_type, analysis.law_number, analysis.law_year, analysis.category, analysis.summary, JSON.stringify(analysis.keywords), 'pending');
+        const id = Number(result.lastInsertRowid);
+        attachLegalDocumentSource(db, id, document);
+        output.push({ ...document, id });
       }
     }
     db.exec('COMMIT');
@@ -375,7 +423,8 @@ function getLegalDocument(db, id) {
   const document = db.prepare('SELECT * FROM legal_documents WHERE id=?').get(id);
   if (!document) return null;
   const chunks = db.prepare('SELECT chunk_index,reference,text,char_start,char_end FROM legal_chunks WHERE document_id=? ORDER BY chunk_index').all(id);
-  return { ...serializeDocument(document, true), chunks };
+  const sources = db.prepare('SELECT source_url,source_label,source_type FROM legal_document_sources WHERE document_id=? ORDER BY id').all(id);
+  return { ...serializeDocument(document, true), chunks, sources };
 }
 
 function getLegalStats(db) {
@@ -383,8 +432,9 @@ function getLegalStats(db) {
     SUM(status='ready') ready,SUM(status='pending') pending,SUM(status='text_unavailable') text_unavailable,SUM(status='error') errors,
     SUM(LENGTH(raw_text)) text_characters,SUM(article_count) articles FROM legal_documents`).get();
   const categories = db.prepare('SELECT category,COUNT(*) count FROM legal_documents GROUP BY category ORDER BY count DESC').all();
+  const sources = db.prepare('SELECT COUNT(*) count FROM legal_document_sources').get().count;
   const latestRun = db.prepare('SELECT * FROM legal_ingestion_runs ORDER BY id DESC LIMIT 1').get() || null;
-  return { ...totals, categories, latest_run: latestRun };
+  return { ...totals, categories, sources, latest_run: latestRun };
 }
 
 function findRelevantLegalContext(db, query, limit = 8) {
@@ -415,11 +465,14 @@ module.exports = {
   analyseLegalDocument,
   chunkLegalText,
   classifyLegalDocument,
+  attachLegalDocumentSource,
   ensureLegalSchema,
   extractIdentity,
   findRelevantLegalContext,
   getLegalDocument,
   getLegalStats,
+  getArabicTextQuality,
+  hasSearchableArabicText,
   markLegalDocumentError,
   normalizeArabicText,
   parseMojLawsHtml,

@@ -10,6 +10,7 @@ const { DatabaseSync } = require('node:sqlite');
 const {
   DEFAULT_SOURCE_PAGE,
   ensureLegalSchema,
+  hasSearchableArabicText,
   markLegalDocumentError,
   parseMojLawsHtml,
   saveLegalDocumentText,
@@ -158,16 +159,18 @@ async function extractPdfText(pdfPath, workDir) {
   let text = await pdftotext(pdfPath, textPath);
   const usefulCharacters = text.replace(/\s/g, '').length;
   const expectedFloor = Math.min(2000, Math.max(300, Number(pageCount || 1) * 80));
-  if (usefulCharacters < expectedFloor) {
+  const extractedTextIsSearchable = hasSearchableArabicText(text);
+  if (usefulCharacters < expectedFloor || !extractedTextIsSearchable) {
     const ocrText = await ocrPdf(pdfPath, workDir, pageCount);
-    if (ocrText.replace(/\s/g, '').length > usefulCharacters) text = ocrText;
+    const ocrIsSearchable = hasSearchableArabicText(ocrText);
+    if (ocrIsSearchable && (!extractedTextIsSearchable || ocrText.replace(/\s/g, '').length > usefulCharacters)) text = ocrText;
   }
   return { text, pageCount };
 }
 
 async function processDocument(db, document, position, total) {
-  const current = db.prepare('SELECT id,status,checksum_sha256 FROM legal_documents WHERE id=?').get(document.id);
-  if (!force && current?.status === 'ready') {
+  const current = db.prepare('SELECT id,status,checksum_sha256,raw_text FROM legal_documents WHERE id=?').get(document.id);
+  if (!force && current?.status === 'ready' && hasSearchableArabicText(current.raw_text)) {
     log('Skipping previously indexed document', { position, total, id: document.id, title: document.title });
     return 'skipped';
   }
@@ -178,7 +181,7 @@ async function processDocument(db, document, position, total) {
     const bytes = await downloadPdf(document.source_url);
     await fsp.writeFile(pdfPath, bytes, { mode: 0o600 });
     const checksum = sha256(bytes);
-    if (!force && current?.checksum_sha256 === checksum && current?.status === 'ready') return 'skipped';
+    if (!force && current?.checksum_sha256 === checksum && current?.status === 'ready' && hasSearchableArabicText(current.raw_text)) return 'skipped';
     const extracted = await extractPdfText(pdfPath, workDir);
     const analysis = saveLegalDocumentText(db, document.id, { ...extracted, checksum });
     log('Indexed legal document', { position, total, id: document.id, pages: extracted.pageCount, characters: analysis.text_length, chunks: analysis.chunks, status: analysis.text_length ? 'ready' : 'text_unavailable' });

@@ -6,7 +6,8 @@
     "start": "node server.js",
     "dev": "node --watch server.js",
     "test": "node --test",
-    "ingest:moj": "node scripts/ingest-moj-laws.js"
+    "ingest:moj": "node scripts/ingest-moj-laws.js",
+    "ingest:local-laws": "node scripts/ingest-local-laws.js"
   },
   "engines": { "node": ">=22.5" },
   "dependencies": {
