@@ -1,4 +1,5 @@
 name: Build Ministry Legal Library
+# The importer is resumable and is intentionally restarted with the newest safeguards.
 
 on:
   workflow_dispatch:
