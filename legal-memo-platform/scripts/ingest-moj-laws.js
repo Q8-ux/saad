@@ -39,8 +39,9 @@ function sleep(ms) {
 }
 
 async function fetchWithRetry(url, options = {}, attempts = 3) {
+  const maxAttempts = Math.max(1, Number(process.env.MOJ_REQUEST_ATTEMPTS || attempts));
   let lastError;
-  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), Number(process.env.MOJ_REQUEST_TIMEOUT_MS || 120000));
     try {
@@ -58,7 +59,7 @@ async function fetchWithRetry(url, options = {}, attempts = 3) {
       return response;
     } catch (error) {
       lastError = error;
-      if (attempt < attempts) await sleep(attempt * 1500);
+      if (attempt < maxAttempts) await sleep(attempt * 1500);
     } finally {
       clearTimeout(timeout);
     }
@@ -78,17 +79,30 @@ async function downloadPdf(url) {
 
 function run(command, args, options = {}) {
   return new Promise((resolve, reject) => {
-    const child = spawn(command, args, { stdio: ['ignore', 'pipe', 'pipe'], ...options });
+    const { timeoutMs = Number(process.env.MOJ_COMMAND_TIMEOUT_MS || 120000), ...spawnOptions } = options;
+    const child = spawn(command, args, { stdio: ['ignore', 'pipe', 'pipe'], ...spawnOptions });
     const stdout = [];
     const stderr = [];
+    let settled = false;
+    const finish = (error, result) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      if (error) reject(error);
+      else resolve(result);
+    };
+    const timer = setTimeout(() => {
+      child.kill('SIGKILL');
+      finish(new Error(`${command} timed out after ${timeoutMs}ms`));
+    }, timeoutMs);
     child.stdout.on('data', chunk => stdout.push(chunk));
     child.stderr.on('data', chunk => stderr.push(chunk));
-    child.on('error', reject);
+    child.on('error', error => finish(error));
     child.on('close', code => {
       const output = Buffer.concat(stdout).toString('utf8');
       const errors = Buffer.concat(stderr).toString('utf8');
-      if (code === 0) resolve({ stdout: output, stderr: errors });
-      else reject(new Error(`${command} exited ${code}: ${errors.slice(0, 600)}`));
+      if (code === 0) finish(null, { stdout: output, stderr: errors });
+      else finish(new Error(`${command} exited ${code}: ${errors.slice(0, 600)}`));
     });
   });
 }
@@ -125,8 +139,12 @@ async function ocrPdf(pdfPath, workDir, pageCount) {
     const prefix = path.join(workDir, `page-${String(page).padStart(4, '0')}`);
     const imagePath = `${prefix}.png`;
     await run('pdftoppm', ['-f', String(page), '-l', String(page), '-singlefile', '-r', '160', '-png', pdfPath, prefix]);
-    const result = await run('tesseract', [imagePath, 'stdout', '-l', 'ara+eng', '--psm', '6']);
-    output.push(result.stdout);
+    try {
+      const result = await run('tesseract', [imagePath, 'stdout', '-l', 'ara+eng', '--psm', '6']);
+      output.push(result.stdout);
+    } catch (error) {
+      log('OCR skipped an unreadable page', { page, pageCount, error: error.message.slice(0, 180) });
+    }
     await fsp.rm(imagePath, { force: true });
     if (page % 25 === 0) log('OCR progress', { page, pageCount });
   }
@@ -228,4 +246,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { extractPdfText, fetchWithRetry };
+module.exports = { extractPdfText, fetchWithRetry, run };
