@@ -1,10 +1,12 @@
 {
   "name": "legal-memo-platform",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "scripts": {
     "start": "node server.js",
-    "dev": "node --watch server.js"
+    "dev": "node --watch server.js",
+    "test": "node --test",
+    "ingest:moj": "node scripts/ingest-moj-laws.js"
   },
   "engines": { "node": ">=22.5" },
   "dependencies": {
