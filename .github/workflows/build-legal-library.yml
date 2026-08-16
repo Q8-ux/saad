@@ -1,0 +1,86 @@
+name: Build Ministry Legal Library
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'legal-memo-platform/**'
+      - '.github/workflows/build-legal-library.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ministry-legal-library
+  cancel-in-progress: false
+
+jobs:
+  extract-and-index:
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    defaults:
+      run:
+        working-directory: legal-memo-platform
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: legal-memo-platform/package-lock.json
+
+      - name: Install Arabic PDF extraction tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends poppler-utils tesseract-ocr tesseract-ocr-ara
+
+      - name: Install application dependencies
+        run: npm ci
+
+      - name: Verify the legal-library implementation
+        run: npm test
+
+      - name: Extract and analyse official Ministry PDFs
+        env:
+          DATA_DIR: ${{ github.workspace }}/legal-memo-platform/generated
+          MOJ_OCR_ENABLED: 'true'
+          MOJ_OCR_MAX_PAGES: '1200'
+          MOJ_REQUEST_DELAY_MS: '350'
+          MOJ_REQUEST_TIMEOUT_MS: '120000'
+          MOJ_MAX_PDF_MB: '250'
+        run: npm run ingest:moj
+
+      - name: Compress the indexed legal database
+        run: |
+          gzip -9 -c generated/legal-memo.db > seed/legal-library.sqlite.gz
+          test "$(stat -c%s seed/legal-library.sqlite.gz)" -le 95000000
+
+      - name: Keep an extraction artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ministry-legal-library
+          path: |
+            legal-memo-platform/generated/legal-memo.db
+            legal-memo-platform/seed/legal-library.sqlite.gz
+          if-no-files-found: warn
+          retention-days: 90
+
+      - name: Commit the refreshed legal-library seed
+        if: success()
+        working-directory: .
+        run: |
+          if git diff --quiet -- legal-memo-platform/seed/legal-library.sqlite.gz; then
+            echo "No legal-library data change to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add legal-memo-platform/seed/legal-library.sqlite.gz
+          git commit -m "Refresh Ministry legal library"
+          git push
