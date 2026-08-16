@@ -15,6 +15,7 @@ const {
   searchLegalDocuments,
   upsertManifest,
 } = require('../legal-library');
+const { run } = require('../scripts/ingest-moj-laws');
 
 test('extracts and deduplicates only official Ministry PDFs', () => {
   const html = `
@@ -88,4 +89,11 @@ test('adds a non-destructive legal library schema and supports retrieval', () =>
   assert.equal(stats.total, 1);
   assert.equal(stats.ready, 1);
   db.close();
+});
+
+test('terminates a stalled extractor command instead of blocking the import', async () => {
+  await assert.rejects(
+    run(process.execPath, ['-e', 'setTimeout(() => {}, 1000)'], { timeoutMs: 20 }),
+    /timed out/,
+  );
 });
