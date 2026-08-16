@@ -1,6 +1,8 @@
 'use strict';
 
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
 const test = require('node:test');
 const { DatabaseSync } = require('node:sqlite');
 const {
@@ -24,6 +26,14 @@ test('extracts and deduplicates only official Ministry PDFs', () => {
   assert.equal(documents.length, 1);
   assert.equal(documents[0].title, 'قانون رقم 59 لسنة 2025 بشأن تعديل بعض أحكام قانون المرافعات المدنية والتجارية');
   assert.equal(documents[0].source_url, 'https://moj.gov.kw/AR/Documents/MojDocs/Law59-2025.pdf');
+});
+
+test('ships the verified Ministry snapshot with 89 unique official PDFs', () => {
+  const manifest = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'seed', 'moj-laws-manifest.json'), 'utf8'));
+  assert.equal(manifest.document_count, 89);
+  assert.equal(manifest.documents.length, 89);
+  assert.equal(new Set(manifest.documents.map(item => item.source_url)).size, 89);
+  assert.ok(manifest.documents.every(item => new URL(item.source_url).hostname === 'moj.gov.kw'));
 });
 
 test('classifies the identity and amendment risk without inventing a legal conclusion', () => {
