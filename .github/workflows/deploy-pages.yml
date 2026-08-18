@@ -10,6 +10,7 @@ on:
       - cyber-data.js
       - sabeq.html
       - 'sabeq-legal-system/**'
+      - 'sabeq-legal-pro/**'
       - 'shalayhna/**'
       - 'zad-restaurants/**'
       - 'tamweenat/**'
@@ -71,6 +72,7 @@ jobs:
           mkdir -p _site
           cp index.html cyber-archive.css cyber-archive.js cyber-data.js sabeq.html _site/
           cp -R sabeq-legal-system _site/sabeq-legal-system
+          cp -R sabeq-legal-pro _site/sabeq-legal-pro
           cp -R shalayhna _site/shalayhna
           cp -R zad-restaurants _site/zad-restaurants
           cp -R tamweenat _site/tamweenat
@@ -94,6 +96,7 @@ jobs:
           test -s _site/ai-tools/index.html
           test -d _site/_next
           test -s _site/sabeq-legal-system/index.html
+          test -s _site/sabeq-legal-pro/index.html
           test -s _site/shalayhna/index.html
           test -s _site/zad-restaurants/index.html
           test -s _site/tamweenat/index.html
