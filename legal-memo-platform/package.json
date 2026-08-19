@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "node server.js",
-    "dev": "node --watch server.js",
+    "start": "node gateway.js",
+    "dev": "node --watch gateway.js",
     "test": "node --test",
     "ingest:moj": "node scripts/ingest-moj-laws.js",
     "ingest:local-laws": "node scripts/ingest-local-laws.js",
