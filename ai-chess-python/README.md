@@ -9,8 +9,9 @@
 - التحقق من قوانين الشطرنج بواسطة `python-chess`.
 - خصم ذكاء اصطناعي مكتوب بلغة Python.
 - 6 مستويات: مبتدئ جداً، مبتدئ، هاوٍ، متوسط، متقدم، خبير.
-- سجل نقلات بصيغة SAN.
+- سجل نقلات بصيغة SAN مع حفظ تاريخ UCI للتحقق من التعادل بالتكرار.
 - دعم الكش، كش مات، التعادل، التبييت، الترقية، والأخذ بالتجاوز عبر `python-chess`.
+- إلغاء الطلبات القديمة تلقائيًا عند بدء مباراة جديدة.
 - FastAPI API جاهز للتوسع لاحقاً للعب الأونلاين والحسابات والتصنيف.
 
 ## التشغيل محلياً
@@ -27,6 +28,20 @@ uvicorn app.main:app --reload
 
 `http://127.0.0.1:8000`
 
+## الاختبارات
+
+```bash
+cd ai-chess-python
+pip install -r requirements-dev.txt
+pytest
+```
+
+## النشر على Render
+
+استخدم Blueprint الموجود في `ai-chess-python/render.yaml` من جذر المستودع. يحدد الملف
+`rootDir: ai-chess-python`، ويشغّل FastAPI عبر Uvicorn، ويتحقق من جاهزية الخدمة عبر
+`/health`.
+
 ## البنية
 
 ```text
@@ -39,7 +54,9 @@ ai-chess-python/
 │       ├── index.html
 │       ├── styles.css
 │       └── app.js
+├── tests/
 ├── requirements.txt
+├── requirements-dev.txt
 └── render.yaml
 ```
 
