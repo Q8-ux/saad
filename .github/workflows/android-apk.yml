@@ -1,6 +1,10 @@
 name: Build AI Chess Android APK
 
 on:
+  pull_request:
+    paths:
+      - "android-chess/**"
+      - ".github/workflows/android-apk.yml"
   push:
     branches: [fix/ai-chess-render-history]
     paths:
