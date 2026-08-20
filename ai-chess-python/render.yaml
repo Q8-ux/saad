@@ -3,6 +3,7 @@ services:
     name: ai-chess-python
     runtime: python
     plan: free
+    rootDir: ai-chess-python
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /health

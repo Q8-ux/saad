@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from pathlib import Path
 from typing import Optional
 
@@ -7,20 +8,28 @@ import chess
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from .engine import LEVELS, choose_move
+from .multiplayer import router as multiplayer_router
 
 BASE_DIR = Path(__file__).resolve().parent
 STATIC_DIR = BASE_DIR / "static"
+MAX_GAME_PLIES = 1024
 
-app = FastAPI(title="AI Chess Arena", version="1.0.0")
+app = FastAPI(title="AI Chess Arena", version="1.0.1")
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+app.include_router(multiplayer_router)
 
 
 class LegalMovesRequest(BaseModel):
     fen: str
     square: str
+
+
+class HintRequest(BaseModel):
+    fen: str
+    move_history: list[str] = Field(default_factory=list, max_length=MAX_GAME_PLIES)
 
 
 class MoveRequest(BaseModel):
@@ -29,6 +38,27 @@ class MoveRequest(BaseModel):
     to_square: str
     promotion: Optional[str] = "q"
     level: str = "intermediate"
+    move_history: list[str] = Field(default_factory=list, max_length=MAX_GAME_PLIES)
+
+
+def board_from_history(fen: str, move_history: list[str]) -> chess.Board:
+    """Rebuild a game with its move stack so repetition rules still work."""
+    if not move_history:
+        return chess.Board(fen)
+
+    board = chess.Board()
+    for uci in move_history:
+        try:
+            move = chess.Move.from_uci(uci)
+        except ValueError as exc:
+            raise ValueError("Invalid move history") from exc
+        if move not in board.legal_moves:
+            raise ValueError("Illegal move in history")
+        board.push(move)
+
+    if board.fen() != chess.Board(fen).fen():
+        raise ValueError("Move history does not match FEN")
+    return board
 
 
 def board_payload(board: chess.Board):
@@ -63,6 +93,15 @@ def levels():
     return LEVELS
 
 
+@app.get("/api/public-config")
+def public_config():
+    return {
+        "supabase_url": os.getenv("SUPABASE_URL", ""),
+        "supabase_key": os.getenv("SUPABASE_KEY", ""),
+        "app_url": os.getenv("APP_URL", ""),
+    }
+
+
 @app.post("/api/legal")
 def legal_moves(req: LegalMovesRequest):
     try:
@@ -75,10 +114,36 @@ def legal_moves(req: LegalMovesRequest):
     return {"moves": moves}
 
 
+@app.post("/api/hint")
+def suggest_move(req: HintRequest):
+    try:
+        board = board_from_history(req.fen, req.move_history)
+        if board.turn is not chess.WHITE:
+            raise HTTPException(status_code=409, detail="Hints are available on the player's turn")
+        if board.is_game_over(claim_draw=True):
+            raise HTTPException(status_code=409, detail="Game is already over")
+        suggestion = choose_move(board, "advanced")
+        if not suggestion:
+            raise HTTPException(status_code=409, detail="No legal hint available")
+        move = chess.Move.from_uci(suggestion.uci)
+        piece = board.piece_at(move.from_square)
+        return {
+            "from_square": chess.square_name(move.from_square),
+            "to_square": chess.square_name(move.to_square),
+            "san": suggestion.san,
+            "piece": chess.piece_name(piece.piece_type) if piece else "piece",
+            "capture": board.is_capture(move),
+        }
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail="Invalid hint request") from exc
+
+
 @app.post("/api/move")
 def make_move(req: MoveRequest):
     try:
-        board = chess.Board(req.fen)
+        board = board_from_history(req.fen, req.move_history)
         promotion_map = {"q": chess.QUEEN, "r": chess.ROOK, "b": chess.BISHOP, "n": chess.KNIGHT}
         promotion = None
         from_sq = chess.parse_square(req.from_square)
@@ -94,7 +159,13 @@ def make_move(req: MoveRequest):
 
         player_san = board.san(move)
         board.push(move)
-        response = {"player_move": move.uci(), "player_san": player_san, **board_payload(board)}
+        history = [item.uci() for item in board.move_stack]
+        response = {
+            "player_move": move.uci(),
+            "player_san": player_san,
+            "move_history": history,
+            **board_payload(board),
+        }
 
         if board.is_game_over(claim_draw=True):
             response["ai_move"] = None
@@ -105,7 +176,12 @@ def make_move(req: MoveRequest):
         if ai:
             ai_move = chess.Move.from_uci(ai.uci)
             board.push(ai_move)
-            response.update({"ai_move": ai.uci, "ai_san": ai.san, **board_payload(board)})
+            response.update({
+                "ai_move": ai.uci,
+                "ai_san": ai.san,
+                "move_history": [item.uci() for item in board.move_stack],
+                **board_payload(board),
+            })
 
         return response
     except HTTPException:
