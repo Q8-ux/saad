@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>AI Chess Arena</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar glass">
+      <div>
+        <div class="eyebrow">AI CHESS ARENA</div>
+        <h1>ساحة الشطرنج الذكية</h1>
+      </div>
+      <div class="status-group">
+        <span class="live-dot"></span>
+        <span id="gameStatus">جاهز للعب</span>
+      </div>
+    </header>
+
+    <main class="layout">
+      <aside class="panel glass controls-panel">
+        <div class="panel-title">إعداد المباراة</div>
+        <label>المستوى</label>
+        <select id="level">
+          <option value="beginner">مبتدئ جداً</option>
+          <option value="easy">مبتدئ</option>
+          <option value="club">هاوٍ</option>
+          <option value="intermediate" selected>متوسط</option>
+          <option value="advanced">متقدم</option>
+          <option value="expert">خبير</option>
+        </select>
+
+        <button id="newGame" class="primary-btn">مباراة جديدة</button>
+
+        <div class="info-card">
+          <span>أنت</span>
+          <strong>الأبيض</strong>
+        </div>
+        <div class="info-card">
+          <span>الخصم</span>
+          <strong>ذكاء اصطناعي Python</strong>
+        </div>
+        <div class="hint">
+          اضغط القطعة لرؤية النقلات القانونية، ثم اختر المربع المطلوب.
+        </div>
+      </aside>
+
+      <section class="board-stage">
+        <div class="player-strip glass black-player">
+          <div class="avatar">AI</div>
+          <div><strong>Python Engine</strong><span id="aiLevelLabel">متوسط</span></div>
+          <div class="rating">AI</div>
+        </div>
+
+        <div class="board-wrap glass">
+          <div id="board" class="board" aria-label="رقعة الشطرنج"></div>
+        </div>
+
+        <div class="player-strip glass">
+          <div class="avatar player-avatar">أنت</div>
+          <div><strong>اللاعب</strong><span>الأبيض</span></div>
+          <div class="rating">LIVE</div>
+        </div>
+      </section>
+
+      <aside class="panel glass moves-panel">
+        <div class="panel-title">سجل النقلات</div>
+        <div id="moves" class="moves-list">
+          <div class="empty-state">ابدأ المباراة وستظهر النقلات هنا.</div>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <div id="toast" class="toast"></div>
+  <script src="/static/app.js"></script>
+</body>
+</html>
