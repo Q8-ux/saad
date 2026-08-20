@@ -1,5 +1,18 @@
 services:
   - type: web
+    name: ai-chess-kuwait
+    repo: https://github.com/Q8-ux/saad
+    branch: main
+    rootDir: ai-chess-python
+    runtime: python
+    plan: free
+    region: frankfurt
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    autoDeployTrigger: commit
+
+  - type: web
     name: workforce-platform-api
     repo: https://github.com/Q8-ux/saad
     branch: workforce-platform
