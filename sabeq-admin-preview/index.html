@@ -1,71 +1,53 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="robots" content="noindex,nofollow">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src 'self' data:">
-  <title>معاينة لوحة التحكم | سابق القانونية</title>
-  <style>
-    :root{--navy:#062a3a;--navy2:#0a4057;--blue:#0d8dcc;--cyan:#61d2f5;--ink:#102e3c;--muted:#6e8791;--line:#dcebf0;--bg:#f2f7f9;--white:#fff;--success:#17a56c;--warning:#ed9c32}
-    *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font-family:Tahoma,"Segoe UI",Arial,sans-serif;font-size:16px}
-    button{font:inherit} .shell{min-height:100vh;display:grid;grid-template-columns:260px 1fr}
-    aside{background:linear-gradient(165deg,#052838,#0a4862);padding:26px 15px;color:white;position:sticky;top:0;height:100vh}
-    .brand{border-bottom:1px solid #5d93a688;padding:3px 12px 20px;margin-bottom:18px}.brand b{font-size:31px;color:#72d6f6;letter-spacing:1px}.brand span{display:block;font-size:12px;opacity:.75;margin-top:5px}
-    nav{display:grid;gap:7px}.nav{border:0;background:transparent;color:#d7e9ef;text-align:right;border-radius:12px;padding:13px 14px;cursor:pointer;display:flex;align-items:center;gap:11px;width:100%}.nav:hover,.nav.active{background:#ffffff16;color:white}.nav i{font-style:normal;width:25px;text-align:center;color:#70d6f6}.foot{position:absolute;bottom:22px;right:27px;left:27px;color:#b4d0d9;font-size:12px;line-height:1.8}
-    main{padding:28px;max-width:1500px;width:100%;margin:auto}.top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:25px}.top h1{font-size:26px;margin:0}.top p{margin:6px 0 0;color:var(--muted);font-size:14px}.badge{background:#e5f7ed;color:#148051;padding:8px 12px;border-radius:999px;font-size:13px;font-weight:bold}.demo{background:#fff7e4;border:1px solid #ffe0a8;border-radius:14px;padding:13px 16px;color:#855a0b;margin-bottom:24px;display:flex;gap:10px;align-items:center}
-    .section{display:none}.section.active{display:block}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}.card,.panel{background:white;border:1px solid var(--line);border-radius:18px;box-shadow:0 8px 24px #204d5d0b}.card{padding:20px}.card .ico{color:var(--blue);font-size:22px}.card b{display:block;font-size:32px;margin:13px 0 6px}.card span{color:var(--muted);font-size:14px}.panel{padding:22px;margin-top:20px}.panel h2{font-size:18px;margin:0 0 15px}.empty{border:1px dashed #bcd6df;padding:29px;text-align:center;border-radius:13px;color:var(--muted);background:#fcfeff}.two{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-    .rows{display:grid;gap:10px}.row{display:flex;align-items:center;justify-content:space-between;padding:13px;border-bottom:1px solid #edf3f5}.row:last-child{border:0}.row small{color:var(--muted)}.pill{background:#e6f7fc;color:#08749f;font-weight:bold;border-radius:99px;padding:5px 9px;font-size:12px}.controls{display:flex;gap:10px;flex-wrap:wrap}.fake-btn{border:1px solid #bee0ea;background:#fff;color:#187aa2;border-radius:10px;padding:10px 13px;cursor:pointer}.fake-btn.primary{background:var(--blue);color:#fff;border-color:var(--blue)}
-    .feature{display:grid;grid-template-columns:50px 1fr;gap:13px;padding:14px;border:1px solid #e1eef2;border-radius:13px;margin-top:10px}.feature i{font-style:normal;background:#e9f7fc;color:var(--blue);border-radius:12px;width:48px;height:48px;display:grid;place-items:center;font-size:22px}.feature b,.feature small{display:block}.feature small{color:var(--muted);margin-top:4px;line-height:1.6}.notice{display:none;position:fixed;bottom:26px;left:26px;background:#07394e;color:white;border-radius:12px;padding:13px 17px;box-shadow:0 8px 24px #0003}
-    @media(max-width:850px){.shell{display:block}aside{height:auto;position:static;padding:14px}.brand{padding-bottom:12px;margin:0}.brand b{font-size:24px}.brand span{display:none}nav{grid-template-columns:repeat(4,1fr);gap:4px;margin-top:10px;overflow:auto}.nav{font-size:0;padding:10px;justify-content:center}.nav i{font-size:19px}.foot{display:none}main{padding:19px}.grid{grid-template-columns:repeat(2,1fr)}.two{grid-template-columns:1fr}.top{align-items:flex-start}.top h1{font-size:21px}.badge{white-space:nowrap}.card{padding:16px}.card b{font-size:27px}}
-  </style>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>لوحة إدارة سابق القانونية — معاينة</title>
+<style>
+:root{--navy:#04283a;--navy-soft:#083d55;--blue:#087eaf;--cyan:#4fc6eb;--ink:#0b2b3b;--muted:#71909c;--wash:#eff7fa;--line:#d6e7ed;--white:#fff;--green:#17956e}
+*{box-sizing:border-box}body{margin:0;background:var(--wash);font-family:Tahoma,"Segoe UI",Arial,sans-serif;color:var(--ink)}button{font:inherit}.app{min-height:100vh;display:grid;grid-template-columns:280px 1fr}
+aside{background:linear-gradient(165deg,#031f2e,#07516e);color:#fff;padding:31px 20px;min-height:100vh}.logo{display:flex;align-items:center;gap:12px;padding:4px 12px 26px;border-bottom:1px solid #9cdbec55}.logo-mark{width:47px;height:56px;border:2px solid #67d0ec;position:relative;border-radius:2px}.logo-mark:before,.logo-mark:after{content:"";position:absolute;top:7px;bottom:7px;width:2px;background:#67d0ec}.logo-mark:before{right:14px}.logo-mark:after{right:27px}.logo b{font-size:25px}.logo span{display:block;font-size:12px;color:#b9e2ed;margin-top:4px}
+.menu{margin-top:22px;display:grid;gap:4px}.menu button{border:0;background:transparent;color:#d9edf3;text-align:right;padding:13px 15px;border-radius:10px;cursor:pointer;font-size:15px}.menu button:hover,.menu button.active{background:#ffffff18;color:#fff;border-right:3px solid var(--cyan);padding-right:12px}.aside-note{margin:28px 10px 0;padding:13px 0;border-top:1px solid #9cdbec55;color:#b9dbe4;font-size:12px;line-height:1.8}
+main{max-width:1500px;width:100%;margin:auto;padding:35px}.top{display:flex;justify-content:space-between;align-items:flex-start;gap:18px}.eyebrow{color:#087eaf;font-weight:bold;font-size:14px;margin:0 0 7px}.top h1{font-size:29px;margin:0}.top p{margin:9px 0;color:var(--muted);font-size:15px}.test-badge{background:#e7f7ef;color:#137250;border:1px solid #b8e3ce;border-radius:100px;padding:9px 14px;font-size:13px;white-space:nowrap}
+.banner{margin:28px 0;background:linear-gradient(110deg,#06344b,#08658a);border-radius:18px;color:#fff;padding:25px 29px}.banner b{font-size:20px;display:block;margin-bottom:7px}.banner span{color:#c3e8f3;font-size:14px}.section{display:none}.section.active{display:block}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:15px}.stat,.panel{background:var(--white);border:1px solid var(--line);border-radius:17px;box-shadow:0 9px 24px #0a41530a}.stat{padding:21px}.stat label{font-size:14px;color:var(--muted);display:block}.stat b{display:block;margin:11px 0 5px;font-size:35px;color:var(--navy)}.stat small{color:#89a1aa}.panel{padding:24px;margin-top:20px}.panel h2{font-size:19px;margin:0 0 16px}.panel>p{color:var(--muted);line-height:1.8}.cols{display:grid;grid-template-columns:1fr 1fr;gap:20px}.empty{padding:28px 20px;border:1px dashed #c4dae2;border-radius:12px;color:var(--muted);background:#fbfdfe;text-align:center;line-height:1.9}.item{border:1px solid #e0edf1;border-radius:14px;padding:18px;margin-top:12px}.item b{font-size:17px}.item p{margin:7px 0 0;color:var(--muted);font-size:14px;line-height:1.7}.state{float:left;color:#117952;background:#e9f8f1;padding:5px 9px;border-radius:10px;font-size:12px}.buttons{display:flex;gap:9px;flex-wrap:wrap;margin-top:18px}.btn{border-radius:10px;padding:10px 14px;border:1px solid #a8d3e1;background:#fff;color:#087aa6;cursor:pointer}.btn.primary{background:#087eaf;color:#fff;border-color:#087eaf}.toast{display:none;position:fixed;bottom:24px;left:24px;background:#06364c;color:#fff;padding:14px 17px;border-radius:11px;box-shadow:0 8px 22px #0003}
+@media(max-width:800px){.app{display:block}aside{min-height:auto;padding:16px}.logo{padding-bottom:14px}.menu{grid-template-columns:repeat(4,1fr);overflow:auto;margin-top:12px}.menu button{font-size:12px;padding:10px 4px;white-space:nowrap}.menu button.active{border-right:0;border-bottom:2px solid var(--cyan);padding-right:4px}.aside-note{display:none}main{padding:20px}.top h1{font-size:23px}.top{align-items:flex-start}.stats{grid-template-columns:repeat(2,1fr)}.stat{padding:16px}.stat b{font-size:28px}.cols{grid-template-columns:1fr}.banner{padding:20px;margin:20px 0}.test-badge{font-size:11px}}
+</style>
 </head>
 <body>
-<div class="shell">
-  <aside>
-    <div class="brand"><b>سابق</b><span>لوحة إدارة المنصة</span></div>
-    <nav>
-      <button class="nav active" data-target="home"><i>⌂</i>الرئيسية</button>
-      <button class="nav" data-target="users"><i>♙</i>المستخدمون</button>
-      <button class="nav" data-target="services"><i>◈</i>الخدمات والأسعار</button>
-      <button class="nav" data-target="archive"><i>▣</i>الأرشيف</button>
-      <button class="nav" data-target="appointments"><i>◷</i>المواعيد</button>
-      <button class="nav" data-target="ai"><i>✦</i>الذكاء القانوني</button>
-      <button class="nav" data-target="payments"><i>◉</i>الدفع</button>
-      <button class="nav" data-target="security"><i>▣</i>الحماية والأمان</button>
-    </nav>
-    <div class="foot">معاينة تجريبية فقط<br>لا بيانات حقيقية ولا صلاحيات تشغيلية</div>
-  </aside>
-  <main>
-    <header class="top"><div><h1>معاينة لوحة التحكم</h1><p>مجموعة سابق القانونية — بيئة اختبار قبل الإطلاق</p></div><span class="badge">● وضع تجريبي آمن</span></header>
-    <div class="demo">ⓘ هذه معاينة مستقلة للواجهة فقط. لا يمكن حفظ أو إرسال أو تعديل أي بيانات من خلالها.</div>
-
-    <section class="section active" id="home">
-      <div class="grid">
-        <div class="card"><div class="ico">♙</div><b>0</b><span>مستخدمون مسجلون</span></div>
-        <div class="card"><div class="ico">▣</div><b>0</b><span>طلبات الذكاء القانوني</span></div>
-        <div class="card"><div class="ico">◷</div><b>0</b><span>مواعيد جديدة</span></div>
-        <div class="card"><div class="ico">◉</div><b>0.000</b><span>د.ك عمليات دفع</span></div>
-      </div>
-      <div class="two">
-        <div class="panel"><h2>أحدث المواعيد</h2><div class="empty">لا توجد مواعيد في بيئة الاختبار.</div></div>
-        <div class="panel"><h2>أحدث السجلات</h2><div class="empty">لا توجد سجلات محفوظة في المعاينة.</div></div>
-      </div>
-      <div class="panel"><h2>حالة المنصة</h2><div class="rows"><div class="row"><div><b>الخدمات القانونية</b><br><small>إعداد تجريبي قبل الإطلاق</small></div><span class="pill">قيد الإعداد</span></div><div class="row"><div><b>بوابة الدفع</b><br><small>غير مفعلة في هذه المعاينة</small></div><span class="pill">آمنة</span></div></div></div>
-    </section>
-    <section class="section" id="users"><div class="panel"><h2>المستخدمون والصلاحيات</h2><div class="empty">لم يتم إنشاء حسابات مستخدمين بعد.<br><small>ستظهر هنا الحسابات وحدود الاستخدام بعد الإطلاق.</small></div></div></section>
-    <section class="section" id="services"><div class="panel"><h2>الخدمات والأسعار</h2><div class="feature"><i>✦</i><div><b>المساعد القانوني</b><small>إعدادات تشغيل وحدود الاستخدام والأسعار ستظهر هنا.</small></div></div><div class="feature"><i>▤</i><div><b>مولد المذكرات</b><small>إعداد الخدمة ورفع المستندات وحفظ النتائج.</small></div></div><div class="feature"><i>⚖</i><div><b>المكتبة القانونية</b><small>البحث في القوانين والتشريعات والمصادر.</small></div></div></div></section>
-    <section class="section" id="archive"><div class="panel"><h2>أرشيف الذكاء القانوني</h2><div class="empty">لا توجد طلبات أو مذكرات أو نتائج محفوظة حتى الآن.</div></div></section>
-    <section class="section" id="appointments"><div class="panel"><h2>إدارة المواعيد</h2><div class="empty">لا توجد طلبات استشارة في مرحلة الاختبار.</div></div></section>
-    <section class="section" id="ai"><div class="panel"><h2>أدوات الذكاء القانوني</h2><div class="feature"><i>✦</i><div><b>المساعد القانوني</b><small>واجهة الاستعلام والتحليل القانوني مع أرشفة الطلبات.</small></div></div><div class="feature"><i>▤</i><div><b>مولد المذكرات</b><small>إنشاء مذكرات عربية قابلة للمراجعة المهنية.</small></div></div><div class="feature"><i>⚖</i><div><b>القوانين والتشريعات</b><small>البحث الموثق في قاعدة المعرفة القانونية.</small></div></div></div></section>
-    <section class="section" id="payments"><div class="panel"><h2>ربط بوابة الدفع</h2><p style="color:#6e8791">تُضاف هنا بيانات المزود ووسائل الدفع واختبار الاتصال، بعد تفعيل بيئة الدفع الآمنة.</p><div class="controls"><button class="fake-btn primary">إعداد بوابة الدفع</button><button class="fake-btn">اختبار الاتصال</button></div></div></section>
-    <section class="section" id="security"><div class="panel"><h2>الحماية والأمان</h2><div class="feature"><i>✓</i><div><b>جلسات إدارية مشفرة</b><small>يتم تفعيل الدخول برمز تحقق للبريد في النظام الفعلي.</small></div></div><div class="feature"><i>✓</i><div><b>حماية المستندات</b><small>فحص نوع وحجم الملفات قبل التحليل والحفظ.</small></div></div><div class="feature"><i>✓</i><div><b>سجل تدقيق</b><small>تسجيل إجراءات الإدارة والخدمات في البيئة الفعلية.</small></div></div></div></section>
-  </main>
-</div>
-<div class="notice" id="notice">هذه معاينة فقط — لا يتم حفظ أي بيانات.</div>
+<div class="app">
+<aside>
+  <div class="logo"><div class="logo-mark"></div><div><b>سابق</b><span>إدارة المنصة القانونية</span></div></div>
+  <nav class="menu">
+    <button class="active" data-view="home">نظرة عامة</button>
+    <button data-view="users">المستخدمون والصلاحيات</button>
+    <button data-view="services">الخدمات</button>
+    <button data-view="archive">الأرشيف</button>
+    <button data-view="appointments">المواعيد</button>
+    <button data-view="intelligence">الذكاء القانوني</button>
+    <button data-view="payments">بوابة الدفع</button>
+    <button data-view="security">الحماية والأمان</button>
+  </nav>
+  <div class="aside-note">نسخة تجريبية مستقلة<br>لا تحتوي على بيانات أو صلاحيات فعلية</div>
+</aside>
+<main>
+<header class="top"><div><p class="eyebrow">مجموعة سابق القانونية</p><h1>لوحة التحكم</h1><p>واجهة الإدارة والتشغيل — مرحلة اختبار قبل الإطلاق</p></div><span class="test-badge">بيئة تجريبية فقط</span></header>
+<div class="banner"><b>مرحبًا بك في معاينة لوحة الإدارة</b><span>تم إعداد الواجهة وفق الهوية البصرية لموقع سابق، مع فصل تام عن بيانات وإعدادات النظام الفعلي.</span></div>
+<section class="section active" id="home">
+<div class="stats"><div class="stat"><label>المستخدمون</label><b>0</b><small>لا حسابات مسجلة</small></div><div class="stat"><label>طلبات الخدمات</label><b>0</b><small>لا طلبات محفوظة</small></div><div class="stat"><label>المواعيد</label><b>0</b><small>لا مواعيد جديدة</small></div><div class="stat"><label>عمليات الدفع</label><b>0.000</b><small>دينار كويتي</small></div></div>
+<div class="cols"><div class="panel"><h2>آخر النشاطات</h2><div class="empty">لا يوجد نشاط في بيئة الاختبار.</div></div><div class="panel"><h2>حالة الخدمات</h2><div class="empty">تظهر حالة التفعيل والاستخدام هنا بعد الإطلاق.</div></div></div>
+</section>
+<section class="section" id="users"><div class="panel"><h2>المستخدمون والصلاحيات</h2><div class="empty">لم يتم إنشاء مستخدمين في هذه المعاينة.<br>سيتم التحكم لاحقًا بالأدوار وحدود الاستخدام وسجل الدخول.</div></div></section>
+<section class="section" id="services"><div class="panel"><h2>الخدمات القانونية</h2><div class="item"><span class="state">قيد الإعداد</span><b>المساعد القانوني</b><p>تحديد التفعيل وحد الاستخدام وقواعد الأرشفة.</p></div><div class="item"><span class="state">قيد الإعداد</span><b>مولد المذكرات</b><p>إدارة الاستخدام ورفع المستندات والنتائج المحفوظة.</p></div><div class="item"><span class="state">قيد الإعداد</span><b>المكتبة القانونية</b><p>البحث في القوانين والتشريعات والمصادر المعتمدة.</p></div></div></section>
+<section class="section" id="archive"><div class="panel"><h2>الأرشيف</h2><div class="empty">لا توجد سجلات محفوظة في المعاينة.</div></div></section>
+<section class="section" id="appointments"><div class="panel"><h2>إدارة المواعيد</h2><div class="empty">لا توجد طلبات استشارة في مرحلة الاختبار.</div></div></section>
+<section class="section" id="intelligence"><div class="panel"><h2>خدمات الذكاء القانوني</h2><p>ستجمع هذه الصفحة تشغيل المساعد القانوني ومولد المذكرات والبحث في القوانين، مع حفظ كل نتيجة في الأرشيف عند الإطلاق.</p><div class="buttons"><button class="btn primary">عرض إعدادات الخدمات</button></div></div></section>
+<section class="section" id="payments"><div class="panel"><h2>إدارة بوابة الدفع</h2><p>تُستخدم هذه الصفحة لإضافة مزود الدفع واختبار الربط وتفعيل الخدمة بعد التأكد من البيئة الآمنة.</p><div class="buttons"><button class="btn primary">إعداد بوابة الدفع</button><button class="btn">اختبار الاتصال</button></div></div></section>
+<section class="section" id="security"><div class="panel"><h2>الحماية والأمان</h2><div class="item"><b>الوصول الإداري</b><p>تسجيل دخول مخصص، تحقق بالبريد، وأدوار منفصلة للمستخدمين والموظفين.</p></div><div class="item"><b>حماية البيانات</b><p>تشفير الأسرار، فحص المرفقات، وسجل تدقيق للعمليات الحساسة.</p></div><div class="item"><b>حماية الخدمات</b><p>حدود استخدام ومراقبة للطلبات قبل الإطلاق العام.</p></div></div></section>
+</main></div>
+<div class="toast" id="toast">هذه معاينة للواجهة فقط ولا تحفظ أي بيانات.</div>
 <script>
-  const btns=document.querySelectorAll('.nav'), sections=document.querySelectorAll('.section'), notice=document.getElementById('notice');
-  btns.forEach(b=>b.addEventListener('click',()=>{btns.forEach(x=>x.classList.remove('active'));sections.forEach(x=>x.classList.remove('active'));b.classList.add('active');document.getElementById(b.dataset.target).classList.add('active');window.scrollTo({top:0,behavior:'smooth'})}));
-  document.querySelectorAll('.fake-btn').forEach(b=>b.addEventListener('click',()=>{notice.style.display='block';setTimeout(()=>notice.style.display='none',2600)}));
-</script>
-</body></html>
+const menu=document.querySelectorAll('.menu button'), views=document.querySelectorAll('.section'), toast=document.getElementById('toast');
+menu.forEach(b=>b.onclick=()=>{menu.forEach(x=>x.classList.remove('active'));views.forEach(x=>x.classList.remove('active'));b.classList.add('active');document.getElementById(b.dataset.view).classList.add('active');scrollTo({top:0,behavior:'smooth'})});
+document.querySelectorAll('.btn').forEach(b=>b.onclick=()=>{toast.style.display='block';setTimeout(()=>toast.style.display='none',2400)});
+</script></body></html>
