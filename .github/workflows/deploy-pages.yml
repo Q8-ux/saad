@@ -22,7 +22,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -63,7 +63,7 @@ jobs:
           NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
           NEXT_PUBLIC_SUPABASE_URL: 'https://onefbrycdifaqghkzneh.supabase.co'
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_M_L4mOwYjcAMbM5QXj2Nzw_4yXmrdXR'
-          NEXT_PUBLIC_INTERFACE_VERSION: 'government-dashboard-pages-repair-v13'
+          NEXT_PUBLIC_INTERFACE_VERSION: 'government-dashboard-live-data-v14'
         run: |
           rm -rf .next out
           npm run build
@@ -89,7 +89,7 @@ jobs:
           cp -R workforce-platform/apps/web/out/ai-tools _site/ai-tools
           cp -R workforce-platform/apps/web/out/notifications _site/notifications
           cp -R workforce-platform/apps/web/out/profile _site/profile
-          echo 'government-dashboard-pages-repair-v13' > _site/interface-version.txt
+          echo 'government-dashboard-live-data-v14' > _site/interface-version.txt
           touch _site/.nojekyll
 
       - name: Validate combined site
@@ -99,6 +99,7 @@ jobs:
           test -s _site/attendance-smart/index.html
           test -s _site/ai-tools/index.html
           test -d _site/_next
+          grep -q 'Smart Operations Center' _site/dashboard/index.html
           test -s _site/sabeq-legal/index.html
           test -s _site/sabeq-admin-preview/index.html
           test -s _site/sabeq-legal-system/index.html
@@ -116,3 +117,19 @@ jobs:
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Record deployment status
+        run: |
+          {
+            echo "status=deployed"
+            echo "version=government-dashboard-live-data-v14"
+            echo "run_id=${GITHUB_RUN_ID}"
+            echo "commit=${GITHUB_SHA}"
+            echo "page_url=${{ steps.deployment.outputs.page_url }}"
+            echo "time=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          } > live-dashboard-status.txt
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add live-dashboard-status.txt
+          git commit -m "Record live dashboard deployment ${GITHUB_RUN_ID}" || true
+          git push || true
