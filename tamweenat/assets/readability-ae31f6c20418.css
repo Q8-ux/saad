@@ -1,0 +1,504 @@
+/*
+ * Readability layer for نظام تموينات
+ * Keeps the existing visual identity while eliminating 8–12px interface text.
+ */
+
+html {
+  font-size: 18px !important;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  font-size: 18px !important;
+  line-height: 1.65 !important;
+  font-weight: 500;
+}
+
+small {
+  font-size: 14px !important;
+  line-height: 1.55 !important;
+}
+
+.text-xs,
+.text-\[0\.8rem\],
+.group-data-\[size\=sm\]\/avatar\:text-xs:is(:where(.group\/avatar)[data-size=sm] *),
+.\[\&_\[cmdk-group-heading\]\]\:text-xs [cmdk-group-heading],
+.\[\&\>span\]\:text-xs > span {
+  font-size: 14px !important;
+  line-height: 1.55 !important;
+}
+
+.text-sm,
+.text-sm\/relaxed,
+.file\:text-sm::file-selector-button,
+.data-\[variant\=label\]\:text-sm[data-variant="label"],
+.md\:text-sm,
+.pointer-coarse\:text-sm {
+  font-size: 15px !important;
+  line-height: 1.6 !important;
+}
+
+.text-base,
+.data-\[variant\=legend\]\:text-base[data-variant="legend"] {
+  font-size: 17px !important;
+  line-height: 1.6 !important;
+}
+
+.text-lg {
+  font-size: 19px !important;
+  line-height: 1.55 !important;
+}
+
+button,
+input,
+select,
+textarea,
+[role="button"],
+[data-slot="button"],
+[data-slot="select-trigger"],
+[data-slot="dropdown-menu-item"] {
+  font-size: 16px !important;
+  line-height: 1.45 !important;
+}
+
+input,
+select,
+textarea,
+[data-slot="select-trigger"] {
+  min-height: 44px;
+}
+
+/* Brand, navigation and top bar */
+.brand-words strong {
+  font-size: 24px !important;
+}
+
+.brand-words small,
+.brand-sidebar [data-slot="sidebar-group-label"],
+.sidebar-credit-card small,
+.sidebar-credit-card span,
+.support-card small {
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+}
+
+.brand-sidebar [data-slot="sidebar-menu-button"] {
+  min-height: 48px;
+  font-size: 16px !important;
+}
+
+.sidebar-credit-card strong,
+.support-card strong {
+  font-size: 16px !important;
+}
+
+.header-title strong {
+  font-size: 18px !important;
+  line-height: 1.45 !important;
+}
+
+.header-title small {
+  font-size: 14px !important;
+  line-height: 1.45 !important;
+}
+
+.notification-button span {
+  min-width: 20px;
+  width: auto;
+  height: 20px;
+  padding-inline: 4px;
+  font-size: 12px !important;
+}
+
+.cart-header-button b {
+  min-width: 24px;
+  height: 24px;
+  font-size: 14px !important;
+}
+
+.account-chip strong {
+  font-size: 16px !important;
+}
+
+.account-chip small {
+  font-size: 14px !important;
+}
+
+.demo-banner {
+  min-height: 42px;
+  padding-block: 9px;
+  font-size: 14px !important;
+  line-height: 1.55 !important;
+}
+
+.app-footer strong,
+.app-footer span,
+.app-footer a {
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+}
+
+.app-footer a {
+  min-height: 44px;
+}
+
+/* Page headings and KPI cards */
+.section-heading h1 {
+  font-size: clamp(30px, 3vw, 40px) !important;
+  line-height: 1.3 !important;
+}
+
+.section-heading p {
+  margin-top: 8px;
+  font-size: 16px !important;
+  line-height: 1.65 !important;
+}
+
+.stat-card p {
+  font-size: 16px !important;
+  line-height: 1.5 !important;
+}
+
+.stat-card strong {
+  font-size: clamp(27px, 3vw, 34px) !important;
+  line-height: 1.35 !important;
+}
+
+.stat-card small {
+  margin-top: 8px;
+  font-size: 14px !important;
+  line-height: 1.55 !important;
+}
+
+.panel-heading h2 {
+  font-size: 23px !important;
+  line-height: 1.4 !important;
+}
+
+.panel-heading p,
+.panel-heading button {
+  font-size: 15px !important;
+  line-height: 1.55 !important;
+}
+
+/* Orders, inventory alerts and quick actions */
+.order-main strong,
+.order-value strong {
+  font-size: 17px !important;
+  line-height: 1.45 !important;
+}
+
+.order-main span {
+  font-size: 15px !important;
+}
+
+.order-main small,
+.order-value span {
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+}
+
+.stock-watch-main strong {
+  font-size: 17px !important;
+  line-height: 1.5 !important;
+}
+
+.stock-watch-main span {
+  font-size: 15px !important;
+  line-height: 1.5 !important;
+}
+
+.stock-watch-main small {
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+}
+
+.fefo-note strong {
+  font-size: 16px !important;
+}
+
+.fefo-note span {
+  font-size: 14px !important;
+  line-height: 1.55 !important;
+}
+
+.quick-actions-row strong {
+  font-size: 18px !important;
+}
+
+.quick-actions-row span {
+  font-size: 14px !important;
+  line-height: 1.55 !important;
+}
+
+/* Catalog and product cards */
+.catalog-profile-control [data-slot="select-trigger"] {
+  min-height: 48px;
+  font-size: 15px !important;
+}
+
+.catalog-meta strong {
+  font-size: 16px !important;
+}
+
+.live-stock-pill,
+.category-tabs-list button {
+  font-size: 15px !important;
+  line-height: 1.45 !important;
+}
+
+.category-tabs-list button {
+  min-height: 44px;
+}
+
+.storage-pill,
+.stock-low-pill {
+  min-height: 30px;
+  font-size: 13px !important;
+}
+
+.product-card h3 {
+  min-height: 0;
+  font-size: 20px !important;
+  line-height: 1.5 !important;
+}
+
+.product-card p {
+  font-size: 14px !important;
+  line-height: 1.55 !important;
+}
+
+.product-stock-line {
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+}
+
+.product-price strong {
+  font-size: 23px !important;
+}
+
+.product-price span {
+  font-size: 13px !important;
+}
+
+.add-product-button {
+  min-height: 44px;
+  height: auto;
+  font-size: 15px !important;
+}
+
+.quantity-stepper strong {
+  font-size: 16px !important;
+}
+
+/* Tables and operational data */
+.data-panel th {
+  height: 52px;
+  font-size: 15px !important;
+  line-height: 1.45 !important;
+}
+
+.data-panel td {
+  font-size: 16px !important;
+  line-height: 1.55 !important;
+}
+
+.table-primary {
+  font-size: 16px !important;
+}
+
+.table-secondary,
+.table-product small,
+.data-panel code {
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+}
+
+.inventory-zones p,
+.inventory-zones small {
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+}
+
+.inventory-zones strong {
+  font-size: 25px !important;
+}
+
+.finance-summary p {
+  font-size: 15px !important;
+}
+
+.finance-summary strong {
+  font-size: 24px !important;
+}
+
+.finance-summary small {
+  font-size: 14px !important;
+}
+
+/* Suppliers, charts and reports */
+.supplier-card h3 {
+  font-size: 19px !important;
+}
+
+.supplier-card p {
+  font-size: 14px !important;
+  line-height: 1.55 !important;
+}
+
+.supplier-score strong {
+  font-size: 21px !important;
+}
+
+.supplier-score span,
+.supplier-products span {
+  font-size: 13px !important;
+  line-height: 1.45 !important;
+}
+
+.revenue-chart .panel-heading > strong {
+  font-size: 22px !important;
+}
+
+.bars-chart i,
+.bars-chart small {
+  font-size: 13px !important;
+}
+
+.margin-ring strong {
+  font-size: 30px !important;
+}
+
+.margin-ring span,
+.margin-breakdown p,
+.report-kpis span {
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+}
+
+.report-kpis strong {
+  font-size: 23px !important;
+}
+
+/* Cart, checkout and dialogs */
+.cart-sheet-header [data-slot="sheet-title"],
+.checkout-dialog [data-slot="dialog-title"] {
+  font-size: 23px !important;
+  line-height: 1.4 !important;
+}
+
+.cart-sheet-header [data-slot="sheet-description"],
+.checkout-dialog [data-slot="dialog-description"] {
+  font-size: 15px !important;
+  line-height: 1.6 !important;
+}
+
+.cart-line-main strong {
+  font-size: 17px !important;
+}
+
+.cart-line-main span,
+.cart-line-main small,
+.empty-cart p,
+.cart-totals p {
+  font-size: 14px !important;
+  line-height: 1.55 !important;
+}
+
+.cart-totals > div {
+  font-size: 17px !important;
+}
+
+.cart-totals > div strong {
+  font-size: 24px !important;
+}
+
+.checkout-button {
+  min-height: 50px;
+  font-size: 17px !important;
+}
+
+.cart-assurance {
+  font-size: 13px !important;
+  line-height: 1.5 !important;
+}
+
+.checkout-summary span {
+  font-size: 14px !important;
+}
+
+.checkout-summary strong {
+  font-size: 18px !important;
+}
+
+.checkout-field > label {
+  font-size: 16px !important;
+}
+
+.payment-options > label span:last-child {
+  font-size: 14px !important;
+  line-height: 1.45 !important;
+}
+
+.success-state h2 {
+  font-size: 26px !important;
+}
+
+.success-state p,
+.success-route {
+  font-size: 15px !important;
+  line-height: 1.6 !important;
+}
+
+/* Mobile must remain at least as readable as desktop. */
+@media (max-width: 720px) {
+  html {
+    font-size: 18px !important;
+  }
+
+  body {
+    font-size: 18px !important;
+  }
+
+  .role-select,
+  .language-select {
+    min-height: 42px !important;
+    height: 42px !important;
+    font-size: 14px !important;
+  }
+
+  .demo-banner {
+    font-size: 14px !important;
+  }
+
+  .section-heading h1 {
+    font-size: 30px !important;
+  }
+
+  .section-heading p {
+    font-size: 16px !important;
+  }
+
+  .stat-card p {
+    font-size: 16px !important;
+  }
+
+  .stat-card strong {
+    font-size: 28px !important;
+  }
+
+  .stat-card small {
+    font-size: 14px !important;
+  }
+
+  .order-value,
+  .live-stock-pill,
+  .checkout-summary strong {
+    font-size: 15px !important;
+  }
+
+  .product-card h3 {
+    font-size: 19px !important;
+  }
+}
