@@ -101,7 +101,7 @@ export class TransfersController {
       include: { originStation: true, destinationStation: true },
     });
     if (!permit) throw new BadRequestException('التصريح غير موجود');
-    if (![TransferPermitStatus.APPROVED, TransferPermitStatus.READY, TransferPermitStatus.DEPARTED, TransferPermitStatus.IN_TRANSIT, TransferPermitStatus.ARRIVED, TransferPermitStatus.AT_DESTINATION, TransferPermitStatus.RETURNING].includes(permit.status)) {
+    if (!([TransferPermitStatus.APPROVED, TransferPermitStatus.READY, TransferPermitStatus.DEPARTED, TransferPermitStatus.IN_TRANSIT, TransferPermitStatus.ARRIVED, TransferPermitStatus.AT_DESTINATION, TransferPermitStatus.RETURNING] as TransferPermitStatus[]).includes(permit.status)) {
       throw new BadRequestException('التصريح غير فعال');
     }
 
@@ -138,19 +138,19 @@ export class TransfersController {
       throw new BadRequestException('تعذر اعتماد الموقع بسبب اشتباه بالتلاعب');
     }
 
-    let eventType = TransferLocationEventType.TRANSIT_CHECK;
+    let eventType: TransferLocationEventType = TransferLocationEventType.TRANSIT_CHECK;
     let nextStatus = permit.status;
     const update: Record<string, unknown> = { riskScore: risk.score, riskReasons: risk.reasons };
 
-    if ([TransferPermitStatus.APPROVED, TransferPermitStatus.READY].includes(permit.status) && originDistanceM > permit.originStation.geofenceM) {
+    if (([TransferPermitStatus.APPROVED, TransferPermitStatus.READY] as TransferPermitStatus[]).includes(permit.status) && originDistanceM > permit.originStation.geofenceM) {
       eventType = TransferLocationEventType.ORIGIN_EXIT;
       nextStatus = TransferPermitStatus.IN_TRANSIT;
       update.actualDepartureAt = now;
-    } else if ([TransferPermitStatus.DEPARTED, TransferPermitStatus.IN_TRANSIT].includes(permit.status) && destinationDistanceM <= permit.destinationStation.geofenceM) {
+    } else if (([TransferPermitStatus.DEPARTED, TransferPermitStatus.IN_TRANSIT] as TransferPermitStatus[]).includes(permit.status) && destinationDistanceM <= permit.destinationStation.geofenceM) {
       eventType = TransferLocationEventType.DESTINATION_ENTRY;
       nextStatus = TransferPermitStatus.ARRIVED;
       update.actualArrivalAt = now;
-    } else if ([TransferPermitStatus.ARRIVED, TransferPermitStatus.AT_DESTINATION].includes(permit.status) && destinationDistanceM > permit.destinationStation.geofenceM) {
+    } else if (([TransferPermitStatus.ARRIVED, TransferPermitStatus.AT_DESTINATION] as TransferPermitStatus[]).includes(permit.status) && destinationDistanceM > permit.destinationStation.geofenceM) {
       eventType = TransferLocationEventType.DESTINATION_EXIT;
       nextStatus = TransferPermitStatus.RETURNING;
     } else if (permit.status === TransferPermitStatus.RETURNING && originDistanceM <= permit.originStation.geofenceM) {
