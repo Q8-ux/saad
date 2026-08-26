@@ -6,13 +6,15 @@
     if (!("DecompressionStream" in window)) {
       throw new Error("This browser needs DecompressionStream support");
     }
-    const response = await fetch(new URL(name, assetsUrl));
+    const assetUrl = new URL(name, assetsUrl);
+    assetUrl.searchParams.set("v", "2edb2fe8aa7b");
+    const response = await fetch(assetUrl, { cache: "no-store" });
     if (!response.ok || !response.body) throw new Error("Unable to load " + name);
     const stream = response.body.pipeThrough(new DecompressionStream("gzip"));
     return new Response(stream).text();
   }
 
-  Promise.all([unpack("app-2c51e4dac959.css.gz"), unpack("app-a3a23723eef0.js.gz")])
+  Promise.all([unpack("app-047c67ce2dbd.css.gz"), unpack("app-f9172c0b0e0b.js.gz")])
     .then(async ([css, js]) => {
       const style = document.createElement("style");
       style.textContent = css;
