@@ -99,7 +99,7 @@ jobs:
           test -s _site/attendance-smart/index.html
           test -s _site/ai-tools/index.html
           test -d _site/_next
-          grep -q 'Smart Operations Center' _site/dashboard/index.html
+          grep -Eq 'Smart Operations Center|مركز العمليات الذكي' _site/dashboard/index.html
           test -s _site/sabeq-legal/index.html
           test -s _site/sabeq-admin-preview/index.html
           test -s _site/sabeq-legal-system/index.html
