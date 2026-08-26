@@ -1,8 +1,9 @@
 {
-  "releaseHash": "b4d20f7c9e61",
-  "loaderName": "loader-b4d20f7c9e61.js",
+  "releaseHash": "f7a91c3e6b42",
+  "loaderName": "loader-f7a91c3e6b42.js",
   "jsFile": "app-648ce9970598.js.gz",
   "cssFile": "app-7ba441233415.css.gz",
   "readabilityFile": "readability-ae31f6c20418.css",
-  "currencyFormatting": "bidi-controls-stripped"
+  "currencyFormatting": "bidi-and-nonbreaking-spaces-normalized",
+  "visibleTextFallback": true
 }
