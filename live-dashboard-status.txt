@@ -1,6 +1,6 @@
 status=deployed
 version=government-dashboard-live-data-v14
-run_id=32996872472
-commit=ff1023abf40241731c4ffc66c9b458a8753e2620
+run_id=32997572438
+commit=6e4f3203d65007e06bd3197ab176fbc327752341
 page_url=https://q8-ux.github.io/saad/
-time=2026-08-26T17:56:53Z
+time=2026-08-26T18:04:08Z
