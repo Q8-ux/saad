@@ -5,5 +5,6 @@
   "cssFile": "app-7ba441233415.css.gz",
   "readabilityFile": "readability-ae31f6c20418.css",
   "currencyFormatting": "bidi-and-nonbreaking-spaces-normalized",
-  "visibleTextFallback": true
+  "visibleTextFallback": true,
+  "deploymentTrigger": "currency-spacing-hotfix"
 }
