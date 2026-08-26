@@ -12,7 +12,7 @@
     return new Response(stream).text();
   }
 
-  Promise.all([unpack("app-a23bb464316e.css.gz"), unpack("app-0855d12c37bb.js.gz")])
+  Promise.all([unpack("app-2c51e4dac959.css.gz"), unpack("app-a83d5acb2586.js.gz")])
     .then(async ([css, js]) => {
       const style = document.createElement("style");
       style.textContent = css;
