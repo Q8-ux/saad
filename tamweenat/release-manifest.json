@@ -1,10 +1,6 @@
 {
-  "releaseHash": "f7a91c3e6b42",
-  "loaderName": "loader-f7a91c3e6b42.js",
-  "jsFile": "app-648ce9970598.js.gz",
-  "cssFile": "app-7ba441233415.css.gz",
-  "readabilityFile": "readability-ae31f6c20418.css",
-  "currencyFormatting": "bidi-and-nonbreaking-spaces-normalized",
-  "visibleTextFallback": true,
-  "deploymentTrigger": "currency-spacing-hotfix"
+  "releaseHash": "704a2cdea533",
+  "loaderName": "loader-704a2cdea533.js",
+  "jsFile": "app-7263a2da5264.js.gz",
+  "cssFile": "app-a23bb464316e.css.gz"
 }

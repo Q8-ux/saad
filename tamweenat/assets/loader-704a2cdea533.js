@@ -12,32 +12,11 @@
     return new Response(stream).text();
   }
 
-  async function readOptionalStyle(name) {
-    try {
-      const response = await fetch(new URL(name, assetsUrl));
-      return response.ok ? response.text() : "";
-    } catch {
-      return "";
-    }
-  }
-
-  Promise.all([
-    unpack("app-7ba441233415.css.gz"),
-    unpack("app-648ce9970598.js.gz"),
-    readOptionalStyle("readability-ae31f6c20418.css")
-  ])
-    .then(async ([css, js, readabilityCss]) => {
+  Promise.all([unpack("app-a23bb464316e.css.gz"), unpack("app-7263a2da5264.js.gz")])
+    .then(async ([css, js]) => {
       const style = document.createElement("style");
       style.textContent = css;
       document.head.append(style);
-
-      if (readabilityCss) {
-        const readabilityStyle = document.createElement("style");
-        readabilityStyle.id = "tamweenat-readability";
-        readabilityStyle.textContent = readabilityCss;
-        document.head.append(readabilityStyle);
-      }
-
       const moduleUrl = URL.createObjectURL(new Blob([js], { type: "text/javascript" }));
       try {
         await import(moduleUrl);
