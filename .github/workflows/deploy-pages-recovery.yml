@@ -1,4 +1,5 @@
 name: Recover GitHub Pages Deployment
+# One-time recovery for the Tamweenat GitHub release
 
 on:
   push:
