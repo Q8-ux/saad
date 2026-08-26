@@ -16,6 +16,7 @@ on:
       - 'shalayhna/**'
       - 'zad-restaurants/**'
       - 'tamweenat/**'
+      - 'tamweenat-admin/**'
       - 'rattil/**'
       - 'workforce-platform/apps/web/**'
       - '.github/workflows/deploy-pages.yml'
@@ -80,6 +81,7 @@ jobs:
           cp -R shalayhna _site/shalayhna
           cp -R zad-restaurants _site/zad-restaurants
           cp -R tamweenat _site/tamweenat
+          cp -R tamweenat-admin _site/tamweenat-admin
           cp -R rattil _site/rattil
           cp -R workforce-platform/apps/web/out/_next _site/_next
           cp -R workforce-platform/apps/web/out/dashboard _site/dashboard
@@ -107,6 +109,8 @@ jobs:
           test -s _site/shalayhna/index.html
           test -s _site/zad-restaurants/index.html
           test -s _site/tamweenat/index.html
+          test -s _site/tamweenat-admin/index.html
+          grep -q 'tamweenat-admin' _site/tamweenat-admin/index.html
           test -s _site/rattil/index.html
 
       - name: Upload Pages artifact
