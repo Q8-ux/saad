@@ -7,14 +7,14 @@
       throw new Error("This browser needs DecompressionStream support");
     }
     const assetUrl = new URL(name, assetsUrl);
-    assetUrl.searchParams.set("v", "2edb2fe8aa7b");
+    assetUrl.searchParams.set("v", "28ccb17ecf66");
     const response = await fetch(assetUrl, { cache: "no-store" });
     if (!response.ok || !response.body) throw new Error("Unable to load " + name);
     const stream = response.body.pipeThrough(new DecompressionStream("gzip"));
     return new Response(stream).text();
   }
 
-  Promise.all([unpack("app-047c67ce2dbd.css.gz"), unpack("app-f9172c0b0e0b.js.gz")])
+  Promise.all([unpack("app-ac182ff0d44f.css.gz"), unpack("app-f9172c0b0e0b.js.gz")])
     .then(async ([css, js]) => {
       const style = document.createElement("style");
       style.textContent = css;
