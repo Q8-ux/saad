@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - "tamweenat-android/**"
+      - "!tamweenat-android/releases/**"
       - ".github/workflows/build-tamweenat-android.yml"
   workflow_dispatch:
 
