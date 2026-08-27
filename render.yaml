@@ -6,7 +6,7 @@ services:
     runtime: node
     plan: free
     region: frankfurt
-    buildCommand: cd workforce-platform/apps/api && npm install && npx prisma generate && npm run build
+    buildCommand: cd workforce-platform/apps/api && npm ci --no-audit --no-fund && npx prisma generate && npm run build
     startCommand: cd workforce-platform/apps/api && npx prisma db push && npm run prisma:seed && npm run start:prod
     healthCheckPath: /docs
     autoDeployTrigger: commit
@@ -17,6 +17,34 @@ services:
           property: connectionString
       - key: JWT_SECRET
         generateValue: true
+      - key: EMAIL_TOKEN_SECRET
+        generateValue: true
+      - key: EMAIL_PROVIDER
+        value: smtp
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_SECURE
+        value: "false"
+      - key: SMTP_REQUIRE_TLS
+        value: "true"
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+      - key: EMAIL_REPLY_TO
+        sync: false
+      - key: EMAIL_BRAND_NAME
+        value: منصة نطاق العمل
+      - key: WEB_APP_URL
+        value: https://q8-ux.github.io/saad/
+      - key: EMAIL_ACTIVATION_TTL_SECONDS
+        value: "86400"
+      - key: EMAIL_RESET_TTL_SECONDS
+        value: "1800"
       - key: INITIAL_ADMIN_PASSWORD
         sync: false
       - key: NODE_VERSION
@@ -29,7 +57,7 @@ services:
     runtime: node
     plan: free
     region: frankfurt
-    buildCommand: cd workforce-platform/apps/web && npm install && npm run build
+    buildCommand: cd workforce-platform/apps/web && npm install --no-audit --no-fund && npm run build
     startCommand: cd workforce-platform/apps/web && npm start -- -p $PORT
     healthCheckPath: /login
     autoDeployTrigger: commit

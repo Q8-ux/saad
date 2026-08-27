@@ -3,6 +3,8 @@
 Production-oriented starter for:
 - Multi-company users
 - JWT authentication
+- Email account activation and password recovery
+- SMTP-backed system notifications with delivery status, retry and stale-attempt recovery
 - Employees
 - Attendance check-in/check-out with GPS
 - Audit-ready PostgreSQL schema
@@ -11,7 +13,7 @@ Production-oriented starter for:
 ## Stack
 - Next.js 16
 - NestJS 11
-- Prisma ORM 7
+- Prisma ORM 6
 - PostgreSQL 17
 - Node.js 24 LTS
 
