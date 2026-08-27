@@ -57,7 +57,7 @@ services:
     runtime: node
     plan: free
     region: frankfurt
-    buildCommand: cd workforce-platform/apps/web && npm ci --no-audit --no-fund && npm run build
+    buildCommand: cd workforce-platform/apps/web && npm install --no-audit --no-fund && npm run build
     startCommand: cd workforce-platform/apps/web && npm start -- -p $PORT
     healthCheckPath: /login
     autoDeployTrigger: commit
