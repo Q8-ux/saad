@@ -54,7 +54,7 @@ jobs:
 
       - name: Install workforce dependencies
         working-directory: workforce-platform/apps/web
-        run: npm install --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
 
       - name: Build workforce platform
         working-directory: workforce-platform/apps/web
@@ -91,6 +91,12 @@ jobs:
           cp -R workforce-platform/apps/web/out/ai-tools _site/ai-tools
           cp -R workforce-platform/apps/web/out/notifications _site/notifications
           cp -R workforce-platform/apps/web/out/profile _site/profile
+          cp -R workforce-platform/apps/web/out/login _site/login
+          cp -R workforce-platform/apps/web/out/activate _site/activate
+          cp -R workforce-platform/apps/web/out/forgot-password _site/forgot-password
+          cp -R workforce-platform/apps/web/out/reset-password _site/reset-password
+          cp -R workforce-platform/apps/web/out/request-activation _site/request-activation
+          cp -R workforce-platform/apps/web/out/users _site/users
           echo 'government-dashboard-live-data-v14' > _site/interface-version.txt
           touch _site/.nojekyll
 
@@ -100,6 +106,12 @@ jobs:
           test -s _site/dashboard/index.html
           test -s _site/attendance-smart/index.html
           test -s _site/ai-tools/index.html
+          test -s _site/login/index.html
+          test -s _site/activate/index.html
+          test -s _site/forgot-password/index.html
+          test -s _site/reset-password/index.html
+          test -s _site/request-activation/index.html
+          test -s _site/users/index.html
           test -d _site/_next
           grep -Eq 'Smart Operations Center|مركز العمليات الذكي' _site/dashboard/index.html
           test -s _site/sabeq-legal/index.html
