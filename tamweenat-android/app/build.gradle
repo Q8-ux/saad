@@ -1,0 +1,72 @@
+plugins {
+    id "com.android.application"
+}
+
+android {
+    namespace "com.digizone.tamweenat"
+    compileSdk 35
+
+    defaultConfig {
+        minSdk 24
+        targetSdk 35
+        versionCode 1
+        versionName "1.0.0"
+    }
+
+    flavorDimensions += "edition"
+    productFlavors {
+        restaurant {
+            dimension "edition"
+            applicationId "com.digizone.tamweenat.restaurant"
+            versionNameSuffix "-restaurant"
+            resValue "string", "app_name", "نظام تموينات – المطاعم"
+            resValue "string", "edition_name", "واجهة المطاعم"
+            resValue "color", "brand_primary", "#176B4D"
+            resValue "color", "brand_primary_dark", "#0D3F30"
+            resValue "color", "brand_surface", "#F3F8F5"
+            buildConfigField "String", "START_URL", '"https://q8-ux.github.io/saad/tamweenat/login.html"'
+            buildConfigField "String", "ALLOWED_PATH_PREFIX", '"/saad/tamweenat/"'
+            buildConfigField "String", "EDITION", '"restaurant"'
+        }
+
+        admin {
+            dimension "edition"
+            applicationId "com.digizone.tamweenat.admin"
+            versionNameSuffix "-admin"
+            resValue "string", "app_name", "نظام تموينات – الإدارة"
+            resValue "string", "edition_name", "لوحة الإدارة"
+            resValue "color", "brand_primary", "#1565C0"
+            resValue "color", "brand_primary_dark", "#081B30"
+            resValue "color", "brand_surface", "#EEF2F6"
+            buildConfigField "String", "START_URL", '"https://q8-ux.github.io/saad/tamweenat-admin/"'
+            buildConfigField "String", "ALLOWED_PATH_PREFIX", '"/saad/tamweenat-admin/"'
+            buildConfigField "String", "EDITION", '"admin"'
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
+        }
+        debug {
+            applicationIdSuffix ".debug"
+            versionNameSuffix "-debug"
+        }
+    }
+
+    buildFeatures {
+        buildConfig true
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    lint {
+        abortOnError true
+        checkReleaseBuilds true
+    }
+}
