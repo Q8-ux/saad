@@ -50,7 +50,12 @@ jobs:
           node-version: 22
       - name: Install web dependencies
         working-directory: workforce-platform/apps/web
-        run: npm ci --no-audit --no-fund
+        run: |
+          if test -f package-lock.json; then
+            npm ci --no-audit --no-fund
+          else
+            npm install --no-audit --no-fund
+          fi
       - name: Export GitHub Pages build
         working-directory: workforce-platform/apps/web
         env:
