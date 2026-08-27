@@ -23,6 +23,7 @@ type QueueRow = {
   title: string;
   message: string;
   status: string;
+  lastAttemptAt: Date | null;
 };
 
 @Injectable()
@@ -37,6 +38,7 @@ export class NotificationsService {
 
   async list(companyId: string, limit = 100) {
     await this.ensureStorage();
+    await this.recoverStaleDeliveries(companyId);
     return this.prisma.$queryRawUnsafe(
       `SELECT * FROM "NotificationQueue" WHERE "companyId"=$1::uuid ORDER BY "createdAt" DESC LIMIT $2`,
       companyId,
@@ -89,6 +91,7 @@ export class NotificationsService {
 
   async retry(actor: Actor, id: string) {
     await this.ensureStorage();
+    await this.recoverStaleDeliveries(actor.companyId);
     const rows: QueueRow[] = await this.prisma.$queryRawUnsafe(
       `SELECT * FROM "NotificationQueue" WHERE "id"=$1::uuid AND "companyId"=$2::uuid LIMIT 1`,
       id,
@@ -105,7 +108,7 @@ export class NotificationsService {
 
   private async dispatchEmail(companyId: string, id: string, recipients: string[]) {
     const claimed: QueueRow[] = await this.prisma.$queryRawUnsafe(
-      `UPDATE "NotificationQueue" SET "status"='PROCESSING', "errorMessage"=NULL
+      `UPDATE "NotificationQueue" SET "status"='PROCESSING', "errorMessage"=NULL, "lastAttemptAt"=CURRENT_TIMESTAMP
        WHERE "id"=$1::uuid AND "companyId"=$2::uuid AND "status" IN ('PENDING','FAILED') RETURNING *`,
       id,
       companyId,
@@ -164,14 +167,29 @@ export class NotificationsService {
         "providerMessageId" TEXT,
         "errorMessage" TEXT,
         "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        "lastAttemptAt" TIMESTAMPTZ,
         "sentAt" TIMESTAMPTZ
       )
     `);
+    await this.prisma.$executeRawUnsafe(
+      `ALTER TABLE "NotificationQueue" ADD COLUMN IF NOT EXISTS "lastAttemptAt" TIMESTAMPTZ`,
+    );
     await this.prisma.$executeRawUnsafe(
       `CREATE INDEX IF NOT EXISTS "NotificationQueue_company_created_idx" ON "NotificationQueue" ("companyId", "createdAt" DESC)`,
     );
     await this.prisma.$executeRawUnsafe(
       `CREATE INDEX IF NOT EXISTS "NotificationQueue_status_idx" ON "NotificationQueue" ("status", "channel")`,
+    );
+  }
+
+  private async recoverStaleDeliveries(companyId: string) {
+    await this.prisma.$executeRawUnsafe(
+      `UPDATE "NotificationQueue"
+       SET "status"='FAILED', "errorMessage"='توقفت محاولة الإرسال قبل اكتمالها. يمكنك إعادة المحاولة.'
+       WHERE "companyId"=$1::uuid
+         AND "status"='PROCESSING'
+         AND COALESCE("lastAttemptAt", "createdAt") < CURRENT_TIMESTAMP - INTERVAL '10 minutes'`,
+      companyId,
     );
   }
 

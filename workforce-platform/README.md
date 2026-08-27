@@ -4,7 +4,7 @@ Production-oriented starter for:
 - Multi-company users
 - JWT authentication
 - Email account activation and password recovery
-- SMTP-backed system notifications with delivery status and retry
+- SMTP-backed system notifications with delivery status, retry and stale-attempt recovery
 - Employees
 - Attendance check-in/check-out with GPS
 - Audit-ready PostgreSQL schema
