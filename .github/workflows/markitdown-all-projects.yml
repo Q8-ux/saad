@@ -82,4 +82,5 @@ jobs:
           name: markitdown-${{ github.event.repository.name }}-${{ github.run_number }}
           path: .markitdown-output
           if-no-files-found: warn
+          include-hidden-files: true
           retention-days: 7
