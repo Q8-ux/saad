@@ -14,6 +14,21 @@ on:
       - "**/documents/**"
       - "**/source-documents/**"
       - "**/markitdown-input/**"
+      - "**/uploads/**"
+  pull_request:
+    paths:
+      - "**/*.pdf"
+      - "**/*.docx"
+      - "**/*.pptx"
+      - "**/*.xlsx"
+      - "**/*.xls"
+      - "**/*.msg"
+      - "**/*.eml"
+      - "**/docs/**"
+      - "**/documents/**"
+      - "**/source-documents/**"
+      - "**/markitdown-input/**"
+      - "**/uploads/**"
   workflow_dispatch:
 
 permissions:
