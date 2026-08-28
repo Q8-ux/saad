@@ -53,25 +53,40 @@
   `;
   document.head.appendChild(style);
 
-  const authText = /(تسجيل الدخول الآمن|يلزم التحقق من حسابك|إرسال رمز التحقق|الاسم الكامل|رقم الهاتف|البريد الإلكتروني)/i;
+  const authText = /(تسجيل الدخول الآمن|يلزم التحقق من حسابك|إرسال رمز التحقق)/i;
+  const authSelector = [
+    '.auth-gate',
+    '.auth-modal',
+    '.login-modal',
+    '.login-form',
+    '[data-auth-gate]',
+    '[data-login-modal]',
+    '[data-login-form]',
+    '[aria-modal="true"][data-auth]',
+    '.secure-login-modal'
+  ].join(',');
 
   function removeAuthUi(root = document) {
-    const candidates = root.querySelectorAll?.('div,section,aside,form,[role="dialog"],[aria-modal="true"]') || [];
-    for (const el of candidates) {
-      const text = (el.innerText || el.textContent || '').replace(/\s+/g, ' ').trim();
-      if (!text || !authText.test(text)) continue;
-
-      const modal = el.closest?.('[role="dialog"],[aria-modal="true"],.auth-gate,.auth-modal,.login-modal,.login-form') || el;
-      if (modal && modal !== document.body && modal !== document.documentElement) {
-        modal.remove();
-      }
+    const explicitAuthElements = [];
+    if (root instanceof Element && root.matches(authSelector)) {
+      explicitAuthElements.push(root);
+    }
+    if (root && typeof root.querySelectorAll === 'function') {
+      explicitAuthElements.push(...root.querySelectorAll(authSelector));
     }
 
-    // Remove full-screen backdrops left behind after deleting the auth modal.
-    const backdrops = root.querySelectorAll?.('[class*="backdrop"],[class*="overlay"],[class*="modal"]') || [];
-    for (const el of backdrops) {
+    for (const el of explicitAuthElements) {
+      if (el !== document.body && el !== document.documentElement) el.remove();
+    }
+
+    // Only inspect actual dialog elements. The previous implementation scanned
+    // every container for generic field labels such as "email" and could remove
+    // the entire application shell when the contact form was rendered.
+    const dialogs = root.querySelectorAll?.('[role="dialog"],[aria-modal="true"]') || [];
+    for (const el of dialogs) {
       const text = (el.innerText || el.textContent || '').replace(/\s+/g, ' ').trim();
-      if (authText.test(text)) el.remove();
+      if (!text || !authText.test(text)) continue;
+      if (el !== document.body && el !== document.documentElement) el.remove();
     }
 
     document.body?.style.removeProperty('overflow');
