@@ -1,20 +1,24 @@
 /* Project-level fixes that must override the compiled application styles. */
-.team-card img[src*="dr-khalifa.jpg"] {
-  position: absolute !important;
-  top: auto !important;
-  right: auto !important;
-  bottom: 0 !important;
-  left: 50% !important;
-  width: min(320px, 100%) !important;
-  max-width: 320px !important;
+.team-grid .team-card:first-child,
+.team-card:has(img[src*="dr-khalifa.jpg"]) {
+  min-height: 0 !important;
   height: auto !important;
   aspect-ratio: 320 / 238 !important;
+}
+
+.team-card img[src*="dr-khalifa.jpg"] {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  max-width: none !important;
+  height: 100% !important;
+  aspect-ratio: auto !important;
   object-fit: contain !important;
   object-position: center center !important;
   box-sizing: border-box !important;
   padding: 0 !important;
   background: none !important;
-  transform: translateX(-50%) !important;
+  transform: none !important;
 }
 
 body.sabeq-forms-open {
