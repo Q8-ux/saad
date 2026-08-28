@@ -4,10 +4,16 @@ on:
   push:
     paths:
       - "markitdown-service/**"
+      - ".github/actions/markitdown-batch/**"
+      - ".github/workflows/markitdown-all-projects.yml"
+      - ".github/workflows/reusable-markitdown.yml"
       - ".github/workflows/markitdown-service-ci.yml"
   pull_request:
     paths:
       - "markitdown-service/**"
+      - ".github/actions/markitdown-batch/**"
+      - ".github/workflows/markitdown-all-projects.yml"
+      - ".github/workflows/reusable-markitdown.yml"
       - ".github/workflows/markitdown-service-ci.yml"
 
 permissions:
@@ -37,7 +43,7 @@ jobs:
       - name: Check dependencies
         run: pip check
       - name: Lint
-        run: ruff check app tests
+        run: ruff check app tests ../.github/actions/markitdown-batch
       - name: Test
         env:
           MARKITDOWN_API_KEY: test-api-key

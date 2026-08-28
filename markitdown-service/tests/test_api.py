@@ -1,7 +1,12 @@
 from __future__ import annotations
 
+import json
+import os
+import subprocess
+import sys
 from dataclasses import replace
 from io import BytesIO
+from pathlib import Path
 
 from fastapi.testclient import TestClient
 from openpyxl import Workbook
@@ -122,3 +127,54 @@ def test_rejects_unsupported_extensions() -> None:
         files={"file": ("archive.zip", b"not-a-zip", "application/zip")},
     )
     assert response.status_code == 415
+
+
+def test_shared_action_discovers_documents_without_converting_site_assets(
+    tmp_path: Path,
+) -> None:
+    project = tmp_path / "sample-project"
+    docs = project / "docs"
+    docs.mkdir(parents=True)
+    (docs / "notes.txt").write_text("نص مشروع سابق", encoding="utf-8")
+    (project / "index.html").write_text("<h1>واجهة الموقع</h1>", encoding="utf-8")
+
+    repository_root = Path(__file__).resolve().parents[2]
+    converter = repository_root / ".github/actions/markitdown-batch/convert.py"
+    environment = os.environ.copy()
+    environment["GITHUB_WORKSPACE"] = str(tmp_path)
+    completed = subprocess.run(
+        [
+            sys.executable,
+            str(converter),
+            "--source-dir",
+            ".",
+            "--output-dir",
+            ".markitdown-output",
+            "--mode",
+            "documents",
+            "--max-file-size-mb",
+            "50",
+            "--max-files",
+            "10",
+            "--max-output-characters",
+            "5000000",
+            "--timeout-seconds",
+            "30",
+            "--fail-on-error",
+            "true",
+        ],
+        cwd=tmp_path,
+        env=environment,
+        capture_output=True,
+        check=False,
+        text=True,
+        timeout=60,
+    )
+
+    assert completed.returncode == 0, completed.stderr
+    output = tmp_path / ".markitdown-output"
+    assert (output / "sample-project/docs/notes.txt.md").is_file()
+    assert not (output / "sample-project/index.html.md").exists()
+    manifest = json.loads((output / "manifest.json").read_text(encoding="utf-8"))
+    assert len(manifest["converted"]) == 1
+    assert manifest["errors"] == []

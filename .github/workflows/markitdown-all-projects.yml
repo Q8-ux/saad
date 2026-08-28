@@ -1,0 +1,85 @@
+name: MarkItDown for all projects
+
+on:
+  push:
+    paths:
+      - "**/*.pdf"
+      - "**/*.docx"
+      - "**/*.pptx"
+      - "**/*.xlsx"
+      - "**/*.xls"
+      - "**/*.msg"
+      - "**/*.eml"
+      - "**/docs/**"
+      - "**/documents/**"
+      - "**/source-documents/**"
+      - "**/markitdown-input/**"
+      - ".github/actions/markitdown-batch/**"
+      - ".github/workflows/markitdown-all-projects.yml"
+  pull_request:
+    paths:
+      - "**/*.pdf"
+      - "**/*.docx"
+      - "**/*.pptx"
+      - "**/*.xlsx"
+      - "**/*.xls"
+      - "**/*.msg"
+      - "**/*.eml"
+      - "**/docs/**"
+      - "**/documents/**"
+      - "**/source-documents/**"
+      - "**/markitdown-input/**"
+      - ".github/actions/markitdown-batch/**"
+      - ".github/workflows/markitdown-all-projects.yml"
+  workflow_dispatch:
+    inputs:
+      source_dir:
+        description: Project directory, or . for every project
+        required: true
+        default: "."
+        type: string
+      mode:
+        description: Smart document discovery or every supported file
+        required: true
+        default: documents
+        type: choice
+        options:
+          - documents
+          - all-supported
+
+permissions:
+  contents: read
+
+concurrency:
+  group: markitdown-all-projects-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Convert project documents
+        id: markitdown
+        uses: ./.github/actions/markitdown-batch
+        with:
+          source-dir: ${{ github.event_name == 'workflow_dispatch' && inputs.source_dir || '.' }}
+          output-dir: .markitdown-output
+          mode: ${{ github.event_name == 'workflow_dispatch' && inputs.mode || 'documents' }}
+          max-file-size-mb: "50"
+          max-files: "250"
+          max-output-characters: "5000000"
+          timeout-seconds: "180"
+          fail-on-error: "true"
+
+      - name: Upload converted Markdown
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: markitdown-${{ github.event.repository.name }}-${{ github.run_number }}
+          path: .markitdown-output
+          if-no-files-found: warn
+          retention-days: 7
