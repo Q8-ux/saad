@@ -1,0 +1,36 @@
+{
+  "id": "/",
+  "name": "منصة العقود والترجمة القانونية",
+  "short_name": "العقود",
+  "description": "إدارة الوثائق والعقود والبحث القانوني والترجمة القانونية القابلة للمراجعة.",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "/?source=android-app",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "orientation": "any",
+  "background_color": "#07111f",
+  "theme_color": "#07111f",
+  "categories": ["business", "productivity", "utilities"],
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

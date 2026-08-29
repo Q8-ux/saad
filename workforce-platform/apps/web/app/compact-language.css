@@ -1,3 +1,0 @@
-.languageSwitcher{font-size:0!important;overflow:hidden!important;white-space:nowrap!important}
-html[lang='ar'] .languageSwitcher::after{content:'EN';font-size:12px;font-weight:800;line-height:1}
-html[lang='en'] .languageSwitcher::after{content:'AR';font-size:12px;font-weight:800;line-height:1}

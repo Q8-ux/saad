@@ -1,1 +1,0 @@
-Workforce Platform starter MVP
