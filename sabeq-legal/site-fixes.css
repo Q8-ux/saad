@@ -13,6 +13,25 @@
   object-position: center center !important;
 }
 
+.team-grid .team-photo::after {
+  background: none !important;
+}
+
+.team-grid .team-card:hover .team-photo img {
+  transform: none !important;
+}
+
+.team-grid .team-info {
+  inset-inline: 16px !important;
+  bottom: 16px !important;
+  padding: 13px 15px;
+  background: linear-gradient(135deg, rgba(2, 17, 27, 0.92), rgba(8, 63, 82, 0.84));
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 14px;
+  box-shadow: 0 10px 28px rgba(0, 15, 25, 0.24);
+  backdrop-filter: blur(7px);
+}
+
 .team-slider-dots {
   display: none;
 }
