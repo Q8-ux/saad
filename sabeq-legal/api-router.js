@@ -3,7 +3,7 @@
 
   const API_ORIGIN = 'https://sabeq-legal-public.centrino.chatgpt.site';
   const GITHUB_HOST = 'q8-ux.github.io';
-  const LOCAL_DR_KHALIFA = '/saad/sabeq-legal/images/team/dr-khalifa.jpg';
+  const LOCAL_DR_KHALIFA = '/saad/sabeq-legal/images/team/dr-khalifa.jpg?v=20260829-8';
   const nativeFetch = window.fetch.bind(window);
 
   function routeApiUrl(value) {
@@ -36,7 +36,7 @@
 
   function isDrKhalifaImage(src) {
     return typeof src === 'string' && (
-      src.endsWith('/images/team/dr-khalifa.jpg') ||
+      src.includes('/images/team/dr-khalifa.jpg') ||
       src.includes('sabeq-legal-public.centrino.chatgpt.site/images/team/dr-khalifa.jpg')
     );
   }
