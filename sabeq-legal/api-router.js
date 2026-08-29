@@ -3,7 +3,7 @@
 
   const API_ORIGIN = 'https://sabeq-legal-public.centrino.chatgpt.site';
   const GITHUB_HOST = 'q8-ux.github.io';
-  const TEAM_IMAGE_VERSION = '20260829-10';
+  const TEAM_IMAGE_VERSION = '20260829-11';
   const LOCAL_TEAM_IMAGES = new Map([
     ['dr-khalifa.jpg', `/saad/sabeq-legal/images/team/dr-khalifa.jpg?v=${TEAM_IMAGE_VERSION}`],
     ['khalid-alhabib.jpg', `/saad/sabeq-legal/images/team/khalid-alhabib.jpg?v=${TEAM_IMAGE_VERSION}`],
