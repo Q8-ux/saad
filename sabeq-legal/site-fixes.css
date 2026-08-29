@@ -5,28 +5,37 @@
 }
 
 .team-grid .team-card {
-  display: block !important;
-  aspect-ratio: 1 / 1;
+  display: flex !important;
+  flex-direction: column;
+  aspect-ratio: auto;
   min-height: 0 !important;
   height: auto !important;
+  overflow: visible !important;
   background: transparent !important;
   border: 0 !important;
+  border-radius: 18px;
   box-shadow: none !important;
 }
 
 .team-grid .team-photo {
-  position: absolute !important;
-  inset: 0 !important;
+  position: relative !important;
+  inset: auto !important;
+  flex: 0 0 auto;
   display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
   overflow: hidden;
-  background: transparent !important;
+  background: linear-gradient(90deg, #42d5da 0%, #0968d7 100%) !important;
+  border-radius: 18px !important;
 }
 
 .team-grid .team-photo.team-photo-fitted {
-  background-image: none !important;
+  background-image: linear-gradient(90deg, #42d5da 0%, #0968d7 100%) !important;
 }
 
 .team-grid .team-photo img {
+  position: absolute !important;
+  inset: 0 !important;
   display: block;
   width: 100% !important;
   height: 100% !important;
@@ -46,13 +55,34 @@
   transform: none !important;
 }
 
+/* A light, isolated zoom-out for Khalid Mishal Al Hazeem only. */
+.team-grid .team-photo img[src*="/khalid_mishal.jpg"],
+.team-grid .team-photo img[src*="/khalid-alhazeem.jpg"] {
+  inset: auto !important;
+  top: 50% !important;
+  right: auto !important;
+  bottom: auto !important;
+  left: 50% !important;
+  width: 90% !important;
+  height: auto !important;
+  object-fit: contain !important;
+  transform: translate(-50%, -50%) !important;
+}
+
+.team-grid .team-card:hover .team-photo img[src*="/khalid_mishal.jpg"],
+.team-grid .team-card:hover .team-photo img[src*="/khalid-alhazeem.jpg"] {
+  transform: translate(-50%, -50%) !important;
+}
+
 .team-grid .team-info {
-  position: absolute !important;
+  position: relative !important;
   z-index: 2;
-  inset: auto 18px 9% !important;
-  min-height: 0 !important;
-  padding: 0 !important;
-  color: #fff;
+  inset: auto !important;
+  display: block !important;
+  width: 100%;
+  min-height: 72px !important;
+  padding: 12px 6px 0 !important;
+  color: #0b2c3b;
   background: transparent !important;
   border: 0 !important;
   border-radius: 0 !important;
@@ -60,22 +90,47 @@
   backdrop-filter: none !important;
   pointer-events: none;
   text-align: center;
+  text-wrap: balance;
 }
 
 .team-grid .team-info small,
-.team-grid .team-info span {
-  display: none !important;
+.team-grid .team-info h3,
+.team-grid .team-card-lead .team-info h3 {
+  display: inline !important;
+  margin: 0 !important;
+  line-height: 1.45 !important;
+  text-shadow: none !important;
+}
+
+.team-grid .team-info small {
+  color: #16879c !important;
+  font-size: clamp(16px, 1.35vw, 18px) !important;
+  font-weight: 700 !important;
+  white-space: nowrap;
+}
+
+.team-grid .team-info small::after {
+  content: " ";
 }
 
 .team-grid .team-info h3,
 .team-grid .team-card-lead .team-info h3 {
-  margin: 0 !important;
-  color: #fff !important;
-  font-size: clamp(20px, 2.2vw, 26px) !important;
-  line-height: 1.35;
-  text-shadow:
-    0 2px 4px rgba(0, 18, 29, 0.98),
-    0 0 12px rgba(0, 18, 29, 0.92);
+  color: #092b3a !important;
+  font-size: clamp(18px, 1.65vw, 21px) !important;
+  font-weight: 700 !important;
+}
+
+.team-grid .team-info span {
+  display: none !important;
+}
+
+html[data-theme="dark"] .team-grid .team-info small {
+  color: #65d7e7 !important;
+}
+
+html[data-theme="dark"] .team-grid .team-info h3,
+html[data-theme="dark"] .team-grid .team-card-lead .team-info h3 {
+  color: #f5fbfd !important;
 }
 
 .team-slider-dots {
