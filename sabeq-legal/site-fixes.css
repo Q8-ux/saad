@@ -4,6 +4,15 @@
   grid-column: span 1 !important;
 }
 
+.team-grid .team-photo {
+  background: linear-gradient(90deg, #4fd1d9 0%, #1169c7 100%);
+}
+
+.team-grid .team-photo img {
+  object-fit: contain !important;
+  object-position: center center !important;
+}
+
 .team-slider-dots {
   display: none;
 }

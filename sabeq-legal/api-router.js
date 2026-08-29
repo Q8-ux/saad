@@ -3,7 +3,16 @@
 
   const API_ORIGIN = 'https://sabeq-legal-public.centrino.chatgpt.site';
   const GITHUB_HOST = 'q8-ux.github.io';
-  const LOCAL_DR_KHALIFA = '/saad/sabeq-legal/images/team/dr-khalifa.jpg?v=20260829-8';
+  const TEAM_IMAGE_VERSION = '20260829-9';
+  const LOCAL_TEAM_IMAGES = new Map([
+    ['dr-khalifa.jpg', `/saad/sabeq-legal/images/team/dr-khalifa.jpg?v=${TEAM_IMAGE_VERSION}`],
+    ['khalid-alhabib.jpg', `/saad/sabeq-legal/images/team/khalid-alhabib.jpg?v=${TEAM_IMAGE_VERSION}`],
+    ['mishal-metaab.jpg', `/saad/sabeq-legal/images/team/mishal-metaab.jpg?v=${TEAM_IMAGE_VERSION}`],
+    ['mohammed-saheb.jpg', `/saad/sabeq-legal/images/team/mohammed-saheb.jpg?v=${TEAM_IMAGE_VERSION}`],
+    ['abdulaziz-mashaan.png', `/saad/sabeq-legal/images/team/abdulaziz-mashaan.png?v=${TEAM_IMAGE_VERSION}`],
+    ['hamad-almadi.jpg', `/saad/sabeq-legal/images/team/hamad-almadi.jpg?v=${TEAM_IMAGE_VERSION}`],
+    ['khalid-alhazeem.jpg', `/saad/sabeq-legal/images/team/khalid-alhazeem.jpg?v=${TEAM_IMAGE_VERSION}`],
+  ]);
   const nativeFetch = window.fetch.bind(window);
 
   function routeApiUrl(value) {
@@ -34,14 +43,17 @@
     return nativeFetch(input, init);
   };
 
-  function isDrKhalifaImage(src) {
-    return typeof src === 'string' && (
-      src.includes('/images/team/dr-khalifa.jpg') ||
-      src.includes('sabeq-legal-public.centrino.chatgpt.site/images/team/dr-khalifa.jpg')
-    );
+  function localTeamImage(src) {
+    if (typeof src !== 'string') return null;
+
+    for (const [filename, localSrc] of LOCAL_TEAM_IMAGES) {
+      if (src.includes(`/images/team/${filename}`)) return localSrc;
+    }
+
+    return null;
   }
 
-  function pinDrKhalifaImage(root = document) {
+  function pinTeamImages(root = document) {
     if (window.location.hostname !== GITHUB_HOST) return;
 
     const images = [];
@@ -52,20 +64,21 @@
 
     for (const img of images) {
       const src = img.getAttribute('src') || img.src || '';
-      if (isDrKhalifaImage(src) && !img.src.endsWith(LOCAL_DR_KHALIFA)) {
-        img.src = LOCAL_DR_KHALIFA;
+      const localSrc = localTeamImage(src);
+      if (localSrc && img.getAttribute('src') !== localSrc) {
+        img.src = localSrc;
       }
     }
   }
 
   if (window.location.hostname === GITHUB_HOST) {
     const startImagePinning = () => {
-      pinDrKhalifaImage();
+      pinTeamImages();
 
       const observer = new MutationObserver((records) => {
         for (const record of records) {
           for (const node of record.addedNodes) {
-            if (node.nodeType === Node.ELEMENT_NODE) pinDrKhalifaImage(node);
+            if (node.nodeType === Node.ELEMENT_NODE) pinTeamImages(node);
           }
         }
       });
@@ -74,8 +87,9 @@
 
       document.addEventListener('error', (event) => {
         const target = event.target;
-        if (target instanceof HTMLImageElement && isDrKhalifaImage(target.src)) {
-          target.src = LOCAL_DR_KHALIFA;
+        if (target instanceof HTMLImageElement) {
+          const localSrc = localTeamImage(target.src);
+          if (localSrc && target.getAttribute('src') !== localSrc) target.src = localSrc;
         }
       }, true);
     };
