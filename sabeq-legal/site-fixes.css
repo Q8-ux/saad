@@ -15,16 +15,32 @@
   position: relative !important;
   inset: auto !important;
   min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   overflow: hidden;
-  background: #dff4fb !important;
+  background-color: #dff4fb !important;
+}
+
+.team-grid .team-photo.team-photo-fitted {
+  background-repeat: no-repeat !important;
+  background-position: center center !important;
+  background-size: contain !important;
+}
+
+.team-grid .team-photo.team-photo-fitted img {
+  opacity: 0 !important;
 }
 
 .team-grid .team-photo img {
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: contain !important;
-  object-position: center center !important;
-  background: #dff4fb !important;
+  flex: 0 0 auto;
+  width: auto !important;
+  height: auto !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  object-fit: initial !important;
+  object-position: initial !important;
+  background-color: #dff4fb !important;
 }
 
 .team-grid .team-photo::after {

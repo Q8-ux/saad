@@ -53,6 +53,14 @@
     return null;
   }
 
+  function fitTeamPhoto(img, localSrc) {
+    const photo = img.closest('.team-photo');
+    if (!photo) return;
+
+    photo.classList.add('team-photo-fitted');
+    photo.style.backgroundImage = `url("${localSrc}")`;
+  }
+
   function pinTeamImages(root = document) {
     if (window.location.hostname !== GITHUB_HOST) return;
 
@@ -68,6 +76,7 @@
       if (localSrc && img.getAttribute('src') !== localSrc) {
         img.src = localSrc;
       }
+      if (localSrc) fitTeamPhoto(img, localSrc);
     }
   }
 
@@ -90,6 +99,7 @@
         if (target instanceof HTMLImageElement) {
           const localSrc = localTeamImage(target.src);
           if (localSrc && target.getAttribute('src') !== localSrc) target.src = localSrc;
+          if (localSrc) fitTeamPhoto(target, localSrc);
         }
       }, true);
     };
