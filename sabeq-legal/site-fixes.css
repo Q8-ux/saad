@@ -1,11 +1,4 @@
 /* Project-level fixes that must override the compiled application styles. */
-.team-grid .team-card:first-child,
-.team-card:has(img[src*="dr-khalifa.jpg"]) {
-  min-height: 0 !important;
-  height: auto !important;
-  aspect-ratio: 320 / 238 !important;
-}
-
 .team-card img[src*="dr-khalifa.jpg"] {
   position: absolute !important;
   inset: 0 !important;
@@ -19,6 +12,64 @@
   padding: 0 !important;
   background: none !important;
   transform: none !important;
+}
+
+.team-slider-dots {
+  display: none;
+}
+
+@media (max-width: 720px) {
+  .team-grid.team-mobile-carousel {
+    display: flex !important;
+    grid-template-columns: none !important;
+    gap: 14px !important;
+    width: auto;
+    margin-inline: -7px;
+    padding: 2px 7px 10px;
+    overflow-x: auto !important;
+    overscroll-behavior-inline: contain;
+    scroll-behavior: smooth;
+    scroll-snap-type: inline mandatory;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .team-grid.team-mobile-carousel::-webkit-scrollbar {
+    display: none;
+  }
+
+  .team-grid.team-mobile-carousel .team-card,
+  .team-grid.team-mobile-carousel .team-card-lead {
+    flex: 0 0 calc(100vw - 56px) !important;
+    width: calc(100vw - 56px) !important;
+    grid-column: auto !important;
+    scroll-snap-align: center;
+    scroll-snap-stop: always;
+  }
+
+  .team-slider-dots {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 18px;
+  }
+
+  .team-slider-dot {
+    width: 9px;
+    height: 9px;
+    padding: 0;
+    background: #aacbd3;
+    border: 0;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: width 180ms ease, background-color 180ms ease;
+  }
+
+  .team-slider-dot.is-active {
+    width: 25px;
+    background: #168ea5;
+  }
 }
 
 body.sabeq-forms-open {
