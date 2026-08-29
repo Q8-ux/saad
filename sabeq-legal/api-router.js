@@ -3,15 +3,15 @@
 
   const API_ORIGIN = 'https://sabeq-legal-public.centrino.chatgpt.site';
   const GITHUB_HOST = 'q8-ux.github.io';
-  const TEAM_IMAGE_VERSION = '20260829-11';
-  const LOCAL_TEAM_IMAGES = new Map([
-    ['dr-khalifa.jpg', `/saad/sabeq-legal/images/team/dr-khalifa.jpg?v=${TEAM_IMAGE_VERSION}`],
-    ['khalid-alhabib.jpg', `/saad/sabeq-legal/images/team/khalid-alhabib.jpg?v=${TEAM_IMAGE_VERSION}`],
-    ['mishal-metaab.jpg', `/saad/sabeq-legal/images/team/mishal-metaab.jpg?v=${TEAM_IMAGE_VERSION}`],
-    ['mohammed-saheb.jpg', `/saad/sabeq-legal/images/team/mohammed-saheb.jpg?v=${TEAM_IMAGE_VERSION}`],
-    ['abdulaziz-mashaan.png', `/saad/sabeq-legal/images/team/abdulaziz-mashaan.png?v=${TEAM_IMAGE_VERSION}`],
-    ['hamad-almadi.jpg', `/saad/sabeq-legal/images/team/hamad-almadi.jpg?v=${TEAM_IMAGE_VERSION}`],
-    ['khalid-alhazeem.jpg', `/saad/sabeq-legal/images/team/khalid-alhazeem.jpg?v=${TEAM_IMAGE_VERSION}`],
+  const TEAM_IMAGE_VERSION = '20260829-12';
+  const OFFICIAL_TEAM_IMAGES = new Map([
+    ['dr-khalifa.jpg', `https://www.sabeq.legal/images/team/DR_khalifa.jpg?v=${TEAM_IMAGE_VERSION}`],
+    ['khalid-alhabib.jpg', `https://www.sabeq.legal/images/team/khalid_alhabib.jpg?v=${TEAM_IMAGE_VERSION}`],
+    ['mishal-metaab.jpg', `https://www.sabeq.legal/images/team/Metaab.jpg?v=${TEAM_IMAGE_VERSION}`],
+    ['mohammed-saheb.jpg', `https://www.sabeq.legal/images/team/Md_saheb.jpg?v=${TEAM_IMAGE_VERSION}`],
+    ['abdulaziz-mashaan.png', `https://www.sabeq.legal/images/team/Mageed.png?v=${TEAM_IMAGE_VERSION}`],
+    ['hamad-almadi.jpg', `https://www.sabeq.legal/images/team/Hamad_almadi.jpg?v=${TEAM_IMAGE_VERSION}`],
+    ['khalid-alhazeem.jpg', `https://www.sabeq.legal/images/team/khalid_mishal.jpg?v=${TEAM_IMAGE_VERSION}`],
   ]);
   const nativeFetch = window.fetch.bind(window);
 
@@ -43,11 +43,11 @@
     return nativeFetch(input, init);
   };
 
-  function localTeamImage(src) {
+  function officialTeamImage(src) {
     if (typeof src !== 'string') return null;
 
-    for (const [filename, localSrc] of LOCAL_TEAM_IMAGES) {
-      if (src.includes(`/images/team/${filename}`)) return localSrc;
+    for (const [filename, officialSrc] of OFFICIAL_TEAM_IMAGES) {
+      if (src.includes(`/images/team/${filename}`)) return officialSrc;
     }
 
     return null;
@@ -72,11 +72,11 @@
 
     for (const img of images) {
       const src = img.getAttribute('src') || img.src || '';
-      const localSrc = localTeamImage(src);
-      if (localSrc && img.getAttribute('src') !== localSrc) {
-        img.src = localSrc;
+      const officialSrc = officialTeamImage(src);
+      if (officialSrc && img.getAttribute('src') !== officialSrc) {
+        img.src = officialSrc;
       }
-      if (localSrc) fitTeamPhoto(img);
+      if (officialSrc) fitTeamPhoto(img);
     }
   }
 
