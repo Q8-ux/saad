@@ -1,16 +1,22 @@
 /* Project-level fixes that must override the compiled application styles. */
+.team-card:has(img[src*="dr-khalifa.jpg"]) .team-photo {
+  display: grid !important;
+  place-items: center !important;
+}
+
 .team-card img[src*="dr-khalifa.jpg"] {
-  position: absolute !important;
-  inset: 0 !important;
-  width: 100% !important;
-  max-width: none !important;
-  height: 100% !important;
+  position: relative !important;
+  inset: auto !important;
+  width: min(320px, 100%) !important;
+  max-width: 100% !important;
+  height: auto !important;
+  max-height: 100% !important;
   aspect-ratio: auto !important;
   object-fit: contain !important;
   object-position: center center !important;
   box-sizing: border-box !important;
   padding: 0 !important;
-  background: none !important;
+  background: transparent !important;
   transform: none !important;
 }
 
