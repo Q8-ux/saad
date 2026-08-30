@@ -1,4 +1,5 @@
-import offices from './law-offices-data-v1.js';
+let offices = [];
+let officesReady = false;
 
 const $ = (s, r = document) => r.querySelector(s);
 const esc = (v = '') => String(v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -31,6 +32,12 @@ function filtered(){
 }
 
 function renderDirectory(){
+  if(!officesReady){
+    $('#resultCount').textContent = 'جاري تحميل دليل المكاتب…';
+    $('#officeGrid').innerHTML = Array.from({length:6},()=>'<div class="office-skeleton"><i></i><span></span><span></span><span></span></div>').join('');
+    $('#pager').innerHTML = '';
+    return;
+  }
   const list = filtered();
   const pages = Math.max(1, Math.ceil(list.length/state.perPage));
   state.page = Math.min(state.page,pages);
@@ -43,6 +50,19 @@ function renderDirectory(){
     <b>التفاصيل ومشروع المكتب ←</b>
   </article>`).join('') || '<div class="empty">لا توجد نتائج مطابقة.</div>';
   $('#pager').innerHTML = `<button data-page="prev" ${state.page===1?'disabled':''}>السابق</button><span>${state.page} من ${pages}</span><button data-page="next" ${state.page===pages?'disabled':''}>التالي</button>`;
+}
+
+async function loadOffices(){
+  try{
+    const mod = await import('./law-offices-data-v1.js?v=2');
+    offices = Array.isArray(mod.default) ? mod.default : [];
+    officesReady = true;
+    renderDirectory();
+  }catch(error){
+    officesReady = false;
+    $('#resultCount').textContent = 'تعذر تحميل الدليل';
+    $('#officeGrid').innerHTML = '<div class="empty"><b>تعذر تحميل بيانات المكاتب</b><p>تحقق من الاتصال ثم اضغط للمحاولة مرة أخرى.</p><button class="primary" id="retryOffices">إعادة المحاولة</button></div>';
+  }
 }
 
 function openModal(title, body){
@@ -85,6 +105,7 @@ document.addEventListener('click',e=>{
   if(e.target.closest('#assistantClose'))$('#assistantPanel').hidden=true;
   if(e.target.closest('#assistantSend')){assistantReply($('#assistantInput').value);$('#assistantInput').value='';}
   if(e.target.closest('#micBtn'))startMic();
+  if(e.target.closest('#retryOffices'))loadOffices();
 });
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){closeModal();$('#assistantPanel').hidden=true;}
@@ -100,3 +121,5 @@ function startMic(){const SR=window.SpeechRecognition||window.webkitSpeechRecogn
 
 initStaticCards(); renderDirectory();
 document.documentElement.classList.add('app-ready');
+if('requestIdleCallback' in window) requestIdleCallback(loadOffices,{timeout:400});
+else setTimeout(loadOffices,0);
