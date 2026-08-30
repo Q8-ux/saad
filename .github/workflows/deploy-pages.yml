@@ -19,6 +19,7 @@ on:
       - 'tamweenat-admin/**'
       - 'rattil/**'
       - 'kuwait-digital-sales-plan/**'
+      - 'kuwait-fund-modern/**'
       - 'workforce-platform/apps/web/**'
       - '.github/workflows/deploy-pages.yml'
   workflow_dispatch:
@@ -85,6 +86,7 @@ jobs:
           cp -R tamweenat-admin _site/tamweenat-admin
           cp -R rattil _site/rattil
           cp -R kuwait-digital-sales-plan _site/kuwait-digital-sales-plan
+          cp -R kuwait-fund-modern _site/kuwait-fund-modern
           cp -R workforce-platform/apps/web/out/_next _site/_next
           cp -R workforce-platform/apps/web/out/dashboard _site/dashboard
           cp -R workforce-platform/apps/web/out/attendance-smart _site/attendance-smart
@@ -115,6 +117,7 @@ jobs:
           grep -q 'tamweenat-admin' _site/tamweenat-admin/index.html
           test -s _site/rattil/index.html
           test -s _site/kuwait-digital-sales-plan/index.html
+          test -s _site/kuwait-fund-modern/index.html
           grep -q 'خطة مبيعات الخدمات الرقمية في الكويت' _site/kuwait-digital-sales-plan/index.html
 
       - name: Upload Pages artifact
