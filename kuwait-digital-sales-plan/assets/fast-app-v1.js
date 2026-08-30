@@ -1,4 +1,4 @@
-import { t as offices } from './company-data-rbzkgVFt.js';
+import offices from './law-offices-data-v1.js';
 
 const $ = (s, r = document) => r.querySelector(s);
 const esc = (v = '') => String(v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
