@@ -31,3 +31,6 @@
 .assistant-topbar-trigger>span{width:30px;height:30px}
 .assistant-topbar-trigger>b{font-size:10px}
 }
+
+/* assistant-bottom-removal-v1: keep only the top-bar plan assistant */
+.assistant-shell>.assistant-launcher{display:none!important}
