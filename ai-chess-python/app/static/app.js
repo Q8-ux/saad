@@ -1,5 +1,7 @@
 const boardEl = document.getElementById('board');
 const movesEl = document.getElementById('moves');
+const movesDisclosure = document.getElementById('movesDisclosure');
+const movesCountEl = document.getElementById('movesCount');
 const levelEl = document.getElementById('level');
 const statusEl = document.getElementById('gameStatus');
 const aiLevelLabel = document.getElementById('aiLevelLabel');
@@ -226,6 +228,9 @@ async function playMove(from, to){
 }
 
 function renderMoves(){
+  const moveCount=moveHistory.length||movePairs.reduce((count,move)=>count+(move.white?1:0)+(move.black?1:0),0);
+  movesCountEl.textContent=String(moveCount);
+  movesDisclosure.setAttribute('aria-label',`${t('moveHistory')}: ${moveCount}`);
   if(!movePairs.length){ movesEl.innerHTML=`<div class="empty-state">${t('emptyMoves')}</div>`; return; }
   movesEl.innerHTML = movePairs.map((m,i)=>`
     <div class="move-row"><span class="n">${i+1}</span><span class="move-pill">${m.white}</span><span class="move-pill">${m.black || '…'}</span></div>

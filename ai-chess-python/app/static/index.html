@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>AI Chess Arena</title>
-  <link rel="stylesheet" href="/static/styles.css?v=20260831-whatsapp1" />
+  <link rel="stylesheet" href="/static/styles.css?v=20260831-moves-dropdown1" />
 </head>
 <body>
   <div class="app-shell">
@@ -99,10 +99,18 @@
       </section>
 
       <aside class="panel glass moves-panel">
-        <div class="panel-title" data-i18n="moveHistory">سجل النقلات</div>
-        <div id="moves" class="moves-list">
-          <div class="empty-state" data-i18n="emptyMoves">ابدأ المباراة وستظهر النقلات هنا.</div>
-        </div>
+        <details id="movesDisclosure" class="moves-disclosure">
+          <summary class="moves-summary">
+            <span class="panel-title" data-i18n="moveHistory">سجل النقلات</span>
+            <span class="moves-summary-meta" aria-hidden="true">
+              <span id="movesCount" class="moves-count">0</span>
+              <span class="moves-chevron">⌄</span>
+            </span>
+          </summary>
+          <div id="moves" class="moves-list">
+            <div class="empty-state" data-i18n="emptyMoves">ابدأ المباراة وستظهر النقلات هنا.</div>
+          </div>
+        </details>
       </aside>
     </main>
   </div>
@@ -136,7 +144,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/static/i18n.js?v=20260831-whatsapp1"></script>
   <script src="/static/audio.js?v=20260820-platform"></script>
-  <script src="/static/app.js?v=20260820-platform"></script>
+  <script src="/static/app.js?v=20260831-moves-dropdown1"></script>
   <script src="/static/multiplayer.js?v=20260820-platform"></script>
   <script>document.getElementById("languageSelect").addEventListener("change",e=>setLanguage(e.target.value));</script>
 </body>

@@ -32,3 +32,24 @@ body{min-height:100vh;padding:24px;overflow-x:hidden}.app-shell{width:100%;max-w
   .topbar h1{font-size:clamp(21px,6.4vw,34px);white-space:nowrap;overflow:visible}
   .topbar-actions{width:100%;justify-content:flex-start}
 }
+
+/* Collapsible move history keeps the board area compact on every screen. */
+.moves-panel{min-height:0;padding:0;overflow:hidden}
+.moves-disclosure{width:100%}
+.moves-summary{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:20px;cursor:pointer;list-style:none;user-select:none;transition:background .2s ease}
+.moves-summary::-webkit-details-marker{display:none}
+.moves-summary::marker{content:""}
+.moves-summary:hover{background:rgba(94,234,212,.06)}
+.moves-summary:focus-visible{outline:3px solid var(--gold);outline-offset:-4px;border-radius:20px}
+.moves-summary .panel-title{margin:0}
+.moves-summary-meta{display:flex;align-items:center;gap:9px;flex:0 0 auto}
+.moves-count{min-width:34px;height:28px;display:grid;place-items:center;padding:0 9px;border-radius:999px;background:rgba(94,234,212,.12);border:1px solid rgba(94,234,212,.28);color:var(--teal);font:900 14px "Al-Mohanad",sans-serif;direction:ltr}
+.moves-chevron{display:grid;place-items:center;width:28px;height:28px;color:var(--gold);font:900 24px/1 Arial,sans-serif;transition:transform .2s ease}
+.moves-disclosure[open] .moves-summary{border-bottom:1px solid var(--line)}
+.moves-disclosure[open] .moves-chevron{transform:rotate(180deg)}
+.moves-panel .moves-list{max-height:620px;padding:16px 20px 20px;scrollbar-gutter:stable}
+@media(max-width:620px){
+  .moves-summary{padding:16px}
+  .moves-summary .panel-title{font-size:20px}
+  .moves-panel .moves-list{max-height:420px;padding:14px 16px 16px}
+}
