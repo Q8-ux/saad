@@ -1,0 +1,5 @@
+@font-face{font-family:"AL-Mohanad";src:url("./fonts/AL-Mohanad.ttf") format("truetype");font-style:normal;font-weight:400;font-display:swap}
+@font-face{font-family:"AL-Mohanad";src:url("./fonts/AL-Mohanad-Bold.ttf") format("truetype");font-style:normal;font-weight:700;font-display:swap}
+@font-face{font-family:"AL-Mohanad";src:url("./fonts/AL-Mohanad-Extra-Bold.ttf") format("truetype");font-style:normal;font-weight:800;font-display:swap}
+html,body,body *{font-family:"AL-Mohanad",Tahoma,Arial,sans-serif!important}
+input,textarea,select,button{font-family:"AL-Mohanad",Tahoma,Arial,sans-serif!important}
