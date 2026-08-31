@@ -3,3 +3,9 @@
 @font-face{font-family:"AL-Mohanad";src:url("./fonts/AL-Mohanad-Extra-Bold.ttf") format("truetype");font-style:normal;font-weight:800;font-display:swap}
 html,body,body *{font-family:"AL-Mohanad",Tahoma,Arial,sans-serif!important}
 input,textarea,select,button{font-family:"AL-Mohanad",Tahoma,Arial,sans-serif!important}
+
+/* Keep the side navigation within the page flow; it must scroll with the page. */
+@media (min-width:768px){
+  div[class*="sidebar-wrapper"] > div[class*="text-sidebar-foreground"] > div:first-child{display:none!important}
+  .brand-sidebar{position:relative!important;inset:auto!important;right:auto!important;left:auto!important;height:auto!important;min-height:100%!important;align-self:stretch!important}
+}
