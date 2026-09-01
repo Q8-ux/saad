@@ -43,6 +43,11 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
+      - name: Verify voice order analysis
+        run: |
+          node --check tamweenat/assets/voice-assistant.js
+          node tamweenat/tests/voice-order-parser.test.cjs
+
       - name: Install Android platform
         run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
 

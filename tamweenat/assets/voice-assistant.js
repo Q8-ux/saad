@@ -27,7 +27,8 @@
       noOrders: "لا توجد طلبات ظاهرة في حساب المطعم حالياً.",
       unknown: "لم أفهم الطلب بالكامل. أستطيع تتبع الطلبات، البحث عن السلع، إضافة الكميات، فتح السلة وعرض الأسعار.",
       help: "جرب أن تقول: وين طلبي؟ أو أضف كرتونين بطاطا مقلية، أو كم سعر زيت القلي، أو افتح السلة.",
-      confirmCheckout: "السلة تحتاج مراجعتك. قل «أكد الطلب» لفتح خطوة الاعتماد، أو «إلغاء» للتراجع.",
+      confirmCheckout: "راجعت السلة. قل «موافق» لفتح خطوة الاعتماد، أو «إلغاء» للتراجع.",
+      approvalReminder: "بانتظار موافقتك. قل «موافق» للتنفيذ أو «إلغاء» للتراجع.",
       cancelled: "تم إلغاء الإجراء ولم يتغير الطلب.",
       openedReview: "فتحت مراجعة السلة. راجع الفرع والموعد والإجمالي ثم اعتمد الطلب من الشاشة.",
       emptyCart: "السلة فارغة. اطلب مني إضافة سلعة أولاً.",
@@ -55,7 +56,8 @@
       noOrders: "There are no visible orders for this restaurant.",
       unknown: "I did not fully understand. I can track orders, search items, add quantities, open the cart, and read prices.",
       help: "Try: track my order, add two cartons of fries, what is the oil price, or open the cart.",
-      confirmCheckout: "The cart needs your review. Say “confirm order” to open approval, or “cancel”.",
+      confirmCheckout: "I reviewed the cart. Say “approve” to open the approval step, or “cancel”.",
+      approvalReminder: "I am waiting for your approval. Say “approve” to proceed or “cancel”.",
       cancelled: "The action was cancelled and the order was not changed.",
       openedReview: "I opened the cart review. Check the branch, slot, and total, then approve it on screen.",
       emptyCart: "The cart is empty. Ask me to add an item first.",
@@ -83,7 +85,8 @@
       noOrders: "اس ریسٹورنٹ کے کوئی آرڈر نظر نہیں آ رہے۔",
       unknown: "درخواست پوری طرح سمجھ نہیں آئی۔ میں آرڈر، اشیا، مقدار، کارٹ اور قیمت میں مدد کر سکتا ہوں۔",
       help: "کہیں: میرا آرڈر ٹریک کریں، فرائز کے دو کارٹن شامل کریں، یا کارٹ کھولیں۔",
-      confirmCheckout: "کارٹ کا جائزہ ضروری ہے۔ منظوری کھولنے کے لیے “تصدیق” کہیں یا “منسوخ” کہیں۔",
+      confirmCheckout: "میں نے کارٹ کا جائزہ لیا ہے۔ آگے بڑھنے کے لیے “منظور” یا واپس جانے کے لیے “منسوخ” کہیں۔",
+      approvalReminder: "آپ کی منظوری درکار ہے۔ عمل کے لیے “منظور” یا واپس جانے کے لیے “منسوخ” کہیں۔",
       cancelled: "کارروائی منسوخ کر دی گئی۔",
       openedReview: "کارٹ کا جائزہ کھول دیا ہے۔ اسکرین پر تفصیل دیکھ کر منظوری دیں۔",
       emptyCart: "کارٹ خالی ہے۔ پہلے کوئی چیز شامل کریں۔",
@@ -294,10 +297,10 @@
     return bestScore >= 3 ? best : null;
   }
 
-  function quantityFrom(command) {
+  function parsedQuantity(command) {
     const value = normal(command);
     const marked = value.match(/(?:عدد|كميه|quantity)\s*(\d{1,2})\b/);
-    const packaged = value.match(/\b(\d{1,2})\s*(?:كرتون|كرتونه|كراتين|حبه|حبات|علبه|علب|كيس|اكياس|تنكه|رول|cartons?|boxes?|pieces?)\b/);
+    const packaged = value.match(/(?:^|\s)(\d{1,2})\s*(?:كرتون|كرتونه|كراتين|حبه|حبات|علبه|علب|كيس|اكياس|تنكه|رول|cartons?|boxes?|pieces?)(?=$|\s)/);
     const leading = value.match(/(?:اضف|اضيف|حط|ضع|زيد|ابي|اريد|add|put|order|شامل)\s*(\d{1,2})\b/);
     const explicit = marked?.[1] || packaged?.[1] || leading?.[1];
     if (explicit) return Math.max(1, Math.min(20, Number(explicit)));
@@ -314,7 +317,11 @@
       "عشر": 10, "عشره": 10, "ten": 10, "دس": 10,
     };
     for (const [word, count] of Object.entries(words)) if (value.split(" ").includes(normal(word))) return count;
-    return 1;
+    return null;
+  }
+
+  function quantityFrom(command) {
+    return parsedQuantity(command) ?? 1;
   }
 
   function cardQuantity(card) {
@@ -324,6 +331,137 @@
 
   function currentProductCard(productName) {
     return productCards().find((item) => normal(textOf(item.querySelector("h3"))) === normal(productName));
+  }
+
+  function productMentions(command) {
+    const value = normal(command);
+    const candidates = [];
+    for (const group of PRODUCT_ALIASES) {
+      let best = null;
+      for (const alias of group) {
+        const candidate = normal(alias);
+        const start = value.indexOf(candidate);
+        if (start >= 0 && (!best || candidate.length > best.alias.length)) {
+          best = { canonical: group[0], alias: candidate, start, end: start + candidate.length };
+        }
+      }
+      if (best) candidates.push(best);
+    }
+    const mentions = [];
+    for (const candidate of candidates.sort((first, second) => second.alias.length - first.alias.length || first.start - second.start)) {
+      const overlaps = mentions.some((item) => candidate.start < item.end && candidate.end > item.start);
+      if (!overlaps) mentions.push(candidate);
+    }
+    return mentions.sort((first, second) => first.start - second.start);
+  }
+
+  function quantityForMention(command, mentions, index) {
+    const value = normal(command);
+    const mention = mentions[index];
+    const previousEnd = index > 0 ? mentions[index - 1].end : 0;
+    const nextStart = index + 1 < mentions.length ? mentions[index + 1].start : value.length;
+    const beforeItems = value.slice(previousEnd, mention.start);
+    const leftConnectors = [...beforeItems.matchAll(/\s(?:و|and|اور)\s*/gi)];
+    const leftBoundary = leftConnectors.length
+      ? leftConnectors.at(-1).index + leftConnectors.at(-1)[0].length
+      : 0;
+    const before = beforeItems.slice(leftBoundary);
+    const beforeQuantity = parsedQuantity(before);
+    if (beforeQuantity != null) return beforeQuantity;
+    const afterItems = value.slice(mention.end, nextStart);
+    const rightConnector = afterItems.match(/\s(?:و|and|اور)\s*/i);
+    const after = afterItems.slice(0, rightConnector?.index ?? afterItems.length).trim();
+    const quantityStartsAfterProduct = /^(?:عدد|كميه|quantity|\d{1,2}\b|واحد|وحده|اثنين|اثنان|ثنتين|ثلاث|ثلاثه|اربع|اربعه|خمس|خمسه|ست|سته|سبع|سبعه|ثمان|ثمانيه|تسع|تسعه|عشر|عشره|one|two|three|four|five|six|seven|eight|nine|ten|ایک|دو|تین|چار|پانچ|چھ|سات|آٹھ|نو|دس|كرتون)/i.test(after);
+    return quantityStartsAfterProduct ? quantityFrom(after) : 1;
+  }
+
+  function priceNumber(value) {
+    const latin = String(value || "")
+      .replace(/[٠-٩]/g, (digit) => String("٠١٢٣٤٥٦٧٨٩".indexOf(digit)))
+      .replace(/[۰-۹]/g, (digit) => String("۰۱۲۳۴۵۶۷۸۹".indexOf(digit)))
+      .replace(/[٬,]/g, "")
+      .replace(/٫/g, ".");
+    return Number(latin.match(/\d+(?:\.\d+)?/)?.[0] || 0);
+  }
+
+  function formatCurrency(value) {
+    const lang = selectedLanguage();
+    const locale = lang === "ar" ? "ar-KW" : lang === "ur" ? "ur-PK" : "en-KW";
+    const amount = new Intl.NumberFormat(locale, { minimumFractionDigits: 3, maximumFractionDigits: 3 }).format(value);
+    return lang === "en" ? `${amount} KWD` : `${amount} د.ك.`;
+  }
+
+  async function analyzeProductCommand(command, type) {
+    if (!(await goToCatalog())) throw new Error("catalog_unavailable");
+    const mentions = productMentions(command);
+    const items = [];
+    for (let index = 0; index < mentions.length; index += 1) {
+      const mention = mentions[index];
+      const card = findProductCard(mention.canonical);
+      if (!card) continue;
+      const quantity = quantityForMention(command, mentions, index);
+      const name = textOf(card.querySelector("h3"));
+      const price = [...card.querySelectorAll("strong")].map(textOf).find((item) => /د\.ك|kwd/i.test(item)) || "";
+      const unitPrice = priceNumber(price);
+      items.push({
+        canonical: mention.canonical,
+        name,
+        quantity,
+        price,
+        unitPrice,
+        lineValue: unitPrice * quantity,
+        pack: textOf(card.querySelector("p")),
+        command: `${type === "remove" ? "احذف" : "أضف"} عدد ${quantity} ${mention.canonical}`,
+      });
+    }
+    return { type, items, total: items.reduce((sum, item) => sum + item.lineValue, 0) };
+  }
+
+  function approvalPrompt(analysis) {
+    const lang = selectedLanguage();
+    const removing = analysis.type === "remove";
+    const parts = analysis.items.map((item) => {
+      const quantity = assistantNumber(item.quantity);
+      if (lang === "en") return removing
+        ? `remove ${quantity} of ${item.name}`
+        : `add ${quantity} of ${item.name}, unit price ${item.price}, value ${formatCurrency(item.lineValue)}`;
+      if (lang === "ur") return removing
+        ? `${item.name} کی ${quantity} مقدار نکالنا`
+        : `${item.name} کی ${quantity} مقدار، فی یونٹ ${item.price}، قیمت ${formatCurrency(item.lineValue)}`;
+      return removing
+        ? `حذف ${quantity} من ${item.name}`
+        : `إضافة ${quantity} من ${item.name}، سعر الوحدة ${item.price}، والقيمة ${formatCurrency(item.lineValue)}`;
+    });
+    if (lang === "en") {
+      const total = !removing && analysis.items.length > 1 ? ` Total ${formatCurrency(analysis.total)}.` : "";
+      return `I analyzed your request: ${parts.join("; ")}.${total} Do you approve? Say “approve” to proceed or “cancel”.`;
+    }
+    if (lang === "ur") {
+      const total = !removing && analysis.items.length > 1 ? ` کل ${formatCurrency(analysis.total)}۔` : "";
+      return `میں نے آپ کی درخواست سمجھی: ${parts.join("، ")}۔${total} کیا آپ منظور کرتے ہیں؟ عمل کے لیے “منظور” یا واپس جانے کے لیے “منسوخ” کہیں۔`;
+    }
+    const total = !removing && analysis.items.length > 1 ? ` الإجمالي ${formatCurrency(analysis.total)}.` : "";
+    return `حللت طلبك: ${parts.join("؛ ")}.${total} هل توافق؟ قل «موافق» للتنفيذ أو «إلغاء» للتراجع.`;
+  }
+
+  async function runApprovedProductAction(pending) {
+    const results = [];
+    for (const item of pending.analysis.items) {
+      const result = pending.type === "remove" ? await removeProduct(item.command) : await addProduct(item.command);
+      if (result.ok) results.push(result);
+    }
+    if (!results.length) return t("genericError");
+    const lang = selectedLanguage();
+    const parts = results.map((result) => `${assistantNumber(result.quantity)} ${result.productName}`);
+    if (lang === "en") return pending.type === "remove"
+      ? `Approved and removed ${parts.join(", ")} from the cart.`
+      : `Approved and added ${parts.join(", ")} to the cart.`;
+    if (lang === "ur") return pending.type === "remove"
+      ? `منظوری کے بعد ${parts.join("، ")} کارٹ سے نکال دیا۔`
+      : `منظوری کے بعد ${parts.join("، ")} کارٹ میں شامل کر دیا۔`;
+    return pending.type === "remove"
+      ? `تمت الموافقة وحذف ${parts.join("، ")} من السلة.`
+      : `تمت الموافقة وإضافة ${parts.join("، ")} إلى السلة.`;
   }
 
   async function addProduct(command) {
@@ -446,6 +584,13 @@
     return { total, names };
   }
 
+  function checkoutApprovalPrompt(summary) {
+    const named = summary.names.join("، ");
+    if (selectedLanguage() === "en") return `I analyzed the cart${named ? `: ${named}` : ""}${summary.total ? `. ${summary.total}` : ""}. Say “approve” to open final review or “cancel”.`;
+    if (selectedLanguage() === "ur") return `میں نے کارٹ کا جائزہ لیا${named ? `: ${named}` : ""}${summary.total ? `۔ ${summary.total}` : ""}۔ آخری جائزے کے لیے “منظور” یا واپس جانے کے لیے “منسوخ” کہیں۔`;
+    return `حللت السلة${named ? `، وتحتوي على ${named}` : ""}${summary.total ? `، ${summary.total}` : ""}. قل «موافق» لفتح المراجعة النهائية أو «إلغاء» للتراجع.`;
+  }
+
   async function openCheckoutReview() {
     const dialog = await openCart();
     if (!dialog || !cartSummary(dialog)) return { ok: false, empty: true };
@@ -462,17 +607,32 @@
     if ("speechSynthesis" in window) window.speechSynthesis.cancel();
   }
 
-  function say(message) {
+  function listenForApproval() {
+    if (state.open && state.pending && !state.listening && !state.busy) startListening();
+  }
+
+  function speechText(message) {
+    const value = String(message || "");
+    if (selectedLanguage() === "en") return value.replace(/\bKWD\b/gi, "Kuwaiti dinars");
+    if (selectedLanguage() === "ur") return value.replace(/د\s*\.?\s*ك\s*\.?/g, "کویتی دینار");
+    return value.replace(/د\s*\.?\s*ك\s*\.?/g, "دينار كويتي");
+  }
+
+  function say(message, listenAfter = false) {
     if (!message) return;
+    const spokenMessage = speechText(message);
     if (window.TamweenatVoice && typeof window.TamweenatVoice.speak === "function") {
       try {
-        window.TamweenatVoice.speak(message, speechLocale());
-        return;
+        const handled = window.TamweenatVoice.speak(spokenMessage, speechLocale(), listenAfter ? "approval" : "reply");
+        if (handled !== false) return;
       } catch {}
     }
-    if (!("speechSynthesis" in window)) return;
+    if (!("speechSynthesis" in window)) {
+      if (listenAfter) setTimeout(listenForApproval, 600);
+      return;
+    }
     stopSpeaking();
-    const utterance = new SpeechSynthesisUtterance(message);
+    const utterance = new SpeechSynthesisUtterance(spokenMessage);
     utterance.lang = speechLocale();
     utterance.rate = selectedLanguage() === "ar" ? 0.92 : 0.96;
     utterance.pitch = 1;
@@ -481,6 +641,10 @@
     const preferred = voices.find((voice) => voice.lang.toLowerCase().startsWith(prefix) && /male|fahd|majid|hamed|maged|tarik/i.test(voice.name))
       || voices.find((voice) => voice.lang.toLowerCase().startsWith(prefix));
     if (preferred) utterance.voice = preferred;
+    if (listenAfter) {
+      utterance.onend = listenForApproval;
+      utterance.onerror = () => setTimeout(listenForApproval, 300);
+    }
     window.speechSynthesis.speak(utterance);
   }
 
@@ -490,10 +654,11 @@
     statusText.textContent = text;
   }
 
-  function answer(message, speak = true) {
+  function answer(message, speak = true, listenAfter = false) {
     answerText.textContent = message;
     renderStatus("ready", t("ready"));
-    if (speak) say(message);
+    if (speak) say(message, listenAfter);
+    else if (listenAfter) setTimeout(listenForApproval, 300);
   }
 
   function assistantNumber(value) {
@@ -509,17 +674,32 @@
     renderStatus("working", t("working"));
     const value = normal(command);
     try {
-      if (state.pending && /^(نعم|اي|ايوه|اكد|تاكيد|أكد|confirm|yes|ok|تصدیق|ہاں)/i.test(value)) {
-        const pending = state.pending;
-        state.pending = null;
-        if (pending === "checkout") {
-          const result = await openCheckoutReview();
-          answer(result.empty ? t("emptyCart") : result.ok ? t("openedReview") : t("genericError"), options.speak !== false);
+      const approved = /^(نعم|اي|ايوه|موافق|موافقه|اوافق|وافق|تمام|اوكي|اعتمد|اكد|تاكيد|confirm|approve|approved|yes|ok|تصدیق|منظور|ہاں)/i.test(value);
+      const cancelled = /^(لا|مو موافق|غير موافق|تراجع|الغاء|إلغاء|cancel|stop|منسوخ)/i.test(value);
+      if (state.pending) {
+        if (approved) {
+          const pending = state.pending;
+          state.pending = null;
+          if (pending.type === "checkout") {
+            const result = await openCheckoutReview();
+            answer(result.empty ? t("emptyCart") : result.ok ? t("openedReview") : t("genericError"), options.speak !== false);
+            return;
+          }
+          if (pending.type === "add" || pending.type === "remove") {
+            answer(await runApprovedProductAction(pending), options.speak !== false);
+            return;
+          }
+        }
+        if (cancelled) {
+          state.pending = null;
+          answer(t("cancelled"), options.speak !== false);
           return;
         }
+        answer(t("approvalReminder"), options.speak !== false, options.voice === true);
+        return;
       }
 
-      if (/^(الغاء|إلغاء|cancel|stop|منسوخ)/i.test(value)) {
+      if (cancelled) {
         state.pending = null;
         answer(t("cancelled"), options.speak !== false);
         return;
@@ -561,8 +741,13 @@
       }
 
       if (/اعتمد|ارسل الطلب|إرسال الطلب|اكد الطلب|أكد الطلب|confirm order|checkout|منظور/.test(value)) {
-        state.pending = "checkout";
-        answer(t("confirmCheckout"), options.speak !== false);
+        const dialog = await openCart();
+        const summary = dialog && cartSummary(dialog);
+        if (!summary) answer(t("emptyCart"), options.speak !== false);
+        else {
+          state.pending = { type: "checkout", summary };
+          answer(checkoutApprovalPrompt(summary), options.speak !== false, options.voice === true);
+        }
         return;
       }
 
@@ -589,21 +774,23 @@
       }
 
       if (/احذف|شيل|نقص|remove|delete|کم|ہٹاؤ/.test(value)) {
-        const result = await removeProduct(command);
-        if (!result.ok) answer(result.reason === "product" ? t("noProduct") : t("genericError"), options.speak !== false);
-        else if (selectedLanguage() === "en") answer(`Removed ${result.quantity} of ${result.productName} from the cart.`, options.speak !== false);
-        else if (selectedLanguage() === "ur") answer(`${result.productName} کی ${result.quantity} مقدار کارٹ سے کم کر دی۔`, options.speak !== false);
-        else answer(`تم إنقاص ${assistantNumber(result.quantity)} من ${result.productName} في السلة.`, options.speak !== false);
+        const analysis = await analyzeProductCommand(command, "remove");
+        if (!analysis.items.length) answer(t("noProduct"), options.speak !== false);
+        else {
+          state.pending = { type: "remove", analysis };
+          answer(approvalPrompt(analysis), options.speak !== false, options.voice === true);
+        }
         return;
       }
 
-      const productNamed = Boolean(resolveAlias(command));
+      const productNamed = productMentions(command).length > 0;
       if (productNamed && /اضف|اضيف|حط|ضع|زيد|ابي|اريد|نبي|add|put|order|شامل|چاہیے/.test(value)) {
-        const result = await addProduct(command);
-        if (!result.ok) answer(result.reason === "product" ? t("noProduct") : t("genericError"), options.speak !== false);
-        else if (selectedLanguage() === "en") answer(`Added ${result.quantity} of ${result.productName} to the cart.`, options.speak !== false);
-        else if (selectedLanguage() === "ur") answer(`${result.productName} کی ${result.quantity} مقدار کارٹ میں شامل کر دی۔`, options.speak !== false);
-        else answer(`تمت إضافة ${assistantNumber(result.quantity)} من ${result.productName} إلى السلة.`, options.speak !== false);
+        const analysis = await analyzeProductCommand(command, "add");
+        if (!analysis.items.length) answer(t("noProduct"), options.speak !== false);
+        else {
+          state.pending = { type: "add", analysis };
+          answer(approvalPrompt(analysis), options.speak !== false, options.voice === true);
+        }
         return;
       }
 
@@ -665,7 +852,7 @@
       answer(t("noSpeech"), false);
       return;
     }
-    execute(value);
+    execute(value, { voice: true });
   }
 
   function scheduleTranscriptCommit() {
@@ -786,6 +973,8 @@
       input.focus({ preventScroll: true });
     } else {
       stopListening();
+      stopSpeaking();
+      state.pending = null;
     }
   }
 
@@ -894,6 +1083,13 @@
     handleRecognizedText(detail.text || "");
   });
 
+  window.addEventListener("tamweenat-native-speech", (event) => {
+    const detail = event.detail || {};
+    if (detail.id === "approval" && (detail.status === "done" || detail.status === "error")) {
+      setTimeout(listenForApproval, 180);
+    }
+  });
+
   document.addEventListener("change", (event) => {
     if (event.target?.matches?.('select[aria-label*="اللغة"], select[aria-label*="language" i]')) setTimeout(syncLanguage, 50);
   });
@@ -905,6 +1101,6 @@
     open: () => setOpen(true),
     close: () => setOpen(false),
     execute: (command, options) => execute(command, options),
-    version: "1.1.0",
+    version: "1.2.0",
   });
 })();

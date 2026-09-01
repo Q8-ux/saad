@@ -18,6 +18,7 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
+import android.speech.tts.UtteranceProgressListener;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -61,8 +62,10 @@ public class MainActivity extends Activity {
     private String pendingSpeechLocale = "ar-KW";
     private TextToSpeech textToSpeech;
     private boolean textToSpeechReady;
+    private boolean textToSpeechFailed;
     private String pendingSpokenText = "";
     private String pendingSpokenLocale = "ar-KW";
+    private String pendingSpokenUtteranceId = "reply";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -169,7 +172,7 @@ public class MainActivity extends Activity {
         settings.setCacheMode(WebSettings.LOAD_DEFAULT);
         settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
         settings.setUserAgentString(settings.getUserAgentString()
-                + " TamweenatAndroid/1.1 (" + BuildConfig.EDITION + ")");
+                + " TamweenatAndroid/1.2 (" + BuildConfig.EDITION + ")");
 
         CookieManager cookies = CookieManager.getInstance();
         cookies.setAcceptCookie(true);
@@ -190,25 +193,57 @@ public class MainActivity extends Activity {
     private void initializeTextToSpeech() {
         textToSpeech = new TextToSpeech(this, status -> {
             textToSpeechReady = status == TextToSpeech.SUCCESS;
+            textToSpeechFailed = !textToSpeechReady;
+            if (textToSpeechReady) {
+                textToSpeech.setOnUtteranceProgressListener(new UtteranceProgressListener() {
+                    @Override
+                    public void onStart(String utteranceId) {
+                    }
+
+                    @Override
+                    public void onDone(String utteranceId) {
+                        dispatchNativeSpeech(utteranceId, "done");
+                    }
+
+                    @Override
+                    public void onError(String utteranceId) {
+                        dispatchNativeSpeech(utteranceId, "error");
+                    }
+                });
+            }
             if (textToSpeechReady && !pendingSpokenText.isEmpty()) {
                 String text = pendingSpokenText;
                 String locale = pendingSpokenLocale;
+                String utteranceId = pendingSpokenUtteranceId;
                 pendingSpokenText = "";
-                speakText(text, locale);
+                speakText(text, locale, utteranceId);
+            } else if (textToSpeechFailed && !pendingSpokenText.isEmpty()) {
+                String utteranceId = pendingSpokenUtteranceId;
+                pendingSpokenText = "";
+                dispatchNativeSpeech(utteranceId, "error");
             }
         });
     }
 
-    private void speakText(String text, String localeTag) {
+    private void speakText(String text, String localeTag, String utteranceId) {
         if (text == null || text.trim().isEmpty()) return;
         String safeText = text.trim();
-        if (safeText.length() > 500) safeText = safeText.substring(0, 500);
+        int maxSpeechLength = Math.min(1800, TextToSpeech.getMaxSpeechInputLength());
+        if (safeText.length() > maxSpeechLength) safeText = safeText.substring(0, maxSpeechLength);
         String safeLocale = localeTag != null && localeTag.matches("[a-zA-Z]{2,3}(-[a-zA-Z]{2})?")
                 ? localeTag
                 : "ar-KW";
+        String safeUtteranceId = utteranceId != null && utteranceId.matches("[a-zA-Z0-9_-]{1,40}")
+                ? utteranceId
+                : "reply";
+        if (textToSpeechFailed) {
+            dispatchNativeSpeech(safeUtteranceId, "error");
+            return;
+        }
         if (!textToSpeechReady || textToSpeech == null) {
             pendingSpokenText = safeText;
             pendingSpokenLocale = safeLocale;
+            pendingSpokenUtteranceId = safeUtteranceId;
             return;
         }
         Locale locale = Locale.forLanguageTag(safeLocale);
@@ -219,7 +254,7 @@ public class MainActivity extends Activity {
         }
         textToSpeech.setSpeechRate(safeLocale.startsWith("ar") ? 0.92f : 0.96f);
         textToSpeech.setPitch(1.0f);
-        textToSpeech.speak(safeText, TextToSpeech.QUEUE_FLUSH, null, "tamweenat-reply");
+        textToSpeech.speak(safeText, TextToSpeech.QUEUE_FLUSH, null, safeUtteranceId);
     }
 
     private void loadHome() {
@@ -294,6 +329,18 @@ public class MainActivity extends Activity {
                 + JSONObject.quote(error == null ? "" : error)
                 + "}}));";
         webView.evaluateJavascript(script, null);
+    }
+
+    private void dispatchNativeSpeech(String utteranceId, String status) {
+        runOnUiThread(() -> {
+            if (webView == null) return;
+            String script = "window.dispatchEvent(new CustomEvent('tamweenat-native-speech',{detail:{id:"
+                    + JSONObject.quote(utteranceId == null ? "reply" : utteranceId)
+                    + ",status:"
+                    + JSONObject.quote(status == null ? "error" : status)
+                    + "}}));";
+            webView.evaluateJavascript(script, null);
+        });
     }
 
     private void openOutside(Uri uri) {
@@ -399,14 +446,17 @@ public class MainActivity extends Activity {
             textToSpeech.shutdown();
             textToSpeech = null;
             textToSpeechReady = false;
+            textToSpeechFailed = false;
         }
         super.onDestroy();
     }
 
     private final class VoiceBridge {
         @JavascriptInterface
-        public void speak(String text, String locale) {
-            runOnUiThread(() -> speakText(text, locale));
+        public boolean speak(String text, String locale, String utteranceId) {
+            if (textToSpeechFailed) return false;
+            runOnUiThread(() -> speakText(text, locale, utteranceId));
+            return true;
         }
 
         @JavascriptInterface
