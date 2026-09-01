@@ -550,9 +550,9 @@
         if (!summary) answer(t("emptyCart"), options.speak !== false);
         else {
           const named = summary.names.join("، ");
-          if (selectedLanguage() === "en") answer(`The cart is open${named ? ` with ${named}` : ""}${summary.total ? `. ${summary.total}` : ""}.`, options.speak !== false);
-          else if (selectedLanguage() === "ur") answer(`کارٹ کھول دیا ہے${named ? `: ${named}` : ""}${summary.total ? `۔ ${summary.total}` : ""}۔`, options.speak !== false);
-          else answer(`فتحت السلة${named ? `، وفيها ${named}` : ""}${summary.total ? `، ${summary.total}` : ""}.`, options.speak !== false);
+          if (selectedLanguage() === "en") answer(`The cart is open${named ? ` with ${named}` : ""}${summary.total ? `. ${summary.total}` : ""}`, options.speak !== false);
+          else if (selectedLanguage() === "ur") answer(`کارٹ کھول دیا ہے${named ? `: ${named}` : ""}${summary.total ? `۔ ${summary.total}` : ""}`, options.speak !== false);
+          else answer(`فتحت السلة${named ? `، وفيها ${named}` : ""}${summary.total ? `، ${summary.total}` : ""}`, options.speak !== false);
         }
         return;
       }
@@ -778,7 +778,15 @@
     micButton.addEventListener("click", startListening);
     root.querySelector("[data-send]").addEventListener("click", () => execute(input.value));
     input.addEventListener("keydown", (event) => {
-      if (event.key === "Enter") execute(input.value);
+      if (event.key !== "Enter") return;
+      event.preventDefault();
+      event.stopPropagation();
+    });
+    input.addEventListener("keyup", (event) => {
+      if (event.key !== "Enter") return;
+      event.preventDefault();
+      event.stopPropagation();
+      execute(input.value);
     });
     syncLanguage();
     answerText.textContent = t("intro");
