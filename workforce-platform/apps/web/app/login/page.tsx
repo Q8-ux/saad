@@ -2,6 +2,7 @@
 
 import { FormEvent, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export default function Login() {
   const router = useRouter();
@@ -44,8 +45,8 @@ export default function Login() {
   }
 
   return (
-    <main>
-      <div className="card" style={{ maxWidth: 460, margin: '80px auto' }}>
+    <main className="authPage">
+      <div className="card authCard">
         <h1>تسجيل الدخول</h1>
         <form onSubmit={submit}>
           <input
@@ -72,6 +73,10 @@ export default function Login() {
           <button disabled={loading}>{loading ? 'جارٍ الدخول...' : 'دخول'}</button>
         </form>
         {error && <p role="alert">{error}</p>}
+        <div className="authLinks">
+          <Link href="/forgot-password">نسيت كلمة المرور؟</Link>
+          <Link href="/request-activation">إعادة إرسال رابط التفعيل</Link>
+        </div>
       </div>
     </main>
   );

@@ -18,7 +18,7 @@ const items: NavItem[] = [
   { href: '/emergency', icon: 'reports', ar: 'التصاريح', en: 'Permits' },
   { href: '/notifications', icon: 'notification', ar: 'التنبيهات', en: 'Notifications' },
   { href: '/dashboard#reports', icon: 'reports', ar: 'التقارير', en: 'Reports' },
-  { href: '/dashboard#employees', icon: 'employees', ar: 'المستخدمون', en: 'Users' },
+  { href: '/users', icon: 'employees', ar: 'المستخدمون', en: 'Users' },
   { href: '/profile#settings', icon: 'settings', ar: 'الإعدادات', en: 'Settings' },
 ];
 
@@ -55,6 +55,11 @@ export default function EnterpriseShell({ children }: { children: React.ReactNod
     document.documentElement.dataset.theme = next;
     window.localStorage.setItem('platform-theme', next);
   };
+
+  const publicPaths = ['/login', '/activate', '/forgot-password', '/reset-password', '/request-activation'];
+  if (publicPaths.some(path => pathname === path || pathname.startsWith(`${path}/`))) {
+    return <div className="publicAuthShell">{children}</div>;
+  }
 
   return (
     <div className="approvedShell darkOpsShell" data-ui-version="government-dashboard-ai-contrast-v9">
