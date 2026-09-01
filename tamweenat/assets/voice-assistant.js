@@ -95,9 +95,6 @@
     },
   };
 
-  const CATALOG_PRODUCTS = Array.isArray(window.TamweenatProductCatalog)
-    ? window.TamweenatProductCatalog
-    : [];
   const EXTRA_PRODUCT_ALIASES = {
     "BRG-0001": ["بصل", "بصل أبيض", "white onion"],
     "BRG-0004": ["ثوم", "garlic"],
@@ -111,14 +108,31 @@
     "BRG-0091": ["بطاطا مقلية", "بطاطس مقلية", "فرايز", "فرائز", "french fries", "fries"],
     "BRG-0093": ["حلقات بصل", "onion rings"],
   };
-  const shortNames = CATALOG_PRODUCTS.map((product) => String(product.nameAr || "").split(/\s+[–-]\s+/)[0].trim());
-  const shortNameCount = shortNames.reduce((counts, name) => counts.set(name, (counts.get(name) || 0) + 1), new Map());
-  const PRODUCT_ALIASES = CATALOG_PRODUCTS.map((product, index) => {
-    const aliases = [product.nameAr, product.nameEn, product.sku];
-    if (shortNames[index] && shortNameCount.get(shortNames[index]) === 1) aliases.push(shortNames[index]);
-    aliases.push(...(EXTRA_PRODUCT_ALIASES[product.sku] || []));
-    return [...new Set(aliases.filter(Boolean))];
-  });
+  function catalogProductsForVoice() {
+    if (Array.isArray(window.TamweenatProductCatalog) && window.TamweenatProductCatalog.length) {
+      return window.TamweenatProductCatalog;
+    }
+    return productCards().map((card) => {
+      const sku = textOf(card).match(/BRG-\d{4}/i)?.[0]?.toUpperCase() || "";
+      return {
+        sku,
+        nameAr: textOf(card.querySelector("h3")),
+        nameEn: "",
+      };
+    });
+  }
+
+  function productAliasGroups() {
+    const products = catalogProductsForVoice();
+    const shortNames = products.map((product) => String(product.nameAr || "").split(/\s+[–-]\s+/)[0].trim());
+    const shortNameCount = shortNames.reduce((counts, name) => counts.set(name, (counts.get(name) || 0) + 1), new Map());
+    return products.map((product, index) => {
+      const aliases = [product.nameAr, product.nameEn, product.sku];
+      if (shortNames[index] && shortNameCount.get(shortNames[index]) === 1) aliases.push(shortNames[index]);
+      aliases.push(...(EXTRA_PRODUCT_ALIASES[product.sku] || []));
+      return [...new Set(aliases.filter(Boolean))];
+    });
+  }
 
   const state = {
     open: false,
@@ -238,7 +252,7 @@
     const value = normal(command);
     let winner = "";
     let size = 0;
-    for (const group of PRODUCT_ALIASES) {
+    for (const group of productAliasGroups()) {
       for (const alias of group) {
         const candidate = normal(alias);
         if (candidate.length > size && value.includes(candidate)) {
@@ -318,7 +332,7 @@
   function productMentions(command) {
     const value = normal(command);
     const candidates = [];
-    for (const group of PRODUCT_ALIASES) {
+    for (const group of productAliasGroups()) {
       let best = null;
       for (const alias of group) {
         const candidate = normal(alias);
@@ -765,8 +779,7 @@
         return;
       }
 
-      const productNamed = productMentions(command).length > 0;
-      if (productNamed && /اضف|اضيف|حط|ضع|زيد|ابي|اريد|نبي|add|put|order|شامل|چاہیے/.test(value)) {
+      if (/اضف|اضيف|حط|ضع|زيد|ابي|اريد|نبي|add|put|order|شامل|چاہیے/.test(value)) {
         const analysis = await analyzeProductCommand(command, "add");
         if (!analysis.items.length) answer(t("noProduct"), options.speak !== false);
         else {
