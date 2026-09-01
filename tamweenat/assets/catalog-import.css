@@ -14,28 +14,295 @@
   position: absolute;
   z-index: 3;
   inset: 6px 6px auto auto;
-  min-height: 20px;
-  padding: 2px 25px 2px 7px;
+  min-height: 30px;
+  padding: 5px 34px 5px 11px;
   border: 1px solid rgba(18, 60, 49, 0.16);
   border-radius: 999px;
   background-color: rgba(255, 255, 255, 0.94);
   background-image: url("/saad/tamweenat/favicon.svg");
   background-repeat: no-repeat;
   background-position: right 5px center;
-  background-size: 16px 16px;
+  background-size: 22px 22px;
   color: #123c31;
   box-shadow: 0 3px 10px rgba(8, 33, 26, 0.18);
-  font-size: 9px;
+  font-size: 13px;
   font-weight: 800;
-  line-height: 16px;
+  line-height: 18px;
+}
+
+/* Clear, large product catalogue with restaurant essentials first. */
+html body .category-tabs {
+  max-width: 100% !important;
+  overflow: visible !important;
+}
+
+html body .category-tabs-list {
+  gap: 10px !important;
+  padding: 5px 2px 13px !important;
+  scroll-padding-inline: 10px;
+}
+
+html body .category-tabs-list button {
+  flex: 0 0 auto !important;
+  min-height: 52px !important;
+  padding-inline: 21px !important;
+  border: 2px solid #d4e0d9 !important;
+  border-radius: 16px !important;
+  background: #fff !important;
+  color: #244b3e !important;
+  box-shadow: 0 6px 16px rgba(17, 57, 44, 0.08) !important;
+  font-size: 18px !important;
+  font-weight: 900 !important;
+  line-height: 1.35 !important;
+}
+
+html body .category-tabs-list button[data-state="active"] {
+  border-color: #17684f !important;
+  background: #17684f !important;
+  color: #fff !important;
+  box-shadow: 0 9px 22px rgba(23, 104, 79, 0.25) !important;
+}
+
+html body .product-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  align-items: stretch !important;
+  gap: 20px !important;
+}
+
+html body article.product-card {
+  display: flex !important;
+  flex-direction: column !important;
+  min-width: 0 !important;
+  border: 2px solid #d5e0da !important;
+  border-radius: 24px !important;
+  background: #fff !important;
+  overflow: hidden !important;
+  box-shadow: 0 14px 34px rgba(19, 59, 46, 0.11) !important;
+}
+
+html body article.product-card:hover {
+  border-color: #8db5a5 !important;
+  box-shadow: 0 20px 42px rgba(19, 59, 46, 0.18) !important;
+}
+
+html body .product-card-top {
+  display: block !important;
+  position: relative !important;
+  min-height: 228px !important;
+  padding: 15px !important;
+  background: linear-gradient(145deg, #f6f2e9, #e9f1ed) !important;
+}
+
+html body .product-photo {
+  width: 100% !important;
+  height: 198px !important;
+  border: 1px solid #dce5e0 !important;
+  border-radius: 18px !important;
+  background: #fff !important;
+  box-shadow: 0 10px 24px rgba(17, 50, 40, 0.13) !important;
+}
+
+html body .product-photo::after {
+  background: linear-gradient(transparent 70%, rgba(8, 33, 26, 0.72)) !important;
+}
+
+html body .product-photo small {
+  max-width: calc(100% - 22px) !important;
+  inset-block-end: 8px !important;
+  padding: 2px 5px !important;
+  font-size: 11px !important;
+  line-height: 1.35 !important;
+}
+
+html body .product-card-badges {
+  position: absolute !important;
+  z-index: 4 !important;
+  inset-block-start: 21px !important;
+  inset-inline-end: 21px !important;
+  align-items: flex-end !important;
+  gap: 7px !important;
+}
+
+html body .product-card-badges > * {
+  min-height: 32px !important;
+  padding: 5px 10px !important;
+  border-radius: 10px !important;
+  font-size: 14px !important;
+  font-weight: 900 !important;
+  line-height: 1.35 !important;
+  box-shadow: 0 5px 13px rgba(8, 33, 26, 0.16) !important;
+}
+
+html body .product-card-body {
+  display: flex !important;
+  flex: 1 !important;
+  flex-direction: column !important;
+  padding: 20px !important;
+}
+
+html body .product-sku {
+  color: #65776d !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  line-height: 1.4 !important;
+}
+
+html body article.product-card h3 {
+  min-height: 72px !important;
+  margin: 8px 0 5px !important;
+  color: #123c31 !important;
+  font-size: 24px !important;
+  font-weight: 900 !important;
+  line-height: 1.5 !important;
+}
+
+html body article.product-card p {
+  color: #52675d !important;
+  font-size: 17px !important;
+  font-weight: 700 !important;
+  line-height: 1.6 !important;
+}
+
+html body .product-stock-line {
+  min-height: 50px !important;
+  margin: 15px 0 !important;
+  padding: 10px 12px !important;
+  border: 1px solid #dfe8e3 !important;
+  border-radius: 13px !important;
+  color: #435b50 !important;
+  background: #f4f8f6 !important;
+  font-size: 16px !important;
+  font-weight: 800 !important;
+  line-height: 1.5 !important;
+}
+
+html body .product-stock-line svg {
+  width: 19px !important;
+  height: 19px !important;
+}
+
+html body .product-card-footer {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 13px !important;
+  margin-top: auto !important;
+}
+
+html body .product-price-wrap {
+  gap: 8px !important;
+}
+
+html body .product-price strong {
+  color: #0b6047 !important;
+  font-size: 29px !important;
+  font-weight: 900 !important;
+  line-height: 1.3 !important;
+}
+
+html body .product-price span {
+  color: #52675d !important;
+  font-size: 16px !important;
+  font-weight: 800 !important;
+  line-height: 1.5 !important;
+}
+
+html body .product-availability {
+  font-size: 17px !important;
+  font-weight: 900 !important;
+  line-height: 1.45 !important;
+}
+
+html body .add-product-button {
+  width: 100% !important;
+  min-height: 54px !important;
+  height: auto !important;
+  border-radius: 14px !important;
+  font-size: 18px !important;
+  font-weight: 900 !important;
+  line-height: 1.4 !important;
+}
+
+html body .add-product-button svg {
+  width: 20px !important;
+  height: 20px !important;
+}
+
+html body .quantity-stepper {
+  justify-content: space-between !important;
+  width: 100% !important;
+  min-height: 54px !important;
+  height: auto !important;
+  border-radius: 14px !important;
+}
+
+html body .quantity-stepper button {
+  width: 48px !important;
+  height: 48px !important;
+}
+
+html body .quantity-stepper button svg {
+  width: 20px !important;
+  height: 20px !important;
+}
+
+html body .quantity-stepper strong {
+  min-width: 32px !important;
+  font-size: 21px !important;
+  font-weight: 900 !important;
+}
+
+@media (max-width: 1180px) {
+  html body .product-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
 }
 
 @media (max-width: 680px) {
+  html body .category-tabs-list button {
+    min-height: 50px !important;
+    padding-inline: 18px !important;
+    font-size: 18px !important;
+  }
+
+  html body .product-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+
+  html body .product-card-top {
+    min-height: 238px !important;
+    padding: 13px !important;
+  }
+
+  html body .product-photo {
+    height: 212px !important;
+  }
+
+  html body .product-card-body {
+    padding: 18px !important;
+  }
+
+  html body article.product-card h3 {
+    min-height: 0 !important;
+    font-size: 23px !important;
+    line-height: 1.55 !important;
+  }
+
+  html body article.product-card p,
+  html body .product-stock-line {
+    font-size: 17px !important;
+  }
+
+  html body .product-price strong {
+    font-size: 30px !important;
+  }
+
   .product-photo::before {
-    min-height: 22px;
-    padding-inline-start: 8px;
-    padding-inline-end: 27px;
-    background-size: 17px 17px;
-    font-size: 10px;
+    min-height: 32px;
+    padding-inline-start: 11px;
+    padding-inline-end: 36px;
+    background-size: 23px 23px;
+    font-size: 14px;
   }
 }

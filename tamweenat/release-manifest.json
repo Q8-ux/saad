@@ -1,5 +1,5 @@
 {
-  "releaseHash": "20260901-burger-warehouse2",
+  "releaseHash": "20260901-catalog-clarity",
   "loaderName": "loader-807f1f72f7f0.js",
   "jsFile": "app-9e47eff7f33a.js.gz",
   "cssFile": "app-8f6e8cf552b6.css.gz",
@@ -14,5 +14,7 @@
   "catalogProducts": 162,
   "catalogCategories": 9,
   "catalogPriceBasis": "source_website",
-  "catalogVerifiedAt": "2026-09-01"
+  "catalogVerifiedAt": "2026-09-01",
+  "catalogOrder": ["all", "proteins", "bakery", "dairy", "fries-appetizers", "sauces", "fresh-vegetables", "soft-drinks", "water", "packaging-hygiene"],
+  "catalogReadableCards": true
 }

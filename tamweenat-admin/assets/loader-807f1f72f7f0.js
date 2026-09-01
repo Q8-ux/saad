@@ -7,7 +7,7 @@
       throw new Error("This browser needs DecompressionStream support");
     }
     const assetUrl = new URL(name, assetsUrl);
-    assetUrl.searchParams.set("v", "20260901-burger-warehouse");
+    assetUrl.searchParams.set("v", "20260901-catalog-clarity");
     const response = await fetch(assetUrl, { cache: "no-store" });
     if (!response.ok || !response.body) throw new Error("Unable to load " + name);
     const stream = response.body.pipeThrough(new DecompressionStream("gzip"));
