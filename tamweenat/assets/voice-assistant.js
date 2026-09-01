@@ -309,28 +309,41 @@
     return 1;
   }
 
+  function cardQuantity(card) {
+    const value = normal(textOf(card?.querySelector(".quantity-stepper strong")));
+    return Number(value.match(/\d+/)?.[0] || 0);
+  }
+
+  function currentProductCard(productName) {
+    return productCards().find((item) => normal(textOf(item.querySelector("h3"))) === normal(productName));
+  }
+
   async function addProduct(command) {
     if (!(await goToCatalog())) throw new Error("catalog_unavailable");
     let card = findProductCard(command);
     if (!card) return { ok: false, reason: "product" };
     const productName = textOf(card.querySelector("h3"));
     const quantity = quantityFrom(command);
-    let remaining = quantity;
+    const initialQuantity = cardQuantity(card);
+    const targetQuantity = initialQuantity + quantity;
     const initialAdd = [...card.querySelectorAll("button")].find((button) => /اضف|add|شامل/i.test(normal(textOf(button))));
     if (initialAdd) {
       initialAdd.click();
-      remaining -= 1;
-      await sleep(90);
+      await waitFor(() => cardQuantity(currentProductCard(productName)) > initialQuantity, 1200);
     }
-    while (remaining > 0) {
-      card = productCards().find((item) => normal(textOf(item.querySelector("h3"))) === normal(productName));
+    let currentQuantity = cardQuantity(currentProductCard(productName));
+    while (currentQuantity < targetQuantity) {
+      card = currentProductCard(productName);
       const plus = card?.querySelector("button .lucide-plus")?.closest("button");
-      if (!plus) break;
+      if (!plus || plus.disabled) break;
+      const before = currentQuantity;
       plus.click();
-      remaining -= 1;
-      await sleep(60);
+      await waitFor(() => cardQuantity(currentProductCard(productName)) > before, 1200);
+      currentQuantity = cardQuantity(currentProductCard(productName));
+      if (currentQuantity <= before) break;
     }
-    return { ok: remaining === 0, productName, quantity: quantity - remaining };
+    const added = Math.max(0, currentQuantity - initialQuantity);
+    return { ok: added === quantity, productName, quantity: added };
   }
 
   async function removeProduct(command) {
@@ -338,17 +351,21 @@
     let card = findProductCard(command);
     if (!card) return { ok: false, reason: "product" };
     const productName = textOf(card.querySelector("h3"));
-    let remaining = quantityFrom(command);
-    let removed = 0;
-    while (remaining > 0) {
-      card = productCards().find((item) => normal(textOf(item.querySelector("h3"))) === normal(productName));
+    const requested = quantityFrom(command);
+    const initialQuantity = cardQuantity(card);
+    const targetQuantity = Math.max(0, initialQuantity - requested);
+    let currentQuantity = initialQuantity;
+    while (currentQuantity > targetQuantity) {
+      card = currentProductCard(productName);
       const minus = card?.querySelector("button .lucide-minus")?.closest("button");
-      if (!minus) break;
+      if (!minus || minus.disabled) break;
+      const before = currentQuantity;
       minus.click();
-      removed += 1;
-      remaining -= 1;
-      await sleep(70);
+      await waitFor(() => cardQuantity(currentProductCard(productName)) < before, 1200);
+      currentQuantity = cardQuantity(currentProductCard(productName));
+      if (currentQuantity >= before) break;
     }
+    const removed = Math.max(0, initialQuantity - currentQuantity);
     return { ok: removed > 0, productName, quantity: removed };
   }
 
@@ -399,10 +416,14 @@
   }
 
   async function openCart() {
+    const getCartDialog = () => [...document.querySelectorAll('[role="dialog"]')]
+      .find((item) => /سلة التوريد|supply cart|سپلائی کارٹ/i.test(textOf(item)));
+    const existing = getCartDialog();
+    if (existing) return existing;
     const cart = findButton(["سلة التوريد", "Supply cart", "سپلائی کارٹ"]);
     if (!cart) return null;
     cart.click();
-    return await waitFor(() => document.querySelector('[role="dialog"]'));
+    return await waitFor(getCartDialog);
   }
 
   function cartSummary(dialog) {
