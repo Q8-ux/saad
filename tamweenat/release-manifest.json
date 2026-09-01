@@ -5,5 +5,7 @@
   "cssFile": "app-8f6e8cf552b6.css.gz",
   "voiceAssistantJs": "voice-assistant.js",
   "voiceAssistantCss": "voice-assistant.css",
-  "voiceAssistantVersion": "20260901-voice3"
+  "voiceAssistantVersion": "20260901-voice4",
+  "voiceAssistantMaxListeningMs": 45000,
+  "voiceAssistantSpokenReplies": true
 }

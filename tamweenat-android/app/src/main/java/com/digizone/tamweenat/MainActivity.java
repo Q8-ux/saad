@@ -17,6 +17,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.speech.RecognizerIntent;
+import android.speech.tts.TextToSpeech;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -58,6 +59,10 @@ public class MainActivity extends Activity {
     private PermissionRequest pendingWebAudioRequest;
     private boolean pendingNativeSpeech;
     private String pendingSpeechLocale = "ar-KW";
+    private TextToSpeech textToSpeech;
+    private boolean textToSpeechReady;
+    private String pendingSpokenText = "";
+    private String pendingSpokenLocale = "ar-KW";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +71,7 @@ public class MainActivity extends Activity {
         getWindow().setNavigationBarColor(getColor(R.color.brand_primary_dark));
         setContentView(createContentView());
         configureWebView();
+        if ("restaurant".equals(BuildConfig.EDITION)) initializeTextToSpeech();
 
         if (savedInstanceState == null) {
             loadHome();
@@ -163,7 +169,7 @@ public class MainActivity extends Activity {
         settings.setCacheMode(WebSettings.LOAD_DEFAULT);
         settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
         settings.setUserAgentString(settings.getUserAgentString()
-                + " TamweenatAndroid/1.0 (" + BuildConfig.EDITION + ")");
+                + " TamweenatAndroid/1.1 (" + BuildConfig.EDITION + ")");
 
         CookieManager cookies = CookieManager.getInstance();
         cookies.setAcceptCookie(true);
@@ -179,6 +185,41 @@ public class MainActivity extends Activity {
         webView.setDownloadListener((url, userAgent, contentDisposition, mimeType, contentLength) ->
                 openOutside(Uri.parse(url))
         );
+    }
+
+    private void initializeTextToSpeech() {
+        textToSpeech = new TextToSpeech(this, status -> {
+            textToSpeechReady = status == TextToSpeech.SUCCESS;
+            if (textToSpeechReady && !pendingSpokenText.isEmpty()) {
+                String text = pendingSpokenText;
+                String locale = pendingSpokenLocale;
+                pendingSpokenText = "";
+                speakText(text, locale);
+            }
+        });
+    }
+
+    private void speakText(String text, String localeTag) {
+        if (text == null || text.trim().isEmpty()) return;
+        String safeText = text.trim();
+        if (safeText.length() > 500) safeText = safeText.substring(0, 500);
+        String safeLocale = localeTag != null && localeTag.matches("[a-zA-Z]{2,3}(-[a-zA-Z]{2})?")
+                ? localeTag
+                : "ar-KW";
+        if (!textToSpeechReady || textToSpeech == null) {
+            pendingSpokenText = safeText;
+            pendingSpokenLocale = safeLocale;
+            return;
+        }
+        Locale locale = Locale.forLanguageTag(safeLocale);
+        int languageResult = textToSpeech.setLanguage(locale);
+        if (languageResult == TextToSpeech.LANG_MISSING_DATA
+                || languageResult == TextToSpeech.LANG_NOT_SUPPORTED) {
+            textToSpeech.setLanguage(new Locale(locale.getLanguage()));
+        }
+        textToSpeech.setSpeechRate(safeLocale.startsWith("ar") ? 0.92f : 0.96f);
+        textToSpeech.setPitch(1.0f);
+        textToSpeech.speak(safeText, TextToSpeech.QUEUE_FLUSH, null, "tamweenat-reply");
     }
 
     private void loadHome() {
@@ -232,8 +273,11 @@ public class MainActivity extends Activity {
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, pendingSpeechLocale);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, pendingSpeechLocale);
-        intent.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, false);
-        intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1);
+        intent.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true);
+        intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3);
+        intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, 15000L);
+        intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 5000L);
+        intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 7000L);
         intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "تحدث الآن");
         try {
             startActivityForResult(intent, SPEECH_RECOGNITION_REQUEST);
@@ -350,10 +394,28 @@ public class MainActivity extends Activity {
             webView.setWebViewClient(null);
             webView.destroy();
         }
+        if (textToSpeech != null) {
+            textToSpeech.stop();
+            textToSpeech.shutdown();
+            textToSpeech = null;
+            textToSpeechReady = false;
+        }
         super.onDestroy();
     }
 
     private final class VoiceBridge {
+        @JavascriptInterface
+        public void speak(String text, String locale) {
+            runOnUiThread(() -> speakText(text, locale));
+        }
+
+        @JavascriptInterface
+        public void stopSpeaking() {
+            runOnUiThread(() -> {
+                if (textToSpeech != null) textToSpeech.stop();
+            });
+        }
+
         @JavascriptInterface
         public void startListening(String locale) {
             runOnUiThread(() -> {

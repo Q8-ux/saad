@@ -16,7 +16,7 @@
       send: "إرسال",
       placeholder: "اكتب طلبك أو استخدم المايكروفون…",
       ready: "جاهز للاستماع",
-      listening: "أسمعك الآن…",
+      listening: "أسمعك الآن… خذ راحتك واضغط للإيقاف عند الانتهاء",
       working: "أنفذ طلبك…",
       intro: "أنا جاهز. اطلب مني تتبع طلب، فتح الكتالوج، البحث عن سلعة أو إضافتها إلى السلة.",
       examples: ["وين طلبي؟", "أضف 3 كراتين بطاطا مقلية", "افتح السلة"],
@@ -44,7 +44,7 @@
       send: "Send",
       placeholder: "Type a request or use the microphone…",
       ready: "Ready to listen",
-      listening: "Listening…",
+      listening: "Listening… take your time and tap stop when finished",
       working: "Working on it…",
       intro: "I can track an order, open the catalog, find an item, or add it to the cart.",
       examples: ["Track my latest order", "Add 3 cartons of fries", "Open the cart"],
@@ -72,7 +72,7 @@
       send: "بھیجیں",
       placeholder: "اپنی درخواست لکھیں یا مائیک استعمال کریں…",
       ready: "سننے کے لیے تیار",
-      listening: "میں سن رہا ہوں…",
+      listening: "میں سن رہا ہوں… آرام سے بولیں، مکمل ہونے پر روکیں",
       working: "درخواست پر عمل ہو رہا ہے…",
       intro: "میں آرڈر ٹریک، کیٹلاگ کھول، چیز تلاش یا کارٹ میں شامل کر سکتا ہوں۔",
       examples: ["میرا آرڈر کہاں ہے؟", "فرائز کے 3 کارٹن شامل کریں", "کارٹ کھولیں"],
@@ -142,6 +142,11 @@
     pending: null,
     recognition: null,
     finalTranscript: "",
+    interimTranscript: "",
+    commitTimer: null,
+    sessionTimer: null,
+    restartTimer: null,
+    recognitionGeneration: 0,
   };
 
   let root;
@@ -155,6 +160,9 @@
   let examples;
 
   const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+  const FINAL_SILENCE_MS = 4200;
+  const MAX_LISTENING_MS = 45000;
+  const RESTART_DELAY_MS = 220;
 
   function selectedLanguage() {
     const languageSelect = document.querySelector('select[aria-label*="اللغة"], select[aria-label*="language" i]');
@@ -447,9 +455,23 @@
     return { ok: true };
   }
 
+  function stopSpeaking() {
+    if (window.TamweenatVoice && typeof window.TamweenatVoice.stopSpeaking === "function") {
+      try { window.TamweenatVoice.stopSpeaking(); } catch {}
+    }
+    if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+  }
+
   function say(message) {
-    if (!("speechSynthesis" in window) || !message) return;
-    window.speechSynthesis.cancel();
+    if (!message) return;
+    if (window.TamweenatVoice && typeof window.TamweenatVoice.speak === "function") {
+      try {
+        window.TamweenatVoice.speak(message, speechLocale());
+        return;
+      } catch {}
+    }
+    if (!("speechSynthesis" in window)) return;
+    stopSpeaking();
     const utterance = new SpeechSynthesisUtterance(message);
     utterance.lang = speechLocale();
     utterance.rate = selectedLanguage() === "ar" ? 0.92 : 0.96;
@@ -611,9 +633,26 @@
     }
   }
 
+  function capturedTranscript() {
+    return `${state.finalTranscript} ${state.interimTranscript}`.replace(/\s+/g, " ").trim();
+  }
+
+  function clearListeningTimers() {
+    clearTimeout(state.commitTimer);
+    clearTimeout(state.sessionTimer);
+    clearTimeout(state.restartTimer);
+    state.commitTimer = null;
+    state.sessionTimer = null;
+    state.restartTimer = null;
+  }
+
   function stopListening() {
-    try { state.recognition?.stop(); } catch {}
     state.listening = false;
+    state.recognitionGeneration += 1;
+    clearListeningTimers();
+    const recognition = state.recognition;
+    state.recognition = null;
+    try { recognition?.abort(); } catch {}
     root?.classList.remove("is-listening");
     micButton?.setAttribute("aria-label", t("listen"));
     renderStatus("ready", t("ready"));
@@ -629,48 +668,100 @@
     execute(value);
   }
 
-  function startBrowserRecognition() {
+  function scheduleTranscriptCommit() {
+    clearTimeout(state.commitTimer);
+    state.commitTimer = setTimeout(() => {
+      if (!state.listening) return;
+      handleRecognizedText(capturedTranscript());
+    }, FINAL_SILENCE_MS);
+  }
+
+  function startBrowserRecognition(resetSession = true) {
     const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!Recognition) {
+      stopListening();
       answer(t("unsupported"), false);
       return;
     }
+    if (resetSession) {
+      state.finalTranscript = "";
+      state.interimTranscript = "";
+      clearListeningTimers();
+      state.sessionTimer = setTimeout(() => {
+        if (!state.listening) return;
+        const captured = capturedTranscript();
+        if (captured) handleRecognizedText(captured);
+        else {
+          stopListening();
+          answer(t("noSpeech"), false);
+        }
+      }, MAX_LISTENING_MS);
+    }
     const recognition = new Recognition();
+    const generation = state.recognitionGeneration + 1;
+    state.recognitionGeneration = generation;
     state.recognition = recognition;
-    state.finalTranscript = "";
     recognition.lang = speechLocale();
-    recognition.continuous = false;
+    recognition.continuous = true;
     recognition.interimResults = true;
     recognition.maxAlternatives = 1;
     recognition.onresult = (event) => {
+      if (!state.listening || generation !== state.recognitionGeneration) return;
       let interim = "";
       for (let index = event.resultIndex; index < event.results.length; index += 1) {
         const text = event.results[index][0]?.transcript || "";
-        if (event.results[index].isFinal) state.finalTranscript += text;
+        if (event.results[index].isFinal) state.finalTranscript = `${state.finalTranscript} ${text}`.trim();
         else interim += text;
       }
-      transcriptText.textContent = state.finalTranscript || interim || t("listening");
-      if (state.finalTranscript) handleRecognizedText(state.finalTranscript);
+      state.interimTranscript = interim.trim();
+      transcriptText.textContent = capturedTranscript() || t("listening");
+      if (capturedTranscript()) scheduleTranscriptCommit();
     };
     recognition.onerror = (event) => {
-      stopListening();
-      answer(event.error === "not-allowed" || event.error === "service-not-allowed" ? t("micDenied") : t("noSpeech"), false);
-    };
-    recognition.onend = () => {
-      if (state.listening && !state.finalTranscript) {
+      if (!state.listening || generation !== state.recognitionGeneration) return;
+      if (event.error === "not-allowed" || event.error === "service-not-allowed") {
         stopListening();
-        answer(t("noSpeech"), false);
+        answer(t("micDenied"), false);
+      } else if (event.error === "audio-capture" || event.error === "network") {
+        stopListening();
+        answer(t("unsupported"), false);
       }
     };
-    recognition.start();
+    recognition.onend = () => {
+      if (generation !== state.recognitionGeneration) return;
+      state.recognition = null;
+      if (!state.listening) return;
+      if (state.interimTranscript) {
+        state.finalTranscript = `${state.finalTranscript} ${state.interimTranscript}`.trim();
+        state.interimTranscript = "";
+        transcriptText.textContent = state.finalTranscript;
+        scheduleTranscriptCommit();
+      }
+      clearTimeout(state.restartTimer);
+      state.restartTimer = setTimeout(() => {
+        if (state.listening && generation === state.recognitionGeneration) startBrowserRecognition(false);
+      }, RESTART_DELAY_MS);
+    };
+    try {
+      recognition.start();
+    } catch {
+      stopListening();
+      answer(capturedTranscript() ? t("noSpeech") : t("unsupported"), false);
+    }
   }
 
   function startListening() {
     if (state.listening) {
-      stopListening();
+      const captured = capturedTranscript();
+      if (captured) handleRecognizedText(captured);
+      else stopListening();
       return;
     }
+    stopSpeaking();
     state.listening = true;
+    state.finalTranscript = "";
+    state.interimTranscript = "";
+    clearListeningTimers();
     root.classList.add("is-listening");
     micButton.setAttribute("aria-label", t("stop"));
     transcriptText.textContent = t("listening");
@@ -814,6 +905,6 @@
     open: () => setOpen(true),
     close: () => setOpen(false),
     execute: (command, options) => execute(command, options),
-    version: "1.0.0",
+    version: "1.1.0",
   });
 })();
