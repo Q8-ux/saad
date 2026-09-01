@@ -1,6 +1,14 @@
 name: Build Tamweenat Android Apps
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - "tamweenat-android/**"
+      - "tamweenat/**"
+      - "!tamweenat-android/releases/**"
+      - ".github/workflows/build-tamweenat-android.yml"
   pull_request:
     paths:
       - "tamweenat-android/**"

@@ -1,10 +1,12 @@
 package com.digizone.tamweenat;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.Network;
@@ -14,10 +16,13 @@ import android.net.http.SslError;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.speech.RecognizerIntent;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.CookieManager;
+import android.webkit.JavascriptInterface;
+import android.webkit.PermissionRequest;
 import android.webkit.SslErrorHandler;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
@@ -33,10 +38,15 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONObject;
+
+import java.util.ArrayList;
 import java.util.Locale;
 
 public class MainActivity extends Activity {
     private static final int FILE_CHOOSER_REQUEST = 4101;
+    private static final int SPEECH_RECOGNITION_REQUEST = 4102;
+    private static final int AUDIO_PERMISSION_REQUEST = 4103;
     private static final String ALLOWED_HOST = "q8-ux.github.io";
 
     private WebView webView;
@@ -45,6 +55,9 @@ public class MainActivity extends Activity {
     private TextView errorTitle;
     private TextView errorMessage;
     private ValueCallback<Uri[]> fileCallback;
+    private PermissionRequest pendingWebAudioRequest;
+    private boolean pendingNativeSpeech;
+    private String pendingSpeechLocale = "ar-KW";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -162,6 +175,7 @@ public class MainActivity extends Activity {
 
         webView.setWebViewClient(new SecureWebViewClient());
         webView.setWebChromeClient(new AppWebChromeClient());
+        webView.addJavascriptInterface(new VoiceBridge(), "TamweenatVoice");
         webView.setDownloadListener((url, userAgent, contentDisposition, mimeType, contentLength) ->
                 openOutside(Uri.parse(url))
         );
@@ -193,6 +207,49 @@ public class MainActivity extends Activity {
                 && ALLOWED_HOST.equalsIgnoreCase(host)
                 && path != null
                 && path.startsWith(BuildConfig.ALLOWED_PATH_PREFIX);
+    }
+
+    private boolean isAllowedOrigin(Uri uri) {
+        return uri != null
+                && "https".equalsIgnoreCase(uri.getScheme())
+                && ALLOWED_HOST.equalsIgnoreCase(uri.getHost());
+    }
+
+    private boolean hasAudioPermission() {
+        return Build.VERSION.SDK_INT < Build.VERSION_CODES.M
+                || checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private void requestAudioPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, AUDIO_PERMISSION_REQUEST);
+        }
+    }
+
+    private void launchSpeechRecognition() {
+        pendingNativeSpeech = false;
+        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, pendingSpeechLocale);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, pendingSpeechLocale);
+        intent.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, false);
+        intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1);
+        intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "تحدث الآن");
+        try {
+            startActivityForResult(intent, SPEECH_RECOGNITION_REQUEST);
+        } catch (ActivityNotFoundException error) {
+            dispatchNativeVoice("", "unavailable");
+        }
+    }
+
+    private void dispatchNativeVoice(String text, String error) {
+        if (webView == null) return;
+        String script = "window.dispatchEvent(new CustomEvent('tamweenat-native-voice',{detail:{text:"
+                + JSONObject.quote(text == null ? "" : text)
+                + ",error:"
+                + JSONObject.quote(error == null ? "" : error)
+                + "}}));";
+        webView.evaluateJavascript(script, null);
     }
 
     private void openOutside(Uri uri) {
@@ -240,6 +297,16 @@ public class MainActivity extends Activity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == SPEECH_RECOGNITION_REQUEST) {
+            if (resultCode == RESULT_OK && data != null) {
+                ArrayList<String> results = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+                String recognized = results != null && !results.isEmpty() ? results.get(0) : "";
+                dispatchNativeVoice(recognized, recognized.isEmpty() ? "no_speech" : "");
+            } else {
+                dispatchNativeVoice("", "cancelled");
+            }
+            return;
+        }
         if (requestCode != FILE_CHOOSER_REQUEST || fileCallback == null) return;
         Uri[] result = WebChromeClient.FileChooserParams.parseResult(resultCode, data);
         fileCallback.onReceiveValue(result);
@@ -247,7 +314,36 @@ public class MainActivity extends Activity {
     }
 
     @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode != AUDIO_PERMISSION_REQUEST) return;
+        boolean granted = grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED;
+
+        PermissionRequest webRequest = pendingWebAudioRequest;
+        pendingWebAudioRequest = null;
+        if (webRequest != null) {
+            if (granted && isAllowedOrigin(webRequest.getOrigin())) {
+                webRequest.grant(new String[]{PermissionRequest.RESOURCE_AUDIO_CAPTURE});
+            } else {
+                webRequest.deny();
+            }
+        }
+
+        if (pendingNativeSpeech) {
+            if (granted) launchSpeechRecognition();
+            else {
+                pendingNativeSpeech = false;
+                dispatchNativeVoice("", "permission_denied");
+            }
+        }
+    }
+
+    @Override
     protected void onDestroy() {
+        if (pendingWebAudioRequest != null) {
+            pendingWebAudioRequest.deny();
+            pendingWebAudioRequest = null;
+        }
         if (webView != null) {
             webView.stopLoading();
             webView.setWebChromeClient(null);
@@ -255,6 +351,23 @@ public class MainActivity extends Activity {
             webView.destroy();
         }
         super.onDestroy();
+    }
+
+    private final class VoiceBridge {
+        @JavascriptInterface
+        public void startListening(String locale) {
+            runOnUiThread(() -> {
+                pendingSpeechLocale = locale != null && locale.matches("[a-zA-Z]{2,3}(-[a-zA-Z]{2})?")
+                        ? locale
+                        : "ar-KW";
+                if (hasAudioPermission()) {
+                    launchSpeechRecognition();
+                } else {
+                    pendingNativeSpeech = true;
+                    requestAudioPermission();
+                }
+            });
+        }
     }
 
     private final class SecureWebViewClient extends WebViewClient {
@@ -296,6 +409,35 @@ public class MainActivity extends Activity {
         public void onProgressChanged(WebView view, int newProgress) {
             progressBar.setProgress(newProgress);
             progressBar.setVisibility(newProgress >= 100 ? View.GONE : View.VISIBLE);
+        }
+
+        @Override
+        public void onPermissionRequest(PermissionRequest request) {
+            runOnUiThread(() -> {
+                boolean asksForAudio = false;
+                for (String resource : request.getResources()) {
+                    if (PermissionRequest.RESOURCE_AUDIO_CAPTURE.equals(resource)) {
+                        asksForAudio = true;
+                        break;
+                    }
+                }
+                if (!asksForAudio || !isAllowedOrigin(request.getOrigin())) {
+                    request.deny();
+                    return;
+                }
+                if (hasAudioPermission()) {
+                    request.grant(new String[]{PermissionRequest.RESOURCE_AUDIO_CAPTURE});
+                    return;
+                }
+                if (pendingWebAudioRequest != null) pendingWebAudioRequest.deny();
+                pendingWebAudioRequest = request;
+                requestAudioPermission();
+            });
+        }
+
+        @Override
+        public void onPermissionRequestCanceled(PermissionRequest request) {
+            if (pendingWebAudioRequest == request) pendingWebAudioRequest = null;
         }
 
         @Override

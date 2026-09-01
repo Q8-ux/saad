@@ -2,5 +2,8 @@
   "releaseHash": "807f1f72f7f0",
   "loaderName": "loader-807f1f72f7f0.js",
   "jsFile": "app-9e47eff7f33a.js.gz",
-  "cssFile": "app-8f6e8cf552b6.css.gz"
+  "cssFile": "app-8f6e8cf552b6.css.gz",
+  "voiceAssistantJs": "voice-assistant.js",
+  "voiceAssistantCss": "voice-assistant.css",
+  "voiceAssistantVersion": "20260901-voice1"
 }

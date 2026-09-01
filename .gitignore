@@ -1,0 +1,5 @@
+# Local environment files and API credentials
+.env
+.env.*
+!.env.example
+
