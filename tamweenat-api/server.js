@@ -37,10 +37,26 @@ const catalog=[
 ].map(([id,name,category,unit,price])=>({id,name,category,unit,price,active:true}));
 
 const store={restaurants:[],orders:[],invoices:[],payments:[],messages:[],audit:[],settings:{warningThreshold:.60,riskThreshold:.80,hardStopThreshold:1,defaultTermsDays:30}};
+const ORDER_STAGES=['new','review','confirmed','reserved','picking','out_for_delivery','delivered'];
+const ORDER_STATUS_LABELS={
+  new:'تم استلام الطلب',
+  review:'قيد المراجعة',
+  confirmed:'تم اعتماد الطلب',
+  reserved:'تم حجز المخزون',
+  picking:'قيد التجهيز',
+  out_for_delivery:'خرج للتوصيل',
+  delivered:'تم الاستلام',
+  cancelled:'تم إلغاء الطلب'
+};
+const LEGACY_ORDER_STATUSES={placed:'new',preparing:'picking',dispatched:'out_for_delivery'};
 function audit(actor,action,target,details={}){store.audit.unshift({id:rid('aud'),at:now(),actor,action,target,details});store.audit=store.audit.slice(0,1000);}
 function state(r){const usage=r.creditLimit? r.outstanding/r.creditLimit:0;const available=Math.max(0,money(r.creditLimit-r.outstanding));let level='safe',locked=false,reason='الحساب ضمن المستوى الآمن.';if(!r.active){level='locked';locked=true;reason='الحساب موقوف من الإدارة.';}else if(r.overdue>0){level='locked';locked=true;reason=`يوجد مبلغ متأخر ${money(r.overdue).toFixed(3)} د.ك.`;}else if(usage>=1){level='locked';locked=true;reason='تم بلوغ الحد الائتماني النهائي.';}else if(usage>=.8){level='risk';reason='استخدام الكريدت في مستوى الخطر.';}else if(usage>=.6){level='warning';reason='استخدام الكريدت تجاوز مستوى التنبيه.';}const health=Math.max(0,Math.min(100,Math.round(100-usage*35-(r.overdue>0?35:0)-Math.min(20,(r.latePayments||0)*4))));return{usage,available,level,locked,reason,health};}
 function seed(){if(store.restaurants.length)return;const r1={id:'rest_001',code:'R-1001',name:'مطعم الديرة',legalName:'شركة مطعم الديرة',phone:'+96550000001',email:'accounts@aldira.example',address:'الكويت',branches:['القبلة','السالمية'],active:true,creditLimit:5000,outstanding:3800,overdue:0,termsDays:30,monthlyBudget:5200,monthSpend:3975,creditSpendMonth:2150,latePayments:0,createdAt:now(),users:[{id:'u_001',username:'restaurant1',password:'123456',name:'مدير المشتريات',role:'owner',active:true}]};const r2={id:'rest_002',code:'R-1002',name:'مطعم الساحة',legalName:'مطعم الساحة ذ.م.م',phone:'+96550000002',email:'finance@alsaha.example',address:'حولي',branches:['حولي'],active:true,creditLimit:8000,outstanding:7250,overdue:450,termsDays:15,monthlyBudget:9000,monthSpend:7100,creditSpendMonth:5100,latePayments:2,createdAt:now(),users:[{id:'u_002',username:'alsaha',password:'123456',name:'مسؤول المشتريات',role:'buyer',active:true}]};store.restaurants.push(r1,r2);store.orders.push({id:'ord_10567',number:'#10567',restaurantId:r1.id,createdAt:addDays(now(),-1),paymentMethod:'credit',total:245,status:'dispatched',items:[{productId:'oil',name:'زيت قلي',qty:40,unit:'لتر',price:1.25}],delivery:{branch:'القبلة',driver:'مندوب تموينات',phone:'+96550168888',eta:'اليوم 11:30'},tracking:[{status:'placed',label:'تم استلام الطلب',at:addDays(now(),-1)},{status:'confirmed',label:'تم تأكيد الطلب',at:addDays(now(),-1)},{status:'preparing',label:'جاري تجهيز التموينات',at:addDays(now(),-.5)},{status:'dispatched',label:'خرج الطلب للتوصيل',at:addDays(now(),-.1)}]},{id:'ord_10540',number:'#10540',restaurantId:r1.id,createdAt:addDays(now(),-3),paymentMethod:'credit',total:310,status:'delivered',items:[{productId:'rice',name:'أرز بسمتي',qty:100,unit:'كجم',price:.78}],tracking:[{status:'placed',label:'تم استلام الطلب',at:addDays(now(),-3)},{status:'delivered',label:'تم التسليم',at:addDays(now(),-2)}]});store.invoices.push({id:'inv_1082',number:'INV-1082',restaurantId:r1.id,amount:750,paid:0,status:'due',issuedAt:addDays(now(),-9),dueAt:addDays(now(),6)},{id:'inv_1074',number:'INV-1074',restaurantId:r1.id,amount:450,paid:0,status:'due',issuedAt:addDays(now(),-13),dueAt:addDays(now(),4)},{id:'inv_2081',number:'INV-2081',restaurantId:r2.id,amount:450,paid:0,status:'overdue',issuedAt:addDays(now(),-26),dueAt:addDays(now(),-11)});store.messages.push({id:'msg_001',restaurantId:r1.id,subject:'موعد التوصيل',body:'متى يصل طلب #10567؟',from:'restaurant',createdAt:addDays(now(),-.2),status:'open',replies:[]});}
 seed();
+for(const order of store.orders){
+  order.status=LEGACY_ORDER_STATUSES[order.status]||order.status;
+  order.tracking=(order.tracking||[]).map(entry=>{const status=LEGACY_ORDER_STATUSES[entry.status]||entry.status;return{...entry,status,label:ORDER_STATUS_LABELS[status]||entry.label||status};});
+}
 
 const sign=p=>jwt.sign(p,JWT_SECRET,{expiresIn:'12h'});
 function auth(req,res,next){const token=(req.headers.authorization||'').replace(/^Bearer\s+/i,'');try{req.user=jwt.verify(token,JWT_SECRET);next();}catch{return res.status(401).json({error:'unauthorized'});}}
@@ -64,8 +80,28 @@ app.patch('/api/admin/restaurants/:rid/users/:uid',auth,adminOnly,(req,res)=>{co
 app.delete('/api/admin/restaurants/:rid/users/:uid',auth,adminOnly,(req,res)=>{const r=store.restaurants.find(x=>x.id===req.params.rid),u=r?.users.find(x=>x.id===req.params.uid);if(!u)return res.status(404).json({error:'not_found'});u.active=false;audit(req.user.username,'disable_user',r.id,{userId:u.id});res.json({ok:true});});
 
 app.get('/api/orders',auth,(req,res)=>{const restId=req.user.role==='admin'?req.query.restaurantId:req.user.restaurantId;res.json(store.orders.filter(o=>!restId||o.restaurantId===restId));});
-app.post('/api/orders',auth,(req,res)=>{const restaurantId=req.user.role==='admin'?req.body.restaurantId:req.user.restaurantId;const r=store.restaurants.find(x=>x.id===restaurantId);if(!r)return res.status(404).json({error:'restaurant_not_found'});const s=state(r);let paymentMethod=req.body.paymentMethod==='credit'?'credit':'direct';if(paymentMethod==='credit'&&s.locked)paymentMethod='direct';const items=(req.body.items||[]).map(x=>{const p=catalog.find(c=>c.id===x.productId);return p?{productId:p.id,name:p.name,qty:Number(x.qty||1),unit:p.unit,price:p.price}:null;}).filter(Boolean);const total=money(items.reduce((sum,x)=>sum+x.qty*x.price,0));if(paymentMethod==='credit'&&total>s.available)paymentMethod='direct';const o={id:rid('ord'),number:`#${10600+store.orders.length}`,restaurantId,createdAt:now(),paymentMethod,total,status:'placed',items,tracking:[{status:'placed',label:'تم استلام الطلب',at:now()}],delivery:req.body.delivery||{}};store.orders.push(o);if(paymentMethod==='credit'){r.outstanding=money(r.outstanding+total);r.creditSpendMonth=money(r.creditSpendMonth+total);}r.monthSpend=money(r.monthSpend+total);audit(req.user.username||req.user.role,'create_order',o.id,{restaurantId,paymentMethod,total});res.status(201).json({...o,creditState:state(r)});});
-app.patch('/api/admin/orders/:id/status',auth,adminOnly,(req,res)=>{const o=store.orders.find(x=>x.id===req.params.id);if(!o)return res.status(404).json({error:'not_found'});const labels={confirmed:'تم تأكيد الطلب',preparing:'جاري تجهيز التموينات',dispatched:'خرج الطلب للتوصيل',delivered:'تم التسليم',cancelled:'تم إلغاء الطلب'};o.status=req.body.status||o.status;o.tracking.push({status:o.status,label:labels[o.status]||o.status,at:now()});if(req.body.delivery)o.delivery={...(o.delivery||{}),...req.body.delivery};audit(req.user.username,'order_status',o.id,{status:o.status});res.json(o);});
+app.post('/api/orders',auth,(req,res)=>{const restaurantId=req.user.role==='admin'?req.body.restaurantId:req.user.restaurantId;const r=store.restaurants.find(x=>x.id===restaurantId);if(!r)return res.status(404).json({error:'restaurant_not_found'});const s=state(r);let paymentMethod=req.body.paymentMethod==='credit'?'credit':'direct';if(paymentMethod==='credit'&&s.locked)paymentMethod='direct';const items=(req.body.items||[]).map(x=>{const p=catalog.find(c=>c.id===x.productId);return p?{productId:p.id,name:p.name,qty:Number(x.qty||1),unit:p.unit,price:p.price}:null;}).filter(Boolean);const total=money(items.reduce((sum,x)=>sum+x.qty*x.price,0));if(paymentMethod==='credit'&&total>s.available)paymentMethod='direct';const o={id:rid('ord'),number:`#${10600+store.orders.length}`,restaurantId,createdAt:now(),paymentMethod,total,status:'new',items,tracking:[{status:'new',label:ORDER_STATUS_LABELS.new,at:now()}],delivery:req.body.delivery||{}};store.orders.push(o);if(paymentMethod==='credit'){r.outstanding=money(r.outstanding+total);r.creditSpendMonth=money(r.creditSpendMonth+total);}r.monthSpend=money(r.monthSpend+total);audit(req.user.username||req.user.role,'create_order',o.id,{restaurantId,paymentMethod,total});res.status(201).json({...o,creditState:state(r)});});
+function updateOrderStatus(req,res){
+  const order=store.orders.find(x=>x.id===req.params.id);
+  if(!order)return res.status(404).json({error:'not_found'});
+  const requested=req.body?.status;
+  if(req.body?.delivery)order.delivery={...(order.delivery||{}),...req.body.delivery};
+  if(!requested||requested===order.status)return res.json(order);
+  const currentIndex=ORDER_STAGES.indexOf(order.status);
+  const nextStatus=currentIndex>=0&&currentIndex<ORDER_STAGES.length-1?ORDER_STAGES[currentIndex+1]:null;
+  const canCancel=requested==='cancelled'&&!['delivered','cancelled'].includes(order.status);
+  if(!canCancel&&requested!==nextStatus){
+    return res.status(409).json({error:'invalid_status_transition',currentStatus:order.status,allowedStatus:nextStatus,canCancel:!['delivered','cancelled'].includes(order.status)});
+  }
+  const previousStatus=order.status;
+  order.status=requested;
+  order.tracking=order.tracking||[];
+  order.tracking.push({status:requested,label:ORDER_STATUS_LABELS[requested],at:now(),actor:req.user.username});
+  audit(req.user.username,'order_status',order.id,{from:previousStatus,to:requested});
+  res.json(order);
+}
+app.patch('/api/admin/orders/:id/status',auth,adminOnly,updateOrderStatus);
+app.patch('/api/orders/:id',auth,adminOnly,updateOrderStatus);
 
 app.get('/api/messages',auth,(req,res)=>{const restId=req.user.role==='admin'?req.query.restaurantId:req.user.restaurantId;res.json(store.messages.filter(m=>!restId||m.restaurantId===restId));});
 app.post('/api/messages',auth,(req,res)=>{const restaurantId=req.user.role==='admin'?req.body.restaurantId:req.user.restaurantId;const m={id:rid('msg'),restaurantId,subject:req.body.subject||'استفسار',body:req.body.body||'',from:req.user.role,createdAt:now(),status:'open',replies:[]};store.messages.unshift(m);audit(req.user.username||req.user.role,'message',restaurantId,{messageId:m.id});res.status(201).json(m);});
