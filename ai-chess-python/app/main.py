@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 import os
+import logging
 from pathlib import Path
-from typing import Optional
+from time import perf_counter
+from typing import Annotated, Literal, Optional
+from uuid import uuid4
 
 import chess
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
@@ -16,6 +19,12 @@ from .multiplayer import router as multiplayer_router
 BASE_DIR = Path(__file__).resolve().parent
 STATIC_DIR = BASE_DIR / "static"
 MAX_GAME_PLIES = 1024
+logger = logging.getLogger("ai_chess.requests")
+
+Fen = Annotated[str, Field(min_length=15, max_length=128)]
+Square = Annotated[str, Field(pattern=r"^[a-h][1-8]$")]
+UciMove = Annotated[str, Field(pattern=r"^[a-h][1-8][a-h][1-8][qrbn]?$")]
+Level = Literal["beginner", "easy", "club", "intermediate", "advanced", "expert"]
 
 app = FastAPI(title="AI Chess Arena", version="1.0.1")
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
@@ -23,22 +32,55 @@ app.include_router(multiplayer_router)
 
 
 class LegalMovesRequest(BaseModel):
-    fen: str
-    square: str
+    fen: Fen
+    square: Square
 
 
 class HintRequest(BaseModel):
-    fen: str
-    move_history: list[str] = Field(default_factory=list, max_length=MAX_GAME_PLIES)
+    fen: Fen
+    move_history: list[UciMove] = Field(default_factory=list, max_length=MAX_GAME_PLIES)
 
 
 class MoveRequest(BaseModel):
-    fen: str
-    from_square: str
-    to_square: str
-    promotion: Optional[str] = "q"
-    level: str = "intermediate"
-    move_history: list[str] = Field(default_factory=list, max_length=MAX_GAME_PLIES)
+    fen: Fen
+    from_square: Square
+    to_square: Square
+    promotion: Optional[Literal["q", "r", "b", "n"]] = "q"
+    level: Level = "intermediate"
+    move_history: list[UciMove] = Field(default_factory=list, max_length=MAX_GAME_PLIES)
+
+
+@app.middleware("http")
+async def add_request_diagnostics(request: Request, call_next):
+    """Add safe correlation and timing headers without exposing user data."""
+    started = perf_counter()
+    supplied_request_id = request.headers.get("x-request-id", "").strip()[:64]
+    request_id = (
+        supplied_request_id
+        if supplied_request_id
+        and all(character.isalnum() or character in "-_." for character in supplied_request_id)
+        else uuid4().hex
+    )
+    try:
+        response = await call_next(request)
+    except Exception:
+        logger.exception("request_failed request_id=%s path=%s", request_id, request.url.path)
+        raise
+
+    duration_ms = (perf_counter() - started) * 1000
+    response.headers["X-Request-ID"] = request_id
+    response.headers["Server-Timing"] = f"app;dur={duration_ms:.2f}"
+    if request.url.path.startswith("/api/") or request.url.path in {"/health", "/ready"}:
+        response.headers.setdefault("Cache-Control", "no-store")
+    logger.info(
+        "request_complete request_id=%s method=%s path=%s status=%s duration_ms=%.2f",
+        request_id,
+        request.method,
+        request.url.path,
+        response.status_code,
+        duration_ms,
+    )
+    return response
 
 
 def board_from_history(fen: str, move_history: list[str]) -> chess.Board:
@@ -102,10 +144,18 @@ def levels():
 
 @app.get("/api/public-config")
 def public_config():
+    multiplayer_configured = all(
+        os.getenv(key, "") for key in ("SUPABASE_URL", "SUPABASE_KEY", "GAME_SERVER_SECRET")
+    )
     return {
         "supabase_url": os.getenv("SUPABASE_URL", ""),
         "supabase_key": os.getenv("SUPABASE_KEY", ""),
         "app_url": os.getenv("APP_URL", ""),
+        "capabilities": {
+            "ai": True,
+            "multiplayer": multiplayer_configured,
+            "accounts": bool(os.getenv("SUPABASE_URL", "") and os.getenv("SUPABASE_KEY", "")),
+        },
     }
 
 
@@ -200,3 +250,24 @@ def make_move(req: MoveRequest):
 @app.get("/health")
 def health():
     return {"ok": True}
+
+
+@app.get("/ready")
+def readiness():
+    static_assets = (STATIC_DIR / "index.html").is_file()
+    ai_engine = bool(LEVELS)
+    multiplayer = all(
+        os.getenv(key, "") for key in ("SUPABASE_URL", "SUPABASE_KEY", "GAME_SERVER_SECRET")
+    )
+    core_ready = static_assets and ai_engine
+    return {
+        "ok": core_ready,
+        "status": "ready" if core_ready and multiplayer else "degraded",
+        "service": "ai-chess-kuwait",
+        "version": app.version,
+        "components": {
+            "static_assets": static_assets,
+            "ai_engine": ai_engine,
+            "multiplayer": multiplayer,
+        },
+    }

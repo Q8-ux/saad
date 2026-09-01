@@ -9,7 +9,9 @@ const toastEl = document.getElementById('toast');
 const hintButton = document.getElementById('hintButton');
 const hintCounter = document.getElementById('hintCounter');
 const resumeButton = document.getElementById('resumeGame');
+const networkBanner = document.getElementById('networkBanner');
 const SAVED_GAME_KEY = 'ai_chess_saved_game_v1';
+const SAVED_GAME_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 const shareButton=document.getElementById('shareGame'),shareModal=document.getElementById('shareModal'),sharePreview=document.getElementById('sharePreview');
 
 const START_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
@@ -80,18 +82,29 @@ function parseFenPieces(fenString){
 }
 
 function currentTurn(){ return fen.split(' ')[1] === 'w' ? 'white' : 'black'; }
-function savedGame(){try{return JSON.parse(localStorage.getItem(SAVED_GAME_KEY)||'null')}catch(_){return null}}
+function savedGame(){
+ try{
+   const saved=JSON.parse(localStorage.getItem(SAVED_GAME_KEY)||'null');
+   const valid=Boolean(
+     saved&&typeof saved.fen==='string'&&saved.fen.split(' ').length===6&&
+     Array.isArray(saved.moveHistory)&&Array.isArray(saved.movePairs)&&
+     Number.isFinite(saved.savedAt)&&Date.now()-saved.savedAt<=SAVED_GAME_TTL_MS
+   );
+   if(!valid&&saved)localStorage.removeItem(SAVED_GAME_KEY);
+   return valid?saved:null;
+ }catch(_){localStorage.removeItem(SAVED_GAME_KEY);return null}
+}
 function refreshResumeButton(){resumeButton.hidden=!savedGame()||Boolean(window.multiplayerGame)}
 function saveCurrentGame(){
  if(window.multiplayerGame||!moveHistory.length)return;
- localStorage.setItem(SAVED_GAME_KEY,JSON.stringify({fen,moveHistory,movePairs,lastMove,level:levelEl.value,savedAt:Date.now()}));
+ localStorage.setItem(SAVED_GAME_KEY,JSON.stringify({schemaVersion:1,fen,moveHistory,movePairs,lastMove,level:levelEl.value,hintsUsed,savedAt:Date.now()}));
  refreshResumeButton();
 }
 function clearSavedGame(){localStorage.removeItem(SAVED_GAME_KEY);refreshResumeButton()}
 function resumePreviousGame(){
  const saved=savedGame();if(!saved)return;
  try{
-   fen=saved.fen;moveHistory=Array.isArray(saved.moveHistory)?saved.moveHistory:[];movePairs=Array.isArray(saved.movePairs)?saved.movePairs:[];lastMove=Array.isArray(saved.lastMove)?saved.lastMove:null;
+   fen=saved.fen;moveHistory=Array.isArray(saved.moveHistory)?saved.moveHistory:[];movePairs=Array.isArray(saved.movePairs)?saved.movePairs:[];lastMove=Array.isArray(saved.lastMove)?saved.lastMove:null;hintsUsed=Math.min(MAX_HINTS,Math.max(0,Number(saved.hintsUsed)||0));
    if(saved.level&&levelEl.querySelector(`option[value="${saved.level}"]`))levelEl.value=saved.level;
    aiLevelLabel.textContent=levelEl.options[levelEl.selectedIndex].text;selected=null;legalMoves=[];hintMove=null;locked=false;
    renderMoves();renderBoard();updateHintAvailability();refreshResumeButton();statusEl.textContent=t('gameResumed');toast(t('gameResumed'));chessSound.play('transition');
@@ -219,7 +232,7 @@ async function playMove(from, to){
   }catch(err){
     if(err.name === 'AbortError' || generation !== gameGeneration) return;
     fen = previousFen;
-    toast(t('illegalMove'));
+    toast(navigator.onLine?t('illegalMove'):t('networkMoveFailed'));
     statusEl.textContent = t('yourWhiteTurn');
   }finally{
     if(pendingMoveController === controller) pendingMoveController = null;
@@ -254,7 +267,7 @@ async function requestHint(){
     const response=await fetch('/api/hint',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fen,move_history:moveHistory})});
     const data=await response.json();if(!response.ok)throw new Error(data.detail||'hint error');
     hintsUsed+=1;hintMove={from:data.from_square,to:data.to_square};selected=data.from_square;legalMoves=[data.to_square];
-    renderBoard();chessSound.play('check');toast(t(data.capture?'hintCapture':'hintMove',{from:data.from_square,to:data.to_square}));
+    renderBoard();saveCurrentGame();chessSound.play('check');toast(t(data.capture?'hintCapture':'hintMove',{from:data.from_square,to:data.to_square}));
   }catch(_){toast(t('hintUnavailable'));}
   finally{hintButton.textContent=t('getHint');updateHintAvailability();}
 }
@@ -283,4 +296,20 @@ levelEl.addEventListener('change', ()=>{
 
 resetGame(false,false);
 
-window.addEventListener('languagechange',()=>{ aiLevelLabel.textContent=levelEl.options[levelEl.selectedIndex].text; hintButton.textContent=t('getHint'); resumeButton.textContent=t('resumeGame'); updateHintAvailability(); refreshResumeButton(); renderMoves(); if(!window.multiplayerGame && !locked) statusEl.textContent=t('yourWhiteTurn'); });
+function updateNetworkState(announce=false){
+ const offline=!navigator.onLine;
+ networkBanner.hidden=!offline;
+ networkBanner.querySelector('strong').textContent=t('offlineNotice');
+ document.body.classList.toggle('is-offline',offline);
+ if(offline){
+   if(!window.multiplayerGame)statusEl.textContent=t('offlineNotice');
+ }else if(announce){
+   toast(t('connectionRestored'));
+   if(!window.multiplayerGame&&!locked)statusEl.textContent=t('yourWhiteTurn');
+ }
+}
+window.addEventListener('offline',()=>updateNetworkState());
+window.addEventListener('online',()=>updateNetworkState(true));
+updateNetworkState();
+
+window.addEventListener('languagechange',()=>{ aiLevelLabel.textContent=levelEl.options[levelEl.selectedIndex].text; hintButton.textContent=t('getHint'); resumeButton.textContent=t('resumeGame'); updateHintAvailability(); refreshResumeButton(); renderMoves(); updateNetworkState(); if(navigator.onLine&&!window.multiplayerGame&&!locked) statusEl.textContent=t('yourWhiteTurn'); });
