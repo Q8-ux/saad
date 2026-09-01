@@ -189,6 +189,31 @@ html body .product-card-footer {
   margin-top: auto !important;
 }
 
+/* Ordering and support actions stay inside Tamweenat. */
+html body button.support-card {
+  width: 100%;
+  color: inherit;
+  text-align: start;
+  font: inherit;
+  cursor: pointer;
+}
+
+html body button.support-card:focus-visible,
+html body .mobile-bottom-nav button:focus-visible {
+  outline: 3px solid rgba(23, 104, 79, 0.34);
+  outline-offset: 2px;
+}
+
+@media (max-width: 720px) {
+  html body .mobile-bottom-nav button {
+    touch-action: manipulation;
+  }
+
+  html body .mobile-bottom-nav button[aria-current="page"] {
+    box-shadow: inset 0 0 0 1px rgba(15, 91, 69, 0.15);
+  }
+}
+
 html body .product-price-wrap {
   gap: 8px !important;
 }
