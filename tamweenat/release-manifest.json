@@ -1,13 +1,18 @@
 {
-  "releaseHash": "807f1f72f7f0",
+  "releaseHash": "20260901-burger-warehouse",
   "loaderName": "loader-807f1f72f7f0.js",
   "jsFile": "app-9e47eff7f33a.js.gz",
   "cssFile": "app-8f6e8cf552b6.css.gz",
   "voiceAssistantJs": "voice-assistant.js",
   "voiceAssistantCss": "voice-assistant.css",
-  "voiceAssistantVersion": "20260901-voice5",
+  "voiceAssistantVersion": "20260901-voice6",
   "voiceAssistantMaxListeningMs": 45000,
   "voiceAssistantSpokenReplies": true,
   "voiceAssistantAutoConfirmation": true,
-  "voiceAssistantApprovalRequired": true
+  "voiceAssistantApprovalRequired": true,
+  "catalogSource": "مخزن البرغر",
+  "catalogProducts": 162,
+  "catalogCategories": 9,
+  "catalogPriceBasis": "source_website",
+  "catalogVerifiedAt": "2026-09-01"
 }

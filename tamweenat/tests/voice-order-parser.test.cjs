@@ -4,6 +4,8 @@ const path = require("node:path");
 const vm = require("node:vm");
 
 const assistantPath = path.join(__dirname, "..", "assets", "voice-assistant.js");
+const catalogPath = path.join(__dirname, "..", "assets", "products", "catalog.json");
+const catalog = JSON.parse(fs.readFileSync(catalogPath, "utf8"));
 let source = fs.readFileSync(assistantPath, "utf8");
 source = source.replace(
   "  window.TamweenatAssistant = Object.freeze({",
@@ -12,6 +14,7 @@ source = source.replace(
 
 const window = {
   __tamweenatVoiceAssistantLoaded: false,
+  TamweenatProductCatalog: catalog.products,
   addEventListener() {},
 };
 window.window = window;
@@ -35,13 +38,13 @@ const parser = window.__voiceParserTest;
 assert.ok(parser, "Voice parser test API was not exposed");
 
 const orderCases = [
-  ["أضف 3 كراتين بطاطا مقلية و 2 كرتون جبن شيدر", [3, 2]],
-  ["أضف بطاطا مقلية و 2 كرتون جبن شيدر", [1, 2]],
-  ["أضف بطاطا مقلية 3 كراتين و جبن شيدر 2 كرتون", [3, 2]],
-  ["أضف ٣ كراتين بطاطا مقلية و ٢ كرتون جبن شيدر", [3, 2]],
-  ["أبي كرتونين فرايز وثلاث كراتين شيدر", [2, 3]],
+  ["أضف 3 عبوات بطاطا مقلية و 2 عبوة جبن شيدر", [3, 2]],
+  ["أضف بطاطا مقلية و 2 عبوة جبن شيدر", [1, 2]],
+  ["أضف بطاطا مقلية 3 عبوات و جبن شيدر 2 عبوة", [3, 2]],
+  ["أضف ٣ عبوات بطاطا مقلية و ٢ عبوة جبن شيدر", [3, 2]],
+  ["أبي عبوتين فرايز وثلاث عبوات شيدر", [2, 3]],
   ["أضف بطاطا مقلية عدد 4 وجبن شيدر عدد 2", [4, 2]],
-  ["add two cartons of fries and three boxes of cheddar", [2, 3]],
+  ["add two packs of fries and three packs of cheddar", [2, 3]],
 ];
 
 for (const [command, expectedQuantities] of orderCases) {
@@ -56,11 +59,14 @@ assert.equal(parser.priceNumber("١٬٢٣٤٫٥٠٠ د.ك."), 1234.5);
 assert.match(parser.speechText("الإجمالي ٦٫٨٠٠ د.ك."), /دينار كويتي/);
 assert.deepEqual(
   Array.from(parser.productMentions("أضف كرتونين حلقات بصل"), (item) => item.canonical),
-  ["حلقات بصل مجمدة"],
+  ["حلقات بصل لامب ويستون – 1 كغ"],
 );
 assert.deepEqual(
-  Array.from(parser.productMentions("أضف ثلاث علب معجون طماطم"), (item) => item.canonical),
-  ["معجون طماطم للمطاعم"],
+  Array.from(parser.productMentions("أضف ثلاث عبوات جبن شيدر كرافت"), (item) => item.canonical),
+  ["جبن شيدر كرافت – 500 غ"],
 );
+
+assert.equal(catalog.products.length, 162);
+assert.equal(catalog.priceBasis, "source_website");
 
 console.log(`Voice order parser: ${orderCases.length} order cases passed`);

@@ -1,6 +1,11 @@
 {
-  "releaseHash": "807f1f72f7f0",
+  "releaseHash": "20260901-burger-warehouse",
   "loaderName": "loader-807f1f72f7f0.js",
   "jsFile": "app-9e47eff7f33a.js.gz",
-  "cssFile": "app-8f6e8cf552b6.css.gz"
+  "cssFile": "app-8f6e8cf552b6.css.gz",
+  "catalogSource": "مخزن البرغر",
+  "catalogProducts": 162,
+  "catalogCategories": 9,
+  "catalogPriceBasis": "source_website",
+  "catalogVerifiedAt": "2026-09-01"
 }

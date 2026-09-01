@@ -95,48 +95,30 @@
     },
   };
 
-  const PRODUCT_ALIASES = [
-    ["بطاطا مقلية مجمدة 9 مم", "بطاطا مقلية", "بطاطس مقلية", "فرايز", "فرائز", "french fries", "fries"],
-    ["بطاطا طازجة", "بطاطا طازجه", "بطاطس طازجة", "fresh potato", "fresh potatoes"],
-    ["أقراص برغر لحم 100 جم", "برغر لحم 100", "برجر لحم 100", "beef burger 100"],
-    ["أقراص برغر لحم 150 جم", "برغر لحم 150", "برجر لحم 150", "beef burger 150"],
-    ["أقراص برغر دجاج 120 جم", "برغر دجاج", "برجر دجاج", "chicken burger"],
-    ["خبز برغر بريوش", "بريوش", "brioche"],
-    ["خبز برغر سمسم", "خبز سمسم", "sesame bun", "burger bun"],
-    ["شرائح جبن شيدر", "جبن شيدر", "شيدر", "cheddar"],
-    ["حلقات بصل مجمدة", "حلقات بصل", "onion rings"],
-    ["خس آيسبرغ طازج", "خس", "lettuce", "iceberg"],
-    ["طماطم طازجة درجة أولى", "طماطم", "طماط", "tomato", "tomatoes"],
-    ["شرائح مخلل خيار", "مخلل", "خيار مخلل", "pickles", "pickle"],
-    ["كاتشب مطاعم", "كاتشب", "ketchup"],
-    ["مايونيز مطاعم", "مايونيز", "مايونيس", "mayo", "mayonnaise"],
-    ["زيت قلي عالي التحمل", "زيت قلي", "زيت", "frying oil", "oil"],
-    ["مشروب غازي كولا 330 مل", "كولا", "مشروب غازي", "cola"],
-    ["أرز بسمتي فاخر", "أرز", "ارز", "بسمتي", "rice"],
-    ["طحين أبيض متعدد الاستخدام", "طحين", "دقيق", "flour"],
-    ["سكر أبيض ناعم", "سكر", "sugar"],
-    ["ملح طعام ناعم", "ملح", "salt"],
-    ["بصل طازج", "بصل", "onion"],
-    ["ثوم مقشر طازج", "ثوم", "garlic"],
-    ["بهارات مشكلة للمطاعم", "بهارات", "توابل", "spices"],
-    ["فلفل أسود مطحون", "فلفل أسود", "black pepper", "pepper"],
-    ["هيل أخضر فاخر", "هيل", "cardamom"],
-    ["عدس أحمر", "عدس", "lentils"],
-    ["حمص حب", "حمص", "chickpeas"],
-    ["معجون طماطم للمطاعم", "معجون طماطم", "tomato paste"],
-    ["دجاج كامل طازج", "دجاج كامل", "whole chicken"],
-    ["مكعبات لحم غنم", "لحم غنم", "lamb"],
-    ["فيليه هامور مجمد", "هامور", "fish fillet"],
-    ["علبة برغر كرافت متوسطة", "علبة برغر", "burger box"],
-    ["ورق تغليف برغر مقاوم للدهون", "ورق تغليف برغر", "burger wrap"],
-    ["أكياس سفري كرافت", "أكياس سفري", "takeaway bags"],
-    ["قفازات نيتريل مقاس L", "قفازات", "gloves"],
-    ["مزيل دهون للمطابخ", "مزيل دهون", "degreaser"],
-    ["رول ألمنيوم للمطاعم", "ألمنيوم", "فويل", "foil"],
-    ["رول تغليف شفاف", "تغليف شفاف", "cling film"],
-    ["أكياس نفايات كبيرة", "أكياس نفايات", "garbage bags"],
-    ["مناديل سفرة للمطاعم", "مناديل", "napkins"],
-  ];
+  const CATALOG_PRODUCTS = Array.isArray(window.TamweenatProductCatalog)
+    ? window.TamweenatProductCatalog
+    : [];
+  const EXTRA_PRODUCT_ALIASES = {
+    "BRG-0001": ["بصل", "بصل أبيض", "white onion"],
+    "BRG-0004": ["ثوم", "garlic"],
+    "BRG-0021": ["خبز بريوش", "بريوش", "brioche bun"],
+    "BRG-0029": ["برغر دجاج", "برجر دجاج", "chicken burger"],
+    "BRG-0032": ["برغر لحم", "برجر لحم", "beef burger"],
+    "BRG-0040": ["جبن شيدر", "شيدر", "cheddar"],
+    "BRG-0059": ["زيت قلي", "زيت صويا للقلي", "frying oil"],
+    "BRG-0066": ["كاتشب", "كاتشاب", "ketchup"],
+    "BRG-0069": ["مايونيز", "مايونيس", "mayo", "mayonnaise"],
+    "BRG-0091": ["بطاطا مقلية", "بطاطس مقلية", "فرايز", "فرائز", "french fries", "fries"],
+    "BRG-0093": ["حلقات بصل", "onion rings"],
+  };
+  const shortNames = CATALOG_PRODUCTS.map((product) => String(product.nameAr || "").split(/\s+[–-]\s+/)[0].trim());
+  const shortNameCount = shortNames.reduce((counts, name) => counts.set(name, (counts.get(name) || 0) + 1), new Map());
+  const PRODUCT_ALIASES = CATALOG_PRODUCTS.map((product, index) => {
+    const aliases = [product.nameAr, product.nameEn, product.sku];
+    if (shortNames[index] && shortNameCount.get(shortNames[index]) === 1) aliases.push(shortNames[index]);
+    aliases.push(...(EXTRA_PRODUCT_ALIASES[product.sku] || []));
+    return [...new Set(aliases.filter(Boolean))];
+  });
 
   const state = {
     open: false,
@@ -272,7 +254,7 @@
     return normal(command)
       .replace(/\b(اضف|اضيف|حط|ضع|زيد|ابي|اريد|نبي|احذف|شيل|نقص|ابحث|دور|عن|سعر|كم|لي|من|الى|السله|السلة|add|put|remove|delete|find|search|price|carton|cartons|box|boxes|please|کے|کا|کی|شامل|تلاش|قیمت)\b/g, " ")
       .replace(/\b\d+\b/g, " ")
-      .replace(/\b(كرتون|كرتونه|كراتين|حبه|حبات|علبه|علب|كيس|اكياس|تنكه|رول)\b/g, " ")
+      .replace(/\b(كرتون|كرتونه|كراتين|حبه|حبات|علبه|علب|عبوه|عبوات|كيس|اكياس|تنكه|رول)\b/g, " ")
       .replace(/\s+/g, " ")
       .trim();
   }
@@ -300,13 +282,13 @@
   function parsedQuantity(command) {
     const value = normal(command);
     const marked = value.match(/(?:عدد|كميه|quantity)\s*(\d{1,2})\b/);
-    const packaged = value.match(/(?:^|\s)(\d{1,2})\s*(?:كرتون|كرتونه|كراتين|حبه|حبات|علبه|علب|كيس|اكياس|تنكه|رول|cartons?|boxes?|pieces?)(?=$|\s)/);
+    const packaged = value.match(/(?:^|\s)(\d{1,2})\s*(?:كرتون|كرتونه|كراتين|حبه|حبات|علبه|علب|عبوه|عبوات|كيس|اكياس|تنكه|رول|cartons?|boxes?|packs?|pieces?)(?=$|\s)/);
     const leading = value.match(/(?:اضف|اضيف|حط|ضع|زيد|ابي|اريد|add|put|order|شامل)\s*(\d{1,2})\b/);
     const explicit = marked?.[1] || packaged?.[1] || leading?.[1];
     if (explicit) return Math.max(1, Math.min(20, Number(explicit)));
     const words = {
       "واحد": 1, "وحده": 1, "كرتون": 1, "one": 1, "ایک": 1,
-      "اثنين": 2, "اثنان": 2, "ثنتين": 2, "كرتونين": 2, "two": 2, "دو": 2,
+      "اثنين": 2, "اثنان": 2, "ثنتين": 2, "كرتونين": 2, "عبوتين": 2, "two": 2, "دو": 2,
       "ثلاث": 3, "ثلاثه": 3, "three": 3, "تین": 3,
       "اربع": 4, "اربعه": 4, "four": 4, "چار": 4,
       "خمس": 5, "خمسه": 5, "five": 5, "پانچ": 5,
@@ -371,7 +353,7 @@
     const afterItems = value.slice(mention.end, nextStart);
     const rightConnector = afterItems.match(/\s(?:و|and|اور)\s*/i);
     const after = afterItems.slice(0, rightConnector?.index ?? afterItems.length).trim();
-    const quantityStartsAfterProduct = /^(?:عدد|كميه|quantity|\d{1,2}\b|واحد|وحده|اثنين|اثنان|ثنتين|ثلاث|ثلاثه|اربع|اربعه|خمس|خمسه|ست|سته|سبع|سبعه|ثمان|ثمانيه|تسع|تسعه|عشر|عشره|one|two|three|four|five|six|seven|eight|nine|ten|ایک|دو|تین|چار|پانچ|چھ|سات|آٹھ|نو|دس|كرتون)/i.test(after);
+    const quantityStartsAfterProduct = /^(?:عدد|كميه|quantity|\d{1,2}\b|واحد|وحده|اثنين|اثنان|ثنتين|ثلاث|ثلاثه|اربع|اربعه|خمس|خمسه|ست|سته|سبع|سبعه|ثمان|ثمانيه|تسع|تسعه|عشر|عشره|one|two|three|four|five|six|seven|eight|nine|ten|ایک|دو|تین|چار|پانچ|چھ|سات|آٹھ|نو|دس|كرتون|عبوه|عبوتين)/i.test(after);
     return quantityStartsAfterProduct ? quantityFrom(after) : 1;
   }
 

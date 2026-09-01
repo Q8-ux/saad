@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import OpenAI from 'openai';
+import fs from 'node:fs';
 
 const app = express();
 const PORT = Number(process.env.PORT || 10000);
@@ -25,16 +26,7 @@ const rid=p=>`${p}_${crypto.randomBytes(5).toString('hex')}`;
 const money=n=>Math.round((Number(n)||0)*1000)/1000;
 const addDays=(d,n)=>{const x=new Date(d);x.setUTCDate(x.getUTCDate()+n);return x.toISOString();};
 
-const catalog=[
-['chicken','دجاج مبرد','دواجن ولحوم','كجم',1.75],['rice','أرز بسمتي','أرز وحبوب','كجم',0.78],['oil','زيت قلي','زيوت','لتر',1.25],
-['tomatoes','طماطم','خضار وفواكه','كجم',0.42],['onions','بصل','خضار وفواكه','كجم',0.35],['potatoes','بطاطا','خضار وفواكه','كجم',0.32],
-['garlic','ثوم','خضار وفواكه','كجم',1.10],['lemons','ليمون','خضار وفواكه','كجم',0.55],['cucumbers','خيار','خضار وفواكه','كجم',0.48],
-['flour','طحين','أساسيات','كجم',0.28],['sugar','سكر','أساسيات','كجم',0.31],['salt','ملح','أساسيات','كجم',0.16],
-['spices','بهارات مشكلة','توابل','كجم',2.40],['cardamom','هيل','توابل','كجم',5.80],['chickpeas','حمص','بقوليات','كجم',0.66],
-['eggs','بيض','ألبان وبيض','كرتون',12.5],['dairy','منتجات ألبان','ألبان وبيض','كرتون',9.75],['cheese','جبن','ألبان وبيض','كرتون',14.25],
-['water','مياه','مشروبات','كرتون',1.2],['juice','عصائر','مشروبات','كرتون',3.6],['tea','شاي','مشروبات','كرتون',7],['coffee','قهوة','مشروبات','كرتون',18],
-['cleaning','مواد تنظيف','تشغيل وتنظيف','كرتون',11.5],['canned','مواد معلبة','معلبات','كرتون',8.4],['frozen','خضروات مجمدة','مجمدات','كرتون',9.9]
-].map(([id,name,category,unit,price])=>({id,name,category,unit,price,active:true}));
+const catalog=JSON.parse(fs.readFileSync(new URL('./catalog.json',import.meta.url),'utf8'));
 
 const store={restaurants:[],orders:[],invoices:[],payments:[],messages:[],audit:[],settings:{warningThreshold:.60,riskThreshold:.80,hardStopThreshold:1,defaultTermsDays:30}};
 const ORDER_STAGES=['new','review','confirmed','reserved','picking','out_for_delivery','delivered'];
@@ -65,7 +57,7 @@ function findRestaurantForUser(username,password){for(const r of store.restauran
 function restaurantView(r){const s=state(r);return{...r,users:undefined,...s,orders:store.orders.filter(o=>o.restaurantId===r.id),invoices:store.invoices.filter(i=>i.restaurantId===r.id),messages:store.messages.filter(m=>m.restaurantId===r.id)};}
 
 app.get('/health',(req,res)=>res.json({ok:true,service:'tamweenat-api',ai:Boolean(process.env.OPENAI_API_KEY),time:now()}));
-app.get('/api/catalog',(req,res)=>res.json(catalog.filter(x=>x.active)));
+app.get('/api/catalog',(req,res)=>res.json(catalog));
 app.post('/api/auth/admin',(req,res)=>{const{username,password}=req.body||{};if(username!==ADMIN_USERNAME||password!==ADMIN_PASSWORD)return res.status(401).json({error:'invalid_credentials'});audit(username,'login','admin');res.json({token:sign({role:'admin',username}),user:{role:'admin',username}});});
 app.post('/api/auth/restaurant',(req,res)=>{const{username,password}=req.body||{};const hit=findRestaurantForUser(username,password);if(!hit)return res.status(401).json({error:'invalid_credentials'});audit(username,'login',hit.r.id);res.json({token:sign({role:'restaurant',username,restaurantId:hit.r.id,userId:hit.u.id}),user:{role:hit.u.role,name:hit.u.name,restaurantId:hit.r.id,restaurantName:hit.r.name,username}});});
 app.get('/api/me',auth,(req,res)=>{if(req.user.role==='admin')return res.json({role:'admin',username:req.user.username});const r=store.restaurants.find(x=>x.id===req.user.restaurantId);if(!r)return res.status(404).json({error:'not_found'});res.json(restaurantView(r));});
@@ -80,7 +72,7 @@ app.patch('/api/admin/restaurants/:rid/users/:uid',auth,adminOnly,(req,res)=>{co
 app.delete('/api/admin/restaurants/:rid/users/:uid',auth,adminOnly,(req,res)=>{const r=store.restaurants.find(x=>x.id===req.params.rid),u=r?.users.find(x=>x.id===req.params.uid);if(!u)return res.status(404).json({error:'not_found'});u.active=false;audit(req.user.username,'disable_user',r.id,{userId:u.id});res.json({ok:true});});
 
 app.get('/api/orders',auth,(req,res)=>{const restId=req.user.role==='admin'?req.query.restaurantId:req.user.restaurantId;res.json(store.orders.filter(o=>!restId||o.restaurantId===restId));});
-app.post('/api/orders',auth,(req,res)=>{const restaurantId=req.user.role==='admin'?req.body.restaurantId:req.user.restaurantId;const r=store.restaurants.find(x=>x.id===restaurantId);if(!r)return res.status(404).json({error:'restaurant_not_found'});const s=state(r);let paymentMethod=req.body.paymentMethod==='credit'?'credit':'direct';if(paymentMethod==='credit'&&s.locked)paymentMethod='direct';const items=(req.body.items||[]).map(x=>{const p=catalog.find(c=>c.id===x.productId);return p?{productId:p.id,name:p.name,qty:Number(x.qty||1),unit:p.unit,price:p.price}:null;}).filter(Boolean);const total=money(items.reduce((sum,x)=>sum+x.qty*x.price,0));if(paymentMethod==='credit'&&total>s.available)paymentMethod='direct';const o={id:rid('ord'),number:`#${10600+store.orders.length}`,restaurantId,createdAt:now(),paymentMethod,total,status:'new',items,tracking:[{status:'new',label:ORDER_STATUS_LABELS.new,at:now()}],delivery:req.body.delivery||{}};store.orders.push(o);if(paymentMethod==='credit'){r.outstanding=money(r.outstanding+total);r.creditSpendMonth=money(r.creditSpendMonth+total);}r.monthSpend=money(r.monthSpend+total);audit(req.user.username||req.user.role,'create_order',o.id,{restaurantId,paymentMethod,total});res.status(201).json({...o,creditState:state(r)});});
+app.post('/api/orders',auth,(req,res)=>{const restaurantId=req.user.role==='admin'?req.body.restaurantId:req.user.restaurantId;const r=store.restaurants.find(x=>x.id===restaurantId);if(!r)return res.status(404).json({error:'restaurant_not_found'});const s=state(r);let paymentMethod=req.body.paymentMethod==='credit'?'credit':'direct';if(paymentMethod==='credit'&&s.locked)paymentMethod='direct';const items=(req.body.items||[]).map(x=>{const p=catalog.find(c=>c.id===x.productId&&c.active);return p?{productId:p.id,name:p.name,qty:Number(x.qty||1),unit:p.unit,price:p.price}:null;}).filter(Boolean);const total=money(items.reduce((sum,x)=>sum+x.qty*x.price,0));if(paymentMethod==='credit'&&total>s.available)paymentMethod='direct';const o={id:rid('ord'),number:`#${10600+store.orders.length}`,restaurantId,createdAt:now(),paymentMethod,total,status:'new',items,tracking:[{status:'new',label:ORDER_STATUS_LABELS.new,at:now()}],delivery:req.body.delivery||{}};store.orders.push(o);if(paymentMethod==='credit'){r.outstanding=money(r.outstanding+total);r.creditSpendMonth=money(r.creditSpendMonth+total);}r.monthSpend=money(r.monthSpend+total);audit(req.user.username||req.user.role,'create_order',o.id,{restaurantId,paymentMethod,total});res.status(201).json({...o,creditState:state(r)});});
 function updateOrderStatus(req,res){
   const order=store.orders.find(x=>x.id===req.params.id);
   if(!order)return res.status(404).json({error:'not_found'});

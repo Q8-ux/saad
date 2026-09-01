@@ -1,0 +1,41 @@
+.product-photo {
+  background: #fff;
+}
+
+.product-photo img {
+  box-sizing: border-box;
+  object-fit: contain !important;
+  background: #fff;
+  padding: 5px;
+}
+
+.product-photo::before {
+  content: "تموينات";
+  position: absolute;
+  z-index: 3;
+  inset: 6px 6px auto auto;
+  min-height: 20px;
+  padding: 2px 25px 2px 7px;
+  border: 1px solid rgba(18, 60, 49, 0.16);
+  border-radius: 999px;
+  background-color: rgba(255, 255, 255, 0.94);
+  background-image: url("/saad/tamweenat/favicon.svg");
+  background-repeat: no-repeat;
+  background-position: right 5px center;
+  background-size: 16px 16px;
+  color: #123c31;
+  box-shadow: 0 3px 10px rgba(8, 33, 26, 0.18);
+  font-size: 9px;
+  font-weight: 800;
+  line-height: 16px;
+}
+
+@media (max-width: 680px) {
+  .product-photo::before {
+    min-height: 22px;
+    padding-inline-start: 8px;
+    padding-inline-end: 27px;
+    background-size: 17px 17px;
+    font-size: 10px;
+  }
+}
