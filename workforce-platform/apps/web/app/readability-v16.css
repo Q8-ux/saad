@@ -1,60 +1,23 @@
-/* Government UI readability and interaction pass v16 */
+/* Government UI readability and interaction pass v17 */
 :root{--readable-body:17px;--readable-small:15px;--readable-title:22px}
-html{font-size:17px}
-body{font-size:var(--readable-body);line-height:1.65}
-
-/* Never break Arabic/English labels word-by-word. */
-.approvedShell :is(h1,h2,h3,h4,p,span,small,b,strong,a,button,label,th,td){
-  word-break:normal!important;
-  overflow-wrap:normal!important;
-  hyphens:none!important;
-}
-.approvedNav a,.approvedBottomNav a,.mobileNav a,.commandHeroActions a,.approvedWideLink,.heroBack{
-  white-space:normal!important;
-  line-height:1.35!important;
-}
+html{font-size:17px} body{font-size:var(--readable-body);line-height:1.65}
+.approvedShell :is(h1,h2,h3,h4,p,span,small,b,strong,a,button,label,th,td){word-break:keep-all!important;overflow-wrap:break-word!important;hyphens:none!important}
+.approvedNav a,.approvedBottomNav a,.mobileNav a,.commandHeroActions a,.approvedWideLink,.heroBack{white-space:normal!important;line-height:1.35!important}
 .approvedNav a span{font-size:16px!important;font-weight:700!important;min-width:0}
-
 .commandHero h1,.pageHero h1{font-size:clamp(30px,3vw,48px)!important;line-height:1.2!important}
 .commandHero p,.pageHero p{font-size:clamp(17px,1.35vw,21px)!important;line-height:1.75!important;max-width:78ch}
 .commandSectionIntro h2,.approvedCardHead h2,.servicePanel h2{font-size:clamp(21px,1.8vw,29px)!important;line-height:1.3!important}
 .commandSectionIntro small,.approvedCardHead small,.approvedCard p,.approvedCard span,.servicePanel p,.servicePanel label{font-size:16px!important;line-height:1.6!important}
 .approvedKpis article strong{font-size:clamp(30px,3vw,44px)!important;line-height:1.1!important}
-.approvedKpis article span{font-size:17px!important;font-weight:700!important;line-height:1.4!important}
-.approvedKpis article small{font-size:15px!important;line-height:1.4!important}
-
-/* Cards get enough horizontal room; grids collapse before text becomes vertical. */
-.approvedKpis,.approvedUpperGrid,.approvedLowerGrid,.aiToolGrid{align-items:stretch}
-.approvedCard,.commandFeatureCard,.aiToolCard,.servicePanel{min-width:0!important}
-.approvedCardHead>div{min-width:0;max-width:100%}
-.approvedCardHead h2,.approvedCardHead small{max-width:100%}
-
-/* Tables remain readable instead of crushing columns. */
-.approvedCard:has(table){overflow-x:auto}
-table{min-width:720px;width:100%;border-collapse:collapse}
-th{font-size:15px!important;white-space:nowrap!important}
-td{font-size:16px!important;line-height:1.5!important;white-space:normal!important}
-
-/* All actual links/buttons visibly interactive. */
-a[href],button:not(:disabled){cursor:pointer}
-.approvedCard a,.commandFeatureCard a,.aiToolCard,.approvedWideLink,.commandPrimary,.commandSecondary,.approvedTool,.themeSwitcher{
-  transition:transform .16s ease,box-shadow .16s ease,filter .16s ease;
-}
-.approvedCard a:hover,.commandFeatureCard a:hover,.approvedWideLink:hover,.commandPrimary:hover,.commandSecondary:hover,.approvedTool:hover,.themeSwitcher:hover{filter:brightness(1.08)}
-.approvedCard a:focus-visible,button:focus-visible,.aiToolCard:focus-visible{outline:3px solid #68aef8!important;outline-offset:3px}
-
-@media(max-width:1180px){
-  .approvedUpperGrid,.approvedLowerGrid{grid-template-columns:1fr!important}
-  .approvedKpis{grid-template-columns:repeat(2,minmax(0,1fr))!important}
-}
+.approvedKpis article span{font-size:17px!important;font-weight:700!important;line-height:1.4!important}.approvedKpis article small{font-size:15px!important;line-height:1.4!important}
+.approvedKpis,.approvedUpperGrid,.approvedLowerGrid,.aiToolGrid{align-items:stretch}.approvedCard,.commandFeatureCard,.aiToolCard,.servicePanel{min-width:0!important}.approvedCardHead>div{min-width:0;max-width:100%;width:auto}.approvedCardHead h2,.approvedCardHead small{max-width:100%}
+.approvedCard:has(table){overflow-x:auto} table{min-width:720px;width:100%;border-collapse:collapse} th{font-size:15px!important;white-space:nowrap!important} td{font-size:16px!important;line-height:1.5!important;white-space:normal!important}
+a[href],button:not(:disabled){cursor:pointer}.approvedCard a,.commandFeatureCard a,.aiToolCard,.approvedWideLink,.commandPrimary,.commandSecondary,.approvedTool,.themeSwitcher{transition:transform .16s ease,box-shadow .16s ease,filter .16s ease}.approvedCard a:hover,.commandFeatureCard a:hover,.approvedWideLink:hover,.commandPrimary:hover,.commandSecondary:hover,.approvedTool:hover,.themeSwitcher:hover{filter:brightness(1.08)}.approvedCard a:focus-visible,button:focus-visible,.aiToolCard:focus-visible{outline:3px solid #68aef8!important;outline-offset:3px}
+@media(max-width:1180px){.approvedUpperGrid,.approvedLowerGrid{grid-template-columns:minmax(0,1fr)!important}.approvedKpis{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
 @media(max-width:760px){
-  html{font-size:16px}
-  .approvedContent{padding-inline:14px!important}
-  .approvedKpis{grid-template-columns:1fr!important}
-  .commandHero{grid-template-columns:1fr!important}
-  .commandHero h1,.pageHero h1{font-size:30px!important}
-  .commandHero p,.pageHero p{font-size:17px!important}
-  .approvedCardHead{align-items:flex-start!important;gap:12px!important;flex-wrap:wrap!important}
-  .approvedCardHead h2{font-size:22px!important}
-  .approvedNav a span{font-size:17px!important}
+ html{font-size:16px}.approvedContent{padding-inline:14px!important;width:100%!important;max-width:100vw!important;overflow-x:hidden!important}.approvedKpis{grid-template-columns:minmax(0,1fr)!important}.commandHero{grid-template-columns:minmax(0,1fr)!important}.commandHero h1,.pageHero h1{font-size:30px!important}.commandHero p,.pageHero p{font-size:17px!important}
+ .approvedUpperGrid,.approvedLowerGrid{display:block!important;width:100%!important}.approvedUpperGrid>.approvedCard,.approvedLowerGrid>.approvedCard,.approvedCard,.commandFeatureCard{width:100%!important;max-width:100%!important;margin-inline:0!important;box-sizing:border-box!important}
+ .approvedCardHead{display:flex!important;align-items:flex-start!important;justify-content:space-between!important;gap:10px!important;flex-wrap:wrap!important;width:100%!important}.approvedCardHead>div{width:100%!important;flex:1 1 100%!important}.approvedCardHead>a{flex:0 0 auto!important}.approvedCardHead h2{font-size:22px!important;line-height:1.3!important;width:100%!important}
+ .approvedAlertRows>div,.summaryRows>div,.barRow{display:grid!important;grid-template-columns:auto minmax(0,1fr) auto!important;width:100%!important;gap:10px!important}.approvedAlertRows>div>div{min-width:0!important}.approvedAlertRows span,.approvedAlertRows b,.summaryRows span,.barRow span{white-space:normal!important;word-break:keep-all!important;overflow-wrap:break-word!important}
+ .approvedNav a span{font-size:17px!important}
 }
