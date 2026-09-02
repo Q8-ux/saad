@@ -1,7 +1,8 @@
 (() => {
   'use strict';
 
-  const API_ORIGIN = 'https://sabeq-legal-public.centrino.chatgpt.site';
+  const API_ORIGIN = 'https://sabeq-legal-research-api.onrender.com';
+  const LEGACY_API_ORIGIN = 'https://sabeq-legal-public.centrino.chatgpt.site';
   const GITHUB_HOST = 'q8-ux.github.io';
   const TEAM_BASE = 'https://q8-ux.github.io/saad/sabeq-legal/images/team';
   const TEAM_IMAGE_VERSION = '20260902-13';
@@ -30,7 +31,10 @@
   function routeApiUrl(value) {
     try {
       const url = new URL(value, window.location.href);
-      if (url.origin === window.location.origin && url.pathname.startsWith('/api/')) {
+      const isApiPath = url.pathname.startsWith('/api/');
+      const isCurrentOrigin = url.origin === window.location.origin;
+      const isLegacyApi = url.origin === LEGACY_API_ORIGIN;
+      if (isApiPath && (isCurrentOrigin || isLegacyApi)) {
         return `${API_ORIGIN}${url.pathname}${url.search}${url.hash}`;
       }
     } catch (_) {}
