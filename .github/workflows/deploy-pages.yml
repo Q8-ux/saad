@@ -20,6 +20,7 @@ on:
       - 'rattil/**'
       - 'kuwait-digital-sales-plan/**'
       - 'kuwait-fund-modern/**'
+      - 'livestock-vax-kw/**'
       - 'workforce-platform/apps/web/**'
       - '.github/workflows/deploy-pages.yml'
   workflow_dispatch:
@@ -75,6 +76,7 @@ jobs:
           cp -R rattil _site/rattil
           cp -R kuwait-digital-sales-plan _site/kuwait-digital-sales-plan
           cp -R kuwait-fund-modern _site/kuwait-fund-modern
+          cp -R livestock-vax-kw _site/livestock-vax-kw
           cp -R workforce-platform/apps/web/out/_next _site/_next
           for p in dashboard admin-control attendance-smart transfers emergency ai-tools notifications profile; do cp -R "workforce-platform/apps/web/out/$p" "_site/$p"; done
           echo 'compact-mobile-header-v21' > _site/interface-version.txt
@@ -83,6 +85,8 @@ jobs:
         run: |
           test -s _site/dashboard/index.html
           test -s _site/admin-control/index.html
+          test -s _site/livestock-vax-kw/index.html
+          test -s _site/livestock-vax-kw/admin/index.html
           test -d _site/_next
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
