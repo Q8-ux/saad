@@ -16,6 +16,7 @@ import './light-mode-audit-v7.css';
 import './ai-tools-contrast-v8.css';
 import './readability-v16.css';
 import './admin-control.css';
+import './mobile-header-v21.css';
 
 export const metadata: Metadata = {
   title: 'منصة نطاق العمل | Work Scope Platform',
