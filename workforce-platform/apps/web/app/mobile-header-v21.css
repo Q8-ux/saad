@@ -1,0 +1,29 @@
+/* Compact mobile header v21 */
+@media (max-width:760px){
+  .approvedTopbar.darkOpsTopbar{
+    min-height:64px!important;height:64px!important;padding:8px 12px!important;
+    display:grid!important;grid-template-columns:44px minmax(0,1fr) auto!important;
+    grid-template-areas:'menu title tools'!important;align-items:center!important;gap:8px!important;
+    border-bottom-width:1px!important;overflow:visible!important;
+  }
+  .approvedMenuButton{grid-area:menu!important;position:static!important;width:42px!important;height:42px!important;min-width:42px!important;margin:0!important;padding:0!important;display:grid!important;place-items:center!important}
+  .darkOpsHeaderCenter{grid-area:title!important;position:static!important;width:100%!important;min-width:0!important;display:flex!important;align-items:center!important;justify-content:flex-start!important;margin:0!important;padding:0!important;transform:none!important}
+  [dir='rtl'] .darkOpsHeaderCenter{justify-content:flex-start!important}
+  .darkOpsTitle{margin:0!important;padding:0!important;display:block!important;width:100%!important;max-width:100%!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;font-size:19px!important;font-weight:700!important;line-height:1.2!important;text-align:start!important;text-decoration:none!important}
+  .darkOpsSearch{display:none!important}
+  .darkOpsUserTools{grid-area:tools!important;position:static!important;display:flex!important;align-items:center!important;justify-content:flex-end!important;gap:6px!important;margin:0!important;padding:0!important;width:auto!important;min-width:0!important;transform:none!important}
+  .approvedUser{display:none!important}
+  .darkOpsUserTools>.approvedTool{width:38px!important;height:38px!important;min-width:38px!important;padding:0!important;display:grid!important;place-items:center!important;border-radius:10px!important}
+  .headerSwitches{display:flex!important;align-items:center!important;gap:5px!important;width:auto!important;margin:0!important;padding:0!important}
+  .headerSwitches>*{margin:0!important}
+  .themeSwitcher,.headerSwitches button,.headerSwitches .languageSwitcher,.headerSwitches select{min-width:38px!important;width:38px!important;height:38px!important;max-height:38px!important;padding:0!important;border-radius:10px!important;font-size:13px!important;line-height:1!important}
+  .approvedWorkspace{min-width:0!important;width:100%!important}
+}
+@media(max-width:390px){
+  .approvedTopbar.darkOpsTopbar{grid-template-columns:40px minmax(0,1fr) auto!important;padding-inline:8px!important;gap:5px!important}
+  .approvedMenuButton{width:38px!important;height:38px!important;min-width:38px!important}
+  .darkOpsTitle{font-size:17px!important}
+  .darkOpsUserTools{gap:4px!important}
+  .darkOpsUserTools>.approvedTool{width:34px!important;height:34px!important;min-width:34px!important}
+  .themeSwitcher,.headerSwitches button,.headerSwitches .languageSwitcher,.headerSwitches select{width:34px!important;min-width:34px!important;height:34px!important;font-size:12px!important}
+}
