@@ -3,16 +3,28 @@
 
   const API_ORIGIN = 'https://sabeq-legal-public.centrino.chatgpt.site';
   const GITHUB_HOST = 'q8-ux.github.io';
-  const TEAM_IMAGE_VERSION = '20260829-12';
-  const OFFICIAL_TEAM_IMAGES = new Map([
-    ['dr-khalifa.jpg', `https://www.sabeq.legal/images/team/DR_khalifa.jpg?v=${TEAM_IMAGE_VERSION}`],
-    ['khalid-alhabib.jpg', `https://www.sabeq.legal/images/team/khalid_alhabib.jpg?v=${TEAM_IMAGE_VERSION}`],
-    ['mishal-metaab.jpg', `https://www.sabeq.legal/images/team/Metaab.jpg?v=${TEAM_IMAGE_VERSION}`],
-    ['mohammed-saheb.jpg', `https://www.sabeq.legal/images/team/Md_saheb.jpg?v=${TEAM_IMAGE_VERSION}`],
-    ['abdulaziz-mashaan.png', `https://www.sabeq.legal/images/team/Mageed.png?v=${TEAM_IMAGE_VERSION}`],
-    ['hamad-almadi.jpg', `https://www.sabeq.legal/images/team/Hamad_almadi.jpg?v=${TEAM_IMAGE_VERSION}`],
-    ['khalid-alhazeem.jpg', `https://www.sabeq.legal/images/team/khalid_mishal.jpg?v=${TEAM_IMAGE_VERSION}`],
+  const TEAM_BASE = 'https://q8-ux.github.io/saad/sabeq-legal/images/team';
+  const TEAM_IMAGE_VERSION = '20260902-13';
+
+  const TEAM_ALIASES = new Map([
+    ['dr-khalifa.jpg', 'dr-khalifa.jpg'],
+    ['dr_khalifa.jpg', 'dr-khalifa.jpg'],
+    ['khalifa.jpg', 'dr-khalifa.jpg'],
+    ['khalid-alhabib.jpg', 'khalid-alhabib.jpg'],
+    ['khalid_alhabib.jpg', 'khalid-alhabib.jpg'],
+    ['mishal-metaab.jpg', 'mishal-metaab.jpg'],
+    ['metaab.jpg', 'mishal-metaab.jpg'],
+    ['mohammed-saheb.jpg', 'mohammed-saheb.jpg'],
+    ['md_saheb.jpg', 'mohammed-saheb.jpg'],
+    ['abdulaziz-mashaan.png', 'abdulaziz-mashaan.png'],
+    ['mageed.png', 'abdulaziz-mashaan.png'],
+    ['hamad-almadi.jpg', 'hamad-almadi.jpg'],
+    ['hamad_almadi.jpg', 'hamad-almadi.jpg'],
+    ['khalid-alhazeem.jpg', 'khalid-alhazeem.jpg'],
+    ['khalid_mishal.jpg', 'khalid-alhazeem.jpg'],
+    ['khalid_mishal.jpeg', 'khalid-alhazeem.jpg'],
   ]);
+
   const nativeFetch = window.fetch.bind(window);
 
   function routeApiUrl(value) {
@@ -21,9 +33,7 @@
       if (url.origin === window.location.origin && url.pathname.startsWith('/api/')) {
         return `${API_ORIGIN}${url.pathname}${url.search}${url.hash}`;
       }
-    } catch (_) {
-      // Leave non-URL fetch inputs untouched.
-    }
+    } catch (_) {}
     return null;
   }
 
@@ -35,48 +45,60 @@
 
     if (input instanceof Request) {
       const routed = routeApiUrl(input.url);
-      if (routed) {
-        return nativeFetch(new Request(routed, input), init);
-      }
+      if (routed) return nativeFetch(new Request(routed, input), init);
     }
 
     return nativeFetch(input, init);
   };
 
-  function officialTeamImage(src) {
-    if (typeof src !== 'string') return null;
-
-    for (const [filename, officialSrc] of OFFICIAL_TEAM_IMAGES) {
-      if (src.includes(`/images/team/${filename}`)) return officialSrc;
+  function imageBasename(value) {
+    if (!value || typeof value !== 'string') return '';
+    try {
+      const url = new URL(value, window.location.href);
+      return decodeURIComponent(url.pathname.split('/').filter(Boolean).pop() || '').toLowerCase();
+    } catch (_) {
+      return value.split('?')[0].split('#')[0].split('/').pop()?.toLowerCase() || '';
     }
+  }
 
-    return null;
+  function localTeamImage(src) {
+    const canonical = TEAM_ALIASES.get(imageBasename(src));
+    if (!canonical) return null;
+    return `${TEAM_BASE}/${canonical}?v=${TEAM_IMAGE_VERSION}`;
   }
 
   function fitTeamPhoto(img) {
     const photo = img.closest('.team-photo');
     if (!photo) return;
-
     photo.classList.add('team-photo-fitted');
     photo.style.removeProperty('background-image');
+    photo.style.removeProperty('display');
+    photo.style.removeProperty('visibility');
+    photo.style.removeProperty('opacity');
+  }
+
+  function pinTeamImage(img) {
+    if (!(img instanceof HTMLImageElement)) return;
+    const src = img.getAttribute('src') || img.currentSrc || img.src || '';
+    const localSrc = localTeamImage(src);
+    if (!localSrc) return;
+
+    img.removeAttribute('srcset');
+    img.removeAttribute('sizes');
+    img.removeAttribute('data-srcset');
+    img.loading = 'eager';
+    img.decoding = 'async';
+
+    if (img.getAttribute('src') !== localSrc) img.setAttribute('src', localSrc);
+    fitTeamPhoto(img);
   }
 
   function pinTeamImages(root = document) {
     if (window.location.hostname !== GITHUB_HOST) return;
 
-    const images = [];
-    if (root instanceof HTMLImageElement) images.push(root);
+    if (root instanceof HTMLImageElement) pinTeamImage(root);
     if (root && typeof root.querySelectorAll === 'function') {
-      images.push(...root.querySelectorAll('img'));
-    }
-
-    for (const img of images) {
-      const src = img.getAttribute('src') || img.src || '';
-      const officialSrc = officialTeamImage(src);
-      if (officialSrc && img.getAttribute('src') !== officialSrc) {
-        img.src = officialSrc;
-      }
-      if (officialSrc) fitTeamPhoto(img);
+      root.querySelectorAll('.team-grid img, .team-card img, .team-photo img, img[src*="/images/team/"]').forEach(pinTeamImage);
     }
   }
 
@@ -86,22 +108,37 @@
 
       const observer = new MutationObserver((records) => {
         for (const record of records) {
+          if (record.type === 'attributes' && record.target instanceof HTMLImageElement) {
+            pinTeamImage(record.target);
+            continue;
+          }
           for (const node of record.addedNodes) {
             if (node.nodeType === Node.ELEMENT_NODE) pinTeamImages(node);
           }
         }
       });
 
-      observer.observe(document.documentElement, { childList: true, subtree: true });
+      observer.observe(document.documentElement, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['src', 'srcset', 'data-src', 'data-lazy-src'],
+      });
 
       document.addEventListener('error', (event) => {
         const target = event.target;
-        if (target instanceof HTMLImageElement) {
-          const localSrc = localTeamImage(target.src);
-          if (localSrc && target.getAttribute('src') !== localSrc) target.src = localSrc;
-          if (localSrc) fitTeamPhoto(target, localSrc);
-        }
+        if (!(target instanceof HTMLImageElement)) return;
+        const localSrc = localTeamImage(target.getAttribute('src') || target.src || '');
+        if (!localSrc) return;
+        if (target.dataset.sabeqImageRetry === '1') return;
+        target.dataset.sabeqImageRetry = '1';
+        target.removeAttribute('srcset');
+        target.removeAttribute('sizes');
+        target.setAttribute('src', `${localSrc}&retry=1`);
+        fitTeamPhoto(target);
       }, true);
+
+      [250, 800, 1600, 3200].forEach(delay => setTimeout(() => pinTeamImages(), delay));
     };
 
     if (document.readyState === 'loading') {
