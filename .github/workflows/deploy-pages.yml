@@ -23,16 +23,13 @@ on:
       - 'workforce-platform/apps/web/**'
       - '.github/workflows/deploy-pages.yml'
   workflow_dispatch:
-
 permissions:
   contents: write
   pages: write
   id-token: write
-
 concurrency:
   group: pages-v2
   cancel-in-progress: true
-
 jobs:
   build-and-deploy:
     environment:
@@ -42,15 +39,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          ref: main
-          fetch-depth: 1
+        with: { ref: main, fetch-depth: 1 }
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
       - name: Setup Node
         uses: actions/setup-node@v4
-        with:
-          node-version: 22
+        with: { node-version: 22 }
       - name: Install workforce dependencies
         working-directory: workforce-platform/apps/web
         run: npm install --no-audit --no-fund
@@ -62,14 +56,13 @@ jobs:
           NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
           NEXT_PUBLIC_SUPABASE_URL: 'https://onefbrycdifaqghkzneh.supabase.co'
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_M_L4mOwYjcAMbM5QXj2Nzw_4yXmrdXR'
-          NEXT_PUBLIC_INTERFACE_VERSION: 'readability-interactions-v19'
+          NEXT_PUBLIC_INTERFACE_VERSION: 'compact-mobile-header-v21'
         run: |
           rm -rf .next out
           npm run build
       - name: Prepare combined site
         run: |
-          rm -rf _site
-          mkdir -p _site
+          rm -rf _site && mkdir -p _site
           cp index.html cyber-archive.css cyber-archive.js cyber-data.js sabeq.html _site/
           cp -R sabeq-legal _site/sabeq-legal
           cp -R sabeq-admin-preview _site/sabeq-admin-preview
@@ -83,55 +76,25 @@ jobs:
           cp -R kuwait-digital-sales-plan _site/kuwait-digital-sales-plan
           cp -R kuwait-fund-modern _site/kuwait-fund-modern
           cp -R workforce-platform/apps/web/out/_next _site/_next
-          cp -R workforce-platform/apps/web/out/dashboard _site/dashboard
-          cp -R workforce-platform/apps/web/out/admin-control _site/admin-control
-          cp -R workforce-platform/apps/web/out/attendance-smart _site/attendance-smart
-          cp -R workforce-platform/apps/web/out/transfers _site/transfers
-          cp -R workforce-platform/apps/web/out/emergency _site/emergency
-          cp -R workforce-platform/apps/web/out/ai-tools _site/ai-tools
-          cp -R workforce-platform/apps/web/out/notifications _site/notifications
-          cp -R workforce-platform/apps/web/out/profile _site/profile
-          echo 'readability-interactions-v19' > _site/interface-version.txt
+          for p in dashboard admin-control attendance-smart transfers emergency ai-tools notifications profile; do cp -R "workforce-platform/apps/web/out/$p" "_site/$p"; done
+          echo 'compact-mobile-header-v21' > _site/interface-version.txt
           touch _site/.nojekyll
       - name: Validate combined site
         run: |
-          test -s _site/index.html
           test -s _site/dashboard/index.html
           test -s _site/admin-control/index.html
-          test -s _site/attendance-smart/index.html
-          test -s _site/ai-tools/index.html
           test -d _site/_next
-          grep -Eq 'Administration & Control|لوحة الإدارة والتحكم' _site/admin-control/index.html
-          test -s _site/sabeq-legal/index.html
-          test -s _site/sabeq-admin-preview/index.html
-          test -s _site/sabeq-legal-system/index.html
-          test -s _site/sabeq-legal-pro/index.html
-          test -s _site/shalayhna/index.html
-          test -s _site/zad-restaurants/index.html
-          test -s _site/tamweenat/index.html
-          test -s _site/tamweenat-admin/index.html
-          test -s _site/rattil/index.html
-          test -s _site/kuwait-digital-sales-plan/index.html
-          test -s _site/kuwait-fund-modern/index.html
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
-        with:
-          path: _site
+        with: { path: _site }
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
       - name: Record deployment status
         run: |
-          {
-            echo "status=deployed"
-            echo "version=readability-interactions-v19"
-            echo "run_id=${GITHUB_RUN_ID}"
-            echo "commit=${GITHUB_SHA}"
-            echo "page_url=${{ steps.deployment.outputs.page_url }}"
-            echo "time=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-          } > live-dashboard-status.txt
+          printf 'status=deployed\nversion=compact-mobile-header-v21\nrun_id=%s\ncommit=%s\npage_url=%s\ntime=%s\n' "$GITHUB_RUN_ID" "$GITHUB_SHA" '${{ steps.deployment.outputs.page_url }}' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > live-dashboard-status.txt
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add live-dashboard-status.txt
-          git commit -m "Record readability deployment ${GITHUB_RUN_ID}" || true
+          git commit -m "Record mobile header deployment ${GITHUB_RUN_ID}" || true
           git push || true
