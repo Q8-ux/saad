@@ -1,4 +1,4 @@
-/* Government UI readability and interaction pass v17 */
+/* Government UI readability and interaction pass v20 */
 :root{--readable-body:17px;--readable-small:15px;--readable-title:22px}
 html{font-size:17px} body{font-size:var(--readable-body);line-height:1.65}
 .approvedShell :is(h1,h2,h3,h4,p,span,small,b,strong,a,button,label,th,td){word-break:keep-all!important;overflow-wrap:break-word!important;hyphens:none!important}
@@ -16,8 +16,12 @@ a[href],button:not(:disabled){cursor:pointer}.approvedCard a,.commandFeatureCard
 @media(max-width:1180px){.approvedUpperGrid,.approvedLowerGrid{grid-template-columns:minmax(0,1fr)!important}.approvedKpis{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
 @media(max-width:760px){
  html{font-size:16px}.approvedContent{padding-inline:14px!important;width:100%!important;max-width:100vw!important;overflow-x:hidden!important}.approvedKpis{grid-template-columns:minmax(0,1fr)!important}.commandHero{grid-template-columns:minmax(0,1fr)!important}.commandHero h1,.pageHero h1{font-size:30px!important}.commandHero p,.pageHero p{font-size:17px!important}
+ /* Platform brand must remain a single clean line on phones. */
+ .darkOpsHeaderCenter{min-width:0!important;overflow:visible!important}
+ .darkOpsTitle{white-space:nowrap!important;word-break:normal!important;overflow-wrap:normal!important;font-size:clamp(17px,5vw,22px)!important;line-height:1.2!important;width:auto!important;max-width:none!important;display:inline-block!important}
  .approvedUpperGrid,.approvedLowerGrid{display:block!important;width:100%!important}.approvedUpperGrid>.approvedCard,.approvedLowerGrid>.approvedCard,.approvedCard,.commandFeatureCard{width:100%!important;max-width:100%!important;margin-inline:0!important;box-sizing:border-box!important}
  .approvedCardHead{display:flex!important;align-items:flex-start!important;justify-content:space-between!important;gap:10px!important;flex-wrap:wrap!important;width:100%!important}.approvedCardHead>div{width:100%!important;flex:1 1 100%!important}.approvedCardHead>a{flex:0 0 auto!important}.approvedCardHead h2{font-size:22px!important;line-height:1.3!important;width:100%!important}
  .approvedAlertRows>div,.summaryRows>div,.barRow{display:grid!important;grid-template-columns:auto minmax(0,1fr) auto!important;width:100%!important;gap:10px!important}.approvedAlertRows>div>div{min-width:0!important}.approvedAlertRows span,.approvedAlertRows b,.summaryRows span,.barRow span{white-space:normal!important;word-break:keep-all!important;overflow-wrap:break-word!important}
  .approvedNav a span{font-size:17px!important}
 }
+@media(max-width:380px){.darkOpsTitle{font-size:16px!important;letter-spacing:-.2px!important}}
