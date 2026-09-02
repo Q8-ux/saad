@@ -1,4 +1,4 @@
-/* Waqaya typography + legibility layer */
+/* Waqaya — AL-Mohanad package + high-legibility typography */
 @font-face {
   font-family: "AL-Mohanad";
   src: url("/saad/livestock-vax-kw/fonts/AL-Mohanad.ttf") format("truetype");
@@ -24,14 +24,15 @@
 }
 
 :root {
-  --ink: #102b36;
-  --muted: #4f646d;
-  --line: #d5dfdd;
+  --ink: #0f2833;
+  --muted: #415a64;
+  --line: #cfdbd9;
   --mohanad: "AL-Mohanad", Tahoma, "Segoe UI", Arial, sans-serif;
 }
 
 html {
-  font-size: 17px;
+  font-size: 19px;
+  -webkit-text-size-adjust: 100%;
 }
 
 html,
@@ -63,30 +64,45 @@ h6 {
 
 body {
   color: var(--ink);
-  line-height: 1.7;
+  line-height: 1.8;
   text-rendering: optimizeLegibility;
   font-weight: 400;
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
+h1,h2,h3,h4,h5,h6 {
+  color: #082c3b;
   font-weight: 800 !important;
+  line-height: 1.35 !important;
 }
 
-strong,
-b {
-  font-weight: 700 !important;
+h1 { font-size: 2.35rem !important; }
+h2 { font-size: 1.95rem !important; }
+h3 { font-size: 1.55rem !important; }
+h4 { font-size: 1.3rem !important; }
+
+strong,b { font-weight: 700 !important; }
+
+p,
+label,
+a,
+button,
+input,
+select,
+textarea,
+td,
+th {
+  font-size: 1rem !important;
+}
+
+small {
+  font-size: 0.9rem !important;
 }
 
 button,
 input,
 select,
 textarea {
-  font-size: 0.95rem;
+  min-height: 46px;
 }
 
 button,
@@ -98,62 +114,48 @@ button,
   font-weight: 700 !important;
 }
 
-p,
-label,
-td,
-th {
-  font-size: 0.95rem;
-}
+/* Sidebar */
+.sidebar { color: #f2f8f8; }
+.brand strong { font-size: 1.65rem !important; font-weight: 800 !important; }
+.brand span { color: #d2e0e2 !important; font-size: 1rem !important; }
+.workspace-label { color: #c4d6da !important; font-size: 0.95rem !important; font-weight: 700 !important; }
+.side-nav button { color: #d4e3e5 !important; min-height: 54px !important; }
+.side-nav button span { font-size: 1.08rem !important; font-weight: 700 !important; }
+.side-nav button b { font-size: 0.9rem !important; }
+.sidebar-help strong { font-size: 1.05rem !important; }
+.sidebar-help p { color: #cfe0e2 !important; font-size: 0.96rem !important; line-height: 1.8 !important; }
+.sidebar-help button { font-size: 0.98rem !important; min-height: 44px !important; }
+.profile-mini strong { font-size: 1.02rem !important; }
+.profile-mini span { color: #cbdcdf !important; font-size: 0.92rem !important; }
+.sidebar-admin-link { color: #effdfa !important; font-size: 1rem !important; min-height: 50px !important; }
 
-small {
-  font-size: 0.82rem !important;
-}
-
-.sidebar {
-  color: #edf7f7;
-}
-.brand strong { font-size: 1.45rem !important; font-weight: 800 !important; }
-.brand span { color: #c8d9dc !important; font-size: 0.88rem !important; }
-.workspace-label { color: #b9ced2 !important; font-size: 0.86rem !important; font-weight: 700 !important; }
-.side-nav button { color: #c7dadd !important; }
-.side-nav button span { font-size: 1rem !important; font-weight: 700 !important; }
-.side-nav button b { font-size: 0.8rem !important; }
-.sidebar-help strong { font-size: 0.95rem !important; }
-.sidebar-help p { color: #c0d2d5 !important; font-size: 0.86rem !important; line-height: 1.75 !important; }
-.sidebar-help button { font-size: 0.86rem !important; }
-.profile-mini strong { font-size: 0.95rem !important; }
-.profile-mini span { color: #c0d2d5 !important; font-size: 0.82rem !important; }
-.sidebar-admin-link { color: #e1fbf7 !important; font-size: 0.9rem !important; }
-
+/* Header / controls */
 .role-switch button,
-.role-switch a { color: #526871 !important; font-size: 0.88rem !important; }
-.icon-button { color: #304f5a !important; }
-.notification-card strong { font-size: 0.95rem !important; }
-.notification-card span { font-size: 0.82rem !important; }
-.notification-card p { color: #405963 !important; font-size: 0.88rem !important; }
+.role-switch a { color: #36525d !important; font-size: 0.98rem !important; min-height: 40px !important; }
+.icon-button { color: #294a56 !important; width: 44px !important; height: 44px !important; }
+.notification-card strong { font-size: 1.05rem !important; }
+.notification-card span { font-size: 0.92rem !important; }
+.notification-card p { color: #334f5a !important; font-size: 0.98rem !important; }
 
-.page-heading p { font-size: 0.9rem !important; font-weight: 700 !important; }
-.page-heading h1 { font-size: clamp(2rem, 2.7vw, 2.65rem) !important; line-height: 1.25 !important; font-weight: 800 !important; }
-.page-heading span { color: #4c626b !important; font-size: 0.95rem !important; }
-.primary-button { font-size: 0.95rem !important; min-height: 48px !important; }
+/* Main page */
+.page-heading p { font-size: 1rem !important; font-weight: 700 !important; }
+.page-heading h1 { font-size: clamp(2.25rem, 3vw, 3rem) !important; line-height: 1.25 !important; font-weight: 800 !important; }
+.page-heading span { color: #334f5a !important; font-size: 1.05rem !important; }
+.primary-button { font-size: 1.05rem !important; min-height: 52px !important; padding-inline: 22px !important; }
 
-.eyebrow { color: #d0efec !important; font-size: 0.86rem !important; font-weight: 700 !important; }
-.hero-copy h2 { font-size: clamp(1.8rem, 2.35vw, 2.35rem) !important; line-height: 1.35 !important; font-weight: 800 !important; }
-.hero-copy > p { color: #d1e5e6 !important; font-size: 0.92rem !important; }
-.progress-row b { font-size: 1.35rem !important; font-weight: 800 !important; }
+/* Hero */
+.eyebrow { color: #e0f2f0 !important; font-size: 0.96rem !important; font-weight: 700 !important; }
+.hero-copy h2 { font-size: clamp(2rem, 2.7vw, 2.6rem) !important; line-height: 1.35 !important; font-weight: 800 !important; }
+.hero-copy > p { color: #e0eff0 !important; font-size: 1.04rem !important; }
+.progress-row b { font-size: 1.55rem !important; font-weight: 800 !important; }
 .progress-row span,
-.progress-row strong { color: #c5dcdc !important; font-size: 0.8rem !important; }
-.hero-stats span { color: #c8dede !important; font-size: 0.82rem !important; }
-.hero-stats b { font-size: 1.8rem !important; font-weight: 800 !important; }
-.hero-stats small { color: #9cf0e3 !important; font-size: 0.76rem !important; }
-.hero-stats button { font-size: 0.88rem !important; }
+.progress-row strong { color: #d2e5e5 !important; font-size: 0.9rem !important; }
+.hero-stats span { color: #d5e6e6 !important; font-size: 0.94rem !important; }
+.hero-stats b { font-size: 2rem !important; font-weight: 800 !important; }
+.hero-stats small { color: #a7f3e7 !important; font-size: 0.88rem !important; }
+.hero-stats button { font-size: 0.98rem !important; min-height: 44px !important; }
 
-[style*="color: rgb(113, 131, 140)"],
-[style*="color:#71838c"],
-[style*="color: #71838c"] {
-  color: #4f646d !important;
-}
-
+/* Cards, forms, tables */
 .card p,
 .card span,
 .card small,
@@ -165,43 +167,62 @@ small {
 .form-card span,
 .empty-state p,
 .empty-state span {
-  color: #405963;
+  color: #334f5a !important;
 }
 
 table th {
-  color: #2f4b56 !important;
-  font-size: 0.9rem !important;
+  color: #1f414d !important;
+  font-size: 1rem !important;
   font-weight: 800 !important;
+  padding-top: 14px !important;
+  padding-bottom: 14px !important;
 }
 
 table td {
-  color: #233f4a !important;
-  font-size: 0.93rem !important;
+  color: #183844 !important;
+  font-size: 1rem !important;
   font-weight: 400 !important;
+  padding-top: 14px !important;
+  padding-bottom: 14px !important;
 }
 
 input,
 select,
 textarea {
-  color: #17333e !important;
+  color: #102f3b !important;
+  font-size: 1rem !important;
   font-weight: 400 !important;
 }
 
 input::placeholder,
 textarea::placeholder {
-  color: #667b84 !important;
+  color: #526a73 !important;
   opacity: 1 !important;
   font-family: var(--mohanad) !important;
 }
 
+[style*="color: rgb(113, 131, 140)"],
+[style*="color:#71838c"],
+[style*="color: #71838c"] {
+  color: #415a64 !important;
+}
+
+/* Mobile — deliberately larger */
 @media (max-width: 768px) {
-  html { font-size: 18px; }
-  .content { padding-left: 18px !important; padding-right: 18px !important; }
-  .page-heading h1 { font-size: 2rem !important; }
-  .page-heading span { font-size: 1rem !important; }
-  .primary-button { font-size: 1rem !important; min-height: 50px !important; }
-  .hero-copy > p { font-size: 0.95rem !important; }
-  .side-nav button span { font-size: 1rem !important; }
-  table th { font-size: 0.9rem !important; }
-  table td { font-size: 0.92rem !important; }
+  html { font-size: 21px; }
+  body { line-height: 1.85; }
+  .content { padding-left: 16px !important; padding-right: 16px !important; }
+  .page-heading { gap: 14px !important; }
+  .page-heading h1 { font-size: 2.15rem !important; }
+  .page-heading p { font-size: 1.02rem !important; }
+  .page-heading span { font-size: 1.08rem !important; }
+  .primary-button { font-size: 1.06rem !important; min-height: 54px !important; }
+  .hero-copy h2 { font-size: 2rem !important; }
+  .hero-copy > p { font-size: 1.08rem !important; }
+  .side-nav button span { font-size: 1.08rem !important; }
+  .brand strong { font-size: 1.55rem !important; }
+  table th { font-size: 0.98rem !important; }
+  table td { font-size: 1rem !important; }
+  input,select,textarea,button { font-size: 1rem !important; }
+  small { font-size: 0.9rem !important; }
 }
