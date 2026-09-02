@@ -1,26 +1,101 @@
-/* Waqaya legibility layer — larger typography and stronger contrast */
+/* Waqaya typography + legibility layer */
+@font-face {
+  font-family: "AL-Mohanad";
+  src: url("/saad/livestock-vax-kw/fonts/AL-Mohanad.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "AL-Mohanad";
+  src: url("/saad/livestock-vax-kw/fonts/AL-Mohanad-Bold.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "AL-Mohanad";
+  src: url("/saad/livestock-vax-kw/fonts/AL-Mohanad-Extra-Bold.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 800 900;
+  font-display: swap;
+}
+
 :root {
   --ink: #102b36;
   --muted: #4f646d;
   --line: #d5dfdd;
+  --mohanad: "AL-Mohanad", Tahoma, "Segoe UI", Arial, sans-serif;
 }
 
 html {
   font-size: 17px;
 }
 
+html,
+body,
+#root,
+button,
+input,
+select,
+textarea,
+table,
+th,
+td,
+label,
+a,
+p,
+span,
+div,
+small,
+strong,
+b,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--mohanad) !important;
+}
+
 body {
   color: var(--ink);
   line-height: 1.7;
   text-rendering: optimizeLegibility;
+  font-weight: 400;
 }
 
-/* Global readable baseline */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 800 !important;
+}
+
+strong,
+b {
+  font-weight: 700 !important;
+}
+
 button,
 input,
 select,
 textarea {
   font-size: 0.95rem;
+}
+
+button,
+.primary-button,
+.side-nav button,
+.role-switch button,
+.role-switch a,
+.sidebar-admin-link {
+  font-weight: 700 !important;
 }
 
 p,
@@ -34,15 +109,14 @@ small {
   font-size: 0.82rem !important;
 }
 
-/* Sidebar */
 .sidebar {
   color: #edf7f7;
 }
-.brand strong { font-size: 1.45rem !important; }
+.brand strong { font-size: 1.45rem !important; font-weight: 800 !important; }
 .brand span { color: #c8d9dc !important; font-size: 0.88rem !important; }
-.workspace-label { color: #b9ced2 !important; font-size: 0.86rem !important; }
+.workspace-label { color: #b9ced2 !important; font-size: 0.86rem !important; font-weight: 700 !important; }
 .side-nav button { color: #c7dadd !important; }
-.side-nav button span { font-size: 1rem !important; font-weight: 800 !important; }
+.side-nav button span { font-size: 1rem !important; font-weight: 700 !important; }
 .side-nav button b { font-size: 0.8rem !important; }
 .sidebar-help strong { font-size: 0.95rem !important; }
 .sidebar-help p { color: #c0d2d5 !important; font-size: 0.86rem !important; line-height: 1.75 !important; }
@@ -51,7 +125,6 @@ small {
 .profile-mini span { color: #c0d2d5 !important; font-size: 0.82rem !important; }
 .sidebar-admin-link { color: #e1fbf7 !important; font-size: 0.9rem !important; }
 
-/* Header and controls */
 .role-switch button,
 .role-switch a { color: #526871 !important; font-size: 0.88rem !important; }
 .icon-button { color: #304f5a !important; }
@@ -59,32 +132,28 @@ small {
 .notification-card span { font-size: 0.82rem !important; }
 .notification-card p { color: #405963 !important; font-size: 0.88rem !important; }
 
-/* Main headings */
-.page-heading p { font-size: 0.9rem !important; }
-.page-heading h1 { font-size: clamp(2rem, 2.7vw, 2.65rem) !important; line-height: 1.25 !important; }
+.page-heading p { font-size: 0.9rem !important; font-weight: 700 !important; }
+.page-heading h1 { font-size: clamp(2rem, 2.7vw, 2.65rem) !important; line-height: 1.25 !important; font-weight: 800 !important; }
 .page-heading span { color: #4c626b !important; font-size: 0.95rem !important; }
 .primary-button { font-size: 0.95rem !important; min-height: 48px !important; }
 
-/* Campaign hero */
-.eyebrow { color: #d0efec !important; font-size: 0.86rem !important; }
-.hero-copy h2 { font-size: clamp(1.8rem, 2.35vw, 2.35rem) !important; line-height: 1.35 !important; }
+.eyebrow { color: #d0efec !important; font-size: 0.86rem !important; font-weight: 700 !important; }
+.hero-copy h2 { font-size: clamp(1.8rem, 2.35vw, 2.35rem) !important; line-height: 1.35 !important; font-weight: 800 !important; }
 .hero-copy > p { color: #d1e5e6 !important; font-size: 0.92rem !important; }
-.progress-row b { font-size: 1.35rem !important; }
+.progress-row b { font-size: 1.35rem !important; font-weight: 800 !important; }
 .progress-row span,
 .progress-row strong { color: #c5dcdc !important; font-size: 0.8rem !important; }
 .hero-stats span { color: #c8dede !important; font-size: 0.82rem !important; }
-.hero-stats b { font-size: 1.8rem !important; }
+.hero-stats b { font-size: 1.8rem !important; font-weight: 800 !important; }
 .hero-stats small { color: #9cf0e3 !important; font-size: 0.76rem !important; }
 .hero-stats button { font-size: 0.88rem !important; }
 
-/* General muted text inside the application */
 [style*="color: rgb(113, 131, 140)"],
 [style*="color:#71838c"],
 [style*="color: #71838c"] {
   color: #4f646d !important;
 }
 
-/* Tables, cards, metadata, pills and form help text */
 .card p,
 .card span,
 .card small,
@@ -108,21 +177,23 @@ table th {
 table td {
   color: #233f4a !important;
   font-size: 0.93rem !important;
+  font-weight: 400 !important;
 }
 
 input,
 select,
 textarea {
   color: #17333e !important;
+  font-weight: 400 !important;
 }
 
 input::placeholder,
 textarea::placeholder {
   color: #667b84 !important;
   opacity: 1 !important;
+  font-family: var(--mohanad) !important;
 }
 
-/* Mobile: prioritize readability over density */
 @media (max-width: 768px) {
   html { font-size: 18px; }
   .content { padding-left: 18px !important; padding-right: 18px !important; }
