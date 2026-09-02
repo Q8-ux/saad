@@ -1,0 +1,266 @@
+/* Waqaya targeted mobile typography — loaded after all other styles */
+
+/* Keep AL-Mohanad across the UI */
+html, body, #root, button, input, select, textarea, a, p, span, small, strong, b, label, li, td, th {
+  font-family: "AL-Mohanad", Tahoma, "Segoe UI", Arial, sans-serif !important;
+}
+
+/* General small-text floor */
+p, span, small, label, a, button, input, select, textarea, td, th {
+  font-size: 18px !important;
+  line-height: 1.65 !important;
+}
+
+small {
+  font-size: 17px !important;
+}
+
+/* Search and filters */
+input,
+select,
+textarea,
+input::placeholder,
+textarea::placeholder {
+  font-size: 18px !important;
+  color: #3f5963 !important;
+  opacity: 1 !important;
+}
+
+/* Appointment / visit times */
+[class*="time"],
+[class*="Time"],
+[class*="schedule"] strong,
+[class*="appointment"] strong,
+[class*="visit"] strong,
+[class*="booking"] strong {
+  font-size: 26px !important;
+  line-height: 1.2 !important;
+  font-weight: 800 !important;
+  color: #082c3b !important;
+}
+
+/* Names of breeders / customers / owners */
+[class*="name"],
+[class*="Name"],
+[class*="owner"],
+[class*="customer"],
+[class*="breeder"] {
+  font-size: 21px !important;
+  line-height: 1.35 !important;
+  font-weight: 700 !important;
+  color: #102f3b !important;
+}
+
+/* Farm / location / herd titles */
+[class*="farm"],
+[class*="location"],
+[class*="herd"],
+[class*="site"],
+[class*="area"] {
+  font-size: 20px !important;
+  line-height: 1.45 !important;
+  font-weight: 700 !important;
+  color: #183844 !important;
+}
+
+/* IDs such as VAC-118 and other metadata */
+[class*="code"],
+[class*="Code"],
+[class*="id"],
+[class*="Id"],
+[class*="meta"],
+[class*="subtitle"],
+[class*="secondary"] {
+  font-size: 18px !important;
+  line-height: 1.55 !important;
+  color: #506771 !important;
+}
+
+/* Badges/status labels */
+[class*="badge"],
+[class*="status"],
+[class*="chip"],
+[class*="tag"] {
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  line-height: 1.3 !important;
+}
+
+/* Cards/list rows: prevent tiny nested typography */
+article p,
+article span,
+article small,
+section p,
+section span,
+section small,
+li p,
+li span,
+li small,
+.card p,
+.card span,
+.card small,
+[class*="card"] p,
+[class*="card"] span,
+[class*="card"] small,
+[class*="row"] p,
+[class*="row"] span,
+[class*="row"] small {
+  font-size: 18px !important;
+}
+
+/* Strong text inside appointment rows */
+article strong,
+section strong,
+li strong,
+.card strong,
+[class*="card"] strong {
+  font-size: 20px !important;
+  font-weight: 700 !important;
+}
+
+/* Bottom navigation */
+nav a,
+nav button,
+nav span,
+footer a,
+footer button,
+footer span,
+[class*="bottom"] a,
+[class*="bottom"] button,
+[class*="bottom"] span,
+[class*="mobile-nav"] a,
+[class*="mobile-nav"] button,
+[class*="mobile-nav"] span,
+[class*="tab-bar"] a,
+[class*="tab-bar"] button,
+[class*="tab-bar"] span {
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  line-height: 1.3 !important;
+}
+
+/* Slightly stronger contrast for muted greys */
+[style*="color: rgb(113, 131, 140)"],
+[style*="color:#71838c"],
+[style*="color: #71838c"],
+[style*="color: rgb(147, 172, 177)"],
+[style*="color:#93acb1"] {
+  color: #506771 !important;
+}
+
+@media (max-width: 768px) {
+  html {
+    font-size: 22px !important;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  /* All formerly-small UI text */
+  p, span, small, label, a, button, input, select, textarea, td, th {
+    font-size: 19px !important;
+  }
+
+  small {
+    font-size: 18px !important;
+  }
+
+  input,
+  select,
+  textarea,
+  input::placeholder,
+  textarea::placeholder {
+    font-size: 19px !important;
+  }
+
+  /* Highly visible times */
+  [class*="time"],
+  [class*="Time"],
+  [class*="schedule"] strong,
+  [class*="appointment"] strong,
+  [class*="visit"] strong,
+  [class*="booking"] strong {
+    font-size: 29px !important;
+  }
+
+  /* Names */
+  [class*="name"],
+  [class*="Name"],
+  [class*="owner"],
+  [class*="customer"],
+  [class*="breeder"] {
+    font-size: 23px !important;
+  }
+
+  /* Farm/location/herd */
+  [class*="farm"],
+  [class*="location"],
+  [class*="herd"],
+  [class*="site"],
+  [class*="area"] {
+    font-size: 22px !important;
+  }
+
+  /* VAC IDs / metadata */
+  [class*="code"],
+  [class*="Code"],
+  [class*="id"],
+  [class*="Id"],
+  [class*="meta"],
+  [class*="subtitle"],
+  [class*="secondary"] {
+    font-size: 19px !important;
+  }
+
+  [class*="badge"],
+  [class*="status"],
+  [class*="chip"],
+  [class*="tag"] {
+    font-size: 18px !important;
+  }
+
+  article p,
+  article span,
+  article small,
+  section p,
+  section span,
+  section small,
+  li p,
+  li span,
+  li small,
+  .card p,
+  .card span,
+  .card small,
+  [class*="card"] p,
+  [class*="card"] span,
+  [class*="card"] small,
+  [class*="row"] p,
+  [class*="row"] span,
+  [class*="row"] small {
+    font-size: 19px !important;
+  }
+
+  article strong,
+  section strong,
+  li strong,
+  .card strong,
+  [class*="card"] strong {
+    font-size: 22px !important;
+  }
+
+  nav a,
+  nav button,
+  nav span,
+  footer a,
+  footer button,
+  footer span,
+  [class*="bottom"] a,
+  [class*="bottom"] button,
+  [class*="bottom"] span,
+  [class*="mobile-nav"] a,
+  [class*="mobile-nav"] button,
+  [class*="mobile-nav"] span,
+  [class*="tab-bar"] a,
+  [class*="tab-bar"] button,
+  [class*="tab-bar"] span {
+    font-size: 18px !important;
+  }
+}
