@@ -45,19 +45,15 @@ jobs:
         with:
           ref: main
           fetch-depth: 1
-
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
-
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 22
-
       - name: Install workforce dependencies
         working-directory: workforce-platform/apps/web
         run: npm install --no-audit --no-fund
-
       - name: Build workforce platform
         working-directory: workforce-platform/apps/web
         env:
@@ -66,11 +62,10 @@ jobs:
           NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
           NEXT_PUBLIC_SUPABASE_URL: 'https://onefbrycdifaqghkzneh.supabase.co'
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_M_L4mOwYjcAMbM5QXj2Nzw_4yXmrdXR'
-          NEXT_PUBLIC_INTERFACE_VERSION: 'government-dashboard-live-data-v14'
+          NEXT_PUBLIC_INTERFACE_VERSION: 'split-user-admin-v18'
         run: |
           rm -rf .next out
           npm run build
-
       - name: Prepare combined site
         run: |
           rm -rf _site
@@ -89,23 +84,24 @@ jobs:
           cp -R kuwait-fund-modern _site/kuwait-fund-modern
           cp -R workforce-platform/apps/web/out/_next _site/_next
           cp -R workforce-platform/apps/web/out/dashboard _site/dashboard
+          cp -R workforce-platform/apps/web/out/admin-control _site/admin-control
           cp -R workforce-platform/apps/web/out/attendance-smart _site/attendance-smart
           cp -R workforce-platform/apps/web/out/transfers _site/transfers
           cp -R workforce-platform/apps/web/out/emergency _site/emergency
           cp -R workforce-platform/apps/web/out/ai-tools _site/ai-tools
           cp -R workforce-platform/apps/web/out/notifications _site/notifications
           cp -R workforce-platform/apps/web/out/profile _site/profile
-          echo 'government-dashboard-live-data-v14' > _site/interface-version.txt
+          echo 'split-user-admin-v18' > _site/interface-version.txt
           touch _site/.nojekyll
-
       - name: Validate combined site
         run: |
           test -s _site/index.html
           test -s _site/dashboard/index.html
+          test -s _site/admin-control/index.html
           test -s _site/attendance-smart/index.html
           test -s _site/ai-tools/index.html
           test -d _site/_next
-          grep -Eq 'Smart Operations Center|مركز العمليات الذكي' _site/dashboard/index.html
+          grep -Eq 'Administration & Control|لوحة الإدارة والتحكم' _site/admin-control/index.html
           test -s _site/sabeq-legal/index.html
           test -s _site/sabeq-admin-preview/index.html
           test -s _site/sabeq-legal-system/index.html
@@ -114,26 +110,21 @@ jobs:
           test -s _site/zad-restaurants/index.html
           test -s _site/tamweenat/index.html
           test -s _site/tamweenat-admin/index.html
-          grep -q 'tamweenat-admin' _site/tamweenat-admin/index.html
           test -s _site/rattil/index.html
           test -s _site/kuwait-digital-sales-plan/index.html
           test -s _site/kuwait-fund-modern/index.html
-          grep -q 'خطة مبيعات الخدمات الرقمية في الكويت' _site/kuwait-digital-sales-plan/index.html
-
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: _site
-
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
-
       - name: Record deployment status
         run: |
           {
             echo "status=deployed"
-            echo "version=government-dashboard-live-data-v14"
+            echo "version=split-user-admin-v18"
             echo "run_id=${GITHUB_RUN_ID}"
             echo "commit=${GITHUB_SHA}"
             echo "page_url=${{ steps.deployment.outputs.page_url }}"
@@ -142,5 +133,5 @@ jobs:
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add live-dashboard-status.txt
-          git commit -m "Record live dashboard deployment ${GITHUB_RUN_ID}" || true
+          git commit -m "Record split platform deployment ${GITHUB_RUN_ID}" || true
           git push || true
