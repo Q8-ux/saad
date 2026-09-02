@@ -1,0 +1,60 @@
+/*
+ * Rattil Quran display safeguards
+ * Quranic text must remain visually unobstructed by notes, insights, or explanatory UI.
+ */
+
+/* The global tafsir notice used to render before the Quran ayah list.
+   Source/provenance remains available inside each expanded tafsir panel below its ayah. */
+.tafsir-source-notice {
+  display: none !important;
+}
+
+/* Home-page insights must participate in normal layout flow instead of floating over the verse card. */
+.hero-visual {
+  grid-auto-flow: row;
+  align-content: center;
+  row-gap: 12px;
+}
+
+.hero-visual .floating-insight,
+.hero-visual .review-insight,
+.hero-visual .streak-insight {
+  position: relative !important;
+  inset: auto !important;
+  top: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  left: auto !important;
+  transform: none !important;
+  z-index: 1 !important;
+  margin: 0 auto;
+  max-width: min(100%, 438px);
+}
+
+/* Quran verse surfaces always stay above decorative layers. */
+.verse-card,
+.ayah-card,
+.session-verse,
+.matched-verse-text-button {
+  isolation: isolate;
+}
+
+/* Explanations and teaching feedback remain below their related Quran text in normal document flow. */
+.ayah-card .tafsir-panel,
+.teacher-note,
+.match-navigation-hint,
+.tafsir-provenance {
+  position: static !important;
+}
+
+@media (max-width: 620px) {
+  .hero-visual {
+    min-height: auto;
+    padding-block: 18px;
+    row-gap: 10px;
+  }
+
+  .hero-visual .floating-insight {
+    width: min(100%, 438px);
+  }
+}
