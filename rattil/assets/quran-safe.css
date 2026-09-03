@@ -47,6 +47,26 @@
   position: static !important;
 }
 
+/* Rattil-wide no-star policy.
+   Remove decorative star/rosette marks and Star/Sparkles icons while preserving text and controls. */
+.hero-visual::after,
+.quote-frame::before,
+.quote-frame::after {
+  content: none !important;
+  display: none !important;
+}
+
+.verse-card-mark,
+.lucide-star,
+.lucide-sparkles {
+  display: none !important;
+}
+
+/* Avoid leaving an empty icon badge where a Star icon was used in progress statistics. */
+.stats-grid article > span:has(.lucide-star) {
+  display: none !important;
+}
+
 /* Site credit: deliberately outside Quran content surfaces. */
 .rattil-credit {
   display: flex;
