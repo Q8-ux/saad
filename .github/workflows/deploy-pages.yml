@@ -48,6 +48,10 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with: { node-version: 22 }
+      - name: Install English audio dependency
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y espeak
       - name: Install workforce dependencies
         working-directory: workforce-platform/apps/web
         run: npm install --no-audit --no-fund
@@ -80,6 +84,7 @@ jobs:
           cp -R kuwait-fund-modern _site/kuwait-fund-modern
           cp -R livestock-vax-kw _site/livestock-vax-kw
           cp -R english-kuwait _site/english-kuwait
+          bash english-kuwait/generate-audio.sh _site/english-kuwait/audio
           cp -R oman-fruits-pos _site/oman-fruits-pos
           cp -R workforce-platform/apps/web/out/_next _site/_next
           for p in dashboard admin-control attendance-smart transfers emergency ai-tools notifications profile; do cp -R "workforce-platform/apps/web/out/$p" "_site/$p"; done
@@ -92,6 +97,8 @@ jobs:
           test -s _site/livestock-vax-kw/index.html
           test -s _site/livestock-vax-kw/admin/index.html
           test -s _site/english-kuwait/index.html
+          test -s _site/english-kuwait/audio/7-1-listen.wav
+          test -s _site/english-kuwait/audio/7-1-speak.wav
           test -s _site/oman-fruits-pos/index.html
           test -d _site/_next
       - name: Upload Pages artifact
