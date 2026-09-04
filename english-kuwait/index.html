@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>English Kuwait | منصة الإنجليزي للمرحلة المتوسطة</title>
+<link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+<header class="topbar">
+  <div class="brand"><div class="flag">🇰🇼</div><div><strong>English Kuwait</strong><span>منصة تعلم اللغة الإنجليزية للمرحلة المتوسطة</span></div></div>
+  <div class="actions"><button id="langBtn" class="ghost">EN</button><button id="parentBtn" class="ghost">ولي الأمر</button><button id="adminBtn" class="primary">لوحة الإدارة</button></div>
+</header>
+
+<main>
+<section class="hero">
+  <div class="hero-copy">
+    <span class="pill">منهج وزارة التربية الكويتية • الصف 6–9</span>
+    <h1>تعلم الإنجليزي خطوة بخطوة<br><em>شرح + تدريب + استماع + تقييم</em></h1>
+    <p>منصة تعليمية متكاملة مبنية حول منهج المرحلة المتوسطة في الكويت، مع تمارين أصلية، أوراق عمل قابلة للطباعة، تدريب استماع ونطق، واختبارات قصيرة تتبع تقدم الطالب.</p>
+    <div class="hero-actions"><button class="primary" onclick="scrollToGrades()">ابدأ التعلم</button><a class="ghost link-btn" href="https://elibrary.moe.edu.kw/StudentsLibrary" target="_blank" rel="noopener">المكتبة الرسمية لوزارة التربية ↗</a></div>
+  </div>
+  <div class="score-card"><div class="ring" id="overallRing"><span id="overallScore">0%</span></div><h3>تقدمك العام</h3><p id="streakText">ابدأ أول درس لتسجيل تقدمك</p></div>
+</section>
+
+<section id="grades" class="section">
+  <div class="section-head"><div><span class="eyebrow">اختر صفك</span><h2>المرحلة المتوسطة</h2></div><div class="semester-tabs"><button class="tab active" data-sem="A">الفصل الأول</button><button class="tab" data-sem="B">الفصل الثاني</button></div></div>
+  <div id="gradeGrid" class="grade-grid"></div>
+</section>
+
+<section class="section learning-shell">
+  <aside class="sidebar">
+    <h3 id="sideTitle">اختر صفاً</h3>
+    <div id="unitList" class="unit-list"><div class="empty">ستظهر الوحدات هنا</div></div>
+  </aside>
+  <article class="lesson-panel" id="lessonPanel">
+    <div class="welcome-card">
+      <div class="icon">🎧</div><h2>جاهز نبدأ؟</h2><p>اختر الصف ثم الوحدة. كل درس يحتوي شرحاً مبسطاً، كلمات، قواعد، استماعاً، نطقاً، تمارين وتصحيحاً فورياً.</p>
+    </div>
+  </article>
+</section>
+
+<section class="section tools-section">
+  <div class="section-head"><div><span class="eyebrow">أدوات الطالب</span><h2>مركز التدريب</h2></div></div>
+  <div class="tool-grid">
+    <button class="tool" onclick="openTool('worksheet')"><span>📝</span><b>أوراق العمل</b><small>تمارين قابلة للطباعة مع نموذج إجابة</small></button>
+    <button class="tool" onclick="openTool('listening')"><span>🎧</span><b>مختبر الاستماع</b><small>استمع وأجب وأعد المقطع</small></button>
+    <button class="tool" onclick="openTool('speaking')"><span>🎙️</span><b>مختبر النطق</b><small>اقرأ الجملة وقارن النطق</small></button>
+    <button class="tool" onclick="openTool('vocab')"><span>🧠</span><b>بنك الكلمات</b><small>بطاقات ومراجعة ذكية</small></button>
+    <button class="tool" onclick="openTool('exam')"><span>🏆</span><b>اختبار قصير</b><small>10 أسئلة مع نتيجة فورية</small></button>
+    <button class="tool" onclick="openTool('books')"><span>📚</span><b>الكتب الرسمية</b><small>روابط مباشرة لمكتبة وزارة التربية</small></button>
+  </div>
+</section>
+
+<section class="section dashboard" id="dashboard">
+  <div class="section-head"><div><span class="eyebrow">لوحة المتابعة</span><h2>مستوى الطالب</h2></div></div>
+  <div class="stats"><div><b id="lessonsDone">0</b><span>دروس مكتملة</span></div><div><b id="questionsDone">0</b><span>إجابات</span></div><div><b id="accuracy">0%</b><span>نسبة الإجابة الصحيحة</span></div><div><b id="minutes">0</b><span>دقائق تعلم</span></div></div>
+  <div id="skillBars" class="skill-bars"></div>
+</section>
+</main>
+
+<div id="modal" class="modal hidden"><div class="modal-card"><button class="modal-x" onclick="closeModal()">×</button><div id="modalBody"></div></div></div>
+<footer><span>English Kuwait</span><span>مصادر المنهج: المكتبة الإلكترونية الرسمية لوزارة التربية – دولة الكويت</span><span>2026</span></footer>
+<script src="./data.js"></script><script src="./app.js"></script>
+</body>
+</html>
