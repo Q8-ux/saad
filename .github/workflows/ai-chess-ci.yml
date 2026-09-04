@@ -33,4 +33,5 @@ jobs:
           cache: pip
           cache-dependency-path: ai-chess-python/requirements-dev.txt
       - run: pip install -r requirements-dev.txt
+      - run: python -m playwright install --with-deps chromium
       - run: python -m pytest -q
