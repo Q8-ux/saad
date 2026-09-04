@@ -3,13 +3,14 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta name="description" content="منصة تعليم اللغة الإنجليزية للمرحلة المتوسطة في الكويت للصفوف السادس إلى التاسع." />
 <title>English Kuwait | منصة الإنجليزي للمرحلة المتوسطة</title>
 <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
 <header class="topbar">
   <div class="brand"><div class="flag">🇰🇼</div><div><strong>English Kuwait</strong><span>منصة تعلم اللغة الإنجليزية للمرحلة المتوسطة</span></div></div>
-  <div class="actions"><button id="langBtn" class="ghost">EN</button><button id="parentBtn" class="ghost">ولي الأمر</button><button id="adminBtn" class="primary">لوحة الإدارة</button></div>
+  <div class="actions"><button id="langBtn" class="ghost">EN</button><button id="parentBtn" class="ghost">ولي الأمر</button><button id="adminBtn" class="primary">المصادر</button></div>
 </header>
 
 <main>
@@ -40,6 +41,18 @@
   </article>
 </section>
 
+<section class="section tutor-section" id="smartTutor">
+  <div class="section-head"><div><span class="eyebrow">مساعد الطالب</span><h2>المعلم الذكي</h2></div><span id="tutorContext" class="context-chip">اختر الصف والوحدة ليصبح الشرح مخصصاً.</span></div>
+  <div class="tutor-card">
+    <div class="tutor-icon">AI</div>
+    <div class="tutor-body">
+      <p>اسأل عن كلمات الوحدة، القاعدة، الاستماع، النطق أو الاختبار. المساعد يوجّهك داخل المحتوى الحالي ويعطيك شرحاً مناسباً للصف المختار.</p>
+      <div class="tutor-input-row"><input id="tutorInput" type="text" autocomplete="off" placeholder="مثال: اشرح لي قاعدة الوحدة" aria-label="اكتب سؤالك للمعلم الذكي"><button id="tutorMic" class="ghost" title="إدخال صوتي" aria-label="إدخال السؤال بالصوت">🎙️</button><button id="tutorAsk" class="primary">اسأل</button></div>
+      <div id="tutorReply" class="tutor-reply" aria-live="polite">اختر صفك ثم ابدأ بالسؤال.</div>
+    </div>
+  </div>
+</section>
+
 <section class="section tools-section">
   <div class="section-head"><div><span class="eyebrow">أدوات الطالب</span><h2>مركز التدريب</h2></div></div>
   <div class="tool-grid">
@@ -47,7 +60,7 @@
     <button class="tool" onclick="openTool('listening')"><span>🎧</span><b>مختبر الاستماع</b><small>استمع وأجب وأعد المقطع</small></button>
     <button class="tool" onclick="openTool('speaking')"><span>🎙️</span><b>مختبر النطق</b><small>اقرأ الجملة وقارن النطق</small></button>
     <button class="tool" onclick="openTool('vocab')"><span>🧠</span><b>بنك الكلمات</b><small>بطاقات ومراجعة ذكية</small></button>
-    <button class="tool" onclick="openTool('exam')"><span>🏆</span><b>اختبار قصير</b><small>10 أسئلة مع نتيجة فورية</small></button>
+    <button class="tool" onclick="openTool('exam')"><span>🏆</span><b>اختبار قصير</b><small>أسئلة مع نتيجة فورية</small></button>
     <button class="tool" onclick="openTool('books')"><span>📚</span><b>الكتب الرسمية</b><small>روابط مباشرة لمكتبة وزارة التربية</small></button>
   </div>
 </section>
@@ -59,9 +72,8 @@
 </section>
 </main>
 
-<div id="modal" class="modal hidden"><div class="modal-card"><button class="modal-x" onclick="closeModal()">×</button><div id="modalBody"></div></div></div>
+<div id="modal" class="modal hidden" role="dialog" aria-modal="true"><div class="modal-card"><button class="modal-x" onclick="closeModal()" aria-label="إغلاق">×</button><div id="modalBody"></div></div></div>
 <footer><span>English Kuwait</span><span>مصادر المنهج: المكتبة الإلكترونية الرسمية لوزارة التربية – دولة الكويت</span><span>2026</span></footer>
 <script src="./data.js"></script><script src="./app.js"></script>
-<!-- deployment trigger: english-kuwait -->
 </body>
 </html>
