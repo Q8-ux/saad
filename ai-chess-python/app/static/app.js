@@ -33,6 +33,7 @@ let locked = false;
 let gameGeneration = 0;
 let pendingMoveController = null;
 let pendingLegalController = null;
+let statusBeforeOffline = null;
 
 function toast(text){
   toastEl.textContent = text;
@@ -92,7 +93,10 @@ function savedGame(){
    );
    if(!valid&&saved)localStorage.removeItem(SAVED_GAME_KEY);
    return valid?saved:null;
- }catch(_){localStorage.removeItem(SAVED_GAME_KEY);return null}
+ }catch(_){
+   try{localStorage.removeItem(SAVED_GAME_KEY)}catch(__){}
+   return null;
+ }
 }
 function refreshResumeButton(){resumeButton.hidden=!savedGame()||Boolean(window.multiplayerGame)}
 function saveCurrentGame(){
@@ -302,10 +306,16 @@ function updateNetworkState(announce=false){
  networkBanner.querySelector('strong').textContent=t('offlineNotice');
  document.body.classList.toggle('is-offline',offline);
  if(offline){
-   if(!window.multiplayerGame)statusEl.textContent=t('offlineNotice');
+   if(!window.multiplayerGame&&!locked){
+     statusBeforeOffline=statusEl.textContent;
+     statusEl.textContent=t('offlineNotice');
+   }
  }else if(announce){
    toast(t('connectionRestored'));
-   if(!window.multiplayerGame&&!locked)statusEl.textContent=t('yourWhiteTurn');
+   if(!window.multiplayerGame&&!locked&&statusBeforeOffline!==null){
+     statusEl.textContent=statusBeforeOffline;
+     statusBeforeOffline=null;
+   }
  }
 }
 window.addEventListener('offline',()=>updateNetworkState());
