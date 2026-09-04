@@ -1,4 +1,4 @@
-name: Deploy Workforce Platform to GitHub Pages
+name: Workforce Platform Build Check
 
 on:
   push:
@@ -10,11 +10,9 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
-  group: workforce-pages
+  group: workforce-build-check
   cancel-in-progress: true
 
 jobs:
@@ -26,28 +24,18 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Configure GitHub Pages
-        uses: actions/configure-pages@v5
-
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
           cache-dependency-path: workforce-platform/apps/web/package.json
-
       - name: Install dependencies
         working-directory: workforce-platform/apps/web
         run: npm install
-
       - name: Build static site
         working-directory: workforce-platform/apps/web
         run: npm run build
-
-      - name: Add nojekyll marker
-        run: touch workforce-platform/apps/web/out/.nojekyll
-
       - name: Verify exported files
         run: |
           test -f workforce-platform/apps/web/out/index.html
@@ -58,19 +46,3 @@ jobs:
           test -f workforce-platform/apps/web/out/ai-tools/index.html
           test -f workforce-platform/apps/web/out/notifications/index.html
           test -f workforce-platform/apps/web/out/profile/index.html
-
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: workforce-platform/apps/web/out
-
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
