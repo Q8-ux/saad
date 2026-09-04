@@ -9,7 +9,7 @@ from uuid import uuid4
 
 import chess
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
@@ -64,8 +64,15 @@ async def add_request_diagnostics(request: Request, call_next):
     try:
         response = await call_next(request)
     except Exception:
+        duration_ms = (perf_counter() - started) * 1000
         logger.exception("request_failed request_id=%s path=%s", request_id, request.url.path)
-        raise
+        headers = {
+            "X-Request-ID": request_id,
+            "Server-Timing": f"app;dur={duration_ms:.2f}",
+        }
+        if request.url.path.startswith("/api/") or request.url.path in {"/health", "/ready"}:
+            headers["Cache-Control"] = "no-store"
+        return JSONResponse(status_code=500, content={"detail": "Internal Server Error"}, headers=headers)
 
     duration_ms = (perf_counter() - started) * 1000
     response.headers["X-Request-ID"] = request_id
