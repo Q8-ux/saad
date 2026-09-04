@@ -22,6 +22,7 @@ on:
       - 'kuwait-fund-modern/**'
       - 'livestock-vax-kw/**'
       - 'english-kuwait/**'
+      - 'oman-fruits-pos/**'
       - 'workforce-platform/apps/web/**'
       - '.github/workflows/deploy-pages.yml'
   workflow_dispatch:
@@ -79,6 +80,7 @@ jobs:
           cp -R kuwait-fund-modern _site/kuwait-fund-modern
           cp -R livestock-vax-kw _site/livestock-vax-kw
           cp -R english-kuwait _site/english-kuwait
+          cp -R oman-fruits-pos _site/oman-fruits-pos
           cp -R workforce-platform/apps/web/out/_next _site/_next
           for p in dashboard admin-control attendance-smart transfers emergency ai-tools notifications profile; do cp -R "workforce-platform/apps/web/out/$p" "_site/$p"; done
           echo 'compact-mobile-header-v21' > _site/interface-version.txt
@@ -90,6 +92,7 @@ jobs:
           test -s _site/livestock-vax-kw/index.html
           test -s _site/livestock-vax-kw/admin/index.html
           test -s _site/english-kuwait/index.html
+          test -s _site/oman-fruits-pos/index.html
           test -d _site/_next
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
