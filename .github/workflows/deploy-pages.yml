@@ -59,7 +59,7 @@ jobs:
           NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
           NEXT_PUBLIC_SUPABASE_URL: 'https://onefbrycdifaqghkzneh.supabase.co'
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_M_L4mOwYjcAMbM5QXj2Nzw_4yXmrdXR'
-          NEXT_PUBLIC_INTERFACE_VERSION: 'compact-mobile-header-v21'
+          NEXT_PUBLIC_INTERFACE_VERSION: 'compact-mobile-header-v22'
         run: |
           rm -rf .next out
           npm run build
@@ -83,7 +83,7 @@ jobs:
           cp -R oman-fruits-pos _site/oman-fruits-pos
           cp -R workforce-platform/apps/web/out/_next _site/_next
           for p in dashboard admin-control attendance-smart transfers emergency ai-tools notifications profile; do cp -R "workforce-platform/apps/web/out/$p" "_site/$p"; done
-          echo 'compact-mobile-header-v21' > _site/interface-version.txt
+          echo 'compact-mobile-header-v22' > _site/interface-version.txt
           touch _site/.nojekyll
       - name: Validate combined site
         run: |
@@ -102,9 +102,9 @@ jobs:
         uses: actions/deploy-pages@v4
       - name: Record deployment status
         run: |
-          printf 'status=deployed\nversion=compact-mobile-header-v21\nrun_id=%s\ncommit=%s\npage_url=%s\ntime=%s\n' "$GITHUB_RUN_ID" "$GITHUB_SHA" '${{ steps.deployment.outputs.page_url }}' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > live-dashboard-status.txt
+          printf 'status=deployed\nversion=compact-mobile-header-v22\nrun_id=%s\ncommit=%s\npage_url=%s\ntime=%s\n' "$GITHUB_RUN_ID" "$GITHUB_SHA" '${{ steps.deployment.outputs.page_url }}' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > live-dashboard-status.txt
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add live-dashboard-status.txt
-          git commit -m "Record mobile header deployment ${GITHUB_RUN_ID}" || true
+          git commit -m "Record combined Pages deployment ${GITHUB_RUN_ID}" || true
           git push || true
