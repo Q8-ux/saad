@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: ai-chess-python
+    name: ai-chess-kuwait
     runtime: python
     plan: free
     rootDir: ai-chess-python

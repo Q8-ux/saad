@@ -66,6 +66,51 @@ def test_health_endpoint():
 
     assert response.status_code == 200
     assert response.json() == {"ok": True}
+    assert response.headers["cache-control"] == "no-store"
+    assert response.headers["x-request-id"]
+    assert response.headers["server-timing"].startswith("app;dur=")
+
+
+def test_request_id_is_preserved_for_safe_correlation():
+    response = client.get("/health", headers={"x-request-id": "health-check-2026"})
+
+    assert response.status_code == 200
+    assert response.headers["x-request-id"] == "health-check-2026"
+
+
+def test_unsafe_request_id_is_replaced():
+    response = client.get("/health", headers={"x-request-id": "unsafe request id"})
+
+    assert response.status_code == 200
+    assert response.headers["x-request-id"] != "unsafe request id"
+    assert len(response.headers["x-request-id"]) == 32
+
+
+def test_readiness_reports_core_and_optional_components():
+    response = client.get("/ready")
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["ok"] is True
+    assert payload["service"] == "ai-chess-kuwait"
+    assert payload["components"]["static_assets"] is True
+    assert payload["components"]["ai_engine"] is True
+    assert isinstance(payload["components"]["multiplayer"], bool)
+
+
+def test_move_input_validation_rejects_invalid_square_and_level():
+    response = client.post(
+        "/api/move",
+        json={
+            "fen": chess.STARTING_FEN,
+            "from_square": "z9",
+            "to_square": "e4",
+            "level": "impossible",
+            "move_history": [],
+        },
+    )
+
+    assert response.status_code == 422
 
 
 def test_beginner_hint_returns_a_legal_white_move():

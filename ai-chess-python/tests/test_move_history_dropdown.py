@@ -21,3 +21,16 @@ def test_move_history_dropdown_updates_count_and_open_state_styles():
     assert "movesDisclosure.setAttribute('aria-label'" in javascript
     assert ".moves-disclosure[open] .moves-chevron" in styles
     assert ".moves-summary:focus-visible" in styles
+
+
+def test_saved_game_and_offline_state_are_resilient():
+    html = (STATIC_DIR / "index.html").read_text(encoding="utf-8")
+    javascript = (STATIC_DIR / "app.js").read_text(encoding="utf-8")
+    translations = (STATIC_DIR / "i18n.js").read_text(encoding="utf-8")
+
+    assert 'id="networkBanner"' in html
+    assert "SAVED_GAME_TTL_MS" in javascript
+    assert "hintsUsed,savedAt" in javascript
+    assert "window.addEventListener('offline'" in javascript
+    assert "window.addEventListener('online'" in javascript
+    assert "networkMoveFailed" in translations
