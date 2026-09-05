@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>مركز قيادة المشاريع الذكي</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <div class="eyebrow">SAAD AI COMMAND CENTER</div>
+      <h1>مركز قيادة المشاريع الذكي</h1>
+      <p>إدارة موحدة للمشاريع، الأولويات، المخاطر، GitHub، والقرارات التنفيذية.</p>
+    </div>
+    <div class="status-pill"><span class="dot"></span> النظام جاهز</div>
+  </header>
+
+  <main class="shell">
+    <section class="stats" id="stats"></section>
+
+    <section class="grid two">
+      <article class="panel ai-panel">
+        <div class="panel-head">
+          <div><span class="kicker">EXECUTIVE AI</span><h2>اسأل مدير المشاريع الذكي</h2></div>
+          <button class="ghost" id="voiceBtn" title="إدخال صوتي">🎙️ صوت</button>
+        </div>
+        <div class="ai-input-row">
+          <input id="aiInput" placeholder="مثال: ما أهم المشاريع التي أعمل عليها اليوم؟" />
+          <button id="askBtn">تحليل</button>
+        </div>
+        <div class="quick-prompts">
+          <button data-q="رتب مشاريعي حسب الأولوية">ترتيب الأولويات</button>
+          <button data-q="ما المشاريع التي تحتاج تدخلي اليوم؟">تحتاج تدخلي اليوم</button>
+          <button data-q="ما المشاريع الأقرب للنشر؟">الأقرب للنشر</button>
+          <button data-q="اعرض المخاطر الحرجة">المخاطر الحرجة</button>
+        </div>
+        <div class="ai-answer" id="aiAnswer">اختر أمرًا سريعًا أو اكتب سؤالك. سيحلل النظام بيانات المشاريع المسجلة ويعطيك توصية تنفيذية.</div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-head"><div><span class="kicker">TODAY</span><h2>الأولويات التنفيذية</h2></div></div>
+        <div id="priorityList" class="priority-list"></div>
+      </article>
+    </section>
+
+    <section class="panel projects-panel">
+      <div class="panel-head project-toolbar">
+        <div><span class="kicker">PORTFOLIO</span><h2>محفظة المشاريع</h2></div>
+        <div class="filters">
+          <input id="search" placeholder="ابحث عن مشروع..." />
+          <select id="statusFilter"><option value="all">كل الحالات</option><option value="active">نشط</option><option value="attention">يحتاج متابعة</option><option value="ready">جاهز للنشر</option><option value="paused">متوقف</option></select>
+        </div>
+      </div>
+      <div id="projects" class="projects-grid"></div>
+    </section>
+
+    <section class="panel" id="controlRoom">
+      <div class="panel-head"><div><span class="kicker">PROJECT CONTROL ROOM</span><h2 id="roomTitle">غرفة تحكم المشروع</h2></div></div>
+      <div id="roomBody" class="room-empty">اختر أي مشروع لعرض التفاصيل التنفيذية.</div>
+    </section>
+  </main>
+
+  <footer>
+    <span>مركز إدارة المشاريع الرقمية</span>
+    <span>GitHub-first • AI-ready • RTL</span>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
