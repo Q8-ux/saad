@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>AI Lead Intelligence</title>
+<style>
+:root{--bg:#07111f;--panel:#0d1b2a;--panel2:#10243a;--text:#edf5ff;--muted:#9db0c5;--line:#1f3853;--accent:#37d0b1;--warn:#ffbf5b;--danger:#ff6b6b;--ok:#5de39a}
+*{box-sizing:border-box}body{margin:0;font-family:Tahoma,Arial,sans-serif;background:linear-gradient(145deg,#06101d,#0a1727 55%,#081522);color:var(--text)}button,input,select,textarea{font:inherit}.app{max-width:1480px;margin:auto;padding:18px}.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}.brand h1{font-size:24px;margin:0}.brand p{color:var(--muted);margin:5px 0 0}.badge{padding:8px 12px;border:1px solid var(--line);background:#0b1a2b;border-radius:999px;color:var(--accent);font-size:13px}.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:16px 0}.card{background:rgba(13,27,42,.94);border:1px solid var(--line);border-radius:16px;padding:14px;box-shadow:0 12px 35px rgba(0,0,0,.12)}.kpi b{font-size:25px;display:block;margin-top:7px}.kpi span{color:var(--muted);font-size:13px}.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.toolbar input,.toolbar select{background:#091827;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-height:42px}.toolbar input{min-width:260px;flex:1}.btn{border:1px solid var(--line);background:#0c2033;color:var(--text);padding:10px 13px;border-radius:10px;cursor:pointer}.btn.primary{background:var(--accent);color:#052019;border-color:transparent;font-weight:700}.btn.good{background:#123724;color:#bff8d5}.btn.warn{background:#3a2a12;color:#ffe0a6}.btn.danger{background:#351a20;color:#ffc3ca}.grid{display:grid;grid-template-columns:1.2fr .8fr;gap:12px}.lead-list{display:grid;gap:10px}.lead{padding:13px;border:1px solid var(--line);border-radius:13px;background:#0a1929;cursor:pointer}.lead:hover{border-color:#35658d}.lead-head{display:flex;justify-content:space-between;gap:12px}.lead h3{margin:0 0 6px;font-size:17px}.meta,.pain{color:var(--muted);font-size:13px;line-height:1.6}.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}.tag{padding:4px 8px;border-radius:999px;background:#112b42;color:#cfe8ff;font-size:11px}.score{min-width:56px;height:56px;border-radius:50%;display:grid;place-items:center;border:4px solid var(--accent);font-weight:800}.detail h2{margin-top:0}.section{border-top:1px solid var(--line);padding-top:12px;margin-top:12px}.section h4{margin:0 0 8px}.source-links{display:flex;gap:8px;flex-wrap:wrap}.source-links a{color:#b9dfff;text-decoration:none;border:1px solid var(--line);padding:8px 10px;border-radius:9px}.approval{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.message{width:100%;min-height:150px;background:#071522;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:11px;line-height:1.7}.pipeline{display:flex;gap:7px;overflow:auto;padding-bottom:4px}.stage{min-width:120px;text-align:center;padding:9px;border:1px solid var(--line);border-radius:9px;color:var(--muted)}.stage.active{color:#081920;background:var(--accent);border-color:var(--accent);font-weight:700}.notice{background:#332812;border:1px solid #6b5524;color:#ffe9b3;padding:11px;border-radius:10px;font-size:13px;line-height:1.6}.empty{padding:35px;text-align:center;color:var(--muted)}
+@media(max-width:900px){.kpis{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}.approval{grid-template-columns:1fr}.app{padding:12px}}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="top"><div class="brand"><h1>AI Lead Intelligence</h1><p>Reddit + LinkedIn + Web → تحليل الفرصة → موافقة → Outreach → متابعة → فرصة بيع</p></div><div class="badge">Human Approval Required</div></header>
+<section class="kpis">
+<div class="card kpi"><span>الفرص المكتشفة</span><b id="kAll">0</b></div>
+<div class="card kpi"><span>عالية الأولوية</span><b id="kHot">0</b></div>
+<div class="card kpi"><span>بانتظار الموافقة</span><b id="kApproval">0</b></div>
+<div class="card kpi"><span>تم التواصل</span><b id="kContacted">0</b></div>
+<div class="card kpi"><span>فرص بيع</span><b id="kWon">0</b></div>
+</section>
+<div class="toolbar card">
+<input id="q" placeholder="ابحث بالمشكلة، القطاع، البلد أو المنصة..." />
+<select id="source"><option value="all">كل المصادر</option><option>Reddit</option><option>LinkedIn</option><option>Web</option></select>
+<select id="stage"><option value="all">كل المراحل</option><option value="new">جديد</option><option value="review">مراجعة</option><option value="approved">موافق عليه</option><option value="contacted">تم التواصل</option><option value="qualified">فرصة مؤهلة</option></select>
+<button class="btn primary" id="addLead">+ إضافة فرصة</button>
+</div>
+<div class="grid">
+<section class="card"><div id="leadList" class="lead-list"></div></section>
+<aside class="card detail" id="detail"><div class="empty">اختر فرصة لعرض تحليلها</div></aside>
+</div>
+</div>
+<script src="app.js"></script>
+</body>
+</html>
