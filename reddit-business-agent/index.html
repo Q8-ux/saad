@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Opportunity Intelligence Agent</title>
+  <style>
+    :root{--bg:#08111f;--panel:#101b2d;--panel2:#15243a;--text:#eef5ff;--muted:#9db0c8;--line:#243750;--accent:#35c2a6;--warn:#f4b942;--danger:#ff6b6b}
+    *{box-sizing:border-box}body{margin:0;font-family:Arial,"Noto Sans Arabic",sans-serif;background:linear-gradient(180deg,#07101d,#0b1525 60%,#0a1320);color:var(--text)}
+    .app{min-height:100vh;display:grid;grid-template-columns:260px 1fr}.side{border-left:1px solid var(--line);padding:22px;background:#0a1423}.brand{font-weight:800;font-size:20px;line-height:1.5}.sub{color:var(--muted);font-size:12px;margin-top:6px}.nav{margin-top:24px;display:grid;gap:8px}.nav button{all:unset;cursor:pointer;padding:12px 14px;border-radius:12px;color:#dce8f6}.nav button.active,.nav button:hover{background:var(--panel2)}
+    main{padding:24px}.top{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}.top h1{margin:0;font-size:26px}.badge{padding:8px 12px;border:1px solid var(--line);border-radius:999px;color:var(--muted)}
+    .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:20px}.card{background:rgba(16,27,45,.94);border:1px solid var(--line);border-radius:16px;padding:16px}.kpi{font-size:30px;font-weight:800;margin-top:6px}.muted{color:var(--muted)}
+    .section{margin-top:18px}.section h2{font-size:18px;margin:0 0 12px}.sources{display:flex;flex-wrap:wrap;gap:8px}.source{padding:8px 11px;border-radius:999px;background:#14263d;border:1px solid #28405f;font-size:13px}
+    .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}.toolbar input,.toolbar select{background:#0d1929;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:10px}.btn{border:0;border-radius:10px;padding:10px 14px;cursor:pointer;font-weight:700}.primary{background:var(--accent);color:#04231d}.secondary{background:#223955;color:var(--text)}
+    .table{overflow:auto;border:1px solid var(--line);border-radius:14px}table{width:100%;border-collapse:collapse;min-width:900px;background:var(--panel)}th,td{padding:13px;border-bottom:1px solid var(--line);text-align:right;vertical-align:top}th{color:#b8cae0;font-size:12px;background:#0d1929}.score{font-weight:800}.hot{color:#58e3c6}.med{color:#ffd36e}.pipeline{display:flex;gap:10px;overflow:auto}.stage{min-width:190px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px}.stage strong{display:block;margin-bottom:6px}.foot{margin-top:20px;color:var(--muted);font-size:12px}
+    @media(max-width:900px){.app{grid-template-columns:1fr}.side{border-left:0;border-bottom:1px solid var(--line);padding:14px}.nav{grid-template-columns:repeat(4,1fr);overflow:auto}.grid{grid-template-columns:repeat(2,1fr)}main{padding:14px}.top h1{font-size:21px}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="brand">Opportunity Intelligence Agent</div>
+    <div class="sub">رادار فرص الأعمال والـ AI Lead Intelligence</div>
+    <div class="nav">
+      <button class="active">لوحة الفرص</button><button>الرادار</button><button>العملاء المحتملون</button><button>الموافقة على التواصل</button><button>المتابعة</button><button>الصفقات</button><button>المصادر</button><button>الإعدادات</button>
+    </div>
+  </aside>
+  <main>
+    <div class="top"><div><h1>لوحة الفرص التشغيلية</h1><div class="muted">Reddit + LinkedIn + Web + X + Founder Sources</div></div><span class="badge">Approval before outreach: ON</span></div>
+    <div class="grid">
+      <div class="card"><div class="muted">فرص مكتشفة</div><div class="kpi">3</div></div>
+      <div class="card"><div class="muted">Purchase Intent مرتفع</div><div class="kpi">2</div></div>
+      <div class="card"><div class="muted">بانتظار موافقتك</div><div class="kpi">3</div></div>
+      <div class="card"><div class="muted">فرص بيع</div><div class="kpi">0</div></div>
+    </div>
+
+    <div class="section card">
+      <h2>المصادر المتصلة في الرادار</h2>
+      <div class="sources"><span class="source">Reddit</span><span class="source">LinkedIn</span><span class="source">Web</span><span class="source">X</span><span class="source">Product Hunt</span><span class="source">Wellfound</span><span class="source">Hacker News</span><span class="source">Indie Hackers</span><span class="source">GitHub</span><span class="source">Reviews</span><span class="source">YouTube / Podcasts</span></div>
+    </div>
+
+    <div class="section">
+      <h2>AI Lead Intelligence</h2>
+      <div class="toolbar"><input id="q" placeholder="ابحث في الفرص..." oninput="filterRows()"/><select><option>كل المصادر</option><option>Reddit</option><option>LinkedIn</option><option>Web</option></select><button class="btn primary" onclick="alert('تم تشغيل الفحص التجريبي. الربط الحي بالمصادر يحتاج API/Connector في الخلفية.')">تشغيل الرادار</button></div>
+      <div class="table"><table><thead><tr><th>العميل</th><th>المصدر</th><th>المشكلة</th><th>Purchase Intent</th><th>القيمة</th><th>الحل المقترح</th><th>الحالة</th><th></th></tr></thead>
+      <tbody id="rows">
+        <tr><td>مؤسسة SaaS — أستراليا</td><td>Reddit</td><td>إدارة التعقيد والثروة بعد نمو الشركة</td><td class="score hot">86/100</td><td>مرتفعة</td><td>Executive + Wealth Intelligence Dashboard</td><td>بانتظار الموافقة</td><td><button class="btn secondary" onclick="approve(this)">موافقة</button></td></tr>
+        <tr><td>مؤسسة تقنية — بريطانيا</td><td>Reddit / Web</td><td>Founder exit + PE + M&A readiness</td><td class="score hot">91/100</td><td>مرتفعة جداً</td><td>Founder Exit Intelligence</td><td>بانتظار الموافقة</td><td><button class="btn secondary" onclick="approve(this)">موافقة</button></td></tr>
+        <tr><td>CFO — Fintech</td><td>Reddit</td><td>استقلال مالي + انتقال دولي</td><td class="score med">74/100</td><td>متوسطة/مرتفعة</td><td>Cross-border Wealth Planner</td><td>بانتظار الموافقة</td><td><button class="btn secondary" onclick="approve(this)">موافقة</button></td></tr>
+      </tbody></table></div>
+    </div>
+
+    <div class="section"><h2>مسار التحويل</h2><div class="pipeline"><div class="stage"><strong>Detected</strong><span class="muted">إشارة مشكلة أو شراء</span></div><div class="stage"><strong>Qualified</strong><span class="muted">تحقق AI والأدلة</span></div><div class="stage"><strong>Approval</strong><span class="muted">موافقتك قبل التواصل</span></div><div class="stage"><strong>Outreach</strong><span class="muted">رسالة شخصية</span></div><div class="stage"><strong>Follow-up</strong><span class="muted">متابعة الردود</span></div><div class="stage"><strong>Deal</strong><span class="muted">فرصة بيع</span></div></div></div>
+    <div class="foot">هذه الواجهة تعمل كلوحة تشغيل Front-end. الاتصال الحي بـ Reddit/LinkedIn وباقي المصادر يحتاج موصلات/API وخلفية آمنة؛ لا يتم الادعاء بأن الأزرار ترسل رسائل حقيقية حالياً.</div>
+  </main>
+</div>
+<script>
+function approve(b){b.textContent='تمت الموافقة';b.disabled=true;b.closest('tr').children[6].textContent='Approved — جاهز للتواصل'}
+function filterRows(){const q=document.getElementById('q').value.toLowerCase();document.querySelectorAll('#rows tr').forEach(r=>r.style.display=r.innerText.toLowerCase().includes(q)?'':'none')}
+</script>
+</body>
+</html>
