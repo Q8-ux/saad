@@ -1,62 +1,39 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Opportunity Intelligence Agent</title>
-  <style>
-    :root{--bg:#08111f;--panel:#101b2d;--panel2:#15243a;--text:#eef5ff;--muted:#9db0c8;--line:#243750;--accent:#35c2a6;--warn:#f4b942;--danger:#ff6b6b}
-    *{box-sizing:border-box}body{margin:0;font-family:Arial,"Noto Sans Arabic",sans-serif;background:linear-gradient(180deg,#07101d,#0b1525 60%,#0a1320);color:var(--text)}
-    .app{min-height:100vh;display:grid;grid-template-columns:260px 1fr}.side{border-left:1px solid var(--line);padding:22px;background:#0a1423}.brand{font-weight:800;font-size:20px;line-height:1.5}.sub{color:var(--muted);font-size:12px;margin-top:6px}.nav{margin-top:24px;display:grid;gap:8px}.nav button{all:unset;cursor:pointer;padding:12px 14px;border-radius:12px;color:#dce8f6}.nav button.active,.nav button:hover{background:var(--panel2)}
-    main{padding:24px}.top{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}.top h1{margin:0;font-size:26px}.badge{padding:8px 12px;border:1px solid var(--line);border-radius:999px;color:var(--muted)}
-    .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:20px}.card{background:rgba(16,27,45,.94);border:1px solid var(--line);border-radius:16px;padding:16px}.kpi{font-size:30px;font-weight:800;margin-top:6px}.muted{color:var(--muted)}
-    .section{margin-top:18px}.section h2{font-size:18px;margin:0 0 12px}.sources{display:flex;flex-wrap:wrap;gap:8px}.source{padding:8px 11px;border-radius:999px;background:#14263d;border:1px solid #28405f;font-size:13px}
-    .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}.toolbar input,.toolbar select{background:#0d1929;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:10px}.btn{border:0;border-radius:10px;padding:10px 14px;cursor:pointer;font-weight:700}.primary{background:var(--accent);color:#04231d}.secondary{background:#223955;color:var(--text)}
-    .table{overflow:auto;border:1px solid var(--line);border-radius:14px}table{width:100%;border-collapse:collapse;min-width:900px;background:var(--panel)}th,td{padding:13px;border-bottom:1px solid var(--line);text-align:right;vertical-align:top}th{color:#b8cae0;font-size:12px;background:#0d1929}.score{font-weight:800}.hot{color:#58e3c6}.med{color:#ffd36e}.pipeline{display:flex;gap:10px;overflow:auto}.stage{min-width:190px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px}.stage strong{display:block;margin-bottom:6px}.foot{margin-top:20px;color:var(--muted);font-size:12px}
-    @media(max-width:900px){.app{grid-template-columns:1fr}.side{border-left:0;border-bottom:1px solid var(--line);padding:14px}.nav{grid-template-columns:repeat(4,1fr);overflow:auto}.grid{grid-template-columns:repeat(2,1fr)}main{padding:14px}.top h1{font-size:21px}}
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+<title>Opportunity Intelligence Agent</title>
+<style>
+:root{--bg:#f6f8fb;--card:#ffffff;--text:#172033;--muted:#68758a;--line:#e4e9f0;--accent:#0f8f79;--accent2:#e8f6f2;--warn:#a66d00;--shadow:0 8px 24px rgba(23,32,51,.07)}
+*{box-sizing:border-box}html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:Arial,"Noto Sans Arabic",sans-serif;overflow-x:hidden}body{min-height:100vh}
+.app{width:100%;max-width:480px;margin:0 auto;min-height:100vh;background:var(--bg);padding-bottom:82px}.header{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.96);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding:14px 16px}.brand{font-size:18px;font-weight:800}.sub{font-size:12px;color:var(--muted);margin-top:3px}.status{margin-top:10px;display:inline-flex;gap:7px;align-items:center;background:var(--accent2);color:#0b6e5d;padding:7px 10px;border-radius:10px;font-size:12px;font-weight:700}.dot{width:8px;height:8px;border-radius:50%;background:#11a889}
+main{padding:14px}.hero{background:linear-gradient(135deg,#ffffff,#eef9f6);border:1px solid var(--line);box-shadow:var(--shadow);border-radius:18px;padding:16px}.hero h1{font-size:22px;margin:0 0 7px}.hero p{margin:0;color:var(--muted);font-size:13px;line-height:1.7}.run{margin-top:14px;width:100%;height:46px;border:0;border-radius:13px;background:var(--accent);color:white;font-size:15px;font-weight:800;cursor:pointer}.kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.kpi{background:var(--card);border:1px solid var(--line);border-radius:15px;padding:13px;box-shadow:var(--shadow)}.kpi b{display:block;font-size:25px;margin-top:5px}.kpi span{font-size:12px;color:var(--muted)}
+.section{margin-top:16px}.section h2{font-size:16px;margin:0 0 9px}.sources{display:flex;gap:7px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}.sources::-webkit-scrollbar{display:none}.source{flex:0 0 auto;background:#fff;border:1px solid var(--line);border-radius:999px;padding:8px 11px;font-size:12px;white-space:nowrap}.search{width:100%;height:44px;border:1px solid var(--line);border-radius:12px;background:white;padding:0 12px;font-size:14px;outline:none}.lead{background:var(--card);border:1px solid var(--line);border-radius:17px;padding:14px;margin-top:10px;box-shadow:var(--shadow)}.lead-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.lead h3{font-size:15px;margin:0}.tag{font-size:11px;background:#f0f4f8;color:#526073;border-radius:999px;padding:5px 8px;white-space:nowrap}.problem{font-size:13px;color:var(--muted);line-height:1.7;margin:10px 0}.scoreline{display:grid;grid-template-columns:1fr 1fr;gap:8px}.metric{background:#f7f9fc;border:1px solid var(--line);border-radius:11px;padding:9px}.metric small{display:block;color:var(--muted);font-size:11px}.metric strong{font-size:14px}.solution{margin-top:9px;padding:10px;background:#f8fbfa;border-right:3px solid var(--accent);border-radius:9px;font-size:12px;line-height:1.6}.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.btn{height:40px;border-radius:11px;border:1px solid var(--line);font-weight:700;cursor:pointer}.approve{background:var(--accent);color:#fff;border-color:var(--accent)}.details{background:#fff;color:var(--text)}
+.pipeline{display:grid;gap:8px}.stage{background:#fff;border:1px solid var(--line);border-radius:13px;padding:11px;display:flex;justify-content:space-between;align-items:center}.stage span{font-size:12px;color:var(--muted)}.stage b{font-size:13px}
+.bottom{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;height:68px;background:#fff;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);z-index:30}.bottom button{border:0;background:transparent;color:#647087;font-size:11px;font-weight:700}.bottom button.active{color:var(--accent)}.empty{display:none;text-align:center;color:var(--muted);padding:18px;font-size:13px}
+</style>
 </head>
 <body>
 <div class="app">
-  <aside class="side">
-    <div class="brand">Opportunity Intelligence Agent</div>
-    <div class="sub">رادار فرص الأعمال والـ AI Lead Intelligence</div>
-    <div class="nav">
-      <button class="active">لوحة الفرص</button><button>الرادار</button><button>العملاء المحتملون</button><button>الموافقة على التواصل</button><button>المتابعة</button><button>الصفقات</button><button>المصادر</button><button>الإعدادات</button>
-    </div>
-  </aside>
-  <main>
-    <div class="top"><div><h1>لوحة الفرص التشغيلية</h1><div class="muted">Reddit + LinkedIn + Web + X + Founder Sources</div></div><span class="badge">Approval before outreach: ON</span></div>
-    <div class="grid">
-      <div class="card"><div class="muted">فرص مكتشفة</div><div class="kpi">3</div></div>
-      <div class="card"><div class="muted">Purchase Intent مرتفع</div><div class="kpi">2</div></div>
-      <div class="card"><div class="muted">بانتظار موافقتك</div><div class="kpi">3</div></div>
-      <div class="card"><div class="muted">فرص بيع</div><div class="kpi">0</div></div>
-    </div>
-
-    <div class="section card">
-      <h2>المصادر المتصلة في الرادار</h2>
-      <div class="sources"><span class="source">Reddit</span><span class="source">LinkedIn</span><span class="source">Web</span><span class="source">X</span><span class="source">Product Hunt</span><span class="source">Wellfound</span><span class="source">Hacker News</span><span class="source">Indie Hackers</span><span class="source">GitHub</span><span class="source">Reviews</span><span class="source">YouTube / Podcasts</span></div>
-    </div>
-
-    <div class="section">
-      <h2>AI Lead Intelligence</h2>
-      <div class="toolbar"><input id="q" placeholder="ابحث في الفرص..." oninput="filterRows()"/><select><option>كل المصادر</option><option>Reddit</option><option>LinkedIn</option><option>Web</option></select><button class="btn primary" onclick="alert('تم تشغيل الفحص التجريبي. الربط الحي بالمصادر يحتاج API/Connector في الخلفية.')">تشغيل الرادار</button></div>
-      <div class="table"><table><thead><tr><th>العميل</th><th>المصدر</th><th>المشكلة</th><th>Purchase Intent</th><th>القيمة</th><th>الحل المقترح</th><th>الحالة</th><th></th></tr></thead>
-      <tbody id="rows">
-        <tr><td>مؤسسة SaaS — أستراليا</td><td>Reddit</td><td>إدارة التعقيد والثروة بعد نمو الشركة</td><td class="score hot">86/100</td><td>مرتفعة</td><td>Executive + Wealth Intelligence Dashboard</td><td>بانتظار الموافقة</td><td><button class="btn secondary" onclick="approve(this)">موافقة</button></td></tr>
-        <tr><td>مؤسسة تقنية — بريطانيا</td><td>Reddit / Web</td><td>Founder exit + PE + M&A readiness</td><td class="score hot">91/100</td><td>مرتفعة جداً</td><td>Founder Exit Intelligence</td><td>بانتظار الموافقة</td><td><button class="btn secondary" onclick="approve(this)">موافقة</button></td></tr>
-        <tr><td>CFO — Fintech</td><td>Reddit</td><td>استقلال مالي + انتقال دولي</td><td class="score med">74/100</td><td>متوسطة/مرتفعة</td><td>Cross-border Wealth Planner</td><td>بانتظار الموافقة</td><td><button class="btn secondary" onclick="approve(this)">موافقة</button></td></tr>
-      </tbody></table></div>
-    </div>
-
-    <div class="section"><h2>مسار التحويل</h2><div class="pipeline"><div class="stage"><strong>Detected</strong><span class="muted">إشارة مشكلة أو شراء</span></div><div class="stage"><strong>Qualified</strong><span class="muted">تحقق AI والأدلة</span></div><div class="stage"><strong>Approval</strong><span class="muted">موافقتك قبل التواصل</span></div><div class="stage"><strong>Outreach</strong><span class="muted">رسالة شخصية</span></div><div class="stage"><strong>Follow-up</strong><span class="muted">متابعة الردود</span></div><div class="stage"><strong>Deal</strong><span class="muted">فرصة بيع</span></div></div></div>
-    <div class="foot">هذه الواجهة تعمل كلوحة تشغيل Front-end. الاتصال الحي بـ Reddit/LinkedIn وباقي المصادر يحتاج موصلات/API وخلفية آمنة؛ لا يتم الادعاء بأن الأزرار ترسل رسائل حقيقية حالياً.</div>
-  </main>
+<header class="header"><div class="brand">Opportunity Intelligence</div><div class="sub">AI Lead Intelligence • Mobile Console</div><div class="status"><span class="dot"></span> الموافقة قبل التواصل مفعّلة</div></header>
+<main>
+<section class="hero"><h1>رادار فرص الأعمال</h1><p>اكتشاف المشكلات عالية القيمة من Reddit وLinkedIn وWeb وX وباقي المصادر، ثم ترتيبها حسب نية الشراء وقوة الفرصة.</p><button class="run" onclick="alert('الفحص التجريبي يعمل من الواجهة. الربط الحي بالمصادر يحتاج Backend/API آمن.')">تشغيل الرادار</button></section>
+<section class="kpis"><div class="kpi"><span>فرص مكتشفة</span><b>3</b></div><div class="kpi"><span>نية شراء مرتفعة</span><b>2</b></div><div class="kpi"><span>بانتظار الموافقة</span><b>3</b></div><div class="kpi"><span>صفقات</span><b>0</b></div></section>
+<section class="section"><h2>المصادر</h2><div class="sources"><span class="source">Reddit</span><span class="source">LinkedIn</span><span class="source">Web</span><span class="source">X</span><span class="source">Product Hunt</span><span class="source">Wellfound</span><span class="source">Hacker News</span><span class="source">Indie Hackers</span></div></section>
+<section class="section"><h2>الفرص</h2><input id="q" class="search" placeholder="ابحث في الفرص..." oninput="filterLeads()"/>
+<div id="leadList">
+<article class="lead"><div class="lead-top"><h3>مؤسسة تقنية — بريطانيا</h3><span class="tag">Reddit / Web</span></div><div class="problem">Founder exit + PE + M&A readiness. مشكلة عالية القيمة وفيها سلطة قرار مباشرة.</div><div class="scoreline"><div class="metric"><small>Purchase Intent</small><strong>91 / 100</strong></div><div class="metric"><small>قيمة الفرصة</small><strong>مرتفعة جداً</strong></div></div><div class="solution">الحل: Founder Exit Intelligence + M&A Readiness Dashboard</div><div class="actions"><button class="btn approve" onclick="approve(this)">موافقة</button><button class="btn details">التفاصيل</button></div></article>
+<article class="lead"><div class="lead-top"><h3>مؤسسة SaaS — أستراليا</h3><span class="tag">Reddit</span></div><div class="problem">تعقيد مالي وتشغيلي بعد نمو الشركة والثروة، مع حاجة لإدارة القرار والأصول.</div><div class="scoreline"><div class="metric"><small>Purchase Intent</small><strong>86 / 100</strong></div><div class="metric"><small>قيمة الفرصة</small><strong>مرتفعة</strong></div></div><div class="solution">الحل: Executive + Wealth Intelligence Dashboard</div><div class="actions"><button class="btn approve" onclick="approve(this)">موافقة</button><button class="btn details">التفاصيل</button></div></article>
+<article class="lead"><div class="lead-top"><h3>CFO — Fintech</h3><span class="tag">Reddit</span></div><div class="problem">استقلال مالي شخصي + انتقال دولي + قرارات ثروة عبر أكثر من دولة.</div><div class="scoreline"><div class="metric"><small>Purchase Intent</small><strong>74 / 100</strong></div><div class="metric"><small>قيمة الفرصة</small><strong>متوسطة / مرتفعة</strong></div></div><div class="solution">الحل: Cross-border Wealth Planner</div><div class="actions"><button class="btn approve" onclick="approve(this)">موافقة</button><button class="btn details">التفاصيل</button></div></article>
+</div><div id="empty" class="empty">لا توجد نتائج مطابقة.</div></section>
+<section class="section"><h2>مسار التحويل</h2><div class="pipeline"><div class="stage"><b>Detected</b><span>إشارة مشكلة</span></div><div class="stage"><b>Qualified</b><span>تحقق AI</span></div><div class="stage"><b>Approval</b><span>موافقتك</span></div><div class="stage"><b>Outreach</b><span>التواصل</span></div><div class="stage"><b>Follow-up</b><span>المتابعة</span></div><div class="stage"><b>Deal</b><span>فرصة بيع</span></div></div></section>
+</main>
+<nav class="bottom"><button class="active">الفرص</button><button>الرادار</button><button>الموافقات</button><button>الصفقات</button></nav>
 </div>
 <script>
-function approve(b){b.textContent='تمت الموافقة';b.disabled=true;b.closest('tr').children[6].textContent='Approved — جاهز للتواصل'}
-function filterRows(){const q=document.getElementById('q').value.toLowerCase();document.querySelectorAll('#rows tr').forEach(r=>r.style.display=r.innerText.toLowerCase().includes(q)?'':'none')}
+function approve(btn){btn.textContent='تمت الموافقة';btn.disabled=true;btn.style.opacity='.65'}
+function filterLeads(){const q=document.getElementById('q').value.trim().toLowerCase();let n=0;document.querySelectorAll('.lead').forEach(el=>{const show=el.innerText.toLowerCase().includes(q);el.style.display=show?'block':'none';if(show)n++});document.getElementById('empty').style.display=n?'none':'block'}
 </script>
 </body>
 </html>
