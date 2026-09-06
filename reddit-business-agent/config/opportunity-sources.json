@@ -1,0 +1,34 @@
+{
+  "version": 2,
+  "strategy": "predictive-opportunity-intelligence",
+  "sources": [
+    {"id":"reddit","priority":1,"roles":["pain","buying_intent","recommendations"]},
+    {"id":"linkedin","priority":1,"roles":["identity","company","decision_authority","buying_intent"]},
+    {"id":"web","priority":1,"roles":["company","funding","hiring","expansion","m_and_a","contact"]},
+    {"id":"x","priority":2,"roles":["realtime_pain","recommendations","competitor_complaints"]},
+    {"id":"product_hunt","priority":2,"roles":["launch","founder","distribution_pain"]},
+    {"id":"wellfound","priority":2,"roles":["founder","startup","company_enrichment"]},
+    {"id":"hacker_news","priority":2,"roles":["technical_pain","ask_hn","startup"]},
+    {"id":"indie_hackers","priority":2,"roles":["founder_pain","saas","growth","pricing"]},
+    {"id":"github_public","priority":3,"roles":["issues","technical_need","workflow_gap"]},
+    {"id":"reviews","priority":3,"roles":["competitor_complaint","switching_intent"]},
+    {"id":"youtube_podcasts","priority":3,"roles":["declared_problem","strategy","founder_context"]},
+    {"id":"founder_communities","priority":3,"roles":["public_problem","recommendations"]}
+  ],
+  "scores": {
+    "problemSeverity": 0.18,
+    "purchaseIntent": 0.20,
+    "decisionAuthority": 0.14,
+    "financialCapacity": 0.12,
+    "recency": 0.12,
+    "solutionFit": 0.12,
+    "contactability": 0.07,
+    "evidenceConfidence": 0.05
+  },
+  "approvalRequiredBeforeOutreach": true,
+  "privacy": {
+    "allowPublicProfessionalEnrichment": true,
+    "allowPseudonymDeanonymization": false,
+    "requireEvidenceForIdentityLink": true
+  }
+}
