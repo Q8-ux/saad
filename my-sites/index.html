@@ -1,0 +1,496 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f5f7fa">
+  <meta name="description" content="بوابة موحدة لمواقع وأنظمة سعد النبهان الرقمية، مع تعريف مختصر ورابط مباشر لكل مشروع.">
+  <title>مواقع سعد | بوابة المشاريع الرقمية</title>
+  <style>
+    @font-face {
+      font-family: "AlMohanad";
+      src: url("../rattil/assets/al-mohanad.woff") format("woff");
+      font-display: swap;
+      font-weight: 400;
+    }
+    @font-face {
+      font-family: "AlMohanad";
+      src: url("../rattil/assets/al-mohanad-bold.woff") format("woff");
+      font-display: swap;
+      font-weight: 700 900;
+    }
+    :root {
+      --ink: #112033;
+      --muted: #58677b;
+      --line: #dbe2ea;
+      --paper: #ffffff;
+      --canvas: #f5f7fa;
+      --navy: #123b5d;
+      --teal: #087f78;
+      --teal-soft: #e7f5f2;
+      --orange: #ee6a3b;
+      --orange-soft: #fff0e9;
+      --shadow: 0 18px 50px rgba(25, 45, 69, .10);
+      --radius: 24px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 88% 0%, rgba(8,127,120,.10), transparent 28rem),
+        radial-gradient(circle at 0% 22%, rgba(238,106,59,.08), transparent 26rem),
+        var(--canvas);
+      font-family: "AlMohanad", Tahoma, Arial, sans-serif;
+      font-size: 17px;
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; }
+    button, input { font: inherit; }
+    .shell { width: min(1180px, calc(100% - 32px)); margin-inline: auto; }
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      border-bottom: 1px solid rgba(219,226,234,.82);
+      background: rgba(245,247,250,.90);
+      backdrop-filter: blur(18px);
+    }
+    .topbar-inner {
+      min-height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+    .brand-mark {
+      width: 46px;
+      height: 46px;
+      display: grid;
+      place-items: center;
+      border-radius: 15px;
+      color: #fff;
+      font-size: 18px;
+      font-weight: 900;
+      letter-spacing: -.03em;
+      background: linear-gradient(135deg, var(--navy), var(--teal));
+      box-shadow: 0 10px 24px rgba(18,59,93,.20);
+    }
+    .brand-copy { display: grid; line-height: 1.15; }
+    .brand-copy strong { font-size: 20px; }
+    .brand-copy small { color: var(--muted); font-size: 13px; margin-top: 5px; }
+    .github-link {
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--paper);
+      text-decoration: none;
+      font-weight: 700;
+      transition: border-color .2s ease, transform .2s ease;
+    }
+    .github-link:hover { border-color: var(--teal); transform: translateY(-1px); }
+    .github-link svg { width: 20px; height: 20px; fill: currentColor; }
+    main { padding-block: 34px 64px; }
+    .intro {
+      display: grid;
+      grid-template-columns: minmax(0, 1.6fr) minmax(250px, .7fr);
+      gap: 22px;
+      align-items: stretch;
+      margin-bottom: 24px;
+    }
+    .intro-copy, .intro-aside {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 30px;
+      background: var(--paper);
+      box-shadow: var(--shadow);
+    }
+    .intro-copy { padding: clamp(28px, 5vw, 54px); }
+    .intro-copy::after {
+      content: "";
+      position: absolute;
+      inset: auto auto -85px -50px;
+      width: 220px;
+      aspect-ratio: 1;
+      border: 44px solid var(--teal-soft);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .eyebrow {
+      margin: 0 0 10px;
+      color: var(--teal);
+      font-weight: 800;
+      font-size: 15px;
+    }
+    h1 {
+      max-width: 760px;
+      margin: 0;
+      font-size: clamp(38px, 6.5vw, 72px);
+      line-height: 1.02;
+      letter-spacing: -.035em;
+    }
+    .intro-lead {
+      max-width: 700px;
+      margin: 18px 0 0;
+      color: var(--muted);
+      font-size: clamp(18px, 2vw, 22px);
+    }
+    .intro-aside {
+      min-height: 250px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 28px;
+      color: #fff;
+      background: linear-gradient(155deg, #123b5d, #0d6c72 72%, #08988d);
+      border-color: transparent;
+    }
+    .intro-aside::before {
+      content: "";
+      position: absolute;
+      inset: -40px -80px auto auto;
+      width: 220px;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: rgba(255,255,255,.07);
+    }
+    .intro-aside span { color: rgba(255,255,255,.72); font-size: 15px; }
+    .intro-aside strong { display: block; font-size: clamp(54px, 8vw, 84px); line-height: .9; }
+    .intro-aside p { margin: 0; color: rgba(255,255,255,.84); }
+    .toolbar {
+      position: sticky;
+      top: 84px;
+      z-index: 10;
+      display: grid;
+      grid-template-columns: minmax(230px, .75fr) minmax(0, 1.6fr);
+      gap: 14px;
+      align-items: center;
+      margin-bottom: 24px;
+      padding: 12px;
+      border: 1px solid rgba(219,226,234,.9);
+      border-radius: 20px;
+      background: rgba(255,255,255,.92);
+      box-shadow: 0 12px 34px rgba(25,45,69,.08);
+      backdrop-filter: blur(18px);
+    }
+    .search {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 48px;
+      padding: 0 14px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #f8fafc;
+    }
+    .search svg { width: 21px; height: 21px; color: var(--muted); flex: 0 0 auto; }
+    .search input {
+      width: 100%;
+      border: 0;
+      outline: 0;
+      color: var(--ink);
+      background: transparent;
+      font-size: 16px;
+    }
+    .filters {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+      scrollbar-width: thin;
+    }
+    .filter {
+      min-height: 44px;
+      flex: 0 0 auto;
+      padding: 7px 15px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--muted);
+      background: var(--paper);
+      cursor: pointer;
+      font-weight: 700;
+      transition: .2s ease;
+    }
+    .filter:hover { color: var(--navy); border-color: #aebbc8; }
+    .filter[aria-pressed="true"] { color: #fff; border-color: var(--navy); background: var(--navy); }
+    .section-line {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 16px;
+      margin: 0 2px 18px;
+    }
+    .section-line h2 { margin: 0; font-size: 28px; }
+    .results-count { color: var(--muted); font-size: 15px; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+    .card {
+      --accent: #087f78;
+      --accent-soft: #e7f5f2;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 315px;
+      padding: 22px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--paper);
+      box-shadow: 0 8px 26px rgba(25,45,69,.06);
+      transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+    }
+    .card:hover { transform: translateY(-4px); border-color: color-mix(in srgb, var(--accent) 40%, var(--line)); box-shadow: var(--shadow); }
+    .card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
+    .monogram {
+      width: 56px;
+      height: 56px;
+      flex: 0 0 auto;
+      display: grid;
+      place-items: center;
+      border-radius: 18px;
+      color: var(--accent);
+      background: var(--accent-soft);
+      font-size: 20px;
+      font-weight: 900;
+      letter-spacing: -.03em;
+    }
+    .type {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      color: var(--muted);
+      background: #f3f6f9;
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .type::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
+    .card h3 { margin: 22px 0 7px; font-size: 24px; line-height: 1.25; }
+    .card p { margin: 0; color: var(--muted); font-size: 16px; line-height: 1.72; }
+    .card-actions { display: grid; grid-template-columns: 1fr auto; gap: 9px; margin-top: auto; padding-top: 22px; }
+    .card-actions a {
+      min-height: 46px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      text-decoration: none;
+      font-size: 15px;
+      font-weight: 800;
+      transition: .2s ease;
+    }
+    .card-actions .visit { color: #fff; border-color: var(--accent); background: var(--accent); }
+    .card-actions .visit:hover { filter: brightness(.94); }
+    .card-actions .source { width: 48px; color: var(--ink); background: #f8fafc; }
+    .card-actions .source:hover { border-color: var(--accent); color: var(--accent); }
+    .card-actions svg { width: 18px; height: 18px; }
+    .empty {
+      display: none;
+      padding: 54px 24px;
+      border: 1px dashed #b9c5d0;
+      border-radius: var(--radius);
+      color: var(--muted);
+      background: rgba(255,255,255,.72);
+      text-align: center;
+    }
+    .empty strong { display: block; color: var(--ink); font-size: 24px; }
+    footer { border-top: 1px solid var(--line); background: rgba(255,255,255,.68); }
+    .footer-inner {
+      min-height: 108px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      color: var(--muted);
+    }
+    .signature { color: var(--ink); font-weight: 800; }
+    .footer-inner p { margin: 0; }
+    @media (max-width: 940px) {
+      .intro { grid-template-columns: 1fr; }
+      .intro-aside { min-height: 190px; }
+      .toolbar { grid-template-columns: 1fr; top: 76px; }
+      .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 620px) {
+      body { font-size: 16px; }
+      .shell { width: min(100% - 22px, 1180px); }
+      .topbar-inner { min-height: 66px; }
+      .brand-mark { width: 42px; height: 42px; border-radius: 13px; }
+      .brand-copy strong { font-size: 18px; }
+      .brand-copy small { display: none; }
+      .github-link span { display: none; }
+      .github-link { width: 44px; justify-content: center; padding: 0; }
+      main { padding-top: 20px; }
+      .intro-copy, .intro-aside { border-radius: 24px; }
+      .intro-copy { padding: 28px 22px 34px; }
+      .intro-aside { min-height: 168px; padding: 23px; }
+      .intro-aside strong { font-size: 58px; }
+      h1 { font-size: clamp(38px, 13vw, 58px); }
+      .intro-lead { font-size: 18px; }
+      .toolbar { position: static; padding: 10px; border-radius: 18px; }
+      .grid { grid-template-columns: 1fr; gap: 14px; }
+      .card { min-height: 288px; padding: 20px; border-radius: 21px; }
+      .section-line h2 { font-size: 24px; }
+      .footer-inner { align-items: flex-start; flex-direction: column; justify-content: center; padding-block: 25px; gap: 6px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell topbar-inner">
+      <a class="brand" href="#projects" aria-label="الانتقال إلى المشاريع">
+        <span class="brand-mark">SR</span>
+        <span class="brand-copy"><strong>مواقع سعد</strong><small>بوابة المشاريع الرقمية</small></span>
+      </a>
+      <a class="github-link" href="https://github.com/Q8-ux" target="_blank" rel="noopener noreferrer" aria-label="فتح حساب Q8-ux على GitHub">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .7a11.5 11.5 0 0 0-3.6 22.4c.6.1.8-.2.8-.6v-2.2c-3.4.7-4.1-1.4-4.1-1.4-.5-1.4-1.3-1.8-1.3-1.8-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.7 1.3 3.4 1 .1-.8.4-1.3.8-1.6-2.7-.3-5.5-1.3-5.5-5.7 0-1.3.4-2.3 1.2-3.1-.1-.3-.5-1.6.1-3.1 0 0 1-.3 3.2 1.2a11 11 0 0 1 5.8 0c2.2-1.5 3.2-1.2 3.2-1.2.6 1.5.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.4-2.8 5.4-5.5 5.7.4.4.8 1.1.8 2.2v3.3c0 .4.2.7.8.6A11.5 11.5 0 0 0 12 .7Z"/></svg>
+        <span>حساب GitHub</span>
+      </a>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section class="intro" aria-labelledby="pageTitle">
+      <div class="intro-copy">
+        <p class="eyebrow">سعد النبهان · مدير المشاريع الرقمية</p>
+        <h1 id="pageTitle">كل المواقع،<br>في مكان واحد.</h1>
+        <p class="intro-lead">مواقع وأنظمة رقمية في القانون والتعليم والتجارة والذكاء الاصطناعي، مع تعريف مختصر ووصول مباشر لكل مشروع.</p>
+      </div>
+      <aside class="intro-aside" aria-label="عدد المشاريع">
+        <span>المشاريع المتاحة</span>
+        <strong id="totalCount">18</strong>
+        <p>موقعًا ونظامًا جاهزًا للاستعراض</p>
+      </aside>
+    </section>
+
+    <section id="projects" aria-labelledby="projectsTitle">
+      <div class="toolbar">
+        <label class="search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+          <input id="searchInput" type="search" placeholder="ابحث باسم الموقع أو مجاله" autocomplete="off" aria-label="البحث في المواقع">
+        </label>
+        <div class="filters" id="filters" aria-label="تصنيف المواقع"></div>
+      </div>
+      <div class="section-line">
+        <h2 id="projectsTitle">المواقع والأنظمة</h2>
+        <span class="results-count" id="resultsCount" aria-live="polite"></span>
+      </div>
+      <div class="grid" id="projectsGrid"></div>
+      <div class="empty" id="emptyState">
+        <strong>لا توجد نتيجة مطابقة</strong>
+        <span>جرّب كلمة أخرى أو اختر «الكل».</span>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="shell footer-inner">
+      <p class="signature">سعد النبهان — مدير المشاريع الرقمية</p>
+      <p>المواقع مستضافة عبر GitHub Pages</p>
+    </div>
+  </footer>
+
+  <script>
+    const projects = [
+      { name: "مركز قيادة المشاريع", mark: "مق", category: "إدارة", type: "لوحة مركزية", color: "#116b78", soft: "#e7f5f5", description: "لوحة موحدة لمتابعة محفظة المشاريع والأدوات وخطط التنفيذ والوصول السريع إلى التفاصيل.", live: "https://q8-ux.github.io/saad/project-command-center/", source: "https://github.com/Q8-ux/saad/tree/main/project-command-center" },
+      { name: "رَتِّل القرآن", mark: "رت", category: "تعليم", type: "منصة تعليمية", color: "#087f78", soft: "#e4f5f0", description: "منصة ذكية لتنظيم حفظ القرآن والمراجعة والتسميع والبحث، مع تلاوة وتفسير ودعم لغات متعددة.", live: "https://q8-ux.github.io/saad/rattil/", source: "https://github.com/Q8-ux/saad/tree/main/rattil" },
+      { name: "أنت الشاعر", mark: "أن", category: "ذكاء ومحتوى", type: "إبداع بالذكاء", color: "#8c4772", soft: "#f7eaf2", description: "نظام يحوّل القصة والمشاعر إلى قصيدة نبطية من ستة أبيات، مع التعديل والأرشفة وإدارة القصائد.", live: "https://q8-ux.github.io/saad/ant-alshaer/", source: "https://github.com/Q8-ux/saad/tree/main/ant-alshaer" },
+      { name: "English Kuwait", mark: "EN", category: "تعليم", type: "منصة تعليمية", color: "#2262a8", soft: "#e9f1fb", description: "تعليم اللغة الإنجليزية لطلبة المرحلة المتوسطة في الكويت عبر الدروس والتدريب والاستماع والتقييم.", live: "https://q8-ux.github.io/saad/english-kuwait/", source: "https://github.com/Q8-ux/saad/tree/main/english-kuwait" },
+      { name: "إعلانك سليم", mark: "إع", category: "قانون", type: "مساعد امتثال", color: "#cf5c34", soft: "#fff0e9", description: "مساعد ذكي يفحص الإعلان قبل نشره ويوضح المتطلبات والمخاطر وفق القواعد المنظمة للإعلان.", live: "https://q8-ux.github.io/saad/elanak-saleem/", source: "https://github.com/Q8-ux/saad/tree/main/elanak-saleem" },
+      { name: "مجموعة سابق القانونية", mark: "سا", category: "قانون", type: "موقع مؤسسي", color: "#173f64", soft: "#eaf0f6", description: "واجهة المجموعة القانونية لخدمات الاستشارات والمذكرات والتواصل، باللغات العربية والإنجليزية والأردية.", live: "https://q8-ux.github.io/saad/sabeq-legal/", source: "https://github.com/Q8-ux/saad/tree/main/sabeq-legal" },
+      { name: "سابق المطوّر", mark: "س+", category: "إدارة", type: "إدارة قانونية", color: "#344d78", soft: "#ebeff7", description: "منصة لإدارة المكتب القانوني والملفات والمذكرات، مع محرك بحث في القوانين ومتابعة العمل.", live: "https://q8-ux.github.io/saad/sabeq-legal-pro/", source: "https://github.com/Q8-ux/saad/tree/main/sabeq-legal-pro" },
+      { name: "شاليهنا", mark: "شل", category: "تجارة وخدمات", type: "دليل حجوزات", color: "#087b9a", soft: "#e5f5f8", description: "دليل للبحث عن شاليهات الكويت، مقارنة الخيارات والتواصل المباشر مع جهة الحجز.", live: "https://q8-ux.github.io/saad/shalayhna/", source: "https://github.com/Q8-ux/saad/tree/main/shalayhna" },
+      { name: "نظام تموينات", mark: "تم", category: "تجارة وخدمات", type: "توريد مطاعم", color: "#a84d25", soft: "#fff0e8", description: "منصة لطلب احتياجات المطاعم ومتابعة التوصيل والمخزون والأسعار في تجربة مناسبة للجوال.", live: "https://q8-ux.github.io/saad/tamweenat/", source: "https://github.com/Q8-ux/saad/tree/main/tamweenat" },
+      { name: "إدارة تموينات", mark: "ت+", category: "إدارة", type: "لوحة إدارة", color: "#8a3e24", soft: "#f9ece7", description: "لوحة تشغيل لإدارة الطلبات والعملاء والمخزون والحسابات والأسعار داخل نظام تموينات.", live: "https://q8-ux.github.io/saad/tamweenat-admin/", source: "https://github.com/Q8-ux/saad/tree/main/tamweenat-admin" },
+      { name: "زاد للمطاعم", mark: "زد", category: "تجارة وخدمات", type: "توريد بالجملة", color: "#396a45", soft: "#eaf4ec", description: "كتالوج لتوريد احتياجات المطاعم اليومية بالجملة في الكويت مع عرض المنتجات والأسعار.", live: "https://q8-ux.github.io/saad/zad-restaurants/", source: "https://github.com/Q8-ux/saad/tree/main/zad-restaurants" },
+      { name: "عُمان للفواكه والخضروات", mark: "عُ", category: "تجارة وخدمات", type: "طلبات ومبيعات", color: "#438148", soft: "#eaf5eb", description: "واجهة لإدارة طلبات ومبيعات الفواكه والخضروات وعرض المنتجات والعملاء بصورة عملية.", live: "https://q8-ux.github.io/saad/oman-fruits-pos/", source: "https://github.com/Q8-ux/saad/tree/main/oman-fruits-pos" },
+      { name: "نظام وقاية", mark: "وق", category: "إدارة", type: "صحة بيطرية", color: "#347357", soft: "#e7f4ed", description: "منصة لتنظيم حملات تطعيم المواشي ومتابعة المربين والقطعان والفرق البيطرية ومواقعهم.", live: "https://q8-ux.github.io/saad/livestock-vax-kw/", source: "https://github.com/Q8-ux/saad/tree/main/livestock-vax-kw" },
+      { name: "خطة المبيعات الرقمية", mark: "خط", category: "ذكاء ومحتوى", type: "خطة تنفيذ", color: "#b15b22", soft: "#fff1e5", description: "خطة عربية عملية للانتقال من البحث عن العملاء إلى توقيع أول عقد خدمات رقمية مدفوع.", live: "https://q8-ux.github.io/saad/kuwait-digital-sales-plan/", source: "https://github.com/Q8-ux/saad/tree/main/kuwait-digital-sales-plan" },
+      { name: "الصندوق الكويتي", mark: "كف", category: "مؤسسي", type: "نموذج مؤسسي", color: "#1d6a86", soft: "#e7f2f6", description: "تصميم مؤسسي حديث يعرض دور الصندوق الكويتي للتنمية وشراكاته ومشاريعه منذ عام 1961.", live: "https://q8-ux.github.io/saad/kuwait-fund-modern/", source: "https://github.com/Q8-ux/saad/tree/main/kuwait-fund-modern" },
+      { name: "دليل الخليج المهني", mark: "دل", category: "ذكاء ومحتوى", type: "فرص وأعمال", color: "#7658a7", soft: "#f1ecf8", description: "واجهة لرصد الاحتياجات والفرص المهنية وتحويل الإشارات المنشورة إلى خيوط عمل قابلة للمتابعة.", live: "https://q8-ux.github.io/saad/reddit-business-agent/", source: "https://github.com/Q8-ux/saad/tree/main/reddit-business-agent" },
+      { name: "إدارة الحضور والانصراف", mark: "حض", category: "إدارة", type: "قوى عاملة", color: "#315e96", soft: "#eaf1fa", description: "نظام لإدارة الحضور والانصراف والموظفين والتحويلات والتنبيهات من لوحة تحكم موحدة.", live: "https://q8-ux.github.io/saad/dashboard/", source: "https://github.com/Q8-ux/saad/tree/main/workforce-platform" },
+      { name: "أرشيف الاختراقات", mark: "CA", category: "ذكاء ومحتوى", type: "أرشيف معرفي", color: "#29384d", soft: "#ebeff3", description: "أرشيف تفاعلي لقصص أشهر الاختراقات الإلكترونية مع تصنيف إقليمي ومصادر ومنهجية تحقق.", live: "https://q8-ux.github.io/saad/", source: "https://github.com/Q8-ux/saad" }
+    ];
+
+    const categories = ["الكل", ...new Set(projects.map(project => project.category))];
+    const grid = document.getElementById("projectsGrid");
+    const filters = document.getElementById("filters");
+    const searchInput = document.getElementById("searchInput");
+    const resultsCount = document.getElementById("resultsCount");
+    const emptyState = document.getElementById("emptyState");
+    document.getElementById("totalCount").textContent = projects.length.toLocaleString("ar-KW");
+    let activeCategory = "الكل";
+
+    const arrowIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg>';
+    const codeIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m8 9-4 3 4 3M16 9l4 3-4 3M14 5l-4 14"/></svg>';
+
+    function normalize(value) {
+      return value.toLocaleLowerCase("ar").normalize("NFKD").replace(/[أإآ]/g, "ا").replace(/ة/g, "ه");
+    }
+
+    function renderFilters() {
+      filters.innerHTML = categories.map(category => `<button class="filter" type="button" data-category="${category}" aria-pressed="${category === activeCategory}">${category}</button>`).join("");
+    }
+
+    function renderProjects() {
+      const query = normalize(searchInput.value.trim());
+      const visible = projects.filter(project => {
+        const matchesCategory = activeCategory === "الكل" || project.category === activeCategory;
+        const haystack = normalize(`${project.name} ${project.category} ${project.type} ${project.description}`);
+        return matchesCategory && (!query || haystack.includes(query));
+      });
+
+      grid.innerHTML = visible.map(project => `
+        <article class="card" style="--accent:${project.color};--accent-soft:${project.soft}">
+          <div class="card-head">
+            <span class="monogram" aria-hidden="true">${project.mark}</span>
+            <span class="type">${project.type}</span>
+          </div>
+          <h3>${project.name}</h3>
+          <p>${project.description}</p>
+          <div class="card-actions">
+            <a class="visit" href="${project.live}" target="_blank" rel="noopener noreferrer">فتح الموقع ${arrowIcon}</a>
+            <a class="source" href="${project.source}" target="_blank" rel="noopener noreferrer" aria-label="فتح مصدر ${project.name} على GitHub">${codeIcon}</a>
+          </div>
+        </article>`).join("");
+
+      resultsCount.textContent = `${visible.length.toLocaleString("ar-KW")} من ${projects.length.toLocaleString("ar-KW")}`;
+      grid.style.display = visible.length ? "grid" : "none";
+      emptyState.style.display = visible.length ? "none" : "block";
+    }
+
+    filters.addEventListener("click", event => {
+      const button = event.target.closest("button[data-category]");
+      if (!button) return;
+      activeCategory = button.dataset.category;
+      renderFilters();
+      renderProjects();
+    });
+    searchInput.addEventListener("input", renderProjects);
+    renderFilters();
+    renderProjects();
+  </script>
+</body>
+</html>
