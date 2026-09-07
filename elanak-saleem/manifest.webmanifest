@@ -1,0 +1,12 @@
+{
+  "name": "إعلانك سليم",
+  "short_name": "إعلانك سليم",
+  "description": "مساعد لفحص الإعلانات قبل النشر",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f3f7f7",
+  "theme_color": "#071f2b",
+  "icons": [{"src":"favicon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+}
