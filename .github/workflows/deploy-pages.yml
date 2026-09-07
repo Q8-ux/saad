@@ -25,6 +25,7 @@ on:
       - 'oman-fruits-pos/**'
       - 'project-command-center/**'
       - 'reddit-business-agent/**'
+      - 'ant-alshaer/**'
       - 'workforce-platform/apps/web/**'
       - '.github/workflows/deploy-pages.yml'
   workflow_dispatch:
@@ -90,6 +91,7 @@ jobs:
           cp -R oman-fruits-pos _site/oman-fruits-pos
           cp -R project-command-center _site/project-command-center
           cp -R reddit-business-agent _site/reddit-business-agent
+          cp -R ant-alshaer _site/ant-alshaer
           cp -R workforce-platform/apps/web/out/_next _site/_next
           for p in dashboard admin-control attendance-smart transfers emergency ai-tools notifications profile; do cp -R "workforce-platform/apps/web/out/$p" "_site/$p"; done
           echo 'compact-mobile-header-v22' > _site/interface-version.txt
@@ -106,6 +108,11 @@ jobs:
           test -s _site/oman-fruits-pos/index.html
           test -s _site/project-command-center/index.html
           test -s _site/reddit-business-agent/index.html
+          test -s _site/ant-alshaer/index.html
+          test -s _site/ant-alshaer/archive/index.html
+          test -s _site/ant-alshaer/login/index.html
+          test -s _site/ant-alshaer/admin/index.html
+          test -s _site/ant-alshaer/admin/login/index.html
           test -d _site/_next
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
