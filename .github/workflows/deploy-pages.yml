@@ -23,7 +23,7 @@ on:
       - 'livestock-vax-kw/**'
       - 'english-kuwait/**'
       - 'oman-fruits-pos/**'
-      - 'project-command-center/**'
+      - 'project-command-center/**'\n      - 'my-sites/**'
       - 'reddit-business-agent/**'
       - 'ant-alshaer/**'
       - 'elanak-saleem/**'
@@ -90,7 +90,7 @@ jobs:
           cp -R english-kuwait _site/english-kuwait
           bash english-kuwait/generate-audio.sh _site/english-kuwait/audio
           cp -R oman-fruits-pos _site/oman-fruits-pos
-          cp -R project-command-center _site/project-command-center
+          cp -R project-command-center _site/project-command-center\n          cp -R my-sites _site/my-sites
           cp -R reddit-business-agent _site/reddit-business-agent
           cp -R ant-alshaer _site/ant-alshaer
           cp -R elanak-saleem _site/elanak-saleem
@@ -108,7 +108,7 @@ jobs:
           test -s _site/english-kuwait/audio/7-1-listen.wav
           test -s _site/english-kuwait/audio/7-1-speak.wav
           test -s _site/oman-fruits-pos/index.html
-          test -s _site/project-command-center/index.html
+          test -s _site/project-command-center/index.html\n          test -s _site/my-sites/index.html
           test -s _site/reddit-business-agent/index.html
           test -s _site/ant-alshaer/index.html
           test -s _site/ant-alshaer/archive/index.html
