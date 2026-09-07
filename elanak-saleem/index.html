@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#071f2b">
+  <meta name="description" content="مساعد ذكي لفحص الإعلانات وتوضيح متطلبات الامتثال قبل النشر.">
+  <title>إعلانك سليم</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="#checker" data-route="checker" aria-label="إعلانك سليم - الرئيسية">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 48 48" role="img"><path d="M24 4 40 10v12c0 10.7-6.6 17.8-16 22C14.6 39.8 8 32.7 8 22V10l16-6Z"/><path d="m16.5 24 5 5 10-11"/></svg>
+        </span>
+        <span><b data-i18n="brand">إعلانك سليم</b><small data-i18n="brandSub">مراجعة أوضح قبل النشر</small></span>
+      </a>
+      <button class="lang-button" id="langButton" type="button" aria-label="Change language">EN</button>
+    </header>
+
+    <main>
+      <section class="view active" id="checkerView" data-view="checker">
+        <div class="intro-row">
+          <div>
+            <p class="eyebrow" data-i18n="eyebrow">مساعد امتثال إعلاني</p>
+            <h1 data-i18n="headline">افحص إعلانك قبل ما تنشره</h1>
+            <p class="lead" data-i18n="lead">نراجع البيانات الأساسية، العبارات الحساسة ومتطلبات كل قطاع، ثم نعطيك نسخة أوضح وجاهزة.</p>
+          </div>
+          <div class="trust-chip"><span></span><b data-i18n="localRules">قواعد مخصصة للسوق الكويتي</b></div>
+        </div>
+
+        <div class="workspace-grid">
+          <form class="panel checker-form" id="checkerForm" novalidate>
+            <div class="step-title"><span>1</span><div><h2 data-i18n="adDetails">بيانات الإعلان</h2><p data-i18n="adDetailsHint">المعلومات التي ستظهر للعميل</p></div></div>
+
+            <label class="field">
+              <span data-i18n="category">نوع الإعلان</span>
+              <select id="category" required>
+                <option value="general" data-i18n="catGeneral">منتج أو خدمة عامة</option>
+                <option value="digital" data-i18n="catDigital">متجر إلكتروني</option>
+                <option value="discount" data-i18n="catDiscount">عرض أو تخفيض</option>
+                <option value="influencer" data-i18n="catInfluencer">إعلان مؤثر</option>
+                <option value="health" data-i18n="catHealth">صحي أو تجميلي</option>
+                <option value="realestate" data-i18n="catRealestate">عقاري</option>
+                <option value="telecom" data-i18n="catTelecom">اتصالات أو اشتراك</option>
+              </select>
+            </label>
+
+            <div class="field-row">
+              <label class="field"><span data-i18n="providerName">اسم المشروع أو المعلن</span><input id="providerName" type="text" autocomplete="organization" data-i18n-placeholder="providerPlaceholder" placeholder="مثال: متجر السالم"></label>
+              <label class="field"><span data-i18n="price">السعر النهائي</span><input id="price" type="text" inputmode="decimal" data-i18n-placeholder="pricePlaceholder" placeholder="مثال: 12 د.ك"></label>
+            </div>
+
+            <label class="field">
+              <span data-i18n="adCopy">نص الإعلان</span>
+              <textarea id="adCopy" rows="7" required data-i18n-placeholder="copyPlaceholder" placeholder="الصق النص كما سيظهر في الإعلان..."></textarea>
+              <small><b id="charCount">0</b> <span data-i18n="characters">حرف</span></small>
+            </label>
+
+            <div class="field-row">
+              <label class="field"><span data-i18n="contact">وسيلة التواصل</span><input id="contact" type="text" inputmode="url" data-i18n-placeholder="contactPlaceholder" placeholder="رابط الموقع أو رقم الشركة"></label>
+              <label class="field"><span data-i18n="permit">رقم الترخيص أو الموافقة</span><input id="permit" type="text" data-i18n-placeholder="optional" placeholder="اختياري"></label>
+            </div>
+
+            <label class="field" id="durationField"><span data-i18n="offerDuration">مدة العرض</span><input id="duration" type="text" data-i18n-placeholder="durationPlaceholder" placeholder="مثال: حتى 30 سبتمبر 2026"></label>
+
+            <label class="upload-box" for="adFile">
+              <input id="adFile" type="file" accept="image/*,video/*,.pdf">
+              <span class="upload-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M12 16V4m0 0L7 9m5-5 5 5M5 14v5h14v-5"/></svg>
+              </span>
+              <span><b data-i18n="upload">أضف صورة أو فيديو الإعلان</b><small id="fileName" data-i18n="uploadHint">اختياري — حتى 20 ميجابايت</small></span>
+            </label>
+
+            <button class="primary-button" type="submit">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 12 2 2 4-5M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Z"/></svg>
+              <span data-i18n="analyze">افحص الإعلان الآن</span>
+            </button>
+            <p class="privacy-note" data-i18n="privacy">الفحص يتم داخل جهازك في هذه النسخة التجريبية، ولا يتم رفع ملفاتك.</p>
+          </form>
+
+          <aside class="panel result-panel empty" id="resultPanel" aria-live="polite">
+            <div class="empty-state" id="emptyState">
+              <div class="empty-visual">
+                <svg viewBox="0 0 90 90" aria-hidden="true"><path d="M45 8 74 19v22c0 19-12 32-29 40C28 73 16 60 16 41V19L45 8Z"/><path d="m32 45 9 9 18-21"/></svg>
+              </div>
+              <h2 data-i18n="resultReady">تقريرك يظهر هنا</h2>
+              <p data-i18n="resultReadyHint">أدخل نص الإعلان وسنوضح لك ما هو مكتمل وما يحتاج تعديل.</p>
+              <ul>
+                <li><span></span><span data-i18n="checkDisclosure">وضوح الإفصاح والسعر</span></li>
+                <li><span></span><span data-i18n="checkClaims">رصد العبارات الحساسة</span></li>
+                <li><span></span><span data-i18n="checkSector">متطلبات القطاع</span></li>
+              </ul>
+            </div>
+
+            <div class="result-content" id="resultContent" hidden>
+              <div class="score-card">
+                <div class="score-ring" id="scoreRing"><strong id="scoreValue">0</strong><small>/100</small></div>
+                <div><span class="status-pill" id="statusPill"></span><h2 id="resultTitle"></h2><p id="resultSummary"></p></div>
+              </div>
+
+              <div class="result-section">
+                <div class="section-heading"><h3 data-i18n="findings">نتائج الفحص</h3><span id="findingCount"></span></div>
+                <div class="findings-list" id="findingsList"></div>
+              </div>
+
+              <div class="result-section corrected-section">
+                <div class="section-heading"><h3 data-i18n="correctedCopy">النص المقترح</h3><button class="text-button" id="copyButton" type="button" data-i18n="copy">نسخ</button></div>
+                <textarea id="correctedCopy" rows="9" readonly></textarea>
+              </div>
+
+              <div class="result-actions">
+                <button class="secondary-button" id="saveButton" type="button" data-i18n="saveRecord">حفظ في السجل</button>
+                <button class="ghost-button" id="downloadButton" type="button" data-i18n="downloadReport">تنزيل التقرير</button>
+              </div>
+              <p class="legal-note" data-i18n="legalNote">هذا تقييم إرشادي وليس اعتماداً قانونياً أو ترخيصاً من جهة حكومية.</p>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="view" id="archiveView" data-view="archive">
+        <div class="page-head"><div><p class="eyebrow" data-i18n="yourWorkspace">مساحة عملك</p><h1 data-i18n="archive">سجل الإعلانات</h1><p data-i18n="archiveHint">محفوظ على هذا الجهاز فقط.</p></div><button class="ghost-button danger" id="clearArchive" type="button" data-i18n="clearAll">مسح الكل</button></div>
+        <div class="archive-grid" id="archiveGrid"></div>
+        <div class="archive-empty" id="archiveEmpty"><svg viewBox="0 0 24 24"><path d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h5"/></svg><h2 data-i18n="noRecords">لا توجد إعلانات محفوظة</h2><p data-i18n="noRecordsHint">افحص إعلاناً ثم احفظ تقريره ليظهر هنا.</p><button class="secondary-button" data-route="checker" type="button" data-i18n="startCheck">ابدأ فحصاً جديداً</button></div>
+      </section>
+
+      <section class="view" id="subscriptionView" data-view="subscription">
+        <div class="subscription-wrap">
+          <div class="subscription-copy"><p class="eyebrow" data-i18n="simplePlan">اشتراك واضح</p><h1 data-i18n="planTitle">كل ما يحتاجه إعلانك قبل النشر</h1><p data-i18n="planLead">خطة شهرية واحدة دون التزام سنوي. التفعيل التجريبي لا يخصم أي مبلغ.</p><div class="operator-strip"><span data-i18n="operatorReady">جاهز للربط مستقبلاً مع</span><b>Zain</b><b>Ooredoo</b><b>stc</b></div></div>
+          <div class="price-card"><div class="plan-label" data-i18n="proPlan">الخطة الاحترافية</div><div class="price"><strong>3</strong><span><b data-i18n="kwd">د.ك</b><small data-i18n="perMonth">شهرياً</small></span></div><ul><li data-i18n="feature1">30 فحصاً شهرياً</li><li data-i18n="feature2">نص معدل جاهز للنشر</li><li data-i18n="feature3">سجل الإعلانات والتقارير</li><li data-i18n="feature4">تنبيهات المتطلبات الحساسة</li><li data-i18n="feature5">إلغاء الاشتراك في أي وقت</li></ul><button class="primary-button" id="activateButton" type="button" data-i18n="activateDemo">جرّب التفعيل</button><small class="demo-label" data-i18n="demoNoCharge">عرض تجريبي — لا يتم الخصم من الرصيد</small></div>
+        </div>
+      </section>
+    </main>
+
+    <nav class="bottom-nav" aria-label="التنقل الرئيسي">
+      <button class="active" data-route="checker" type="button"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Zm-3 9 2 2 4-5"/></svg><span data-i18n="check">الفحص</span></button>
+      <button data-route="archive" type="button"><svg viewBox="0 0 24 24"><path d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h5"/></svg><span data-i18n="archiveNav">السجل</span></button>
+      <button data-route="subscription" type="button"><svg viewBox="0 0 24 24"><path d="M4 7h16v10H4zM4 10h16M8 14h3"/></svg><span data-i18n="subscription">الاشتراك</span></button>
+    </nav>
+  </div>
+
+  <div class="toast" id="toast" role="status"></div>
+
+  <dialog id="activationDialog">
+    <form method="dialog" id="activationForm">
+      <button class="dialog-close" value="cancel" aria-label="إغلاق">×</button>
+      <div class="dialog-icon"><svg viewBox="0 0 24 24"><path d="M7 2h10v20H7zM10 18h4"/></svg></div>
+      <h2 data-i18n="demoActivation">تجربة التفعيل</h2>
+      <p data-i18n="demoActivationHint">أدخل رقمك لمشاهدة تجربة الاشتراك. لن تُرسل رسالة ولن يُخصم أي مبلغ.</p>
+      <label class="field"><span data-i18n="mobileNumber">رقم الهاتف</span><input id="mobileNumber" type="tel" inputmode="numeric" placeholder="5XXXXXXX" maxlength="8"></label>
+      <div class="demo-banner" data-i18n="demoBanner">نسخة عرض فقط — الربط الفعلي يتطلب موافقة شركة الاتصالات.</div>
+      <button class="primary-button" id="confirmDemo" value="default" type="submit" data-i18n="continue">متابعة</button>
+    </form>
+  </dialog>
+
+  <script src="app.js" defer></script>
+</body>
+</html>
