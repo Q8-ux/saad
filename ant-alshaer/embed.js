@@ -7,6 +7,9 @@
   const retryButton = document.querySelector(".retry");
   const route = document.body.dataset.appPath || "/";
   const audioBridgeChannel = "ant-alshaer-audio";
+  const navigationChannel = "ant-alshaer-navigation";
+  const githubBasePath = "/saad/ant-alshaer";
+  const supportedRoutes = new Set(["/", "/archive", "/login", "/admin", "/admin/login"]);
   const maxAudioBytes = 800 * 1024;
   const recorderBitrate = 24_000;
   let activeRecorder = null;
@@ -138,11 +141,38 @@
     }
   };
 
-  const loadApp = () => {
-    const target = new URL(route, appOrigin);
+  const loadApp = (appPath = route) => {
+    const target = new URL(appPath, appOrigin);
     target.search = window.location.search;
     target.hash = window.location.hash;
     frame.src = target.toString();
+  };
+
+  const githubPathForRoute = (appPath) =>
+    appPath === "/" ? `${githubBasePath}/` : `${githubBasePath}${appPath}/`;
+
+  const routeForGitHubPath = (pathname) => {
+    if (pathname === `${githubBasePath}/` || pathname === githubBasePath) return "/";
+    const relativePath = pathname.startsWith(githubBasePath)
+      ? pathname.slice(githubBasePath.length).replace(/\/+$/, "") || "/"
+      : null;
+    return relativePath && supportedRoutes.has(relativePath) ? relativePath : null;
+  };
+
+  const syncGitHubAddress = (message) => {
+    if (message.type !== "route-changed" || !supportedRoutes.has(message.pathname)) return;
+    const next = new URL(githubPathForRoute(message.pathname), window.location.origin);
+    if (typeof message.search === "string" && message.search.startsWith("?")) {
+      next.search = message.search;
+    }
+    if (typeof message.hash === "string" && message.hash.startsWith("#")) {
+      next.hash = message.hash;
+    }
+    const nextAddress = `${next.pathname}${next.search}${next.hash}`;
+    const currentAddress = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+    if (nextAddress !== currentAddress) {
+      window.history.pushState({ appPath: message.pathname }, "", nextAddress);
+    }
   };
 
   frame.addEventListener("load", () => {
@@ -161,9 +191,19 @@
 
   window.addEventListener("message", (event) => {
     if (event.origin !== appOrigin || event.source !== frame.contentWindow) return;
-    if (event.data?.channel !== audioBridgeChannel) return;
-    if (event.data.type === "start-recording") void startParentRecording();
-    if (event.data.type === "stop-recording") stopParentRecording();
+    if (event.data?.channel === navigationChannel) {
+      syncGitHubAddress(event.data);
+      return;
+    }
+    if (event.data?.channel === audioBridgeChannel) {
+      if (event.data.type === "start-recording") void startParentRecording();
+      if (event.data.type === "stop-recording") stopParentRecording();
+    }
+  });
+
+  window.addEventListener("popstate", () => {
+    const appPath = routeForGitHubPath(window.location.pathname);
+    if (appPath) loadApp(appPath);
   });
 
   window.addEventListener("pagehide", () => {
