@@ -1,0 +1,213 @@
+/* Readability override for desktop, tablet, and mobile. */
+html {
+  font-size: 18px;
+}
+
+body {
+  font-size: 1rem;
+  line-height: 1.75;
+}
+
+h1 {
+  font-size: clamp(1.85rem, 2.5vw, 2.55rem);
+  line-height: 1.25;
+}
+
+h2 {
+  font-size: clamp(1.5rem, 2vw, 2rem);
+  line-height: 1.3;
+}
+
+h3 {
+  font-size: clamp(1.2rem, 1.5vw, 1.55rem);
+  line-height: 1.4;
+}
+
+p,
+li,
+td,
+th,
+label,
+input,
+select,
+textarea,
+button,
+a,
+small,
+span {
+  letter-spacing: 0;
+}
+
+label {
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+input,
+select,
+textarea {
+  min-height: 52px;
+  padding: 13px 15px;
+  font-size: 1.05rem;
+  line-height: 1.55;
+}
+
+textarea {
+  min-height: 118px;
+}
+
+button,
+.button,
+.small-button,
+.text-button,
+.signout-button,
+.quick-search-button,
+.install-app-button {
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.nav-button {
+  min-height: 58px;
+  font-size: 1.08rem;
+}
+
+.nav-short {
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.brand-copy strong {
+  font-size: 1.18rem;
+}
+
+.brand-copy span,
+.sidebar-account,
+.sidebar-status,
+.account-summary,
+.muted-line,
+.document-meta,
+.result-source,
+.results-note,
+.source-open-note,
+.source-complete-note {
+  font-size: 0.98rem;
+}
+
+.eyebrow,
+.tag,
+.status-badge,
+.quality-pill,
+.source-mark,
+.seat-badge {
+  font-size: 0.92rem;
+  font-weight: 750;
+}
+
+.kpi-card > strong,
+.analysis-score {
+  font-size: clamp(1.75rem, 2.4vw, 2.4rem);
+}
+
+.kpi-card p,
+.kpi-top,
+.quality-item p,
+.source-disclaimer,
+.alert,
+.toast,
+.empty-state p {
+  font-size: 1rem;
+}
+
+.panel-heading h2,
+.panel-heading h3 {
+  font-weight: 800;
+}
+
+.responsive-table table {
+  font-size: 1rem;
+}
+
+.responsive-table th {
+  font-size: 0.98rem;
+  font-weight: 800;
+}
+
+.responsive-table td {
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+.cell-stack strong,
+.timeline-copy h3,
+.document-card h3,
+.result-card h3,
+.archive-grid h3 {
+  font-size: 1.08rem;
+}
+
+.member-password-controls input {
+  min-width: 180px;
+}
+
+@media (max-width: 900px) {
+  html {
+    font-size: 18px;
+  }
+
+  body {
+    font-size: 1rem;
+  }
+
+  .topbar h1 {
+    font-size: 1.65rem;
+  }
+
+  .topbar p {
+    font-size: 1rem;
+  }
+
+  .mobile-nav button {
+    min-height: 64px;
+    font-size: 1rem;
+  }
+
+  .mobile-nav small,
+  .mobile-nav-label {
+    font-size: 0.88rem;
+  }
+
+  .responsive-table td,
+  .responsive-table th {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 560px) {
+  html {
+    font-size: 18px;
+  }
+
+  input,
+  select,
+  textarea,
+  button,
+  .button {
+    font-size: 1rem;
+  }
+
+  .page-content {
+    font-size: 1rem;
+  }
+
+  .member-password-controls {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .member-password-controls input {
+    min-width: 0;
+    width: 100%;
+  }
+}
