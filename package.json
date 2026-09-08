@@ -6,7 +6,7 @@
     "node": "22.x"
   },
   "scripts": {
-    "postinstall": "node scripts/render-fix-source.mjs && node scripts/render-whatsapp-ui-patch.mjs",
+    "postinstall": "node scripts/render-fix-source.mjs && node scripts/render-whatsapp-ui-patch.mjs && node scripts/render-whatsapp-reply-fix.mjs",
     "install:ci": "bash scripts/install-ci.sh",
     "dev": "WRANGLER_LOG_PATH=.wrangler/wrangler.log vite",
     "build": "bash scripts/build-verified.sh",
