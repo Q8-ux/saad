@@ -2,11 +2,12 @@ import { chatGPTSignOutPath } from "./chatgpt-auth";
 import LegalOfficeApp from "./legal-office-app";
 import LoginPanel from "./login-panel";
 import { getApplicationIdentity } from "../lib/local-auth";
+import { getRenderAdminIdentity } from "../lib/render-admin-session";
 
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  const viewer = await getApplicationIdentity();
+  const viewer = (await getApplicationIdentity()) ?? (await getRenderAdminIdentity());
   if (!viewer) return <LoginPanel />;
 
   return (
