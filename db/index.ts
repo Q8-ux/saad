@@ -1,10 +1,11 @@
 import { drizzle } from "drizzle-orm/d1";
+import Database from "better-sqlite3";
+import * as fs from "node:fs";
+import * as path from "node:path";
 import * as schema from "./schema";
 
-// Cloudflare Sites injects a real D1 binding at runtime. Render does not, so
-// the Render-only branch supplies a small D1-compatible adapter backed by
-// better-sqlite3. This keeps the application routes unchanged while allowing
-// the same SQL to run on a regular Node server.
+// Render-only branch: keep the application D1 call sites unchanged, but back
+// them with a local SQLite database when the Cloudflare D1 binding is absent.
 type LegalOfficeRuntime = typeof globalThis & {
   __LEGAL_OFFICE_D1__?: D1Database;
   __LEGAL_OFFICE_NODE_D1__?: D1Database;
@@ -15,8 +16,8 @@ type LegalOfficeRuntime = typeof globalThis & {
 
 const runtimeDefaults = globalThis as LegalOfficeRuntime;
 if (typeof process !== "undefined" && process.versions?.node) {
-  // Render bootstrap: password is never stored in plaintext. These values are
-  // a PBKDF2 salt/hash for the initial administrator requested by the owner.
+  // Initial Render administrator. The plaintext password is not stored here;
+  // only its PBKDF2 salt/hash is committed for this bootstrap deployment.
   runtimeDefaults.__LEGAL_OFFICE_LOCAL_AUTH_PEPPER__ ??= "render-local-bootstrap-v1";
   runtimeDefaults.__LEGAL_OFFICE_LOCAL_AUTH_BOOTSTRAP__ ??= JSON.stringify([
     {
@@ -56,7 +57,7 @@ type BetterSqliteDatabase = {
   pragma: (sql: string) => unknown;
   exec: (sql: string) => void;
   prepare: (sql: string) => BetterSqliteStatement;
-  transaction: <T extends (...args: never[]) => unknown>(fn: T) => T;
+  transaction: (fn: (...args: any[]) => any) => (...args: any[]) => any;
 };
 
 class NodePreparedStatement {
@@ -89,9 +90,7 @@ class NodePreparedStatement {
 
   all<T = Record<string, unknown>>(): D1LikeResult<T> {
     const statement = this.database.prepare(this.sql);
-    if (!statement.reader) {
-      return this.run() as D1LikeResult<T>;
-    }
+    if (!statement.reader) return this.run() as D1LikeResult<T>;
     return {
       success: true,
       results: statement.all(...this.params) as T[],
@@ -133,42 +132,36 @@ function loadNodeD1(): D1Database {
   const runtime = globalThis as LegalOfficeRuntime;
   if (runtime.__LEGAL_OFFICE_NODE_D1__) return runtime.__LEGAL_OFFICE_NODE_D1__;
 
-  // Hide the Node-only dependency from Cloudflare/Vite static analysis. This
-  // code path is reached only when a D1 binding is absent (Render Node server).
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const require = Function("return require")() as (id: string) => unknown;
-  const BetterSqlite3 = require("better-sqlite3") as new (path: string) => BetterSqliteDatabase;
-  const fs = require("node:fs") as typeof import("node:fs");
-  const path = require("node:path") as typeof import("node:path");
-
   const dataDir = process.env.RENDER_DISK_PATH || path.resolve(process.cwd(), ".render-data");
   fs.mkdirSync(dataDir, { recursive: true });
   const databasePath = path.join(dataDir, "legal-office.sqlite");
-  const database = new BetterSqlite3(databasePath);
+  const database = new Database(databasePath) as unknown as BetterSqliteDatabase;
   database.pragma("journal_mode = WAL");
   database.pragma("foreign_keys = ON");
 
-  // Apply generated SQLite migrations exactly once per database file.
   database.exec(
     "CREATE TABLE IF NOT EXISTS __render_migrations (name TEXT PRIMARY KEY NOT NULL, applied_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)",
   );
+
   const migrationDir = path.resolve(process.cwd(), "drizzle");
   if (fs.existsSync(migrationDir)) {
-    const files = fs
+    const migrationFiles = fs
       .readdirSync(migrationDir)
       .filter((name) => name.endsWith(".sql"))
       .sort();
-    for (const name of files) {
+
+    for (const name of migrationFiles) {
       const applied = database
         .prepare("SELECT name FROM __render_migrations WHERE name=? LIMIT 1")
         .get(name);
       if (applied) continue;
+
       const sql = fs.readFileSync(path.join(migrationDir, name), "utf8");
-      const apply = database.transaction(() => {
+      const applyMigration = database.transaction(() => {
         database.exec(sql);
         database.prepare("INSERT INTO __render_migrations (name) VALUES (?)").run(name);
       });
-      apply();
+      applyMigration();
     }
   }
 
