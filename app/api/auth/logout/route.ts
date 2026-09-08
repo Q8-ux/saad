@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { LOCAL_AUTH_COOKIE, revokeCurrentLocalSession } from "../../../../lib/local-auth";
+import { RENDER_ADMIN_COOKIE } from "../../../../lib/render-admin-session";
 
 export const dynamic = "force-dynamic";
 
@@ -27,14 +28,16 @@ export async function GET(request: Request) {
 
   const response = NextResponse.redirect(new URL("/", publicOrigin(request)), 303);
   response.headers.set("Cache-Control", "private, no-store, max-age=0");
-  response.cookies.set({
-    name: LOCAL_AUTH_COOKIE,
-    value: "",
-    httpOnly: true,
-    secure: true,
-    sameSite: "lax",
-    path: "/",
-    maxAge: 0,
-  });
+  for (const name of [LOCAL_AUTH_COOKIE, RENDER_ADMIN_COOKIE]) {
+    response.cookies.set({
+      name,
+      value: "",
+      httpOnly: true,
+      secure: true,
+      sameSite: "lax",
+      path: "/",
+      maxAge: 0,
+    });
+  }
   return response;
 }
