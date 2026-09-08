@@ -32,32 +32,20 @@ on:
       - 'workforce-platform/apps/web/**'
       - '.github/workflows/deploy-pages.yml'
   workflow_dispatch:
-permissions:
-  contents: write
-  pages: write
-  id-token: write
-concurrency:
-  group: pages-v2
-  cancel-in-progress: true
+permissions: { contents: write, pages: write, id-token: write }
+concurrency: { group: pages-v2, cancel-in-progress: true }
 jobs:
   build-and-deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    environment: { name: github-pages, url: '${{ steps.deployment.outputs.page_url }}' }
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with: { ref: main, fetch-depth: 1 }
-      - name: Configure GitHub Pages
-        uses: actions/configure-pages@v5
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/configure-pages@v5
+      - uses: actions/setup-node@v4
         with: { node-version: 22 }
       - name: Install English audio dependency
-        run: |
-          sudo apt-get update -y
-          sudo apt-get install -y espeak
+        run: sudo apt-get update -y && sudo apt-get install -y espeak
       - name: Install workforce dependencies
         working-directory: workforce-platform/apps/web
         run: npm install --no-audit --no-fund
@@ -66,75 +54,37 @@ jobs:
         env:
           GITHUB_PAGES: 'true'
           NEXT_PUBLIC_API_URL: 'https://workforce-platform-api.onrender.com/api'
-          NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+          NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: '${{ secrets.GOOGLE_MAPS_API_KEY }}'
           NEXT_PUBLIC_SUPABASE_URL: 'https://onefbrycdifaqghkzneh.supabase.co'
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_M_L4mOwYjcAMbM5QXj2Nzw_4yXmrdXR'
-          NEXT_PUBLIC_INTERFACE_VERSION: 'compact-mobile-header-v22'
-        run: |
-          rm -rf .next out
-          npm run build
+          NEXT_PUBLIC_INTERFACE_VERSION: 'smart-assistant-flags-v23'
+        run: rm -rf .next out && npm run build
       - name: Prepare combined site
         run: |
           rm -rf _site && mkdir -p _site
           cp index.html cyber-archive.css cyber-archive.js cyber-data.js sabeq.html _site/
-          cp -R sabeq-legal _site/sabeq-legal
-          cp -R sabeq-admin-preview _site/sabeq-admin-preview
-          cp -R sabeq-legal-system _site/sabeq-legal-system
-          cp -R sabeq-legal-pro _site/sabeq-legal-pro
-          cp -R hessa-alobaid _site/hessa-alobaid
-          cp -R shalayhna _site/shalayhna
-          cp -R zad-restaurants _site/zad-restaurants
-          cp -R tamweenat _site/tamweenat
-          cp -R tamweenat-admin _site/tamweenat-admin
-          cp -R rattil _site/rattil
-          cp -R kuwait-digital-sales-plan _site/kuwait-digital-sales-plan
-          cp -R kuwait-fund-modern _site/kuwait-fund-modern
-          cp -R livestock-vax-kw _site/livestock-vax-kw
-          cp -R english-kuwait _site/english-kuwait
+          for p in sabeq-legal sabeq-admin-preview sabeq-legal-system sabeq-legal-pro hessa-alobaid shalayhna zad-restaurants tamweenat tamweenat-admin rattil kuwait-digital-sales-plan kuwait-fund-modern livestock-vax-kw english-kuwait oman-fruits-pos project-command-center my-sites reddit-business-agent ant-alshaer elanak-saleem; do cp -R "$p" "_site/$p"; done
           bash english-kuwait/generate-audio.sh _site/english-kuwait/audio
-          cp -R oman-fruits-pos _site/oman-fruits-pos
-          cp -R project-command-center _site/project-command-center
-          cp -R my-sites _site/my-sites
-          cp -R reddit-business-agent _site/reddit-business-agent
-          cp -R ant-alshaer _site/ant-alshaer
-          cp -R elanak-saleem _site/elanak-saleem
           cp -R workforce-platform/apps/web/out/_next _site/_next
           for p in dashboard admin-control attendance-smart transfers emergency ai-tools notifications profile; do cp -R "workforce-platform/apps/web/out/$p" "_site/$p"; done
-          echo 'compact-mobile-header-v22' > _site/interface-version.txt
+          echo 'smart-assistant-flags-v23' > _site/interface-version.txt
           touch _site/.nojekyll
       - name: Validate combined site
         run: |
           test -s _site/dashboard/index.html
+          test -s _site/ai-tools/index.html
           test -s _site/admin-control/index.html
-          test -s _site/hessa-alobaid/index.html
-          test -s _site/hessa-alobaid/login-credentials-fix.js
-          test -s _site/livestock-vax-kw/index.html
-          test -s _site/livestock-vax-kw/admin/index.html
-          test -s _site/english-kuwait/index.html
-          test -s _site/english-kuwait/audio/7-1-listen.wav
-          test -s _site/english-kuwait/audio/7-1-speak.wav
-          test -s _site/oman-fruits-pos/index.html
-          test -s _site/project-command-center/index.html
-          test -s _site/my-sites/index.html
-          test -s _site/reddit-business-agent/index.html
-          test -s _site/ant-alshaer/index.html
-          test -s _site/ant-alshaer/archive/index.html
-          test -s _site/ant-alshaer/login/index.html
-          test -s _site/ant-alshaer/admin/index.html
-          test -s _site/ant-alshaer/admin/login/index.html
-          test -s _site/elanak-saleem/index.html
           test -d _site/_next
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v3
         with: { path: _site }
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
       - name: Record deployment status
         run: |
-          printf 'status=deployed\nversion=compact-mobile-header-v22\nrun_id=%s\ncommit=%s\npage_url=%s\ntime=%s\n' "$GITHUB_RUN_ID" "$GITHUB_SHA" '${{ steps.deployment.outputs.page_url }}' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > live-dashboard-status.txt
+          printf 'status=deployed\nversion=smart-assistant-flags-v23\nrun_id=%s\ncommit=%s\npage_url=%s\ntime=%s\n' "$GITHUB_RUN_ID" "$GITHUB_SHA" '${{ steps.deployment.outputs.page_url }}' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > live-dashboard-status.txt
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add live-dashboard-status.txt
-          git commit -m "Record combined Pages deployment ${GITHUB_RUN_ID}" || true
+          git commit -m "Record smart assistant deployment ${GITHUB_RUN_ID}" || true
           git push || true
