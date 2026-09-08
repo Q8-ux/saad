@@ -231,9 +231,51 @@ patch(
   'MemberRow credential cells',
 );
 
+patch(
+  [
+    '          {page === "search" && (',
+    '            <LegalSearchPage',
+    '              key={searchSeed || "empty-search"}',
+    '              initialQuery={searchSeed}',
+    '              stats={stats}',
+    '              onUseInMemo={useInMemo}',
+    '              onOpenSource={setSourceDocumentId}',
+    '              onToast={showToast}',
+    '            />',
+    '          )}',
+  ].join('\n'),
+  [
+    '          {page === "search" && (',
+    '            <>',
+    '              <LegalSearchPage',
+    '                key={searchSeed || "empty-search"}',
+    '                initialQuery={searchSeed}',
+    '                stats={stats}',
+    '                onUseInMemo={useInMemo}',
+    '                onOpenSource={setSourceDocumentId}',
+    '                onToast={showToast}',
+    '              />',
+    '              <section className="search-library-embed" aria-label={t("المكتبة القانونية")}>',
+    '                <div className="embedded-library-heading">',
+    '                  <span className="eyebrow">{t("المكتبة القانونية")}</span>',
+    '                  <h2>{t("تصفح القوانين والوثائق أثناء البحث")}</h2>',
+    '                  <p>{t("يمكنك فتح أي وثيقة أو البحث داخلها مباشرة دون مغادرة محرك البحث القانوني.")}</p>',
+    '                </div>',
+    '                <LegalLibrary',
+    '                  stats={stats}',
+    '                  onSearch={startSearch}',
+    '                  onOpenSource={setSourceDocumentId}',
+    '                />',
+    '              </section>',
+    '            </>',
+    '          )}',
+  ].join('\n'),
+  'embed legal library in search page',
+);
+
 if (source !== original) {
   await writeFile(path, source, "utf8");
-  console.log("Applied Render source compatibility and owner credential-management patches.");
+  console.log("Applied Render source compatibility, credentials, and embedded legal-library patches.");
 } else {
   console.log("Render source patches already applied or not required.");
 }
