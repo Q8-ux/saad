@@ -8,7 +8,31 @@ import * as schema from "./schema";
 type LegalOfficeRuntime = typeof globalThis & {
   __LEGAL_OFFICE_D1__?: D1Database;
   __LEGAL_OFFICE_NODE_D1__?: D1Database;
+  __LEGAL_OFFICE_LOCAL_AUTH_BOOTSTRAP__?: string;
+  __LEGAL_OFFICE_LOCAL_AUTH_PEPPER__?: string;
+  __LEGAL_OFFICE_PLATFORM_ADMIN_EMAILS__?: string;
 };
+
+const runtimeDefaults = globalThis as LegalOfficeRuntime;
+if (typeof process !== "undefined" && process.versions?.node) {
+  // Render bootstrap: password is never stored in plaintext. These values are
+  // a PBKDF2 salt/hash for the initial administrator requested by the owner.
+  runtimeDefaults.__LEGAL_OFFICE_LOCAL_AUTH_PEPPER__ ??= "render-local-bootstrap-v1";
+  runtimeDefaults.__LEGAL_OFFICE_LOCAL_AUTH_BOOTSTRAP__ ??= JSON.stringify([
+    {
+      id: "c27ff055-ec13-43c8-b43e-72d6f0f26078",
+      username: "Saad",
+      email: "saad@legal.local",
+      displayName: "Saad",
+      isPlatformAdmin: true,
+      initialOfficeName: "منصة العقود والترجمة القانونية",
+      passwordSalt: "lRsZOJEWDs38zGsRfFUD9Q",
+      passwordHash: "YhOr8njLaH9JCxpOCem0CixziczSANPbiTUL7O7J2E4",
+      passwordIterations: 100000,
+    },
+  ]);
+  runtimeDefaults.__LEGAL_OFFICE_PLATFORM_ADMIN_EMAILS__ ??= "saad@legal.local";
+}
 
 type RunMeta = {
   changes: number;
