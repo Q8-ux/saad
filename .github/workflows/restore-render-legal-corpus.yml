@@ -1,0 +1,54 @@
+name: Restore Render Legal Corpus
+
+on:
+  push:
+    branches:
+      - legal-contracts-render
+    paths:
+      - '.github/workflows/restore-render-legal-corpus.yml'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  restore-corpus:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out Render branch
+        uses: actions/checkout@v4
+        with:
+          ref: legal-contracts-render
+          fetch-depth: 0
+
+      - name: Download verified Ministry legal-library artifact
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          run-id: 31949686941
+          name: ministry-legal-library
+          path: .legal-corpus-checkpoint
+
+      - name: Build compressed corpus seed
+        run: |
+          set -euo pipefail
+          test -s .legal-corpus-checkpoint/generated/legal-memo.db
+          mkdir -p seed
+          gzip -9 -c .legal-corpus-checkpoint/generated/legal-memo.db > seed/legal-library.sqlite.gz
+          test -s seed/legal-library.sqlite.gz
+          echo "Compressed seed: $(du -h seed/legal-library.sqlite.gz | cut -f1)"
+
+      - name: Commit corpus seed to Render branch
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- seed/legal-library.sqlite.gz; then
+            echo "Corpus seed is already current."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add seed/legal-library.sqlite.gz
+          git commit -m "Restore verified Ministry legal corpus seed"
+          git push origin HEAD:legal-contracts-render
