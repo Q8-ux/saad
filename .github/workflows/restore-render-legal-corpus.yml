@@ -43,7 +43,7 @@ jobs:
       - name: Commit corpus seed to Render branch
         run: |
           set -euo pipefail
-          if git diff --quiet -- seed/legal-library.sqlite.gz; then
+          if [ -z "$(git status --porcelain -- seed/legal-library.sqlite.gz)" ]; then
             echo "Corpus seed is already current."
             exit 0
           fi
