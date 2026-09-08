@@ -1,4 +1,4 @@
-import { getD1 } from "../../../../../db";
+import { getD1 } from "../../../../db";
 
 export const dynamic = "force-dynamic";
 
