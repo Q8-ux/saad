@@ -7,11 +7,14 @@ on:
     paths:
       - "tamweenat-android/**"
       - "tamweenat/**"
+      - "tamweenat-api/**"
       - "!tamweenat-android/releases/**"
       - ".github/workflows/build-tamweenat-android.yml"
   pull_request:
     paths:
       - "tamweenat-android/**"
+      - "tamweenat/**"
+      - "tamweenat-api/**"
       - "!tamweenat-android/releases/**"
       - ".github/workflows/build-tamweenat-android.yml"
   workflow_dispatch:
@@ -45,8 +48,12 @@ jobs:
 
       - name: Verify voice order analysis
         run: |
+          node --check tamweenat/assets/support-runtime.js
           node --check tamweenat/assets/voice-assistant.js
+          node --check tamweenat-api/server.js
+          node --check tamweenat-api/auth-wrapper.js
           node tamweenat/tests/voice-order-parser.test.cjs
+          node tamweenat/tests/assistant-integration.test.cjs
 
       - name: Install Android platform
         run: sdkmanager "platforms;android-35" "build-tools;35.0.0"

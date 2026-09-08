@@ -15,8 +15,13 @@ import android.net.Uri;
 import android.net.http.SslError;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.SystemClock;
 import android.provider.Settings;
+import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
+import android.speech.SpeechRecognizer;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 import android.view.Gravity;
@@ -47,9 +52,9 @@ import java.util.Locale;
 
 public class MainActivity extends Activity {
     private static final int FILE_CHOOSER_REQUEST = 4101;
-    private static final int SPEECH_RECOGNITION_REQUEST = 4102;
     private static final int AUDIO_PERMISSION_REQUEST = 4103;
     private static final String ALLOWED_HOST = "q8-ux.github.io";
+    private static final long MAX_NATIVE_LISTENING_MS = 45_000L;
 
     private WebView webView;
     private ProgressBar progressBar;
@@ -66,6 +71,11 @@ public class MainActivity extends Activity {
     private String pendingSpokenText = "";
     private String pendingSpokenLocale = "ar-KW";
     private String pendingSpokenUtteranceId = "reply";
+    private final Handler speechHandler = new Handler(Looper.getMainLooper());
+    private SpeechRecognizer speechRecognizer;
+    private boolean nativeListening;
+    private long nativeListeningStartedAt;
+    private String nativeTranscript = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -304,29 +314,158 @@ public class MainActivity extends Activity {
 
     private void launchSpeechRecognition() {
         pendingNativeSpeech = false;
+        if (!SpeechRecognizer.isRecognitionAvailable(this)) {
+            dispatchNativeVoice("", "unavailable");
+            return;
+        }
+        stopNativeSpeechRecognition();
+        nativeListening = true;
+        nativeListeningStartedAt = SystemClock.elapsedRealtime();
+        nativeTranscript = "";
+        ensureSpeechRecognizer();
+        speechHandler.postDelayed(() -> finishNativeSpeechRecognition(""), MAX_NATIVE_LISTENING_MS);
+        startNativeRecognitionSegment();
+    }
+
+    private Intent nativeRecognitionIntent() {
         Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, pendingSpeechLocale);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, pendingSpeechLocale);
         intent.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true);
         intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3);
-        intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, 15000L);
-        intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 5000L);
-        intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 7000L);
-        intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "تحدث الآن");
+        intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, 15_000L);
+        intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 5_000L);
+        intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 7_000L);
+        return intent;
+    }
+
+    private void ensureSpeechRecognizer() {
+        if (speechRecognizer != null) return;
+        speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
+        speechRecognizer.setRecognitionListener(new RecognitionListener() {
+            @Override
+            public void onReadyForSpeech(Bundle params) {
+            }
+
+            @Override
+            public void onBeginningOfSpeech() {
+            }
+
+            @Override
+            public void onRmsChanged(float rmsdB) {
+            }
+
+            @Override
+            public void onBufferReceived(byte[] buffer) {
+            }
+
+            @Override
+            public void onEndOfSpeech() {
+            }
+
+            @Override
+            public void onError(int error) {
+                if (!nativeListening) return;
+                if (error == SpeechRecognizer.ERROR_NO_MATCH
+                        || error == SpeechRecognizer.ERROR_SPEECH_TIMEOUT
+                        || error == SpeechRecognizer.ERROR_RECOGNIZER_BUSY) {
+                    restartNativeRecognitionSegment(error == SpeechRecognizer.ERROR_RECOGNIZER_BUSY ? 450L : 220L);
+                    return;
+                }
+                finishNativeSpeechRecognition(error == SpeechRecognizer.ERROR_NETWORK
+                        || error == SpeechRecognizer.ERROR_NETWORK_TIMEOUT ? "network" : "unavailable");
+            }
+
+            @Override
+            public void onResults(Bundle results) {
+                if (!nativeListening) return;
+                String segment = bestRecognitionResult(results);
+                if (!segment.isEmpty()) {
+                    nativeTranscript = joinTranscript(nativeTranscript, segment);
+                    dispatchNativeVoice(nativeTranscript, "", true);
+                }
+                restartNativeRecognitionSegment(220L);
+            }
+
+            @Override
+            public void onPartialResults(Bundle partialResults) {
+                if (!nativeListening) return;
+                String partial = bestRecognitionResult(partialResults);
+                if (!partial.isEmpty()) dispatchNativeVoice(joinTranscript(nativeTranscript, partial), "", true);
+            }
+
+            @Override
+            public void onEvent(int eventType, Bundle params) {
+            }
+        });
+    }
+
+    private String bestRecognitionResult(Bundle bundle) {
+        if (bundle == null) return "";
+        ArrayList<String> results = bundle.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+        return results != null && !results.isEmpty() ? String.valueOf(results.get(0)).trim() : "";
+    }
+
+    private String joinTranscript(String first, String second) {
+        String left = first == null ? "" : first.trim();
+        String right = second == null ? "" : second.trim();
+        if (left.isEmpty()) return right;
+        if (right.isEmpty() || left.endsWith(right)) return left;
+        return left + " " + right;
+    }
+
+    private void startNativeRecognitionSegment() {
+        if (!nativeListening || speechRecognizer == null) return;
+        if (SystemClock.elapsedRealtime() - nativeListeningStartedAt >= MAX_NATIVE_LISTENING_MS) {
+            finishNativeSpeechRecognition("");
+            return;
+        }
         try {
-            startActivityForResult(intent, SPEECH_RECOGNITION_REQUEST);
-        } catch (ActivityNotFoundException error) {
-            dispatchNativeVoice("", "unavailable");
+            speechRecognizer.startListening(nativeRecognitionIntent());
+        } catch (SecurityException error) {
+            finishNativeSpeechRecognition("permission_denied");
+        } catch (RuntimeException error) {
+            finishNativeSpeechRecognition("unavailable");
+        }
+    }
+
+    private void restartNativeRecognitionSegment(long delayMs) {
+        if (!nativeListening) return;
+        speechHandler.postDelayed(this::startNativeRecognitionSegment, delayMs);
+    }
+
+    private void finishNativeSpeechRecognition(String error) {
+        if (!nativeListening) return;
+        String transcript = nativeTranscript;
+        stopNativeSpeechRecognition();
+        dispatchNativeVoice(transcript, transcript.isEmpty() && error.isEmpty() ? "no_speech" : error, false);
+    }
+
+    private void stopNativeSpeechRecognition() {
+        nativeListening = false;
+        pendingNativeSpeech = false;
+        speechHandler.removeCallbacksAndMessages(null);
+        if (speechRecognizer != null) {
+            try {
+                speechRecognizer.cancel();
+            } catch (RuntimeException ignored) {
+            }
         }
     }
 
     private void dispatchNativeVoice(String text, String error) {
+        dispatchNativeVoice(text, error, false);
+    }
+
+    private void dispatchNativeVoice(String text, String error, boolean partial) {
         if (webView == null) return;
         String script = "window.dispatchEvent(new CustomEvent('tamweenat-native-voice',{detail:{text:"
                 + JSONObject.quote(text == null ? "" : text)
                 + ",error:"
                 + JSONObject.quote(error == null ? "" : error)
+                + ",partial:"
+                + partial
                 + "}}));";
         webView.evaluateJavascript(script, null);
     }
@@ -388,16 +527,6 @@ public class MainActivity extends Activity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == SPEECH_RECOGNITION_REQUEST) {
-            if (resultCode == RESULT_OK && data != null) {
-                ArrayList<String> results = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-                String recognized = results != null && !results.isEmpty() ? results.get(0) : "";
-                dispatchNativeVoice(recognized, recognized.isEmpty() ? "no_speech" : "");
-            } else {
-                dispatchNativeVoice("", "cancelled");
-            }
-            return;
-        }
         if (requestCode != FILE_CHOOSER_REQUEST || fileCallback == null) return;
         Uri[] result = WebChromeClient.FileChooserParams.parseResult(resultCode, data);
         fileCallback.onReceiveValue(result);
@@ -431,6 +560,11 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onDestroy() {
+        stopNativeSpeechRecognition();
+        if (speechRecognizer != null) {
+            speechRecognizer.destroy();
+            speechRecognizer = null;
+        }
         if (pendingWebAudioRequest != null) {
             pendingWebAudioRequest.deny();
             pendingWebAudioRequest = null;
@@ -479,6 +613,11 @@ public class MainActivity extends Activity {
                     requestAudioPermission();
                 }
             });
+        }
+
+        @JavascriptInterface
+        public void stopListening() {
+            runOnUiThread(MainActivity.this::stopNativeSpeechRecognition);
         }
     }
 

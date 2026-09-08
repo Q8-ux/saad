@@ -3,3 +3,5 @@
 .env.*
 !.env.example
 
+# Local dependency installs
+node_modules/

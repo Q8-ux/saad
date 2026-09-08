@@ -661,6 +661,132 @@
     return selectedLanguage() === "ar" ? new Intl.NumberFormat("ar-KW").format(value) : String(value);
   }
 
+  function cartSnapshotForAssistant() {
+    return productCards().map((card) => {
+      const sku = textOf(card).match(/BRG-\d{4}/i)?.[0]?.toUpperCase() || "";
+      return { sku, quantity: cardQuantity(card) };
+    }).filter((item) => item.sku && item.quantity > 0).slice(0, 50);
+  }
+
+  function catalogProductBySku(sku) {
+    const wanted = String(sku || "").toUpperCase();
+    return catalogProductsForVoice().find((item) => String(item.sku || item.id || "").toUpperCase() === wanted) || null;
+  }
+
+  async function analysisFromAssistantPlan(plan, type) {
+    if (!(await goToCatalog())) throw new Error("catalog_unavailable");
+    const items = [];
+    for (const planned of Array.isArray(plan?.items) ? plan.items.slice(0, 12) : []) {
+      const product = catalogProductBySku(planned.sku);
+      if (!product) continue;
+      const card = findProductCard(product.nameAr || product.name || product.nameEn || planned.sku);
+      if (!card) continue;
+      const quantity = Math.max(1, Math.min(20, Math.trunc(Number(planned.quantity) || 1)));
+      const name = textOf(card.querySelector("h3"));
+      const price = [...card.querySelectorAll("strong")].map(textOf).find((item) => /د\.ك|kwd/i.test(item)) || "";
+      const unitPrice = priceNumber(price);
+      const canonical = product.nameAr || product.name || name;
+      items.push({
+        canonical,
+        name,
+        quantity,
+        price,
+        unitPrice,
+        lineValue: unitPrice * quantity,
+        pack: textOf(card.querySelector("p")),
+        command: `${type === "remove" ? "احذف" : "أضف"} عدد ${quantity} ${canonical}`,
+      });
+    }
+    return { type, items, total: items.reduce((sum, item) => sum + item.lineValue, 0) };
+  }
+
+  async function applyAssistantPlan(plan, rawCommand, options) {
+    const speak = options.speak !== false;
+    if (!plan || typeof plan.intent !== "string") return false;
+    if (plan.intent === "add" || plan.intent === "remove") {
+      const analysis = await analysisFromAssistantPlan(plan, plan.intent);
+      if (!analysis.items.length) {
+        answer(t("noProduct"), speak);
+        return true;
+      }
+      state.pending = { type: plan.intent, analysis };
+      answer(approvalPrompt(analysis), speak, options.voice === true);
+      return true;
+    }
+    if (plan.intent === "price") {
+      const product = catalogProductBySku(plan.items?.[0]?.sku);
+      const result = await productPrice(product?.nameAr || product?.name || plan.query || rawCommand);
+      if (!result?.price) answer(t("noProduct"), speak);
+      else if (selectedLanguage() === "en") answer(`${result.name}: ${result.price}, ${result.pack}.`, speak);
+      else if (selectedLanguage() === "ur") answer(`${result.name} کی قیمت ${result.price} ہے، ${result.pack}۔`, speak);
+      else answer(`سعر ${result.name} هو ${result.price}، والعبوة ${result.pack}.`, speak);
+      return true;
+    }
+    if (plan.intent === "search") {
+      const result = await searchCatalog(plan.query || rawCommand);
+      answer(plan.reply || (result.query ? `${result.query}: ${assistantNumber(result.count)}` : t("noProduct")), speak);
+      return true;
+    }
+    if (plan.intent === "navigate_catalog") {
+      await goToCatalog();
+      answer(plan.reply || (selectedLanguage() === "en" ? "The supply catalog is open." : "فتحت كتالوج التموينات."), speak);
+      return true;
+    }
+    if (plan.intent === "navigate_orders") {
+      await goToOrders();
+      answer(plan.reply || (selectedLanguage() === "en" ? "Orders are open." : "فتحت صفحة الطلبات."), speak);
+      return true;
+    }
+    if (plan.intent === "track_order") {
+      const order = await orderStatus(plan.orderNumber || rawCommand);
+      if (!order) answer(t("noOrders"), speak);
+      else if (selectedLanguage() === "en") answer(`Order ${order.number} is ${order.status}. Delivery: ${order.slot}.`, speak);
+      else if (selectedLanguage() === "ur") answer(`آرڈر ${order.number} کی حالت ${order.status} ہے۔ ڈیلیوری: ${order.slot}۔`, speak);
+      else answer(`طلبك ${order.number} حالته ${order.status}، وموعد التوصيل ${order.slot}.`, speak);
+      return true;
+    }
+    if (plan.intent === "open_cart") {
+      const dialog = await openCart();
+      const summary = dialog && cartSummary(dialog);
+      answer(summary ? (plan.reply || checkoutApprovalPrompt(summary)) : t("emptyCart"), speak);
+      return true;
+    }
+    if (plan.intent === "checkout") {
+      const dialog = await openCart();
+      const summary = dialog && cartSummary(dialog);
+      if (!summary) answer(t("emptyCart"), speak);
+      else {
+        state.pending = { type: "checkout", summary };
+        answer(checkoutApprovalPrompt(summary), speak, options.voice === true);
+      }
+      return true;
+    }
+    if (plan.intent === "cancel") {
+      state.pending = null;
+      answer(t("cancelled"), speak);
+      return true;
+    }
+    if (["answer", "help", "unknown"].includes(plan.intent)) {
+      answer(plan.reply || (plan.intent === "help" ? t("help") : t("unknown")), speak);
+      return true;
+    }
+    return false;
+  }
+
+  async function askSmartAssistant(command, options) {
+    if (!window.TamweenatSupport || typeof window.TamweenatSupport.analyzeOrder !== "function") return false;
+    try {
+      const plan = await window.TamweenatSupport.analyzeOrder(command, {
+        language: selectedLanguage(),
+        cart: cartSnapshotForAssistant(),
+      });
+      return await applyAssistantPlan(plan, command, options);
+    } catch (error) {
+      window.dispatchEvent(new CustomEvent("tamweenat-assistant-fallback", { detail: { code: error?.code || "unavailable" } }));
+      return false;
+    }
+  }
+
   async function execute(rawCommand, options = {}) {
     const command = String(rawCommand || "").trim();
     if (!command || state.busy) return;
@@ -806,6 +932,7 @@
         return;
       }
 
+      if (await askSmartAssistant(command, options)) return;
       answer(t("unknown"), options.speak !== false);
     } catch (error) {
       console.warn("Tamweenat voice command failed", error);
@@ -835,6 +962,9 @@
     const recognition = state.recognition;
     state.recognition = null;
     try { recognition?.abort(); } catch {}
+    if (window.TamweenatVoice && typeof window.TamweenatVoice.stopListening === "function") {
+      try { window.TamweenatVoice.stopListening(); } catch {}
+    }
     root?.classList.remove("is-listening");
     micButton?.setAttribute("aria-label", t("listen"));
     renderStatus("ready", t("ready"));
@@ -1075,6 +1205,22 @@
       answer(t("micDenied"), false);
       return;
     }
+    if (detail.partial && state.listening) {
+      state.finalTranscript = String(detail.text || "").trim();
+      state.interimTranscript = "";
+      transcriptText.textContent = state.finalTranscript || t("listening");
+      if (state.finalTranscript) scheduleTranscriptCommit();
+      return;
+    }
+    if (detail.error === "cancelled") {
+      stopListening();
+      return;
+    }
+    if (detail.error && !detail.text) {
+      stopListening();
+      answer(detail.error === "no_speech" ? t("noSpeech") : t("unsupported"), false);
+      return;
+    }
     handleRecognizedText(detail.text || "");
   });
 
@@ -1096,6 +1242,6 @@
     open: () => setOpen(true),
     close: () => setOpen(false),
     execute: (command, options) => execute(command, options),
-    version: "1.2.0",
+    version: "2.0.0",
   });
 })();

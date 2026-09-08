@@ -30,7 +30,8 @@ function corsHeaders(req) {
   const origin = req.headers.origin || '';
   return {
     'Access-Control-Allow-Origin': allowedOrigin(origin) ? (origin || '*') : 'null',
-    'Access-Control-Allow-Headers': 'Authorization, Content-Type',
+    'Access-Control-Allow-Headers': 'Authorization, Content-Type, X-Request-ID, X-Tamweenat-Client',
+    'Access-Control-Expose-Headers': 'X-Request-ID',
     'Access-Control-Allow-Methods': 'GET,POST,PATCH,DELETE,OPTIONS',
     'Vary': 'Origin'
   };

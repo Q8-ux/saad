@@ -44,6 +44,12 @@ jobs:
       - uses: actions/configure-pages@v5
       - uses: actions/setup-node@v4
         with: { node-version: 22 }
+      - name: Validate Tamweenat assistant
+        run: |
+          node --check tamweenat/assets/support-runtime.js
+          node --check tamweenat/assets/voice-assistant.js
+          node tamweenat/tests/voice-order-parser.test.cjs
+          node tamweenat/tests/assistant-integration.test.cjs
       - name: Install English audio dependency
         run: sudo apt-get update -y && sudo apt-get install -y espeak
       - name: Install workforce dependencies

@@ -1,8 +1,10 @@
 {
-  "releaseHash": "20260901-internal-navigation",
+  "releaseHash": "20260908-assistant2",
   "loaderName": "loader-807f1f72f7f0.js",
   "jsFile": "app-9e47eff7f33a.js.gz",
   "cssFile": "app-8f6e8cf552b6.css.gz",
+  "supportRuntimeJs": "/saad/tamweenat/assets/support-runtime.js",
+  "supportRuntimeVersion": "2.0.0",
   "catalogSource": "مخزن البرغر",
   "catalogProducts": 162,
   "catalogCategories": 9,

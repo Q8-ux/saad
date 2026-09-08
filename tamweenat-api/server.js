@@ -12,14 +12,18 @@ const JWT_SECRET = process.env.JWT_SECRET || 'tamweenat-dev-secret';
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'change-me';
 const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-5';
+const OPENAI_CATALOG_MODEL = process.env.OPENAI_CATALOG_MODEL || OPENAI_MODEL;
 const REALTIME_MODEL = process.env.OPENAI_REALTIME_MODEL || 'gpt-realtime';
 const allowedOrigins = (process.env.CORS_ORIGIN || 'https://q8-ux.github.io,http://localhost:3000,http://127.0.0.1:5500')
   .split(',').map(x=>x.trim()).filter(Boolean);
 
+app.disable('x-powered-by');
+app.set('trust proxy',1);
 app.use(helmet({crossOriginResourcePolicy:false}));
 app.use(cors({origin(origin,cb){if(!origin||allowedOrigins.some(x=>origin.startsWith(x))) return cb(null,true); cb(new Error('CORS blocked'));}}));
 app.use(express.json({limit:'1mb'}));
 app.use(express.text({type:['application/sdp','text/plain'],limit:'2mb'}));
+app.use((req,res,next)=>{const requestId=String(req.get('x-request-id')||rid('req')).slice(0,96);req.requestId=requestId;res.set('X-Request-ID',requestId);res.set('Cache-Control','no-store');next();});
 
 const now=()=>new Date().toISOString();
 const rid=p=>`${p}_${crypto.randomBytes(5).toString('hex')}`;
@@ -27,6 +31,34 @@ const money=n=>Math.round((Number(n)||0)*1000)/1000;
 const addDays=(d,n)=>{const x=new Date(d);x.setUTCDate(x.getUTCDate()+n);return x.toISOString();};
 
 const catalog=JSON.parse(fs.readFileSync(new URL('./catalog.json',import.meta.url),'utf8'));
+const activeCatalog=catalog.filter(item=>item.active);
+const catalogBySku=new Map(activeCatalog.map(item=>[String(item.sku||item.id).toUpperCase(),item]));
+const ASSISTANT_INTENTS=['answer','navigate_catalog','navigate_orders','open_cart','track_order','search','price','add','remove','checkout','cancel','help','unknown'];
+const ASSISTANT_PLAN_SCHEMA={
+  type:'object',
+  properties:{
+    reply:{type:'string'},
+    intent:{type:'string',enum:ASSISTANT_INTENTS},
+    requiresConfirmation:{type:'boolean'},
+    items:{type:'array',items:{type:'object',properties:{sku:{type:'string'},quantity:{type:'integer'}},required:['sku','quantity'],additionalProperties:false}},
+    query:{type:'string'},
+    orderNumber:{type:'string'}
+  },
+  required:['reply','intent','requiresConfirmation','items','query','orderNumber'],
+  additionalProperties:false
+};
+const assistantRateBuckets=new Map();
+function assistantRateLimit(req,res,next){
+  const key=String(req.ip||req.socket?.remoteAddress||'unknown');
+  const current=Date.now();
+  const windowMs=10*60*1000;
+  const recent=(assistantRateBuckets.get(key)||[]).filter(at=>current-at<windowMs);
+  if(recent.length>=24){res.set('Retry-After','60');return res.status(429).json({error:'assistant_rate_limited',requestId:req.requestId});}
+  recent.push(current);
+  assistantRateBuckets.set(key,recent);
+  next();
+}
+setInterval(()=>{const current=Date.now();for(const[key,items]of assistantRateBuckets){const recent=items.filter(at=>current-at<10*60*1000);if(recent.length)assistantRateBuckets.set(key,recent);else assistantRateBuckets.delete(key);}},10*60*1000).unref();
 
 const store={restaurants:[],orders:[],invoices:[],payments:[],messages:[],audit:[],settings:{warningThreshold:.60,riskThreshold:.80,hardStopThreshold:1,defaultTermsDays:30}};
 const ORDER_STAGES=['new','review','confirmed','reserved','picking','out_for_delivery','delivered'];
@@ -99,6 +131,60 @@ app.get('/api/messages',auth,(req,res)=>{const restId=req.user.role==='admin'?re
 app.post('/api/messages',auth,(req,res)=>{const restaurantId=req.user.role==='admin'?req.body.restaurantId:req.user.restaurantId;const m={id:rid('msg'),restaurantId,subject:req.body.subject||'استفسار',body:req.body.body||'',from:req.user.role,createdAt:now(),status:'open',replies:[]};store.messages.unshift(m);audit(req.user.username||req.user.role,'message',restaurantId,{messageId:m.id});res.status(201).json(m);});
 app.post('/api/messages/:id/reply',auth,(req,res)=>{const m=store.messages.find(x=>x.id===req.params.id);if(!m)return res.status(404).json({error:'not_found'});if(req.user.role!=='admin'&&m.restaurantId!==req.user.restaurantId)return res.status(403).json({error:'forbidden'});m.replies.push({id:rid('reply'),from:req.user.role,body:req.body.body||'',createdAt:now()});if(req.user.role==='admin')m.status='answered';res.json(m);});
 
+function safeAssistantCart(input){
+  if(!Array.isArray(input))return[];
+  return input.slice(0,50).map(item=>{
+    const sku=String(item?.sku||'').toUpperCase().slice(0,24);
+    const product=catalogBySku.get(sku);
+    const quantity=Math.max(0,Math.min(20,Math.trunc(Number(item?.quantity)||0)));
+    return product&&quantity?{sku,quantity}:null;
+  }).filter(Boolean);
+}
+function safeAssistantPlan(input){
+  const requestedIntent=ASSISTANT_INTENTS.includes(input?.intent)?input.intent:'unknown';
+  const items=(Array.isArray(input?.items)?input.items:[]).slice(0,12).map(item=>{
+    const sku=String(item?.sku||'').toUpperCase().slice(0,24);
+    const product=catalogBySku.get(sku);
+    const quantity=Math.max(1,Math.min(20,Math.trunc(Number(item?.quantity)||1)));
+    return product?{sku,quantity}:null;
+  }).filter(Boolean);
+  const intent=['add','remove','price'].includes(requestedIntent)&&!items.length?'unknown':requestedIntent;
+  return{
+    reply:String(input?.reply||'').trim().slice(0,800),
+    intent,
+    requiresConfirmation:['add','remove','checkout'].includes(intent),
+    items,
+    query:String(input?.query||'').trim().slice(0,160),
+    orderNumber:String(input?.orderNumber||'').trim().slice(0,40)
+  };
+}
+app.post('/api/ai/catalog-assistant',assistantRateLimit,async(req,res)=>{
+  if(!process.env.OPENAI_API_KEY)return res.status(503).json({error:'ai_not_configured',requestId:req.requestId});
+  const message=String(req.body?.message||'').trim();
+  if(!message||message.length>600)return res.status(400).json({error:'invalid_message',requestId:req.requestId});
+  const language=['ar','en','ur'].includes(req.body?.language)?req.body.language:'ar';
+  const cart=safeAssistantCart(req.body?.cart);
+  const products=activeCatalog.map(item=>({sku:String(item.sku||item.id),name:item.name,nameEn:item.nameEn||'',unit:item.unit,price:item.price}));
+  try{
+    const client=new OpenAI({apiKey:process.env.OPENAI_API_KEY,timeout:24000,maxRetries:1});
+    const response=await client.responses.create({
+      model:OPENAI_CATALOG_MODEL,
+      store:false,
+      max_output_tokens:900,
+      instructions:'You are the order assistant inside Tamweenat, a Kuwait restaurant supply catalog. Interpret only catalog, cart, order-navigation, price, search, add, remove, checkout-preview, cancel, and help requests. Use only SKUs from the supplied catalog. Never invent a product, price, quantity, order status, or account fact. Never claim an action was completed: you only return a plan that the application validates and executes. Adding, removing, or opening final checkout always requires user confirmation. Reply concisely in the requested language; for Arabic use clear professional Kuwaiti wording. If the request is unrelated or cannot be grounded in the catalog, use intent unknown and explain what the assistant can do.',
+      input:`Requested language: ${language}\nCurrent cart: ${JSON.stringify(cart)}\nCatalog: ${JSON.stringify(products)}\nUser request: ${message}`,
+      text:{format:{type:'json_schema',name:'tamweenat_assistant_plan',strict:true,schema:ASSISTANT_PLAN_SCHEMA}}
+    });
+    const parsed=JSON.parse(response.output_text||'{}');
+    const plan=safeAssistantPlan(parsed);
+    if(!plan.reply)plan.reply=language==='en'?'I could not understand that request.':language==='ur'?'میں اس درخواست کو نہیں سمجھ سکا۔':'لم أفهم الطلب بشكل كافٍ.';
+    res.json({...plan,requestId:req.requestId});
+  }catch(error){
+    console.error('Tamweenat catalog assistant error',{requestId:req.requestId,name:error?.name,status:error?.status});
+    res.status(502).json({error:'assistant_unavailable',requestId:req.requestId});
+  }
+});
+
 function contextFor(restaurantId){const r=store.restaurants.find(x=>x.id===restaurantId);if(!r)return null;const s=state(r);return{restaurant:{id:r.id,name:r.name,branches:r.branches,creditLimit:r.creditLimit,outstanding:r.outstanding,overdue:r.overdue,monthlyBudget:r.monthlyBudget,monthSpend:r.monthSpend,...s},orders:store.orders.filter(o=>o.restaurantId===r.id).slice(-10),invoices:store.invoices.filter(i=>i.restaurantId===r.id).slice(-10),catalog:catalog.filter(x=>x.active).map(x=>({id:x.id,name:x.name,category:x.category,unit:x.unit,price:x.price}))};}
 app.post('/api/ai/assistant',auth,async(req,res)=>{if(!process.env.OPENAI_API_KEY)return res.status(503).json({error:'ai_not_configured'});const restaurantId=req.user.role==='admin'?req.body.restaurantId:req.user.restaurantId;const context=contextFor(restaurantId);if(!context)return res.status(404).json({error:'restaurant_not_found'});try{const client=new OpenAI({apiKey:process.env.OPENAI_API_KEY});const response=await client.responses.create({model:OPENAI_MODEL,instructions:'أنت مساعد تموينات الذكي للمطاعم. أجب بالعربية الكويتية المهنية المختصرة. اعتمد فقط على بيانات الحساب المرسلة. لا تخترع أسعاراً أو حالات طلب. ساعد في الحسابات والميزانية والشراء والتذكير والمتابعة.',input:`بيانات الحساب:\n${JSON.stringify(context)}\n\nسؤال المستخدم: ${String(req.body.message||'')}`});res.json({text:response.output_text});}catch(e){res.status(502).json({error:'ai_error',message:e.message});}});
 
@@ -108,5 +194,5 @@ app.get('/api/admin/audit',auth,adminOnly,(req,res)=>res.json(store.audit.slice(
 app.get('/api/admin/settings',auth,adminOnly,(req,res)=>res.json({...store.settings,aiEnabled:Boolean(process.env.OPENAI_API_KEY)}));
 app.patch('/api/admin/settings',auth,adminOnly,(req,res)=>{Object.assign(store.settings,req.body||{});audit(req.user.username,'settings','system',req.body);res.json(store.settings);});
 
-app.use((err,req,res,next)=>{console.error(err);res.status(500).json({error:'server_error'});});
+app.use((err,req,res,next)=>{const corsBlocked=err?.message==='CORS blocked';console.error('Tamweenat request error',{requestId:req.requestId,name:err?.name,corsBlocked});res.status(corsBlocked?403:500).json({error:corsBlocked?'origin_forbidden':'server_error',requestId:req.requestId});});
 app.listen(PORT,'0.0.0.0',()=>console.log(`Tamweenat API listening on ${PORT}`));
