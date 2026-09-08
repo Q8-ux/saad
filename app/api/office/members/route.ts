@@ -18,6 +18,11 @@ export const dynamic = "force-dynamic";
 const ROLES = new Set(["admin", "lawyer", "secretary", "finance", "viewer"]);
 const MEMBER_STATUSES = new Set(["active", "inactive"]);
 const MEMBER_ID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const PASSWORD_ITERATIONS = 100000;
+
+type AuthRuntime = typeof globalThis & {
+  __LEGAL_OFFICE_LOCAL_AUTH_PEPPER__?: string;
+};
 
 type MemberRow = {
   id: string;
@@ -26,6 +31,8 @@ type MemberRow = {
   displayName: string;
   role: string;
   status: string;
+  username: string;
+  hasPassword: number;
   createdAt: string;
 };
 
@@ -46,6 +53,60 @@ function status(value: unknown) {
   const selected = textValue(value, 30);
   if (!MEMBER_STATUSES.has(selected)) throw new RequestValidationError("حالة العضو غير صحيحة.");
   return selected;
+}
+
+function normalizeUsername(value: unknown) {
+  return textValue(value, 80).toLowerCase().replace(/\s+/g, " ");
+}
+
+function passwordValue(value: unknown) {
+  const password = String(value ?? "");
+  if (password.length < 8) throw new RequestValidationError("كلمة المرور يجب ألا تقل عن 8 أحرف أو أرقام.");
+  if (password.length > 512) throw new RequestValidationError("كلمة المرور طويلة جداً.");
+  return password;
+}
+
+function validateUsername(value: unknown) {
+  const username = normalizeUsername(value);
+  if (username.length < 3) throw new RequestValidationError("اسم المستخدم يجب ألا يقل عن 3 أحرف.");
+  if (!/^[\p{L}\p{N}._@\- ]+$/u.test(username)) {
+    throw new RequestValidationError("اسم المستخدم يحتوي على رموز غير مسموحة.");
+  }
+  return username;
+}
+
+function toBase64Url(bytes: Uint8Array): string {
+  let binary = "";
+  for (const byte of bytes) binary += String.fromCharCode(byte);
+  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+}
+
+function newSalt() {
+  const bytes = new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+  return toBase64Url(bytes);
+}
+
+async function hashPassword(password: string, salt: string) {
+  const pepper = (globalThis as AuthRuntime).__LEGAL_OFFICE_LOCAL_AUTH_PEPPER__ ?? "";
+  if (!pepper) throw new Error("إعداد حماية كلمات المرور غير متاح.");
+  const normalized = salt.replace(/-/g, "+").replace(/_/g, "/");
+  const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, "=");
+  const binary = atob(padded);
+  const saltBytes = Uint8Array.from(binary, (character) => character.charCodeAt(0));
+  const material = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(`${pepper}\u0000${password}`),
+    "PBKDF2",
+    false,
+    ["deriveBits"],
+  );
+  const bits = await crypto.subtle.deriveBits(
+    { name: "PBKDF2", hash: "SHA-256", salt: saltBytes, iterations: PASSWORD_ITERATIONS },
+    material,
+    256,
+  );
+  return toBase64Url(new Uint8Array(bits));
 }
 
 function failure(error: unknown, fallback: string) {
@@ -78,11 +139,45 @@ async function activeOwnerCount(officeId: string) {
 async function listMembers(officeId: string) {
   const rows = await getD1()
     .prepare(
-      "SELECT m.id AS id,m.user_id AS userId,u.email AS email,u.display_name AS displayName,m.role AS role,m.status AS status,m.created_at AS createdAt FROM office_members m JOIN app_users u ON u.id=m.user_id WHERE m.office_id=? ORDER BY CASE m.role WHEN 'owner' THEN 0 WHEN 'admin' THEN 1 ELSE 2 END, m.created_at ASC",
+      "SELECT m.id AS id,m.user_id AS userId,u.email AS email,u.display_name AS displayName,m.role AS role,m.status AS status,COALESCE(c.username,'') AS username,CASE WHEN c.password_hash IS NOT NULL AND c.password_hash<>'' THEN 1 ELSE 0 END AS hasPassword,m.created_at AS createdAt FROM office_members m JOIN app_users u ON u.id=m.user_id LEFT JOIN local_login_credentials c ON c.user_id=u.id WHERE m.office_id=? ORDER BY CASE m.role WHEN 'owner' THEN 0 WHEN 'admin' THEN 1 ELSE 2 END, m.created_at ASC",
     )
     .bind(officeId)
     .all<MemberRow>();
   return rows.results ?? [];
+}
+
+async function assertUsernameAvailable(username: string, userId: string) {
+  const existing = await getD1()
+    .prepare("SELECT user_id AS userId FROM local_login_credentials WHERE username=? LIMIT 1")
+    .bind(username)
+    .first<{ userId: string }>();
+  if (existing && existing.userId !== userId) {
+    throw new RequestValidationError("اسم المستخدم مستخدم بالفعل. اختر اسماً آخر.");
+  }
+}
+
+async function upsertCredentials(params: {
+  userId: string;
+  username: string;
+  password: string;
+  officeName: string;
+  revokeSessions: boolean;
+}) {
+  await assertUsernameAvailable(params.username, params.userId);
+  const salt = newSalt();
+  const hash = await hashPassword(params.password, salt);
+  const db = getD1();
+  const statements = [
+    db
+      .prepare(
+        "INSERT INTO local_login_credentials (user_id,username,password_hash,password_salt,password_iterations,is_platform_admin,initial_office_name,failed_attempts,locked_until,updated_at) VALUES (?,?,?,?,?,0,?,0,'',CURRENT_TIMESTAMP) ON CONFLICT(user_id) DO UPDATE SET username=excluded.username,password_hash=excluded.password_hash,password_salt=excluded.password_salt,password_iterations=excluded.password_iterations,failed_attempts=0,locked_until='',updated_at=CURRENT_TIMESTAMP",
+      )
+      .bind(params.userId, params.username, hash, salt, PASSWORD_ITERATIONS, params.officeName),
+  ];
+  if (params.revokeSessions) {
+    statements.push(db.prepare("DELETE FROM local_login_sessions WHERE user_id=?").bind(params.userId));
+  }
+  await db.batch(statements);
 }
 
 export async function GET(request: Request) {
@@ -94,6 +189,7 @@ export async function GET(request: Request) {
       seatLimit: context.seatLimit,
       activeMemberCount: count,
       canManageMembers: context.role === "owner" || context.role === "admin",
+      canManageCredentials: context.role === "owner",
     });
   } catch (error) {
     return failure(error, "تعذّر تحميل أعضاء المكتب حالياً.");
@@ -110,6 +206,19 @@ export async function POST(request: Request) {
     if (!email) throw new RequestValidationError("البريد الإلكتروني للعضو مطلوب.");
     const displayName = textValue(body.displayName, 180);
     const memberRole = role(body.role);
+    const requestedUsername = textValue(body.username, 80);
+    const requestedPassword = String(body.password ?? "");
+    const wantsCredentials = Boolean(requestedUsername || requestedPassword);
+    let username = "";
+    let password = "";
+    if (wantsCredentials) {
+      if (context.role !== "owner") {
+        return privateJson({ error: "إنشاء بيانات الدخول متاح لمالك المكتب فقط." }, { status: 403 });
+      }
+      username = validateUsername(requestedUsername);
+      password = passwordValue(requestedPassword);
+    }
+
     const db = getD1();
     const existingUser = await db
       .prepare("SELECT id FROM app_users WHERE email=? LIMIT 1")
@@ -131,7 +240,7 @@ export async function POST(request: Request) {
     await db.batch([
       db
         .prepare(
-          "INSERT INTO app_users (id,email,display_name,status,updated_at) VALUES (?,?,?,'active',CURRENT_TIMESTAMP) ON CONFLICT(email) DO UPDATE SET display_name=CASE WHEN excluded.display_name<>'' THEN excluded.display_name ELSE app_users.display_name END,updated_at=CURRENT_TIMESTAMP",
+          "INSERT INTO app_users (id,email,display_name,status,updated_at) VALUES (?,?,?,'active',CURRENT_TIMESTAMP) ON CONFLICT(email) DO UPDATE SET display_name=CASE WHEN excluded.display_name<>'' THEN excluded.display_name ELSE app_users.display_name END,status='active',updated_at=CURRENT_TIMESTAMP",
         )
         .bind(userId, email, displayName),
       existingMembership
@@ -142,18 +251,31 @@ export async function POST(request: Request) {
             .prepare("INSERT INTO office_members (id,office_id,user_id,role,status) VALUES (?,?,?,?,'active')")
             .bind(crypto.randomUUID(), context.officeId, userId, memberRole),
     ]);
+
+    if (wantsCredentials) {
+      await upsertCredentials({
+        userId,
+        username,
+        password,
+        officeName: context.officeName,
+        revokeSessions: userId !== context.id,
+      });
+    }
+
     await writeAuditLog({
       officeId: context.officeId,
       actorUserId: context.id,
       action: existingMembership ? "reactivate_member" : "add_member",
       entityType: "office_member",
       entityId: userId,
-      metadata: { role: memberRole },
+      metadata: { role: memberRole, credentialsCreated: wantsCredentials },
     });
 
     return privateJson({
       ok: true,
-      message: "تمت إضافة العضو. عليه تسجيل الدخول بالعنوان نفسه للوصول إلى المكتب.",
+      message: wantsCredentials
+        ? "تمت إضافة العضو وإنشاء بيانات دخوله."
+        : "تمت إضافة العضو إلى المكتب.",
     }, { status: existingMembership ? 200 : 201 });
   } catch (error) {
     return failure(error, "تعذّرت إضافة عضو المكتب.");
@@ -167,8 +289,6 @@ export async function PATCH(request: Request) {
     requireCapability(context, "manageMembers");
     const body = await readJsonObject(request);
     const id = memberId(body.id);
-    const selectedRole = role(body.role, true);
-    const selectedStatus = status(body.status);
     const db = getD1();
     const existing = await db
       .prepare("SELECT id,user_id AS userId,role,status FROM office_members WHERE id=? AND office_id=? LIMIT 1")
@@ -176,6 +296,32 @@ export async function PATCH(request: Request) {
       .first<{ id: string; userId: string; role: string; status: string }>();
     if (!existing) return privateJson({ error: "لم يُعثر على العضو المطلوب." }, { status: 404 });
 
+    if (body.action === "resetPassword") {
+      if (context.role !== "owner") {
+        return privateJson({ error: "إعادة تعيين كلمة المرور متاحة لمالك المكتب فقط." }, { status: 403 });
+      }
+      const username = validateUsername(body.username);
+      const password = passwordValue(body.password);
+      await upsertCredentials({
+        userId: existing.userId,
+        username,
+        password,
+        officeName: context.officeName,
+        revokeSessions: existing.userId !== context.id,
+      });
+      await writeAuditLog({
+        officeId: context.officeId,
+        actorUserId: context.id,
+        action: "reset_member_password",
+        entityType: "office_member",
+        entityId: existing.id,
+        metadata: { username },
+      });
+      return privateJson({ ok: true, message: "تم تعيين اسم المستخدم وكلمة المرور الجديدة." });
+    }
+
+    const selectedRole = role(body.role, true);
+    const selectedStatus = status(body.status);
     const wouldDeactivateOwner = existing.role === "owner" && existing.status === "active" && (selectedRole !== "owner" || selectedStatus !== "active");
     if (wouldDeactivateOwner && (await activeOwnerCount(context.officeId)) <= 1) {
       return privateJson({ error: "لا يمكن إزالة أو تعطيل آخر مالك نشط للمكتب." }, { status: 409 });
