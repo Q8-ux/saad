@@ -5,17 +5,51 @@ const PRIVATE_API_HEADERS = {
   "X-Content-Type-Options": "nosniff",
 };
 
+function firstForwardedValue(value: string | null): string {
+  return (value ?? "").split(",")[0]?.trim() ?? "";
+}
+
+function normalizedOrigin(value: string): string | null {
+  try {
+    const url = new URL(value);
+    if (url.protocol !== "https:" && url.protocol !== "http:") return null;
+    return url.origin;
+  } catch {
+    return null;
+  }
+}
+
 /**
- * State-changing browser requests must come from this application. Requests
- * without an Origin header are allowed for trusted server-side callers and
- * local tooling; browsers send Origin for JSON POST/PATCH/DELETE requests.
+ * State-changing browser requests must come from this application.
+ *
+ * On reverse-proxy hosts such as Render, request.url can contain an internal
+ * origin while the browser correctly sends the public Origin. Validate against
+ * the proxy-preserved public host/protocol first, then fall back to request.url.
  */
 export function assertTrustedMutation(request: Request) {
-  const origin = request.headers.get("origin");
-  if (!origin) return;
+  const originHeader = request.headers.get("origin");
+  if (!originHeader) return;
 
-  const expectedOrigin = new URL(request.url).origin;
-  if (origin !== expectedOrigin) {
+  const origin = normalizedOrigin(originHeader);
+  if (!origin) {
+    throw new RequestValidationError("تم رفض الطلب لاعتبارات الحماية.");
+  }
+
+  const forwardedHost = firstForwardedValue(request.headers.get("x-forwarded-host"));
+  const host = forwardedHost || firstForwardedValue(request.headers.get("host"));
+  const forwardedProto = firstForwardedValue(request.headers.get("x-forwarded-proto"));
+  const requestUrl = new URL(request.url);
+  const protocol = forwardedProto === "https" || forwardedProto === "http"
+    ? `${forwardedProto}:`
+    : requestUrl.protocol;
+
+  const acceptedOrigins = new Set<string>([requestUrl.origin]);
+  if (host) {
+    const publicOrigin = normalizedOrigin(`${protocol}//${host}`);
+    if (publicOrigin) acceptedOrigins.add(publicOrigin);
+  }
+
+  if (!acceptedOrigins.has(origin)) {
     throw new RequestValidationError("تم رفض الطلب لاعتبارات الحماية.");
   }
 }
