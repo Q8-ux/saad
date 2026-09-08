@@ -1,0 +1,47 @@
+name: Build Legal Contracts Windows EXE
+
+on:
+  push:
+    branches:
+      - legal-contracts-windows
+    paths:
+      - 'windows-app/**'
+      - '.github/workflows/build-legal-contracts-windows.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: windows-app/package-lock.json
+
+      - name: Install desktop dependencies
+        working-directory: windows-app
+        run: npm install --no-audit --no-fund
+
+      - name: Build Windows installer
+        working-directory: windows-app
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+        run: npm run build:win
+
+      - name: Upload EXE
+        uses: actions/upload-artifact@v4
+        with:
+          name: legal-contracts-windows-exe
+          path: windows-app/dist/*.exe
+          if-no-files-found: error
+          retention-days: 30
