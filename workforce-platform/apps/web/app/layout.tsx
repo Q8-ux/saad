@@ -3,6 +3,7 @@ import { LanguageProvider } from './components/LanguageProvider';
 import EnterpriseShell from './components/EnterpriseShell';
 import EmojiSanitizer from './components/EmojiSanitizer';
 import UrlSanitizer from './components/UrlSanitizer';
+import SmartAssistant from './components/SmartAssistant';
 import './globals.css';
 import './ui-enhancements.css';
 import './approved-dashboard.css';
@@ -17,22 +18,7 @@ import './ai-tools-contrast-v8.css';
 import './readability-v16.css';
 import './admin-control.css';
 import './mobile-header-v21.css';
+import './smart-assistant-v23.css';
 
-export const metadata: Metadata = {
-  title: 'منصة نطاق العمل | Work Scope Platform',
-  description: 'منصة ثنائية اللغة للحضور الذكي والانتقالات والطوارئ والتشغيل المؤسسي',
-};
-
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return (
-    <html lang="ar" dir="rtl" data-theme="dark">
-      <body>
-        <LanguageProvider>
-          <EmojiSanitizer />
-          <UrlSanitizer />
-          <EnterpriseShell>{children}</EnterpriseShell>
-        </LanguageProvider>
-      </body>
-    </html>
-  );
-}
+export const metadata: Metadata = {title:'منصة نطاق العمل | Work Scope Platform',description:'منصة ثنائية اللغة للحضور الذكي والانتقالات والطوارئ والتشغيل المؤسسي'};
+export default function RootLayout({children}:Readonly<{children:React.ReactNode}>){return <html lang="ar" dir="rtl" data-theme="dark"><body><LanguageProvider><EmojiSanitizer/><UrlSanitizer/><EnterpriseShell>{children}</EnterpriseShell><SmartAssistant/></LanguageProvider></body></html>}
