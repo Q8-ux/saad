@@ -15,6 +15,8 @@ const DUMMY_SALT = "bGVnYWwtYXV0aC1kdW1teS1zYWx0LXdlLWRvLW5vdC1yZXVzZQ";
 type LocalAuthRuntime = typeof globalThis & {
   __LEGAL_OFFICE_LOCAL_AUTH_BOOTSTRAP__?: string;
   __LEGAL_OFFICE_LOCAL_AUTH_PEPPER__?: string;
+  __LEGAL_OFFICE_LOCAL_AUTH_SCHEMA_READY__?: boolean;
+  __LEGAL_OFFICE_LOCAL_AUTH_BOOTSTRAP_APPLIED__?: string;
 };
 
 type BootstrapAccount = {
@@ -168,45 +170,117 @@ export function localAuthConfigured(): boolean {
   return Boolean(localAuthPepper()) && bootstrapAccounts().length > 0;
 }
 
+async function ensureLocalAuthSchema(): Promise<void> {
+  const runtime = globalThis as LocalAuthRuntime;
+  if (runtime.__LEGAL_OFFICE_LOCAL_AUTH_SCHEMA_READY__) return;
+
+  const db = getD1();
+  await db.exec(`
+    PRAGMA foreign_keys = ON;
+    CREATE TABLE IF NOT EXISTS app_users (
+      id TEXT PRIMARY KEY NOT NULL,
+      email TEXT NOT NULL,
+      display_name TEXT NOT NULL DEFAULT '',
+      status TEXT NOT NULL DEFAULT 'active',
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE UNIQUE INDEX IF NOT EXISTS app_users_email_unique ON app_users(email);
+    CREATE INDEX IF NOT EXISTS app_users_status_idx ON app_users(status);
+    CREATE TABLE IF NOT EXISTS local_login_credentials (
+      user_id TEXT PRIMARY KEY NOT NULL,
+      username TEXT NOT NULL,
+      password_hash TEXT NOT NULL,
+      password_salt TEXT NOT NULL,
+      password_iterations INTEGER NOT NULL,
+      is_platform_admin INTEGER NOT NULL DEFAULT 0,
+      initial_office_name TEXT NOT NULL DEFAULT '',
+      failed_attempts INTEGER NOT NULL DEFAULT 0,
+      locked_until TEXT NOT NULL DEFAULT '',
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES app_users(id) ON DELETE CASCADE
+    );
+    CREATE UNIQUE INDEX IF NOT EXISTS local_login_credentials_username_unique ON local_login_credentials(username);
+    CREATE INDEX IF NOT EXISTS local_login_credentials_lock_idx ON local_login_credentials(locked_until);
+    CREATE TABLE IF NOT EXISTS local_login_sessions (
+      id TEXT PRIMARY KEY NOT NULL,
+      user_id TEXT NOT NULL,
+      token_hash TEXT NOT NULL,
+      expires_at TEXT NOT NULL,
+      revoked_at TEXT NOT NULL DEFAULT '',
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      last_seen_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES app_users(id) ON DELETE CASCADE
+    );
+    CREATE UNIQUE INDEX IF NOT EXISTS local_login_sessions_token_unique ON local_login_sessions(token_hash);
+    CREATE INDEX IF NOT EXISTS local_login_sessions_user_expiry_idx ON local_login_sessions(user_id, expires_at);
+  `);
+
+  runtime.__LEGAL_OFFICE_LOCAL_AUTH_SCHEMA_READY__ = true;
+}
+
 async function ensureLocalAuthBootstrap(): Promise<void> {
+  await ensureLocalAuthSchema();
+
+  const runtime = globalThis as LocalAuthRuntime;
+  const raw = runtime.__LEGAL_OFFICE_LOCAL_AUTH_BOOTSTRAP__ ?? "";
   const accounts = bootstrapAccounts();
   if (!accounts.length) return;
+  if (runtime.__LEGAL_OFFICE_LOCAL_AUTH_BOOTSTRAP_APPLIED__ === raw) return;
 
-  const statements = accounts.flatMap((account) => [
-    getD1()
+  const db = getD1();
+
+  for (const account of accounts) {
+    await db
       .prepare(
-        "INSERT OR IGNORE INTO app_users (id,email,display_name,status,updated_at) VALUES (?,?,?,'active',CURRENT_TIMESTAMP)",
+        "INSERT INTO app_users (id,email,display_name,status,updated_at) VALUES (?,?,?,'active',CURRENT_TIMESTAMP) ON CONFLICT(email) DO UPDATE SET display_name=excluded.display_name,status='active',updated_at=CURRENT_TIMESTAMP",
       )
-      .bind(account.id, account.email, account.displayName),
-    getD1()
+      .bind(account.id, account.email, account.displayName)
+      .run();
+
+    const user = await db
+      .prepare("SELECT id,email FROM app_users WHERE email=? LIMIT 1")
+      .bind(account.email)
+      .first<{ id: string; email: string }>();
+    if (!user) {
+      throw new Error("تعذّر تهيئة حساب تسجيل الدخول المحلي.");
+    }
+
+    const usernameOwner = await db
       .prepare(
-        "INSERT OR IGNORE INTO local_login_credentials (user_id,username,password_hash,password_salt,password_iterations,is_platform_admin,initial_office_name,failed_attempts,locked_until,updated_at) VALUES (?,?,?,?,?,?,?,0,'',CURRENT_TIMESTAMP)",
+        "SELECT c.user_id AS userId,u.email FROM local_login_credentials c JOIN app_users u ON u.id=c.user_id WHERE c.username=? LIMIT 1",
+      )
+      .bind(account.username)
+      .first<{ userId: string; email: string }>();
+
+    if (usernameOwner && usernameOwner.userId !== user.id) {
+      if (usernameOwner.email.trim().toLowerCase() !== account.email) {
+        throw new Error("اسم المستخدم المحلي مرتبط بحساب مختلف.");
+      }
+      await db.batch([
+        db.prepare("DELETE FROM local_login_sessions WHERE user_id=?").bind(usernameOwner.userId),
+        db.prepare("DELETE FROM local_login_credentials WHERE user_id=?").bind(usernameOwner.userId),
+      ]);
+    }
+
+    await db
+      .prepare(
+        "INSERT INTO local_login_credentials (user_id,username,password_hash,password_salt,password_iterations,is_platform_admin,initial_office_name,failed_attempts,locked_until,updated_at) VALUES (?,?,?,?,?,?,?,0,'',CURRENT_TIMESTAMP) ON CONFLICT(user_id) DO UPDATE SET username=excluded.username,password_hash=excluded.password_hash,password_salt=excluded.password_salt,password_iterations=excluded.password_iterations,is_platform_admin=excluded.is_platform_admin,initial_office_name=excluded.initial_office_name,failed_attempts=CASE WHEN local_login_credentials.password_hash<>excluded.password_hash OR local_login_credentials.password_salt<>excluded.password_salt THEN 0 ELSE local_login_credentials.failed_attempts END,locked_until=CASE WHEN local_login_credentials.password_hash<>excluded.password_hash OR local_login_credentials.password_salt<>excluded.password_salt THEN '' ELSE local_login_credentials.locked_until END,updated_at=CURRENT_TIMESTAMP",
       )
       .bind(
-        account.id,
+        user.id,
         account.username,
         account.passwordHash,
         account.passwordSalt,
         account.passwordIterations,
         account.isPlatformAdmin ? 1 : 0,
         account.initialOfficeName,
-      ),
-    getD1()
-      .prepare(
-        "UPDATE local_login_credentials SET password_hash=?,password_salt=?,password_iterations=?,is_platform_admin=?,initial_office_name=?,failed_attempts=0,locked_until='',updated_at=CURRENT_TIMESTAMP WHERE user_id=? AND password_iterations<>?",
       )
-      .bind(
-        account.passwordHash,
-        account.passwordSalt,
-        account.passwordIterations,
-        account.isPlatformAdmin ? 1 : 0,
-        account.initialOfficeName,
-        account.id,
-        account.passwordIterations,
-      ),
-  ]);
+      .run();
+  }
 
-  await getD1().batch(statements);
+  runtime.__LEGAL_OFFICE_LOCAL_AUTH_BOOTSTRAP_APPLIED__ = raw;
 }
 
 function asIdentity(row: Pick<LocalCredentialRow, "id" | "email" | "displayName" | "isPlatformAdmin" | "initialOfficeName">): ApplicationIdentity {
@@ -332,6 +406,7 @@ export async function getLocalIdentity(): Promise<ApplicationIdentity | null> {
 export async function revokeCurrentLocalSession(): Promise<void> {
   const token = (await cookies()).get(LOCAL_AUTH_COOKIE)?.value ?? "";
   if (!/^[A-Za-z0-9_-]{40,128}$/.test(token)) return;
+  await ensureLocalAuthSchema();
   const tokenHash = await sha256(token);
   await getD1()
     .prepare("UPDATE local_login_sessions SET revoked_at=CURRENT_TIMESTAMP WHERE token_hash=? AND revoked_at=''")
