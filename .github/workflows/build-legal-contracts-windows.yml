@@ -25,8 +25,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'npm'
-          cache-dependency-path: windows-app/package-lock.json
 
       - name: Install desktop dependencies
         working-directory: windows-app
