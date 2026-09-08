@@ -237,3 +237,28 @@ if (source !== original) {
 } else {
   console.log("Render source patches already applied or not required.");
 }
+
+// Keep the platform-admin identity available to tenant-scoped APIs even when
+// Render replaces the ephemeral SQLite instance during a deploy. This fallback
+// accepts only the HMAC-signed platform-admin cookie; ordinary members are not
+// elevated or auto-recovered by this path.
+const tenantPath = new URL("../lib/tenant-access.ts", import.meta.url);
+let tenantSource = await readFile(tenantPath, "utf8");
+const tenantOriginal = tenantSource;
+
+if (!tenantSource.includes('import { getRenderAdminIdentity } from "./render-admin-session";')) {
+  tenantSource = tenantSource.replace(
+    'import { getApplicationIdentity } from "./local-auth";',
+    'import { getApplicationIdentity } from "./local-auth";\nimport { getRenderAdminIdentity } from "./render-admin-session";',
+  );
+}
+
+tenantSource = tenantSource.replace(
+  '  const identity = await getApplicationIdentity();',
+  '  const identity = (await getApplicationIdentity()) ?? (await getRenderAdminIdentity());',
+);
+
+if (tenantSource !== tenantOriginal) {
+  await writeFile(tenantPath, tenantSource, "utf8");
+  console.log("Applied Render platform-admin tenant-session recovery patch.");
+}
