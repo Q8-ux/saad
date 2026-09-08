@@ -1,0 +1,45 @@
+{
+  "name": "legal-contracts-windows",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Windows desktop client for منصة العقود والترجمة القانونية",
+  "main": "main.cjs",
+  "scripts": {
+    "start": "electron .",
+    "build:win": "electron-builder --win nsis --x64"
+  },
+  "devDependencies": {
+    "electron": "38.2.1",
+    "electron-builder": "26.0.12"
+  },
+  "build": {
+    "appId": "com.saad.legalcontracts",
+    "productName": "منصة العقود والترجمة القانونية",
+    "asar": true,
+    "files": [
+      "main.cjs",
+      "preload.cjs",
+      "package.json"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ],
+      "artifactName": "Legal-Contracts-Platform-Setup-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "منصة العقود والترجمة القانونية",
+      "runAfterFinish": true
+    }
+  }
+}
