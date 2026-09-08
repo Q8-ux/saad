@@ -2,6 +2,7 @@ import { drizzle } from "drizzle-orm/d1";
 import Database from "better-sqlite3";
 import * as fs from "node:fs";
 import * as path from "node:path";
+import { restoreRenderLegalCorpus } from "./render-legal-corpus";
 import * as schema from "./schema";
 
 // Render-only branch: keep the application D1 call sites unchanged, but back
@@ -164,6 +165,14 @@ function loadNodeD1(): D1Database {
       applyMigration();
     }
   }
+
+  // Rehydrate the verified Ministry of Justice search corpus after migrations.
+  // This only replaces documents that share the same official source URL and
+  // leaves office/client/case data untouched.
+  restoreRenderLegalCorpus(
+    database as unknown as Parameters<typeof restoreRenderLegalCorpus>[0],
+    dataDir,
+  );
 
   const adapter = new NodeD1Database(database) as unknown as D1Database;
   runtime.__LEGAL_OFFICE_NODE_D1__ = adapter;
