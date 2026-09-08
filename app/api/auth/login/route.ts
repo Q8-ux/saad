@@ -5,6 +5,10 @@ import {
   localAuthConfigured,
 } from "../../../../lib/local-auth";
 import {
+  createRenderAdminToken,
+  RENDER_ADMIN_COOKIE,
+} from "../../../../lib/render-admin-session";
+import {
   assertTrustedMutation,
   privateJson,
   readJsonObject,
@@ -48,6 +52,24 @@ export async function POST(request: Request) {
       path: "/",
       expires: new Date(result.expiresAt),
     });
+
+    // Render instances are replaced during deploys, so the SQLite-backed
+    // session table can disappear even while the browser remains open. Give
+    // the platform administrator a signed, HttpOnly recovery cookie that can
+    // re-establish the same admin identity without weakening member access.
+    const adminToken = await createRenderAdminToken(result.identity, result.expiresAt);
+    if (adminToken) {
+      response.cookies.set({
+        name: RENDER_ADMIN_COOKIE,
+        value: adminToken,
+        httpOnly: true,
+        secure: true,
+        sameSite: "lax",
+        path: "/",
+        expires: new Date(result.expiresAt),
+      });
+    }
+
     return response;
   } catch (error) {
     if (error instanceof RequestValidationError) {
