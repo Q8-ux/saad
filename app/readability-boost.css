@@ -1,0 +1,180 @@
+/* Readability boost: keep the legal platform comfortably readable on desktop and mobile. */
+html {
+  font-size: 18px;
+}
+
+body {
+  font-size: 1rem;
+  line-height: 1.75;
+}
+
+button,
+input,
+select,
+textarea {
+  font-size: 1rem;
+}
+
+input,
+select,
+textarea {
+  min-height: 50px;
+  padding: 13px 15px;
+}
+
+textarea {
+  min-height: 120px;
+}
+
+label,
+.results-note,
+.db-line,
+.db-line strong,
+.theme-button,
+.account-summary span,
+.account-summary small,
+.topbar p,
+.brand-copy span {
+  font-size: 0.94rem;
+  line-height: 1.65;
+}
+
+.brand-copy strong {
+  font-size: 1.18rem;
+}
+
+.nav-button {
+  min-height: 50px;
+  padding: 11px 12px;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.nav-short {
+  width: 38px;
+  height: 38px;
+  font-size: 0.82rem;
+}
+
+.topbar h1 {
+  font-size: 1.55rem;
+  line-height: 1.35;
+}
+
+.result-card h3,
+.document-card h3 {
+  font-size: 1.2rem;
+  line-height: 1.6;
+}
+
+.result-card,
+.search-console,
+.analysis-card,
+.library-summary,
+.panel,
+.document-card {
+  font-size: 1rem;
+  line-height: 1.75;
+}
+
+.result-source,
+.document-meta,
+.quality-pill,
+.result-topline,
+.search-analysis,
+.analysis-card p,
+.analysis-card li,
+.result-card p,
+.document-card p {
+  font-size: 0.98rem;
+  line-height: 1.7;
+}
+
+button,
+.button,
+.primary-button,
+.secondary-button,
+.icon-button {
+  min-height: 46px;
+  font-size: 1rem;
+}
+
+@media (max-width: 900px) {
+  html {
+    font-size: 18px;
+  }
+
+  body {
+    font-size: 1rem;
+    line-height: 1.8;
+  }
+
+  .topbar h1 {
+    font-size: 1.45rem;
+  }
+
+  .nav-button {
+    font-size: 1.05rem;
+    min-height: 54px;
+  }
+
+  .result-card h3,
+  .document-card h3 {
+    font-size: 1.22rem;
+  }
+
+  input,
+  select,
+  textarea,
+  button,
+  .button,
+  .primary-button,
+  .secondary-button {
+    font-size: 1.04rem;
+  }
+
+  .result-card,
+  .search-console,
+  .analysis-card,
+  .library-summary,
+  .panel,
+  .document-card {
+    font-size: 1.02rem;
+  }
+}
+
+@media (max-width: 520px) {
+  html {
+    font-size: 18px;
+  }
+
+  body {
+    line-height: 1.82;
+  }
+
+  .topbar h1 {
+    font-size: 1.38rem;
+  }
+
+  .topbar p,
+  label,
+  .results-note,
+  .result-source,
+  .document-meta,
+  .account-summary span,
+  .account-summary small {
+    font-size: 0.98rem;
+  }
+
+  .result-card h3,
+  .document-card h3 {
+    font-size: 1.2rem;
+  }
+
+  input,
+  select,
+  textarea {
+    min-height: 52px;
+    font-size: 1.05rem;
+  }
+}
