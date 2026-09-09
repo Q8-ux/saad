@@ -159,6 +159,26 @@
     return relativePath && supportedRoutes.has(relativePath) ? relativePath : null;
   };
 
+
+  const recoverRedirectedRoute = () => {
+    const storedAddress = sessionStorage.getItem("ant-alshaer-return-path");
+    sessionStorage.removeItem("ant-alshaer-return-path");
+    if (!storedAddress) return route;
+    try {
+      const restored = new URL(storedAddress, window.location.origin);
+      const appPath = routeForGitHubPath(restored.pathname);
+      if (!appPath) return route;
+      window.history.replaceState(
+        { appPath },
+        "",
+        `${restored.pathname}${restored.search}${restored.hash}`,
+      );
+      return appPath;
+    } catch {
+      return route;
+    }
+  };
+
   const syncGitHubAddress = (message) => {
     if (message.type !== "route-changed" || !supportedRoutes.has(message.pathname)) return;
     const next = new URL(githubPathForRoute(message.pathname), window.location.origin);
@@ -212,5 +232,5 @@
   });
 
   window.setTimeout(() => loader?.classList.add("is-slow"), 7000);
-  loadApp();
+  loadApp(recoverRedirectedRoute());
 })();
