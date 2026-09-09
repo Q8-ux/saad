@@ -13,6 +13,8 @@ require('dotenv').config({ path: path.join(__dirname, '.env.local') });
 require('dotenv').config({ path: path.join(__dirname, '..', '.env.local') });
 
 const { searchLegalDocuments, findRelevantLegalContext } = require('./legal-library');
+const { corsPolicy } = require('./cors-policy');
+const { openAiError, openAiErrorDetails } = require('./openai-errors');
 
 const publicPort = Number(process.env.PORT || 3000);
 const appPort = Number(process.env.INTERNAL_APP_PORT || 3001);
@@ -35,28 +37,7 @@ const upload = multer({
   },
 });
 
-const allowedOrigins = new Set([
-  'https://q8-ux.github.io',
-  'https://sabeq.legal',
-  'https://www.sabeq.legal',
-  'http://localhost:5173',
-  'http://127.0.0.1:5173',
-]);
-
-app.use((req, res, next) => {
-  const origin = String(req.headers.origin || '');
-  if (origin && allowedOrigins.has(origin)) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
-    res.setHeader('Vary', 'Origin');
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
-  }
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Cache-Control', 'no-store');
-  res.setHeader('X-Content-Type-Options', 'nosniff');
-  if (req.method === 'OPTIONS') return res.status(204).end();
-  next();
-});
+app.use(corsPolicy);
 
 function aiClient() {
   if (!process.env.OPENAI_API_KEY) return null;
@@ -110,13 +91,6 @@ function contextText(items) {
     const identity = [item.lawNumber ? `رقم ${item.lawNumber}` : '', item.lawYear ? `لسنة ${item.lawYear}` : ''].filter(Boolean).join(' ');
     return `[${index + 1}] ${item.title}${identity ? ` — ${identity}` : ''}\n${String(item.excerpt || '').slice(0, 3500)}\nالمصدر: ${item.sourceUrl || 'وزارة العدل الكويتية'}`;
   }).join('\n\n');
-}
-
-function openAiError(error) {
-  const status = Number(error?.status || error?.response?.status || 0);
-  if (status === 401 || status === 403) return { status: 503, message: 'مفتاح OpenAI غير صالح أو غير مفعل في الخادم.' };
-  if (status === 429) return { status: 503, message: 'تم بلوغ حد استخدام خدمة الذكاء الاصطناعي مؤقتاً. يرجى المحاولة بعد قليل.' };
-  return { status: 503, message: 'تعذر تنفيذ الطلب الآن. يرجى المحاولة مجدداً.' };
 }
 
 function requireAi(res) {
@@ -238,9 +212,10 @@ app.post('/api/legal/assistant', jsonBody, async (req, res) => {
     });
     const answer = outputText(response);
     if (!answer) throw new Error('Empty OpenAI response');
+    console.log('SABEQ assistant response received:', JSON.stringify({ model: AI_MODEL, requestId: response._request_id || null }));
     return res.json({ answer, sources });
   } catch (error) {
-    console.error('Public legal assistant failed:', error?.message || error);
+    console.error('Public legal assistant failed:', openAiErrorDetails(error));
     const mapped = openAiError(error);
     return res.status(mapped.status).json({ error: mapped.message });
   }
@@ -272,7 +247,7 @@ app.post('/api/legal/draft-tools', jsonBody, async (req, res) => {
     if (!rewritten) throw new Error('Empty OpenAI response');
     return res.json({ text: rewritten, sources, sourceCount: sources.length });
   } catch (error) {
-    console.error('Draft tools failed:', error?.message || error);
+    console.error('Draft tools failed:', openAiErrorDetails(error));
     const mapped = openAiError(error);
     return res.status(mapped.status).json({ error: mapped.message });
   }
@@ -311,7 +286,7 @@ app.post('/api/legal/memo', jsonBody, async (req, res) => {
     if (!memo) throw new Error('Empty OpenAI response');
     return res.json({ memo, sources });
   } catch (error) {
-    console.error('Public memo generation failed:', error?.message || error);
+    console.error('Public memo generation failed:', openAiErrorDetails(error));
     const mapped = openAiError(error);
     return res.status(mapped.status).json({ error: mapped.message });
   }
@@ -335,7 +310,7 @@ app.post('/api/legal/transcribe', upload.single('audio'), async (req, res) => {
     if (!text) throw new Error('Empty transcription');
     return res.json({ text });
   } catch (error) {
-    console.error('Public transcription failed:', error?.message || error);
+    console.error('Public transcription failed:', openAiErrorDetails(error));
     const mapped = openAiError(error);
     return res.status(mapped.status).json({ error: mapped.message });
   } finally {
@@ -391,7 +366,7 @@ app.post('/api/legal/analyze-documents', upload.array('documents', 25), async (r
     const analysis = normalizeAnalysis(parseJsonOutput(outputText(response)));
     return res.json({ analysis });
   } catch (error) {
-    console.error('Document analysis failed:', error?.message || error);
+    console.error('Document analysis failed:', openAiErrorDetails(error));
     const mapped = openAiError(error);
     return res.status(mapped.status).json({ error: mapped.message });
   } finally {
@@ -439,6 +414,7 @@ app.use((req, res) => proxy(req, res));
 
 const server = app.listen(publicPort, () => {
   console.log(`SABEQ public legal gateway listening on http://localhost:${publicPort}`);
+  console.log('SABEQ API configuration:', JSON.stringify({ aiConfigured: Boolean(process.env.OPENAI_API_KEY), model: AI_MODEL }));
 });
 
 function shutdown(signal) {
