@@ -1,7 +1,66 @@
 'use strict';
 (() => {
-  const menu = document.querySelector('.menu-button');
+  const theme = document.createElement('link');
+  theme.rel = 'stylesheet';
+  theme.href = 'assets/school-v2.css';
+  document.head.appendChild(theme);
+  const themeMeta = document.querySelector('meta[name="theme-color"]');
+  if (themeMeta) themeMeta.setAttribute('content', '#0b1f3a');
+
   const nav = document.querySelector('#main-nav');
+  if (nav && !nav.querySelector('a[href="#student-library"]')) {
+    const libraryLink = document.createElement('a');
+    libraryLink.href = '#student-library';
+    libraryLink.textContent = 'مكتبة الطالب';
+    const parentsLink = nav.querySelector('a[href="#parents"]');
+    nav.insertBefore(libraryLink, parentsLink || null);
+  }
+
+  const parentsSection = document.querySelector('#parents');
+  if (parentsSection && !document.querySelector('#student-library')) {
+    const section = document.createElement('section');
+    section.className = 'school-library';
+    section.id = 'student-library';
+    section.setAttribute('aria-labelledby', 'library-title');
+    section.innerHTML = `
+      <div class="container">
+        <div class="library-shell">
+          <div class="library-head">
+            <div>
+              <p class="eyebrow">مكتبة الطالب · وزارة التربية</p>
+              <h2 id="library-title">كل مواد المرحلة المتوسطة في مكان واحد.</h2>
+            </div>
+            <p>وصول مباشر إلى مكتبة الطالب الرسمية التابعة لوزارة التربية للصفوف السادس والسابع والثامن والتاسع، مع الكتب الدراسية والاختبارات والمراجعات والفيديوهات التعليمية.</p>
+          </div>
+          <div class="grade-grid" aria-label="صفوف المرحلة المتوسطة">
+            <a class="grade-card" href="https://elibrary.moe.edu.kw/StudentsLibrary" target="_blank" rel="noopener noreferrer"><strong>الصف السادس</strong><span>كتب · مراجعات · فيديو</span></a>
+            <a class="grade-card" href="https://elibrary.moe.edu.kw/StudentsLibrary" target="_blank" rel="noopener noreferrer"><strong>الصف السابع</strong><span>كتب · مراجعات · فيديو</span></a>
+            <a class="grade-card" href="https://elibrary.moe.edu.kw/StudentsLibrary" target="_blank" rel="noopener noreferrer"><strong>الصف الثامن</strong><span>كتب · مراجعات · فيديو</span></a>
+            <a class="grade-card" href="https://elibrary.moe.edu.kw/StudentsLibrary" target="_blank" rel="noopener noreferrer"><strong>الصف التاسع</strong><span>كتب · مراجعات · فيديو</span></a>
+          </div>
+          <div class="subject-row" aria-label="المواد الأساسية">
+            <span class="subject-chip">القرآن الكريم</span><span class="subject-chip">التربية الإسلامية</span><span class="subject-chip">اللغة العربية</span><span class="subject-chip">اللغة الإنجليزية</span><span class="subject-chip">الرياضيات</span><span class="subject-chip">العلوم</span><span class="subject-chip">الاجتماعيات</span><span class="subject-chip">تكنولوجيا الاتصالات والمعلومات</span>
+          </div>
+          <div class="moe-frame-wrap">
+            <div class="moe-frame-toolbar"><span>المكتبة الرسمية داخل موقع المدرسة</span><a href="https://elibrary.moe.edu.kw/StudentsLibrary" target="_blank" rel="noopener noreferrer">فتح بصفحة مستقلة</a></div>
+            <iframe class="moe-frame" src="https://elibrary.moe.edu.kw/StudentsLibrary" title="مكتبة الطالب الإلكترونية - وزارة التربية" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+          </div>
+          <p class="frame-note">إذا منعت وزارة التربية العرض داخل الإطار في بعض المتصفحات، استخدم زر «فتح بصفحة مستقلة» أعلاه.</p>
+          <div class="instagram-wall" aria-labelledby="media-title">
+            <h3 id="media-title">من حساب المدرسة</h3>
+            <div class="instagram-grid">
+              <iframe class="instagram-embed" src="https://www.instagram.com/reel/C7OdkRvMWDS/embed" title="منشور بأخلاقنا نرتقي من حساب مدرسة السقاف" loading="lazy" allowtransparency="true"></iframe>
+              <iframe class="instagram-embed" src="https://www.instagram.com/reel/Cynjf2ZsQ_n/embed" title="منشور تعليمي من حساب مدرسة السقاف" loading="lazy" allowtransparency="true"></iframe>
+              <iframe class="instagram-embed" src="https://www.instagram.com/reel/DOwQ6pCjDFC/embed" title="تغطية مرتبطة بمدرسة السقاف" loading="lazy" allowtransparency="true"></iframe>
+            </div>
+            <a class="media-fallback" href="https://www.instagram.com/alsaqaf_school/" target="_blank" rel="noopener noreferrer">مشاهدة جميع منشورات المدرسة على Instagram</a>
+          </div>
+        </div>
+      </div>`;
+    parentsSection.parentNode.insertBefore(section, parentsSection);
+  }
+
+  const menu = document.querySelector('.menu-button');
   if (!menu || !nav) return;
   document.documentElement.classList.add('has-menu-js');
   menu.hidden = false;
@@ -31,7 +90,7 @@
     const anchor = event.target.closest('a');
     if (anchor) {
       closeMenu();
-      if (narrow.matches) {
+      if (narrow.matches && anchor.getAttribute('href')?.startsWith('#')) {
         const section = document.querySelector(anchor.getAttribute('href'));
         if (section) {
           section.setAttribute('tabindex', '-1');
