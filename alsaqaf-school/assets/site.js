@@ -27,25 +27,34 @@
         <div class="library-shell">
           <div class="library-head">
             <div>
-              <p class="eyebrow">مكتبة الطالب · وزارة التربية</p>
-              <h2 id="library-title">كل مواد المرحلة المتوسطة في مكان واحد.</h2>
+              <p class="eyebrow">المكتبة الرسمية · وزارة التربية</p>
+              <h2 id="library-title">مكتبة الطالب للمرحلة المتوسطة</h2>
             </div>
-            <p>وصول مباشر إلى مكتبة الطالب الرسمية التابعة لوزارة التربية للصفوف السادس والسابع والثامن والتاسع، مع الكتب الدراسية والاختبارات والمراجعات والفيديوهات التعليمية.</p>
+            <p>هذا القسم لا ينشئ روابط كتب أو مواد من عندنا. الوصول يكون إلى مكتبة الطالب الرسمية لوزارة التربية، ثم يختار الطالب الفلاتر الرسمية من داخل المكتبة.</p>
           </div>
-          <div class="grade-grid" aria-label="صفوف المرحلة المتوسطة">
-            <a class="grade-card" href="https://elibrary.moe.edu.kw/StudentsLibrary" target="_blank" rel="noopener noreferrer"><strong>الصف السادس</strong><span>كتب · مراجعات · فيديو</span></a>
-            <a class="grade-card" href="https://elibrary.moe.edu.kw/StudentsLibrary" target="_blank" rel="noopener noreferrer"><strong>الصف السابع</strong><span>كتب · مراجعات · فيديو</span></a>
-            <a class="grade-card" href="https://elibrary.moe.edu.kw/StudentsLibrary" target="_blank" rel="noopener noreferrer"><strong>الصف الثامن</strong><span>كتب · مراجعات · فيديو</span></a>
-            <a class="grade-card" href="https://elibrary.moe.edu.kw/StudentsLibrary" target="_blank" rel="noopener noreferrer"><strong>الصف التاسع</strong><span>كتب · مراجعات · فيديو</span></a>
+
+          <div class="grade-grid" aria-label="طريقة الوصول إلى كتب المرحلة المتوسطة">
+            <div class="grade-card"><strong>1</strong><span>نوع التعليم: التعليم العام</span></div>
+            <div class="grade-card"><strong>2</strong><span>المرحلة التعليمية: المتوسطة</span></div>
+            <div class="grade-card"><strong>3</strong><span>اختر الصف الدراسي</span></div>
+            <div class="grade-card"><strong>4</strong><span>اختر المادة والفصل الدراسي</span></div>
           </div>
-          <div class="subject-row" aria-label="المواد الأساسية">
-            <span class="subject-chip">القرآن الكريم</span><span class="subject-chip">التربية الإسلامية</span><span class="subject-chip">اللغة العربية</span><span class="subject-chip">اللغة الإنجليزية</span><span class="subject-chip">الرياضيات</span><span class="subject-chip">العلوم</span><span class="subject-chip">الاجتماعيات</span><span class="subject-chip">تكنولوجيا الاتصالات والمعلومات</span>
+
+          <div class="subject-row" aria-label="محتوى المكتبة الرسمية">
+            <span class="subject-chip">الكتب الدراسية</span>
+            <span class="subject-chip">الاختبارات والمراجعات</span>
+            <span class="subject-chip">الفيديوهات التعليمية</span>
           </div>
+
           <div class="moe-frame-wrap">
-            <div class="moe-frame-toolbar"><span>المكتبة الرسمية داخل موقع المدرسة</span><a href="https://elibrary.moe.edu.kw/StudentsLibrary" target="_blank" rel="noopener noreferrer">فتح بصفحة مستقلة</a></div>
-            <iframe class="moe-frame" src="https://elibrary.moe.edu.kw/StudentsLibrary" title="مكتبة الطالب الإلكترونية - وزارة التربية" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+            <div class="moe-frame-toolbar">
+              <span>مكتبة الطالب الرسمية — وزارة التربية بدولة الكويت</span>
+              <a href="https://elibrary.moe.edu.kw/StudentsLibrary" target="_blank" rel="noopener noreferrer">فتح المكتبة الرسمية</a>
+            </div>
+            <iframe class="moe-frame" src="https://elibrary.moe.edu.kw/StudentsLibrary" title="مكتبة الطالب الإلكترونية الرسمية - وزارة التربية بدولة الكويت" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
           </div>
-          <p class="frame-note">إذا منعت وزارة التربية العرض داخل الإطار في بعض المتصفحات، استخدم زر «فتح بصفحة مستقلة» أعلاه.</p>
+          <p class="frame-note">إذا لم تسمح بوابة الوزارة بعرض الصفحة داخل الموقع في متصفحك، استخدم زر «فتح المكتبة الرسمية». لا نعتمد روابط داخلية ثابتة للكتب لأن الوزارة قد تغيّر مسارات الملفات.</p>
+
           <div class="instagram-wall" aria-labelledby="media-title">
             <h3 id="media-title">من حساب المدرسة</h3>
             <div class="instagram-grid">
@@ -91,11 +100,11 @@
     if (anchor) {
       closeMenu();
       if (narrow.matches && anchor.getAttribute('href')?.startsWith('#')) {
-        const section = document.querySelector(anchor.getAttribute('href'));
-        if (section) {
-          section.setAttribute('tabindex', '-1');
-          section.focus({ preventScroll: true });
-          section.addEventListener('blur', () => section.removeAttribute('tabindex'), { once: true });
+        const targetSection = document.querySelector(anchor.getAttribute('href'));
+        if (targetSection) {
+          targetSection.setAttribute('tabindex', '-1');
+          targetSection.focus({ preventScroll: true });
+          targetSection.addEventListener('blur', () => targetSection.removeAttribute('tabindex'), { once: true });
         }
       }
     }
