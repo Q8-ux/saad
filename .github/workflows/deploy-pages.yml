@@ -30,6 +30,7 @@ on:
       - 'reddit-business-agent/**'
       - 'ant-alshaer/**'
       - 'elanak-saleem/**'
+      - 'alsaqaf-school/**'
       - 'workforce-platform/apps/web/**'
       - '.github/workflows/deploy-pages.yml'
   workflow_dispatch:
@@ -70,7 +71,7 @@ jobs:
         run: |
           rm -rf _site && mkdir -p _site
           cp index.html 404.html cyber-archive.css cyber-archive.js cyber-data.js sabeq.html _site/
-          for p in sabeq-legal sabeq-admin-preview sabeq-legal-system sabeq-legal-pro hessa-alobaid shalayhna zad-restaurants tamweenat tamweenat-admin rattil kuwait-digital-sales-plan kuwait-fund-modern livestock-vax-kw english-kuwait oman-fruits-pos project-command-center my-sites reddit-business-agent ant-alshaer elanak-saleem; do cp -R "$p" "_site/$p"; done
+          for p in sabeq-legal sabeq-admin-preview sabeq-legal-system sabeq-legal-pro hessa-alobaid shalayhna zad-restaurants tamweenat tamweenat-admin rattil kuwait-digital-sales-plan kuwait-fund-modern livestock-vax-kw english-kuwait oman-fruits-pos project-command-center my-sites reddit-business-agent ant-alshaer elanak-saleem alsaqaf-school; do cp -R "$p" "_site/$p"; done
           bash english-kuwait/generate-audio.sh _site/english-kuwait/audio
           cp -R workforce-platform/apps/web/out/_next _site/_next
           for p in dashboard admin-control attendance-smart transfers emergency ai-tools notifications profile; do cp -R "workforce-platform/apps/web/out/$p" "_site/$p"; done
@@ -79,6 +80,8 @@ jobs:
       - name: Validate combined site
         run: |
           test -s _site/404.html
+          test -s _site/alsaqaf-school/index.html
+          test -s _site/alsaqaf-school/assets/learning-art.webp
           test -s _site/ant-alshaer/admin/login/index.html
           test -s _site/dashboard/index.html
           test -s _site/ai-tools/index.html
