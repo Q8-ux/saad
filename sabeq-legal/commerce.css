@@ -1,0 +1,26 @@
+@font-face{font-family:SabeqMohanad;src:url('./assets/al-mohanad.ttf') format('truetype');font-display:swap}
+.sabeq-commerce,.sc-account-button,.sc-admin{font-family:SabeqMohanad,Tahoma,Arial,sans-serif!important;font-size:18px;line-height:1.65}
+.sabeq-commerce{color:#122f42;background:#fff;border:1px solid #c7d5de;border-radius:18px;padding:0;width:min(680px,calc(100vw - 24px));max-height:90dvh;box-shadow:0 24px 80px #05131f55}
+.sabeq-commerce::backdrop{background:#071d2abd}
+.sc-header{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:18px 22px;border-bottom:1px solid #dbe4e9;background:#f4f8fa;position:sticky;top:0;z-index:1}
+.sc-header h2{font-size:1.35rem;margin:0;color:#123950}
+.sc-body{padding:20px 22px}.sc-message{margin:0;padding:0 22px 18px;color:#874116;white-space:pre-wrap}.sc-message:empty{padding:0}
+.sc-body form{display:grid;gap:14px}.sc-field{display:grid;gap:6px;text-align:start}.sc-field[hidden]{display:none}
+.sabeq-commerce input,.sabeq-commerce select,.sabeq-commerce textarea,.sc-admin input,.sc-admin select{font:inherit;min-width:0;width:100%;box-sizing:border-box;background:#fff;color:#123950;border:1px solid #b4c7d3;border-radius:9px;padding:10px 12px;min-height:48px}
+.sabeq-commerce input[name=code]{font-family:Arial,sans-serif;font-size:26px;letter-spacing:.3em;text-align:center}
+.sc-primary,.sc-secondary{font:inherit;cursor:pointer;min-height:46px;padding:9px 17px;border-radius:9px;border:1px solid transparent;white-space:normal}
+.sc-primary{background:#0b5a65;color:#fff}.sc-secondary{background:#edf3f7;color:#173c51;border-color:#c8d8e2}
+.sc-primary:hover{background:#08434c}.sc-secondary:hover{background:#e0ecf2}
+.sc-primary:focus-visible,.sc-secondary:focus-visible,.sabeq-commerce input:focus-visible,.sc-admin input:focus-visible{outline:3px solid #258daf;outline-offset:3px}
+.sc-primary:disabled,.sc-secondary:disabled{opacity:.55;cursor:wait}
+.sc-body>.sc-primary,.sc-body>.sc-secondary{display:block;width:100%;margin-top:12px}
+.sc-reference{font-family:Arial,sans-serif;color:#647787;font-size:14px;margin:0}
+.sc-status{font-size:22px;font-weight:bold;margin:12px 0}.sc-price{font-size:24px;color:#0a5963;margin:8px 0}
+.sc-details{display:grid;grid-template-columns:1fr 2fr;gap:8px;margin:18px 0}.sc-details dt{color:#667c8b}.sc-details dd{margin:0;overflow-wrap:anywhere}
+.sc-note{font-size:16px;color:#526b7a}.sc-test{background:#fff3cb;color:#614500;padding:10px;border-radius:8px}
+.sc-memo{font:inherit;white-space:pre-wrap;overflow-wrap:anywhere;background:#f6f9fb;border:1px solid #d9e4ea;border-radius:10px;padding:18px;max-height:48dvh;overflow:auto;text-align:right}
+.sc-order-row{border-bottom:1px solid #dbe4e9;padding:14px 0}.sc-order-row p{margin:6px 0}.sc-order-row button{width:100%}
+.sc-account-button{font-size:16px;padding:5px 12px;min-height:40px;flex-shrink:0}.memo-guest-notice{display:block;color:#526b7a;font-size:15px;margin-top:8px}
+.sc-admin{margin:0;background:#eef3f7;color:#15384b}.sc-admin main{max-width:1100px;margin:auto;padding:28px 18px}.sc-admin h1{font-size:28px;margin:0 0 8px}.sc-admin h2{font-size:22px}
+.sc-admin .sc-panel{background:#fff;padding:24px;margin-top:20px;border:1px solid #d8e3e9;border-radius:14px}.sc-admin .sc-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.sc-admin label{display:grid;gap:5px}.sc-admin small{font-size:15px;color:#596f7b}.sc-admin .sc-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}.sc-admin .sc-table{overflow:auto}.sc-admin table{width:100%;border-collapse:collapse;font-size:16px}.sc-admin th,.sc-admin td{padding:12px;text-align:start;border-bottom:1px solid #dfE7ec;vertical-align:top}.sc-admin [hidden]{display:none!important}.sc-admin #admin-message{white-space:pre-wrap;color:#874116}.sc-admin .sc-info{padding:14px;border-radius:10px;background:#eaf5f4;color:#164d53}
+@media(max-width:600px){.sc-header,.sc-body{padding:16px}.sc-header h2{font-size:1.15rem}.sc-header .sc-secondary{font-size:16px;padding:6px 10px}.sc-details{grid-template-columns:1fr 1.6fr}.sc-admin .sc-grid{grid-template-columns:1fr}.sc-admin main{padding:18px 12px}.sc-admin .sc-panel{padding:17px}.sc-admin h1{font-size:25px}.sc-account-button{font-size:15px;min-height:38px}}

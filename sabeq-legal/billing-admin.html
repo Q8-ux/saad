@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://sabeq-legal-research-api.onrender.com; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data:; base-uri 'self'; form-action 'self'; object-src 'none'">
+  <title>الدفع والتحقق | إدارة مجموعة سابق القانونية</title>
+  <link rel="stylesheet" href="./commerce.css?v=20260913-1">
+  <script defer src="./commerce-client.js?v=20260913-1"></script>
+  <script defer src="./billing-admin.js?v=20260913-1"></script>
+</head>
+<body class="sc-admin"><main>
+  <h1>إدارة الدفع والتحقق</h1><p>مجموعة سابق القانونية</p>
+  <p id="admin-message" role="status" aria-live="polite"></p>
+  <section id="admin-login" class="sc-panel">
+    <h2>دخول الإدارة</h2>
+    <p>استخدم البريد المخوّل بالإدارة، أو مفتاح التهيئة الخاص بالخادم عند إعداد الخدمة لأول مرة.</p>
+    <div class="sc-actions"><button id="email-login" type="button" class="sc-primary">الدخول بالحساب المخوّل</button></div>
+    <form id="bootstrap-form"><label>مفتاح تهيئة الإدارة<input type="password" name="secret" required minlength="32" autocomplete="off"></label><div class="sc-actions"><button type="submit" class="sc-secondary">الدخول بمفتاح التهيئة</button></div></form>
+  </section>
+  <div id="admin-workspace" hidden>
+    <div class="sc-actions"><button id="admin-refresh" class="sc-secondary">تحديث</button><button id="admin-logout" class="sc-secondary">تسجيل الخروج</button></div>
+    <p id="setup-status" class="sc-info"></p>
+    <section class="sc-panel"><h2>إعدادات الدفع والإرسال</h2>
+      <form id="settings-form"><div class="sc-grid">
+        <label>بوابة الدفع<select name="paymentProvider"><option value="">لم تُحدّد البوابة</option value="myfatoorah">MyFatoorah</option></select><small>اختر هذه البوابة فقط إذا كان المفتاح صادراً لحسابك فيها. ربط بنك آخر يحتاج إلى توثيقه.</small></label>
+        <label>بيئة الدفع<select name="environment"><option value="test">اختبار</option><option value="live">تشغيل فعلي</option></select></label>
+        <label>سعر المذكرة بالدينار الكويتي<input name="priceDinars" type="number" min="0" step="0.001" required dir="ltr"></label>
+        <label>مفتاح بوابة الدفع<input name="paymentKey" type="password" autocomplete="new-password" dir="ltr"><small data-secret="paymentKey"></small></label>
+        <label>مفتاح توقيع إشعارات الدفع<input name="webhookSecret" type="password" autocomplete="new-password" dir="ltr"><small data-secret="webhookSecret"></small></label>
+        <label>قنوات التحقق<select name="enabledChannels"><option value="email">البريد الإلكتروني</option><option value="sms">الرسائل النصية</option><option value="whatsapp">واتساب</option><option value="email,sms">البريد والرسائل النصية</option><option value="email,whatsapp">البريد وواتساب</option><option value="sms,whatsapp">الرسائل النصية وواتساب</option><option value="email,sms,whatsapp">القنوات الثلاث</option></select></label>
+        <label>بريد الإرسال المعتمد<input name="emailFrom" type="email" placeholder="no-reply@sabeq.legal" dir="ltr"><small>يجب توثيق النطاق لدى خدمة الإرسال.</small></label>
+        <label>مفتاح إرسال البريد — Resend<input name="resendKey" type="password" autocomplete="new-password" dir="ltr"><small data-secret="resendKey"></small></label>
+        <label>معرّف حساب Twilio<input name="twilioSid" dir="ltr" autocomplete="off"></label>
+        <label>مفتاح Twilio<input name="twilioToken" type="password" autocomplete="new-password" dir="ltr"><small data-secret="twilioToken"></small></label>
+        <label>معرّف خدمة التحقق Twilio Verify<input name="twilioService" dir="ltr" autocomplete="off"></label>
+      </div><p>اترك حقل المفتاح فارغاً للاحتفاظ بالقيمة المحفوظة. لا تُعرض المفاتيح بعد الحفظ.</p><div class="sc-actions"><button type="submit" class="sc-primary">حفظ الإعدادات</button></div></form>
+    </section>
+    <section class="sc-panel"><h2>الطلبات والمدفوعات</h2><div id="admin-orders" class="sc-table"></div></section>
+    <section class="sc-panel"><h2>طلبات مراجعة الاسترداد</h2><p>يُسجّل هنا سير المراجعة ومرجع الطلب لدى البنك. تسجيل الطلب لا يعني أن المبلغ قد رُدّ.</p><div id="admin-refunds" class="sc-table"></div></section>
+    <section class="sc-panel"><h2>سجل الإجراءات</h2><div id="admin-audit" class="sc-table"></div></section>
+  </div>
+</main></body></html>
