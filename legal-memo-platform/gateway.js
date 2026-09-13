@@ -15,6 +15,8 @@ require('dotenv').config({ path: path.join(__dirname, '..', '.env.local') });
 const { searchLegalDocuments, findRelevantLegalContext } = require('./legal-library');
 const { corsPolicy } = require('./cors-policy');
 const { openAiError, openAiErrorDetails } = require('./openai-errors');
+const { createCommerce } = require('./commerce');
+const { CommerceError } = require('./commerce/settings');
 
 const publicPort = Number(process.env.PORT || 3000);
 const appPort = Number(process.env.INTERNAL_APP_PORT || 3001);
@@ -37,7 +39,22 @@ const upload = multer({
   },
 });
 
+app.set('trust proxy', 1);
 app.use(corsPolicy);
+const commerce = createCommerce({ directory: path.join(dataDir, 'commerce'), generateMemo: generatePaidMemo });
+app.use(commerce.router);
+app.use(['/api/legal/assistant', '/api/legal/draft-tools', '/api/legal/transcribe', '/api/legal/analyze-documents'], commerce.requireUser);
+app.use(['/api/legal/assistant', '/api/legal/draft-tools', '/api/legal/transcribe', '/api/legal/analyze-documents'], commerce.limitAi);
+commerce.startWorkers();
+
+app.post('/api/orders/uploads', commerce.requireUser, commerce.limitAi, upload.array('documents', 25), async (req, res, next) => {
+  const files = req.files || [];
+  try {
+    const attachmentIds = await commerce.archiveUploads(req.commerceUser.id, String(req.headers['x-sabeq-draft-id'] || ''), files);
+    res.json({ attachmentIds });
+  } catch (error) { next(error); }
+  finally { await Promise.allSettled(files.map(file => fs.promises.unlink(file.path))); }
+});
 
 function aiClient() {
   if (!process.env.OPENAI_API_KEY) return null;
@@ -253,10 +270,9 @@ app.post('/api/legal/draft-tools', jsonBody, async (req, res) => {
   }
 });
 
-app.post('/api/legal/memo', jsonBody, async (req, res) => {
-  const client = requireAi(res);
-  if (!client) return;
-  const body = req.body || {};
+async function generatePaidMemo(body) {
+  const client = aiClient();
+  if (!client) throw new CommerceError(503, 'generation_not_configured', 'خدمة التوليد غير مهيأة.');
   const facts = String(body.facts || '').trim().slice(0, 40000);
   const requests = String(body.requests || '').trim().slice(0, 20000);
   const issues = Array.isArray(body.legalIssues) ? body.legalIssues.join('، ') : String(body.legalIssues || '');
@@ -284,13 +300,13 @@ app.post('/api/legal/memo', jsonBody, async (req, res) => {
     });
     const memo = outputText(response);
     if (!memo) throw new Error('Empty OpenAI response');
-    return res.json({ memo, sources });
+    return { memo, sources };
   } catch (error) {
     console.error('Public memo generation failed:', openAiErrorDetails(error));
     const mapped = openAiError(error);
-    return res.status(mapped.status).json({ error: mapped.message });
+    throw new CommerceError(mapped.status, 'generation_failed', mapped.message);
   }
-});
+}
 
 app.post('/api/legal/transcribe', upload.single('audio'), async (req, res) => {
   const client = requireAi(res);
@@ -333,7 +349,9 @@ app.post('/api/legal/analyze-documents', upload.array('documents', 25), async (r
   }
 
   const uploadedIds = [];
+  let attachmentIds = [];
   try {
+    attachmentIds = await commerce.archiveUploads(req.commerceUser.id, String(req.headers['x-sabeq-draft-id'] || ''), files);
     const content = [{
       type: 'input_text',
       text: `حلل المستندات القانونية المرفقة واستخرج بيانات القضية فقط مما هو ظاهر فيها. أعد JSON فقط بهذه المفاتيح بالإنجليزية: caseType, caseNumber, court, clientName, phone, partyRole, otherParty, legalIssues (array), facts, requests, parties (array of {name,role}), warnings (array). لا تخمن بيانات غير موجودة؛ اتركها فارغة وأضف تنبيهاً في warnings عند الغموض. صغ facts والrequests بالعربية القانونية الواضحة.`,
@@ -364,11 +382,12 @@ app.post('/api/legal/analyze-documents', upload.array('documents', 25), async (r
     });
 
     const analysis = normalizeAnalysis(parseJsonOutput(outputText(response)));
-    return res.json({ analysis });
+    return res.json({ analysis, attachmentIds });
   } catch (error) {
     console.error('Document analysis failed:', openAiErrorDetails(error));
+    if (error instanceof CommerceError) return res.status(error.status).json({ error: error.message, code: error.code, attachmentIds });
     const mapped = openAiError(error);
-    return res.status(mapped.status).json({ error: mapped.message });
+    return res.status(mapped.status).json({ error: mapped.message, attachmentIds });
   } finally {
     await deleteOpenAiFiles(client, uploadedIds);
     await removeUploadedFiles(files);
@@ -401,7 +420,7 @@ function proxy(req, res) {
 
 const child = spawn(process.execPath, [path.join(__dirname, 'server.js')], {
   cwd: __dirname,
-  env: { ...process.env, PORT: String(appPort), MOJ_AUTO_SYNC: process.env.MOJ_AUTO_SYNC || 'true' },
+  env: { ...process.env, AUTH_DISABLED: 'false', INTERNAL_ONLY: 'true', PORT: String(appPort), MOJ_AUTO_SYNC: process.env.MOJ_AUTO_SYNC || 'true' },
   stdio: 'inherit',
 });
 
@@ -410,6 +429,7 @@ child.on('exit', code => {
   process.exit(code || 1);
 });
 
+app.use(commerce.errorHandler);
 app.use((req, res) => proxy(req, res));
 
 const server = app.listen(publicPort, () => {
