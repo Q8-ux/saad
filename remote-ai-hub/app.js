@@ -17,7 +17,7 @@
   const icon=name=>`<svg aria-hidden="true" viewBox="0 0 24 24" fill="none">${icons[name]||icons.grid}</svg>`;
   function renderCategories(){
     const sectionResources=resources.filter(r=>r.section===state.section);
-    byId('categories').innerHTML=`<div class="categories-list">${categories[state.section].map(cat=>`<button class="category-button ${cat.id===state.category?'active':''}" data-category="${cat.id}" aria-pressed="${cat.id===state.category}">${icon(cat.icon)}<span>${escape(cat.label)}</span><span class="category-count">${sectionResources.filter(r=>cat.id==='all'||r.category===cat.id).length}</span></button>`).join('')}</div>`;
+    byId('categories').innerHTML=`<div class="categories-list">${categories[state.section].map(cat=>`<button class="category-button ${cat.id===state.category?'active':''}" data-category="${cat.id}" aria-pressed="${cat.id===state.category}">${icon(cat.icon)}<span>${escape(cat.label)}</span><span class="category-count">${sectionResources.filter(r=>cat.id==='all'||(cat.filter==='cost'?r.cost===cat.id:r.category===cat.id)).length}</span></button>`).join('')}</div>`;
   }
   function card(r){
     const category=categories[r.section].find(c=>c.id===r.category)?.label||'';
@@ -27,7 +27,7 @@
     const action=r.action||(r.section==='learn'?'فتح المورد':'فتح الموقع');
     const source=r.source&&r.source!==r.url?`<a class="source-link" href="${safeUrl(r.source)}" target="_blank" rel="noopener noreferrer" aria-label="مصدر معلومات ${escape(r.name)}، يفتح في علامة تبويب جديدة">${r.section==='learn'?'تفاصيل المصدر':'المصدر الأصلي'}</a>`:'';
     return `<article class="resource-card" aria-labelledby="title-${escape(r.id)}" data-resource-id="${escape(r.id)}">
-      <div class="card-top"><span class="site-logo" aria-hidden="true" style="--logo-color:${escape(r.color||(r.section==='learn'?'#386412':'#275473'))};--logo-bg:${escape(r.bg||(r.section==='learn'?'#ecf6e3':'#edf3f7'))}">${escape(logo)}</span><div class="site-title"><h3 id="title-${escape(r.id)}">${escape(r.name)}</h3><span class="domain" dir="ltr">${escape(domain)}</span></div><span class="card-tag ${r.review||r.badge==='مدفوع'?'review':''}">${escape(badge)}</span></div>
+      <div class="card-top"><span class="site-logo" aria-hidden="true" style="--logo-color:${escape(r.color||(r.section==='learn'?'#386412':'#275473'))};--logo-bg:${escape(r.bg||(r.section==='learn'?'#ecf6e3':'#edf3f7'))}">${escape(logo)}</span><div class="site-title"><h3 id="title-${escape(r.id)}">${escape(r.name)}</h3><span class="domain" dir="ltr">${escape(domain)}</span></div><span class="card-tag ${r.cost==='paid'?'review':r.cost==='resource'?'resource':r.review?'review':''}">${escape(badge)}</span></div>
       ${r.title?`<p class="resource-title-ar"><strong>${escape(r.title)}</strong></p>`:''}
       <p class="card-description">${escape(r.description)}</p>
       <div class="card-meta">${r.tags.map(tag=>`<span class="meta-chip">${escape(tag)}</span>`).join('')}</div>
@@ -45,7 +45,7 @@
     byId('empty-state').hidden=results.length!==0;
     byId('section-title').textContent=state.category==='all'?(state.section==='work'?'كل منصات العمل':'موارد NVIDIA للتعلّم'):cat.label;
     byId('result-count').textContent=`${results.length} من ${total} ${state.section==='work'?'منصة وروابطها':'مورداً تعليمياً'}`;
-    byId('context-note').textContent=state.section==='learn'?'ليست كل الموارد مجانية. الرسوم المذكورة من صفحات NVIDIA، وقد تتغير عند التسجيل.':state.category==='testing'?'هذه فرص لمقابل إضافي متغير، ولا تعادل وظيفة أو راتباً شهرياً.':state.category==='local'?'هذه مهام ميدانية في مدن مدعومة، وليست كلها عملاً من المنزل.':'';
+    byId('context-note').textContent=state.section==='learn'?(state.category==='free'?'هذه 7 دورات أكدت صفحات NVIDIA أنها مجانية وقت المراجعة. قد تحتاج إلى حساب أو جهاز مناسب.':state.category==='paid'?'هذه 3 دورات مدفوعة؛ الأسعار الظاهرة موثقة وقت المراجعة وقد تتغير عند التسجيل.':state.category==='resource'?'هذا مقال رسمي مجاني للقراءة، لكنه ليس دورة مؤكدة أو شهادة.':'الموارد مصنفة إلى 7 دورات مجانية، و3 مدفوعة، ومورد رسمي بديل واحد.'):state.category==='testing'?'هذه فرص لمقابل إضافي متغير، ولا تعادل وظيفة أو راتباً شهرياً.':state.category==='local'?'هذه مهام ميدانية في مدن مدعومة، وليست كلها عملاً من المنزل.':'';
     byId('resource-panel').setAttribute('aria-labelledby',`tab-${state.section}`);
     document.querySelectorAll('[data-section]').forEach(tab=>{const active=tab.dataset.section===state.section;tab.classList.toggle('active',active);tab.setAttribute('aria-selected',String(active));tab.tabIndex=active?0:-1;});
     document.querySelectorAll('[data-category]').forEach(button=>{const active=button.dataset.category===state.category;button.classList.toggle('active',active);button.setAttribute('aria-pressed',String(active));});
