@@ -1,11 +1,16 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
   <defs>
-    <linearGradient id="g" x1="8" y1="4" x2="56" y2="60" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#4b8dff"/>
-      <stop offset="1" stop-color="#174ca9"/>
+    <linearGradient id="g" x1="7" y1="5" x2="57" y2="59" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#54a4ff"/>
+      <stop offset=".55" stop-color="#2f72ef"/>
+      <stop offset="1" stop-color="#1749b8"/>
     </linearGradient>
   </defs>
   <rect width="64" height="64" rx="18" fill="#07111f"/>
-  <rect x="8" y="8" width="48" height="48" rx="14" fill="url(#g)"/>
-  <text x="32" y="43" text-anchor="middle" font-family="Tahoma, Arial, sans-serif" font-size="32" font-weight="700" fill="white">ق</text>
+  <rect x="5" y="5" width="54" height="54" rx="15" fill="url(#g)"/>
+  <path d="M19 15h20l7 7v19c0 4.4-3.6 8-8 8H19c-4.4 0-8-3.6-8-8V23c0-4.4 3.6-8 8-8Z" fill="#fff"/>
+  <path d="M39 15v7h7" fill="none" stroke="#c7d9ff" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M20 25h12M20 31h15M20 37h9" stroke="#2d6fe9" stroke-width="3" stroke-linecap="round"/>
+  <path d="M42 30c-4.7 0-8.2 1.8-8.2 1.8v6.1c0 5.8 4 8.9 8.2 11.1 4.2-2.2 8.2-5.3 8.2-11.1v-6.1S46.7 30 42 30Z" fill="#0d2f6f"/>
+  <path d="M42 34.3v8M38.2 37h7.6M39.3 37l-1.8 3.6h3.6M44.7 37l-1.8 3.6h3.6" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
