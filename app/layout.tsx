@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import "./readability-boost.css";
 import "./whatsapp.css";
+import "./vector-nav.css";
 
 export const metadata: Metadata = {
   title: "منصة العقود والترجمة القانونية",
