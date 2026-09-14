@@ -3,6 +3,7 @@ import "./globals.css";
 import "./readability-boost.css";
 import "./whatsapp.css";
 import "./vector-nav.css";
+import "./sidebar-cleanup.css";
 
 export const metadata: Metadata = {
   title: "منصة العقود والترجمة القانونية",
