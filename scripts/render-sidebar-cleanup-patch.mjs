@@ -65,9 +65,16 @@ if (!source.includes('className="site-account-footer"')) {
   source = source.replace(mainCloseAnchor, footer);
 }
 
+// Use user-facing Arabic labels instead of developer terminology in the memo result panel.
+source = source.replace(
+  '<div><span className="eyebrow">{t("المخرج")}</span><h2>{t("المسودة")}</h2></div>',
+  '<div><span className="eyebrow">{t("النتيجة")}</span><h2>{t("المسودة القانونية")}</h2></div>',
+);
+source = source.replaceAll("المخرخ", "النتيجة");
+
 if (source !== original) {
   await writeFile(path, source, "utf8");
-  console.log("Removed sidebar status/account blocks and moved account controls to a clean site footer.");
+  console.log("Applied sidebar cleanup and clearer memo-result labels.");
 } else {
-  console.log("Sidebar cleanup patch already applied.");
+  console.log("Sidebar cleanup and memo-result labels already applied.");
 }
