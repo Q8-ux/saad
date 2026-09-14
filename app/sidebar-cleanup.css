@@ -1,0 +1,143 @@
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.main-nav {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding-bottom: 24px;
+}
+
+.site-account-footer {
+  margin: 28px 0 92px;
+  padding: 0 24px 24px;
+}
+
+.site-account-footer-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 18px 20px;
+  border: 1px solid color-mix(in srgb, var(--line, #dbe4ef) 76%, transparent);
+  border-radius: 22px;
+  background: color-mix(in srgb, var(--panel, #ffffff) 94%, transparent);
+  box-shadow: 0 16px 38px rgba(15, 35, 62, 0.08);
+}
+
+.site-account-footer-user,
+.site-account-footer-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.site-account-footer-user strong {
+  font-size: 1.05rem;
+  line-height: 1.4;
+}
+
+.site-account-footer-avatar {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: linear-gradient(145deg, rgba(58, 126, 255, 0.14), rgba(16, 185, 129, 0.1));
+  color: var(--primary, #2f6ee5);
+}
+
+.site-account-footer-avatar svg,
+.site-account-footer-theme svg {
+  width: 23px;
+  height: 23px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.site-account-footer-whatsapp,
+.site-account-footer-signout,
+.site-account-footer-theme {
+  min-height: 44px;
+  border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--line, #dbe4ef) 80%, transparent);
+  background: color-mix(in srgb, var(--panel, #ffffff) 96%, transparent);
+  color: inherit;
+  text-decoration: none;
+}
+
+.site-account-footer-whatsapp,
+.site-account-footer-signout {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 10px 14px;
+  font-weight: 700;
+}
+
+.site-account-footer-whatsapp {
+  color: #0f8f72;
+}
+
+.site-account-footer-whatsapp svg {
+  width: 24px;
+  height: 24px;
+  fill: currentColor;
+}
+
+.site-account-footer-theme {
+  width: 44px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.site-account-footer-signout {
+  color: var(--primary, #2f6ee5);
+}
+
+@media (max-width: 900px) {
+  .site-account-footer {
+    margin-top: 20px;
+    margin-bottom: 90px;
+    padding: 0 14px 18px;
+  }
+
+  .site-account-footer-inner {
+    align-items: stretch;
+    flex-direction: column;
+    padding: 16px;
+  }
+
+  .site-account-footer-user {
+    justify-content: center;
+  }
+
+  .site-account-footer-actions {
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .site-account-footer-whatsapp,
+  .site-account-footer-signout {
+    flex: 1 1 180px;
+  }
+}
+
+@media (max-width: 520px) {
+  .site-account-footer-whatsapp span {
+    font-size: 0.98rem;
+  }
+
+  .site-account-footer-actions {
+    gap: 8px;
+  }
+}
