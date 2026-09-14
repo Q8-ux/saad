@@ -1,0 +1,95 @@
+/* Professional vector navigation icons. No letter abbreviations in navigation. */
+.nav-vector-icon,
+.mobile-nav-vector-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  color: currentColor;
+}
+
+.nav-vector-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 13px;
+  background: color-mix(in srgb, currentColor 8%, transparent);
+}
+
+.nav-vector-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.nav-button.active .nav-vector-icon {
+  background: color-mix(in srgb, currentColor 14%, transparent);
+}
+
+.mobile-nav {
+  align-items: center;
+}
+
+.mobile-nav button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 9px 7px;
+}
+
+.mobile-nav-vector-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 15px;
+  background: #edf2f8;
+  color: #738199;
+  transition: transform 160ms ease, background 160ms ease, color 160ms ease, box-shadow 160ms ease;
+}
+
+.mobile-nav-vector-icon svg {
+  width: 27px;
+  height: 27px;
+}
+
+.mobile-nav button.active .mobile-nav-vector-icon {
+  color: #fff;
+  background: linear-gradient(145deg, #3979ef, #2165df);
+  box-shadow: 0 8px 20px rgba(37, 105, 226, 0.24);
+  transform: translateY(-1px);
+}
+
+.mobile-nav-label,
+.mobile-nav button > small {
+  display: none !important;
+}
+
+@media (max-width: 900px) {
+  .mobile-nav button {
+    min-height: 64px;
+  }
+
+  .mobile-nav-vector-icon {
+    width: 47px;
+    height: 47px;
+  }
+}
+
+@media (max-width: 520px) {
+  .mobile-nav {
+    padding-inline: 8px;
+  }
+
+  .mobile-nav button {
+    min-height: 61px;
+    padding: 6px 4px;
+  }
+
+  .mobile-nav-vector-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+  }
+
+  .mobile-nav-vector-icon svg {
+    width: 25px;
+    height: 25px;
+  }
+}
