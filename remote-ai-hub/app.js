@@ -82,6 +82,10 @@
   document.querySelectorAll('[data-open-about]').forEach(button=>button.addEventListener('click',openAbout));
   byId('close-dialog').addEventListener('click',()=>byId('about-dialog').close());
   byId('about-dialog').addEventListener('click',event=>{if(event.target!==event.currentTarget)return;const rect=event.currentTarget.getBoundingClientRect();if(event.clientX<rect.left||event.clientX>rect.right||event.clientY<rect.top||event.clientY>rect.bottom)event.currentTarget.close();});
+  const profileDialog=byId('profile-dialog');
+  document.querySelectorAll('[data-open-profile]').forEach(button=>button.addEventListener('click',()=>profileDialog.showModal()));
+  byId('close-profile').addEventListener('click',()=>profileDialog.close());
+  profileDialog.addEventListener('click',event=>{if(event.target!==profileDialog)return;const rect=profileDialog.getBoundingClientRect();if(event.clientX<rect.left||event.clientX>rect.right||event.clientY<rect.top||event.clientY>rect.bottom)profileDialog.close();});
   const workCount=resources.filter(r=>r.section==='work').length;
   byId('work-total').textContent=workCount;byId('work-count').textContent=workCount;
   byId('learn-total').textContent=resources.filter(r=>r.section==='learn').length;

@@ -113,6 +113,10 @@
   });
   byId('print-lesson').addEventListener('click',()=>window.print());
   const siteMenu=document.querySelector('.site-menu');
+  const profileDialog=byId('profile-dialog');
+  document.querySelectorAll('[data-open-profile]').forEach(button=>button.addEventListener('click',()=>profileDialog.showModal()));
+  byId('close-profile').addEventListener('click',()=>profileDialog.close());
+  profileDialog.addEventListener('click',event=>{if(event.target!==profileDialog)return;const rect=profileDialog.getBoundingClientRect();if(event.clientX<rect.left||event.clientX>rect.right||event.clientY<rect.top||event.clientY>rect.bottom)profileDialog.close();});
   siteMenu?.addEventListener('click',event=>{if(event.target.closest('a,.menu-action'))siteMenu.removeAttribute('open');});
   document.addEventListener('click',event=>{if(siteMenu?.open&&!siteMenu.contains(event.target))siteMenu.removeAttribute('open');});
   document.addEventListener('keydown',event=>{if(event.key==='Escape'&&siteMenu?.open){siteMenu.removeAttribute('open');siteMenu.querySelector('summary')?.focus();}});
