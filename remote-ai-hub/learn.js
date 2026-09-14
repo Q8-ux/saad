@@ -112,5 +112,9 @@
     byId('reading-status').textContent=canStore?(wasDone?'أُلغيت علامة إكمال الدرس.':done.size===activeCourse.lessons.length?'أكملت دروس هذا المسار. يمكنك مراجعتها أو استكشاف مسار آخر.':'حُفظ إكمال الدرس على هذا المتصفح.'):'تغيّرت العلامة لهذه الجلسة؛ تعذّر حفظها في المتصفح.';
   });
   byId('print-lesson').addEventListener('click',()=>window.print());
+  const siteMenu=document.querySelector('.site-menu');
+  siteMenu?.addEventListener('click',event=>{if(event.target.closest('a,.menu-action'))siteMenu.removeAttribute('open');});
+  document.addEventListener('click',event=>{if(siteMenu?.open&&!siteMenu.contains(event.target))siteMenu.removeAttribute('open');});
+  document.addEventListener('keydown',event=>{if(event.key==='Escape'&&siteMenu?.open){siteMenu.removeAttribute('open');siteMenu.querySelector('summary')?.focus();}});
   route();
 })();
