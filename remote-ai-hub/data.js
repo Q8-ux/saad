@@ -4,7 +4,7 @@
   const work = (id,name,category,url,description,tags,note,extra={}) => ({id,name,category,url,description,tags,note,section:'work',...extra});
   const sg='https://www.nvidia.com/en-sg/learn/ai-learning-essentials/';
   const catalog='https://www.nvidia.com/en-gb/training/online/';
-  const course=(id,name,title,category,cost,url,description,tags,note,source,extra={})=>({id,name,title,category,cost,url,description,tags,note,source,section:'learn',logo:'NV',badge:cost==='free'?'مجانية':cost==='paid'?'مدفوعة':'مورد بديل',...extra});
+  const course=(id,name,title,category,cost,url,description,tags,note,source,extra={})=>({id,name,title,category,cost,url,description,tags,note,source,section:'learn',localUrl:'./learn.html?course='+encodeURIComponent(id),logo:'NV',badge:cost==='free'?'مجانية':cost==='paid'?'مدفوعة':'مورد بديل',...extra});
   const resources=[
     work('wwr','We Work Remotely','jobs','https://weworkremotely.com/','وظائف في البرمجة والتصميم والتسويق وخدمة العملاء لدى شركات تعمل عن بُعد.',['وظائف متنوعة','حسب بلد الوظيفة'],'ابدأ بتحديد المنطقة؛ ليست كل الوظائف متاحة من الكويت.',{logo:'W',color:'#087466',bg:'#e0f3ed'}),
     work('remotive','Remotive','jobs','https://remotive.com/','دليل للوظائف عن بُعد، يسهّل الوصول إلى تخصصك والشركات التي تبحث عن مهاراتك.',['تقنية وأعمال','وظائف وعقود'],'راجع الموقع الجغرافي ونوع العقد داخل كل إعلان.',{logo:'R',color:'#a25031',bg:'#fff0e7'}),

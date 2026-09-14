@@ -1,7 +1,10 @@
 (function(){
   'use strict';
   const {resources,categories,select}=window.MADAR;
-  const state={section:'work',category:'all',query:'',sort:'default',review:false};
+  const initialParams=new URLSearchParams(location.search);
+  const initialSection=initialParams.get('section')==='learn'?'learn':'work';
+  const initialCategory=categories[initialSection].some(c=>c.id===initialParams.get('category'))?initialParams.get('category'):'all';
+  const state={section:initialSection,category:initialCategory,query:'',sort:'default',review:false};
   const byId=id=>document.getElementById(id);
   const escape=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const safeUrl=value=>{try{const url=new URL(value);return url.protocol==='https:'?escape(url.href):'#';}catch{return '#';}};
@@ -24,7 +27,9 @@
     const domain=new URL(r.url).hostname.replace(/^www\./,'');
     const badge=r.badge||(r.section==='work'?category:'NVIDIA');
     const logo=r.logo||r.name.slice(0,2);
-    const action=r.action||(r.section==='learn'?'فتح المورد':'فتح الموقع');
+    const action=r.section==='learn'?'اقرأ الدروس بالعربية':r.action||'فتح الموقع';
+    const primary=r.section==='learn'?'<a class="primary-link" href="'+escape(r.localUrl)+'">'+escape(action)+'</a>':'<a class="primary-link" href="'+safeUrl(r.url)+'" target="_blank" rel="noopener noreferrer" aria-label="'+escape(action)+': '+escape(r.name)+'، يفتح في علامة تبويب جديدة">'+escape(action)+'</a>';
+    const official=r.section==='learn'?'<a class="source-link" href="'+safeUrl(r.url)+'" target="_blank" rel="noopener noreferrer">'+(r.cost==='resource'?'المورد الأصلي':'الدورة الأصلية')+'</a>':'';
     const source=r.source&&r.source!==r.url?`<a class="source-link" href="${safeUrl(r.source)}" target="_blank" rel="noopener noreferrer" aria-label="مصدر معلومات ${escape(r.name)}، يفتح في علامة تبويب جديدة">${r.section==='learn'?'تفاصيل المصدر':'المصدر الأصلي'}</a>`:'';
     return `<article class="resource-card" aria-labelledby="title-${escape(r.id)}" data-resource-id="${escape(r.id)}">
       <div class="card-top"><span class="site-logo" aria-hidden="true" style="--logo-color:${escape(r.color||(r.section==='learn'?'#386412':'#275473'))};--logo-bg:${escape(r.bg||(r.section==='learn'?'#ecf6e3':'#edf3f7'))}">${escape(logo)}</span><div class="site-title"><h3 id="title-${escape(r.id)}">${escape(r.name)}</h3><span class="domain" dir="ltr">${escape(domain)}</span></div><span class="card-tag ${r.cost==='paid'?'review':r.cost==='resource'?'resource':r.review?'review':''}">${escape(badge)}</span></div>
@@ -32,7 +37,7 @@
       <p class="card-description">${escape(r.description)}</p>
       <div class="card-meta">${r.tags.map(tag=>`<span class="meta-chip">${escape(tag)}</span>`).join('')}</div>
       <p class="card-note ${r.review?'warning':''}">${escape(r.note)}</p>
-      <div class="card-actions"><a class="primary-link" href="${safeUrl(r.url)}" target="_blank" rel="noopener noreferrer" aria-label="${escape(action)}: ${escape(r.name)}، يفتح في علامة تبويب جديدة">${escape(action)}</a>${source}</div>
+      <div class="card-actions">${primary}${official}${source}</div>
       ${r.related?`<div class="related-links">${r.related.map(link=>`<a href="${safeUrl(link.url)}" target="_blank" rel="noopener noreferrer" aria-label="وظائف Remote OK في ${escape(link.label)}، يفتح في علامة تبويب جديدة">${escape(link.label)}</a>`).join('')}</div>`:''}
     </article>`;
   }
@@ -45,7 +50,8 @@
     byId('empty-state').hidden=results.length!==0;
     byId('section-title').textContent=state.category==='all'?(state.section==='work'?'كل منصات العمل':'موارد NVIDIA للتعلّم'):cat.label;
     byId('result-count').textContent=`${results.length} من ${total} ${state.section==='work'?'منصة وروابطها':'مورداً تعليمياً'}`;
-    byId('context-note').textContent=state.section==='learn'?(state.category==='free'?'هذه 7 دورات أكدت صفحات NVIDIA أنها مجانية وقت المراجعة. قد تحتاج إلى حساب أو جهاز مناسب.':state.category==='paid'?'هذه 3 دورات مدفوعة؛ الأسعار الظاهرة موثقة وقت المراجعة وقد تتغير عند التسجيل.':state.category==='resource'?'هذا مقال رسمي مجاني للقراءة، لكنه ليس دورة مؤكدة أو شهادة.':'الموارد مصنفة إلى 7 دورات مجانية، و3 مدفوعة، ومورد رسمي بديل واحد.'):state.category==='testing'?'هذه فرص لمقابل إضافي متغير، ولا تعادل وظيفة أو راتباً شهرياً.':state.category==='local'?'هذه مهام ميدانية في مدن مدعومة، وليست كلها عملاً من المنزل.':'';
+    byId('context-note').textContent=state.section==='learn'?(state.category==='free'?'افتح الدروس العربية هنا لكل موضوع من الدورات السبع المجانية. شروح مدار وترجماته المختارة لا تشمل فيديوهات الدورة الأصلية أو شهادتها.':state.category==='paid'?'الدورات الأصلية الثلاث مدفوعة. المقدمات العربية داخل مدار مجانية للقراءة؛ الأسعار والمدد على البطاقة تخص الدورة الأصلية.':state.category==='resource'?'افتح مقدمة NeMo بالعربية داخل مدار. المورد الرسمي المرتبط مقال، وليس دورة مؤكدة أو شهادة.':'يمكنك قراءة دروس عربية لكل موضوع داخل مدار. تصنيف السعر والمدة على البطاقة يخص مورد NVIDIA الأصلي: 7 دورات مجانية، و3 مدفوعة، ومقال.'):state.category==='testing'?'هذه فرص لمقابل إضافي متغير، ولا تعادل وظيفة أو راتباً شهرياً.':state.category==='local'?'هذه مهام ميدانية في مدن مدعومة، وليست كلها عملاً من المنزل.':'';
+    const viewUrl=new URL(location.href);viewUrl.searchParams.set('section',state.section);viewUrl.searchParams.set('category',state.category);history.replaceState({},'',viewUrl);
     byId('resource-panel').setAttribute('aria-labelledby',`tab-${state.section}`);
     document.querySelectorAll('[data-section]').forEach(tab=>{const active=tab.dataset.section===state.section;tab.classList.toggle('active',active);tab.setAttribute('aria-selected',String(active));tab.tabIndex=active?0:-1;});
     document.querySelectorAll('[data-category]').forEach(button=>{const active=button.dataset.category===state.category;button.classList.toggle('active',active);button.setAttribute('aria-pressed',String(active));});
@@ -77,5 +83,6 @@
   const workCount=resources.filter(r=>r.section==='work').length;
   byId('work-total').textContent=workCount;byId('work-count').textContent=workCount;
   byId('learn-total').textContent=resources.filter(r=>r.section==='learn').length;
+  byId('search').placeholder=state.section==='learn'?'ابحث عن دورة أو موضوع...':'ابحث عن منصة أو مهارة...';
   renderCategories();render();
 })();

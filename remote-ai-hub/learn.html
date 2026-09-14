@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#102b39">
+  <meta name="description" content="تعلّم بالعربية داخل مدار: دروس في الذكاء الاصطناعي وCUDA وNIM، وترجمات مختارة من أمثلة NVIDIA المفتوحة، مع تمارين وحفظ للتقدم على جهازك.">
+  <title>مدار | الدروس العربية</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23102b39'/%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='%2362dac2' stroke-width='3'/%3E%3Ccircle cx='23' cy='10' r='4' fill='%23fff'/%3E%3C/svg%3E">
+  <link rel="preload" href="./assets/al-mohanad.woff" as="font" type="font/woff" crossorigin>
+  <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="./learn.css">
+  <script src="./data.js" defer></script>
+  <script src="./lessons.js" defer></script>
+  <script src="./learn.js" defer></script>
+</head>
+<body class="learning-page">
+  <a class="skip" href="#reading-main">انتقل إلى المحتوى</a>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="./" aria-label="مدار، الصفحة الرئيسية"><span class="brand-mark" aria-hidden="true"><i></i></span><span>مدار<small>تعلّم بالعربية</small></span></a>
+      <nav class="reader-header-links" aria-label="التنقل الرئيسي"><a href="./?section=learn&amp;category=free#directory">دليل الدورات</a><a href="./learn.html">كل الدروس</a></nav>
+      <a class="github-link" href="https://github.com/Q8-ux/saad/tree/main/remote-ai-hub" target="_blank" rel="noopener noreferrer">GitHub</a>
+    </div>
+  </header>
+  <main id="reading-main" class="reader-shell">
+    <div id="route-message" class="context-note" role="status" hidden></div>
+    <section id="learning-library" aria-labelledby="library-title">
+      <div class="library-intro"><div><p class="eyebrow">اقرأ. جرّب. تعلّم.</p><h1 id="library-title">المعرفة أقرب، بلغتك.</h1><p>دروس عربية تقرؤها هنا، وتمارين تطبقها خطوة بخطوة.</p></div><div class="library-total"><strong id="lesson-total"></strong><span>درساً داخل مدار</span></div></div>
+      <p class="reader-scope">شروح عربية مستقلة، مع ترجمات مختارة من أمثلة NVIDIA المفتوحة. فيديوهات الدورات الأصلية ومختبراتها وشهاداتها تبقى على منصة NVIDIA.</p>
+      <div class="library-group"><h2>مسارات الدورات المجانية</h2><p>ثلاثة دروس عربية لكل موضوع من الدورات السبع المصنّفة مجانية في الدليل.</p><div id="free-paths" class="path-grid"></div></div>
+      <div class="library-group"><h2>مقدمات لمواضيع إضافية</h2><p>هذه المقدمات متاحة هنا مجاناً؛ حالة الدورة أو المورد الأصلي موضحة في كل بطاقة.</p><div id="other-paths" class="path-grid"></div></div>
+    </section>
+    <section id="course-reader" hidden aria-labelledby="course-title">
+      <div class="reader-breadcrumb"><a href="./learn.html">الدروس العربية</a><span aria-hidden="true">/</span><span id="breadcrumb-title"></span></div>
+      <header class="course-header"><div><p class="eyebrow" id="course-eyebrow"></p><h1 id="course-title"></h1><p class="course-original" id="course-original" lang="en" dir="ltr"></p><p class="course-summary" id="course-summary"></p></div><div class="course-meta" id="course-meta"></div></header>
+      <p class="reader-scope">المحتوى هنا دروس من إعداد مدار وترجمات مختارة للمصادر المفتوحة المبيّنة داخلها. لا يمثل المنهج الكامل أو ترجمة رسمية من NVIDIA.</p>
+      <div class="reader-layout">
+        <aside class="lesson-sidebar" aria-label="قائمة الدروس">
+          <div class="lesson-sidebar-top"><h2>محتوى المسار</h2><p id="course-needs"></p></div>
+          <nav id="lesson-nav" aria-label="دروس هذا المسار"></nav>
+          <div class="course-progress"><label for="reading-progress">تقدّمك في القراءة <span id="progress-label"></span></label><progress id="reading-progress" max="1" value="0"></progress><p>علامات الإكمال تُحفظ في هذا المتصفح فقط.</p></div>
+          <a id="official-course" class="official-course" target="_blank" rel="noopener noreferrer"></a>
+        </aside>
+        <div class="reading-column">
+          <article class="lesson-paper" aria-labelledby="lesson-title">
+            <div class="lesson-topline"><p id="lesson-position"></p><span id="lesson-origin"></span></div>
+            <h2 id="lesson-title" tabindex="-1"></h2>
+            <div id="lesson-body" class="lesson-body"></div>
+            <div id="lesson-sources" class="lesson-sources"></div>
+          </article>
+          <div class="reading-controls"><button id="complete-lesson" class="primary-button" aria-pressed="false">علّم الدرس كمكتمل</button><button id="print-lesson" class="print-button">طباعة الدرس</button></div>
+          <p id="reading-status" class="reading-status" role="status" aria-live="polite"></p>
+          <nav class="lesson-pagination" aria-label="التنقل بين الدروس"><a id="previous-lesson" class="page-link"></a><a id="next-lesson" class="page-link"></a><a id="finish-course" class="page-link" href="./learn.html" hidden>استكشف مساراً آخر</a></nav>
+        </div>
+      </div>
+    </section>
+    <noscript><div class="empty-state"><h2>فعّل JavaScript لفتح الدروس</h2><p>تُعرض الدروس من ملفات الموقع. لا يلزم حساب أو اتصال بخدمة ذكاء اصطناعي.</p><a href="./">العودة إلى الدليل</a></div></noscript>
+    <footer class="reader-footer"><p>مدار · محتوى تعليمي مستقل · مراجعة 14 سبتمبر 2026</p><a href="./learning-sources/NOTICE.md" target="_blank" rel="noopener noreferrer">المصادر والتراخيص</a></footer>
+  </main>
+</body>
+</html>

@@ -1,0 +1,79 @@
+{
+  "reviewed": "2026-09-14",
+  "sources": [
+    {
+      "gitBlobSha": "3e9500189a1cbae45116eb96e76a0ef630eb00c4",
+      "local": "licenses/jetbot-MIT.txt",
+      "path": "LICENSE.md",
+      "repository": "NVIDIA-AI-IOT/jetbot",
+      "reviewed": "2026-09-14",
+      "source": "https://github.com/NVIDIA-AI-IOT/jetbot/blob/master/LICENSE.md",
+      "commit": "3ebfff2b2341378b959b790aaef612da5322da83"
+    },
+    {
+      "gitBlobSha": "7d7f3572ea30b885a622447d26f7612be1424bd8",
+      "local": "learning-sources/jetbot-collision-avoidance.en.md",
+      "path": "docs/examples/collision_avoidance.md",
+      "repository": "NVIDIA-AI-IOT/jetbot",
+      "reviewed": "2026-09-14",
+      "source": "https://github.com/NVIDIA-AI-IOT/jetbot/blob/master/docs/examples/collision_avoidance.md",
+      "commit": "3ebfff2b2341378b959b790aaef612da5322da83"
+    },
+    {
+      "gitBlobSha": "f49a4e16e68b128803cc2dcea614603632b04eac",
+      "local": "licenses/generative-ai-Apache-2.0.txt",
+      "path": "LICENSE.md",
+      "repository": "NVIDIA/GenerativeAIExamples",
+      "reviewed": "2026-09-14",
+      "source": "https://github.com/NVIDIA/GenerativeAIExamples/blob/main/LICENSE.md",
+      "commit": "203b0de48d1142124842d56d4b40f3733888f5ee"
+    },
+    {
+      "gitBlobSha": "b1aa52e136acad6b5d0fd9db46b3ce721e6c463c",
+      "local": "learning-sources/rag-notebooks.en.md",
+      "path": "RAG/notebooks/README.md",
+      "repository": "NVIDIA/GenerativeAIExamples",
+      "reviewed": "2026-09-14",
+      "source": "https://github.com/NVIDIA/GenerativeAIExamples/blob/main/RAG/notebooks/README.md",
+      "commit": "203b0de48d1142124842d56d4b40f3733888f5ee"
+    },
+    {
+      "gitBlobSha": "74a476cd095bb3296718244046849fef59dec2f3",
+      "local": "learning-sources/smart-health-agent.en.md",
+      "path": "community/smart-health-agent/README.md",
+      "repository": "NVIDIA/GenerativeAIExamples",
+      "reviewed": "2026-09-14",
+      "source": "https://github.com/NVIDIA/GenerativeAIExamples/blob/main/community/smart-health-agent/README.md",
+      "commit": "203b0de48d1142124842d56d4b40f3733888f5ee"
+    },
+    {
+      "gitBlobSha": "1e58bd5df0dd619135c58af0428c0f73c62921d7",
+      "local": "licenses/cuda-samples-BSD-3-Clause.txt",
+      "path": "LICENSE",
+      "repository": "NVIDIA/cuda-samples",
+      "reviewed": "2026-09-14",
+      "source": "https://github.com/NVIDIA/cuda-samples/blob/master/LICENSE",
+      "commit": "5443602d89ed99aede2e4b7bf329daddeadb320e"
+    },
+    {
+      "gitBlobSha": "23c2e040c51ccfe8404f1daee4abe9e148c540ce",
+      "local": "learning-sources/cuda-vector-add.en.md",
+      "path": "cpp/0_Introduction/vectorAdd/README.md",
+      "repository": "NVIDIA/cuda-samples",
+      "reviewed": "2026-09-14",
+      "source": "https://github.com/NVIDIA/cuda-samples/blob/master/cpp/0_Introduction/vectorAdd/README.md",
+      "commit": "5443602d89ed99aede2e4b7bf329daddeadb320e"
+    },
+    {
+      "local": "learning-sources/rag-langchain-excerpts.en.md",
+      "repository": "NVIDIA/GenerativeAIExamples",
+      "path": "RAG/notebooks/langchain/langchain_basic_RAG.ipynb",
+      "gitBlobSha": "5384879c8c820e083ef4799ba19e4bc4c6c354c0",
+      "source": "https://github.com/NVIDIA/GenerativeAIExamples/blob/main/RAG/notebooks/langchain/langchain_basic_RAG.ipynb",
+      "reviewed": "2026-09-14",
+      "modification": "Selected prose cells only; code and output excluded.",
+      "commit": "203b0de48d1142124842d56d4b40f3733888f5ee"
+    }
+  ]
+}
+
