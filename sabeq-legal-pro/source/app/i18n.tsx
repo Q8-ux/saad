@@ -23,7 +23,6 @@ type I18nValue = {
 
 const EN: Record<string, string> = {
   "جميع الحقوق محفوظة": "All rights reserved",
-  "سعد النبهان": "Saad Alnabhan",
   "الدخول كضيف": "Continue as guest",
   "تصفّح كامل الموقع ببيانات تجريبية، دون حساب.": "Explore the entire site with sample data. No account required.",
   "وضع الضيف": "Guest mode",
@@ -584,7 +583,6 @@ const EN: Record<string, string> = {
 
 const UR: Record<string, string> = {
   "جميع الحقوق محفوظة": "جملہ حقوق محفوظ ہیں",
-  "سعد النبهان": "سعد النبهان",
   "الدخول كضيف": "بطور مہمان داخل ہوں",
   "تصفّح كامل الموقع ببيانات تجريبية، دون حساب.": "نمونہ ڈیٹا کے ساتھ پوری سائٹ دیکھیں۔ اکاؤنٹ درکار نہیں۔",
   "وضع الضيف": "مہمان موڈ",
