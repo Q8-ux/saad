@@ -1,0 +1,267 @@
+{
+  "scope": "Curated development scenarios on the same local corpus. Not competitor results; not a blind benchmark.",
+  "scenarios": 24,
+  "previousTop3": 10,
+  "currentTop3": 24,
+  "rows": [
+    {
+      "query": "كيف أبني شخصية مقنعة",
+      "expected": "guide:character",
+      "previousTop3": false,
+      "currentTop3": true,
+      "current": [
+        "guide:character",
+        "template:character",
+        "term:term-3"
+      ]
+    },
+    {
+      "query": "شلون أكتب لوجلاين لفيلمي",
+      "expected": "guide:logline",
+      "previousTop3": false,
+      "currentTop3": true,
+      "current": [
+        "guide:logline",
+        "work:wadjda",
+        "term:term-0"
+      ]
+    },
+    {
+      "query": "ما تحت النص",
+      "expected": "guide:subtext",
+      "previousTop3": false,
+      "currentTop3": true,
+      "current": [
+        "guide:subtext",
+        "guide:visual",
+        "guide:causality"
+      ]
+    },
+    {
+      "query": "character arc",
+      "expected": "guide:arc",
+      "previousTop3": false,
+      "currentTop3": true,
+      "current": [
+        "term:term-5",
+        "guide:arc",
+        "work:groundhog"
+      ]
+    },
+    {
+      "query": "كيف أكتب مشهد صامت",
+      "expected": "guide:visual",
+      "previousTop3": false,
+      "currentTop3": true,
+      "current": [
+        "guide:visual",
+        "term:term-11",
+        "template:scene"
+      ]
+    },
+    {
+      "query": "الحدث المحفز",
+      "expected": "guide:structure",
+      "previousTop3": false,
+      "currentTop3": true,
+      "current": [
+        "term:term-7",
+        "guide:structure",
+        "guide:causality"
+      ]
+    },
+    {
+      "query": "تريتمنت",
+      "expected": "guide:synopsis",
+      "previousTop3": false,
+      "currentTop3": true,
+      "current": [
+        "guide:synopsis",
+        "term:term-12",
+        "term:term-13"
+      ]
+    },
+    {
+      "query": "بايبل",
+      "expected": "guide:bible",
+      "previousTop3": false,
+      "currentTop3": true,
+      "current": [
+        "guide:bible",
+        "term:term-14"
+      ]
+    },
+    {
+      "query": "كيف أرتب الحبكة",
+      "expected": "guide:structure",
+      "previousTop3": false,
+      "currentTop3": true,
+      "current": [
+        "guide:structure",
+        "work:alleys",
+        "work:groundhog"
+      ]
+    },
+    {
+      "query": "فلاش باك",
+      "expected": "guide:time",
+      "previousTop3": false,
+      "currentTop3": true,
+      "current": [
+        "guide:time",
+        "work:groundhog"
+      ]
+    },
+    {
+      "query": "point of view",
+      "expected": "guide:pov",
+      "previousTop3": false,
+      "currentTop3": true,
+      "current": [
+        "guide:pov",
+        "work:parasite",
+        "work:theeb"
+      ]
+    },
+    {
+      "query": "كيف أراجع المسودة",
+      "expected": "guide:rewrite",
+      "previousTop3": false,
+      "currentTop3": true,
+      "current": [
+        "guide:rewrite",
+        "work:alleys",
+        "template:rewrite"
+      ]
+    },
+    {
+      "query": "بناء مسلسل",
+      "expected": "guide:series",
+      "previousTop3": false,
+      "currentTop3": true,
+      "current": [
+        "guide:series",
+        "template:series",
+        "term:term-14"
+      ]
+    },
+    {
+      "query": "فيلم قصير",
+      "expected": "guide:short",
+      "previousTop3": true,
+      "currentTop3": true,
+      "current": [
+        "guide:short",
+        "work:falafel",
+        "guide:arc"
+      ]
+    },
+    {
+      "query": "السبب والنتيجة",
+      "expected": "guide:causality",
+      "previousTop3": true,
+      "currentTop3": true,
+      "current": [
+        "guide:causality",
+        "work:alleys",
+        "guide:rewrite"
+      ]
+    },
+    {
+      "query": "قوس الشخصية",
+      "expected": "guide:arc",
+      "previousTop3": true,
+      "currentTop3": true,
+      "current": [
+        "guide:arc",
+        "term:term-5",
+        "work:groundhog"
+      ]
+    },
+    {
+      "query": "بس يا بحر",
+      "expected": "work:sea",
+      "previousTop3": true,
+      "currentTop3": true,
+      "current": [
+        "work:sea"
+      ]
+    },
+    {
+      "query": "LOGLINE",
+      "expected": "guide:logline",
+      "previousTop3": true,
+      "currentTop3": true,
+      "current": [
+        "term:term-0",
+        "guide:logline",
+        "work:wadjda"
+      ]
+    },
+    {
+      "query": "الْحِوَار",
+      "expected": "guide:dialogue",
+      "previousTop3": true,
+      "currentTop3": true,
+      "current": [
+        "guide:dialogue",
+        "work:jury",
+        "template:scene"
+      ]
+    },
+    {
+      "query": "رَهَان",
+      "expected": "guide:stakes",
+      "previousTop3": true,
+      "currentTop3": true,
+      "current": [
+        "guide:stakes",
+        "term:term-6",
+        "work:sea"
+      ]
+    },
+    {
+      "query": "Slugline",
+      "expected": "term:term-11",
+      "previousTop3": true,
+      "currentTop3": true,
+      "current": [
+        "term:term-11",
+        "guide:format"
+      ]
+    },
+    {
+      "query": "ورقة تحليل عمل",
+      "expected": "template:watch",
+      "previousTop3": true,
+      "currentTop3": true,
+      "current": [
+        "template:watch",
+        "work:falafel",
+        "work:sea"
+      ]
+    },
+    {
+      "query": "الملخص والمعالجة",
+      "expected": "guide:synopsis",
+      "previousTop3": true,
+      "currentTop3": true,
+      "current": [
+        "guide:synopsis",
+        "term:term-12",
+        "term:term-13"
+      ]
+    },
+    {
+      "query": "غرض البحث وتوثيق المصادر",
+      "expected": "guide:research",
+      "previousTop3": false,
+      "currentTop3": true,
+      "current": [
+        "guide:research",
+        "work:sea",
+        "term:term-12"
+      ]
+    }
+  ]
+}

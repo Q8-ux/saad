@@ -89,7 +89,7 @@
   document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden")flushDraft();});
   document.addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="s"&&route==="lab"){e.preventDefault();snapshot();}});
   window.addEventListener("storage",e=>{if(e.key===KEY&&e.newValue)toast("تغيّرت المساحة في نافذة أخرى. صدّر نصك الحالي قبل تحديث الصفحة.");});
-  window.NouraApp={C,D,escape,icon,title,empty,courseCard,render,toast,openModal,closeModal,download,dateText,flushDraft,createDraft:newDraft,drafts:()=>db.drafts,registerViews:views=>Object.assign(extraViews,views),baseViews:{home,courses,courseDetail,workspace,privacy,admin,readiness}};
+  window.NouraApp={C,D,escape,icon,title,empty,courseCard,render,toast,openModal,closeModal,download,dateText,flushDraft,currentDraft:getDraft,createDraft:newDraft,drafts:()=>db.drafts,registerViews:views=>Object.assign(extraViews,views),baseViews:{home,courses,courseDetail,workspace,privacy,admin,readiness}};
   render();
   // Read-only WebMCP discovery for available programs. No private drafts are exposed.
   if(document.modelContext?.registerTool){try{document.modelContext.registerTool({name:"list_writing_programs",description:"List the proposed Arabic writing and criticism workshops, their audience and publication status.",inputSchema:{type:"object",properties:{},additionalProperties:false},annotations:{readOnlyHint:true},execute:async()=>({content:[{type:"text",text:JSON.stringify(C.courses.map(c=>({id:c.id,title:c.title,status:"demo_subscription_only",audience:c.audience,modules:c.modules}))) }]})});}catch{/* Browser does not support the optional registry. */}}
