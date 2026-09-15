@@ -16,6 +16,7 @@ import { financialSummary, invoiceState, paidAmount } from "../lib/financial-pol
 import {OfficeContact, UploadDocument, AuditPanel} from "./office-tools";
 import DocumentReviewPanel from "./document-review-panel";
 import NavigationIcon from "./navigation-icon";
+import LegalAssistant from "./legal-assistant";
 import { roleCan, canViewPage, type OfficeRole } from "../lib/access-policy";
 import { GUEST_OFFICE, GUEST_SESSION, GUEST_STATS } from "../lib/guest-data";
 
@@ -58,6 +59,7 @@ type SpeechRecognitionWindow = Window &
 
 type PageKey =
   | "dashboard"
+  | "assistant"
   | "search"
   | "library"
   | "clients"
@@ -476,6 +478,7 @@ const NAV: Array<{
   label: string;
 }> = [
   { key: "dashboard", label: "لوحة التحكم" },
+  { key: "assistant", label: "المساعد القانوني الذكي" },
   { key: "search", label: "البحث القانوني" },
   { key: "library", label: "قاعدة القوانين" },
   { key: "clients", label: "العملاء" },
@@ -488,6 +491,10 @@ const NAV: Array<{
 ];
 
 const PAGE_META: Record<PageKey, { title: string; sub: string }> = {
+  assistant: {
+    title: "المساعد القانوني الذكي",
+    sub: "حوار قانوني يساعدك على الفهم والمراجعة والصياغة",
+  },
   dashboard: {
     title: "لوحة التحكم",
     sub: "إدارة المكتب والمعرفة القانونية في مكان واحد",
@@ -1129,6 +1136,7 @@ function LegalOfficeAppContent({
             <p>{t(meta.sub)}</p>
           </div>
           <div className="topbar-actions">
+            {page !== "assistant" && <button type="button" className="assistant-launch-button" onClick={() => goTo("assistant")} aria-label={t("فتح المساعد القانوني الذكي")} title={t("المساعد القانوني الذكي")}><NavigationIcon name="assistant" /><span>{t("المساعد")}</span></button>}
             {!appInstalled && installPrompt && (
               <button
                 type="button"
@@ -1180,7 +1188,8 @@ function LegalOfficeAppContent({
         </header>
 
         <div className="page-content">
-          {guest && <aside className="guest-banner" aria-label={t("وضع الضيف")}><div><strong>{t("وضع الضيف")}</strong><p>{t("جميع الأقسام متاحة للاستعراض ببيانات تجريبية؛ لا تُحفظ التغييرات.")}</p></div><a className="button subtle" href={signInPath}>{t("إعادة بدء العرض")}</a></aside>}
+          {guest && page !== "assistant" && <aside className="guest-banner" aria-label={t("وضع الضيف")}><div><strong>{t("وضع الضيف")}</strong><p>{t("أقسام إدارة المكتب للاستعراض ببيانات تجريبية؛ لا تُحفظ التغييرات.")}</p></div><a className="button subtle" href={signInPath}>{t("إعادة بدء العرض")}</a></aside>}
+          <div hidden={page !== "assistant"}><LegalAssistant active={page === "assistant"} /></div>
           {officeError && <div className="alert danger" role="alert">{t(officeError)} <button onClick={()=>void loadOffice()}>{t("إعادة المحاولة")}</button></div>}
           {page === "dashboard" && (
             <Dashboard
@@ -1305,7 +1314,7 @@ function LegalOfficeAppContent({
       </main>
 
       <nav inert={menuOpen} className="mobile-nav" aria-label={t("التنقل السريع")}>
-        {availableNav.filter((item) => item.key !== "admin").slice(0, 5).map((item) => (
+        {availableNav.filter((item) => item.key !== "admin" && item.key !== "assistant").slice(0, 5).map((item) => (
           <button
             key={item.key}
             type="button"
@@ -1389,6 +1398,7 @@ function Dashboard({
 
   return (
     <div className="dashboard-page">
+      <section className="assistant-teaser"><div className="assistant-emblem"><NavigationIcon name="assistant" /></div><div><h2>{t("المساعد القانوني الذكي")}</h2><p>{t("ناقش سؤالك، راجع صياغتك، وتابع الحوار خطوة بخطوة.")}</p></div><button type="button" className="button primary" onClick={() => onNavigate("assistant")}>{t("ابدأ المحادثة")}</button></section>
       <div className="result-actions dashboard-actions" aria-label={t("إجراءات سريعة")}>
         {roleCan(role,"manageCases") && <button className="button primary" onClick={()=>onAdd("cases")}>{t("قضية جديدة")}</button>}
         {roleCan(role,"manageClients") && <button className="button subtle" onClick={()=>onAdd("clients")}>{t("عميل جديد")}</button>}

@@ -39,14 +39,15 @@ test('all guest writes and unknown reads fail closed and preserve sample data', 
   assert.equal(JSON.stringify(GUEST_OFFICE), before);
 });
 
-test('direct entry exposes all ten sections and a localized preview notice', () => {
-  const expected = { dashboard:'لوحة التحكم', search:'محرك البحث القانوني', library:'قاعدة القوانين', clients:'العملاء', cases:'القضايا', hearings:'الجلسات والمهام', invoices:'الفواتير', memos:'مولّد المذكرات', settings:'الإعدادات', admin:'إدارة المكاتب والمستخدمين' };
+test('direct entry exposes all eleven sections and a scoped preview notice', () => {
+  const expected = { dashboard:'لوحة التحكم', assistant:'المساعد القانوني الذكي', search:'محرك البحث القانوني', library:'قاعدة القوانين', clients:'العملاء', cases:'القضايا', hearings:'الجلسات والمهام', invoices:'الفواتير', memos:'مولّد المذكرات', settings:'الإعدادات', admin:'إدارة المكاتب والمستخدمين' };
   for (const [screen, heading] of Object.entries(expected)) {
     const html = renderFixture('ar', screen, false, true);
     assert.ok(html.includes(heading), `${screen} renders`);
     assert.ok(html.includes('إعادة بدء العرض'), `${screen} has an exit`);
-    assert.equal((html.match(/class="nav-button /g) || []).length, 10, `${screen} has all sections`);
-    assert.ok(html.includes('جميع الأقسام متاحة للاستعراض ببيانات تجريبية'));
+    assert.equal((html.match(/class="nav-button /g) || []).length, 11, `${screen} has all sections`);
+    if (screen !== 'assistant') assert.ok(html.includes('أقسام إدارة المكتب للاستعراض ببيانات تجريبية'));
+    else assert.ok(!html.includes('class="guest-banner"'));
     assert.ok(!html.includes('href="/api/legal/original'));
   }
   for (const language of ['ar','en','ur']) {
@@ -76,5 +77,5 @@ test('all shared UI API calls use the scoped request adapter', () => {
   const adapter=readFileSync(new URL('../source/app/office-request.tsx',import.meta.url),'utf8');
   assert.ok(!/\bfetch\(/.test(adapter));
   const html=readFileSync(new URL('../source/index.html',import.meta.url),'utf8');
-  assert.ok(html.includes("connect-src 'none'"));
+  assert.equal(html.match(/connect-src ([^;]+);/)[1], 'https://sabeq-legal-research-api.onrender.com/api/legal/assistant');
 });

@@ -1,4 +1,5 @@
 const paths: Record<string, string> = {
+ assistant: "M4 4h16v12H9l-5 4z M8 9h8 M8 12h5 M20 2v4 M18 4h4",
  dashboard: "M3 3h7v7H3z M14 3h7v7h-7z M3 14h7v7H3z M14 14h7v7h-7z",
  search: "M21 21l-5-5 M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0",
  library: "M3 4h5v16H3z M10 4h5v16h-5z M17 5l4-1 3 15-4 1z",
