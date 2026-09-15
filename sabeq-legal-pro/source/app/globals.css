@@ -455,6 +455,8 @@ label > span {
 }
 
 .main-area {
+  display: flex;
+  flex-direction: column;
   width: auto;
   min-width: 0;
   max-width: 100%;
@@ -772,11 +774,64 @@ label > span {
 }
 
 .page-content {
+  flex: 1;
   width: min(1500px, 100%);
   min-width: 0;
   max-width: 100%;
   margin: 0 auto;
-  padding: 28px 30px 70px;
+  padding: 28px 30px;
+}
+
+.site-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 2px 12px;
+  width: min(1440px, calc(100% - 60px));
+  margin: 0 auto;
+  padding: 8px 0 16px;
+  border-top: 1px solid var(--line);
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  line-height: 1.6;
+  text-align: center;
+}
+
+.site-footer-copyright {
+  white-space: nowrap;
+}
+
+.site-footer-contact {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 44px;
+  padding: 4px 6px;
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.site-footer-contact:hover,
+.site-footer-contact:focus-visible {
+  background: var(--blue-soft);
+  color: var(--blue-deep);
+}
+
+.site-footer-contact:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 3px;
+}
+
+.site-footer-whatsapp {
+  flex: 0 0 18px;
+  width: 18px;
+  height: 18px;
+  color: var(--blue-deep);
 }
 
 .search-hero {
@@ -2973,7 +3028,12 @@ td small {
 
   .page-content {
     min-width: 0;
-    padding: 13px 11px 108px;
+    padding: 13px 11px 28px;
+  }
+
+  .site-footer {
+    width: calc(100% - 22px);
+    padding-bottom: calc(92px + env(safe-area-inset-bottom));
   }
 
   .search-hero {
@@ -3492,7 +3552,11 @@ td small {
   }
 
   .page-content {
-    padding-bottom: 92px;
+    padding-bottom: 24px;
+  }
+
+  .site-footer {
+    padding-bottom: calc(80px + env(safe-area-inset-bottom));
   }
 
   .topbar-actions > .button.primary {
@@ -3771,6 +3835,7 @@ td small {
   .sidebar,
   .topbar,
   .mobile-nav,
+  .site-footer,
   .memo-form,
   .memo-warning,
   .memo-archive,
