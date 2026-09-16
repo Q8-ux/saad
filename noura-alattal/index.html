@@ -3,11 +3,22 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script>
+    (() => {
+      const url = new URL(window.location.href);
+      const trackingKeys = ['utm_source','utm_medium','utm_campaign','utm_term','utm_content','gclid','fbclid','mc_cid','mc_eid'];
+      let changed = false;
+      trackingKeys.forEach(key => { if (url.searchParams.has(key)) { url.searchParams.delete(key); changed = true; } });
+      if (changed) history.replaceState(null, '', url.pathname + (url.search ? url.search : '') + url.hash);
+    })();
+  </script>
   <meta name="theme-color" content="#10282b">
   <meta name="description" content="مرجع عربي تفاعلي لكتابة السيناريو، وأمثلة عالمية وعربية وكويتية، مع تجربة الاشتراك في دورات د. نورة العتال.">
   <meta property="og:title" content="د. نورة العتال | مرجع السيناريو والدورات">
   <meta property="og:description" content="ابحث، تعلّم، وقارن الأعمال ضمن مرجع السيناريو والدورات وورش العمل.">
   <meta property="og:type" content="website">
+  <meta property="og:url" content="https://q8-ux.github.io/saad/noura-alattal/">
+  <link rel="canonical" href="https://q8-ux.github.io/saad/noura-alattal/">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="د. نورة العتال | مرجع السيناريو والدورات">
   <meta name="twitter:description" content="مرجع متخصص في كتابة السيناريو ومنصة للاطلاع والاشتراك في الدورات.">
@@ -15,21 +26,21 @@
   <title>د. نورة العتال | الأدب والنقد والكتابة الدرامية</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2310282b'/%3E%3Cpath d='M17 33c0 21 30 21 30 0' stroke='%23d7b081' stroke-width='5' fill='none'/%3E%3Ccircle cx='32' cy='23' r='3' fill='%23d7b081'/%3E%3C/svg%3E">
   <link rel="preload" href="assets/fonts/AL-Mohanad.ttf" as="font" type="font/ttf" crossorigin>
-  <link rel="stylesheet" href="assets/site.css?v=20260916-nolab">
-  <script src="assets/content.js?v=20260916-nolab" defer></script>
-  <script src="assets/demo-state.js?v=20260916-nolab" defer></script>
-  <script src="assets/site.js?v=20260916-nolab" defer></script>
-  <script src="assets/enrollment.js?v=20260916-nolab" defer></script>
-  <link rel="stylesheet" href="assets/enrollment.css?v=20260916-nolab">
-  <link rel="stylesheet" href="assets/knowledge.css?v=20260916-nolab">
-  <script src="assets/knowledge-content.js?v=20260916-nolab" defer></script>
-  <script src="assets/learning-core.js?v=20260916-nolab" defer></script>
-  <script src="assets/knowledge-core.js?v=20260916-nolab" defer></script>
-  <script src="assets/knowledge.js?v=20260916-nolab" defer></script>
-  <link rel="stylesheet" href="assets/learning.css?v=20260916-nolab">
-  <script src="assets/learning.js?v=20260916-nolab" defer></script>
-  <link rel="stylesheet" href="assets/start.css?v=20260916-nolab">
-  <script src="assets/start.js?v=20260916-nolab" defer></script>
+  <link rel="stylesheet" href="assets/site.css?v=20260916-cleanurl">
+  <script src="assets/content.js?v=20260916-cleanurl" defer></script>
+  <script src="assets/demo-state.js?v=20260916-cleanurl" defer></script>
+  <script src="assets/site.js?v=20260916-cleanurl" defer></script>
+  <script src="assets/enrollment.js?v=20260916-cleanurl" defer></script>
+  <link rel="stylesheet" href="assets/enrollment.css?v=20260916-cleanurl">
+  <link rel="stylesheet" href="assets/knowledge.css?v=20260916-cleanurl">
+  <script src="assets/knowledge-content.js?v=20260916-cleanurl" defer></script>
+  <script src="assets/learning-core.js?v=20260916-cleanurl" defer></script>
+  <script src="assets/knowledge-core.js?v=20260916-cleanurl" defer></script>
+  <script src="assets/knowledge.js?v=20260916-cleanurl" defer></script>
+  <link rel="stylesheet" href="assets/learning.css?v=20260916-cleanurl">
+  <script src="assets/learning.js?v=20260916-cleanurl" defer></script>
+  <link rel="stylesheet" href="assets/start.css?v=20260916-cleanurl">
+  <script src="assets/start.js?v=20260916-cleanurl" defer></script>
   <style>
     a[href="#lab"], a[href^="#lab/"] {display:none!important}
     .feature-panel:has(a[href="#lab"]) {display:none!important}
