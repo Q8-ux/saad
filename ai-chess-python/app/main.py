@@ -11,15 +11,17 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from .engine import LEVELS, choose_move
+from .marketing import router as marketing_router
 from .multiplayer import router as multiplayer_router
 
 BASE_DIR = Path(__file__).resolve().parent
 STATIC_DIR = BASE_DIR / "static"
 MAX_GAME_PLIES = 1024
 
-app = FastAPI(title="AI Chess Arena", version="1.0.1")
+app = FastAPI(title="AI Chess Arena", version="1.1.0")
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 app.include_router(multiplayer_router)
+app.include_router(marketing_router)
 
 
 class LegalMovesRequest(BaseModel):
@@ -45,7 +47,6 @@ def board_from_history(fen: str, move_history: list[str]) -> chess.Board:
     """Rebuild a game with its move stack so repetition rules still work."""
     if not move_history:
         return chess.Board(fen)
-
     board = chess.Board()
     for uci in move_history:
         try:
@@ -55,7 +56,6 @@ def board_from_history(fen: str, move_history: list[str]) -> chess.Board:
         if move not in board.legal_moves:
             raise ValueError("Illegal move in history")
         board.push(move)
-
     if board.fen() != chess.Board(fen).fen():
         raise ValueError("Move history does not match FEN")
     return board
@@ -66,21 +66,11 @@ def board_payload(board: chess.Board):
     status = "playing"
     winner = None
     reason = None
-
     if outcome:
         status = "game_over"
         winner = "white" if outcome.winner is chess.WHITE else "black" if outcome.winner is chess.BLACK else "draw"
         reason = outcome.termination.name.lower()
-
-    return {
-        "fen": board.fen(),
-        "turn": "white" if board.turn == chess.WHITE else "black",
-        "check": board.is_check(),
-        "status": status,
-        "winner": winner,
-        "reason": reason,
-        "legal_count": board.legal_moves.count(),
-    }
+    return {"fen": board.fen(), "turn": "white" if board.turn == chess.WHITE else "black", "check": board.is_check(), "status": status, "winner": winner, "reason": reason, "legal_count": board.legal_moves.count()}
 
 
 @app.get("/")
@@ -95,11 +85,7 @@ def levels():
 
 @app.get("/api/public-config")
 def public_config():
-    return {
-        "supabase_url": os.getenv("SUPABASE_URL", ""),
-        "supabase_key": os.getenv("SUPABASE_KEY", ""),
-        "app_url": os.getenv("APP_URL", ""),
-    }
+    return {"supabase_url": os.getenv("SUPABASE_URL", ""), "supabase_key": os.getenv("SUPABASE_KEY", ""), "app_url": os.getenv("APP_URL", "")}
 
 
 @app.post("/api/legal")
@@ -109,7 +95,6 @@ def legal_moves(req: LegalMovesRequest):
         square = chess.parse_square(req.square)
     except Exception as exc:
         raise HTTPException(status_code=400, detail="Invalid board state or square") from exc
-
     moves = [m.uci()[2:4] for m in board.legal_moves if m.from_square == square]
     return {"moves": moves}
 
@@ -127,13 +112,7 @@ def suggest_move(req: HintRequest):
             raise HTTPException(status_code=409, detail="No legal hint available")
         move = chess.Move.from_uci(suggestion.uci)
         piece = board.piece_at(move.from_square)
-        return {
-            "from_square": chess.square_name(move.from_square),
-            "to_square": chess.square_name(move.to_square),
-            "san": suggestion.san,
-            "piece": chess.piece_name(piece.piece_type) if piece else "piece",
-            "capture": board.is_capture(move),
-        }
+        return {"from_square": chess.square_name(move.from_square), "to_square": chess.square_name(move.to_square), "san": suggestion.san, "piece": chess.piece_name(piece.piece_type) if piece else "piece", "capture": board.is_capture(move)}
     except HTTPException:
         raise
     except Exception as exc:
@@ -148,41 +127,25 @@ def make_move(req: MoveRequest):
         promotion = None
         from_sq = chess.parse_square(req.from_square)
         to_sq = chess.parse_square(req.to_square)
-
         piece = board.piece_at(from_sq)
         if piece and piece.piece_type == chess.PAWN and chess.square_rank(to_sq) in (0, 7):
             promotion = promotion_map.get((req.promotion or "q").lower(), chess.QUEEN)
-
         move = chess.Move(from_sq, to_sq, promotion=promotion)
         if move not in board.legal_moves:
             raise HTTPException(status_code=400, detail="Illegal move")
-
         player_san = board.san(move)
         board.push(move)
         history = [item.uci() for item in board.move_stack]
-        response = {
-            "player_move": move.uci(),
-            "player_san": player_san,
-            "move_history": history,
-            **board_payload(board),
-        }
-
+        response = {"player_move": move.uci(), "player_san": player_san, "move_history": history, **board_payload(board)}
         if board.is_game_over(claim_draw=True):
             response["ai_move"] = None
             response["ai_san"] = None
             return response
-
         ai = choose_move(board, req.level)
         if ai:
             ai_move = chess.Move.from_uci(ai.uci)
             board.push(ai_move)
-            response.update({
-                "ai_move": ai.uci,
-                "ai_san": ai.san,
-                "move_history": [item.uci() for item in board.move_stack],
-                **board_payload(board),
-            })
-
+            response.update({"ai_move": ai.uci, "ai_san": ai.san, "move_history": [item.uci() for item in board.move_stack], **board_payload(board)})
         return response
     except HTTPException:
         raise
@@ -192,4 +155,4 @@ def make_move(req: MoveRequest):
 
 @app.get("/health")
 def health():
-    return {"ok": True}
+    return {"ok": True, "marketing": "route10"}
