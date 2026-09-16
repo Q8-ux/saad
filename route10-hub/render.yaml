@@ -17,3 +17,7 @@ services:
         sync: false
       - key: VOICESTUDIO_API_TOKEN
         sync: false
+      - key: POOLDAY_API_URL
+        sync: false
+      - key: POOLDAY_API_KEY
+        sync: false
