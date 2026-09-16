@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: route10-marketing-hub
+    runtime: python
+    rootDir: route10-hub
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: OPENSHORTS_API_KEY
+        sync: false
+      - key: OPENSHORTS_WEBHOOK_SECRET
+        generateValue: true
+      - key: ROUTE10_HUB_TOKEN
+        generateValue: true
