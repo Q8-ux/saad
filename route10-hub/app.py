@@ -6,14 +6,16 @@ import httpx
 from fastapi import FastAPI, Header, HTTPException, Request
 from pydantic import BaseModel, Field, HttpUrl
 
-app = FastAPI(title="Route 10 Marketing Hub", version="1.0.0")
+app = FastAPI(title="Route 10 Marketing Hub", version="1.1.0")
 OPENSHORTS_API_URL = os.getenv("OPENSHORTS_API_URL", "https://api.openshorts.app").rstrip("/")
 OPENSHORTS_API_KEY = os.getenv("OPENSHORTS_API_KEY", "")
 WEBHOOK_SECRET = os.getenv("OPENSHORTS_WEBHOOK_SECRET", "")
 HUB_TOKEN = os.getenv("ROUTE10_HUB_TOKEN", "")
+VOICESTUDIO_API_URL = os.getenv("VOICESTUDIO_API_URL", "").rstrip("/")
+VOICESTUDIO_API_TOKEN = os.getenv("VOICESTUDIO_API_TOKEN", "")
 
 PRODUCTS = {
- "ai-chess-kuwait": {"name":"AI Chess Kuwait","url":"https://ai-chess-kuwait.onrender.com","pillars":["puzzle","mistake","ai","beginner","social","elo"]},
+ "ai-chess-kuwait": {"name":"AI Chess Kuwait","url":"https://ai-chess-kuwait.onrender.com","pillars":["puzzle","mistake","ai","beginner","social","elo"],"audio":True},
 }
 
 class Campaign(BaseModel):
@@ -30,6 +32,16 @@ class Event(BaseModel):
  content_id: Optional[str] = None
  metadata: dict = Field(default_factory=dict)
 
+class VoiceJob(BaseModel):
+ product_id: str
+ text: str = Field(min_length=1, max_length=10000)
+ language: str = "ar"
+ voice_id: Optional[str] = None
+ mode: str = "tts"
+ reference_audio_url: Optional[HttpUrl] = None
+ consent_confirmed: bool = False
+ metadata: dict = Field(default_factory=dict)
+
 def authorize(value: str | None):
  if HUB_TOKEN and value != f"Bearer {HUB_TOKEN}": raise HTTPException(401,"Invalid hub token")
 
@@ -37,12 +49,39 @@ def product(pid: str):
  if pid not in PRODUCTS: raise HTTPException(404,"Unknown product")
  return PRODUCTS[pid]
 
+def voice_headers():
+ h={"Content-Type":"application/json"}
+ if VOICESTUDIO_API_TOKEN: h["Authorization"]=f"Bearer {VOICESTUDIO_API_TOKEN}"
+ return h
+
 @app.get("/health")
-def health(): return {"ok":True,"products":len(PRODUCTS),"openshorts":bool(OPENSHORTS_API_KEY)}
+def health():
+ return {"ok":True,"products":len(PRODUCTS),"openshorts":bool(OPENSHORTS_API_KEY),"voice_route":{"engine":"VoiceStudio","configured":bool(VOICESTUDIO_API_URL)}}
 
 @app.get("/api/products")
 def products(authorization: str|None=Header(default=None)):
  authorize(authorization); return PRODUCTS
+
+@app.get("/api/audio/status")
+def audio_status(authorization: str|None=Header(default=None)):
+ authorize(authorization)
+ return {"engine":"VoiceStudio","configured":bool(VOICESTUDIO_API_URL),"local_first":True,"capabilities":["tts","voice_clone","dubbing","transcription","multi_voice"]}
+
+@app.post("/api/audio/generate")
+async def audio_generate(req: VoiceJob, authorization: str|None=Header(default=None)):
+ authorize(authorization); p=product(req.product_id)
+ if not p.get("audio"): raise HTTPException(400,"Audio route disabled for product")
+ if not VOICESTUDIO_API_URL: raise HTTPException(503,"VOICESTUDIO_API_URL not configured")
+ if req.mode in {"voice_clone","clone"} and not req.consent_confirmed:
+  raise HTTPException(400,"Explicit speaker consent is required for voice cloning")
+ payload={"text":req.text,"language":req.language,"voice_id":req.voice_id,"mode":req.mode,"reference_audio_url":str(req.reference_audio_url) if req.reference_audio_url else None,"metadata":{"product_id":req.product_id,**req.metadata}}
+ # VoiceStudio is isolated behind this adapter so its local API can evolve without changing product integrations.
+ async with httpx.AsyncClient(timeout=180) as client:
+  r=await client.post(f"{VOICESTUDIO_API_URL}/generate",headers=voice_headers(),json=payload)
+ if r.status_code>=400: raise HTTPException(502,f"VoiceStudio error: {r.text[:300]}")
+ try: result=r.json()
+ except Exception: result={"response":r.text[:1000]}
+ return {"engine":"VoiceStudio","product":p["name"],"result":result}
 
 @app.post("/api/campaigns")
 async def campaign(req: Campaign, request: Request, authorization: str|None=Header(default=None)):
