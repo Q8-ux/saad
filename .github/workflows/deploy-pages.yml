@@ -34,6 +34,7 @@ on:
       - 'youtube-studio-ai/**'
       - 'remote-ai-hub/**'
       - 'noura-alattal/**'
+      - 'ai-video-studio/**'
       - 'workforce-platform/apps/web/**'
       - '.github/workflows/deploy-pages.yml'
   workflow_dispatch:
@@ -74,7 +75,7 @@ jobs:
         run: |
           rm -rf _site && mkdir -p _site
           cp index.html 404.html cyber-archive.css cyber-archive.js cyber-data.js sabeq.html _site/
-          for p in sabeq-legal sabeq-admin-preview sabeq-legal-system sabeq-legal-pro hessa-alobaid shalayhna zad-restaurants tamweenat tamweenat-admin rattil kuwait-digital-sales-plan kuwait-fund-modern livestock-vax-kw english-kuwait oman-fruits-pos project-command-center my-sites reddit-business-agent ant-alshaer elanak-saleem alsaqaf-school youtube-studio-ai remote-ai-hub noura-alattal; do cp -R "$p" "_site/$p"; done
+          for p in sabeq-legal sabeq-admin-preview sabeq-legal-system sabeq-legal-pro hessa-alobaid shalayhna zad-restaurants tamweenat tamweenat-admin rattil kuwait-digital-sales-plan kuwait-fund-modern livestock-vax-kw english-kuwait oman-fruits-pos project-command-center my-sites reddit-business-agent ant-alshaer elanak-saleem alsaqaf-school youtube-studio-ai remote-ai-hub noura-alattal ai-video-studio; do cp -R "$p" "_site/$p"; done
           bash english-kuwait/generate-audio.sh _site/english-kuwait/audio
           cp -R workforce-platform/apps/web/out/_next _site/_next
           for p in dashboard admin-control attendance-smart transfers emergency ai-tools notifications profile; do cp -R "workforce-platform/apps/web/out/$p" "_site/$p"; done
@@ -88,6 +89,7 @@ jobs:
           test -s _site/remote-ai-hub/index.html
           test -s _site/noura-alattal/index.html
           test -s _site/noura-alattal/admin/index.html
+          test -s _site/ai-video-studio/index.html
           test -s _site/alsaqaf-school/assets/learning-art.webp
           test -s _site/ant-alshaer/admin/login/index.html
           test -s _site/dashboard/index.html
