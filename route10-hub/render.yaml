@@ -13,3 +13,7 @@ services:
         generateValue: true
       - key: ROUTE10_HUB_TOKEN
         generateValue: true
+      - key: VOICESTUDIO_API_URL
+        sync: false
+      - key: VOICESTUDIO_API_TOKEN
+        sync: false
