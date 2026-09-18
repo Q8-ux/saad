@@ -132,7 +132,6 @@ function normalizeAnalysis(value = {}) {
     caseNumber: String(value.caseNumber || '').trim(),
     court: String(value.court || '').trim(),
     clientName: String(value.clientName || '').trim(),
-    phone: String(value.phone || '').trim(),
     partyRole: String(value.partyRole || '').trim(),
     otherParty: String(value.otherParty || '').trim(),
     legalIssues: list(value.legalIssues),
@@ -336,7 +335,7 @@ app.post('/api/legal/analyze-documents', upload.array('documents', 25), async (r
   try {
     const content = [{
       type: 'input_text',
-      text: `حلل المستندات القانونية المرفقة واستخرج بيانات القضية فقط مما هو ظاهر فيها. أعد JSON فقط بهذه المفاتيح بالإنجليزية: caseType, caseNumber, court, clientName, phone, partyRole, otherParty, legalIssues (array), facts, requests, parties (array of {name,role}), warnings (array). لا تخمن بيانات غير موجودة؛ اتركها فارغة وأضف تنبيهاً في warnings عند الغموض. صغ facts والrequests بالعربية القانونية الواضحة.`,
+      text: `حلل المستندات القانونية المرفقة واستخرج بيانات القضية فقط مما هو ظاهر فيها. أعد JSON فقط بهذه المفاتيح بالإنجليزية: caseType, caseNumber, court, clientName, partyRole, otherParty, legalIssues (array), facts, requests, parties (array of {name,role}), warnings (array). لا تخمن بيانات غير موجودة؛ اتركها فارغة وأضف تنبيهاً في warnings عند الغموض. صغ facts والrequests بالعربية القانونية الواضحة.`,
     }];
 
     for (const file of files) {
