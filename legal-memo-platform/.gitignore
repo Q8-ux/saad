@@ -3,4 +3,5 @@ node_modules/
 .env.local
 data/
 uploads/
+private-case-files/
 npm-debug.log*
