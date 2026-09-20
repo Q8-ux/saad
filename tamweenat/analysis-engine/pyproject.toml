@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "masar-analysis"
+version = "1.0.0"
+description = "مسار التحليل — reusable, source-grounded web research service"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi==0.141.1", "uvicorn==0.53.0", "httpx==0.28.1", "scrapling==0.4.15"
+]
+
+[project.optional-dependencies]
+agent = ["agent-reach @ git+https://github.com/Panniantong/Agent-Reach.git@a19a171fa980a0785849596492e0af4db800c82f"]
+social = ["twitter-cli==0.8.5", "rdt-cli @ git+https://github.com/public-clis/rdt-cli.git@5e4fb3720d5c174e976cd425ccc3b879d52cac66"]
+mcp = ["mcp>=1.26,<2"]
+test = ["pytest>=9,<10"]
+
+[project.scripts]
+masar = "masar.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["masar*"]
+
+[tool.setuptools.package-data]
+masar = ["browser.cjs"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
