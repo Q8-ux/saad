@@ -1,0 +1,6 @@
+.env
+backend/.env
+.sites-runtime/
+test-results/
+*.log
+node_modules/

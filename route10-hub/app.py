@@ -19,6 +19,7 @@ POOLDAY_API_URL = os.getenv("POOLDAY_API_URL", "").rstrip("/")
 POOLDAY_API_KEY = os.getenv("POOLDAY_API_KEY", "")
 
 PRODUCTS = {"ai-chess-kuwait":{"name":"AI Chess Kuwait","url":"https://ai-chess-kuwait.onrender.com","pillars":["puzzle","mistake","ai","beginner","social","elo"],"audio":True,"video":True,"chinese":True}}
+PRODUCTS["autoclip-studio"] = {"name":"AutoClip Studio","url":"https://q8-ux.github.io/saad/autoclip-studio","pillars":["highlights","tutorial","interview","social"],"audio":True,"video":True,"chinese":True}
 
 class Campaign(BaseModel):
  product_id:str; source_url:HttpUrl; language:str="ar"; pillar:str="puzzle"; target_clips:int=Field(3,ge=1,le=10)
