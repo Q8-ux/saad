@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "tamweenat": {
+      "token_env": "MASAR_TAMWEENAT_TOKEN",
+      "allowed_hosts": [
+        "*"
+      ],
+      "max_urls": 8,
+      "requests_per_minute": 10,
+      "browser": false,
+      "social": false,
+      "llm": false
+    }
+  }
+}
