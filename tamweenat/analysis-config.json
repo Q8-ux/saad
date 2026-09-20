@@ -1,0 +1,37 @@
+{
+  "project": "tamweenat",
+  "service": "../masar-analysis",
+  "mode": "recommend_only",
+  "approval_required": true,
+  "auto_update_prices": false,
+  "use_cases": [
+    "supplier_price_monitoring",
+    "competitor_price_comparison",
+    "product_discovery",
+    "burger_restaurant_needs",
+    "kuwaiti_restaurant_needs",
+    "catalog_gap_analysis"
+  ],
+  "categories": [
+    "خضار",
+    "فواكه",
+    "حبوب",
+    "بقوليات",
+    "توابل",
+    "زيوت",
+    "مواد أساسية",
+    "ألبان وبيض",
+    "دواجن ولحوم",
+    "مجمدات",
+    "معلبات",
+    "مشروبات",
+    "تنظيف وتشغيل"
+  ],
+  "restaurant_profiles": [
+    "مطاعم البرجر",
+    "مطاعم الطبخ الكويتي"
+  ],
+  "output": "admin_review_queue",
+  "evidence_required": true,
+  "sources_required": true
+}
