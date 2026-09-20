@@ -1,0 +1,16 @@
+services:
+  analysis:
+    build: .
+    ports: ["127.0.0.1:8787:8787"]
+    env_file: .env
+    environment:
+      MASAR_CONFIG: /app/config.local.json
+    volumes:
+      - ./config.local.json:/app/config.local.json:ro
+    read_only: true
+    tmpfs: ["/tmp:size=128m"]
+    cap_drop: ["ALL"]
+    security_opt: ["no-new-privileges:true"]
+    pids_limit: 128
+    mem_limit: 768m
+    restart: unless-stopped

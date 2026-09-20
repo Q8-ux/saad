@@ -1,0 +1,8 @@
+.env
+config.local.json
+.venv
+.runtime
+node_modules
+reports
+__pycache__
+.git

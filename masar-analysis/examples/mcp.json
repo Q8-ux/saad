@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "masar-analysis": {
+      "command": "/ABSOLUTE/PATH/masar-analysis/.venv/bin/masar",
+      "args": ["mcp", "--project", "demo"],
+      "env": {
+        "MASAR_CONFIG": "/ABSOLUTE/PATH/masar-analysis/config.local.json",
+        "MASAR_DEMO_TOKEN": "SET_LOCALLY_FROM_ENV_NOT_IN_GIT",
+        "MASAR_ENHANCED_DIR": "/ABSOLUTE/PATH/masar-analysis/.runtime/patchright-enhanced"
+      }
+    }
+  }
+}
