@@ -1,0 +1,46 @@
+name: Deploy MUHAMI Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'muhami/**'
+      - '.github/workflows/deploy-muhami-pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: muhami-pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+      - name: Prepare MUHAMI site
+        run: |
+          rm -rf _site
+          mkdir -p _site/muhami
+          cp -R muhami/. _site/muhami/
+          touch _site/.nojekyll
+          test -s _site/muhami/index.html
+          test -s _site/muhami/style.css
+          test -s _site/muhami/app.js
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - name: Deploy MUHAMI
+        id: deployment
+        uses: actions/deploy-pages@v4
