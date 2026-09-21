@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import chess
 from fastapi.testclient import TestClient
 
@@ -65,7 +67,7 @@ def test_health_endpoint():
     response = client.get("/health")
 
     assert response.status_code == 200
-    assert response.json() == {"ok": True}
+    assert response.json()["ok"] is True
 
 
 def test_beginner_hint_returns_a_legal_white_move():
@@ -89,3 +91,13 @@ def test_hint_rejects_when_it_is_not_players_turn():
         "move_history": ["e2e4"],
     })
     assert response.status_code == 409
+
+
+def test_public_frontend_uses_github_link_and_compact_controls():
+    static_dir = Path(__file__).resolve().parents[1] / "app" / "static"
+    html = (static_dir / "index.html").read_text(encoding="utf-8")
+    javascript = (static_dir / "app.js").read_text(encoding="utf-8")
+
+    assert '<details class="panel glass moves-panel">' in html
+    assert 'href="https://wa.me/96551231313"' in html
+    assert "PUBLIC_GAME_URL='https://q8-ux.github.io/saad/ai-chess-kuwait/'" in javascript

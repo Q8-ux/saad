@@ -29,6 +29,8 @@ on:
       - 'my-sites/**'
       - 'reddit-business-agent/**'
       - 'ant-alshaer/**'
+      - 'ai-chess-kuwait/**'
+      - 'ai-chess-python/**'
       - 'elanak-saleem/**'
       - 'alsaqaf-school/**'
       - 'youtube-studio-ai/**'
@@ -79,7 +81,7 @@ jobs:
         run: |
           rm -rf _site && mkdir -p _site
           cp index.html 404.html cyber-archive.css cyber-archive.js cyber-data.js sabeq.html _site/
-          for p in sabeq-legal sabeq-admin-preview sabeq-legal-system sabeq-legal-pro hessa-alobaid shalayhna zad-restaurants tamweenat tamweenat-admin rattil kuwait-digital-sales-plan kuwait-fund-modern livestock-vax-kw english-kuwait oman-fruits-pos project-command-center my-sites reddit-business-agent ant-alshaer elanak-saleem alsaqaf-school youtube-studio-ai remote-ai-hub noura-alattal ai-video-studio; do cp -R "$p" "_site/$p"; done
+          for p in sabeq-legal sabeq-admin-preview sabeq-legal-system sabeq-legal-pro hessa-alobaid shalayhna zad-restaurants tamweenat tamweenat-admin rattil kuwait-digital-sales-plan kuwait-fund-modern livestock-vax-kw english-kuwait oman-fruits-pos project-command-center my-sites reddit-business-agent ant-alshaer ai-chess-kuwait elanak-saleem alsaqaf-school youtube-studio-ai remote-ai-hub noura-alattal ai-video-studio; do cp -R "$p" "_site/$p"; done
           mkdir -p _site/autoclip-studio
           cp -R autoclip-studio/dist/. _site/autoclip-studio/
           bash english-kuwait/generate-audio.sh _site/english-kuwait/audio
@@ -100,6 +102,8 @@ jobs:
           test -s _site/autoclip-studio/vendor/webm-duration.mjs
           test -s _site/alsaqaf-school/assets/learning-art.webp
           test -s _site/ant-alshaer/admin/login/index.html
+          test -s _site/ai-chess-kuwait/index.html
+          test -s _site/ai-chess-kuwait/embed.js
           test -s _site/dashboard/index.html
           test -s _site/ai-tools/index.html
           test -s _site/admin-control/index.html

@@ -9,6 +9,7 @@ const hintCounter = document.getElementById('hintCounter');
 const resumeButton = document.getElementById('resumeGame');
 const SAVED_GAME_KEY = 'ai_chess_saved_game_v1';
 const shareButton=document.getElementById('shareGame'),shareModal=document.getElementById('shareModal'),sharePreview=document.getElementById('sharePreview');
+const PUBLIC_GAME_URL='https://q8-ux.github.io/saad/ai-chess-kuwait/';
 
 const START_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 const SYMBOLS = {
@@ -38,7 +39,7 @@ function toast(text){
 
 function inviteData(){
  const code=window.multiplayerGame?.room_code||'';
- const url=new URL(location.origin+location.pathname);if(code)url.searchParams.set('room',code);
+ const url=new URL(PUBLIC_GAME_URL);if(code)url.searchParams.set('room',code);
  return {title:t('inviteTitle'),text:code?t('inviteRoomText',{code}):t('inviteText'),url:url.toString()};
 }
 function prepareShareFallback(data){
