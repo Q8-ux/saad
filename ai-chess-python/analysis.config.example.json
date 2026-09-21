@@ -1,0 +1,22 @@
+{
+  "projects": {
+    "ai-chess-kuwait": {
+      "token_env": "MASAR_AI_CHESS_TOKEN",
+      "allowed_hosts": [
+        "www.fide.com",
+        "handbook.fide.com",
+        "lichess.org",
+        "www.chess.com",
+        "www.youtube.com",
+        "youtu.be",
+        "www.reddit.com",
+        "x.com"
+      ],
+      "max_urls": 8,
+      "requests_per_minute": 6,
+      "browser": true,
+      "social": true,
+      "llm": true
+    }
+  }
+}
