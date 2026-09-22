@@ -7,7 +7,7 @@
   const API_BASE = String(
     window.TAMWEENAT_API_BASE ||
     document.querySelector('meta[name="tamweenat-api"]')?.content ||
-    "https://tamweenat-api.onrender.com",
+    "https://cfauiqcvhioxpjlbvsgx.supabase.co/functions/v1/tamweenat-api",
   ).replace(/\/+$/, "");
   const FAILURE_LIMIT = 3;
   const CIRCUIT_PAUSE_MS = 45_000;
@@ -135,7 +135,7 @@
     health,
     analyzeOrder,
     diagnostics: () => ({
-      version: "2.0.0",
+      version: "2.3.0",
       circuitOpen: circuit.openUntil > Date.now(),
       recentEvents: telemetry.slice(0, 12),
     }),
