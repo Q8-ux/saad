@@ -156,7 +156,7 @@
   let transcriptText;
   let answerText;
   let input;
-  let examples;
+  let examples;\n  let talkingPath = null;
 
   const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
   const FINAL_SILENCE_MS = 4200;
@@ -1078,6 +1078,32 @@
     micButton.setAttribute("aria-label", t("stop"));
     transcriptText.textContent = t("listening");
     renderStatus("listening", t("listening"));
+    if (window.TalkingPath?.create) {
+      try {
+        talkingPath?.stop?.();
+        talkingPath = window.TalkingPath.create({
+          mode: "free-browser",
+          language: speechLocale(),
+          onState: ({ state: voiceState }) => {
+            if (voiceState === "listening") renderStatus("listening", t("listening"));
+            if (voiceState === "thinking") renderStatus("working", t("working"));
+            if (voiceState === "speaking") renderStatus("speaking", selectedLanguage()==="ar" ? "أتحدث معك الآن…" : t("working"));
+          },
+          onText: async (text) => {
+            const value=String(text||"").trim();
+            stopListening();
+            if(!value){answer(t("noSpeech"),false);return "";}
+            transcriptText.textContent=value;
+            await execute(value,{voice:true,speak:true});
+            return "";
+          }
+        });
+        talkingPath.start().catch(() => {
+          if (state.listening) startBrowserRecognition();
+        });
+        return;
+      } catch {}
+    }
     if (window.TamweenatVoice && typeof window.TamweenatVoice.startListening === "function") {
       try {
         window.TamweenatVoice.startListening(speechLocale());
@@ -1242,6 +1268,6 @@
     open: () => setOpen(true),
     close: () => setOpen(false),
     execute: (command, options) => execute(command, options),
-    version: "2.0.0",
+    version: "2.3.0-talking-path",
   });
 })();
