@@ -156,7 +156,8 @@
   let transcriptText;
   let answerText;
   let input;
-  let examples;\n  let talkingPath = null;
+  let examples;
+  let talkingPath = null;
 
   const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
   const FINAL_SILENCE_MS = 4200;
