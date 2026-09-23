@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>سابق | مركز تحليلات التسويق</title>
+<style>
+:root{--navy:#081b2c;--navy2:#0d2b42;--cyan:#19c7c5;--silver:#dbe4ea;--white:#fff;--muted:#8fa4b5;--danger:#ffb86b}
+*{box-sizing:border-box}body{margin:0;background:#061522;color:var(--white);font-family:"Almohand","Tahoma",sans-serif}
+header{display:flex;justify-content:space-between;align-items:center;padding:20px 28px;border-bottom:1px solid #17354b;background:var(--navy)}
+.brand{font-size:26px;font-weight:800}.brand small{display:block;color:var(--muted);font-size:14px;margin-top:5px}.live{padding:9px 13px;border:1px solid #24516d;border-radius:999px;color:var(--silver)}
+main{max-width:1500px;margin:auto;padding:24px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.card{background:linear-gradient(145deg,#0b2235,#0a1d2e);border:1px solid #183a52;border-radius:18px;padding:18px}
+.kpi .n{font-size:34px;font-weight:900;margin:8px 0}.kpi .l{color:var(--muted)}.wide{grid-column:span 2}.full{grid-column:1/-1}
+h2{font-size:20px;margin:0 0 16px}.bar{height:11px;background:#12354c;border-radius:8px;overflow:hidden;margin:7px 0 13px}.bar i{display:block;height:100%;background:var(--cyan);border-radius:8px}
+table{width:100%;border-collapse:collapse}th,td{text-align:right;padding:12px;border-bottom:1px solid #17354b}th{color:var(--muted)}
+.notice{margin-bottom:16px;padding:14px 16px;border:1px solid #6d542e;background:#2a2418;border-radius:14px;color:#ffd89b}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 16px}.filters button{background:#0c2940;color:#fff;border:1px solid #24516d;border-radius:10px;padding:9px 13px}.filters button.active{background:var(--cyan);color:#042021}
+.empty{color:var(--muted);padding:28px 8px;text-align:center}.insight{border-right:4px solid var(--cyan);padding:10px 14px;background:#0b2639;border-radius:8px;margin:9px 0}
+@media(max-width:900px){.grid{grid-template-columns:1fr 1fr}.wide{grid-column:span 2}}@media(max-width:560px){.grid{grid-template-columns:1fr}.wide,.full{grid-column:span 1}header{padding:16px}.brand{font-size:21px}main{padding:14px}}
+</style></head>
+<body>
+<header><div class="brand">مجموعة سابق القانونية<small>مركز تحليلات التسويق</small></div><div class="live" id="status">● بانتظار مصدر البيانات</div></header>
+<main>
+<div class="notice" id="notice">هذه الواجهة جاهزة للبيانات الحقيقية. لا تعرض أرقامًا تجريبية حتى لا تُبنى قرارات التسويق على بيانات وهمية. يلزم ربط مصدر التحليلات الآمن بالموقع.</div>
+<div class="filters"><button class="active">اليوم</button><button>7 أيام</button><button>30 يوم</button><button>90 يوم</button></div>
+<section class="grid">
+<div class="card kpi"><div class="l">الزوار</div><div class="n" data-kpi="users">—</div><small>Unique visitors</small></div>
+<div class="card kpi"><div class="l">الجلسات</div><div class="n" data-kpi="sessions">—</div><small>Sessions</small></div>
+<div class="card kpi"><div class="l">مشاهدات الصفحات</div><div class="n" data-kpi="views">—</div><small>Page views</small></div>
+<div class="card kpi"><div class="l">متوسط مدة الجلسة</div><div class="n" data-kpi="duration">—</div><small>Engagement</small></div>
+
+<div class="card wide"><h2>الصفحات الأكثر زيارة</h2><div id="pages" class="empty">لا توجد بيانات بعد</div></div>
+<div class="card wide"><h2>مصادر الزيارات</h2><div id="sources" class="empty">لا توجد بيانات بعد</div></div>
+<div class="card wide"><h2>الأجهزة</h2><div id="devices" class="empty">لا توجد بيانات بعد</div></div>
+<div class="card wide"><h2>الدول والمدن</h2><div id="geo" class="empty">لا توجد بيانات بعد</div></div>
+
+<div class="card full"><h2>مسار التحويل التسويقي</h2>
+<table><thead><tr><th>المرحلة</th><th>الزوار</th><th>النسبة</th><th>الهدف</th></tr></thead>
+<tbody id="funnel"><tr><td colspan="4" class="empty">سيظهر هنا: زيارة ← خدمة ← بدء طلب/مذكرة ← رفع مستند ← دفع/إرسال ← اكتمال</td></tr></tbody></table></div>
+
+<div class="card full"><h2>تحليل تنفيذي تلقائي</h2><div id="insights">
+<div class="insight">سيتم ترتيب الصفحات الأعلى جذبًا، أفضل مصادر الزيارات، نقاط التسرب، والحملات ذات التحويل الأعلى بمجرد وصول البيانات الحقيقية.</div>
+<div class="insight">لن يتم تخزين مفاتيح API أو بيانات حساسة داخل GitHub Pages.</div></div></div>
+</section></main>
+<script>
+const API=localStorage.getItem('SABEQ_ANALYTICS_API')||'';
+async function load(){
+ if(!API)return;
+ try{
+  const r=await fetch(API+'/dashboard?range=30d',{credentials:'include'}); if(!r.ok)throw 0;
+  const d=await r.json(); document.getElementById('status').textContent='● متصل — آخر تحديث '+(d.updatedAt||'الآن');
+  document.getElementById('notice').style.display='none';
+  ['users','sessions','views','duration'].forEach(k=>{const e=document.querySelector('[data-kpi="'+k+'"]');if(e)e.textContent=d.kpis?.[k]??'—'});
+  renderBars('pages',d.pages,'label','value');renderBars('sources',d.sources,'label','value');renderBars('devices',d.devices,'label','value');renderBars('geo',d.geo,'label','value');
+ }catch(e){document.getElementById('status').textContent='● تعذر الاتصال بمصدر البيانات'}
+}
+function renderBars(id,rows,label,value){if(!rows?.length)return;let m=Math.max(...rows.map(x=>x[value]||0),1);document.getElementById(id).innerHTML=rows.slice(0,10).map(x=>'<div><b>'+esc(x[label])+'</b><span style="float:left">'+x[value]+'</span><div class="bar"><i style="width:'+Math.round(x[value]/m*100)+'%"></i></div></div>').join('')}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+load();setInterval(load,60000);
+</script></body></html>
