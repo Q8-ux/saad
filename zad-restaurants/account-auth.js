@@ -65,8 +65,8 @@
       const b=e.target.closest('[data-section]');
       if(!b)return;
       if(b.dataset.section==='supplies'){
-        loadStyle('./supplies.css?v=20260823-1600','suppliesCss');
-        loadScript('./supplies.js?v=20260823-1600','suppliesCatalog');
+        loadStyle('./supplies.css?v=20260924-veg-only','suppliesCss');
+        loadScript('./supplies.js?v=20260924-veg-only','suppliesCatalog');
       }
     },{passive:true});
   });
