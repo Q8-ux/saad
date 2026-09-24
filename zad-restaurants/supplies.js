@@ -1,20 +1,5 @@
 (()=>{
-const groups=[
-{key:'الكل',label:'كل المنتجات',icon:'▦'},
-{key:'خضار',label:'خضار',icon:'🥬'},
-{key:'فواكه',label:'فواكه',icon:'🍋'},
-{key:'حبوب',label:'حبوب',icon:'🌾'},
-{key:'بقوليات',label:'بقوليات',icon:'🫘'},
-{key:'توابل',label:'توابل',icon:'✦'},
-{key:'زيوت',label:'زيوت',icon:'◉'},
-{key:'مواد أساسية',label:'مواد أساسية',icon:'▣'},
-{key:'ألبان وبيض',label:'ألبان وبيض',icon:'🥚'},
-{key:'دواجن ولحوم',label:'دواجن ولحوم',icon:'🍗'},
-{key:'مجمدات',label:'مجمدات',icon:'❄'},
-{key:'معلبات',label:'معلبات',icon:'▤'},
-{key:'مشروبات',label:'مشروبات',icon:'🥤'},
-{key:'تنظيف وتشغيل',label:'تنظيف وتشغيل',icon:'✧'}
-];
+const groups=[{key:'خضار',label:'الخضروات',icon:'🥬'}];
 const supplyFamilies=[
 {key:'fresh',code:'01',label:'الطازج اليومي',description:'خضروات وفواكه للتجهيز اليومي',categories:['خضار','فواكه']},
 {key:'dry',code:'02',label:'المخزن الجاف',description:'أرز وحبوب وبقوليات ومواد أساسية',categories:['حبوب','بقوليات','مواد أساسية']},
@@ -70,7 +55,7 @@ products.splice(0,products.length,...visibleProducts);
 const session=(()=>{try{return JSON.parse(sessionStorage.getItem('tamweenatRestaurantSession')||'{}')}catch{return{}}})();
 const cartKey=`tamweenatCart:${session.username||'restaurant'}`;
 let cart=(()=>{try{return JSON.parse(localStorage.getItem(cartKey)||'{}')}catch{return{}}})();
-let search='',category='الكل',family='',restaurantType='';
+let search='',category='خضار',family='',restaurantType='';
 const save=()=>localStorage.setItem(cartKey,JSON.stringify(cart));
 const itemCount=()=>Object.values(cart).reduce((s,n)=>s+Number(n||0),0);
 const selected=()=>products.filter(p=>cart[p.id]>0);
@@ -79,13 +64,13 @@ function mount(){
  const root=document.getElementById('supplies');if(!root)return;
  root.innerHTML=`<div class="section-title"><div><p class="eyebrow">التوريد المباشر</p><h2>طلب التموينات</h2></div><span class="status-pill safe">داخل حساب المطعم</span></div>
  <div id="suppliesCreditNote" class="gate-status"></div>
- <div class="classification-heading"><div><p class="eyebrow">تصنيف واضح للمخزون</p><h3>المواد الاستهلاكية في مجموعات تشغيلية</h3><p>كل مجموعة تجمع منتجاتها المرتبطة لتسهيل الطلب والجرد وإعادة التوريد.</p></div><span>6 مجموعات رئيسية</span></div>
- <div class="supply-family-grid">${supplyFamilies.map(f=>{const count=products.filter(p=>f.categories.includes(p.category)).length;return `<button type="button" class="supply-family-card" data-family="${f.key}"><span class="family-code">${f.code}</span><span class="family-copy"><b>${f.label}</b><small>${f.description}</small><em>${f.categories.join(' • ')}</em></span><span class="family-count">${count}<small>منتج</small></span><i>عرض المنتجات ←</i></button>`}).join('')}</div>
- <div class="restaurant-type-heading"><div><p class="eyebrow">قوائم مصممة حسب النشاط</p><h3>ابدأ من احتياج مطعمك، لا من كتالوج طويل</h3></div><small>قوائم مرجعية للمكونات والتغليف والتشغيل</small></div>
- <div class="restaurant-type-grid">${Object.entries(restaurantTypes).map(([key,t])=>`<button type="button" class="restaurant-type-card ${key}" data-restaurant-type="${key}"><span class="restaurant-type-icon">${t.code}</span><span><b>${t.label}</b><small>${t.description}</small></span><em>فتح القائمة ←</em></button>`).join('')}</div>
+ <div class="classification-heading" style="display:none"><div><p class="eyebrow">تصنيف واضح للمخزون</p><h3>المواد الاستهلاكية في مجموعات تشغيلية</h3><p>كل مجموعة تجمع منتجاتها المرتبطة لتسهيل الطلب والجرد وإعادة التوريد.</p></div><span>6 مجموعات رئيسية</span></div>
+ <div class="supply-family-grid" style="display:none">${supplyFamilies.map(f=>{const count=products.filter(p=>f.categories.includes(p.category)).length;return `<button type="button" class="supply-family-card" data-family="${f.key}"><span class="family-code">${f.code}</span><span class="family-copy"><b>${f.label}</b><small>${f.description}</small><em>${f.categories.join(' • ')}</em></span><span class="family-count">${count}<small>منتج</small></span><i>عرض المنتجات ←</i></button>`}).join('')}</div>
+ <div class="restaurant-type-heading" style="display:none"><div><p class="eyebrow">قوائم مصممة حسب النشاط</p><h3>ابدأ من احتياج مطعمك، لا من كتالوج طويل</h3></div><small>قوائم مرجعية للمكونات والتغليف والتشغيل</small></div>
+ <div class="restaurant-type-grid" style="display:none">${Object.entries(restaurantTypes).map(([key,t])=>`<button type="button" class="restaurant-type-card ${key}" data-restaurant-type="${key}"><span class="restaurant-type-icon">${t.code}</span><span><b>${t.label}</b><small>${t.description}</small></span><em>فتح القائمة ←</em></button>`).join('')}</div>
  <div id="restaurantNeedsBox" class="restaurant-needs-box" hidden></div>
- <div class="catalog-divider"><span>أو تصفح حسب قسم المنتج</span></div>
- <div class="supply-groups" id="supplyGroups">${groups.map(g=>`<button type="button" class="supply-group${g.key==='الكل'?' active':''}" data-category="${g.key}"><span>${g.icon}</span><b>${g.label}</b><small>${g.key==='الكل'?products.length:products.filter(p=>p.category===g.key).length}</small></button>`).join('')}</div>
+ <div class="catalog-divider" style="display:none"><span>أو تصفح حسب قسم المنتج</span></div>
+ <div class="supply-groups" id="supplyGroups">${groups.map(g=>`<button type="button" class="supply-group${g.key==='خضار'?' active':''}" data-category="${g.key}"><span>${g.icon}</span><b>${g.label}</b><small>${g.key==='خضار'?products.length:products.filter(p=>p.category===g.key).length}</small></button>`).join('')}</div>
  <div class="supplies-toolbar"><input id="suppliesSearch" class="supplies-search" type="search" placeholder="ابحث عن منتج أو تصنيف..."><select id="suppliesCategory" class="category-filter">${groups.map(g=>`<option value="${g.key}">${g.label}</option>`).join('')}</select></div>
  <div class="catalog-layout"><div><div class="catalog-section-title"><div><h3 id="currentCategoryTitle">كل المنتجات</h3><small id="productsCount"></small></div><small>اختر الكمية ثم أضف إلى السلة</small></div><div id="suppliesProductGrid" class="product-grid"></div></div>
  <aside class="cart-panel"><div class="cart-head"><h3>سلة الشراء</h3><span id="cartCount" class="cart-count">0</span></div><div id="cartList" class="cart-list"></div><div class="cart-summary"><div class="cart-summary-row"><span>عدد الأصناف</span><strong id="cartKinds">0</strong></div><div class="cart-summary-row"><span>إجمالي الوحدات</span><strong id="cartUnits">0</strong></div></div><button id="reviewCartBtn" class="checkout-btn" type="button">مراجعة طلب التموينات</button><p id="cartPaymentNote" class="payment-note"></p></aside></div><div id="orderReviewBox" class="panel" style="display:none;margin-top:18px"></div>`;
