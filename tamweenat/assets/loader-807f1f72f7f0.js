@@ -7,7 +7,7 @@
       throw new Error("This browser needs DecompressionStream support");
     }
     const assetUrl = new URL(name, assetsUrl);
-    assetUrl.searchParams.set("v", "20260901-internal-navigation");
+    assetUrl.searchParams.set("v", "20260924-vegetables-only");
     const response = await fetch(assetUrl, { cache: "no-store" });
     if (!response.ok || !response.body) throw new Error("Unable to load " + name);
     const stream = response.body.pipeThrough(new DecompressionStream("gzip"));
@@ -21,7 +21,7 @@
       document.head.append(style);
       const moduleUrl = URL.createObjectURL(new Blob([js], { type: "text/javascript" }));
       try {
-        await import(moduleUrl);
+        await import(moduleUrl);\n        window.dispatchEvent(new Event("tamweenat-app-loaded"));
       } finally {
         URL.revokeObjectURL(moduleUrl);
       }
