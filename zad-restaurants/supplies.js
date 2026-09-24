@@ -63,21 +63,10 @@ const restaurantTypes={
    {title:'القلي والجوانب',items:['بطاطا مقلية مجمدة','حلقات بصل','زيت قلي عالي التحمل']},
    {title:'التغليف والتشغيل',items:['ورق وعلب برغر','علب بطاطا وأكياس','أكواب ومصاصات','قفازات ومناديل ومنظفات']}
   ]
- },
- kuwaiti:{
-  label:'احتياجات المطاعم الكويتية',code:'KWT',description:'أساسيات المجبوس والمرق والهريس والتشريب من المخزن حتى التغليف.',
-  productIds:['rice','chicken','onions','potatoes','tomatoes','garlic','lemons','chickpeas','spices','cardamom','oil','flour','sugar','salt','dairy','eggs','tea','coffee','water','cleaning'],
-  quoteMessage:'مرحباً، أريد عرض سعر كاملاً لقائمة احتياجات مطعم كويتي من تموينات.',
-  needGroups:[
-   {title:'اللحوم والدواجن',items:['دجاج كامل وقطع','لحم غنم','لحم بقري','سمك وروبيان']},
-   {title:'الأرز والحبوب',items:['أرز بسمتي ومصري','هريس وجريش','عدس وحمص']},
-   {title:'الخضار اليومية',items:['بصل وطماطم','بطاطا وثوم','ليمون وكزبرة وبقدونس']},
-   {title:'بهارات المطبخ الكويتي',items:['هيل وزعفران','لومي أسود وقرفة','قرنفل وكمون وكركم','فلفل أسود وبهارات مجبوس']},
-   {title:'أساسيات الطبخ',items:['زيت وسمن','معجون طماطم','ملح ودقيق','لبن وزبادي','زبيب ومكسرات وماء ورد']},
-   {title:'التغليف والتشغيل',items:['صحون وأوعية للأرز والمرق','فويل ونايلون حفظ','أكياس وقفازات ومناديل','منظفات ومزيل دهون']}
-  ]
  }
 };
+const visibleProducts=products.filter(p=>p.category==='خضار');
+products.splice(0,products.length,...visibleProducts);
 const session=(()=>{try{return JSON.parse(sessionStorage.getItem('tamweenatRestaurantSession')||'{}')}catch{return{}}})();
 const cartKey=`tamweenatCart:${session.username||'restaurant'}`;
 let cart=(()=>{try{return JSON.parse(localStorage.getItem(cartKey)||'{}')}catch{return{}}})();
