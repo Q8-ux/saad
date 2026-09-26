@@ -1,0 +1,10 @@
+(()=>{const tracks=[
+{id:'google',name:'مسار تحليل قوقل',role:'تنسيق التحليل',desc:'يفهم المهمة، يوزعها على أدوات التحليل، يراجع النتائج ثم يعرضها للإدارة.',state:'جاهز للربط',priority:1},
+{id:'agents',name:'مسار الوكلاء',role:'تشغيل الوكلاء',desc:'وكلاء للمخزون والأسعار والكريدت والموردين والطلب المتوقع.',state:'مجهز',priority:2},
+{id:'spec',name:'Spec-Kit',role:'ضبط التطوير',desc:'يحوّل أي تطوير جديد إلى متطلبات وخطة تحقق قبل تعديل النظام.',state:'مجهز',priority:3},
+{id:'engineering',name:'المسار الهندسي',role:'فحص الجودة',desc:'يفحص الأداء والدخول والطلبات والكريدت والروابط قبل اعتماد الإصدار.',state:'مجهز',priority:4},
+{id:'codewiki',name:'CodeWiki',role:'خريطة النظام',desc:'يوثّق مكونات تموينات ومصادر البيانات والعلاقات بينها لتقليل أخطاء التعديل.',state:'مجهز',priority:5},
+{id:'analysis',name:'مسار التحليل',role:'بحث السوق',desc:'جمع وتحليل أدلة السوق والموردين والأسعار والمنتجات مع المصادر.',state:'المحرك داخل المشروع',priority:0}
+];
+function mount(){if(document.getElementById('tamweenatOpsTracks'))return;const s=document.createElement('section');s.id='tamweenatOpsTracks';s.innerHTML='<div class="ops-head"><div><small>أدوات الإدارة الداخلية</small><h2>مركز المسارات الذكية</h2><p>هذه الأدوات خاصة بإدارة تموينات ولا تظهر لحسابات المطاعم.</p></div><span>ADMIN ONLY</span></div><div class="ops-flow">السوق والموردون ← مسار التحليل ← تنسيق ومراجعة ← الوكلاء المتخصصون ← اعتماد الإدارة</div><div class="ops-grid">'+tracks.sort((a,b)=>a.priority-b.priority).map(t=>'<article><div class="ops-num">'+String(t.priority+1).padStart(2,'0')+'</div><div><h3>'+t.name+'</h3><b>'+t.role+'</b><p>'+t.desc+'</p><small>'+t.state+'</small></div></article>').join('')+'</div><div class="ops-guard"><b>قاعدة الاعتماد:</b> لا يغيّر أي مسار سعر منتج، حد كريدت، حالة مطعم أو مورد تلقائياً. التغيير المالي والتشغيلي يحتاج اعتماد الإدارة.</div>';const anchor=document.getElementById('catalog-admin-panel');if(anchor)anchor.before(s);else document.body.appendChild(s)}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(mount,900));else setTimeout(mount,900)})();
