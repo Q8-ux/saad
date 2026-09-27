@@ -1,8 +1,9 @@
 {
-  "release": "2026-09-28-voice-countdown",
-  "clientSource": "c794a30da6f39eac3a8f8a32e14f03d5cb4808ea",
+  "release": "2026-09-28-address-glyph",
+  "clientSource": "0ea4ecea2e608c63799a5aa6b0d74c24c7feddfc",
   "assistant": "compact-analysis-4",
   "voice": "streamed-voice-3",
   "tools": "legal-tools-1",
-  "voiceIndicator": "red-wave-estimated-countdown-1"
+  "voiceIndicator": "red-wave-estimated-countdown-1",
+  "addressFont": "mohanad-900"
 }
