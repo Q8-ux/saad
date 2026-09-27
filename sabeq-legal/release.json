@@ -1,7 +1,8 @@
 {
-  "release": "2026-09-27-fast-tools",
-  "clientSource": "21f9a8e634d742b370634caa21120ee2fc062890",
+  "release": "2026-09-28-voice-countdown",
+  "clientSource": "c794a30da6f39eac3a8f8a32e14f03d5cb4808ea",
   "assistant": "compact-analysis-4",
   "voice": "streamed-voice-3",
-  "tools": "legal-tools-1"
+  "tools": "legal-tools-1",
+  "voiceIndicator": "red-wave-estimated-countdown-1"
 }
