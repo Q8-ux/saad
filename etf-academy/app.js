@@ -1,6 +1,7 @@
 (function(){
  'use strict';
  const D=window.ETF_CONTENT,M=window.ETFMath,$=s=>document.querySelector(s),main=$('#main');
+ const learning=window.ETFLearning.create(D);let voice=null;
  const key='etf-learning-v1';let storageOK=true,saved={};
  try{saved=JSON.parse(localStorage.getItem(key)||'{}')||{};}catch{storageOK=false;}
  const ids=D.lessons.map(l=>l.id),state={done:Array.isArray(saved.done)?saved.done.filter(x=>ids.includes(x)):[],large:saved.large===true,answers:{}};
@@ -17,7 +18,7 @@
  function breadcrumb(text){return `<div class="breadcrumb"><a href="#home">خريطة التعلّم</a><span aria-hidden="true"> / </span><b>${text}</b></div>`;}
  function nav(route){
   const item=(href,label,i)=>`<a class="nav-main ${route===href?'active':''}" href="#${href}" ${route===href?'aria-current="page"':''}>${icon(i)}${label}</a>`;
-  $('#main-nav').innerHTML=item('home','خريطة التعلّم','home')+D.stages.map((s,i)=>`<div class="nav-group"><span class="nav-group-label">${number(i+1)} · ${s.name}</span>${D.lessons.filter(l=>l.stage===i).map(l=>{const n=ids.indexOf(l.id)+1,active=route==='lesson/'+l.id,done=state.done.includes(l.id);return `<a href="#lesson/${l.id}" class="nav-lesson ${active?'active':''} ${done?'done':''}" ${active?'aria-current="page"':''}><span class="lesson-digit" aria-hidden="true">${done?'✓':String(n).padStart(2,'0')}</span>${l.short}${done?'<span class="sr-only">، مكتمل</span>':''}</a>`;}).join('')}</div>`).join('')+`<div class="nav-extra">${item('tools','المعامل التفاعلية','tools')}${item('glossary','قاموس المصطلحات','terms')}${item('sources','الدليل والمراجع','book')}</div>`;
+  $('#main-nav').innerHTML=item('home','خريطة التعلّم','home')+D.stages.map((s,i)=>`<div class="nav-group"><span class="nav-group-label">${number(i+1)} · ${s.name}</span>${D.lessons.filter(l=>l.stage===i).map(l=>{const n=ids.indexOf(l.id)+1,active=route==='lesson/'+l.id,done=state.done.includes(l.id);return `<a href="#lesson/${l.id}" class="nav-lesson ${active?'active':''} ${done?'done':''}" ${active?'aria-current="page"':''}><span class="lesson-digit" aria-hidden="true">${done?'✓':String(n).padStart(2,'0')}</span>${l.short}${done?'<span class="sr-only">، مكتمل</span>':''}</a>`;}).join('')}</div>`).join('')+`<div class="nav-extra">${item('assistant','مساعد التعلّم','book')}${item('tools','المعامل التفاعلية','tools')}${item('glossary','قاموس المصطلحات','terms')}${item('sources','الدليل والمراجع','book')}</div>`;
  }
  function home(){
   const next=D.lessons.find(l=>!state.done.includes(l.id))||D.lessons[0],pct=Math.round(state.done.length/ids.length*100);
@@ -25,7 +26,7 @@
   ${state.done.length===ids.length?'<div class="completion-box"><h2>أكملت قراءة المسار</h2><p>ارجع إلى التمارين والمصادر لتثبيت فهمك. إكمال الدروس لا يمثل تأهيلًا مهنيًا أو تقييمًا لملاءمة استثمار.</p></div>':''}
   <section class="hero" aria-labelledby="hero-title"><div class="hero-copy"><span class="eyebrow">من الأساسيات إلى بناء المحفظة</span><h2 id="hero-title">افهم الصندوق.<br><em>ثم اتّخذ قرارك بوعي.</em></h2><p>دروس مبسّطة تشرح ما تملكه، وما تدفعه، وما قد تخسره. جرّب الأمثلة لتتحول الأرقام إلى فهم.</p><div class="hero-actions"><a class="btn light" href="#lesson/${next.id}">${state.done.length?'تابع التعلّم':'ابدأ بالدرس الأول'}</a><a class="btn ghost" href="#tools/fees">جرّب أثر الرسوم</a></div></div><div class="hero-figure"><span class="small">توزيع أصول افتراضي للتعلّم</span><div class="donut" role="img" aria-label="مثال تعليمي: 60% أسهم و35% سندات و5% نقد"><div class="donut-center"><b>ETF</b><span>افهم ما تملك</span></div></div><div class="legend"><span class="legend-item"><i class="swatch" style="background:#82e4d3"></i>أسهم 60%</span><span class="legend-item"><i class="swatch" style="background:#72a9f5"></i>سندات 35%</span><span class="legend-item"><i class="swatch" style="background:#e6edf3"></i>نقد 5%</span></div></div></section>
   <div class="stats-strip"><div><b>12</b><span>درسًا متدرّجًا</span></div><div><b>4</b><span>معامل تفاعلية</span></div><div><b>24</b><span>مصطلحًا مشروحًا</span></div></div>
-  <section class="home-definition"><h2>ما هو ETF باختصار؟</h2><p>صندوق استثماري تُتداول وحداته في البورصة. قد يضم أسهمًا أو سندات أو أصولًا أخرى، ويتبع مؤشرًا أو يُدار بنشاط. المخاطرة تعتمد على ما بداخله.</p></section>
+  <a class="assistant-entry" href="#assistant"><strong>لديك سؤال عن مفهوم؟</strong><span>ابحث في الدروس ومصادرها، وراجع ما يحتاج إلى تثبيت.</span><b>افتح مساعد التعلّم</b></a><section class="home-definition"><h2>ما هو ETF باختصار؟</h2><p>صندوق استثماري تُتداول وحداته في البورصة. قد يضم أسهمًا أو سندات أو أصولًا أخرى، ويتبع مؤشرًا أو يُدار بنشاط. المخاطرة تعتمد على ما بداخله.</p></section>
   <section aria-labelledby="path-title"><div class="section-head"><div><h2 id="path-title">خريطة التعلّم</h2><p>خمس مراحل تغطي موضوعات الدليل الأصلي، مع شرح وتطبيق.</p></div><span class="badge">ابدأ دون معرفة سابقة</span></div>
   ${D.stages.map((s,i)=>`<section class="stage-section"><div class="stage-heading"><span class="stage-number">0${i+1}</span><div><h3>${s.name}</h3><p>${s.description}</p></div></div><div class="lesson-grid">${D.lessons.filter(l=>l.stage===i).map(l=>`<a class="lesson-card" href="#lesson/${l.id}"><div class="card-top"><span class="label">${l.tag}</span><span>${number(l.minutes)} دقائق تقريبًا</span></div><h4>${l.short}</h4><p>${l.objectives[0]}</p><div class="card-bottom"><span>الدرس ${number(ids.indexOf(l.id)+1)}</span><span class="${state.done.includes(l.id)?'complete-mark':''}">${state.done.includes(l.id)?'✓ تمت قراءته':'افتح الدرس'}</span></div></a>`).join('')}</div></section>`).join('')}</section>
   <div class="bottom-links"><a href="#glossary">${icon('terms')}<span>مصطلح غير واضح؟<small>قاموس عربي مع المقابل الإنجليزي</small></span></a><a href="#sources">${icon('book')}<span>ارجع إلى المصدر<small>ربط الدروس بالدليل والمراجع الرسمية</small></span></a></div><p class="progress-note">${storageNote()}</p>`;
@@ -33,7 +34,7 @@
  function table(t){return `<div class="table-wrap" tabindex="0" role="region" aria-label="جدول قابل للتمرير أفقيًا"><table><thead><tr>${t.head.map(h=>`<th scope="col">${h}</th>`).join('')}</tr></thead><tbody>${t.rows.map(row=>`<tr>${row.map((c,i)=>i===0?`<th scope="row">${c}</th>`:`<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;}
  function lesson(l){
   const index=ids.indexOf(l.id),selected=state.answers[l.id],done=state.done.includes(l.id);
-  return `${breadcrumb(D.stages[l.stage].name)}<header class="lesson-header"><div class="eyebrow">الدرس ${number(index+1)} من ${number(ids.length)} <span class="badge">${l.tag}</span></div><h1>${l.title}</h1><p class="lesson-intro">${l.intro}</p><div class="lesson-meta"><span>${number(l.minutes)} دقائق قراءة تقريبًا</span><span>·</span><span>الدليل الأصلي: ص ${l.pages}</span>${l.lab?'<span>· يتضمن تجربة تفاعلية</span>':''}</div></header>
+  return `${breadcrumb(D.stages[l.stage].name)}<header class="lesson-header"><div class="eyebrow">الدرس ${number(index+1)} من ${number(ids.length)} <span class="badge">${l.tag}</span></div><h1>${l.title}</h1><p class="lesson-intro">${l.intro}</p><div class="lesson-meta"><span>${number(l.minutes)} دقائق قراءة تقريبًا</span><span>·</span><span>الدليل الأصلي: ص ${l.pages}</span>${l.lab?'<span>· يتضمن تجربة تفاعلية</span>':''}</div>${voicePanel()}</header>
   <article class="lesson-body"><section class="objectives"><h2>بعد هذا الدرس ستستطيع</h2><ul>${l.objectives.map(x=>`<li>${x}</li>`).join('')}</ul></section>
   ${l.sections.map(s=>`<section class="lesson-section"><h2>${s.title}</h2>${s.body?`<p>${s.body}</p>`:''}${s.list?`<ul>${s.list.map(x=>`<li>${x}</li>`).join('')}</ul>`:''}${s.table?table(s.table):''}</section>`).join('')}
   <section class="example"><span class="eyebrow">مثال محلول</span><h3>${l.example.title}</h3><p>${l.example.body}</p></section>
@@ -42,6 +43,32 @@
   <form class="quiz-card" id="lesson-quiz"><span class="quiz-label">تحقّق من فهمك · سؤال قصير</span><fieldset><legend>${l.question.text}</legend>${l.question.options.map((o,i)=>`<label class="option"><input type="radio" name="answer" value="${i}" required ${selected===i?'checked':''}><span>${o}</span></label>`).join('')}</fieldset><button class="btn small secondary" type="submit">تحقّق من الإجابة</button><div id="quiz-feedback" class="quiz-feedback" aria-live="polite"></div></form>
   <div class="lesson-actions"><button id="complete-lesson" class="btn secondary" aria-pressed="${done}">${done?'✓ تمت قراءة الدرس':'أكملت قراءة الدرس'}</button><div class="next-links">${index>0?`<a class="btn secondary" href="#lesson/${ids[index-1]}">الدرس السابق</a>`:''}<a class="btn" href="${index<ids.length-1?'#lesson/'+ids[index+1]:'#home'}">${index<ids.length-1?'الدرس التالي':'العودة إلى المسار'}</a></div></div><p class="progress-note">${storageNote()}</p>
   <section class="refs-box"><h3>للتوسّع والتحقّق</h3>${ext(D.source+'#page='+l.pages.split('،')[0],'الدليل الأصلي · ص '+l.pages)}${l.refs.map(r=>ext(D.refs[r].url,D.refs[r].title)).join('')}<p class="muted">الشرح والأمثلة الموسّعة هنا إعداد تعليمي مستقل. راجع حدود المراجع في صفحة المصادر.</p></section></article>`;
+ }
+
+ function voicePanel(){return `<div class="voice-bar"><button id="read-lesson" class="btn small secondary" type="button">استمع للدرس</button><button id="stop-speech" class="btn small secondary" type="button" disabled>إيقاف الصوت</button><span id="voice-status" class="small muted" aria-live="polite">الصوت العربي حسب الأصوات المتاحة على جهازك.</span></div>`;}
+ function initVoice(){
+  const status=$('#voice-status'),stop=$('#stop-speech');
+  voice=window.TalkingPath.create({language:'ar-KW',onState:({state,message})=>{if(status?.isConnected)status.textContent=message||'جاهز.';if(stop?.isConnected)stop.disabled=!['speaking','listening'].includes(state);}});
+  if(stop)stop.addEventListener('click',()=>voice.stop());return voice;
+ }
+ function wireVoice(l){const v=initVoice(),read=$('#read-lesson');if(!v.support().speak){read.disabled=true;$('#voice-status').textContent='القراءة الصوتية غير متاحة في هذا المتصفح.';return;}read.addEventListener('click',()=>{const text=[l.title,l.intro,...l.sections.flatMap(s=>[s.title,s.body||'',s.list?.join('. ')||'',s.table?.rows.map(row=>row.join('، ')).join('. ')||'']),l.example.title,l.example.body,l.takeaway].join('. ');void v.speak(text);});}
+ function assistantPage(){
+  const next=learning.recommend(state.done,state.answers);
+  return `${breadcrumb('مساعد التعلّم')}<header class="page-title"><span class="eyebrow">اسأل، واقرأ الدليل، ثم اختبر فهمك</span><h1>مساعد التعلّم</h1><p>يبحث في الدروس المنشورة ويعرض المقاطع المرتبطة بسؤالك ومراجعها. يعمل بالمطابقة المحلية؛ لا يتصل بنموذج ذكاء اصطناعي أو بحث حي.</p></header>
+  <section class="assistant-card"><form id="study-form"><label for="study-query">ما المفهوم الذي تريد فهمه؟</label><textarea id="study-query" name="query" rows="3" maxlength="700" required placeholder="مثال: كيف تؤثر الرسوم في الاستثمار؟"></textarea><div class="assistant-controls"><button class="btn" type="submit">ابحث في الدروس</button><button class="btn secondary" type="button" id="dictate-query">أملِ السؤال صوتيًا</button><button class="btn secondary" type="button" id="stop-speech" disabled>إيقاف الصوت</button></div><p class="small muted">عند الإملاء قد يعالج مزوّد المتصفح الصوت عبر الإنترنت. استخدم سؤالًا تعليميًا دون بيانات مالية شخصية؛ راجع النص قبل إرساله للبحث المحلي.</p><p id="voice-status" class="small muted" aria-live="polite"></p></form><div class="question-chips" aria-label="أمثلة أسئلة"><button type="button" data-question="ما الفرق بين الرسوم وفارق السعر؟">الرسوم وفارق السعر</button><button type="button" data-question="هل التنويع يمنع الخسارة؟">حدود التنويع</button><button type="button" data-question="كيف تعمل إعادة التوازن؟">إعادة التوازن</button></div></section>
+ <section id="study-results" class="study-results" aria-live="polite" aria-label="نتائج البحث"></section>
+ <section class="review-section"><h2>خطوتك التالية</h2><p class="muted">اقتراحات مبنية على الدروس التي أكملتها وإجابات الفهم في هذا المتصفح.</p><div class="review-grid">${next.map(x=>`<a class="lesson-card" href="#lesson/${x.id}"><h3>${x.title}</h3><p>${x.reason}</p></a>`).join('')||'<p>أكملت المسار دون إجابات خاطئة محفوظة. يمكنك العودة إلى المعامل أو مراجعة المصادر.</p>'}</div></section>`;
+ }
+ function wireAssistant(){
+  const v=initVoice(),query=$('#study-query'),results=$('#study-results'),mic=$('#dictate-query');let reading='';
+  if(!v.support().listen){mic.disabled=true;mic.textContent='الإملاء غير متاح هنا';}
+  mic.addEventListener('click',async()=>{try{const text=await v.listen();if(text&&query.isConnected){query.value=text.slice(0,700);query.focus();}}catch{/* State callback supplies the user-facing message. */}});
+  function search(){v.stop();const answer=learning.ask(query.value);reading=answer.passages.map(x=>x.title+'. '+x.text).join('. ');
+   results.innerHTML=`<div class="search-summary"><h2>${answer.status==='matched'?'مقاطع تساعدك على الفهم':'حدود الإجابة'}</h2><p>${answer.message}</p></div>${answer.passages.map(p=>`<article class="search-passage"><span class="eyebrow">من درس: ${p.lessonTitle}</span><h3>${p.title}</h3><p>${p.text}</p><div class="passage-refs"><a href="#lesson/${p.lessonId}">اقرأ الدرس كاملًا</a><span>الدليل: ص ${p.pages}</span>${p.refs.map(id=>ext(D.refs[id].url,D.refs[id].title)).join('')}</div></article>`).join('')}${answer.passages.length?'<button id="read-answer" class="btn secondary" type="button">استمع للمقاطع</button>':''}${answer.suggested.length?`<div class="question-chips">${answer.suggested.map(id=>`<a href="#lesson/${id}">${D.lessons.find(l=>l.id===id).short}</a>`).join('')}</div>`:''}`;
+   if($('#read-answer'))$('#read-answer').addEventListener('click',()=>void v.speak(reading));
+  }
+  $('#study-form').addEventListener('submit',e=>{e.preventDefault();search();});
+  document.querySelectorAll('[data-question]').forEach(b=>b.addEventListener('click',()=>{query.value=b.dataset.question;search();}));
  }
  const toolNames={fees:'أثر الرسوم',allocation:'توزيع الأصول',orders:'فارق السعر',rebalance:'إعادة التوازن'};
  function field(name,label,val,min,max,step='any',hint=''){return `<label class="field" for="calc-${name}">${label}<input id="calc-${name}" name="${name}" type="number" value="${val}" min="${min}" max="${max}" step="${step}" required inputmode="decimal">${hint?`<small>${hint}</small>`:''}</label>`;}
@@ -126,12 +153,15 @@
   if(route==='home'){html=home();title='خريطة التعلّم';}
   else if(parts[0]==='lesson'&&(l=D.lessons.find(x=>x.id===parts[1]))){html=lesson(l);title=l.short;}
   else if(parts[0]==='tools'&&(!parts[1]||Object.hasOwn(toolNames,parts[1]))){html=tools(parts[1]||'fees');title='المعامل التفاعلية';}
+  else if(route==='assistant'){html=assistantPage();title='مساعد التعلّم';}
   else if(route==='glossary'){html=glossary();title='قاموس المصطلحات';}
   else if(route==='sources'){html=sources();title='الدليل والمراجع';}
   else html='<section class="not-found"><h1>لم نعثر على هذا الدرس</h1><p>اختر درسًا من خريطة التعلّم.</p><a class="btn" href="#home">العودة إلى المسار</a></section>';
-  closeMenu();main.innerHTML=html+footer();nav(parts[0]==='tools'?'tools':route);document.title=title+' | دليل ETF';if(l)wireLesson(l);wireLab();
+  if(voice){voice.stop();voice=null;}closeMenu();main.innerHTML=html+footer();nav(parts[0]==='tools'?'tools':route);document.title=title+' | دليل ETF';if(l){wireLesson(l);wireVoice(l);}if(route==='assistant')wireAssistant();wireLab();
   if(!initial){window.scrollTo({top:0,behavior:'instant'});main.focus({preventScroll:true});announce(title);}
  }
  $('.skip').addEventListener('click',e=>{e.preventDefault();main.focus({preventScroll:true});window.scrollTo({top:0,behavior:'instant'});});
+ document.addEventListener('visibilitychange',()=>{if(document.hidden&&voice)voice.stop();});
+ window.addEventListener('pagehide',()=>{if(voice)voice.stop();});
  window.addEventListener('hashchange',()=>render());render(true);
 })();
