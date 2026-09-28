@@ -65,7 +65,7 @@ jobs:
           node tamweenat/tests/voice-order-parser.test.cjs
           node tamweenat/tests/assistant-integration.test.cjs
       - name: Validate ETF learning paths
-        run: node --test etf-academy/tests/quality-gate.test.cjs
+        run: node --test etf-academy/tests/*.test.cjs
       - name: Install English audio dependency
         run: sudo apt-get update -y && sudo apt-get install -y espeak
       - name: Install workforce dependencies

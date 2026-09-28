@@ -1,7 +1,7 @@
 (function(){
  'use strict';
  const D=window.ETF_CONTENT,M=window.ETFMath,$=s=>document.querySelector(s),main=$('#main');
- const learning=window.ETFLearning.create(D);let voice=null;
+ const learning=window.ETFLearning.create(D);let voice=null,recording=null;
  const key='etf-learning-v1';let storageOK=true,saved={};
  try{saved=JSON.parse(localStorage.getItem(key)||'{}')||{};}catch{storageOK=false;}
  const ids=D.lessons.map(l=>l.id),state={done:Array.isArray(saved.done)?saved.done.filter(x=>ids.includes(x)):[],large:saved.large===true,answers:{}};
@@ -34,7 +34,7 @@
  function table(t){return `<div class="table-wrap" tabindex="0" role="region" aria-label="جدول قابل للتمرير أفقيًا"><table><thead><tr>${t.head.map(h=>`<th scope="col">${h}</th>`).join('')}</tr></thead><tbody>${t.rows.map(row=>`<tr>${row.map((c,i)=>i===0?`<th scope="row">${c}</th>`:`<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;}
  function lesson(l){
   const index=ids.indexOf(l.id),selected=state.answers[l.id],done=state.done.includes(l.id);
-  return `${breadcrumb(D.stages[l.stage].name)}<header class="lesson-header"><div class="eyebrow">الدرس ${number(index+1)} من ${number(ids.length)} <span class="badge">${l.tag}</span></div><h1>${l.title}</h1><p class="lesson-intro">${l.intro}</p><div class="lesson-meta"><span>${number(l.minutes)} دقائق قراءة تقريبًا</span><span>·</span><span>الدليل الأصلي: ص ${l.pages}</span>${l.lab?'<span>· يتضمن تجربة تفاعلية</span>':''}</div>${voicePanel()}</header>
+  return `${breadcrumb(D.stages[l.stage].name)}<header class="lesson-header"><div class="eyebrow">الدرس ${number(index+1)} من ${number(ids.length)} <span class="badge">${l.tag}</span></div><h1>${l.title}</h1><p class="lesson-intro">${l.intro}</p><div class="lesson-meta"><span>${number(l.minutes)} دقائق قراءة تقريبًا</span><span>·</span><span>الدليل الأصلي: ص ${l.pages}</span>${l.lab?'<span>· يتضمن تجربة تفاعلية</span>':''}</div>${voicePanel(l)}</header>
   <article class="lesson-body"><section class="objectives"><h2>بعد هذا الدرس ستستطيع</h2><ul>${l.objectives.map(x=>`<li>${x}</li>`).join('')}</ul></section>
   ${l.sections.map(s=>`<section class="lesson-section"><h2>${s.title}</h2>${s.body?`<p>${s.body}</p>`:''}${s.list?`<ul>${s.list.map(x=>`<li>${x}</li>`).join('')}</ul>`:''}${s.table?table(s.table):''}</section>`).join('')}
   <section class="example"><span class="eyebrow">مثال محلول</span><h3>${l.example.title}</h3><p>${l.example.body}</p></section>
@@ -45,27 +45,35 @@
   <section class="refs-box"><h3>للتوسّع والتحقّق</h3>${ext(D.source+'#page='+l.pages.split('،')[0],'الدليل الأصلي · ص '+l.pages)}${l.refs.map(r=>ext(D.refs[r].url,D.refs[r].title)).join('')}<p class="muted">الشرح والأمثلة الموسّعة هنا إعداد تعليمي مستقل. راجع حدود المراجع في صفحة المصادر.</p></section></article>`;
  }
 
- function voicePanel(){return `<div class="voice-bar"><button id="read-lesson" class="btn small secondary" type="button">استمع للدرس</button><button id="stop-speech" class="btn small secondary" type="button" disabled>إيقاف الصوت</button><span id="voice-status" class="small muted" aria-live="polite">الصوت العربي حسب الأصوات المتاحة على جهازك.</span></div>`;}
+ function recordingPanel(buttonId,label){return `<div class="recording-card"><div class="audio-actions"><button id="${buttonId}" class="btn small secondary" type="button">${label}</button><button id="stop-recording" class="btn small secondary" type="button" disabled>إيقاف الصوت</button></div><audio id="recorded-player" controls preload="metadata" aria-label="مشغّل القراءة العربية"></audio><p id="recording-status" class="small muted" aria-live="polite">قراءة عربية مولّدة آليًا. اضغط التشغيل للاستماع.</p><a id="audio-file" class="small" target="_blank" rel="noopener noreferrer" hidden>افتح التسجيل مباشرة</a></div>`;}
+ function voicePanel(l){return recordingPanel('read-lesson','استمع للدرس');}
+ function initRecording(){
+  const status=$('#recording-status'),stop=$('#stop-recording'),link=$('#audio-file');
+  recording=window.ETFRecordedAudio.create($('#recorded-player'),{beforePlay:()=>{if(voice)voice.stop();},onState:({state,message,track,index,total})=>{
+   if(status?.isConnected)status.textContent=state==='ready'?'جاهز للاستماع. يحتاج تحميل التسجيل اتصالًا بالإنترنت.':message+(state==='playing'&&total>1?` · المقطع ${index+1} من ${total}`:'');
+   if(stop?.isConnected)stop.disabled=['idle','ready','ended','error'].includes(state);
+   if(link?.isConnected&&track){link.href=track.src;link.hidden=false;}
+  }});stop.addEventListener('click',()=>recording.stop());return recording;
+ }
  function initVoice(){
   const status=$('#voice-status'),stop=$('#stop-speech');
   voice=window.TalkingPath.create({language:'ar-KW',onState:({state,message})=>{if(status?.isConnected)status.textContent=message||'جاهز.';if(stop?.isConnected)stop.disabled=!['speaking','listening'].includes(state);}});
   if(stop)stop.addEventListener('click',()=>voice.stop());return voice;
  }
- function wireVoice(l){const v=initVoice(),read=$('#read-lesson');if(!v.support().speak){read.disabled=true;$('#voice-status').textContent='القراءة الصوتية غير متاحة في هذا المتصفح.';return;}read.addEventListener('click',()=>{const text=[l.title,l.intro,...l.sections.flatMap(s=>[s.title,s.body||'',s.list?.join('. ')||'',s.table?.rows.map(row=>row.join('، ')).join('. ')||'']),l.example.title,l.example.body,l.takeaway].join('. ');void v.speak(text);});}
+ function wireVoice(l){const r=initRecording(),track=window.ETF_AUDIO.lessons[l.id];r.setQueue([{src:track.src,start:0,end:track.duration,title:l.short}]);$('#read-lesson').addEventListener('click',()=>void r.play());}
  function assistantPage(){
   const next=learning.recommend(state.done,state.answers);
   return `${breadcrumb('مساعد التعلّم')}<header class="page-title"><span class="eyebrow">اسأل، واقرأ الدليل، ثم اختبر فهمك</span><h1>مساعد التعلّم</h1><p>يبحث في الدروس المنشورة ويعرض المقاطع المرتبطة بسؤالك ومراجعها. يعمل بالمطابقة المحلية؛ لا يتصل بنموذج ذكاء اصطناعي أو بحث حي.</p></header>
-  <section class="assistant-card"><form id="study-form"><label for="study-query">ما المفهوم الذي تريد فهمه؟</label><textarea id="study-query" name="query" rows="3" maxlength="700" required placeholder="مثال: كيف تؤثر الرسوم في الاستثمار؟"></textarea><div class="assistant-controls"><button class="btn" type="submit">ابحث في الدروس</button><button class="btn secondary" type="button" id="dictate-query">أملِ السؤال صوتيًا</button><button class="btn secondary" type="button" id="stop-speech" disabled>إيقاف الصوت</button></div><p class="small muted">عند الإملاء قد يعالج مزوّد المتصفح الصوت عبر الإنترنت. استخدم سؤالًا تعليميًا دون بيانات مالية شخصية؛ راجع النص قبل إرساله للبحث المحلي.</p><p id="voice-status" class="small muted" aria-live="polite"></p></form><div class="question-chips" aria-label="أمثلة أسئلة"><button type="button" data-question="ما الفرق بين الرسوم وفارق السعر؟">الرسوم وفارق السعر</button><button type="button" data-question="هل التنويع يمنع الخسارة؟">حدود التنويع</button><button type="button" data-question="كيف تعمل إعادة التوازن؟">إعادة التوازن</button></div></section>
- <section id="study-results" class="study-results" aria-live="polite" aria-label="نتائج البحث"></section>
+  <section class="assistant-card"><form id="study-form"><label for="study-query">ما المفهوم الذي تريد فهمه؟</label><textarea id="study-query" name="query" rows="3" maxlength="700" required placeholder="مثال: كيف تؤثر الرسوم في الاستثمار؟"></textarea><div class="assistant-controls"><button class="btn" type="submit">ابحث في الدروس</button><button class="btn secondary" type="button" id="dictate-query">أملِ السؤال صوتيًا</button><button class="btn secondary" type="button" id="stop-speech" disabled>إيقاف الإملاء</button></div><p class="small muted">عند الإملاء قد يعالج مزوّد المتصفح الصوت عبر الإنترنت. استخدم سؤالًا تعليميًا دون بيانات مالية شخصية؛ راجع النص قبل إرساله للبحث المحلي.</p><p id="voice-status" class="small muted" aria-live="polite"></p></form><div class="question-chips" aria-label="أمثلة أسئلة"><button type="button" data-question="ما الفرق بين الرسوم وفارق السعر؟">الرسوم وفارق السعر</button><button type="button" data-question="هل التنويع يمنع الخسارة؟">حدود التنويع</button><button type="button" data-question="كيف تعمل إعادة التوازن؟">إعادة التوازن</button></div></section>
+ <section id="study-results" class="study-results" aria-live="polite" aria-label="نتائج البحث"></section><section id="answer-recording" hidden>${recordingPanel('read-answer','استمع للمقاطع')}</section>
  <section class="review-section"><h2>خطوتك التالية</h2><p class="muted">اقتراحات مبنية على الدروس التي أكملتها وإجابات الفهم في هذا المتصفح.</p><div class="review-grid">${next.map(x=>`<a class="lesson-card" href="#lesson/${x.id}"><h3>${x.title}</h3><p>${x.reason}</p></a>`).join('')||'<p>أكملت المسار دون إجابات خاطئة محفوظة. يمكنك العودة إلى المعامل أو مراجعة المصادر.</p>'}</div></section>`;
  }
  function wireAssistant(){
-  const v=initVoice(),query=$('#study-query'),results=$('#study-results'),mic=$('#dictate-query');let reading='';
+  const v=initVoice(),r=initRecording(),query=$('#study-query'),results=$('#study-results'),mic=$('#dictate-query');$('#read-answer').addEventListener('click',()=>void r.play());
   if(!v.support().listen){mic.disabled=true;mic.textContent='الإملاء غير متاح هنا';}
-  mic.addEventListener('click',async()=>{try{const text=await v.listen();if(text&&query.isConnected){query.value=text.slice(0,700);query.focus();}}catch{/* State callback supplies the user-facing message. */}});
-  function search(){v.stop();const answer=learning.ask(query.value);reading=answer.passages.map(x=>x.title+'. '+x.text).join('. ');
-   results.innerHTML=`<div class="search-summary"><h2>${answer.status==='matched'?'مقاطع تساعدك على الفهم':'حدود الإجابة'}</h2><p>${answer.message}</p></div>${answer.passages.map(p=>`<article class="search-passage"><span class="eyebrow">من درس: ${p.lessonTitle}</span><h3>${p.title}</h3><p>${p.text}</p><div class="passage-refs"><a href="#lesson/${p.lessonId}">اقرأ الدرس كاملًا</a><span>الدليل: ص ${p.pages}</span>${p.refs.map(id=>ext(D.refs[id].url,D.refs[id].title)).join('')}</div></article>`).join('')}${answer.passages.length?'<button id="read-answer" class="btn secondary" type="button">استمع للمقاطع</button>':''}${answer.suggested.length?`<div class="question-chips">${answer.suggested.map(id=>`<a href="#lesson/${id}">${D.lessons.find(l=>l.id===id).short}</a>`).join('')}</div>`:''}`;
-   if($('#read-answer'))$('#read-answer').addEventListener('click',()=>void v.speak(reading));
+  mic.addEventListener('click',async()=>{r.stop();try{const text=await v.listen();if(text&&query.isConnected){query.value=text.slice(0,700);query.focus();}}catch{/* State callback supplies the user-facing message. */}});
+  function search(){v.stop();r.stop();const answer=learning.ask(query.value);const tracks=answer.passages.map(p=>{const l=window.ETF_AUDIO.lessons[p.lessonId],clip=l.sections[p.id];return {src:l.src,start:clip.start,end:clip.end,title:p.title};});r.setQueue(tracks);$('#answer-recording').hidden=!tracks.length;
+   results.innerHTML=`<div class="search-summary"><h2>${answer.status==='matched'?'مقاطع تساعدك على الفهم':'حدود الإجابة'}</h2><p>${answer.message}</p></div>${answer.passages.map(p=>`<article class="search-passage"><span class="eyebrow">من درس: ${p.lessonTitle}</span><h3>${p.title}</h3><p>${p.text}</p><div class="passage-refs"><a href="#lesson/${p.lessonId}">اقرأ الدرس كاملًا</a><span>الدليل: ص ${p.pages}</span>${p.refs.map(id=>ext(D.refs[id].url,D.refs[id].title)).join('')}</div></article>`).join('')}${answer.suggested.length?`<div class="question-chips">${answer.suggested.map(id=>`<a href="#lesson/${id}">${D.lessons.find(l=>l.id===id).short}</a>`).join('')}</div>`:''}`;
   }
   $('#study-form').addEventListener('submit',e=>{e.preventDefault();search();});
   document.querySelectorAll('[data-question]').forEach(b=>b.addEventListener('click',()=>{query.value=b.dataset.question;search();}));
@@ -157,11 +165,11 @@
   else if(route==='glossary'){html=glossary();title='قاموس المصطلحات';}
   else if(route==='sources'){html=sources();title='الدليل والمراجع';}
   else html='<section class="not-found"><h1>لم نعثر على هذا الدرس</h1><p>اختر درسًا من خريطة التعلّم.</p><a class="btn" href="#home">العودة إلى المسار</a></section>';
-  if(voice){voice.stop();voice=null;}closeMenu();main.innerHTML=html+footer();nav(parts[0]==='tools'?'tools':route);document.title=title+' | دليل ETF';if(l){wireLesson(l);wireVoice(l);}if(route==='assistant')wireAssistant();wireLab();
+  if(voice){voice.stop();voice=null;}if(recording){recording.destroy();recording=null;}closeMenu();main.innerHTML=html+footer();nav(parts[0]==='tools'?'tools':route);document.title=title+' | دليل ETF';if(l){wireLesson(l);wireVoice(l);}if(route==='assistant')wireAssistant();wireLab();
   if(!initial){window.scrollTo({top:0,behavior:'instant'});main.focus({preventScroll:true});announce(title);}
  }
  $('.skip').addEventListener('click',e=>{e.preventDefault();main.focus({preventScroll:true});window.scrollTo({top:0,behavior:'instant'});});
  document.addEventListener('visibilitychange',()=>{if(document.hidden&&voice)voice.stop();});
- window.addEventListener('pagehide',()=>{if(voice)voice.stop();});
+ window.addEventListener('pagehide',()=>{if(voice)voice.stop();if(recording)recording.stop();});
  window.addEventListener('hashchange',()=>render());render(true);
 })();
