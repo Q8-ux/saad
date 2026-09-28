@@ -20,6 +20,7 @@ on:
       - 'tamweenat/**'
       - 'tamweenat-admin/**'
       - 'rattil/**'
+      - 'etf-academy/**'
       - 'kuwait-digital-sales-plan/**'
       - 'kuwait-fund-modern/**'
       - 'livestock-vax-kw/**'
@@ -82,7 +83,7 @@ jobs:
         run: |
           rm -rf _site && mkdir -p _site
           cp index.html 404.html cyber-archive.css cyber-archive.js cyber-data.js sabeq.html _site/
-          for p in sabeq-legal sabeq-admin-preview sabeq-legal-system sabeq-legal-pro hessa-alobaid shalayhna zad-restaurants tamweenat tamweenat-admin rattil kuwait-digital-sales-plan kuwait-fund-modern livestock-vax-kw english-kuwait oman-fruits-pos project-command-center my-sites reddit-business-agent ant-alshaer ai-chess-kuwait elanak-saleem alsaqaf-school youtube-studio-ai remote-ai-hub noura-alattal ai-video-studio muhami-next; do cp -R "$p" "_site/$p"; done
+          for p in sabeq-legal sabeq-admin-preview sabeq-legal-system sabeq-legal-pro hessa-alobaid shalayhna zad-restaurants tamweenat tamweenat-admin rattil etf-academy kuwait-digital-sales-plan kuwait-fund-modern livestock-vax-kw english-kuwait oman-fruits-pos project-command-center my-sites reddit-business-agent ant-alshaer ai-chess-kuwait elanak-saleem alsaqaf-school youtube-studio-ai remote-ai-hub noura-alattal ai-video-studio muhami-next; do cp -R "$p" "_site/$p"; done
           mkdir -p _site/autoclip-studio
           cp -R autoclip-studio/dist/. _site/autoclip-studio/
           bash english-kuwait/generate-audio.sh _site/english-kuwait/audio
@@ -93,6 +94,10 @@ jobs:
       - name: Validate combined site
         run: |
           test -s _site/404.html
+          test -s _site/etf-academy/index.html
+          node --check _site/etf-academy/app.js
+          node --check _site/etf-academy/content.js
+          node --check _site/etf-academy/calculations.js
           test -s _site/alsaqaf-school/index.html
           test -s _site/youtube-studio-ai/index.html
           test -s _site/remote-ai-hub/index.html
