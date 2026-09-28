@@ -1,9 +1,10 @@
 {
-  "release": "2026-09-28-address-glyph",
-  "clientSource": "0ea4ecea2e608c63799a5aa6b0d74c24c7feddfc",
-  "assistant": "compact-analysis-4",
+  "release": "2026-09-28-fact-led-cassation",
+  "clientSource": "f35836a4cfc068910c264443d0cd841dcc005d72",
+  "assistant": "fact-led-cassation-5",
   "voice": "streamed-voice-3",
   "tools": "legal-tools-1",
   "voiceIndicator": "red-wave-estimated-countdown-1",
-  "addressFont": "mohanad-900"
+  "addressFont": "mohanad-900",
+  "memoHandoff": "review-with-revalidated-sources-1"
 }
