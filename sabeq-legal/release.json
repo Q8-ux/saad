@@ -1,7 +1,7 @@
 {
   "release": "2026-09-28-fact-led-cassation",
-  "clientSource": "f35836a4cfc068910c264443d0cd841dcc005d72",
-  "assistant": "fact-led-cassation-5",
+  "clientSource": "a3a346eed0e73d68b164e13958bdaaf0708afec9",
+  "assistant": "fact-led-cassation-6",
   "voice": "streamed-voice-3",
   "tools": "legal-tools-1",
   "voiceIndicator": "red-wave-estimated-countdown-1",
