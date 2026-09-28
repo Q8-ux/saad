@@ -22,6 +22,7 @@ test('recorded playback works without browser speech synthesis and waits for met
  assert.equal(audio.currentTime,12);assert.equal(audio.paused,false);
  assert.equal(states.at(-1).state,'playing');
  player.stop();assert.equal(audio.paused,true);assert.equal(audio.currentTime,12);
+ audio.emit('pause');assert.equal(states.at(-1).state,'idle');
 });
 
 test('a passage playlist advances within one recording and stops at the final range',async()=>{
