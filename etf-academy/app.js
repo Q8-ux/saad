@@ -14,7 +14,7 @@
  function announce(t){$('#announcer').textContent=t;}
  function storageNote(){return storageOK?'التقدّم محفوظ على هذا المتصفح فقط. لا تتم مزامنته بين الأجهزة.':'تعذّر الحفظ في المتصفح؛ يبقى تقدّمك لهذه الجلسة فقط.';}
  function footer(){return `<footer class="footer"><p>مادة تعليمية عامة. الأمثلة والمحاكاة افتراضية، ولا تمثل توصية مالية أو ضمانًا للعائد.</p><a href="#sources">المصادر وحدود المحتوى</a></footer>`;}
- function breadcrumb(text){return `<div class="breadcrumb"><a href="#home">خريطة التعلّم</a><span> / </span><span>${text}</span></div>`;}
+ function breadcrumb(text){return `<div class="breadcrumb"><a href="#home">خريطة التعلّم</a><span aria-hidden="true"> / </span><b>${text}</b></div>`;}
  function nav(route){
   const item=(href,label,i)=>`<a class="nav-main ${route===href?'active':''}" href="#${href}" ${route===href?'aria-current="page"':''}>${icon(i)}${label}</a>`;
   $('#main-nav').innerHTML=item('home','خريطة التعلّم','home')+D.stages.map((s,i)=>`<div class="nav-group"><span class="nav-group-label">${number(i+1)} · ${s.name}</span>${D.lessons.filter(l=>l.stage===i).map(l=>{const n=ids.indexOf(l.id)+1,active=route==='lesson/'+l.id,done=state.done.includes(l.id);return `<a href="#lesson/${l.id}" class="nav-lesson ${active?'active':''} ${done?'done':''}" ${active?'aria-current="page"':''}><span class="lesson-digit" aria-hidden="true">${done?'✓':String(n).padStart(2,'0')}</span>${l.short}${done?'<span class="sr-only">، مكتمل</span>':''}</a>`;}).join('')}</div>`).join('')+`<div class="nav-extra">${item('tools','المعامل التفاعلية','tools')}${item('glossary','قاموس المصطلحات','terms')}${item('sources','الدليل والمراجع','book')}</div>`;
@@ -132,5 +132,6 @@
   closeMenu();main.innerHTML=html+footer();nav(parts[0]==='tools'?'tools':route);document.title=title+' | دليل ETF';if(l)wireLesson(l);wireLab();
   if(!initial){window.scrollTo({top:0,behavior:'instant'});main.focus({preventScroll:true});announce(title);}
  }
+ $('.skip').addEventListener('click',e=>{e.preventDefault();main.focus({preventScroll:true});window.scrollTo({top:0,behavior:'instant'});});
  window.addEventListener('hashchange',()=>render());render(true);
 })();
