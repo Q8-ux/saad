@@ -12,6 +12,7 @@ from pydantic import BaseModel, Field
 
 from .analysis import router as analysis_router
 from .engine import LEVELS, choose_move
+from .explainer import router as explainer_router
 from .marketing import router as marketing_router
 from .multiplayer import router as multiplayer_router
 from .storycast import router as storycast_router
@@ -26,6 +27,7 @@ app.include_router(multiplayer_router)
 app.include_router(marketing_router)
 app.include_router(analysis_router)
 app.include_router(storycast_router)
+app.include_router(explainer_router)
 
 
 class LegalMovesRequest(BaseModel):
