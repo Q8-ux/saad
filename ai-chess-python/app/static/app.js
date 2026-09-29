@@ -6,6 +6,7 @@ const aiLevelLabel = document.getElementById('aiLevelLabel');
 const toastEl = document.getElementById('toast');
 const hintButton = document.getElementById('hintButton');
 const hintCounter = document.getElementById('hintCounter');
+const hintExplanation = document.getElementById('hintExplanation');
 const resumeButton = document.getElementById('resumeGame');
 const SAVED_GAME_KEY = 'ai_chess_saved_game_v1';
 const shareButton=document.getElementById('shareGame'),shareModal=document.getElementById('shareModal'),sharePreview=document.getElementById('sharePreview');
@@ -92,7 +93,7 @@ function resumePreviousGame(){
  try{
    fen=saved.fen;moveHistory=Array.isArray(saved.moveHistory)?saved.moveHistory:[];movePairs=Array.isArray(saved.movePairs)?saved.movePairs:[];lastMove=Array.isArray(saved.lastMove)?saved.lastMove:null;
    if(saved.level&&levelEl.querySelector(`option[value="${saved.level}"]`))levelEl.value=saved.level;
-   aiLevelLabel.textContent=levelEl.options[levelEl.selectedIndex].text;selected=null;legalMoves=[];hintMove=null;locked=false;
+   aiLevelLabel.textContent=levelEl.options[levelEl.selectedIndex].text;selected=null;legalMoves=[];hintMove=null;locked=false;hintExplanation.hidden=true;
    renderMoves();renderBoard();updateHintAvailability();refreshResumeButton();statusEl.textContent=t('gameResumed');toast(t('gameResumed'));chessSound.play('transition');
  }catch(_){clearSavedGame();toast(t('savedGameInvalid'))}
 }
@@ -136,6 +137,7 @@ function renderBoard(){
 
 async function onSquareClick(square, piece){
   hintMove=null;
+  hintExplanation.hidden=true;
   if(locked || (window.multiplayerGame ? !window.multiplayerCanMove() : currentTurn() !== 'white')) return;
 
   if(selected && legalMoves.includes(square)){
@@ -172,6 +174,7 @@ async function onSquareClick(square, piece){
 
 async function playMove(from, to){
   if(window.multiplayerGame){ await window.multiplayerMove(from,to); return; }
+  hintExplanation.hidden=true;
   const generation = gameGeneration;
   const controller = new AbortController();
   pendingMoveController = controller;
@@ -238,8 +241,19 @@ function updateHintAvailability(){
   const enabled=['beginner','easy'].includes(levelEl.value)&&!window.multiplayerGame;
   hintButton.hidden=!enabled;
   hintCounter.hidden=!enabled;
+  if(!enabled)hintExplanation.hidden=true;
   hintButton.disabled=hintsUsed>=MAX_HINTS||locked;
   hintCounter.textContent=enabled?t('hintsRemaining',{count:Math.max(0,MAX_HINTS-hintsUsed)}):'';
+}
+
+async function explainHint(hintFen, uci, generation){
+  hintExplanation.hidden=false;hintExplanation.textContent=t('explainLoading');
+  try{
+    const explanationResponse=await fetch('/api/explain',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fen:hintFen,uci,language:document.documentElement.lang||'ar'})});
+    if(!explanationResponse.ok)throw new Error('explanation unavailable');
+    const explanation=await explanationResponse.json();
+    if(generation===gameGeneration&&fen===hintFen)hintExplanation.textContent=explanation.explanation;
+  }catch(_){if(generation===gameGeneration&&fen===hintFen)hintExplanation.textContent=t('explainUnavailable');}
 }
 
 async function requestHint(){
@@ -251,6 +265,7 @@ async function requestHint(){
     const data=await response.json();if(!response.ok)throw new Error(data.detail||'hint error');
     hintsUsed+=1;hintMove={from:data.from_square,to:data.to_square};selected=data.from_square;legalMoves=[data.to_square];
     renderBoard();chessSound.play('check');toast(t(data.capture?'hintCapture':'hintMove',{from:data.from_square,to:data.to_square}));
+    void explainHint(fen,data.from_square+data.to_square,gameGeneration);
   }catch(_){toast(t('hintUnavailable'));}
   finally{hintButton.textContent=t('getHint');updateHintAvailability();}
 }
@@ -262,6 +277,7 @@ function resetGame(playSound=true,clearPrevious=true){
   pendingMoveController = null;
   pendingLegalController = null;
   fen=START_FEN; selected=null; legalMoves=[]; movePairs=[]; moveHistory=[]; lastMove=null; hintMove=null; hintsUsed=0; locked=false;
+  hintExplanation.hidden=true;hintExplanation.textContent='';
   statusEl.textContent=t('yourWhiteTurn');
   renderMoves(); renderBoard(); updateHintAvailability();
   if(clearPrevious)clearSavedGame();else refreshResumeButton();
@@ -274,6 +290,7 @@ document.getElementById('newGame').addEventListener('click',()=>resetGame(true))
 levelEl.addEventListener('change', ()=>{
   aiLevelLabel.textContent = levelEl.options[levelEl.selectedIndex].text;
   hintsUsed=0; hintMove=null; selected=null; legalMoves=[]; renderBoard(); updateHintAvailability();
+  hintExplanation.hidden=true;
   toast(t('levelToast',{level:aiLevelLabel.textContent}));
 });
 
