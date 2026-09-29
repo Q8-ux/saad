@@ -12,6 +12,7 @@ from pydantic import BaseModel, Field
 
 from .analysis import router as analysis_router
 from .engine import LEVELS, choose_move
+from .explainer import router as explainer_router
 from .multiplayer import router as multiplayer_router
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -22,6 +23,7 @@ app = FastAPI(title="AI Chess Arena", version="1.0.1")
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 app.include_router(multiplayer_router)
 app.include_router(analysis_router)
+app.include_router(explainer_router)
 
 
 class LegalMovesRequest(BaseModel):
