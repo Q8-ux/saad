@@ -1,12 +1,13 @@
 {
-  "release": "2026-09-30-manual-voice-end",
-  "clientSource": "fdc8ce72631671f68166f7ddbc66f3fcb79f44a7",
-  "backendSource": "fdc8ce72631671f68166f7ddbc66f3fcb79f44a7",
+  "release": "2026-09-30-memo-voice-fields",
+  "clientSource": "a730d2a0891bdaffc8f74e444ccff23a7a3c2dbe",
+  "backendSource": "a730d2a0891bdaffc8f74e444ccff23a7a3c2dbe",
   "assistant": "fact-led-cassation-6",
   "voice": "streamed-voice-3",
   "tools": "legal-tools-1",
   "voiceIndicator": "red-wave-estimated-countdown-1",
   "addressFont": "mohanad-900",
   "memoHandoff": "prefill-with-two-approval-notices-2",
-  "voiceRecording": "manual-finish-no-silence-cutoff-1"
+  "voiceRecording": "manual-finish-no-silence-cutoff-1",
+  "memoVoice": "reviewed-dictation-fields-1"
 }
