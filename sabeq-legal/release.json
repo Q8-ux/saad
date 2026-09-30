@@ -9,5 +9,7 @@
   "addressFont": "mohanad-900",
   "memoHandoff": "prefill-with-two-approval-notices-2",
   "voiceRecording": "manual-finish-no-silence-cutoff-1",
-  "memoVoice": "reviewed-dictation-fields-1"
+  "memoVoice": "reviewed-dictation-fields-1",
+  "requirements": "SABEQ_MASTER_REQUIREMENTS.md",
+  "requirementsVersion": "2026-09-30-master-legal-site-prompt-1"
 }
