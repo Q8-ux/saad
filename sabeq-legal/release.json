@@ -1,11 +1,11 @@
 {
-  "release": "2026-09-28-fact-led-cassation",
-  "clientSource": "a3a346eed0e73d68b164e13958bdaaf0708afec9",
-  "backendSource": "11778a887d5ca05842eef9422bc107bf2cd7374b",
+  "release": "2026-09-30-memo-approval-handoff",
+  "clientSource": "3c5e89fe32e2ebdffc55dd4788b5d27a97f7c706",
+  "backendSource": "3c5e89fe32e2ebdffc55dd4788b5d27a97f7c706",
   "assistant": "fact-led-cassation-6",
   "voice": "streamed-voice-3",
   "tools": "legal-tools-1",
   "voiceIndicator": "red-wave-estimated-countdown-1",
   "addressFont": "mohanad-900",
-  "memoHandoff": "review-with-revalidated-sources-1"
+  "memoHandoff": "prefill-with-two-approval-notices-2"
 }
