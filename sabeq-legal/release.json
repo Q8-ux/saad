@@ -1,8 +1,8 @@
 {
-  "release": "2026-09-30-memo-voice-fields",
-  "clientSource": "a730d2a0891bdaffc8f74e444ccff23a7a3c2dbe",
-  "backendSource": "a730d2a0891bdaffc8f74e444ccff23a7a3c2dbe",
-  "assistant": "fact-led-cassation-6",
+  "release": "2026-10-01-language-research-ownership",
+  "clientSource": "235afadf5e4b3a1482f2a664882aeab89dbee701",
+  "backendSource": "235afadf5e4b3a1482f2a664882aeab89dbee701",
+  "assistant": "research-owned-spelling-7",
   "voice": "streamed-voice-3",
   "tools": "legal-tools-1",
   "voiceIndicator": "red-wave-estimated-countdown-1",
@@ -11,5 +11,8 @@
   "voiceRecording": "manual-finish-no-silence-cutoff-1",
   "memoVoice": "reviewed-dictation-fields-1",
   "requirements": "SABEQ_MASTER_REQUIREMENTS.md",
-  "requirementsVersion": "2026-09-30-master-legal-site-prompt-1"
+  "requirementsVersion": "2026-09-30-master-legal-site-prompt-1",
+  "languageReview": "integrated-protected-identities-1",
+  "legalResearchOwner": "assistant",
+  "mojCoverage": "indexed-publications-not-live-sync"
 }
