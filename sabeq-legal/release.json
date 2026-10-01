@@ -1,7 +1,7 @@
 {
-  "release": "2026-10-01-clean-memo-result-tools",
-  "clientSource": "64d2dfa7ce2b6edadd4aa05dfa4afddbcfd5c70b",
-  "backendSource": "64d2dfa7ce2b6edadd4aa05dfa4afddbcfd5c70b",
+  "release": "2026-10-01-arabic-rtl-memoranda",
+  "clientSource": "02217d2034f288b6ddef8806c1331324ce59954b",
+  "backendSource": "02217d2034f288b6ddef8806c1331324ce59954b",
   "assistant": "research-owned-spelling-7",
   "voice": "streamed-voice-3",
   "tools": "legal-tools-1",
@@ -17,10 +17,13 @@
   "mojCoverage": "indexed-publications-not-live-sync",
   "pleadingTemplates": "approved-pleadings-1",
   "templateStorage": "D1-and-private-R2",
-  "memoExport": "structured-docx-and-print-1",
+  "memoExport": "arabic-rtl-docx-and-print-2",
   "finalMemo": "clean-no-review-notes-1",
   "memoResultTools": "bottom-vector-actions-1",
   "memoPreview": "document-derived-clean-text-1",
-  "githubPagesAsset": "index-C3e79E14.js",
-  "publishedAt": "2026-10-01T11:54:07.587Z"
+  "githubPagesAsset": "index-CifpCLp2.js",
+  "publishedAt": "2026-10-01T14:37:31.861Z",
+  "memoLanguage": "ar-KW",
+  "memoDirection": "rtl",
+  "memoAlignment": "right"
 }
