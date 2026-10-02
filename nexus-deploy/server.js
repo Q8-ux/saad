@@ -1,88 +1,73 @@
-import http from 'http';
-import fs from 'fs';
-import path from 'path';
-import crypto from 'crypto';
-import { fileURLToPath } from 'url';
+import http from 'node:http';
+import fs from 'node:fs';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
+import {levels,VERSION} from './public/engine.js';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const PUBLIC = path.join(__dirname,'public');
-const PORT = Number(process.env.PORT || 3000);
-
-const markets = [
-{symbol:'SPY',name:'S&P 500 ETF',nameAr:'مؤشر S&P 500',market:'US',type:'Index',sector:'Indices',price:650.12,change:0.48,status:'DEMO'},
-{symbol:'QQQ',name:'Nasdaq 100 ETF',nameAr:'مؤشر ناسداك 100',market:'US',type:'Index',sector:'Indices',price:584.18,change:0.71,status:'DEMO'},
-{symbol:'DIA',name:'Dow Jones ETF',nameAr:'مؤشر داو جونز',market:'US',type:'Index',sector:'Indices',price:459.23,change:0.21,status:'DEMO'},
-{symbol:'AAPL',name:'Apple',nameAr:'آبل',market:'US',type:'Stock',sector:'Technology',price:227.16,change:0.61,status:'DEMO'},
-{symbol:'MSFT',name:'Microsoft',nameAr:'مايكروسوفت',market:'US',type:'Stock',sector:'Technology',price:509.33,change:0.44,status:'DEMO'},
-{symbol:'NVDA',name:'NVIDIA',nameAr:'إنفيديا',market:'US',type:'Stock',sector:'Technology',price:181.42,change:1.26,status:'DEMO'},
-{symbol:'GOOGL',name:'Alphabet',nameAr:'ألفابت',market:'US',type:'Stock',sector:'Technology',price:205.84,change:0.32,status:'DEMO'},
-{symbol:'AMZN',name:'Amazon',nameAr:'أمازون',market:'US',type:'Stock',sector:'Technology',price:231.77,change:0.69,status:'DEMO'},
-{symbol:'META',name:'Meta',nameAr:'ميتا',market:'US',type:'Stock',sector:'Technology',price:768.10,change:0.85,status:'DEMO'},
-{symbol:'LLY',name:'Eli Lilly',nameAr:'إيلي ليلي',market:'US',type:'Stock',sector:'Healthcare',price:761.2,change:0.41,status:'DEMO'},
-{symbol:'PFE',name:'Pfizer',nameAr:'فايزر',market:'US',type:'Stock',sector:'Healthcare',price:25.18,change:-0.28,status:'DEMO'},
-{symbol:'XOM',name:'ExxonMobil',nameAr:'إكسون موبيل',market:'US',type:'Stock',sector:'Energy',price:119.22,change:0.33,status:'DEMO'},
-{symbol:'CVX',name:'Chevron',nameAr:'شيفرون',market:'US',type:'Stock',sector:'Energy',price:157.11,change:0.27,status:'DEMO'},
-{symbol:'XAU/USD',name:'Gold',nameAr:'الذهب',market:'GLOBAL',type:'Metal',sector:'Metals',price:3374.6,change:0.47,status:'DEMO'},
-{symbol:'XAG/USD',name:'Silver',nameAr:'الفضة',market:'GLOBAL',type:'Metal',sector:'Metals',price:38.82,change:0.39,status:'DEMO'},
-{symbol:'COPPER',name:'Copper',nameAr:'النحاس',market:'GLOBAL',type:'Metal',sector:'Metals',price:4.45,change:-0.18,status:'DEMO'},
-{symbol:'WTI',name:'WTI Crude',nameAr:'خام WTI',market:'GLOBAL',type:'Energy',sector:'Energy',price:64.21,change:0.31,status:'DEMO'},
-{symbol:'BRENT',name:'Brent Crude',nameAr:'خام برنت',market:'GLOBAL',type:'Energy',sector:'Energy',price:68.02,change:0.28,status:'DEMO'},
-{symbol:'WHEAT',name:'Wheat',nameAr:'القمح',market:'GLOBAL',type:'Commodity',sector:'Agriculture',price:528.25,change:0.36,status:'DEMO'},
-{symbol:'CORN',name:'Corn',nameAr:'الذرة',market:'GLOBAL',type:'Commodity',sector:'Agriculture',price:407.5,change:-0.27,status:'DEMO'},
-{symbol:'SOYBEAN',name:'Soybeans',nameAr:'فول الصويا',market:'GLOBAL',type:'Commodity',sector:'Agriculture',price:1005.25,change:0.19,status:'DEMO'},
-{symbol:'COFFEE',name:'Coffee',nameAr:'القهوة',market:'GLOBAL',type:'Commodity',sector:'Agriculture',price:326.7,change:0.62,status:'DEMO'},
-{symbol:'COCOA',name:'Cocoa',nameAr:'الكاكاو',market:'GLOBAL',type:'Commodity',sector:'Agriculture',price:8175,change:-0.73,status:'DEMO'},
-{symbol:'SUGAR',name:'Sugar',nameAr:'السكر',market:'GLOBAL',type:'Commodity',sector:'Agriculture',price:16.18,change:0.14,status:'DEMO'},
-{symbol:'BTC/USD',name:'Bitcoin',nameAr:'بيتكوين',market:'GLOBAL',type:'Crypto',sector:'Crypto',price:111850,change:1.12,status:'DEMO'},
-{symbol:'ETH/USD',name:'Ethereum',nameAr:'إيثيريوم',market:'GLOBAL',type:'Crypto',sector:'Crypto',price:4625,change:0.86,status:'DEMO'},
-{symbol:'SOL/USD',name:'Solana',nameAr:'سولانا',market:'GLOBAL',type:'Crypto',sector:'Crypto',price:204.2,change:1.34,status:'DEMO'},
-{symbol:'XRP/USD',name:'XRP',nameAr:'إكس آر بي',market:'GLOBAL',type:'Crypto',sector:'Crypto',price:2.92,change:-0.25,status:'DEMO'},
-{symbol:'US02Y',name:'US Treasury 2Y',nameAr:'السند الأمريكي سنتان',market:'US',type:'Treasury',sector:'Treasuries',price:3.69,change:-0.04,status:'DEMO',unit:'%'},
-{symbol:'US05Y',name:'US Treasury 5Y',nameAr:'السند الأمريكي 5 سنوات',market:'US',type:'Treasury',sector:'Treasuries',price:3.84,change:-0.03,status:'DEMO',unit:'%'},
-{symbol:'US10Y',name:'US Treasury 10Y',nameAr:'السند الأمريكي 10 سنوات',market:'US',type:'Treasury',sector:'Treasuries',price:4.27,change:-0.02,status:'DEMO',unit:'%'},
-{symbol:'US20Y',name:'US Treasury 20Y',nameAr:'السند الأمريكي 20 سنة',market:'US',type:'Treasury',sector:'Treasuries',price:4.86,change:-0.01,status:'DEMO',unit:'%'},
-{symbol:'US30Y',name:'US Treasury 30Y',nameAr:'السند الأمريكي 30 سنة',market:'US',type:'Treasury',sector:'Treasuries',price:4.92,change:0.01,status:'DEMO',unit:'%'},
-{symbol:'KW-PREMIER',name:'Kuwait Premier Market',nameAr:'السوق الأول',market:'KUWAIT',type:'Index',sector:'Kuwait',price:9321.4,change:0.21,status:'DEMO'},
-{symbol:'KW-MAIN',name:'Kuwait Main Market',nameAr:'السوق الرئيسي',market:'KUWAIT',type:'Index',sector:'Kuwait',price:7028.8,change:-0.08,status:'DEMO'},
-{symbol:'KW-ALL',name:'Kuwait All Share',nameAr:'مؤشر السوق العام',market:'KUWAIT',type:'Index',sector:'Kuwait',price:8448.5,change:0.13,status:'DEMO'}
-];
-const bySymbol = new Map(markets.map(x=>[x.symbol,x]));
-let portfolio={startingCash:100000,cash:100000,dailyRealizedPnL:0,positions:[],trades:[]};
-let watchlist=['SPY','QQQ','AAPL','MSFT','NVDA','XAU/USD','BTC/USD','US10Y','KW-PREMIER'];
-let alerts=[];
-let risk={riskPerTradePct:1,maxDailyLossPct:3,maxOpenPositions:8,maxPositionPct:20,requireStopLoss:true,requireTakeProfit:false,emergencyStop:false};
-let audit=[];
-
-const json=(res,code,obj)=>{res.writeHead(code,{'content-type':'application/json; charset=utf-8','cache-control':'no-store'});res.end(JSON.stringify(obj));};
-const readBody=req=>new Promise(resolve=>{let s='';req.on('data',c=>s+=c);req.on('end',()=>{try{resolve(JSON.parse(s||'{}'))}catch{resolve({})}})});
-const moneyView=()=>{const positions=portfolio.positions.map(p=>{const q=bySymbol.get(p.symbol);const currentPrice=q?.price??p.entryPrice;const pnl=(currentPrice-p.entryPrice)*p.qty*(p.side==='BUY'?1:-1);return {...p,currentPrice,pnl};});const marketValue=positions.reduce((a,p)=>a+p.currentPrice*p.qty,0);const unrealizedPnL=positions.reduce((a,p)=>a+p.pnl,0);const equity=portfolio.cash+marketValue;return {...portfolio,positions,marketValue,unrealizedPnL,equity,totalReturnPct:+(((equity-portfolio.startingCash)/portfolio.startingCash)*100).toFixed(2)};};
-function serveStatic(req,res){let p=new URL(req.url,'http://x').pathname;if(p==='/')p='/index.html';const file=path.normalize(path.join(PUBLIC,p));if(!file.startsWith(PUBLIC))return false;if(!fs.existsSync(file)||!fs.statSync(file).isFile())return false;const ext=path.extname(file);const type={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.svg':'image/svg+xml'}[ext]||'application/octet-stream';res.writeHead(200,{'content-type':type,'cache-control':'no-cache'});fs.createReadStream(file).pipe(res);return true;}
-
-const server=http.createServer(async(req,res)=>{try{const u=new URL(req.url,'http://localhost');const p=u.pathname;
-if(p==='/api/health')return json(res,200,{ok:true,version:'production-fixed',time:new Date().toISOString()});
-if(p==='/api/config')return json(res,200,{dbEnabled:false,baseCurrency:'USD',markets:['US','KUWAIT']});
-if(p==='/api/auth/session')return json(res,200,{authenticated:true,user:{id:'demo',email:'demo@nexus.local',role:'trader',aal:'demo'}});
-if(p==='/api/auth/logout'&&req.method==='POST')return json(res,200,{ok:true});
-if((p==='/api/auth/login'||p==='/api/auth/signup')&&req.method==='POST')return json(res,200,{ok:true,emailConfirmationRequired:false});
-if(p==='/api/auth/mfa/factors')return json(res,200,{totp:[],all:[]});
-if(p==='/api/auth/mfa/enroll'&&req.method==='POST')return json(res,200,{id:'demo-factor',totp:{id:'demo-factor',secret:'DEMO-ONLY'}});
-if(p==='/api/auth/mfa/verify'&&req.method==='POST')return json(res,200,{ok:true,aal:'aal2'});
-if(p==='/api/markets/live')return json(res,200,{mode:'DEMO',currency:'USD',data:markets,counts:{live:0,delayed:0,demo:markets.length},lastUpdated:new Date().toISOString()});
-if(p==='/api/portfolio')return json(res,200,moneyView());
-if(p==='/api/watchlist'&&req.method==='GET')return json(res,200,{symbols:watchlist});
-if(p==='/api/watchlist'&&req.method==='POST'){const b=await readBody(req);if(bySymbol.has(b.symbol)&&!watchlist.includes(b.symbol))watchlist.push(b.symbol);return json(res,200,{ok:true});}
-if(p==='/api/watchlist'&&req.method==='DELETE'){const s=u.searchParams.get('symbol');watchlist=watchlist.filter(x=>x!==s);return json(res,200,{ok:true});}
-if(p==='/api/alerts'&&req.method==='GET')return json(res,200,{alerts});
-if(p==='/api/alerts'&&req.method==='POST'){const b=await readBody(req);const a={id:crypto.randomUUID(),symbol:b.symbol,condition:b.condition==='BELOW'?'BELOW':'ABOVE',target:Number(b.target)||0,enabled:true,created_at:new Date().toISOString()};alerts.unshift(a);return json(res,200,a);}
-if(p==='/api/alerts'&&req.method==='DELETE'){const id=u.searchParams.get('id');alerts=alerts.filter(x=>x.id!==id);return json(res,200,{ok:true});}
-if(p==='/api/settings'&&req.method==='GET')return json(res,200,{language:'ar',theme:'dark',baseCurrency:'USD',markets:['US','KUWAIT'],risk,connections:{supabase:false,openai:Boolean(process.env.OPENAI_API_KEY),twelveData:Boolean(process.env.TWELVE_DATA_API_KEY),finnhub:Boolean(process.env.FINNHUB_API_KEY),kuwaitData:Boolean(process.env.KUWAIT_DATA_API_URL),alpaca:false,liveTradingEnabled:false}});
-if(p==='/api/settings'&&req.method==='PUT'){const b=await readBody(req);if(b.risk)risk={...risk,...b.risk};audit.unshift({action:'RISK_SETTINGS_UPDATED',created_at:new Date().toISOString()});return json(res,200,{ok:true,risk});}
-if(p==='/api/brokers/status')return json(res,200,{brokers:[{name:'MetaTrader 5',connected:false,configured:false,mode:'—',note:'Connector ready for broker bridge'},{name:'Interactive Brokers',connected:false,configured:false,mode:'—',note:'API adapter placeholder'},{name:'Alpaca',connected:false,configured:false,mode:'PAPER',note:'Add API keys to connect'},{name:'OANDA',connected:false,configured:false,mode:'—',note:'API adapter placeholder'}]});
-if(p==='/api/audit')return json(res,200,{events:audit});
-if(p==='/api/ai/analyze-trade'&&req.method==='POST'){const b=await readBody(req);const q=bySymbol.get(b.symbol);if(!q)return json(res,400,{error:'Unsupported symbol'});const sentiment=q.change>.25?'bullish':q.change<-.25?'bearish':'neutral';return json(res,200,{source:'LOCAL',symbol:q.symbol,horizon:b.horizon||'1D',sentiment,confidence:Math.min(78,Math.round(52+Math.abs(q.change)*8)),riskLevel:q.type==='Crypto'?'High':q.type==='Treasury'?'Low':'Medium',summaryAr:`الحركة الحالية ${q.change>=0?'إيجابية':'سلبية'} بنسبة ${Math.abs(q.change).toFixed(2)}%.`,summaryEn:`Current movement is ${q.change>=0?'positive':'negative'} by ${Math.abs(q.change).toFixed(2)}%.`,factors:['Price momentum','Risk controls','Demo data status'],warnings:['Price is not verified live data.']});}
-if(p==='/api/paper/order'&&req.method==='POST'){const b=await readBody(req);const q=bySymbol.get(b.symbol);if(!q)return json(res,400,{error:'Unsupported symbol'});const qty=Math.max(.0001,Number(b.qty)||1);const sl=b.stopLoss?Number(b.stopLoss):null;if(risk.emergencyStop)return json(res,400,{error:'Risk check failed',reasons:['Emergency stop enabled']});if(risk.requireStopLoss&&!sl)return json(res,400,{error:'Risk check failed',reasons:['Stop Loss required']});if(sl&&b.side==='BUY'&&sl>=q.price)return json(res,400,{error:'Risk check failed',reasons:['BUY Stop Loss must be below entry']});if(sl&&b.side==='SELL'&&sl<=q.price)return json(res,400,{error:'Risk check failed',reasons:['SELL Stop Loss must be above entry']});const id=crypto.randomUUID();const pos={id,symbol:q.symbol,side:b.side==='SELL'?'SELL':'BUY',qty,entryPrice:q.price,stopLoss:sl,takeProfit:b.takeProfit?Number(b.takeProfit):null,openedAt:new Date().toISOString()};portfolio.positions.push(pos);portfolio.trades.unshift({...pos,status:'OPEN'});if(pos.side==='BUY')portfolio.cash-=q.price*qty;audit.unshift({action:'PAPER_ORDER_OPENED',created_at:new Date().toISOString()});return json(res,200,{ok:true,positionId:id,price:q.price});}
-if(p==='/api/paper/close'&&req.method==='POST'){const b=await readBody(req);const pos=portfolio.positions.find(x=>x.id===b.id);if(!pos)return json(res,404,{error:'Position not found'});const q=bySymbol.get(pos.symbol);const price=q?.price??pos.entryPrice;const pnl=(price-pos.entryPrice)*pos.qty*(pos.side==='BUY'?1:-1);portfolio.positions=portfolio.positions.filter(x=>x.id!==pos.id);portfolio.cash+=pos.side==='BUY'?price*pos.qty:pnl;portfolio.dailyRealizedPnL+=pnl;portfolio.trades.unshift({...pos,status:'CLOSED',exitPrice:price,pnl,closedAt:new Date().toISOString()});return json(res,200,{ok:true,pnl,exitPrice:price});}
-if(p==='/api/paper/reset'&&req.method==='POST'){portfolio={startingCash:100000,cash:100000,dailyRealizedPnL:0,positions:[],trades:[]};return json(res,200,{ok:true});}
-if(serveStatic(req,res))return;res.writeHead(404);res.end('Not Found');
-}catch(e){console.error(e);json(res,500,{error:'Internal server error'});}});
-server.listen(PORT,'0.0.0.0',()=>console.log(`NEXUS Markets production server listening on ${PORT}`));
+const PUBLIC=path.join(path.dirname(fileURLToPath(import.meta.url)),'public');
+const PORT=Number(process.env.PORT||3000),cache=new Map(),pending=new Map();
+const getJSON=async(url,ttl=5000)=>{
+  const old=cache.get(url);if(old&&Date.now()-old.at<ttl)return old.data;
+  if(pending.has(url))return pending.get(url);
+  const p=(async()=>{const response=await fetch(url,{signal:AbortSignal.timeout(8500),headers:{accept:'application/json'}});if(!response.ok)throw Error(`HTTP ${response.status}`);const data=await response.json();cache.set(url,{at:Date.now(),data});if(cache.size>400)cache.delete(cache.keys().next().value);return data;})();
+  pending.set(url,p);try{return await p;}finally{pending.delete(url);}
+};
+async function exchange(id) {
+  const t=Date.now();try{
+    let d,bids,asks,asOf;
+    if(id==='Binance'){d=await getJSON('https://data-api.binance.vision/api/v3/depth?symbol=BTCUSDT&limit=20');bids=d.bids;asks=d.asks;asOf=cache.get('https://data-api.binance.vision/api/v3/depth?symbol=BTCUSDT&limit=20').at;}
+    else if(id==='OKX'){d=await getJSON('https://www.okx.com/api/v5/market/books?instId=BTC-USDT&sz=20');if(d.code!=='0')throw Error('upstream');bids=d.data[0].bids;asks=d.data[0].asks;asOf=Number(d.data[0].ts);}
+    else {d=await getJSON('https://api.bybit.com/v5/market/orderbook?category=spot&symbol=BTCUSDT&limit=25');if(d.retCode!==0)throw Error('upstream');bids=d.result.b;asks=d.result.a;asOf=Number(d.result.ts);}
+    bids=levels(bids,'sell');asks=levels(asks);if(!bids.length||!asks.length||!(asOf>0)||asks[0].price<bids[0].price)throw Error('invalid book');
+    return {id,ok:true,bids,asks,asOf,quote:'USDT',price:(bids[0].price+asks[0].price)/2,latency:Date.now()-t,timestampType:id==='Binance'?'received':'exchange'};
+  }catch{return {id,ok:false,quote:'USDT',error:'sourceUnavailable',asOf:null};}
+}
+function hourlySlug(ts){const p=new Intl.DateTimeFormat('en-US',{timeZone:'America/New_York',month:'long',day:'numeric',hour:'numeric',hour12:true}).formatToParts(new Date(ts));const v=k=>p.find(x=>x.type===k)?.value.toLowerCase();return `bitcoin-up-or-down-${v('month')}-${v('day')}-${v('hour')}${v('dayPeriod')}-et`;}
+async function market(slug,frame){
+  try{
+    const list=await getJSON(`https://gamma-api.polymarket.com/markets?slug=${encodeURIComponent(slug)}`,15000);const m=list[0];if(!m||m.closed)return null;
+    const ids=typeof m.clobTokenIds==='string'?JSON.parse(m.clobTokenIds):m.clobTokenIds, outcomes=typeof m.outcomes==='string'?JSON.parse(m.outcomes):m.outcomes;
+    if(ids?.length!==2||outcomes?.length!==2)return null;
+    const ix=outcomes.findIndex(x=>x.toLowerCase()==='up'),iy=outcomes.findIndex(x=>x.toLowerCase()==='down');if(ix<0||iy<0)return null;
+    const books=await Promise.all(ids.map(async token=>{try{const b=await getJSON(`https://clob.polymarket.com/book?token_id=${token}`);return {tokenId:String(b.asset_id),conditionId:b.market,asks:levels(b.asks),bids:levels(b.bids,'sell'),asOf:Number(b.timestamp)};}catch{return {tokenId:token,conditionId:m.conditionId,asks:[],bids:[],asOf:null};}}));
+    return {id:m.id,slug,title:m.question,conditionId:m.conditionId,frame,endDate:m.endDate,active:m.active===true,closed:m.closed===true,acceptingOrders:m.acceptingOrders===true,negRisk:!!m.negRisk,feesEnabled:m.feesEnabled,feeSchedule:m.feeSchedule?{rate:Number(m.feeSchedule.rate),exponent:Number(m.feeSchedule.exponent)}:null,minSize:Number(m.orderMinSize)||5,up:books[ix],down:books[iy]};
+  }catch{return null;}
+}
+async function polyMarkets(){
+  const now=Date.now(),jobs=[];
+  for(const frame of [5,15])for(const delta of [0,1]){const epoch=Math.floor(now/1000/(frame*60))*frame*60+delta*frame*60;jobs.push(market(`btc-updown-${frame}m-${epoch}`,`${frame}m`));}
+  jobs.push(market(hourlySlug(Math.floor(now/3600000)*3600000),'1h'));
+  return (await Promise.all(jobs)).filter(Boolean).sort((a,b)=>Date.parse(a.endDate)-Date.parse(b.endDate));
+}
+let snapshotPending=null,lastSnapshot=null;
+async function snapshot(){
+  if(lastSnapshot&&Date.now()-lastSnapshot.generatedAt<4500)return lastSnapshot;
+  if(snapshotPending)return snapshotPending;
+  snapshotPending=(async()=>{const [exchanges,markets]=await Promise.all([Promise.all(['Binance','OKX','Bybit'].map(exchange)),polyMarkets()]);return lastSnapshot={version:VERSION,generatedAt:Date.now(),exchanges,markets,pollSeconds:10,liveTrading:false};})();
+  try{return await snapshotPending;}finally{snapshotPending=null;}
+}
+async function candles(interval){
+  if(!['1m','5m','15m','1h'].includes(interval))throw Error('invalid interval');
+  const raw=await getJSON(`https://data-api.binance.vision/api/v3/klines?symbol=BTCUSDT&interval=${interval}&limit=500`,30000);
+  if(!Array.isArray(raw))throw Error('invalid history');
+  const data=raw.filter(r=>Number(r[6])<Date.now()).map(r=>({time:Number(r[0]),open:Number(r[1]),high:Number(r[2]),low:Number(r[3]),close:Number(r[4]),volume:Number(r[5])})).filter(r=>Object.values(r).every(Number.isFinite)&&r.low>0&&r.low<=r.high);
+  if(!data.length)throw Error('empty history');return {source:'Binance',symbol:'BTC/USDT',interval,closedOnly:true,data,asOf:data.at(-1).time};
+}
+const json=(res,status,data)=>{res.writeHead(status,{'content-type':'application/json; charset=utf-8','cache-control':'no-store'});res.end(JSON.stringify(data));};
+const types={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.svg':'image/svg+xml','.ttf':'font/ttf'};
+const server=http.createServer(async(req,res)=>{
+  res.setHeader('X-Content-Type-Options','nosniff');res.setHeader('Referrer-Policy','strict-origin-when-cross-origin');res.setHeader('X-Frame-Options','DENY');
+  res.setHeader('Content-Security-Policy',"default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'");
+  try{
+    const u=new URL(req.url,'http://localhost'),p=u.pathname;
+    if(req.method!=='GET'&&req.method!=='HEAD')return json(res,405,{error:'readOnlyAPI',message:'Real-money orders are not enabled.'});
+    if(p==='/api/health')return json(res,200,{ok:true,name:'Fainance Bot',version:VERSION,mode:'paper',time:Date.now()});
+    if(p==='/api/snapshot')return json(res,200,await snapshot());
+    if(p==='/api/candles') {try{return json(res,200,await candles(u.searchParams.get('interval')||'5m'));}catch{return json(res,503,{error:'historyUnavailable'});}}
+    if(p.startsWith('/api/'))return json(res,404,{error:'notFound'});
+    const relative=decodeURIComponent(p==='/'?'/index.html':p);const file=path.resolve(PUBLIC,'.'+relative);
+    if(!file.startsWith(PUBLIC+path.sep)||!fs.existsSync(file)||!fs.statSync(file).isFile())return json(res,404,{error:'notFound'});
+    res.writeHead(200,{'content-type':types[path.extname(file)]||'application/octet-stream','cache-control':'no-cache'});if(req.method==='HEAD')res.end();else fs.createReadStream(file).pipe(res);
+  }catch{return json(res,500,{error:'serviceUnavailable'});}
+});
+server.listen(PORT,'0.0.0.0',()=>console.log(`Fainance Bot ${VERSION} on ${PORT}; public data + device-local paper trading`));
