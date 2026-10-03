@@ -1,0 +1,43 @@
+name: Sabeq agent pipeline
+on:
+  pull_request:
+    paths:
+      - legal-memo-platform/**
+      - sabeq-legal/deployment/agent-pipeline/**
+      - .github/workflows/sabeq-agent-pipeline.yml
+  push:
+    branches: [main, codex/sabeq-agent-pipeline]
+    paths:
+      - legal-memo-platform/**
+      - sabeq-legal/deployment/agent-pipeline/**
+      - .github/workflows/sabeq-agent-pipeline.yml
+permissions:
+  contents: read
+jobs:
+  pipeline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: legal-memo-platform/agents/requirements.txt
+      - run: python -m pip install -r legal-memo-platform/agents/requirements.txt pytest==9.1.1
+      - run: python -m pytest -q tests
+        working-directory: legal-memo-platform/agents
+      - run: npm ci
+        working-directory: legal-memo-platform
+      - run: SABEQ_TEST_PYTHON="$(command -v python)" npm test
+        working-directory: legal-memo-platform
+  container:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t sabeq-agents:test legal-memo-platform
+      - run: docker run --rm -e OPENAI_API_KEY=test-placeholder -e SABEQ_TEST_PYTHON=/opt/sabeq-agents/bin/python --entrypoint node sabeq-agents:test --test test/agent-pipeline.test.js
