@@ -15,6 +15,8 @@ require('dotenv').config({ path: path.join(__dirname, '..', '.env.local') });
 const { searchLegalDocuments, findRelevantLegalContext } = require('./legal-library');
 const { corsPolicy } = require('./cors-policy');
 const { openAiError, openAiErrorDetails } = require('./openai-errors');
+const { AgentClient } = require('./agent-client');
+const { agentRouter } = require('./agent-router');
 
 const publicPort = Number(process.env.PORT || 3000);
 const appPort = Number(process.env.INTERNAL_APP_PORT || 3001);
@@ -38,6 +40,10 @@ const upload = multer({
 });
 
 app.use(corsPolicy);
+
+// Only the authenticated canonical backend may invoke the Python pipeline.
+const agentClient = new AgentClient();
+app.use('/internal/sabeq-agents', agentRouter({ client: agentClient }));
 
 function aiClient() {
   if (!process.env.OPENAI_API_KEY) return null;
@@ -419,6 +425,7 @@ const server = app.listen(publicPort, () => {
 function shutdown(signal) {
   console.log(`Received ${signal}; shutting down gateway.`);
   try { child.kill('SIGTERM'); } catch (_) {}
+  agentClient.stop();
   server.close(() => process.exit(0));
   setTimeout(() => process.exit(0), 5000).unref();
 }
