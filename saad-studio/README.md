@@ -25,3 +25,11 @@ Prices, WhatsApp number, real approved samples and payment configuration remain 
 `npm run check` checks JavaScript syntax. `npm test` covers the retained legacy server's account protections; it does not test storefront orders. Accounts remain disabled by default; the public catalog does not call legacy editor APIs.
 
 The existing `.github/workflows/deploy-saad-studio.yml` preserves the latest combined Pages artifact and overlays `saad-studio/public`. Other projects in the shared repository must not be overwritten.
+
+## Seven-language support
+
+Arabic (default), English, Urdu, Hindi, Persian, Turkish and French. The language switcher is present on every page. `?lang=` makes shared URLs explicit; a local preference preserves selection when navigating. Arabic keeps local Al Mohanad; other scripts use Inter, Noto Sans Arabic or Noto Sans Devanagari.
+
+All 50 service titles and descriptions, category text, service dimensions and scope, static pages, form fields and order-summary labels are translated. Customer-entered text is never translated or altered. Arabic sample artwork remains Arabic and is marked with its script and direction; it is illustrative artwork, not interface text.
+
+Editable translation sources are in `localization/*.tsv`. Run `python localization/build.py` from this folder to rebuild `public/translations.js` and validate all service records. Prices, dates and supplied customer content are not stored by the localization layer.
