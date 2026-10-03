@@ -36,7 +36,6 @@ on:
       - 'alsaqaf-school/**'
       - 'youtube-studio-ai/**'
       - 'remote-ai-hub/**'
-      - 'noura-alattal/**'
       - 'ai-video-studio/**'
       - 'autoclip-studio/**'
       - 'barcode/**'

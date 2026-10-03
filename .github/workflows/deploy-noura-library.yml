@@ -1,0 +1,41 @@
+name: Publish Noura Video Library
+on:
+  push:
+    branches: [main]
+    paths: ['noura-alattal/**', '.github/workflows/deploy-noura-library.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages-v2
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check video library
+        run: |
+          node --check noura-alattal/assets/video-core.js
+          node --check noura-alattal/assets/video-catalog.js
+          node --check noura-alattal/assets/video-library.js
+          node --check noura-alattal/assets/navigation.js
+          node --check noura-alattal/assets/admin-reference.js
+          node --test noura-alattal/tests/video-library.test.cjs
+      - uses: actions/configure-pages@v5
+      - name: Preserve published projects and update Noura
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 noura-alattal/deployment/publish.py
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+          retention-days: 30
+      - uses: actions/deploy-pages@v4
+        id: deploy
