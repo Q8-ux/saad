@@ -35,7 +35,8 @@
   function render() {
     const list = activeVideos();
     $("video-grid").innerHTML = list.length ? list.map(card).join("") : `<div class="video-empty"><p>${mode === "saved" ? "لم تحفظ مقاطع بعد." : mode === "search" ? "اكتب موضوعًا واضغط بحث لعرض الفيديوهات." : "لا توجد نتائج مطابقة."}</p><p>${mode === "saved" ? "اضغط رمز الحفظ بجانب الفيديو للعودة إليه لاحقًا على هذا الجهاز." : mode === "search" ? "يمكنك أيضًا مشاهدة المراجع المختارة من المكتبة." : "جرّب كلمة أخرى أو اختر جميع الموضوعات."}</p></div>`;
-    $("video-count").textContent = list.length ? `${list.length.toLocaleString("ar-KW")} مقاطع` : "";
+    const count = list.length, number = count.toLocaleString("ar-KW");
+    $("video-count").textContent = !count ? "" : count === 1 ? "مقطع واحد" : count === 2 ? "مقطعان" : `${number} ${count <= 10 ? "مقاطع" : "مقطعًا"}`;
   }
   function findVideo(id) { return [...chosen, ...remote, ...saved].find(v => v.videoId === id); }
   function save(id) {
