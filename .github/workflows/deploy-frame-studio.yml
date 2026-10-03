@@ -1,0 +1,42 @@
+name: Publish Frame Studio
+on:
+  push:
+    branches: [main]
+    paths: ['frame-studio/**', '.github/workflows/deploy-frame-studio.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages-v2
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - name: Restore last published site
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p prior _site
+          artifact_id=$(gh api "repos/$GITHUB_REPOSITORY/actions/artifacts?name=github-pages&per_page=100" --jq '.artifacts | map(select(.expired == false)) | sort_by(.created_at) | reverse | .[0].id')
+          test -n "$artifact_id" && test "$artifact_id" != null
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$artifact_id/zip" > prior/site.zip
+          unzip -q prior/site.zip -d prior
+          tar -xf prior/artifact.tar -C _site
+          mkdir -p _site/frame-studio
+          cp frame-studio/index.html _site/frame-studio/index.html
+          test -s _site/frame-studio/index.html
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+          retention-days: 30
+      - uses: actions/deploy-pages@v4
+        id: deploy
