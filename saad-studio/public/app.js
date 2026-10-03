@@ -11,7 +11,18 @@ function render(filter='all'){
  const card=el('article','card'),art=el('div','card-art '+s.tone);
  const preview=(s.templates||[]).find(t=>safeImage(t.image));
  if(preview){const img=el('img','template-img');img.src=safeImage(preview.image);img.alt=preview.title;img.loading='lazy';art.append(img)}
- else{art.setAttribute('aria-hidden','true');art.append(el('small','',s.label),el('strong','',s.mark),el('span','','SAAD STUDIO'))}
+ else{
+ art.setAttribute('aria-hidden','true');art.classList.add('showcase','showcase-'+s.id);
+ const sheet=el('div','design-sheet'),back=el('div','design-back');
+ sheet.append(el('span','design-kicker',s.label),el('strong','design-title',s.mark),el('span','design-rule'),el('span','design-signature','SAAD STUDIO'));
+ for(let i=1;i<=3;i++)sheet.append(el('i','design-shape shape-'+i));
+ const second=el('div','design-mini');
+ const miniText={social:'MAKE IT\nBOLD.',invitation:'دعوة خاصة',business:'SAAD\nSTUDIO',menu:'THE\nMENU',greeting:'FOR YOU',presentation:'01 / IDEAS'};
+ second.append(el('span','',miniText[s.id]||'DESIGN'));
+ if(s.id==='menu'){const lines=el('div','menu-lines');for(const text of ['قهوة مختصة','لحظات حلوة','صُنعت بحب'])lines.append(el('span','',text));sheet.append(lines)}
+ if(s.id==='presentation'){const bars=el('div','chart-bars');for(let i=0;i<4;i++)bars.append(el('i'));sheet.append(bars)}
+ art.append(back,sheet,second,el('span','preview-tag','تصوّر للخدمة'));
+} 
  const bottom=el('div','card-bottom'),button=el('button','','اطلب الخدمة ↗');button.type='button';button.dataset.order=s.id;
  bottom.append(el('span','price',priceText(s)),button);card.append(art,el('h3','',s.title),el('p','',s.description),bottom);catalog.append(card);
  }
