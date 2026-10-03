@@ -1,16 +1,1279 @@
-// Public storefront settings. Never put secrets here.
-// Set the business WhatsApp number in international digits only (no +).
-// Prices are deliberately unset until approved by the owner.
-// Add ONLY owner-approved licensed previews to each service's templates:
-// {id:'...', title:'...', image:'https://...'}
+// Public storefront configuration. Add only approved licensed previews and confirmed prices.
 window.STUDIO_STORE = {
- whatsapp: '', currency: 'د.ك',
- services: [
-  {id:'social',category:'business',title:'تصاميم التواصل الاجتماعي',description:'منشورات وقصص تحمل أسلوب مشروعك وتوصل رسالتك.',label:'SOCIAL / CONTENT',tone:'sage',mark:'حضورك\nله أسلوب.',price:null,templates:[]},
-  {id:'invitation',category:'occasion',title:'دعوات وبطاقات المناسبات',description:'دعوة تعكس فرحتك، بتفاصيل وأسماء تختارها.',label:'EVENTS / INVITATIONS',tone:'rose',mark:'بكلّ حب\nندعوكم.',price:null,templates:[]},
-  {id:'business',category:'business',title:'بطاقات الأعمال',description:'اسمك، هويتك، وطريقة التواصل معك في بطاقة أنيقة.',label:'BRAND / STATIONERY',tone:'ink',mark:'انطباع\nيبقى.',price:null,templates:[]},
-  {id:'menu',category:'business',title:'القوائم والمطبوعات',description:'قوائم أسعار، قوائم طعام، وبروشورات واضحة ومنظّمة.',label:'PRINT / MENUS',tone:'sand',mark:'اختيارات\nتستحق.',price:null,templates:[]},
-  {id:'greeting',category:'occasion',title:'بطاقات التهنئة',description:'كلماتك في بطاقة خاصة للإهداء والمناسبات.',label:'MOMENTS / GREETINGS',tone:'lavender',mark:'لك\nأطيب الأمنيات.',price:null,templates:[]},
-  {id:'presentation',category:'business',title:'العروض والملفات التعريفية',description:'عرض منسّق يقدّم أفكارك وخدماتك بوضوح.',label:'BUSINESS / PRESENTATIONS',tone:'blue',mark:'فكرة واضحة.\nأثر أكبر.',price:null,templates:[]}
- ]
+  "whatsapp": "",
+  "currency": "د.ك",
+  "categories": [
+    {
+      "id": "instagram",
+      "title": "إنستغرام",
+      "description": "منشورات، ستوري، كاروسيل وأغلفة ريلز.",
+      "style": "social",
+      "tone": "sage"
+    },
+    {
+      "id": "social",
+      "title": "المنصات والإعلانات",
+      "description": "تصاميم مخصّصة لبقية المنصات والحملات.",
+      "style": "social",
+      "tone": "blue"
+    },
+    {
+      "id": "brand",
+      "title": "الشعارات والهوية",
+      "description": "من الشعار إلى تفاصيل حضور علامتك.",
+      "style": "business",
+      "tone": "ink"
+    },
+    {
+      "id": "websites",
+      "title": "المواقع والواجهات",
+      "description": "تصميم صفحات وواجهات تناسب نشاطك.",
+      "style": "presentation",
+      "tone": "blue"
+    },
+    {
+      "id": "business",
+      "title": "الشركات والأعمال",
+      "description": "عروض وملفات ومراسلات تحمل هويتك.",
+      "style": "presentation",
+      "tone": "sage"
+    },
+    {
+      "id": "resumes",
+      "title": "السير الذاتية",
+      "description": "تنسيق سير وملفات مهنية واضحة ومنظّمة.",
+      "style": "business",
+      "tone": "blue"
+    },
+    {
+      "id": "print",
+      "title": "المطبوعات والكروت",
+      "description": "كروت وقوائم ومطبوعات جاهزة للإخراج.",
+      "style": "menu",
+      "tone": "sand"
+    },
+    {
+      "id": "events",
+      "title": "الدعوات والمناسبات",
+      "description": "تصاميم للمناسبات واللحظات الخاصة.",
+      "style": "invitation",
+      "tone": "rose"
+    },
+    {
+      "id": "education",
+      "title": "التعليم والمحتوى",
+      "description": "شروحات وأوراق عمل ومواد معرفية.",
+      "style": "greeting",
+      "tone": "lavender"
+    },
+    {
+      "id": "packaging",
+      "title": "التغليف والهدايا",
+      "description": "لمسة بصرية على عبواتك ومنتجاتك.",
+      "style": "greeting",
+      "tone": "sand"
+    }
+  ],
+  "services": [
+    {
+      "id": "instagram-post",
+      "category": "instagram",
+      "title": "بوست إنستغرام",
+      "description": "منشور بصورة أو عرض أو رسالة يبرز نشاطك.",
+      "size": "1080 × 1350 بكسل",
+      "mark": "حضورك\nله أسلوب.",
+      "scope": "منشور واحد",
+      "label": "SOCIAL / POST",
+      "style": "social",
+      "tone": "sage",
+      "price": null,
+      "templates": [],
+      "formats": [
+        "حسب الاستخدام والاتفاق"
+      ],
+      "needs": [
+        "النصوص النهائية والأسماء المطلوبة",
+        "الشعار أو الصور التي تريد استخدامها",
+        "الألوان أو مرجع بصري يعجبك",
+        "المقاس والموعد المطلوب"
+      ],
+      "variant": 0
+    },
+    {
+      "id": "instagram-story",
+      "category": "instagram",
+      "title": "ستوري إنستغرام",
+      "description": "تصميم رأسي للإعلانات اليومية والمناسبات والعروض.",
+      "size": "1080 × 1920 بكسل",
+      "mark": "لحظتك\nتستحق.",
+      "scope": "ستوري واحد",
+      "label": "INSTAGRAM / STORY",
+      "style": "social",
+      "tone": "sage",
+      "price": null,
+      "templates": [],
+      "formats": [
+        "حسب الاستخدام والاتفاق"
+      ],
+      "needs": [
+        "النصوص النهائية والأسماء المطلوبة",
+        "الشعار أو الصور التي تريد استخدامها",
+        "الألوان أو مرجع بصري يعجبك",
+        "المقاس والموعد المطلوب"
+      ],
+      "variant": 1
+    },
+    {
+      "id": "instagram-carousel",
+      "category": "instagram",
+      "title": "كاروسيل إنستغرام",
+      "description": "تسلسل شرائح يقدّم فكرتك خطوة بخطوة.",
+      "size": "1080 × 1350 بكسل لكل شريحة",
+      "mark": "كل شريحة\nحكاية.",
+      "scope": "عدد الشرائح بحسب الطلب",
+      "label": "INSTAGRAM / CAROUSEL",
+      "style": "social",
+      "tone": "sage",
+      "price": null,
+      "templates": [],
+      "formats": [
+        "حسب الاستخدام والاتفاق"
+      ],
+      "needs": [
+        "النصوص النهائية والأسماء المطلوبة",
+        "الشعار أو الصور التي تريد استخدامها",
+        "الألوان أو مرجع بصري يعجبك",
+        "المقاس والموعد المطلوب"
+      ],
+      "variant": 2
+    },
+    {
+      "id": "reels-cover",
+      "category": "instagram",
+      "title": "غلاف ريلز",
+      "description": "عنوان بارز وغلاف ينسجم مع حسابك.",
+      "size": "تصميم رأسي مع مراعاة قصّ الشبكة",
+      "mark": "أول نظرة\nتفرق.",
+      "scope": "غلاف ثابت",
+      "label": "REELS / COVER",
+      "style": "social",
+      "tone": "sage",
+      "price": null,
+      "templates": [],
+      "formats": [
+        "حسب الاستخدام والاتفاق"
+      ],
+      "needs": [
+        "النصوص النهائية والأسماء المطلوبة",
+        "الشعار أو الصور التي تريد استخدامها",
+        "الألوان أو مرجع بصري يعجبك",
+        "المقاس والموعد المطلوب"
+      ],
+      "variant": 3
+    },
+    {
+      "id": "instagram-grid",
+      "category": "instagram",
+      "title": "هوية حساب إنستغرام",
+      "description": "تنسيق شبكة منشورات وأغلفة هايلايت بأسلوب موحّد.",
+      "size": "تُحدّد المقاسات حسب عناصر الباقة",
+      "mark": "حسابك\nبروح واحدة.",
+      "scope": "باقة بحسب عدد العناصر",
+      "label": "INSTAGRAM / IDENTITY",
+      "style": "social",
+      "tone": "sage",
+      "price": null,
+      "templates": [],
+      "formats": [
+        "حسب الاستخدام والاتفاق"
+      ],
+      "needs": [
+        "النصوص النهائية والأسماء المطلوبة",
+        "الشعار أو الصور التي تريد استخدامها",
+        "الألوان أو مرجع بصري يعجبك",
+        "المقاس والموعد المطلوب"
+      ],
+      "variant": 4
+    },
+    {
+      "id": "snapchat-story",
+      "category": "social",
+      "title": "إعلان سناب شات",
+      "description": "تصميم رأسي واضح لعرض منتجك أو خدمتك.",
+      "size": "1080 × 1920 بكسل",
+      "mark": "عرضك\nفي الواجهة.",
+      "scope": "إعلان ثابت",
+      "label": "SNAPCHAT / AD",
+      "style": "social",
+      "tone": "blue",
+      "price": null,
+      "templates": [],
+      "formats": [
+        "حسب الاستخدام والاتفاق"
+      ],
+      "needs": [
+        "النصوص النهائية والأسماء المطلوبة",
+        "الشعار أو الصور التي تريد استخدامها",
+        "الألوان أو مرجع بصري يعجبك",
+        "المقاس والموعد المطلوب"
+      ],
+      "variant": 0
+    },
+    {
+      "id": "tiktok-cover",
+      "category": "social",
+      "title": "غلاف تيك توك",
+      "description": "غلاف وعنوان لمحتواك الرأسي.",
+      "size": "1080 × 1920 بكسل",
+      "mark": "خلّ الفكرة\nتلفت.",
+      "scope": "غلاف ثابت",
+      "label": "TIKTOK / COVER",
+      "style": "social",
+      "tone": "blue",
+      "price": null,
+      "templates": [],
+      "formats": [
+        "حسب الاستخدام والاتفاق"
+      ],
+      "needs": [
+        "النصوص النهائية والأسماء المطلوبة",
+        "الشعار أو الصور التي تريد استخدامها",
+        "الألوان أو مرجع بصري يعجبك",
+        "المقاس والموعد المطلوب"
+      ],
+      "variant": 1
+    },
+    {
+      "id": "youtube-thumbnail",
+      "category": "social",
+      "title": "صورة يوتيوب المصغّرة",
+      "description": "صورة مصغّرة بعنوان مقروء وتركيب بصري واضح.",
+      "size": "1280 × 720 بكسل",
+      "mark": "عنوان\nيشدّ النظر.",
+      "scope": "صورة مصغّرة واحدة",
+      "label": "YOUTUBE / THUMBNAIL",
+      "style": "social",
+      "tone": "blue",
+      "price": null,
+      "templates": [],
+      "formats": [
+        "حسب الاستخدام والاتفاق"
+      ],
+      "needs": [
+        "النصوص النهائية والأسماء المطلوبة",
+        "الشعار أو الصور التي تريد استخدامها",
+        "الألوان أو مرجع بصري يعجبك",
+        "المقاس والموعد المطلوب"
+      ],
+      "variant": 2
+    },
+    {
+      "id": "linkedin-cover",
+      "category": "social",
+      "title": "غلاف لينكدإن",
+      "description": "غلاف لحسابك المهني أو صفحة شركتك.",
+      "size": "يُحدّد حسب نوع الحساب",
+      "mark": "حضور\nمهني.",
+      "scope": "غلاف واحد",
+      "label": "LINKEDIN / COVER",
+      "style": "social",
+      "tone": "blue",
+      "price": null,
+      "templates": [],
+      "formats": [
+        "حسب الاستخدام والاتفاق"
+      ],
+      "needs": [
+        "النصوص النهائية والأسماء المطلوبة",
+        "الشعار أو الصور التي تريد استخدامها",
+        "الألوان أو مرجع بصري يعجبك",
+        "المقاس والموعد المطلوب"
+      ],
+      "variant": 3
+    },
+    {
+      "id": "campaign-banners",
+      "category": "social",
+      "title": "بنرات حملة إعلانية",
+      "description": "تصاميم متناسقة بمقاسات الحملة المطلوبة.",
+      "size": "مقاسات متعددة بحسب المنصة",
+      "mark": "فكرة واحدة.\nحضور متعدد.",
+      "scope": "عدد المقاسات بحسب الاتفاق",
+      "label": "DIGITAL / CAMPAIGN",
+      "style": "social",
+      "tone": "blue",
+      "price": null,
+      "templates": [],
+      "formats": [
+        "حسب الاستخدام والاتفاق"
+      ],
+      "needs": [
+        "النصوص النهائية والأسماء المطلوبة",
+        "الشعار أو الصور التي تريد استخدامها",
+        "الألوان أو مرجع بصري يعجبك",
+        "المقاس والموعد المطلوب"
+      ],
+      "variant": 4
+    },
+    {
+      "id": "logo-design",
+      "category": "brand",
+      "title": "تصميم شعار",
+      "description": "تصميم شعار بحسب اسم المشروع ومجاله واتجاهه البصري.",
+      "size": "نسخ للاستخدام الرقمي والطباعة حسب الاتفاق",
+      "mark": "اسمك\nعلامة.",
+      "scope": "نطاق الشعار يُحدّد قبل التنفيذ",
+      "label": "BRAND / LOGO",
+      "style": "business",
+      "tone": "ink",
+      "price": null,
+      "templates": [],
+      "formats": [
+        "حسب الاستخدام والاتفاق"
+      ],
+      "needs": [
+        "النصوص النهائية والأسماء المطلوبة",
+        "الشعار أو الصور التي تريد استخدامها",
+        "الألوان أو مرجع بصري يعجبك",
+        "المقاس والموعد المطلوب"
+      ],
+      "variant": 0
+    },
+    {
+      "id": "visual-identity",
+      "category": "brand",
+      "title": "هوية بصرية",
+      "description": "تنظيم الألوان والخطوط وتطبيقات الهوية في نظام متناسق.",
+      "size": "تطبيقات تُحدّد في عرض السعر",
+      "mark": "هوية\nتُعرف.",
+      "scope": "باقة هوية بحسب النطاق",
+      "label": "BRAND / IDENTITY",
+      "style": "business",
+      "tone": "ink",
+      "price": null,
+      "templates": [],
+      "formats": [
+        "حسب الاستخدام والاتفاق"
+      ],
+      "needs": [
+        "النصوص النهائية والأسماء المطلوبة",
+        "الشعار أو الصور التي تريد استخدامها",
+        "الألوان أو مرجع بصري يعجبك",
+        "المقاس والموعد المطلوب"
+      ],
+      "variant": 1
+    },
+    {
+      "id": "brand-guide",
+      "category": "brand",
+      "title": "دليل الهوية",
+      "description": "دليل يوضّح استخدام الشعار والألوان والخطوط.",
+      "size": "ملف PDF",
+      "mark": "تفاصيل\nمتّسقة.",
+      "scope": "عدد الصفحات بحسب المحتوى",
+      "label": "BRAND / GUIDELINES",
+      "style": "business",
+      "tone": "ink",
+      "price": null,
+      "templates": [],
+      "formats": [
+        "حسب الاستخدام والاتفاق"
+      ],
+      "needs": [
+        "النصوص النهائية والأسماء المطلوبة",
+        "الشعار أو الصور التي تريد استخدامها",
+        "الألوان أو مرجع بصري يعجبك",
+        "المقاس والموعد المطلوب"
+      ],
+      "variant": 2
+    },
+    {
+      "id": "business-card",
+      "category": "brand",
+      "title": "كرت شخصي",
+      "description": "بطاقة أعمال بتوزيع واضح للاسم والبيانات.",
+      "size": "المقاس والهوامش حسب المطبعة",
+      "mark": "انطباع\nيبقى.",
+      "scope": "وجه أو وجهان بحسب الطلب",
+      "label": "BRAND / BUSINESS CARD",
+      "style": "business",
+      "tone": "ink",
+      "price": null,
+      "templates": [],
+      "formats": [
+        "حسب الاستخدام والاتفاق"
+      ],
+      "needs": [
+        "النصوص النهائية والأسماء المطلوبة",
+        "الشعار أو الصور التي تريد استخدامها",
+        "الألوان أو مرجع بصري يعجبك",
+        "المقاس والموعد المطلوب"
+      ],
+      "variant": 3
+    },
+    {
+      "id": "letterhead",
+      "category": "brand",
+      "title": "ورق رسمي ومراسلات",
+      "description": "ترويسة ورقية متناسقة مع هوية الشركة.",
+      "size": "A4 أو المقاس المطلوب",
+      "mark": "مراسلاتك\nبهويتك.",
+      "scope": "تصميم ترويسة",
+      "label": "BRAND / LETTERHEAD",
+      "style": "business",
+      "tone": "ink",
+      "price": null,
+      "templates": [],
+      "formats": [
+        "حسب الاستخدام والاتفاق"
+      ],
+      "needs": [
+        "النصوص النهائية والأسماء المطلوبة",
+        "الشعار أو الصور التي تريد استخدامها",
+        "الألوان أو مرجع بصري يعجبك",
+        "المقاس والموعد المطلوب"
+      ],
+      "variant": 4
+    },
+    {
+      "id": "landing-page",
+      "category": "websites",
+      "title": "تصميم صفحة هبوط",
+      "description": "واجهة صفحة تعرّف بخدمة أو منتج وتوجّه الزائر للطلب.",
+      "size": "تصميم للحاسوب والجوال",
+      "mark": "صفحة\nتبدأ منها.",
+      "scope": "تصميم واجهة؛ البرمجة تُحدّد منفصلة",
+      "label": "WEB / LANDING PAGE",
+      "style": "presentation",
+      "tone": "blue",
+      "price": null,
+      "templates": [],
+      "formats": [
+        "حسب الاستخدام والاتفاق"
+      ],
+      "needs": [
+        "النصوص النهائية والأسماء المطلوبة",
+        "الشعار أو الصور التي تريد استخدامها",
+        "الألوان أو مرجع بصري يعجبك",
+        "المقاس والموعد المطلوب"
+      ],
+      "variant": 0
+    },
+    {
+      "id": "company-website",
+      "category": "websites",
+      "title": "تصميم موقع شركة",
+      "description": "تنسيق صفحات التعريف والخدمات والأعمال والتواصل.",
+      "size": "عدد الصفحات بحسب الاتفاق",
+      "mark": "شركتك\nعلى الويب.",
+      "scope": "تصميم صفحات؛ النشر بحسب الاتفاق",
+      "label": "WEB / COMPANY",
+      "style": "presentation",
+      "tone": "blue",
+      "price": null,
+      "templates": [],
+      "formats": [
+        "حسب الاستخدام والاتفاق"
+      ],
+      "needs": [
+        "النصوص النهائية والأسماء المطلوبة",
+        "الشعار أو الصور التي تريد استخدامها",
+        "الألوان أو مرجع بصري يعجبك",
+        "المقاس والموعد المطلوب"
+      ],
+      "variant": 1
+    },
+    {
+      "id": "portfolio-website",
+      "category": "websites",
+      "title": "موقع أعمال شخصي",
+      "description": "واجهة لعرض أعمالك وخبراتك وطرق التواصل.",
+      "size": "الحاسوب والجوال",
+      "mark": "أعمالك\nتحكي عنك.",
+      "scope": "تصميم معرض أعمال",
+      "label": "WEB / PORTFOLIO",
+      "style": "presentation",
+      "tone": "blue",
+      "price": null,
+      "templates": [],
+      "formats": [
+        "حسب الاستخدام والاتفاق"
+      ],
+      "needs": [
+        "النصوص النهائية والأسماء المطلوبة",
+        "الشعار أو الصور التي تريد استخدامها",
+        "الألوان أو مرجع بصري يعجبك",
+        "المقاس والموعد المطلوب"
+      ],
+      "variant": 2
+    },
+    {
+      "id": "storefront-design",
+      "category": "websites",
+      "title": "تصميم واجهة متجر",
+      "description": "صفحات عرض المنتجات وتفاصيلها بتصميم متناسق.",
+      "size": "واجهات تُحدّد في نطاق العمل",
+      "mark": "منتجاتك\nتستحق.",
+      "scope": "تصميم واجهات؛ الدفع والبرمجة منفصلان",
+      "label": "WEB / STOREFRONT",
+      "style": "presentation",
+      "tone": "blue",
+      "price": null,
+      "templates": [],
+      "formats": [
+        "حسب الاستخدام والاتفاق"
+      ],
+      "needs": [
+        "النصوص النهائية والأسماء المطلوبة",
+        "الشعار أو الصور التي تريد استخدامها",
+        "الألوان أو مرجع بصري يعجبك",
+        "المقاس والموعد المطلوب"
+      ],
+      "variant": 3
+    },
+    {
+      "id": "website-banners",
+      "category": "websites",
+      "title": "بنرات وصور موقع",
+      "description": "بنرات رئيسية وصور أقسام تتناسق مع موقعك.",
+      "size": "حسب مساحة العرض في موقعك",
+      "mark": "واجهة\nتلفت.",
+      "scope": "عدد البنرات بحسب الطلب",
+      "label": "WEB / BANNERS",
+      "style": "presentation",
+      "tone": "blue",
+      "price": null,
+      "templates": [],
+      "formats": [
+        "حسب الاستخدام والاتفاق"
+      ],
+      "needs": [
+        "النصوص النهائية والأسماء المطلوبة",
+        "الشعار أو الصور التي تريد استخدامها",
+        "الألوان أو مرجع بصري يعجبك",
+        "المقاس والموعد المطلوب"
+      ],
+      "variant": 4
+    },
+    {
+      "id": "presentation-deck",
+      "category": "business",
+      "title": "عرض تقديمي",
+      "description": "تنسيق عرض للأعمال أو المشاريع بحسب النص المعتمد.",
+      "size": "16:9 أو المقاس المطلوب",
+      "mark": "فكرة واضحة.\nأثر أكبر.",
+      "scope": "عدد الشرائح بحسب الطلب",
+      "label": "BUSINESS / PRESENTATION",
+      "style": "presentation",
+      "tone": "sage",
+      "price": null,
+      "templates": [],
+      "formats": [
+        "حسب الاستخدام والاتفاق"
+      ],
+      "needs": [
+        "النصوص النهائية والأسماء المطلوبة",
+        "الشعار أو الصور التي تريد استخدامها",
+        "الألوان أو مرجع بصري يعجبك",
+        "المقاس والموعد المطلوب"
+      ],
+      "variant": 0
+    },
+    {
+      "id": "company-profile",
+      "category": "business",
+      "title": "ملف تعريفي للشركة",
+      "description": "عرض خدمات شركتك وقصتها وأعمالها في ملف منسّق.",
+      "size": "A4 أو مقاس عرض مخصّص",
+      "mark": "عرّفهم\nبمشروعك.",
+      "scope": "عدد الصفحات بحسب المحتوى",
+      "label": "BUSINESS / PROFILE",
+      "style": "presentation",
+      "tone": "sage",
+      "price": null,
+      "templates": [],
+      "formats": [
+        "حسب الاستخدام والاتفاق"
+      ],
+      "needs": [
+        "النصوص النهائية والأسماء المطلوبة",
+        "الشعار أو الصور التي تريد استخدامها",
+        "الألوان أو مرجع بصري يعجبك",
+        "المقاس والموعد المطلوب"
+      ],
+      "variant": 1
+    },
+    {
+      "id": "proposal-design",
+      "category": "business",
+      "title": "عرض سعر ومقترح",
+      "description": "تنسيق عرض خدمات أو مقترح تجاري واضح.",
+      "size": "A4 أو مقاس مخصّص",
+      "mark": "قدّم عرضك\nبوضوح.",
+      "scope": "تنسيق المحتوى المقدّم",
+      "label": "BUSINESS / PROPOSAL",
+      "style": "presentation",
+      "tone": "sage",
+      "price": null,
+      "templates": [],
+      "formats": [
+        "حسب الاستخدام والاتفاق"
+      ],
+      "needs": [
+        "النصوص النهائية والأسماء المطلوبة",
+        "الشعار أو الصور التي تريد استخدامها",
+        "الألوان أو مرجع بصري يعجبك",
+        "المقاس والموعد المطلوب"
+      ],
+      "variant": 2
+    },
+    {
+      "id": "report-design",
+      "category": "business",
+      "title": "تقرير احترافي",
+      "description": "إخراج تقرير بنصوصه وجداوله ورسومه المقدّمة.",
+      "size": "A4 أو المقاس المطلوب",
+      "mark": "أرقامك\nتروي قصة.",
+      "scope": "عدد الصفحات بحسب المحتوى",
+      "label": "BUSINESS / REPORT",
+      "style": "presentation",
+      "tone": "sage",
+      "price": null,
+      "templates": [],
+      "formats": [
+        "حسب الاستخدام والاتفاق"
+      ],
+      "needs": [
+        "النصوص النهائية والأسماء المطلوبة",
+        "الشعار أو الصور التي تريد استخدامها",
+        "الألوان أو مرجع بصري يعجبك",
+        "المقاس والموعد المطلوب"
+      ],
+      "variant": 3
+    },
+    {
+      "id": "product-catalog",
+      "category": "business",
+      "title": "كتالوج منتجات",
+      "description": "تنسيق صور المنتجات وأسعارها ومواصفاتها.",
+      "size": "رقمي أو مهيأ للطباعة",
+      "mark": "منتجاتك\nفي مكان واحد.",
+      "scope": "عدد المنتجات والصفحات حسب الطلب",
+      "label": "BUSINESS / CATALOG",
+      "style": "presentation",
+      "tone": "sage",
+      "price": null,
+      "templates": [],
+      "formats": [
+        "حسب الاستخدام والاتفاق"
+      ],
+      "needs": [
+        "النصوص النهائية والأسماء المطلوبة",
+        "الشعار أو الصور التي تريد استخدامها",
+        "الألوان أو مرجع بصري يعجبك",
+        "المقاس والموعد المطلوب"
+      ],
+      "variant": 4
+    },
+    {
+      "id": "professional-cv",
+      "category": "resumes",
+      "title": "سيرة ذاتية احترافية",
+      "description": "تنسيق البيانات والخبرات في سيرة واضحة.",
+      "size": "A4",
+      "mark": "خبرتك\nبأفضل صورة.",
+      "scope": "تنسيق النص الذي تقدّمه",
+      "label": "CAREER / RESUME",
+      "style": "business",
+      "tone": "blue",
+      "price": null,
+      "templates": [],
+      "formats": [
+        "حسب الاستخدام والاتفاق"
+      ],
+      "needs": [
+        "النصوص النهائية والأسماء المطلوبة",
+        "الشعار أو الصور التي تريد استخدامها",
+        "الألوان أو مرجع بصري يعجبك",
+        "المقاس والموعد المطلوب"
+      ],
+      "variant": 0
+    },
+    {
+      "id": "medical-cv",
+      "category": "resumes",
+      "title": "سيرة ذاتية طبية",
+      "description": "تنظيم المؤهلات والخبرات والأبحاث المهنية.",
+      "size": "A4 وعدد الصفحات حسب المحتوى",
+      "mark": "مسيرتك\nتستحق.",
+      "scope": "تنسيق دون إضافة مؤهلات",
+      "label": "CAREER / MEDICAL CV",
+      "style": "business",
+      "tone": "blue",
+      "price": null,
+      "templates": [],
+      "formats": [
+        "حسب الاستخدام والاتفاق"
+      ],
+      "needs": [
+        "النصوص النهائية والأسماء المطلوبة",
+        "الشعار أو الصور التي تريد استخدامها",
+        "الألوان أو مرجع بصري يعجبك",
+        "المقاس والموعد المطلوب"
+      ],
+      "variant": 1
+    },
+    {
+      "id": "academic-cv",
+      "category": "resumes",
+      "title": "سيرة ذاتية أكاديمية",
+      "description": "تنسيق التعليم والمنشورات والمشاركات العلمية.",
+      "size": "A4",
+      "mark": "علمك\nوإنجازك.",
+      "scope": "عدد الصفحات حسب المحتوى",
+      "label": "CAREER / ACADEMIC CV",
+      "style": "business",
+      "tone": "blue",
+      "price": null,
+      "templates": [],
+      "formats": [
+        "حسب الاستخدام والاتفاق"
+      ],
+      "needs": [
+        "النصوص النهائية والأسماء المطلوبة",
+        "الشعار أو الصور التي تريد استخدامها",
+        "الألوان أو مرجع بصري يعجبك",
+        "المقاس والموعد المطلوب"
+      ],
+      "variant": 2
+    },
+    {
+      "id": "cover-letter",
+      "category": "resumes",
+      "title": "خطاب تقديم وظيفي",
+      "description": "تنسيق خطابك بهوية تتناسب مع سيرتك الذاتية.",
+      "size": "A4",
+      "mark": "بداية\nفرصة.",
+      "scope": "تنسيق خطاب مقدّم من العميل",
+      "label": "CAREER / COVER LETTER",
+      "style": "business",
+      "tone": "blue",
+      "price": null,
+      "templates": [],
+      "formats": [
+        "حسب الاستخدام والاتفاق"
+      ],
+      "needs": [
+        "النصوص النهائية والأسماء المطلوبة",
+        "الشعار أو الصور التي تريد استخدامها",
+        "الألوان أو مرجع بصري يعجبك",
+        "المقاس والموعد المطلوب"
+      ],
+      "variant": 3
+    },
+    {
+      "id": "professional-portfolio",
+      "category": "resumes",
+      "title": "ملف إنجاز مهني",
+      "description": "عرض مشاريعك ومهاراتك وأعمالك في ملف بصري.",
+      "size": "PDF بمقاس مخصّص",
+      "mark": "أعمالك\nتتحدث.",
+      "scope": "عدد الصفحات بحسب الاتفاق",
+      "label": "CAREER / PORTFOLIO",
+      "style": "business",
+      "tone": "blue",
+      "price": null,
+      "templates": [],
+      "formats": [
+        "حسب الاستخدام والاتفاق"
+      ],
+      "needs": [
+        "النصوص النهائية والأسماء المطلوبة",
+        "الشعار أو الصور التي تريد استخدامها",
+        "الألوان أو مرجع بصري يعجبك",
+        "المقاس والموعد المطلوب"
+      ],
+      "variant": 4
+    },
+    {
+      "id": "restaurant-menu",
+      "category": "print",
+      "title": "منيو مطعم أو مقهى",
+      "description": "قائمة منظّمة للأصناف والأسعار والتفاصيل.",
+      "size": "حسب الطباعة أو العرض الرقمي",
+      "mark": "اختيارات\nتستحق.",
+      "scope": "عدد الصفحات بحسب القائمة",
+      "label": "PRINT / MENU",
+      "style": "menu",
+      "tone": "sand",
+      "price": null,
+      "templates": [],
+      "formats": [
+        "حسب الاستخدام والاتفاق"
+      ],
+      "needs": [
+        "النصوص النهائية والأسماء المطلوبة",
+        "الشعار أو الصور التي تريد استخدامها",
+        "الألوان أو مرجع بصري يعجبك",
+        "المقاس والموعد المطلوب"
+      ],
+      "variant": 0
+    },
+    {
+      "id": "flyer-design",
+      "category": "print",
+      "title": "فلاير إعلاني",
+      "description": "تصميم إعلان لمنتج أو خدمة أو عرض.",
+      "size": "A5 أو A4 أو مقاس مخصّص",
+      "mark": "إعلانك\nيلفت.",
+      "scope": "وجه أو وجهان",
+      "label": "PRINT / FLYER",
+      "style": "menu",
+      "tone": "sand",
+      "price": null,
+      "templates": [],
+      "formats": [
+        "حسب الاستخدام والاتفاق"
+      ],
+      "needs": [
+        "النصوص النهائية والأسماء المطلوبة",
+        "الشعار أو الصور التي تريد استخدامها",
+        "الألوان أو مرجع بصري يعجبك",
+        "المقاس والموعد المطلوب"
+      ],
+      "variant": 1
+    },
+    {
+      "id": "brochure-design",
+      "category": "print",
+      "title": "بروشور",
+      "description": "تنسيق مطوية تعرّف بخدماتك أو منتجاتك.",
+      "size": "الطيات والمقاس حسب المطبعة",
+      "mark": "تفاصيل\nبين يديك.",
+      "scope": "مطوية بحسب النطاق",
+      "label": "PRINT / BROCHURE",
+      "style": "menu",
+      "tone": "sand",
+      "price": null,
+      "templates": [],
+      "formats": [
+        "حسب الاستخدام والاتفاق"
+      ],
+      "needs": [
+        "النصوص النهائية والأسماء المطلوبة",
+        "الشعار أو الصور التي تريد استخدامها",
+        "الألوان أو مرجع بصري يعجبك",
+        "المقاس والموعد المطلوب"
+      ],
+      "variant": 2
+    },
+    {
+      "id": "poster-design",
+      "category": "print",
+      "title": "بوستر وملصق",
+      "description": "تصميم ملصق بعنوان بارز ومعلومات مرتبة.",
+      "size": "A3 أو مقاس مخصّص",
+      "mark": "رسالتك\nبوضوح.",
+      "scope": "بوستر واحد",
+      "label": "PRINT / POSTER",
+      "style": "menu",
+      "tone": "sand",
+      "price": null,
+      "templates": [],
+      "formats": [
+        "حسب الاستخدام والاتفاق"
+      ],
+      "needs": [
+        "النصوص النهائية والأسماء المطلوبة",
+        "الشعار أو الصور التي تريد استخدامها",
+        "الألوان أو مرجع بصري يعجبك",
+        "المقاس والموعد المطلوب"
+      ],
+      "variant": 3
+    },
+    {
+      "id": "rollup-design",
+      "category": "print",
+      "title": "رول أب وبنر مطبوع",
+      "description": "تصميم دعائي للمؤتمرات والمعارض والمتاجر.",
+      "size": "حسب مقاسات مزوّد الطباعة",
+      "mark": "حضور\nمن بعيد.",
+      "scope": "تصميم واحد بحسب المقاس",
+      "label": "PRINT / ROLL UP",
+      "style": "menu",
+      "tone": "sand",
+      "price": null,
+      "templates": [],
+      "formats": [
+        "حسب الاستخدام والاتفاق"
+      ],
+      "needs": [
+        "النصوص النهائية والأسماء المطلوبة",
+        "الشعار أو الصور التي تريد استخدامها",
+        "الألوان أو مرجع بصري يعجبك",
+        "المقاس والموعد المطلوب"
+      ],
+      "variant": 4
+    },
+    {
+      "id": "wedding-invitation",
+      "category": "events",
+      "title": "دعوة زفاف",
+      "description": "دعوة بأسماء وتفاصيل وألوان تناسب المناسبة.",
+      "size": "رقمية أو بمقاس مطبوع",
+      "mark": "بكلّ حب\nندعوكم.",
+      "scope": "دعوة ثابتة",
+      "label": "EVENT / WEDDING",
+      "style": "invitation",
+      "tone": "rose",
+      "price": null,
+      "templates": [],
+      "formats": [
+        "حسب الاستخدام والاتفاق"
+      ],
+      "needs": [
+        "النصوص النهائية والأسماء المطلوبة",
+        "الشعار أو الصور التي تريد استخدامها",
+        "الألوان أو مرجع بصري يعجبك",
+        "المقاس والموعد المطلوب"
+      ],
+      "variant": 0
+    },
+    {
+      "id": "birthday-invitation",
+      "category": "events",
+      "title": "دعوة عيد ميلاد",
+      "description": "دعوة مرحة بطابع وألوان تختارها.",
+      "size": "مقاس رقمي أو مطبوع",
+      "mark": "يومك\nله فرحة.",
+      "scope": "دعوة ثابتة",
+      "label": "EVENT / BIRTHDAY",
+      "style": "invitation",
+      "tone": "rose",
+      "price": null,
+      "templates": [],
+      "formats": [
+        "حسب الاستخدام والاتفاق"
+      ],
+      "needs": [
+        "النصوص النهائية والأسماء المطلوبة",
+        "الشعار أو الصور التي تريد استخدامها",
+        "الألوان أو مرجع بصري يعجبك",
+        "المقاس والموعد المطلوب"
+      ],
+      "variant": 1
+    },
+    {
+      "id": "graduation-card",
+      "category": "events",
+      "title": "بطاقة تخرّج",
+      "description": "تصميم يشارك الفرحة بالتخرّج والإنجاز.",
+      "size": "مقاس رقمي أو مطبوع",
+      "mark": "للحلم\nموعد.",
+      "scope": "بطاقة واحدة",
+      "label": "EVENT / GRADUATION",
+      "style": "invitation",
+      "tone": "rose",
+      "price": null,
+      "templates": [],
+      "formats": [
+        "حسب الاستخدام والاتفاق"
+      ],
+      "needs": [
+        "النصوص النهائية والأسماء المطلوبة",
+        "الشعار أو الصور التي تريد استخدامها",
+        "الألوان أو مرجع بصري يعجبك",
+        "المقاس والموعد المطلوب"
+      ],
+      "variant": 2
+    },
+    {
+      "id": "greeting-card",
+      "category": "events",
+      "title": "بطاقات تهنئة",
+      "description": "تهنئة خاصة للأعياد والنجاح والمناسبات.",
+      "size": "مقاس رقمي أو مطبوع",
+      "mark": "لك\nأطيب الأمنيات.",
+      "scope": "بطاقة واحدة",
+      "label": "EVENT / GREETING",
+      "style": "invitation",
+      "tone": "rose",
+      "price": null,
+      "templates": [],
+      "formats": [
+        "حسب الاستخدام والاتفاق"
+      ],
+      "needs": [
+        "النصوص النهائية والأسماء المطلوبة",
+        "الشعار أو الصور التي تريد استخدامها",
+        "الألوان أو مرجع بصري يعجبك",
+        "المقاس والموعد المطلوب"
+      ],
+      "variant": 3
+    },
+    {
+      "id": "event-program",
+      "category": "events",
+      "title": "برنامج فعالية",
+      "description": "تنسيق جدول المناسبة وأسماء المشاركين وتفاصيلها.",
+      "size": "A4 أو مطوية أو مقاس رقمي",
+      "mark": "لحظات\nمرتّبة.",
+      "scope": "عدد الصفحات بحسب البرنامج",
+      "label": "EVENT / PROGRAM",
+      "style": "invitation",
+      "tone": "rose",
+      "price": null,
+      "templates": [],
+      "formats": [
+        "حسب الاستخدام والاتفاق"
+      ],
+      "needs": [
+        "النصوص النهائية والأسماء المطلوبة",
+        "الشعار أو الصور التي تريد استخدامها",
+        "الألوان أو مرجع بصري يعجبك",
+        "المقاس والموعد المطلوب"
+      ],
+      "variant": 4
+    },
+    {
+      "id": "infographic",
+      "category": "education",
+      "title": "إنفوغرافيك",
+      "description": "تحويل المعلومات المقدّمة إلى عرض بصري منظّم.",
+      "size": "حسب حجم المحتوى والاستخدام",
+      "mark": "المعلومة\nبصورة.",
+      "scope": "تصميم من محتوى معتمد",
+      "label": "EDUCATION / INFOGRAPHIC",
+      "style": "greeting",
+      "tone": "lavender",
+      "price": null,
+      "templates": [],
+      "formats": [
+        "حسب الاستخدام والاتفاق"
+      ],
+      "needs": [
+        "النصوص النهائية والأسماء المطلوبة",
+        "الشعار أو الصور التي تريد استخدامها",
+        "الألوان أو مرجع بصري يعجبك",
+        "المقاس والموعد المطلوب"
+      ],
+      "variant": 0
+    },
+    {
+      "id": "worksheet",
+      "category": "education",
+      "title": "ورقة عمل تعليمية",
+      "description": "تنسيق أسئلة وأنشطة تعليمية من محتواك.",
+      "size": "A4",
+      "mark": "تعلّم\nبمتعة.",
+      "scope": "عدد الأوراق بحسب الطلب",
+      "label": "EDUCATION / WORKSHEET",
+      "style": "greeting",
+      "tone": "lavender",
+      "price": null,
+      "templates": [],
+      "formats": [
+        "حسب الاستخدام والاتفاق"
+      ],
+      "needs": [
+        "النصوص النهائية والأسماء المطلوبة",
+        "الشعار أو الصور التي تريد استخدامها",
+        "الألوان أو مرجع بصري يعجبك",
+        "المقاس والموعد المطلوب"
+      ],
+      "variant": 1
+    },
+    {
+      "id": "certificate",
+      "category": "education",
+      "title": "شهادة تقدير",
+      "description": "شهادة بأسماء ونصوص وهوية الجهة.",
+      "size": "A4 أو المقاس المطلوب",
+      "mark": "لإنجازك\nتقدير.",
+      "scope": "تصميم شهادة",
+      "label": "EDUCATION / CERTIFICATE",
+      "style": "greeting",
+      "tone": "lavender",
+      "price": null,
+      "templates": [],
+      "formats": [
+        "حسب الاستخدام والاتفاق"
+      ],
+      "needs": [
+        "النصوص النهائية والأسماء المطلوبة",
+        "الشعار أو الصور التي تريد استخدامها",
+        "الألوان أو مرجع بصري يعجبك",
+        "المقاس والموعد المطلوب"
+      ],
+      "variant": 2
+    },
+    {
+      "id": "ebook-cover",
+      "category": "education",
+      "title": "غلاف كتاب إلكتروني",
+      "description": "غلاف يعكس موضوع كتابك وعنوانه.",
+      "size": "حسب منصة النشر",
+      "mark": "بين السطور\nحكاية.",
+      "scope": "غلاف أمامي؛ الكامل حسب الاتفاق",
+      "label": "EDUCATION / BOOK COVER",
+      "style": "greeting",
+      "tone": "lavender",
+      "price": null,
+      "templates": [],
+      "formats": [
+        "حسب الاستخدام والاتفاق"
+      ],
+      "needs": [
+        "النصوص النهائية والأسماء المطلوبة",
+        "الشعار أو الصور التي تريد استخدامها",
+        "الألوان أو مرجع بصري يعجبك",
+        "المقاس والموعد المطلوب"
+      ],
+      "variant": 3
+    },
+    {
+      "id": "course-slides",
+      "category": "education",
+      "title": "شرائح دورة تدريبية",
+      "description": "تصميم وتنسيق محتوى الدورة المقدّم منك.",
+      "size": "16:9 أو المقاس المطلوب",
+      "mark": "فكرة\nتعلّم شيئًا.",
+      "scope": "عدد الشرائح بحسب الاتفاق",
+      "label": "EDUCATION / COURSE",
+      "style": "greeting",
+      "tone": "lavender",
+      "price": null,
+      "templates": [],
+      "formats": [
+        "حسب الاستخدام والاتفاق"
+      ],
+      "needs": [
+        "النصوص النهائية والأسماء المطلوبة",
+        "الشعار أو الصور التي تريد استخدامها",
+        "الألوان أو مرجع بصري يعجبك",
+        "المقاس والموعد المطلوب"
+      ],
+      "variant": 4
+    },
+    {
+      "id": "product-label",
+      "category": "packaging",
+      "title": "ملصق منتج",
+      "description": "تنسيق اسم المنتج وبياناته على ملصق مناسب.",
+      "size": "وفق قالب ومقاس العبوة",
+      "mark": "تفاصيل\nصُنعت لك.",
+      "scope": "تصميم ملصق",
+      "label": "PACKAGING / LABEL",
+      "style": "greeting",
+      "tone": "sand",
+      "price": null,
+      "templates": [],
+      "formats": [
+        "حسب الاستخدام والاتفاق"
+      ],
+      "needs": [
+        "النصوص النهائية والأسماء المطلوبة",
+        "الشعار أو الصور التي تريد استخدامها",
+        "الألوان أو مرجع بصري يعجبك",
+        "المقاس والموعد المطلوب"
+      ],
+      "variant": 0
+    },
+    {
+      "id": "box-design",
+      "category": "packaging",
+      "title": "تصميم علبة",
+      "description": "إخراج شكل العلبة على قالب الطباعة المقدّم.",
+      "size": "وفق ملف القصّ من المطبعة",
+      "mark": "أول انطباع\nمن الغلاف.",
+      "scope": "تصميم على قالب معتمد",
+      "label": "PACKAGING / BOX",
+      "style": "greeting",
+      "tone": "sand",
+      "price": null,
+      "templates": [],
+      "formats": [
+        "حسب الاستخدام والاتفاق"
+      ],
+      "needs": [
+        "النصوص النهائية والأسماء المطلوبة",
+        "الشعار أو الصور التي تريد استخدامها",
+        "الألوان أو مرجع بصري يعجبك",
+        "المقاس والموعد المطلوب"
+      ],
+      "variant": 1
+    },
+    {
+      "id": "thank-you-card",
+      "category": "packaging",
+      "title": "كرت شكر للطلبات",
+      "description": "رسالة شكر وهوية مشروعك داخل كل طلب.",
+      "size": "مقاس حسب العبوة",
+      "mark": "شكرًا\nلاختيارك.",
+      "scope": "وجه أو وجهان",
+      "label": "PACKAGING / THANK YOU",
+      "style": "greeting",
+      "tone": "sand",
+      "price": null,
+      "templates": [],
+      "formats": [
+        "حسب الاستخدام والاتفاق"
+      ],
+      "needs": [
+        "النصوص النهائية والأسماء المطلوبة",
+        "الشعار أو الصور التي تريد استخدامها",
+        "الألوان أو مرجع بصري يعجبك",
+        "المقاس والموعد المطلوب"
+      ],
+      "variant": 2
+    },
+    {
+      "id": "gift-tag",
+      "category": "packaging",
+      "title": "تاغ هدية",
+      "description": "بطاقة صغيرة تضيف رسالة خاصة للهدية.",
+      "size": "المقاس والشكل حسب الطلب",
+      "mark": "هدية\nبمحبة.",
+      "scope": "تصميم تاغ",
+      "label": "PACKAGING / GIFT TAG",
+      "style": "greeting",
+      "tone": "sand",
+      "price": null,
+      "templates": [],
+      "formats": [
+        "حسب الاستخدام والاتفاق"
+      ],
+      "needs": [
+        "النصوص النهائية والأسماء المطلوبة",
+        "الشعار أو الصور التي تريد استخدامها",
+        "الألوان أو مرجع بصري يعجبك",
+        "المقاس والموعد المطلوب"
+      ],
+      "variant": 3
+    },
+    {
+      "id": "merch-design",
+      "category": "packaging",
+      "title": "تصميم تيشيرت أو كوب",
+      "description": "رسم أو عبارة لتطبيقها على منتجك حسب المقاس.",
+      "size": "وفق مواصفات مزوّد الطباعة",
+      "mark": "تصميمك\nيرافقك.",
+      "scope": "ملف تصميم؛ المنتج والطباعة منفصلان",
+      "label": "PACKAGING / MERCH",
+      "style": "greeting",
+      "tone": "sand",
+      "price": null,
+      "templates": [],
+      "formats": [
+        "حسب الاستخدام والاتفاق"
+      ],
+      "needs": [
+        "النصوص النهائية والأسماء المطلوبة",
+        "الشعار أو الصور التي تريد استخدامها",
+        "الألوان أو مرجع بصري يعجبك",
+        "المقاس والموعد المطلوب"
+      ],
+      "variant": 4
+    }
+  ]
 };
