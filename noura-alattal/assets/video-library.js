@@ -30,7 +30,7 @@
   }
   function card(v) {
     const isSaved = saved.some(s => s.videoId === v.videoId);
-    return `<article class="video-card" data-video-id="${v.videoId}"><div class="video-poster"><img src="https://i.ytimg.com/vi/${v.videoId}/hqdefault.jpg" alt="${E(v.title)}" loading="lazy" decoding="async" referrerpolicy="no-referrer"><span class="video-time">${core.duration(v.lengthSeconds)}</span><button class="video-play-overlay" type="button" data-video-play="${v.videoId}" aria-label="شاهد: ${E(v.title)}"><span class="video-play-circle">${icon("play")}</span></button></div><div class="video-card-body"><span class="video-topic-label">${E(topics[v.topic] || "نتيجة من يوتيوب")}</span><h3>${E(v.title)}</h3><p class="video-author" dir="auto">${E(v.author)}</p>${v.note ? `<p class="video-note">${E(v.note)}</p>` : ""}<div class="video-card-actions"><button class="video-button primary" type="button" data-video-play="${v.videoId}">${icon("play")} شاهد</button><button class="video-button bookmark" type="button" data-video-save="${v.videoId}" aria-pressed="${isSaved}" aria-label="${isSaved ? "إزالة من" : "إضافة إلى"} المحفوظة: ${E(v.title)}">${icon("bookmark")}</button></div></div></article>`;
+    return `<article class="video-card" data-video-id="${v.videoId}"><div class="video-poster"><img src="${E(catalog.apiBase)}/vi/${v.videoId}/maxres.jpg" alt="${E(v.title)}" loading="lazy" decoding="async" referrerpolicy="no-referrer"><span class="video-time">${core.duration(v.lengthSeconds)}</span><button class="video-play-overlay" type="button" data-video-play="${v.videoId}" aria-label="شاهد: ${E(v.title)}"><span class="video-play-circle">${icon("play")}</span></button></div><div class="video-card-body"><span class="video-topic-label">${E(topics[v.topic] || "نتيجة من يوتيوب")}</span><h3>${E(v.title)}</h3><p class="video-author" dir="auto">${E(v.author)}</p>${v.note ? `<p class="video-note">${E(v.note)}</p>` : ""}<div class="video-card-actions"><button class="video-button primary" type="button" data-video-play="${v.videoId}">${icon("play")} شاهد</button><button class="video-button bookmark" type="button" data-video-save="${v.videoId}" aria-pressed="${isSaved}" aria-label="${isSaved ? "إزالة من" : "إضافة إلى"} المحفوظة: ${E(v.title)}">${icon("bookmark")}</button></div></div></article>`;
   }
   function render() {
     const list = activeVideos();
@@ -139,6 +139,9 @@
       if(run===captionRun)$("video-transcript-status").textContent="تعذّر الوصول إلى نصوص الترجمة الآن. المشاهدة متاحة عبر المشغل أو المصدر الأصلي.";
     } finally { if(run===captionRun)$("video-captions-button").disabled=false; }
   }
+  section.addEventListener("error", event => {
+    if (event.target instanceof HTMLImageElement && event.target.closest(".video-poster")) event.target.remove();
+  }, true);
   section.addEventListener("click",event=>{
     const b=event.target.closest("button");if(!b)return;
     if(b.dataset.videoMode){setMode(b.dataset.videoMode);return;}
