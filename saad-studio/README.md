@@ -38,7 +38,7 @@ To enable beta accounts, provision durable storage (paid Render disk or replace 
 2. Set up transactional email, email verification, password reset, account deletion and support contact.
 3. Approve a privacy policy, commercial terms and retention/backups; add production abuse protection and monitoring.
 4. Register a Canva integration, obtain OAuth client credentials on the server, implement and test per-user OAuth/PKCE and export/autofill, complete public integration review. No Canva tokens or templates are copied into this project.
-5. Supply licensed Al-Muhannad webfont. Current beta uses system Tahoma/Arial; it does not claim to include Al-Muhannad.
+5. Al Mohanad regular and bold webfonts are bundled from existing repository assets. UI and canvas rendering share the fonts; exports wait for font loading.
 6. Brand-kit management, teams, video generation, AI generation, background removal and advanced image cropping are not implemented. Existing named workflows have not been executed or connected by this code.
 
 ## Canva design constraints
