@@ -1,0 +1,11 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {indicators,confluence,validateStrategy} from '../public/signals.js';
+const now=Date.UTC(2026,9,3,0);
+const series=(count=400,ms=300000)=>Array.from({length:count},(_,i)=>{const price=100+i*.03+Math.sin(i/6);return {time:now-(count-i)*ms,open:price,high:price+.4,low:price-.4,close:price+.1,volume:10+i%5};});
+const book={ok:true,asOf:now,asks:[{price:113,size:10}],bids:[{price:112.99,size:12}]};
+test('indicators are finite, Wilder RSI and ADX stay within bounds',()=>{const a=indicators(series());assert.ok(a.rsi>=0&&a.rsi<=100);assert.ok(a.adx>=0&&a.adx<=100);assert.ok(a.atr>0);assert.ok(a.bollUpper>a.bollLower);assert.ok(Object.values(a).every(Number.isFinite));});
+test('flat prices produce neutral RSI, zero ATR and ADX',()=>{const c=series().map(x=>({...x,open:100,high:100,low:100,close:100})),a=indicators(c);assert.equal(a.rsi,50);assert.equal(a.atr,0);assert.equal(a.adx,0);assert.equal(a.vwap,100);});
+test('missing, future, stale or gapped frames never produce an actionable signal',()=>{const h={'5m':series(),'15m':series(400,900000),'1h':series(400,3600000)};assert.equal(confluence(h,{...book,asOf:now-20000},{now}).action,'wait');const gap=structuredClone(h);gap['5m'].splice(-20,1);assert.ok(confluence(gap,book,{now}).blocks.includes('history'));h['1h']=series(400,3600000).map(x=>({...x,time:x.time+3600000}));assert.equal(confluence(h,book,{now}).action,'wait');});
+test('invalid OHLC and duplicate timestamps are rejected',()=>{const a=series();a[100].close=a[100].high+1;assert.equal(indicators(a),null);const b=series();b[100].time=b[99].time;assert.equal(indicators(b),null);});
+test('holdout uses last 30%, costs and baseline, never declares strategy qualified',()=>{const c=series(),v=validateStrategy(c);assert.equal(v.from,c[280].time);assert.equal(v.bars,120);assert.equal(v.passed,null);assert.equal(v.scope,'5m-trend-only-no-orderbook-no-mtf');assert.ok(Number.isFinite(v.benchmarkPct));assert.ok(v.trades.every(x=>x.time>=c[280].time));});

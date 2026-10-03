@@ -1,5 +1,5 @@
 // Original implementation. Shared, deterministic financial calculations.
-export const VERSION = '2.0.0';
+export const VERSION = '3.0.0';
 export const DEFAULT_RISK = { maxTrade: 250, maxExposure: 2000, dailyLoss: 200, minEdge: 0.5, slippageBps: 10, spotFeeBps: 10, stopLossPct: 2, takeProfitPct: 4, maxPositions: 8 };
 export const valid = x => Number.isFinite(Number(x));
 export const round = (x, n = 8) => Number(x.toFixed(n));

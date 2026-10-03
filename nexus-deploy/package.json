@@ -1,6 +1,6 @@
 {
   "name": "fainance-bot",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "private": true,
   "type": "module",
   "description": "Bilingual research terminal and local paper trading workspace",

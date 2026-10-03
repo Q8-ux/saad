@@ -3,6 +3,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {levels,VERSION} from './public/engine.js';
+import {confluence} from './public/signals.js';
+import {createExecutionService} from './lib/execution-service.js';
+import {WATCH_SYMBOLS,normalizeTicker,observationState} from './public/market-data.js';
 
 const PUBLIC=path.join(path.dirname(fileURLToPath(import.meta.url)),'public');
 const PORT=Number(process.env.PORT||3000),cache=new Map(),pending=new Map();
@@ -12,6 +15,35 @@ const getJSON=async(url,ttl=5000)=>{
   const p=(async()=>{const response=await fetch(url,{signal:AbortSignal.timeout(8500),headers:{accept:'application/json'}});if(!response.ok)throw Error(`HTTP ${response.status}`);const data=await response.json();cache.set(url,{at:Date.now(),data});if(cache.size>400)cache.delete(cache.keys().next().value);return data;})();
   pending.set(url,p);try{return await p;}finally{pending.delete(url);}
 };
+const quoteURLs={
+  Binance:`https://data-api.binance.vision/api/v3/ticker/24hr?symbols=${encodeURIComponent(JSON.stringify(WATCH_SYMBOLS))}`,
+  OKX:'https://www.okx.com/api/v5/market/ticker?instId=BTC-USDT',
+  Bybit:'https://api.bybit.com/v5/market/tickers?category=spot&symbol=BTCUSDT'
+};
+const providerLinks={Binance:'https://www.binance.com/en/trade/BTC_USDT?type=spot',OKX:'https://www.okx.com/trade-spot/btc-usdt',Bybit:'https://www.bybit.com/en/trade/spot/BTC/USDT'};
+async function tickerProvider(source){
+  const requestedAt=Date.now(),url=quoteURLs[source];
+  try{
+    const data=await getJSON(url,3000),receivedAt=cache.get(url).at;
+    let raw;
+    if(source==='Binance')raw=data;
+    else if(source==='OKX'){if(data.code!=='0')throw Error('upstream');raw=data.data;}
+    else {if(data.retCode!==0)throw Error('upstream');raw=data.result.list;}
+    if(!Array.isArray(raw))throw Error('invalidTicker');
+    const rows=[],rejected=[];
+    for(const r of raw){try{rows.push(normalizeTicker(source,r,{receivedAt,sourceAsOf:source==='Bybit'?Number(data.time):undefined}));}catch{rejected.push(r.symbol||r.instId||'unknown');}}
+    const expected=source==='Binance'?WATCH_SYMBOLS:['BTCUSDT'];
+    for(const symbol of expected)if(!rows.some(r=>r.symbol===symbol))rows.push({source,symbol,base:symbol.replace('USDT',''),quote:'USDT',ok:false,error:'invalidTicker',receivedAt:null,sourceAsOf:null});
+    return {source,ok:rows.some(r=>r.ok),receivedAt,requestMs:Date.now()-requestedAt,url:providerLinks[source],error:rejected.length?'partialData':null,rows};
+  }catch{return {source,ok:false,receivedAt:null,requestMs:Date.now()-requestedAt,url:providerLinks[source],error:'sourceUnavailable',rows:(source==='Binance'?WATCH_SYMBOLS:['BTCUSDT']).map(symbol=>({source,symbol,base:symbol.replace('USDT',''),quote:'USDT',ok:false,error:'sourceUnavailable',receivedAt:null,sourceAsOf:null}))};}
+}
+let boardPending=null,boardCache=null;
+async function marketBoard(){
+  if(boardCache&&Date.now()-boardCache.generatedAt<3000)return boardCache;
+  if(boardPending)return boardPending;
+  boardPending=(async()=>{const providers=await Promise.all(Object.keys(quoteURLs).map(tickerProvider));const now=Date.now();return boardCache={version:VERSION,generatedAt:now,pollSeconds:5,quoteCurrency:'USDT',priceType:'last-trade',providers,observations:providers.flatMap(p=>p.rows).map(row=>({...row,state:observationState(row,now)}))};})();
+  try{return await boardPending;}finally{boardPending=null;}
+}
 async function exchange(id) {
   const t=Date.now();try{
     let d,bids,asks,asOf;
@@ -53,6 +85,8 @@ async function candles(interval){
   const data=raw.filter(r=>Number(r[6])<Date.now()).map(r=>({time:Number(r[0]),open:Number(r[1]),high:Number(r[2]),low:Number(r[3]),close:Number(r[4]),volume:Number(r[5])})).filter(r=>Object.values(r).every(Number.isFinite)&&r.low>0&&r.low<=r.high);
   if(!data.length)throw Error('empty history');return {source:'Binance',symbol:'BTC/USDT',interval,closedOnly:true,data,asOf:data.at(-1).time};
 }
+const execution=createExecutionService({getBook:()=>exchange('OKX')});
+async function signalBoard(){const frames={};await Promise.all(['5m','15m','1h'].map(async tf=>{try{frames[tf]=(await candles(tf)).data;}catch{frames[tf]=[];}}));const book=await exchange('Binance');return {generatedAt:Date.now(),source:'Binance',symbol:'BTC-USDT',history:frames,book,signal:confluence(frames,book)};}
 const json=(res,status,data)=>{res.writeHead(status,{'content-type':'application/json; charset=utf-8','cache-control':'no-store'});res.end(JSON.stringify(data));};
 const types={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.svg':'image/svg+xml','.ttf':'font/ttf'};
 const server=http.createServer(async(req,res)=>{
@@ -60,8 +94,11 @@ const server=http.createServer(async(req,res)=>{
   res.setHeader('Content-Security-Policy',"default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'");
   try{
     const u=new URL(req.url,'http://localhost'),p=u.pathname;
+    if(await execution.handle(req,res,u,json))return;
     if(req.method!=='GET'&&req.method!=='HEAD')return json(res,405,{error:'readOnlyAPI',message:'Real-money orders are not enabled.'});
-    if(p==='/api/health')return json(res,200,{ok:true,name:'Fainance Bot',version:VERSION,mode:'paper',time:Date.now()});
+    if(p==='/api/health')return json(res,200,{ok:true,name:'Fainance Bot',version:VERSION,mode:'paper',execution:execution.summary(),time:Date.now()});
+    if(p==='/api/signals')return json(res,200,await signalBoard());
+    if(p==='/api/market-board')return json(res,200,{...await marketBoard(),serverNow:Date.now()});
     if(p==='/api/snapshot')return json(res,200,await snapshot());
     if(p==='/api/candles') {try{return json(res,200,await candles(u.searchParams.get('interval')||'5m'));}catch{return json(res,503,{error:'historyUnavailable'});}}
     if(p.startsWith('/api/'))return json(res,404,{error:'notFound'});
