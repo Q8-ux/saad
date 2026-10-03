@@ -49,7 +49,7 @@ export function createOrder(s,intent,book,now=Date.now()){
   const existing=s.orders.find(o=>o.id===intent.id);if(existing){if(existing.side!==intent.side||!near(existing.qty,intent.qty)||!near(existing.limit,intent.limit))throw Error('idConflict');return existing;}
   const risk=checkOrder(s,intent,book,now);if(!risk.ok){event(s,'blocked',risk.blocks.join(','),now);throw Error(risk.blocks[0]);}
   if(s.orders.length>=5000)throw Error('archiveRequired');
-  const o={id:intent.id,symbol:'BTC-USDT',side:intent.side,qty:intent.qty,limit:intent.limit,stop:intent.stop||null,target:intent.target||null,reason:intent.reason||'manual',modelVersion:intent.modelVersion||'manual',state:'prepared',filled:0,gross:0,feeQuote:0,feeBase:0,createdAt:now,updatedAt:now,bookAt:book.asOf,risk};s.orders.unshift(o);event(s,'prepared',o.id,now);return o;
+  const o={id:intent.id,symbol:'BTC-USDT',source:book.id||'simulation',side:intent.side,qty:intent.qty,limit:intent.limit,stop:intent.stop||null,target:intent.target||null,reason:intent.reason||'manual',modelVersion:intent.modelVersion||'manual',state:'prepared',filled:0,gross:0,feeQuote:0,feeBase:0,createdAt:now,updatedAt:now,bookAt:book.asOf,risk};s.orders.unshift(o);event(s,'prepared',o.id,now);return o;
 }
 export function applyReport(s,id,r,now=Date.now()){
   const o=s.orders.find(o=>o.id===id);if(!o)throw Error('unknownOrder');

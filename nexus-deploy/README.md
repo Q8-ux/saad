@@ -2,9 +2,9 @@
 
 An original Arabic/English Bitcoin and Polymarket research terminal. Replaces the previous NEXUS application at the existing deployment URL: https://nexus-markets.onrender.com.
 
-## Version 3.0.0 — opportunities, execution and independent risk
+## Version 3.0.1 — opportunities, execution and independent risk
 
-The default screen is **Trade opportunities / اقتناص الفرص**. The live-market enhancement prepared in 2.1.0 is included.
+The default screen is **Trade opportunities / اقتناص الفرص**. The live-market enhancement prepared in 2.1.0 is included. Version 3.0.1 also handles provider outages: all six watch assets are requested from three venues, each displayed quote keeps the selected venue name, and signals use closed candles plus depth from one consistent available venue (Binance, OKX, or Bybit). No candles or prices are invented or relabeled during failover. OKX candle pagination retains about 499 completed bars for holdout tests. The most recently working signal venue is preferred to avoid needless switching.
 
 - `public/signals.js` computes EMA20/50, Wilder RSI14, MACD12/26/9, ADX14, ATR14, rolling 96-bar VWAP, relative volume, Bollinger bands, OBV change, and top-ten-level book imbalance. Book imbalance is a snapshot, not cumulative trade delta. Five-minute closed candles are checked against closed 15-minute and hourly frames. Invalid, gapped, future or stale data block signals.
 - Original rule confluence is scored 0–100; it is **not a calibrated probability**. Trend, volume, momentum, multi-timeframe agreement and liquidity are separate inputs. ADX, volume, spread, volatility and modeled cost gates can force a wait. A sell signal only reduces owned spot BTC. No derivatives or shorting. A decline target is never presented as profit from a short position.
@@ -19,13 +19,13 @@ The default screen is **Trade opportunities / اقتناص الفرص**. The liv
 - The new holdout tool tests a **simpler, single-timeframe trend rule**, on the final 30% of available 5m candles, with next-open entries, conservative same-bar stop priority, fees/slippage, drawdown and buy-and-hold baseline. It does not validate the full multi-timeframe/order-book strategy. The few days of available candles are insufficient to qualify deployment with real funds.
 - Tardis.dev, Kaiko and TradingView are optional data/research candidates with official links, **not active paid integrations**. No subscription was purchased. Numeric indicators are computed locally. The existing logistic model is retained; no news feed or external LLM is connected.
 
-Validation: 30 deterministic tests cover the legacy engine, live observations, indicators, journal exclusivity, authentication, lost submit responses, cumulative partial fills, duplicate requests, balances, risk and holdout boundaries. Browser tests exercise live sources, both languages, mobile layout, paper buy/sell, emergency stop, risk rejection and API failure. Broker integration tests use controlled fake transport; no demo or real account orders were sent during development.
+Validation: 32 deterministic tests cover the legacy engine, live observations, indicators, journal exclusivity, authentication, lost submit responses, cumulative partial fills, duplicate requests, balances, risk and holdout boundaries. Browser tests exercise live sources, both languages, mobile layout, paper buy/sell, emergency stop, risk rejection and API failure. Broker integration tests use controlled fake transport; no demo or real account orders were sent during development.
 
 ## Live market board (2.1.0)
 
 The **Live markets / السوق الآن** page displays public spot-market observations independently of paper account balances:
 
-- Actual last-trade prices for BTC, ETH, SOL, XRP, BNB and DOGE against USDT from Binance's official market-data-only REST API.
+- Actual last-trade prices for BTC, ETH, SOL, XRP, BNB and DOGE against USDT. Official public APIs from Binance, OKX and Bybit are queried; the watchlist selects a fresh available observation and explicitly displays its venue. A venue can lack a listing without creating a synthetic quote.
 - Rolling 24-hour change, high/low, base and quote volume; bid/ask spread is identified as a spread, never a profit.
 - BTC/USDT last trade and best bid/ask on Binance, OKX and Bybit, with source timestamp and server receipt timestamp separately displayed.
 - Five-second browser polling of `/api/market-board`, shared server cache of at most three seconds, and independent provider failures. Requests may take longer during upstream timeouts. No generated or fallback prices are inserted.
@@ -51,7 +51,7 @@ Render keeps the existing service and `nexus-markets-production` branch. The sta
 ## Working features
 
 - Arabic by default, RTL layout and locally hosted Al-Mohanad font already supplied by the repository; full English mode and mobile layout.
-- Public BTC/USDT order books from Binance's market-data-only API, OKX, and Bybit, with explicit availability and timestamps. Closed Binance candles across 1m, 5m, 15m and 1h.
+- Public BTC/USDT order books from Binance's market-data-only API, OKX, and Bybit, with explicit availability and timestamps. Closed candles from the available source across 1m, 5m, 15m and 1h.
 - Polymarket BTC UP/DOWN discovery for current/next 5m and 15m markets plus the current hourly market. Exact condition and token validation, executable order-book depth, per-market fee schedule, adverse slippage, minimum size and stale-book checks.
 - Cross-exchange spread monitor; maker quote planner with inventory skew; complete-set hedge coverage calculator.
 - Device-local paper account: virtual $10,000 initial balance, depth-based spot buys/sells, simulated pairs, full ledger, JSON export/import, per-entry limits, daily realized-loss cap, stop/take-profit checks, emergency stop.
@@ -84,4 +84,4 @@ Hummingbot, Freqtrade/FreqAI, Polymarket's unified SDK, NautilusTrader, CCXT and
 
 ## Validation
 
-`node --test test/*.test.js` exercises fee-negative pairs, multi-level fills, stale and mismatched markets, missing fee schedules, capital conservation, risk gates and chronological holdout/look-ahead protection. Market-data tests also verify raw price preservation, percentage/volume normalization, timestamp freshness and rejection of missing/crossed prices. Browser checks cover both directions, narrow screens, navigation, paper order/close, risk controls, bot stop, backtests, hedging, live quote export, automatic refresh and data-error states. The code exposes version 3.0.0 via `/api/health`; `/api/market-board`, `/api/snapshot`, `/api/candles` and `/api/signals` are read-only. The new private execution endpoints are separately authenticated and disabled unless explicitly configured.
+`node --test test/*.test.js` exercises fee-negative pairs, multi-level fills, stale and mismatched markets, missing fee schedules, capital conservation, risk gates and chronological holdout/look-ahead protection. Market-data tests also verify raw price preservation, percentage/volume normalization, timestamp freshness and rejection of missing/crossed prices. Browser checks cover both directions, narrow screens, navigation, paper order/close, risk controls, bot stop, backtests, hedging, live quote export, automatic refresh and data-error states. The code exposes version 3.0.1 via `/api/health`; `/api/market-board`, `/api/snapshot`, `/api/candles` and `/api/signals` are read-only. The new private execution endpoints are separately authenticated and disabled unless explicitly configured.

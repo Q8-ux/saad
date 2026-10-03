@@ -5,7 +5,7 @@ import {fileURLToPath} from 'node:url';
 import {levels,VERSION} from './public/engine.js';
 import {confluence} from './public/signals.js';
 import {createExecutionService} from './lib/execution-service.js';
-import {WATCH_SYMBOLS,normalizeTicker,observationState} from './public/market-data.js';
+import {WATCH_SYMBOLS,normalizeTicker,observationState,normalizeCandles} from './public/market-data.js';
 
 const PUBLIC=path.join(path.dirname(fileURLToPath(import.meta.url)),'public');
 const PORT=Number(process.env.PORT||3000),cache=new Map(),pending=new Map();
@@ -17,8 +17,8 @@ const getJSON=async(url,ttl=5000)=>{
 };
 const quoteURLs={
   Binance:`https://data-api.binance.vision/api/v3/ticker/24hr?symbols=${encodeURIComponent(JSON.stringify(WATCH_SYMBOLS))}`,
-  OKX:'https://www.okx.com/api/v5/market/ticker?instId=BTC-USDT',
-  Bybit:'https://api.bybit.com/v5/market/tickers?category=spot&symbol=BTCUSDT'
+  OKX:'https://www.okx.com/api/v5/market/tickers?instType=SPOT',
+  Bybit:'https://api.bybit.com/v5/market/tickers?category=spot'
 };
 const providerLinks={Binance:'https://www.binance.com/en/trade/BTC_USDT?type=spot',OKX:'https://www.okx.com/trade-spot/btc-usdt',Bybit:'https://www.bybit.com/en/trade/spot/BTC/USDT'};
 async function tickerProvider(source){
@@ -31,11 +31,11 @@ async function tickerProvider(source){
     else {if(data.retCode!==0)throw Error('upstream');raw=data.result.list;}
     if(!Array.isArray(raw))throw Error('invalidTicker');
     const rows=[],rejected=[];
-    for(const r of raw){try{rows.push(normalizeTicker(source,r,{receivedAt,sourceAsOf:source==='Bybit'?Number(data.time):undefined}));}catch{rejected.push(r.symbol||r.instId||'unknown');}}
-    const expected=source==='Binance'?WATCH_SYMBOLS:['BTCUSDT'];
+    for(const r of raw.filter(r=>WATCH_SYMBOLS.includes(r.symbol||r.instId?.replace('-','')))){try{rows.push(normalizeTicker(source,r,{receivedAt,sourceAsOf:source==='Bybit'?Number(data.time):undefined}));}catch{rejected.push(r.symbol||r.instId||'unknown');}}
+    const expected=WATCH_SYMBOLS;
     for(const symbol of expected)if(!rows.some(r=>r.symbol===symbol))rows.push({source,symbol,base:symbol.replace('USDT',''),quote:'USDT',ok:false,error:'invalidTicker',receivedAt:null,sourceAsOf:null});
     return {source,ok:rows.some(r=>r.ok),receivedAt,requestMs:Date.now()-requestedAt,url:providerLinks[source],error:rejected.length?'partialData':null,rows};
-  }catch{return {source,ok:false,receivedAt:null,requestMs:Date.now()-requestedAt,url:providerLinks[source],error:'sourceUnavailable',rows:(source==='Binance'?WATCH_SYMBOLS:['BTCUSDT']).map(symbol=>({source,symbol,base:symbol.replace('USDT',''),quote:'USDT',ok:false,error:'sourceUnavailable',receivedAt:null,sourceAsOf:null}))};}
+  }catch{return {source,ok:false,receivedAt:null,requestMs:Date.now()-requestedAt,url:providerLinks[source],error:'sourceUnavailable',rows:WATCH_SYMBOLS.map(symbol=>({source,symbol,base:symbol.replace('USDT',''),quote:'USDT',ok:false,error:'sourceUnavailable',receivedAt:null,sourceAsOf:null}))};}
 }
 let boardPending=null,boardCache=null;
 async function marketBoard(){
@@ -78,15 +78,40 @@ async function snapshot(){
   snapshotPending=(async()=>{const [exchanges,markets]=await Promise.all([Promise.all(['Binance','OKX','Bybit'].map(exchange)),polyMarkets()]);return lastSnapshot={version:VERSION,generatedAt:Date.now(),exchanges,markets,pollSeconds:10,liveTrading:false};})();
   try{return await snapshotPending;}finally{snapshotPending=null;}
 }
-async function candles(interval){
+let signalSource='Binance';
+async function sourceCandles(interval,source){
   if(!['1m','5m','15m','1h'].includes(interval))throw Error('invalid interval');
-  const raw=await getJSON(`https://data-api.binance.vision/api/v3/klines?symbol=BTCUSDT&interval=${interval}&limit=500`,30000);
-  if(!Array.isArray(raw))throw Error('invalid history');
-  const data=raw.filter(r=>Number(r[6])<Date.now()).map(r=>({time:Number(r[0]),open:Number(r[1]),high:Number(r[2]),low:Number(r[3]),close:Number(r[4]),volume:Number(r[5])})).filter(r=>Object.values(r).every(Number.isFinite)&&r.low>0&&r.low<=r.high);
-  if(!data.length)throw Error('empty history');return {source:'Binance',symbol:'BTC/USDT',interval,closedOnly:true,data,asOf:data.at(-1).time};
+  let raw;
+  if(source==='Binance')raw=await getJSON(`https://data-api.binance.vision/api/v3/klines?symbol=BTCUSDT&interval=${interval}&limit=500`,30000);
+  else if(source==='OKX'){
+    const url=`https://www.okx.com/api/v5/market/candles?instId=BTC-USDT&bar=${interval==='1h'?'1H':interval}`;
+    const recent=await getJSON(url+'&limit=300',30000);if(recent.code!=='0'||!recent.data?.length)throw Error('historyUnavailable');
+    const older=await getJSON(url+`&limit=200&after=${recent.data.at(-1)[0]}`,30000);if(older.code!=='0')throw Error('historyUnavailable');raw=[...recent.data,...older.data];
+  }else{
+    const minutes=({'1m':'1','5m':'5','15m':'15','1h':'60'})[interval];
+    const data=await getJSON(`https://api.bybit.com/v5/market/kline?category=spot&symbol=BTCUSDT&interval=${minutes}&limit=500`,30000);if(data.retCode!==0)throw Error('historyUnavailable');raw=data.result.list;
+  }
+  const data=normalizeCandles(source,raw,interval);if(data.length<100)throw Error('historyUnavailable');
+  return {source,symbol:'BTC/USDT',interval,closedOnly:true,data,asOf:data.at(-1).time};
 }
+const sourceOrder=()=>[signalSource,...['Binance','OKX','Bybit'].filter(x=>x!==signalSource)];
+async function candles(interval){for(const source of sourceOrder()){try{return await sourceCandles(interval,source);}catch{}}throw Error('historyUnavailable');}
 const execution=createExecutionService({getBook:()=>exchange('OKX')});
-async function signalBoard(){const frames={};await Promise.all(['5m','15m','1h'].map(async tf=>{try{frames[tf]=(await candles(tf)).data;}catch{frames[tf]=[];}}));const book=await exchange('Binance');return {generatedAt:Date.now(),source:'Binance',symbol:'BTC-USDT',history:frames,book,signal:confluence(frames,book)};}
+let signalsPending=null,signalsCache=null;
+async function signalBoard(){
+  if(signalsCache&&Date.now()-signalsCache.generatedAt<3000)return signalsCache;if(signalsPending)return signalsPending;
+  signalsPending=(async()=>{
+    for(const source of sourceOrder()){
+      try{
+        const result=await Promise.all(['5m','15m','1h'].map(tf=>sourceCandles(tf,source))),frames=Object.fromEntries(result.map(x=>[x.interval,x.data]));
+        const book=await exchange(source);if(!book.ok||Date.now()-book.asOf>15000)continue;
+        const signal=confluence(frames,book);if(signal.blocks.includes('history'))continue;
+        signalSource=source;return signalsCache={generatedAt:Date.now(),source,symbol:'BTC-USDT',history:frames,book,signal};
+      }catch{}
+    }
+    return {generatedAt:Date.now(),source:null,symbol:'BTC-USDT',history:{},book:null,signal:confluence({},null)};
+  })();try{return await signalsPending;}finally{signalsPending=null;}
+}
 const json=(res,status,data)=>{res.writeHead(status,{'content-type':'application/json; charset=utf-8','cache-control':'no-store'});res.end(JSON.stringify(data));};
 const types={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.svg':'image/svg+xml','.ttf':'font/ttf'};
 const server=http.createServer(async(req,res)=>{

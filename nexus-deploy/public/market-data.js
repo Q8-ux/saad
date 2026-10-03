@@ -22,3 +22,14 @@ export function normalizeTicker(source,raw,{receivedAt,sourceAsOf}={}) {
   row.spread=row.ask-row.bid;row.spreadBps=row.spread/((row.ask+row.bid)/2)*10000;row.ok=true;
   return row;
 }
+
+export function selectObservation(rows,symbol,now=Date.now()){
+  const candidates=['Binance','OKX','Bybit'].map(source=>rows.find(r=>r.source===source&&r.symbol===symbol)).filter(Boolean);
+  return candidates.find(r=>observationState(r,now)==='fresh')||candidates.find(r=>r.ok)||candidates[0];
+}
+export function normalizeCandles(source,raw,interval,now=Date.now()){
+  const ms=({'1m':60000,'5m':300000,'15m':900000,'1h':3600000})[interval];
+  if(!ms||!Array.isArray(raw))throw Error('invalidHistory');
+  const rows=raw.filter(r=>Number(r[0])+ms<=now&&(source!=='OKX'||r[8]==='1')&&(source!=='Binance'||Number(r[6])<now)).map(r=>({time:Number(r[0]),open:Number(r[1]),high:Number(r[2]),low:Number(r[3]),close:Number(r[4]),volume:Number(r[5])})).filter(r=>Object.values(r).every(Number.isFinite)&&r.low>0&&r.volume>=0&&r.high>=Math.max(r.open,r.close)&&r.low<=Math.min(r.open,r.close));
+  return [...new Map(rows.map(r=>[r.time,r])).values()].sort((a,b)=>a.time-b.time).slice(-500);
+}
