@@ -1890,5 +1890,6 @@ window.STUDIO_STORE = {
       "shape": "circle",
       "label": "دائرة بقطر 6 سم"
     }
-  ]
+  ],
+  "email": "saad.alrawdan@gmail.com"
 };
