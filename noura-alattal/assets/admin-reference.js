@@ -1,6 +1,6 @@
 "use strict";
 (() => {
-  const KEY="noura-admin-preview-v1",E=window.NouraVideoCore.escape;
+  const KEY="noura-admin-preview-v1";
   let data={courses:[],checks:[]};
   try{const old=JSON.parse(localStorage.getItem(KEY)||"null");if(old&&Array.isArray(old.courses))data=old;}catch{}
   const status=document.getElementById("admin-status");
@@ -25,3 +25,4 @@
   });
   // This public preparation view does not grant administrative privileges or publish browser data.
 })();
+

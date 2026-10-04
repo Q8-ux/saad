@@ -1,4 +1,4 @@
-name: Publish Noura Video Library
+name: Publish Noura Website
 on:
   push:
     branches: [main]
@@ -20,14 +20,10 @@ jobs:
       url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
-      - name: Check video library
+      - name: Check site scripts
         run: |
-          node --check noura-alattal/assets/video-core.js
-          node --check noura-alattal/assets/video-catalog.js
-          node --check noura-alattal/assets/video-library.js
           node --check noura-alattal/assets/navigation.js
           node --check noura-alattal/assets/admin-reference.js
-          node --test noura-alattal/tests/video-library.test.cjs
       - uses: actions/configure-pages@v5
       - name: Preserve published projects and update Noura
         env:
@@ -39,3 +35,4 @@ jobs:
           retention-days: 30
       - uses: actions/deploy-pages@v4
         id: deploy
+

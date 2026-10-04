@@ -53,13 +53,20 @@ def main():
     before = hashes(target)
     if not before:
         raise RuntimeError("Empty published baseline; refusing a destructive replacement")
-    shutil.copytree("noura-alattal", target / "noura-alattal", dirs_exist_ok=True)
+    noura_target = target / "noura-alattal"
+    if noura_target.exists():
+        shutil.rmtree(noura_target)
+    shutil.copytree("noura-alattal", noura_target)
     page = (target / "noura-alattal/index.html").read_text()
-    if 'id="videos"' not in page or "20261003-video-library-v1" not in page or "</html>" not in page:
+    if 'id="courses"' not in page or "20261004-courses-v2" not in page or "</html>" not in page:
         raise RuntimeError("Noura release is incomplete")
-    for name in ["video-core.js", "video-library.js", "video-catalog.js", "navigation.js"]:
+    for name in ["navigation.js", "admin-reference.js"]:
         if not (target / "noura-alattal/assets" / name).is_file():
             raise RuntimeError(f"Missing required asset: {name}")
+    for html in noura_target.rglob("*.html"):
+        content = html.read_text()
+        if "#videos" in content or 'id="videos"' in content or "video-library." in content or "video-core.js" in content:
+            raise RuntimeError(f"Removed video library is still referenced: {html}")
     if hashes(target) != before:
         raise RuntimeError("An unrelated published file changed")
     print(f"Updated Noura; preserved {len(before)} unrelated published files from artifact {chosen['id']}.")
@@ -67,3 +74,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
