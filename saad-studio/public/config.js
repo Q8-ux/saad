@@ -595,7 +595,13 @@ window.STUDIO_STORE = {
       "style": "presentation",
       "tone": "blue",
       "price": null,
-      "templates": [],
+      "templates": [
+        {
+          "id": "web-02",
+          "title": "واجهة موقع عقاري — رواق",
+          "image": "samples/web-02.webp"
+        }
+      ],
       "formats": [
         "حسب الاستخدام والاتفاق"
       ],
@@ -643,7 +649,13 @@ window.STUDIO_STORE = {
       "style": "presentation",
       "tone": "blue",
       "price": null,
-      "templates": [],
+      "templates": [
+        {
+          "id": "web-01",
+          "title": "واجهة متجر تقني — فولت تك",
+          "image": "samples/web-01.webp"
+        }
+      ],
       "formats": [
         "حسب الاستخدام والاتفاق"
       ],
@@ -715,7 +727,13 @@ window.STUDIO_STORE = {
       "style": "presentation",
       "tone": "sage",
       "price": null,
-      "templates": [],
+      "templates": [
+        {
+          "id": "company-01",
+          "title": "غلاف ملف شركة — رؤية وعمران",
+          "image": "samples/company-01.webp"
+        }
+      ],
       "formats": [
         "حسب الاستخدام والاتفاق"
       ],
@@ -787,7 +805,13 @@ window.STUDIO_STORE = {
       "style": "presentation",
       "tone": "sage",
       "price": null,
-      "templates": [],
+      "templates": [
+        {
+          "id": "catalog-01",
+          "title": "غلاف كتالوج أثاث — خطوط",
+          "image": "samples/catalog-01.webp"
+        }
+      ],
       "formats": [
         "حسب الاستخدام والاتفاق"
       ],
@@ -1309,7 +1333,13 @@ window.STUDIO_STORE = {
       "style": "greeting",
       "tone": "lavender",
       "price": null,
-      "templates": [],
+      "templates": [
+        {
+          "id": "book-01",
+          "title": "غلاف كتاب — فنّ المساحة",
+          "image": "samples/book-01.webp"
+        }
+      ],
       "formats": [
         "حسب الاستخدام والاتفاق"
       ],
@@ -1357,7 +1387,18 @@ window.STUDIO_STORE = {
       "style": "greeting",
       "tone": "sand",
       "price": null,
-      "templates": [],
+      "templates": [
+        {
+          "id": "pack-01",
+          "title": "ملصق قهوة — مداد البن",
+          "image": "samples/pack-01.webp"
+        },
+        {
+          "id": "pack-02",
+          "title": "ملصق عطر — سدرة نوار",
+          "image": "samples/pack-02.webp"
+        }
+      ],
       "formats": [
         "حسب الاستخدام والاتفاق"
       ],
@@ -1437,7 +1478,13 @@ window.STUDIO_STORE = {
       "style": "greeting",
       "tone": "sand",
       "price": null,
-      "templates": [],
+      "templates": [
+        {
+          "id": "pack-03",
+          "title": "بطاقة شكر — أثر المنزل",
+          "image": "samples/pack-03.webp"
+        }
+      ],
       "formats": [
         "حسب الاستخدام والاتفاق"
       ],
@@ -1791,6 +1838,54 @@ window.STUDIO_STORE = {
       "title": "دعوة معرض — مساحة للإلهام",
       "image": "samples/invite-02.webp",
       "service": "event-invitation"
+    },
+    {
+      "id": "company-01",
+      "title": "غلاف ملف شركة — رؤية وعمران",
+      "image": "samples/company-01.webp",
+      "service": "company-profile"
+    },
+    {
+      "id": "catalog-01",
+      "title": "غلاف كتالوج أثاث — خطوط",
+      "image": "samples/catalog-01.webp",
+      "service": "product-catalog"
+    },
+    {
+      "id": "book-01",
+      "title": "غلاف كتاب — فنّ المساحة",
+      "image": "samples/book-01.webp",
+      "service": "ebook-cover"
+    },
+    {
+      "id": "pack-01",
+      "title": "ملصق قهوة — مداد البن",
+      "image": "samples/pack-01.webp",
+      "service": "product-label"
+    },
+    {
+      "id": "pack-02",
+      "title": "ملصق عطر — سدرة نوار",
+      "image": "samples/pack-02.webp",
+      "service": "product-label"
+    },
+    {
+      "id": "pack-03",
+      "title": "بطاقة شكر — أثر المنزل",
+      "image": "samples/pack-03.webp",
+      "service": "thank-you-card"
+    },
+    {
+      "id": "web-01",
+      "title": "واجهة متجر تقني — فولت تك",
+      "image": "samples/web-01.webp",
+      "service": "storefront-design"
+    },
+    {
+      "id": "web-02",
+      "title": "واجهة موقع عقاري — رواق",
+      "image": "samples/web-02.webp",
+      "service": "company-website"
     }
   ],
   "printSizes": [
