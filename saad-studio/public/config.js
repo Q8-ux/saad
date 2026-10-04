@@ -569,6 +569,11 @@ window.STUDIO_STORE = {
       "price": null,
       "templates": [
         {
+          "id": "select-03",
+          "title": "كرت شخصي — لمسة",
+          "image": "samples/select-03.webp"
+        },
+        {
           "id": "complete-10",
           "title": "كرت شخصي — رواق",
           "image": "samples/complete-10.webp"
@@ -939,6 +944,11 @@ window.STUDIO_STORE = {
       "price": null,
       "templates": [
         {
+          "id": "select-01",
+          "title": "سيرة تنفيذية — وضوح",
+          "image": "samples/select-01.webp"
+        },
+        {
           "id": "cv-01",
           "title": "سيرة تنفيذية — كحلي وذهبي",
           "image": "samples/cv-01.webp"
@@ -988,6 +998,11 @@ window.STUDIO_STORE = {
       "tone": "blue",
       "price": null,
       "templates": [
+        {
+          "id": "select-02",
+          "title": "سيرة طبية — مسار مهني",
+          "image": "samples/select-02.webp"
+        },
         {
           "id": "complete-18",
           "title": "سيرة طبية — تنظيم مهني",
@@ -1269,6 +1284,11 @@ window.STUDIO_STORE = {
       "price": null,
       "templates": [
         {
+          "id": "select-04",
+          "title": "دعوة زفاف — ليلة ذهبية",
+          "image": "samples/select-04.webp"
+        },
+        {
           "id": "complete-22",
           "title": "دعوة زفاف — فرحة العمر",
           "image": "samples/complete-22.webp"
@@ -1298,6 +1318,11 @@ window.STUDIO_STORE = {
       "tone": "rose",
       "price": null,
       "templates": [
+        {
+          "id": "select-06",
+          "title": "دعوة ميلاد — رحلة سعيدة",
+          "image": "samples/select-06.webp"
+        },
         {
           "id": "complete-23",
           "title": "دعوة ميلاد — وقت الاحتفال",
@@ -1478,6 +1503,11 @@ window.STUDIO_STORE = {
       "tone": "lavender",
       "price": null,
       "templates": [
+        {
+          "id": "select-05",
+          "title": "شهادة إنجاز — خطوة للأمام",
+          "image": "samples/select-05.webp"
+        },
         {
           "id": "complete-29",
           "title": "شهادة تقدير — امتنان",
@@ -1821,6 +1851,42 @@ window.STUDIO_STORE = {
     }
   ],
   "samples": [
+    {
+      "id": "select-01",
+      "title": "سيرة تنفيذية — وضوح",
+      "image": "samples/select-01.webp",
+      "service": "professional-cv"
+    },
+    {
+      "id": "select-02",
+      "title": "سيرة طبية — مسار مهني",
+      "image": "samples/select-02.webp",
+      "service": "medical-cv"
+    },
+    {
+      "id": "select-03",
+      "title": "كرت شخصي — لمسة",
+      "image": "samples/select-03.webp",
+      "service": "business-card"
+    },
+    {
+      "id": "select-04",
+      "title": "دعوة زفاف — ليلة ذهبية",
+      "image": "samples/select-04.webp",
+      "service": "wedding-invitation"
+    },
+    {
+      "id": "select-05",
+      "title": "شهادة إنجاز — خطوة للأمام",
+      "image": "samples/select-05.webp",
+      "service": "certificate"
+    },
+    {
+      "id": "select-06",
+      "title": "دعوة ميلاد — رحلة سعيدة",
+      "image": "samples/select-06.webp",
+      "service": "birthday-invitation"
+    },
     {
       "id": "instagram-01",
       "title": "قهوة مختصة — تحميص بطابع خاص",
@@ -2286,36 +2352,36 @@ window.STUDIO_STORE = {
   ],
   "printSizes": [
     {
-      "width": 5.0,
-      "height": 5.0,
+      "width": 5,
+      "height": 5,
       "unit": "cm",
       "shape": "rect",
       "label": "5 × 5 سم"
     },
     {
-      "width": 4.0,
-      "height": 4.0,
+      "width": 4,
+      "height": 4,
       "unit": "cm",
       "shape": "rect",
       "label": "4 × 4 سم"
     },
     {
-      "width": 3.0,
-      "height": 3.0,
+      "width": 3,
+      "height": 3,
       "unit": "cm",
       "shape": "rect",
       "label": "3 × 3 سم"
     },
     {
-      "width": 2.0,
-      "height": 2.0,
+      "width": 2,
+      "height": 2,
       "unit": "cm",
       "shape": "rect",
       "label": "2 × 2 سم"
     },
     {
-      "width": 9.0,
-      "height": 5.0,
+      "width": 9,
+      "height": 5,
       "unit": "cm",
       "shape": "rect",
       "label": "9 × 5 سم"
@@ -2328,57 +2394,57 @@ window.STUDIO_STORE = {
       "label": "8.5 × 5.5 سم"
     },
     {
-      "width": 7.0,
+      "width": 7,
       "height": 3.5,
       "unit": "cm",
       "shape": "rect",
       "label": "7 × 3.5 سم"
     },
     {
-      "width": 7.0,
-      "height": 4.0,
+      "width": 7,
+      "height": 4,
       "unit": "cm",
       "shape": "rect",
       "label": "7 × 4 سم"
     },
     {
-      "width": 4.0,
-      "height": 7.0,
+      "width": 4,
+      "height": 7,
       "unit": "cm",
       "shape": "rect",
       "label": "4 × 7 سم"
     },
     {
-      "width": 10.0,
-      "height": 7.0,
+      "width": 10,
+      "height": 7,
       "unit": "cm",
       "shape": "rect",
       "label": "10 × 7 سم"
     },
     {
-      "width": 6.0,
-      "height": 6.0,
+      "width": 6,
+      "height": 6,
       "unit": "cm",
       "shape": "rect",
       "label": "6 × 6 سم"
     },
     {
-      "width": 9.0,
-      "height": 6.0,
+      "width": 9,
+      "height": 6,
       "unit": "cm",
       "shape": "rect",
       "label": "9 × 6 سم"
     },
     {
-      "width": 12.0,
-      "height": 8.0,
+      "width": 12,
+      "height": 8,
       "unit": "cm",
       "shape": "rect",
       "label": "12 × 8 سم"
     },
     {
-      "width": 10.0,
-      "height": 10.0,
+      "width": 10,
+      "height": 10,
       "unit": "cm",
       "shape": "rect",
       "label": "10 × 10 سم"
@@ -2391,36 +2457,36 @@ window.STUDIO_STORE = {
       "label": "2.5 × 2.5 سم"
     },
     {
-      "width": 9.0,
-      "height": 3.0,
+      "width": 9,
+      "height": 3,
       "unit": "cm",
       "shape": "rect",
       "label": "9 × 3 سم"
     },
     {
-      "width": 9.0,
-      "height": 2.0,
+      "width": 9,
+      "height": 2,
       "unit": "cm",
       "shape": "rect",
       "label": "9 × 2 سم"
     },
     {
-      "width": 8.0,
-      "height": 2.0,
+      "width": 8,
+      "height": 2,
       "unit": "cm",
       "shape": "rect",
       "label": "8 × 2 سم"
     },
     {
-      "width": 10.0,
+      "width": 10,
       "height": 2.5,
       "unit": "cm",
       "shape": "rect",
       "label": "10 × 2.5 سم"
     },
     {
-      "width": 8.0,
-      "height": 8.0,
+      "width": 8,
+      "height": 8,
       "unit": "cm",
       "shape": "rect",
       "label": "8 × 8 سم"
@@ -2440,57 +2506,57 @@ window.STUDIO_STORE = {
       "label": "1.5 × 1.5 سم"
     },
     {
-      "width": 7.0,
-      "height": 7.0,
+      "width": 7,
+      "height": 7,
       "unit": "cm",
       "shape": "circle",
       "label": "دائرة بقطر 7 سم"
     },
     {
-      "width": 8.0,
-      "height": 8.0,
+      "width": 8,
+      "height": 8,
       "unit": "cm",
       "shape": "circle",
       "label": "دائرة بقطر 8 سم"
     },
     {
-      "width": 9.0,
-      "height": 9.0,
+      "width": 9,
+      "height": 9,
       "unit": "cm",
       "shape": "circle",
       "label": "دائرة بقطر 9 سم"
     },
     {
-      "width": 2.0,
-      "height": 2.0,
+      "width": 2,
+      "height": 2,
       "unit": "cm",
       "shape": "circle",
       "label": "دائرة بقطر 2 سم"
     },
     {
-      "width": 3.0,
-      "height": 3.0,
+      "width": 3,
+      "height": 3,
       "unit": "cm",
       "shape": "circle",
       "label": "دائرة بقطر 3 سم"
     },
     {
-      "width": 4.0,
-      "height": 4.0,
+      "width": 4,
+      "height": 4,
       "unit": "cm",
       "shape": "circle",
       "label": "دائرة بقطر 4 سم"
     },
     {
-      "width": 5.0,
-      "height": 5.0,
+      "width": 5,
+      "height": 5,
       "unit": "cm",
       "shape": "circle",
       "label": "دائرة بقطر 5 سم"
     },
     {
-      "width": 6.0,
-      "height": 6.0,
+      "width": 6,
+      "height": 6,
       "unit": "cm",
       "shape": "circle",
       "label": "دائرة بقطر 6 سم"
