@@ -859,7 +859,7 @@ window.STUDIO_STORE = {
         {
           "id": "cv-05",
           "title": "سيرة معمارية — هندسة هادئة",
-          "image": "samples/cv-05.webp"
+          "image": "samples/cv-05.webp?v=clean-name"
         }
       ],
       "formats": [
@@ -1782,7 +1782,7 @@ window.STUDIO_STORE = {
     {
       "id": "cv-05",
       "title": "سيرة معمارية — هندسة هادئة",
-      "image": "samples/cv-05.webp",
+      "image": "samples/cv-05.webp?v=clean-name",
       "service": "professional-cv"
     },
     {
