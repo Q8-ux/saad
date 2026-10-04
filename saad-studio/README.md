@@ -2,7 +2,7 @@
 
 GitHub Pages: https://q8-ux.github.io/saad/saad-studio/
 
-The public frontend is a multi-page Arabic RTL service catalog, not an online design editor. All interface typography uses locally hosted Al Mohanad. Category preview artwork retains six distinct display fonts loaded from Google Fonts.
+The public frontend is a multi-page Arabic RTL service catalog, not an online design editor. The interface is Arabic only and uses Cairo from Google Fonts. The English brand name is retained. A teal/cobalt wavy mesh is decorative page background.
 
 ## Published surface
 
@@ -14,7 +14,7 @@ The public frontend is a multi-page Arabic RTL service catalog, not an online de
 
 ## Content and launch configuration
 
-Edit `public/config.js`: `whatsapp` is international digits only; service `price` is a number in KWD, or null until confirmed. Only add owner-approved licensed previews to `templates` as `{id,title,image}`. No Canva marketplace templates have been imported. Existing visual previews are original HTML/CSS service illustrations and are labeled as such.
+Edit `public/config.js`: `whatsapp` is international digits only; service `price` is a number in KWD, or null until confirmed. Only add owner-approved licensed previews to `templates` as `{id,title,image}`. No Canva marketplace templates have been imported. Rejected synthetic service illustrations have been removed. Until licensed samples are supplied, services render as text cards, without pretending they are Canva previews.
 
 Do not publish private customer designs as catalog samples without approval. A Pro subscription is not a license to mirror the Canva marketplace. The Canva connector returned no available Brand Templates during this implementation.
 
@@ -26,10 +26,6 @@ Prices, WhatsApp number, real approved samples and payment configuration remain 
 
 The existing `.github/workflows/deploy-saad-studio.yml` preserves the latest combined Pages artifact and overlays `saad-studio/public`. Other projects in the shared repository must not be overwritten.
 
-## Seven-language support
+## Arabic-only interface
 
-Arabic (default), English, Urdu, Hindi, Persian, Turkish and French. The language switcher is present on every page. `?lang=` makes shared URLs explicit; a local preference preserves selection when navigating. Arabic keeps local Al Mohanad; other scripts use Inter, Noto Sans Arabic or Noto Sans Devanagari.
-
-All 50 service titles and descriptions, category text, service dimensions and scope, static pages, form fields and order-summary labels are translated. Customer-entered text is never translated or altered. Arabic sample artwork remains Arabic and is marked with its script and direction; it is illustrative artwork, not interface text.
-
-Editable translation sources are in `localization/*.tsv`. Run `python localization/build.py` from this folder to rebuild `public/translations.js` and validate all service records. Prices, dates and supplied customer content are not stored by the localization layer.
+All 14 pages use Arabic RTL. The former translation scripts and localization source files remain archived in the repository but are not loaded or used by the site. Language query parameters do not change the interface.
