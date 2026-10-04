@@ -23,6 +23,18 @@
     "catalog_review": {
       "source": "New Canva designs from this task only",
       "count": 28
+    },
+    "print_size_presets": {
+      "source": "frame-export-tool.zip",
+      "unique_presets": 30,
+      "unit": "cm",
+      "scope": [
+        "business-card",
+        "thank-you-card",
+        "product-label",
+        "gift-tag"
+      ],
+      "note": "Frame counts and identity-card labeling were excluded; no image editor exposed to customers."
     }
   },
   "font_sha256": {

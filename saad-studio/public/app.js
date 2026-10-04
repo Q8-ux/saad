@@ -3,6 +3,7 @@ const settings=window.STUDIO_STORE||{services:[],categories:[]},services=setting
 const $=s=>document.querySelector(s),catalog=$('#catalog'),dialog=$('#orderDialog');
 const I={code:'ar',t:s=>s,href:s=>s},t=I.t;
 let chosen=null;
+let sampleCategory='';
 const samples=settings.samples||[];
 const priceText=s=>Number.isFinite(s.price)?`${s.price.toLocaleString(I.code)} ${settings.currency||'د.ك'}`:t('السعر حسب تفاصيل الطلب');
 const el=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=t(text);return n};
@@ -34,7 +35,7 @@ if($('#featuredSamples'))renderSamples(['instagram-01','instagram-02','instagram
 function render(list){if(!catalog)return;catalog.replaceChildren();for(const s of list)catalog.append(cardFor(s));if(!list.length){const empty=el('div','empty-catalog');empty.append(el('h3','','لم نجد خدمة بهذا الاسم'),el('p','','جرّب كلمة أخرى أو اكتب فكرتك في طلب خاص.'));const b=el('button','button','طلب تصميم خاص');b.dataset.order='custom';empty.append(b);catalog.append(empty)}if($('#resultCount'))$('#resultCount').textContent=t(`${list.length} خدمة`)}
 function baseServices(){return page==='category'?services.filter(s=>s.category===categoryId):page==='home'?[services[0],services[2],services[13],services[15],services[20],services[25],services[30],services[35],services[40],services[45]]:services}
 function norm(s){return s.replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').toLowerCase()}
-if($('#serviceSearch'))$('#serviceSearch').addEventListener('input',e=>{const q=norm(e.target.value.trim());if(page==='samples'){renderSamples(samples.filter(x=>norm(x.title).includes(q)));return;}const list=page==='home'&&q?services:baseServices();render(list.filter(s=>norm([s.title,s.description,s.label,categories.find(c=>c.id===s.category)?.title].join(' ')).includes(q)))});
+if($('#serviceSearch'))$('#serviceSearch').addEventListener('input',e=>{const q=norm(e.target.value.trim());if(page==='samples'){filterSamples();return;}const list=page==='home'&&q?services:baseServices();render(list.filter(s=>norm([s.title,s.description,s.label,categories.find(c=>c.id===s.category)?.title].join(' ')).includes(q)))});
 const categoryNav=$('#categoryNav');if(categoryNav){categoryNav.append(link('الكل','all.html',page==='all'?'selected':''));for(const c of categories){const a=link(c.title,c.id+'.html',c.id===categoryId?'selected':'');if(c.id===categoryId)a.setAttribute('aria-current','page');categoryNav.append(a)}}
 if($('#departmentGrid'))for(const [i,c] of categories.entries()){const a=link('',c.id+'.html','department-tile department-'+c.id);a.append(el('span','department-number',String(i+1).padStart(2,'0')),el('h3','',c.title),el('p','',c.description),el('span','department-count','5 خدمات'));$('#departmentGrid').append(a)}
 function listBlock(title,items){const section=el('section','detail-block');section.append(el('h2','',title));const list=el('ul');for(const text of items)list.append(el('li','',text));section.append(list);return section}
@@ -49,8 +50,19 @@ if(page==='service'){
  const blocks=el('div','detail-columns');blocks.append(listBlock('ماذا ترسل لنا؟',s.needs),listBlock('كيف يتم التنفيذ؟',['تجهّز التفاصيل والنصوص والمراجع.','نحدّد النطاق والسعر والموعد وصيغة الملفات.','ينفّذ المصمم العمل ويراجع ملاحظاتك بحسب الاتفاق.','تستلم النسخة النهائية بالصيغة المتفق عليها.']));target.append(blocks);render(services.filter(x=>x.category===s.category&&x.id!==s.id));
  }
 }else if(page==='samples')renderSamples(samples);else render(baseServices());
+function filterSamples(){
+ const q=norm($('#serviceSearch')?.value.trim()||'');
+ renderSamples(samples.filter(x=>{const service=services.find(s=>s.id===x.service);return (!sampleCategory||service?.category===sampleCategory)&&norm([x.title,service?.title,categories.find(c=>c.id===service?.category)?.title].join(' ')).includes(q)}));
+}
+if($('#sampleFilters')){
+ const available=categories.filter(c=>samples.some(x=>services.find(s=>s.id===x.service)?.category===c.id));
+ for(const c of [{id:'',title:'كل النماذج'},...available]){const b=el('button','filter-chip',c.title);b.type='button';b.setAttribute('aria-pressed',String(!c.id));b.addEventListener('click',()=>{sampleCategory=c.id;for(const item of $('#sampleFilters').children)item.setAttribute('aria-pressed',String(item===b));filterSamples()});$('#sampleFilters').append(b)}
+}
 const businessNumber=()=>/^\d{8,15}$/.test(settings.whatsapp||'')?settings.whatsapp:'';
 function openOrder(id,sampleId){chosen=services.find(s=>s.id===id)||{id:'custom',title:t('طلب تصميم خاص'),price:null,templates:[],size:''};$('#orderTitle').textContent=chosen.title;$('#orderPrice').textContent=priceText(chosen);$('#orderForm').reset();if(chosen.size)$('#orderForm').elements.size.value=chosen.size;$('#orderResult').hidden=true;
+ const presets=chosen.sizeOptions||[];$('#sizePresets').hidden=!presets.length;$('#sizeOptions').replaceChildren();
+ for(const label of presets){const b=el('button','size-chip',label);b.type='button';b.setAttribute('aria-pressed','false');b.addEventListener('click',()=>{$('#orderForm').elements.size.value=label;for(const item of $('#sizeOptions').children)item.setAttribute('aria-pressed',String(item===b))});$('#sizeOptions').append(b)}
+
  const options=chosen.templates||[];$('#templateLabel').hidden=!options.length;$('#templateSelect').replaceChildren(new Option('تصميم حسب التفاصيل',''));
  for(const t of options)$('#templateSelect').add(new Option(t.title,t.id));
  const selected=sampleId||new URLSearchParams(location.search).get('sample');if(options.some(t=>t.id===selected))$('#templateSelect').value=selected;
@@ -61,4 +73,10 @@ document.addEventListener('click',e=>{const order=e.target.closest('[data-order]
 $('.close').addEventListener('click',()=>dialog.close());dialog.addEventListener('click',e=>{if(e.target===dialog){const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)dialog.close()}});
 $('#orderForm').addEventListener('submit',e=>{e.preventDefault();const f=new FormData(e.target),template=(chosen.templates||[]).find(t=>t.id===f.get('template'));const summary=['SAAD STUDIO — '+t('طلب تصميم'),`${t('الخدمة')}: ${chosen.title}`,`${t('السعر')}: ${priceText(chosen)}`,template?`${t('النموذج')}: ${template.title} (${template.id})`:'',`${t('الاسم')}: ${f.get('name').trim()}`,`${t('التواصل')}: ${f.get('contact').trim()}`,f.get('size')?`${t('المقاس / الاستخدام')}: ${f.get('size')}`:'',f.get('date')?`${t('الموعد المطلوب')}: ${f.get('date')}`:'',`${t('التفاصيل')}:\n${f.get('details').trim()}`].filter(Boolean).join('\n');$('#summaryText').value=summary;$('#orderResult').hidden=false;$('#copyOrder').textContent='نسخ ملخص الطلب';if(businessNumber()){window.open('https://wa.me/'+businessNumber()+'?text='+encodeURIComponent(summary),'_blank','noopener,noreferrer');$('#resultStatus').textContent='أكمل الإرسال في واتساب. فتح الرسالة وحده لا يرسل الطلب.'}else $('#resultStatus').textContent='ملخصك جاهز للنسخ. لم يتم إرسال طلبك.';});
 $('#copyOrder').addEventListener('click',async()=>{try{await navigator.clipboard.writeText($('#summaryText').value);$('#copyOrder').textContent='تم نسخ الملخص'}catch{$('#summaryText').focus();$('#summaryText').select();$('#copyOrder').textContent='حدّد النص وانسخه من الملخص'}});
+$('#orderForm').elements.size.addEventListener('input',()=>{for(const item of $('#sizeOptions').children)item.setAttribute('aria-pressed',String(item.textContent===$('#orderForm').elements.size.value))});
+$('#downloadOrder').addEventListener('click',()=>{
+ const summary=$('#summaryText').value;if(!summary)return;
+ const url=URL.createObjectURL(new Blob(['\ufeff'+summary],{type:'text/plain;charset=utf-8'}));
+ const a=document.createElement('a');a.href=url;a.download='SAAD-STUDIO-order.txt';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+});
 $('#year').textContent=new Date().getFullYear();

@@ -1,4 +1,4 @@
-// Public catalog samples created for this task; no previous personal Canva projects.
+// Catalog and size presets for manual design orders.
 window.STUDIO_STORE = {
   "whatsapp": "",
   "currency": "د.ك",
@@ -492,7 +492,17 @@ window.STUDIO_STORE = {
         "الألوان أو مرجع بصري يعجبك",
         "المقاس والموعد المطلوب"
       ],
-      "variant": 3
+      "variant": 3,
+      "sizeOptions": [
+        "9 × 5 سم",
+        "8.5 × 5.5 سم",
+        "7 × 4 سم",
+        "10 × 7 سم",
+        "9 × 6 سم",
+        "12 × 8 سم",
+        "10 × 10 سم",
+        "8 × 8 سم"
+      ]
     },
     {
       "id": "letterhead",
@@ -1326,7 +1336,39 @@ window.STUDIO_STORE = {
         "الألوان أو مرجع بصري يعجبك",
         "المقاس والموعد المطلوب"
       ],
-      "variant": 0
+      "variant": 0,
+      "sizeOptions": [
+        "5 × 5 سم",
+        "4 × 4 سم",
+        "3 × 3 سم",
+        "2 × 2 سم",
+        "9 × 5 سم",
+        "8.5 × 5.5 سم",
+        "7 × 3.5 سم",
+        "7 × 4 سم",
+        "4 × 7 سم",
+        "10 × 7 سم",
+        "6 × 6 سم",
+        "9 × 6 سم",
+        "12 × 8 سم",
+        "10 × 10 سم",
+        "2.5 × 2.5 سم",
+        "9 × 3 سم",
+        "9 × 2 سم",
+        "8 × 2 سم",
+        "10 × 2.5 سم",
+        "8 × 8 سم",
+        "3.5 × 3.5 سم",
+        "1.5 × 1.5 سم",
+        "دائرة بقطر 7 سم",
+        "دائرة بقطر 8 سم",
+        "دائرة بقطر 9 سم",
+        "دائرة بقطر 2 سم",
+        "دائرة بقطر 3 سم",
+        "دائرة بقطر 4 سم",
+        "دائرة بقطر 5 سم",
+        "دائرة بقطر 6 سم"
+      ]
     },
     {
       "id": "box-design",
@@ -1374,7 +1416,17 @@ window.STUDIO_STORE = {
         "الألوان أو مرجع بصري يعجبك",
         "المقاس والموعد المطلوب"
       ],
-      "variant": 2
+      "variant": 2,
+      "sizeOptions": [
+        "9 × 5 سم",
+        "8.5 × 5.5 سم",
+        "7 × 4 سم",
+        "10 × 7 سم",
+        "9 × 6 سم",
+        "12 × 8 سم",
+        "10 × 10 سم",
+        "8 × 8 سم"
+      ]
     },
     {
       "id": "gift-tag",
@@ -1398,7 +1450,39 @@ window.STUDIO_STORE = {
         "الألوان أو مرجع بصري يعجبك",
         "المقاس والموعد المطلوب"
       ],
-      "variant": 3
+      "variant": 3,
+      "sizeOptions": [
+        "5 × 5 سم",
+        "4 × 4 سم",
+        "3 × 3 سم",
+        "2 × 2 سم",
+        "9 × 5 سم",
+        "8.5 × 5.5 سم",
+        "7 × 3.5 سم",
+        "7 × 4 سم",
+        "4 × 7 سم",
+        "10 × 7 سم",
+        "6 × 6 سم",
+        "9 × 6 سم",
+        "12 × 8 سم",
+        "10 × 10 سم",
+        "2.5 × 2.5 سم",
+        "9 × 3 سم",
+        "9 × 2 سم",
+        "8 × 2 سم",
+        "10 × 2.5 سم",
+        "8 × 8 سم",
+        "3.5 × 3.5 سم",
+        "1.5 × 1.5 سم",
+        "دائرة بقطر 7 سم",
+        "دائرة بقطر 8 سم",
+        "دائرة بقطر 9 سم",
+        "دائرة بقطر 2 سم",
+        "دائرة بقطر 3 سم",
+        "دائرة بقطر 4 سم",
+        "دائرة بقطر 5 سم",
+        "دائرة بقطر 6 سم"
+      ]
     },
     {
       "id": "merch-design",
@@ -1593,6 +1677,218 @@ window.STUDIO_STORE = {
       "title": "سيرة أكاديمية — بحث وسياسات",
       "image": "samples/cv-06.webp",
       "service": "academic-cv"
+    }
+  ],
+  "printSizes": [
+    {
+      "width": 5.0,
+      "height": 5.0,
+      "unit": "cm",
+      "shape": "rect",
+      "label": "5 × 5 سم"
+    },
+    {
+      "width": 4.0,
+      "height": 4.0,
+      "unit": "cm",
+      "shape": "rect",
+      "label": "4 × 4 سم"
+    },
+    {
+      "width": 3.0,
+      "height": 3.0,
+      "unit": "cm",
+      "shape": "rect",
+      "label": "3 × 3 سم"
+    },
+    {
+      "width": 2.0,
+      "height": 2.0,
+      "unit": "cm",
+      "shape": "rect",
+      "label": "2 × 2 سم"
+    },
+    {
+      "width": 9.0,
+      "height": 5.0,
+      "unit": "cm",
+      "shape": "rect",
+      "label": "9 × 5 سم"
+    },
+    {
+      "width": 8.5,
+      "height": 5.5,
+      "unit": "cm",
+      "shape": "rect",
+      "label": "8.5 × 5.5 سم"
+    },
+    {
+      "width": 7.0,
+      "height": 3.5,
+      "unit": "cm",
+      "shape": "rect",
+      "label": "7 × 3.5 سم"
+    },
+    {
+      "width": 7.0,
+      "height": 4.0,
+      "unit": "cm",
+      "shape": "rect",
+      "label": "7 × 4 سم"
+    },
+    {
+      "width": 4.0,
+      "height": 7.0,
+      "unit": "cm",
+      "shape": "rect",
+      "label": "4 × 7 سم"
+    },
+    {
+      "width": 10.0,
+      "height": 7.0,
+      "unit": "cm",
+      "shape": "rect",
+      "label": "10 × 7 سم"
+    },
+    {
+      "width": 6.0,
+      "height": 6.0,
+      "unit": "cm",
+      "shape": "rect",
+      "label": "6 × 6 سم"
+    },
+    {
+      "width": 9.0,
+      "height": 6.0,
+      "unit": "cm",
+      "shape": "rect",
+      "label": "9 × 6 سم"
+    },
+    {
+      "width": 12.0,
+      "height": 8.0,
+      "unit": "cm",
+      "shape": "rect",
+      "label": "12 × 8 سم"
+    },
+    {
+      "width": 10.0,
+      "height": 10.0,
+      "unit": "cm",
+      "shape": "rect",
+      "label": "10 × 10 سم"
+    },
+    {
+      "width": 2.5,
+      "height": 2.5,
+      "unit": "cm",
+      "shape": "rect",
+      "label": "2.5 × 2.5 سم"
+    },
+    {
+      "width": 9.0,
+      "height": 3.0,
+      "unit": "cm",
+      "shape": "rect",
+      "label": "9 × 3 سم"
+    },
+    {
+      "width": 9.0,
+      "height": 2.0,
+      "unit": "cm",
+      "shape": "rect",
+      "label": "9 × 2 سم"
+    },
+    {
+      "width": 8.0,
+      "height": 2.0,
+      "unit": "cm",
+      "shape": "rect",
+      "label": "8 × 2 سم"
+    },
+    {
+      "width": 10.0,
+      "height": 2.5,
+      "unit": "cm",
+      "shape": "rect",
+      "label": "10 × 2.5 سم"
+    },
+    {
+      "width": 8.0,
+      "height": 8.0,
+      "unit": "cm",
+      "shape": "rect",
+      "label": "8 × 8 سم"
+    },
+    {
+      "width": 3.5,
+      "height": 3.5,
+      "unit": "cm",
+      "shape": "rect",
+      "label": "3.5 × 3.5 سم"
+    },
+    {
+      "width": 1.5,
+      "height": 1.5,
+      "unit": "cm",
+      "shape": "rect",
+      "label": "1.5 × 1.5 سم"
+    },
+    {
+      "width": 7.0,
+      "height": 7.0,
+      "unit": "cm",
+      "shape": "circle",
+      "label": "دائرة بقطر 7 سم"
+    },
+    {
+      "width": 8.0,
+      "height": 8.0,
+      "unit": "cm",
+      "shape": "circle",
+      "label": "دائرة بقطر 8 سم"
+    },
+    {
+      "width": 9.0,
+      "height": 9.0,
+      "unit": "cm",
+      "shape": "circle",
+      "label": "دائرة بقطر 9 سم"
+    },
+    {
+      "width": 2.0,
+      "height": 2.0,
+      "unit": "cm",
+      "shape": "circle",
+      "label": "دائرة بقطر 2 سم"
+    },
+    {
+      "width": 3.0,
+      "height": 3.0,
+      "unit": "cm",
+      "shape": "circle",
+      "label": "دائرة بقطر 3 سم"
+    },
+    {
+      "width": 4.0,
+      "height": 4.0,
+      "unit": "cm",
+      "shape": "circle",
+      "label": "دائرة بقطر 4 سم"
+    },
+    {
+      "width": 5.0,
+      "height": 5.0,
+      "unit": "cm",
+      "shape": "circle",
+      "label": "دائرة بقطر 5 سم"
+    },
+    {
+      "width": 6.0,
+      "height": 6.0,
+      "unit": "cm",
+      "shape": "circle",
+      "label": "دائرة بقطر 6 سم"
     }
   ]
 };
