@@ -29,7 +29,6 @@ on:
       - 'project-command-center/**'
       - 'my-sites/**'
       - 'reddit-business-agent/**'
-      - 'ant-alshaer/**'
       - 'ai-chess-kuwait/**'
       - 'ai-chess-python/**'
       - 'elanak-saleem/**'
