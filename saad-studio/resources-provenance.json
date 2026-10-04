@@ -1,0 +1,36 @@
+{
+  "source": "User content automation archive",
+  "integrated": {
+    "typography": {
+      "family": "Cairo",
+      "weights": [
+        400,
+        700,
+        800
+      ],
+      "delivery": "same-origin WOFF",
+      "license": "public/fonts/OFL-Cairo.txt"
+    },
+    "image_processing": {
+      "tool": "Pillow",
+      "output": "WebP",
+      "maximum_dimensions": [
+        1000,
+        1400
+      ],
+      "quality": 87
+    },
+    "catalog_review": {
+      "source": "New Canva designs from this task only",
+      "count": 28
+    }
+  },
+  "font_sha256": {
+    "cairo-bold.woff": "7ae303446859411f2666cead5e2fada0dd4ae33c8889b76f93e4fa8ca26c9421",
+    "cairo-regular.woff": "cbe8d2a12a1f92968c176fae6c7965c3103e8c7315088ba37107b555f20e61eb",
+    "cairo-extrabold.woff": "f42b98c0908062299171f2360b7ea79b9443ae05d90d4dfb1a51b873411a5126"
+  },
+  "not_enabled": [
+    "Automatic text generation, speech synthesis and social publishing require a separately configured production server and accounts; they are not active on this static storefront."
+  ]
+}

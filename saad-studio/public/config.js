@@ -770,7 +770,33 @@ window.STUDIO_STORE = {
       "style": "business",
       "tone": "blue",
       "price": null,
-      "templates": [],
+      "templates": [
+        {
+          "id": "cv-01",
+          "title": "سيرة تنفيذية — كحلي وذهبي",
+          "image": "samples/cv-01.webp"
+        },
+        {
+          "id": "cv-02",
+          "title": "سيرة تحريرية — أبيض وأسود",
+          "image": "samples/cv-02.webp"
+        },
+        {
+          "id": "cv-03",
+          "title": "سيرة تقنية — أزرق رقمي",
+          "image": "samples/cv-03.webp"
+        },
+        {
+          "id": "cv-04",
+          "title": "سيرة إبداعية — هوية بصرية",
+          "image": "samples/cv-04.webp"
+        },
+        {
+          "id": "cv-05",
+          "title": "سيرة معمارية — هندسة هادئة",
+          "image": "samples/cv-05.webp"
+        }
+      ],
       "formats": [
         "حسب الاستخدام والاتفاق"
       ],
@@ -818,7 +844,13 @@ window.STUDIO_STORE = {
       "style": "business",
       "tone": "blue",
       "price": null,
-      "templates": [],
+      "templates": [
+        {
+          "id": "cv-06",
+          "title": "سيرة أكاديمية — بحث وسياسات",
+          "image": "samples/cv-06.webp"
+        }
+      ],
       "formats": [
         "حسب الاستخدام والاتفاق"
       ],
@@ -1525,6 +1557,42 @@ window.STUDIO_STORE = {
       "title": "غلاف بروشور — خط الأفق",
       "image": "samples/print-06.webp",
       "service": "brochure-design"
+    },
+    {
+      "id": "cv-01",
+      "title": "سيرة تنفيذية — كحلي وذهبي",
+      "image": "samples/cv-01.webp",
+      "service": "professional-cv"
+    },
+    {
+      "id": "cv-02",
+      "title": "سيرة تحريرية — أبيض وأسود",
+      "image": "samples/cv-02.webp",
+      "service": "professional-cv"
+    },
+    {
+      "id": "cv-03",
+      "title": "سيرة تقنية — أزرق رقمي",
+      "image": "samples/cv-03.webp",
+      "service": "professional-cv"
+    },
+    {
+      "id": "cv-04",
+      "title": "سيرة إبداعية — هوية بصرية",
+      "image": "samples/cv-04.webp",
+      "service": "professional-cv"
+    },
+    {
+      "id": "cv-05",
+      "title": "سيرة معمارية — هندسة هادئة",
+      "image": "samples/cv-05.webp",
+      "service": "professional-cv"
+    },
+    {
+      "id": "cv-06",
+      "title": "سيرة أكاديمية — بحث وسياسات",
+      "image": "samples/cv-06.webp",
+      "service": "academic-cv"
     }
   ]
 };

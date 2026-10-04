@@ -33,3 +33,11 @@ All 14 pages use Arabic RTL. The former translation scripts and localization sou
 ## New Canva sample gallery (2026-10-04)
 
 22 previews from four designs generated for this task, hosted as local WebP files. No prior user projects were used. samples.html supports search and each preview preselects its model in the local order summary. Original editable sources and scope are recorded in catalog-provenance.json. These are Canva-generated samples, not copied Pro marketplace templates. Resume, YouTube, business, education, events, packaging and website generation requests failed with quota_exceeded; no replacements from personal files were used.
+
+## تحديث الموارد ومعرض السير الذاتية
+
+المعرض يحتوي الآن على 28 نموذجًا، منها 6 سير ذاتية جديدة أنشئت داخل كانفا لهذا الطلب. مصدرها `DAHXAYb2dco`. بقية الأقسام متوقفة حاليًا بسبب حصة التوليد.
+
+استُخدمت خطوط Cairo الأصلية بأوزان 400 و700 و800 من حزمة أتمتة المحتوى المملوكة للمستخدم، مع ترخيص OFL، وحُوّلت إلى WOFF وتُحمّل من الموقع نفسه. أزيل تحميل Google Fonts من الصفحات العربية. تُجهّز صور المعرض عبر Pillow بصيغة WebP. ملف `resources-provenance.json` يوثّق الموارد المدمجة.
+
+لم تُدمج ملفات هويات المشاريع الأخرى أو أمثلتها، ولم يُفعّل توليد النصوص أو الصوت أو النشر التلقائي؛ المتجر مخصص لاختيار نموذج وتكليف المصمم بالتنفيذ اليدوي.
