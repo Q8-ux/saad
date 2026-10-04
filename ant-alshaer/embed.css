@@ -1,6 +1,14 @@
+@font-face {
+  font-family: "Cairo";
+  src: url("/saad/ant-alshaer/fonts/Cairo-Variable.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 200 1000;
+  font-display: swap;
+}
+
 :root {
   color-scheme: light;
-  font-family: "AL Mohanad", Tahoma, Arial, sans-serif;
+  font-family: "Cairo", Tahoma, Arial, sans-serif;
   background: #f6f2ea;
   color: #18201c;
 }
