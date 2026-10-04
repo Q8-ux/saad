@@ -212,7 +212,13 @@ window.STUDIO_STORE = {
       "style": "social",
       "tone": "sage",
       "price": null,
-      "templates": [],
+      "templates": [
+        {
+          "id": "complete-01",
+          "title": "كاروسيل — مساحة للإبداع",
+          "image": "samples/complete-01.webp"
+        }
+      ],
       "formats": [
         "حسب الاستخدام والاتفاق"
       ],
@@ -236,7 +242,13 @@ window.STUDIO_STORE = {
       "style": "social",
       "tone": "sage",
       "price": null,
-      "templates": [],
+      "templates": [
+        {
+          "id": "complete-02",
+          "title": "غلاف ريلز — دقيقة إلهام",
+          "image": "samples/complete-02.webp"
+        }
+      ],
       "formats": [
         "حسب الاستخدام والاتفاق"
       ],
@@ -260,7 +272,13 @@ window.STUDIO_STORE = {
       "style": "social",
       "tone": "sage",
       "price": null,
-      "templates": [],
+      "templates": [
+        {
+          "id": "complete-03",
+          "title": "هوية حساب — أثر",
+          "image": "samples/complete-03.webp"
+        }
+      ],
       "formats": [
         "حسب الاستخدام والاتفاق"
       ],
@@ -284,7 +302,13 @@ window.STUDIO_STORE = {
       "style": "social",
       "tone": "blue",
       "price": null,
-      "templates": [],
+      "templates": [
+        {
+          "id": "complete-04",
+          "title": "إعلان سناب — لحظتك تستاهل",
+          "image": "samples/complete-04.webp"
+        }
+      ],
       "formats": [
         "حسب الاستخدام والاتفاق"
       ],
@@ -308,7 +332,13 @@ window.STUDIO_STORE = {
       "style": "social",
       "tone": "blue",
       "price": null,
-      "templates": [],
+      "templates": [
+        {
+          "id": "complete-05",
+          "title": "غلاف تيك توك — من فكرة إلى واقع",
+          "image": "samples/complete-05.webp"
+        }
+      ],
       "formats": [
         "حسب الاستخدام والاتفاق"
       ],
@@ -387,7 +417,13 @@ window.STUDIO_STORE = {
       "style": "social",
       "tone": "blue",
       "price": null,
-      "templates": [],
+      "templates": [
+        {
+          "id": "complete-06",
+          "title": "غلاف لينكدإن — رؤية وأثر",
+          "image": "samples/complete-06.webp"
+        }
+      ],
       "formats": [
         "حسب الاستخدام والاتفاق"
       ],
@@ -411,7 +447,13 @@ window.STUDIO_STORE = {
       "style": "social",
       "tone": "blue",
       "price": null,
-      "templates": [],
+      "templates": [
+        {
+          "id": "complete-07",
+          "title": "بنر حملة — حضورك يبدأ هنا",
+          "image": "samples/complete-07.webp"
+        }
+      ],
       "formats": [
         "حسب الاستخدام والاتفاق"
       ],
@@ -465,7 +507,13 @@ window.STUDIO_STORE = {
       "style": "business",
       "tone": "ink",
       "price": null,
-      "templates": [],
+      "templates": [
+        {
+          "id": "complete-08",
+          "title": "هوية بصرية — نور",
+          "image": "samples/complete-08.webp"
+        }
+      ],
       "formats": [
         "حسب الاستخدام والاتفاق"
       ],
@@ -489,7 +537,13 @@ window.STUDIO_STORE = {
       "style": "business",
       "tone": "ink",
       "price": null,
-      "templates": [],
+      "templates": [
+        {
+          "id": "complete-09",
+          "title": "دليل هوية — نور",
+          "image": "samples/complete-09.webp"
+        }
+      ],
       "formats": [
         "حسب الاستخدام والاتفاق"
       ],
@@ -513,7 +567,13 @@ window.STUDIO_STORE = {
       "style": "business",
       "tone": "ink",
       "price": null,
-      "templates": [],
+      "templates": [
+        {
+          "id": "complete-10",
+          "title": "كرت شخصي — رواق",
+          "image": "samples/complete-10.webp"
+        }
+      ],
       "formats": [
         "حسب الاستخدام والاتفاق"
       ],
@@ -547,7 +607,13 @@ window.STUDIO_STORE = {
       "style": "business",
       "tone": "ink",
       "price": null,
-      "templates": [],
+      "templates": [
+        {
+          "id": "complete-11",
+          "title": "ورق رسمي — رواق للاستشارات",
+          "image": "samples/complete-11.webp"
+        }
+      ],
       "formats": [
         "حسب الاستخدام والاتفاق"
       ],
@@ -571,7 +637,13 @@ window.STUDIO_STORE = {
       "style": "presentation",
       "tone": "blue",
       "price": null,
-      "templates": [],
+      "templates": [
+        {
+          "id": "complete-12",
+          "title": "صفحة هبوط — أفق للتعلّم",
+          "image": "samples/complete-12.webp"
+        }
+      ],
       "formats": [
         "حسب الاستخدام والاتفاق"
       ],
@@ -625,7 +697,13 @@ window.STUDIO_STORE = {
       "style": "presentation",
       "tone": "blue",
       "price": null,
-      "templates": [],
+      "templates": [
+        {
+          "id": "complete-13",
+          "title": "موقع أعمال — أثر",
+          "image": "samples/complete-13.webp"
+        }
+      ],
       "formats": [
         "حسب الاستخدام والاتفاق"
       ],
@@ -679,7 +757,13 @@ window.STUDIO_STORE = {
       "style": "presentation",
       "tone": "blue",
       "price": null,
-      "templates": [],
+      "templates": [
+        {
+          "id": "complete-14",
+          "title": "بنر موقع — لمسات طبيعية",
+          "image": "samples/complete-14.webp"
+        }
+      ],
       "formats": [
         "حسب الاستخدام والاتفاق"
       ],
@@ -703,7 +787,13 @@ window.STUDIO_STORE = {
       "style": "presentation",
       "tone": "sage",
       "price": null,
-      "templates": [],
+      "templates": [
+        {
+          "id": "complete-15",
+          "title": "عرض تقديمي — مدار للأعمال",
+          "image": "samples/complete-15.webp"
+        }
+      ],
       "formats": [
         "حسب الاستخدام والاتفاق"
       ],
@@ -757,7 +847,13 @@ window.STUDIO_STORE = {
       "style": "presentation",
       "tone": "sage",
       "price": null,
-      "templates": [],
+      "templates": [
+        {
+          "id": "complete-16",
+          "title": "عرض خدمات — هوية بصرية",
+          "image": "samples/complete-16.webp"
+        }
+      ],
       "formats": [
         "حسب الاستخدام والاتفاق"
       ],
@@ -781,7 +877,13 @@ window.STUDIO_STORE = {
       "style": "presentation",
       "tone": "sage",
       "price": null,
-      "templates": [],
+      "templates": [
+        {
+          "id": "complete-17",
+          "title": "غلاف تقرير — الأداء السنوي",
+          "image": "samples/complete-17.webp"
+        }
+      ],
       "formats": [
         "حسب الاستخدام والاتفاق"
       ],
@@ -885,7 +987,13 @@ window.STUDIO_STORE = {
       "style": "business",
       "tone": "blue",
       "price": null,
-      "templates": [],
+      "templates": [
+        {
+          "id": "complete-18",
+          "title": "سيرة طبية — تنظيم مهني",
+          "image": "samples/complete-18.webp"
+        }
+      ],
       "formats": [
         "حسب الاستخدام والاتفاق"
       ],
@@ -939,7 +1047,13 @@ window.STUDIO_STORE = {
       "style": "business",
       "tone": "blue",
       "price": null,
-      "templates": [],
+      "templates": [
+        {
+          "id": "complete-19",
+          "title": "خطاب تقديم — لمسة احترافية",
+          "image": "samples/complete-19.webp"
+        }
+      ],
       "formats": [
         "حسب الاستخدام والاتفاق"
       ],
@@ -963,7 +1077,13 @@ window.STUDIO_STORE = {
       "style": "business",
       "tone": "blue",
       "price": null,
-      "templates": [],
+      "templates": [
+        {
+          "id": "complete-20",
+          "title": "ملف إنجاز — خبرات وأثر",
+          "image": "samples/complete-20.webp"
+        }
+      ],
       "formats": [
         "حسب الاستخدام والاتفاق"
       ],
@@ -1117,7 +1237,13 @@ window.STUDIO_STORE = {
       "style": "menu",
       "tone": "sand",
       "price": null,
-      "templates": [],
+      "templates": [
+        {
+          "id": "complete-21",
+          "title": "رول أب — نماء",
+          "image": "samples/complete-21.webp"
+        }
+      ],
       "formats": [
         "حسب الاستخدام والاتفاق"
       ],
@@ -1141,7 +1267,13 @@ window.STUDIO_STORE = {
       "style": "invitation",
       "tone": "rose",
       "price": null,
-      "templates": [],
+      "templates": [
+        {
+          "id": "complete-22",
+          "title": "دعوة زفاف — فرحة العمر",
+          "image": "samples/complete-22.webp"
+        }
+      ],
       "formats": [
         "حسب الاستخدام والاتفاق"
       ],
@@ -1165,7 +1297,13 @@ window.STUDIO_STORE = {
       "style": "invitation",
       "tone": "rose",
       "price": null,
-      "templates": [],
+      "templates": [
+        {
+          "id": "complete-23",
+          "title": "دعوة ميلاد — وقت الاحتفال",
+          "image": "samples/complete-23.webp"
+        }
+      ],
       "formats": [
         "حسب الاستخدام والاتفاق"
       ],
@@ -1189,7 +1327,13 @@ window.STUDIO_STORE = {
       "style": "invitation",
       "tone": "rose",
       "price": null,
-      "templates": [],
+      "templates": [
+        {
+          "id": "complete-24",
+          "title": "بطاقة تخرّج — حكاية نجاح",
+          "image": "samples/complete-24.webp"
+        }
+      ],
       "formats": [
         "حسب الاستخدام والاتفاق"
       ],
@@ -1213,7 +1357,13 @@ window.STUDIO_STORE = {
       "style": "invitation",
       "tone": "rose",
       "price": null,
-      "templates": [],
+      "templates": [
+        {
+          "id": "complete-25",
+          "title": "بطاقة تهنئة — بكل محبة",
+          "image": "samples/complete-25.webp"
+        }
+      ],
       "formats": [
         "حسب الاستخدام والاتفاق"
       ],
@@ -1237,7 +1387,13 @@ window.STUDIO_STORE = {
       "style": "invitation",
       "tone": "rose",
       "price": null,
-      "templates": [],
+      "templates": [
+        {
+          "id": "complete-26",
+          "title": "برنامج فعالية — ملتقى الإبداع",
+          "image": "samples/complete-26.webp"
+        }
+      ],
       "formats": [
         "حسب الاستخدام والاتفاق"
       ],
@@ -1261,7 +1417,13 @@ window.STUDIO_STORE = {
       "style": "greeting",
       "tone": "lavender",
       "price": null,
-      "templates": [],
+      "templates": [
+        {
+          "id": "complete-27",
+          "title": "إنفوغرافيك — نظّم مشروعك",
+          "image": "samples/complete-27.webp"
+        }
+      ],
       "formats": [
         "حسب الاستخدام والاتفاق"
       ],
@@ -1285,7 +1447,13 @@ window.STUDIO_STORE = {
       "style": "greeting",
       "tone": "lavender",
       "price": null,
-      "templates": [],
+      "templates": [
+        {
+          "id": "complete-28",
+          "title": "ورقة عمل — رحلة الكلمة",
+          "image": "samples/complete-28.webp"
+        }
+      ],
       "formats": [
         "حسب الاستخدام والاتفاق"
       ],
@@ -1309,7 +1477,13 @@ window.STUDIO_STORE = {
       "style": "greeting",
       "tone": "lavender",
       "price": null,
-      "templates": [],
+      "templates": [
+        {
+          "id": "complete-29",
+          "title": "شهادة تقدير — امتنان",
+          "image": "samples/complete-29.webp"
+        }
+      ],
       "formats": [
         "حسب الاستخدام والاتفاق"
       ],
@@ -1363,7 +1537,13 @@ window.STUDIO_STORE = {
       "style": "greeting",
       "tone": "lavender",
       "price": null,
-      "templates": [],
+      "templates": [
+        {
+          "id": "complete-30",
+          "title": "شرائح دورة — التصميم بلغة بسيطة",
+          "image": "samples/complete-30.webp"
+        }
+      ],
       "formats": [
         "حسب الاستخدام والاتفاق"
       ],
@@ -1454,7 +1634,13 @@ window.STUDIO_STORE = {
       "style": "greeting",
       "tone": "sand",
       "price": null,
-      "templates": [],
+      "templates": [
+        {
+          "id": "complete-31",
+          "title": "تصور علبة — نور",
+          "image": "samples/complete-31.webp"
+        }
+      ],
       "formats": [
         "حسب الاستخدام والاتفاق"
       ],
@@ -1518,7 +1704,13 @@ window.STUDIO_STORE = {
       "style": "greeting",
       "tone": "sand",
       "price": null,
-      "templates": [],
+      "templates": [
+        {
+          "id": "complete-32",
+          "title": "تاغ هدية — لك وحدك",
+          "image": "samples/complete-32.webp"
+        }
+      ],
       "formats": [
         "حسب الاستخدام والاتفاق"
       ],
@@ -1574,7 +1766,13 @@ window.STUDIO_STORE = {
       "style": "greeting",
       "tone": "sand",
       "price": null,
-      "templates": [],
+      "templates": [
+        {
+          "id": "complete-33",
+          "title": "تيشيرت وكوب — أثر يومي",
+          "image": "samples/complete-33.webp"
+        }
+      ],
       "formats": [
         "حسب الاستخدام والاتفاق"
       ],
@@ -1886,6 +2084,204 @@ window.STUDIO_STORE = {
       "title": "واجهة موقع عقاري — رواق",
       "image": "samples/web-02.webp",
       "service": "company-website"
+    },
+    {
+      "id": "complete-01",
+      "title": "كاروسيل — مساحة للإبداع",
+      "image": "samples/complete-01.webp",
+      "service": "instagram-carousel"
+    },
+    {
+      "id": "complete-02",
+      "title": "غلاف ريلز — دقيقة إلهام",
+      "image": "samples/complete-02.webp",
+      "service": "reels-cover"
+    },
+    {
+      "id": "complete-03",
+      "title": "هوية حساب — أثر",
+      "image": "samples/complete-03.webp",
+      "service": "instagram-grid"
+    },
+    {
+      "id": "complete-04",
+      "title": "إعلان سناب — لحظتك تستاهل",
+      "image": "samples/complete-04.webp",
+      "service": "snapchat-story"
+    },
+    {
+      "id": "complete-05",
+      "title": "غلاف تيك توك — من فكرة إلى واقع",
+      "image": "samples/complete-05.webp",
+      "service": "tiktok-cover"
+    },
+    {
+      "id": "complete-06",
+      "title": "غلاف لينكدإن — رؤية وأثر",
+      "image": "samples/complete-06.webp",
+      "service": "linkedin-cover"
+    },
+    {
+      "id": "complete-07",
+      "title": "بنر حملة — حضورك يبدأ هنا",
+      "image": "samples/complete-07.webp",
+      "service": "campaign-banners"
+    },
+    {
+      "id": "complete-08",
+      "title": "هوية بصرية — نور",
+      "image": "samples/complete-08.webp",
+      "service": "visual-identity"
+    },
+    {
+      "id": "complete-09",
+      "title": "دليل هوية — نور",
+      "image": "samples/complete-09.webp",
+      "service": "brand-guide"
+    },
+    {
+      "id": "complete-10",
+      "title": "كرت شخصي — رواق",
+      "image": "samples/complete-10.webp",
+      "service": "business-card"
+    },
+    {
+      "id": "complete-11",
+      "title": "ورق رسمي — رواق للاستشارات",
+      "image": "samples/complete-11.webp",
+      "service": "letterhead"
+    },
+    {
+      "id": "complete-12",
+      "title": "صفحة هبوط — أفق للتعلّم",
+      "image": "samples/complete-12.webp",
+      "service": "landing-page"
+    },
+    {
+      "id": "complete-13",
+      "title": "موقع أعمال — أثر",
+      "image": "samples/complete-13.webp",
+      "service": "portfolio-website"
+    },
+    {
+      "id": "complete-14",
+      "title": "بنر موقع — لمسات طبيعية",
+      "image": "samples/complete-14.webp",
+      "service": "website-banners"
+    },
+    {
+      "id": "complete-15",
+      "title": "عرض تقديمي — مدار للأعمال",
+      "image": "samples/complete-15.webp",
+      "service": "presentation-deck"
+    },
+    {
+      "id": "complete-16",
+      "title": "عرض خدمات — هوية بصرية",
+      "image": "samples/complete-16.webp",
+      "service": "proposal-design"
+    },
+    {
+      "id": "complete-17",
+      "title": "غلاف تقرير — الأداء السنوي",
+      "image": "samples/complete-17.webp",
+      "service": "report-design"
+    },
+    {
+      "id": "complete-18",
+      "title": "سيرة طبية — تنظيم مهني",
+      "image": "samples/complete-18.webp",
+      "service": "medical-cv"
+    },
+    {
+      "id": "complete-19",
+      "title": "خطاب تقديم — لمسة احترافية",
+      "image": "samples/complete-19.webp",
+      "service": "cover-letter"
+    },
+    {
+      "id": "complete-20",
+      "title": "ملف إنجاز — خبرات وأثر",
+      "image": "samples/complete-20.webp",
+      "service": "professional-portfolio"
+    },
+    {
+      "id": "complete-21",
+      "title": "رول أب — نماء",
+      "image": "samples/complete-21.webp",
+      "service": "rollup-design"
+    },
+    {
+      "id": "complete-22",
+      "title": "دعوة زفاف — فرحة العمر",
+      "image": "samples/complete-22.webp",
+      "service": "wedding-invitation"
+    },
+    {
+      "id": "complete-23",
+      "title": "دعوة ميلاد — وقت الاحتفال",
+      "image": "samples/complete-23.webp",
+      "service": "birthday-invitation"
+    },
+    {
+      "id": "complete-24",
+      "title": "بطاقة تخرّج — حكاية نجاح",
+      "image": "samples/complete-24.webp",
+      "service": "graduation-card"
+    },
+    {
+      "id": "complete-25",
+      "title": "بطاقة تهنئة — بكل محبة",
+      "image": "samples/complete-25.webp",
+      "service": "greeting-card"
+    },
+    {
+      "id": "complete-26",
+      "title": "برنامج فعالية — ملتقى الإبداع",
+      "image": "samples/complete-26.webp",
+      "service": "event-program"
+    },
+    {
+      "id": "complete-27",
+      "title": "إنفوغرافيك — نظّم مشروعك",
+      "image": "samples/complete-27.webp",
+      "service": "infographic"
+    },
+    {
+      "id": "complete-28",
+      "title": "ورقة عمل — رحلة الكلمة",
+      "image": "samples/complete-28.webp",
+      "service": "worksheet"
+    },
+    {
+      "id": "complete-29",
+      "title": "شهادة تقدير — امتنان",
+      "image": "samples/complete-29.webp",
+      "service": "certificate"
+    },
+    {
+      "id": "complete-30",
+      "title": "شرائح دورة — التصميم بلغة بسيطة",
+      "image": "samples/complete-30.webp",
+      "service": "course-slides"
+    },
+    {
+      "id": "complete-31",
+      "title": "تصور علبة — نور",
+      "image": "samples/complete-31.webp",
+      "service": "box-design"
+    },
+    {
+      "id": "complete-32",
+      "title": "تاغ هدية — لك وحدك",
+      "image": "samples/complete-32.webp",
+      "service": "gift-tag"
+    },
+    {
+      "id": "complete-33",
+      "title": "تيشيرت وكوب — أثر يومي",
+      "image": "samples/complete-33.webp",
+      "service": "merch-design"
     }
   ],
   "printSizes": [
