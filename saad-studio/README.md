@@ -29,3 +29,7 @@ The existing `.github/workflows/deploy-saad-studio.yml` preserves the latest com
 ## Arabic-only interface
 
 All 14 pages use Arabic RTL. The former translation scripts and localization source files remain archived in the repository but are not loaded or used by the site. Language query parameters do not change the interface.
+
+## New Canva sample gallery (2026-10-04)
+
+22 previews from four designs generated for this task, hosted as local WebP files. No prior user projects were used. samples.html supports search and each preview preselects its model in the local order summary. Original editable sources and scope are recorded in catalog-provenance.json. These are Canva-generated samples, not copied Pro marketplace templates. Resume, YouTube, business, education, events, packaging and website generation requests failed with quota_exceeded; no replacements from personal files were used.

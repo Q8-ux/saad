@@ -1,4 +1,4 @@
-// Public storefront configuration. Add only approved licensed previews and confirmed prices.
+// Public catalog samples created for this task; no previous personal Canva projects.
 window.STUDIO_STORE = {
   "whatsapp": "",
   "currency": "د.ك",
@@ -87,7 +87,53 @@ window.STUDIO_STORE = {
       "style": "social",
       "tone": "sage",
       "price": null,
-      "templates": [],
+      "templates": [
+        {
+          "id": "instagram-01",
+          "title": "قهوة مختصة — تحميص بطابع خاص",
+          "image": "samples/instagram-01.webp"
+        },
+        {
+          "id": "instagram-02",
+          "title": "إعلان تقني — فولت تك",
+          "image": "samples/instagram-02.webp"
+        },
+        {
+          "id": "instagram-03",
+          "title": "أثاث — تفاصيل تصنع المكان",
+          "image": "samples/instagram-03.webp"
+        },
+        {
+          "id": "instagram-04",
+          "title": "عيادة — عناية تبدأ بالوضوح",
+          "image": "samples/instagram-04.webp"
+        },
+        {
+          "id": "instagram-05",
+          "title": "عطور — نفحات نادرة",
+          "image": "samples/instagram-05.webp"
+        },
+        {
+          "id": "instagram-06",
+          "title": "مطعم — شريحة بطابع جريء",
+          "image": "samples/instagram-06.webp"
+        },
+        {
+          "id": "instagram-07",
+          "title": "عقارات — مساحات تستحق الوصول",
+          "image": "samples/instagram-07.webp"
+        },
+        {
+          "id": "instagram-08",
+          "title": "ساعات — دقة تُرى",
+          "image": "samples/instagram-08.webp"
+        },
+        {
+          "id": "instagram-09",
+          "title": "رياضة — تحرّك بقوة",
+          "image": "samples/instagram-09.webp"
+        }
+      ],
       "formats": [
         "حسب الاستخدام والاتفاق"
       ],
@@ -111,7 +157,38 @@ window.STUDIO_STORE = {
       "style": "social",
       "tone": "sage",
       "price": null,
-      "templates": [],
+      "templates": [
+        {
+          "id": "story-01",
+          "title": "قهوة — لحظة تُحضّر ببطء",
+          "image": "samples/story-01.webp"
+        },
+        {
+          "id": "story-02",
+          "title": "عطور — أثير",
+          "image": "samples/story-02.webp"
+        },
+        {
+          "id": "story-03",
+          "title": "مطعم — فحم",
+          "image": "samples/story-03.webp"
+        },
+        {
+          "id": "story-04",
+          "title": "عقارات — رحاب",
+          "image": "samples/story-04.webp"
+        },
+        {
+          "id": "story-05",
+          "title": "رياضة — حرّك قوتك",
+          "image": "samples/story-05.webp"
+        },
+        {
+          "id": "story-06",
+          "title": "عناية — ندى",
+          "image": "samples/story-06.webp"
+        }
+      ],
       "formats": [
         "حسب الاستخدام والاتفاق"
       ],
@@ -327,7 +404,13 @@ window.STUDIO_STORE = {
       "style": "business",
       "tone": "ink",
       "price": null,
-      "templates": [],
+      "templates": [
+        {
+          "id": "logo-02",
+          "title": "شعار مدار — تكوين هندسي",
+          "image": "samples/logo-02.webp"
+        }
+      ],
       "formats": [
         "حسب الاستخدام والاتفاق"
       ],
@@ -807,7 +890,18 @@ window.STUDIO_STORE = {
       "style": "menu",
       "tone": "sand",
       "price": null,
-      "templates": [],
+      "templates": [
+        {
+          "id": "print-01",
+          "title": "منيو مطعم — مائدة نوار",
+          "image": "samples/print-01.webp"
+        },
+        {
+          "id": "print-02",
+          "title": "قائمة قهوة — رواق البن",
+          "image": "samples/print-02.webp"
+        }
+      ],
       "formats": [
         "حسب الاستخدام والاتفاق"
       ],
@@ -831,7 +925,13 @@ window.STUDIO_STORE = {
       "style": "menu",
       "tone": "sand",
       "price": null,
-      "templates": [],
+      "templates": [
+        {
+          "id": "print-04",
+          "title": "فلاير أثاث — خطوط",
+          "image": "samples/print-04.webp"
+        }
+      ],
       "formats": [
         "حسب الاستخدام والاتفاق"
       ],
@@ -855,7 +955,13 @@ window.STUDIO_STORE = {
       "style": "menu",
       "tone": "sand",
       "price": null,
-      "templates": [],
+      "templates": [
+        {
+          "id": "print-06",
+          "title": "غلاف بروشور — خط الأفق",
+          "image": "samples/print-06.webp"
+        }
+      ],
       "formats": [
         "حسب الاستخدام والاتفاق"
       ],
@@ -879,7 +985,18 @@ window.STUDIO_STORE = {
       "style": "menu",
       "tone": "sand",
       "price": null,
-      "templates": [],
+      "templates": [
+        {
+          "id": "print-03",
+          "title": "بوستر فعالية — ليلة الضوء",
+          "image": "samples/print-03.webp"
+        },
+        {
+          "id": "print-05",
+          "title": "بوستر معرض — أجساد من ضوء",
+          "image": "samples/print-05.webp"
+        }
+      ],
       "formats": [
         "حسب الاستخدام والاتفاق"
       ],
@@ -1274,6 +1391,140 @@ window.STUDIO_STORE = {
         "المقاس والموعد المطلوب"
       ],
       "variant": 4
+    }
+  ],
+  "samples": [
+    {
+      "id": "instagram-01",
+      "title": "قهوة مختصة — تحميص بطابع خاص",
+      "image": "samples/instagram-01.webp",
+      "service": "instagram-post"
+    },
+    {
+      "id": "instagram-02",
+      "title": "إعلان تقني — فولت تك",
+      "image": "samples/instagram-02.webp",
+      "service": "instagram-post"
+    },
+    {
+      "id": "instagram-03",
+      "title": "أثاث — تفاصيل تصنع المكان",
+      "image": "samples/instagram-03.webp",
+      "service": "instagram-post"
+    },
+    {
+      "id": "instagram-04",
+      "title": "عيادة — عناية تبدأ بالوضوح",
+      "image": "samples/instagram-04.webp",
+      "service": "instagram-post"
+    },
+    {
+      "id": "instagram-05",
+      "title": "عطور — نفحات نادرة",
+      "image": "samples/instagram-05.webp",
+      "service": "instagram-post"
+    },
+    {
+      "id": "instagram-06",
+      "title": "مطعم — شريحة بطابع جريء",
+      "image": "samples/instagram-06.webp",
+      "service": "instagram-post"
+    },
+    {
+      "id": "instagram-07",
+      "title": "عقارات — مساحات تستحق الوصول",
+      "image": "samples/instagram-07.webp",
+      "service": "instagram-post"
+    },
+    {
+      "id": "instagram-08",
+      "title": "ساعات — دقة تُرى",
+      "image": "samples/instagram-08.webp",
+      "service": "instagram-post"
+    },
+    {
+      "id": "instagram-09",
+      "title": "رياضة — تحرّك بقوة",
+      "image": "samples/instagram-09.webp",
+      "service": "instagram-post"
+    },
+    {
+      "id": "story-01",
+      "title": "قهوة — لحظة تُحضّر ببطء",
+      "image": "samples/story-01.webp",
+      "service": "instagram-story"
+    },
+    {
+      "id": "story-02",
+      "title": "عطور — أثير",
+      "image": "samples/story-02.webp",
+      "service": "instagram-story"
+    },
+    {
+      "id": "story-03",
+      "title": "مطعم — فحم",
+      "image": "samples/story-03.webp",
+      "service": "instagram-story"
+    },
+    {
+      "id": "story-04",
+      "title": "عقارات — رحاب",
+      "image": "samples/story-04.webp",
+      "service": "instagram-story"
+    },
+    {
+      "id": "story-05",
+      "title": "رياضة — حرّك قوتك",
+      "image": "samples/story-05.webp",
+      "service": "instagram-story"
+    },
+    {
+      "id": "story-06",
+      "title": "عناية — ندى",
+      "image": "samples/story-06.webp",
+      "service": "instagram-story"
+    },
+    {
+      "id": "logo-02",
+      "title": "شعار مدار — تكوين هندسي",
+      "image": "samples/logo-02.webp",
+      "service": "logo-design"
+    },
+    {
+      "id": "print-01",
+      "title": "منيو مطعم — مائدة نوار",
+      "image": "samples/print-01.webp",
+      "service": "restaurant-menu"
+    },
+    {
+      "id": "print-02",
+      "title": "قائمة قهوة — رواق البن",
+      "image": "samples/print-02.webp",
+      "service": "restaurant-menu"
+    },
+    {
+      "id": "print-03",
+      "title": "بوستر فعالية — ليلة الضوء",
+      "image": "samples/print-03.webp",
+      "service": "poster-design"
+    },
+    {
+      "id": "print-04",
+      "title": "فلاير أثاث — خطوط",
+      "image": "samples/print-04.webp",
+      "service": "flyer-design"
+    },
+    {
+      "id": "print-05",
+      "title": "بوستر معرض — أجساد من ضوء",
+      "image": "samples/print-05.webp",
+      "service": "poster-design"
+    },
+    {
+      "id": "print-06",
+      "title": "غلاف بروشور — خط الأفق",
+      "image": "samples/print-06.webp",
+      "service": "brochure-design"
     }
   ]
 };
