@@ -1,6 +1,6 @@
 // Catalog and size presets for manual design orders.
 window.STUDIO_STORE = {
-  "whatsapp": "",
+  "whatsapp": "96551231313",
   "currency": "د.ك",
   "categories": [
     {
