@@ -1,8 +1,18 @@
-# Execution operations — 3.0.0
+# Execution operations — 3.1.0
 
 ## What runs on the current service
 
 Public market data, indicator calculation, legacy paper tools and the new browser execution simulator run without credentials. Real-money trading is unavailable. `/api/execution/status` exposes capability booleans only; account data and controls require an owner session and an explicitly configured demo service. No public route accepts exchange keys.
+
+## Public order-flow collection
+
+`lib/market-flow.js` subscribes to the public OKX WebSocket at `wss://ws.okx.com:8443/ws/v5/public`, with `trades` and full-snapshot `books5`, BTC-USDT only. No account credentials are needed. Failed subscription, transport errors and heartbeat timeouts reconnect after five seconds. A reconnect resets CVD and coverage. Old, malformed and out-of-order trade data fail closed; trade IDs prevent replay duplication. `seqId` is not assumed to increment by one for every message.
+
+The collector is memory-only, capped at 30,000 recording events and 60,000 analysis trades / 45 minutes. `/api/flow/export` is a public download of public-market observations, never private account state. The archive includes only the top five levels and cannot establish order queue priority, atomic execution or actual fills. Profile availability requires capture beginning before the previous fixed UTC quarter-hour. The free hosting plan may sleep, reset the capture and require warmup. Persistent storage and an always-on recorder have not been provisioned or purchased.
+
+`/api/health` exposes collector connection, observed coverage and last trade timestamp. Once per minute the service logs a public-flow health summary without credentials, account balances or private order data. A healthy HTTP process is not sufficient: strategy entries separately require recent trades, recent books, complete anchored VWAP and closed candle coverage from OKX. Monitoring prices from another venue never substitutes for missing strategy flow.
+
+Paper adverse allowance (default 2 bps per side) and maximum IOC price deviation (default 15 bps) are separate fields. Legacy paper ledgers without the new allowance retain balances/orders and receive the 2 bps default. Existing orders retain their original model version; new decisions use `orderflow-1.0`. The old single-timeframe OHLC holdout does not validate this strategy and is no longer on its screen.
 
 ## Private OKX demo service
 
@@ -63,3 +73,4 @@ The next release requires account/venue selection, eligibility checks, explicit 
 - Optional market-data APIs and streams: https://docs.kaiko.com/
 
 No third-party strategy code or paid indicators were copied. The new modules are original implementations.
+

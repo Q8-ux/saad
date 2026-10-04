@@ -1,6 +1,6 @@
 // Shared execution state machine. The broker is outside this module.
-export const EXEC_VERSION='execution-1.0';
-export const EXEC_LIMITS=Object.freeze({capital:1000,maxOrder:100,maxExposure:300,dailyLoss:30,maxDrawdownPct:5,maxPending:1,maxSpreadBps:12,maxSlippageBps:15,maxAgeMs:15000,feeBps:10,riskPerTradePct:.5});
+export const EXEC_VERSION='execution-1.1';
+export const EXEC_LIMITS=Object.freeze({capital:1000,maxOrder:100,maxExposure:300,dailyLoss:30,maxDrawdownPct:5,maxPending:1,maxSpreadBps:12,maxSlippageBps:15,paperAllowanceBps:2,maxAgeMs:15000,feeBps:10,riskPerTradePct:.5});
 export const terminal=o=>['filled','canceled','rejected'].includes(o.state);
 const finite=x=>typeof x==='number'&&Number.isFinite(x);
 const day=now=>new Date(now+3*3600000).toISOString().slice(0,10); // Kuwait risk day
@@ -13,7 +13,7 @@ export function markExecution(s,book,now=Date.now()){
   if(day(now)!==s.day){s.day=day(now);s.dayEquity=equity;}
   s.peak=Math.max(s.peak,equity);return {equity,exposure:s.base*bid,dayPnl:equity-s.dayEquity,drawdown:s.peak?(s.peak-equity)/s.peak*100:0,unrealized:s.base*bid*(1-s.limits.feeBps/10000)-s.cost};
 }
-export function validLimits(l){return Object.keys(EXEC_LIMITS).every(k=>finite(l[k])&&l[k]>0)&&l.feeBps<=200&&l.maxOrder<=l.maxExposure&&l.maxExposure<=l.capital&&l.capital<=1000000&&l.dailyLoss<=l.capital&&l.maxPending<=5&&Number.isInteger(l.maxPending)&&l.maxSlippageBps<=100&&l.maxSpreadBps<=100&&l.maxAgeMs<=20000&&l.maxDrawdownPct<=20&&l.riskPerTradePct<=2;}
+export function validLimits(l){return Object.keys(EXEC_LIMITS).every(k=>k==='paperAllowanceBps'?(l[k]===undefined||(finite(l[k])&&l[k]>=0&&l[k]<=l.maxSlippageBps)):finite(l[k])&&l[k]>0)&&l.feeBps<=200&&l.maxOrder<=l.maxExposure&&l.maxExposure<=l.capital&&l.capital<=1000000&&l.dailyLoss<=l.capital&&l.maxPending<=5&&Number.isInteger(l.maxPending)&&l.maxSlippageBps<=100&&l.maxSpreadBps<=100&&l.maxAgeMs<=20000&&l.maxDrawdownPct<=20&&l.riskPerTradePct<=2;}
 export function checkOrder(s,intent,book,now=Date.now()){
   const blocks=[],l=s.limits,side=intent.side,qty=intent.qty,limit=intent.limit;
   if(!validLimits(l)||!['buy','sell'].includes(side)||intent.symbol!=='BTC-USDT'||![qty,limit].every(x=>finite(x)&&x>0))return {ok:false,blocks:['invalid']};
@@ -72,7 +72,7 @@ export function simulateIOC(s,id,book,now=Date.now()){
   const o=s.orders.find(o=>o.id===id);if(!o||terminal(o))return o;
   if(o.state!=='prepared')return o;
   if(!book?.ok||now-book.asOf>s.limits.maxAgeMs||book.asOf>now+3000){o.state='rejected';event(s,'blocked','stale',now);return o;}
-  let filled=0,gross=0;const slippage=s.limits.maxSlippageBps/10000;
+  let filled=0,gross=0;const slippage=(s.limits.paperAllowanceBps??2)/10000;
   for(const r of o.side==='buy'?book.asks:book.bids){const p=r.price*(1+(o.side==='buy'?1:-1)*slippage);if(o.side==='buy'?p>o.limit+1e-7:p<o.limit-1e-7)break;const q=Math.min(o.qty-filled,r.size);filled+=q;gross+=q*p;if(filled>=o.qty-1e-10)break;}
   return applyReport(s,id,{state:filled>=o.qty-1e-10?'filled':'canceled',filled,gross,feeQuote:-gross*s.limits.feeBps/10000,feeBase:0},now);
 }

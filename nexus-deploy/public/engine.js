@@ -1,5 +1,5 @@
 // Original implementation. Shared, deterministic financial calculations.
-export const VERSION = '3.0.1';
+export const VERSION = '3.1.0';
 export const DEFAULT_RISK = { maxTrade: 250, maxExposure: 2000, dailyLoss: 200, minEdge: 0.5, slippageBps: 10, spotFeeBps: 10, stopLossPct: 2, takeProfitPct: 4, maxPositions: 8 };
 export const valid = x => Number.isFinite(Number(x));
 export const round = (x, n = 8) => Number(x.toFixed(n));
@@ -109,3 +109,4 @@ export function makerQuote(mid,spreadBps,inventoryPct,tick=0.01) {
   const bid=Math.floor((center-half)/tick)*tick,ask=Math.ceil((center+half)/tick)*tick;
   return {bid,ask,spread:ask-bid,center};
 }
+

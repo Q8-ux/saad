@@ -14,3 +14,18 @@ td.num{display:table-cell} .source-link svg{width:19px;height:19px;flex:none}
 @media(max-width:1300px){.indicator-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.signal-hero{gap:22px}.signal-detail{padding-inline-start:16px}.signal-hero h2{font-size:28px}}
 @media(max-width:1000px){.signal-hero{grid-template-columns:1fr auto}.signal-detail{grid-column:1/-1;border:0;border-top:1px solid #3a5247;padding:15px 0 0}.data-upgrades{grid-template-columns:1fr}.indicator-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:760px){.signal-hero{padding:22px 18px;gap:15px}.signal-score b{font-size:44px}.signal-hero h2{font-size:28px}.indicator-card{padding:16px 12px}.indicator-card strong{font-size:17px}.indicator-card p{font-size:15px}.desk-stat{font-size:19px}.validation-grid{grid-template-columns:1fr}.desk-wrap .button{flex:1;white-space:normal}.ticket .metric-row{flex-wrap:wrap}.nav button{padding-block:8px}.sidebar .brand{margin-bottom:20px}.sidebar-bottom{padding-top:15px}}
+
+
+/* Trade-flow workspace */
+.flow-timeframes{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+.flow-timeframes>span:not(.pill){display:flex;align-items:center;gap:10px;padding:9px 14px;border:1px solid #304147;border-radius:8px;color:#a9b9bf}
+.flow-timeframes b{color:#c6f372;font-size:18px}.flow-timeframes .pill{margin-inline-start:auto}
+.flow-rank{font:12px Arial;color:#c6f372;margin-inline-end:10px}.flow-chart{width:100%;padding-block:10px}
+.flow-chart svg{width:100%;height:auto;max-height:200px}.flow-chart-times{display:flex;justify-content:space-between;color:#91a3ac;font:12px Arial;padding:0 20px}
+.decision-blocks .pill{white-space:normal;max-width:100%;line-height:1.65}.metric-row{gap:12px}.metric-row b{flex-shrink:0;max-width:62%;overflow-wrap:anywhere}.indicator-card strong{max-width:100%;overflow-wrap:anywhere}
+@media(max-width:600px){.flow-timeframes{gap:7px}.flow-timeframes>span:not(.pill){flex:1 1 29%;padding:8px;display:grid;gap:2px;font-size:14px}.flow-timeframes .pill{margin-inline-start:0}.metric-row{font-size:16px}.metric-row b{font-size:14px;max-width:60%}.signal-detail .metric-row{display:flex;flex-wrap:wrap}}
+
+.flow-indicators{grid-template-columns:repeat(4,minmax(0,1fr))}.flow-rank{display:inline-block;min-width:25px}
+@media(max-width:1100px){.flow-indicators{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:420px){.flow-indicators .indicator-card strong{font-size:18px}}
+@media(max-width:760px){.sidebar:not(.open){display:none}.topbar .crumb{min-width:0;flex:1;gap:7px}.topbar .crumb>b{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.topbar .mobile-toggle{flex:none}.top-actions{flex-shrink:0}.topbar #liveConnection{display:none}}

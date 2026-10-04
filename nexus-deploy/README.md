@@ -2,7 +2,23 @@
 
 An original Arabic/English Bitcoin and Polymarket research terminal. Replaces the previous NEXUS application at the existing deployment URL: https://nexus-markets.onrender.com.
 
-## Version 3.0.1 — opportunities, execution and independent risk
+## Version 3.1.0 — actual trade flow, 1m entry / 5m setup
+
+The default screen is **Order flow & opportunities / تدفق الصفقات والفرص**. This release replaces the default signal rule with the user's October 4 specification; the older studies remain isolated research tools.
+
+- **One source for the strategy: OKX BTC-USDT spot.** Native Node WebSocket subscribes to public `trades` and `books5`. Aggressor-side BTC volume comes from actual trades, including exchange-aggregated fills. `sz` is counted once, never multiplied by `count`. No candle-estimated CVD is substituted. The market board continues to monitor three venues independently.
+- Delta uses trailing 1m and 5m windows. CVD starts at the current server connection, and resets after reconnects, malformed/late data or a trade-stream silence longer than 15 seconds. IDs are deduplicated. Entry requires at least one minute of observed continuous coverage and source data at most five seconds old. Continuity is observational, not a claim to have audited every matching-engine event.
+- **15m context, 5m setup, 1m retest.** A closed 5m bar must break the high/low of the preceding 20 bars with RVOL at least 1.2. A later closed 1m retest, actual directional delta, no absorption flag, VWAP alignment, liquidity/cost gates, and an EMA9/21 supporting filter are required. All checks must pass; the 0–100 display is rule completion, not a win probability. One filled automatic entry per setup, at least 60 seconds between entries. Thresholds are starting hypotheses, not optimized or profitable settings.
+- Daily VWAP is anchored at 00:00 UTC. Anchored VWAP uses the predeclared start of the current four-hour UTC block. Both use total quote turnover divided by base volume from completely covered, closed 5m bars. No HLC3 estimate or incomplete-session fallback is presented as exact VWAP. At a new anchor the display waits for its first closed bar.
+- Volume Profile is derived only from captured actual trades in the **previous complete UTC quarter-hour**, fixed 25 USDT bins and a contiguous 70% value area. POC is the center of the highest-volume bin; VAH/VAL are outer bin boundaries. Missing coverage hides the profile. It is context, not a mandatory gate or a promise of support. Previous-day highs/lows come from a complete 96-bar 15m session.
+- Round-trip costs sweep both sides of the same book for the configured size. This includes spread exactly once, separates additional depth impact, applies two fee charges, and includes an explicitly assumed adverse price allowance. Default paper allowance is 2 bps per side, separate from the 15 bps maximum IOC limit budget. The paper simulator uses that same allowance. Future book liquidity, account fees and latency costs remain uncertain.
+- `/api/flow` returns real observed flow and its coverage metadata. `/api/flow/export` downloads a JSON recording of actual trades, receive timestamps, top-five snapshots and gap/reset markers. Capture is **bounded memory (30,000 events)**, not durable storage; eviction is disclosed. Trade analysis retains at most 60,000 events / 45 minutes. Restart/sleep loses capture. A longer persistent archive and a replay engine are still required for full strategy validation; the old OHLC holdout is removed from this strategy's screen.
+- Browser flow polling is approximately two seconds, with history refreshed approximately every ten seconds. Exchange publication rates do not guarantee delivery or execution latency. Server public flow collection runs while the service is awake. Paper execution still runs only with the page open and visible; no new real-money or autonomous server trading is enabled.
+- Arabic/English UI, real-data coverage, reset count, cost breakdown and capture export are included. Existing paper balances/orders are retained and the new allowance is migrated independently of the maximum slippage limit. No paid data subscription was activated; exchange data remains the first priority. TradingView visual studies and optional Tardis/Kaiko archives are research candidates. CoinGlass is optional derivative context, not an execution feed.
+
+Validation: `npm test` passes **43 deterministic tests**, including aggregation/deduplication, disconnect/warmup/staleness, bounded capture, full-snapshot validation, anchored turnover VWAP, fixed profile coverage, spread accounting, same-allowance paper fills, and no-lookahead breakout/retest gates. Tests use synthetic fixtures only inside tests; the application never generates market prices. Browser verification also passed Arabic RTL, English, eight live-flow indicator cards, 390px layouts in both languages, paper IOC buy, halt retaining holdings, capture download, the separate allowance field, and blocked signals after an API failure, with no JavaScript page errors. Browser fixtures are confined to the test harness. Real/demo financial orders were not sent. Signal profitability remains unvalidated.
+
+## Previous version 3.0.1 — historical implementation notes
 
 The default screen is **Trade opportunities / اقتناص الفرص**. The live-market enhancement prepared in 2.1.0 is included. Version 3.0.1 also handles provider outages: all six watch assets are requested from three venues, each displayed quote keeps the selected venue name, and signals use closed candles plus depth from one consistent available venue (Binance, OKX, or Bybit). No candles or prices are invented or relabeled during failover. OKX candle pagination retains about 499 completed bars for holdout tests. The most recently working signal venue is preferred to avoid needless switching.
 
@@ -43,7 +59,7 @@ Node 22 or newer; no runtime dependencies and no install step.
 ```sh
 cd nexus-deploy
 node server.js
-node --test test/*.test.js
+npm test
 ```
 
 Render keeps the existing service and `nexus-markets-production` branch. The start command remains `node nexus-deploy/server.js`. All source files for this application are scoped to this directory; unrelated projects in the shared repository are untouched.
@@ -84,4 +100,5 @@ Hummingbot, Freqtrade/FreqAI, Polymarket's unified SDK, NautilusTrader, CCXT and
 
 ## Validation
 
-`node --test test/*.test.js` exercises fee-negative pairs, multi-level fills, stale and mismatched markets, missing fee schedules, capital conservation, risk gates and chronological holdout/look-ahead protection. Market-data tests also verify raw price preservation, percentage/volume normalization, timestamp freshness and rejection of missing/crossed prices. Browser checks cover both directions, narrow screens, navigation, paper order/close, risk controls, bot stop, backtests, hedging, live quote export, automatic refresh and data-error states. The code exposes version 3.0.1 via `/api/health`; `/api/market-board`, `/api/snapshot`, `/api/candles` and `/api/signals` are read-only. The new private execution endpoints are separately authenticated and disabled unless explicitly configured.
+`npm test` exercises fee-negative pairs, multi-level fills, stale and mismatched markets, missing fee schedules, capital conservation, risk gates and chronological holdout/look-ahead protection. Market-data tests also verify raw price preservation, percentage/volume normalization, timestamp freshness and rejection of missing/crossed prices. Browser checks cover both directions, narrow screens, navigation, paper order/close, risk controls, bot stop, backtests, hedging, live quote export, automatic refresh and data-error states. The code exposes version 3.1.0 via `/api/health`; `/api/market-board`, `/api/snapshot`, `/api/candles` and `/api/signals` are read-only. The new private execution endpoints are separately authenticated and disabled unless explicitly configured.
+

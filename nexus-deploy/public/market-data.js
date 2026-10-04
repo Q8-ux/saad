@@ -30,6 +30,6 @@ export function selectObservation(rows,symbol,now=Date.now()){
 export function normalizeCandles(source,raw,interval,now=Date.now()){
   const ms=({'1m':60000,'5m':300000,'15m':900000,'1h':3600000})[interval];
   if(!ms||!Array.isArray(raw))throw Error('invalidHistory');
-  const rows=raw.filter(r=>Number(r[0])+ms<=now&&(source!=='OKX'||r[8]==='1')&&(source!=='Binance'||Number(r[6])<now)).map(r=>({time:Number(r[0]),open:Number(r[1]),high:Number(r[2]),low:Number(r[3]),close:Number(r[4]),volume:Number(r[5])})).filter(r=>Object.values(r).every(Number.isFinite)&&r.low>0&&r.volume>=0&&r.high>=Math.max(r.open,r.close)&&r.low<=Math.min(r.open,r.close));
+  const rows=raw.filter(r=>Number(r[0])+ms<=now&&(source!=='OKX'||r[8]==='1')&&(source!=='Binance'||Number(r[6])<now)).map(r=>({time:Number(r[0]),open:Number(r[1]),high:Number(r[2]),low:Number(r[3]),close:Number(r[4]),volume:Number(r[5]),quoteVolume:numeric(r[source==='Bybit'?6:7])})).filter(r=>['time','open','high','low','close','volume'].every(k=>Number.isFinite(r[k]))&&r.low>0&&r.volume>=0&&r.high>=Math.max(r.open,r.close)&&r.low<=Math.min(r.open,r.close));
   return [...new Map(rows.map(r=>[r.time,r])).values()].sort((a,b)=>a.time-b.time).slice(-500);
 }

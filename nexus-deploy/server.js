@@ -3,7 +3,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {levels,VERSION} from './public/engine.js';
-import {confluence} from './public/signals.js';
+import {scalpSignal} from './public/scalp-signals.js';
+import {startMarketFlow} from './lib/market-flow.js';
 import {createExecutionService} from './lib/execution-service.js';
 import {WATCH_SYMBOLS,normalizeTicker,observationState,normalizeCandles} from './public/market-data.js';
 
@@ -85,7 +86,7 @@ async function sourceCandles(interval,source){
   if(source==='Binance')raw=await getJSON(`https://data-api.binance.vision/api/v3/klines?symbol=BTCUSDT&interval=${interval}&limit=500`,30000);
   else if(source==='OKX'){
     const url=`https://www.okx.com/api/v5/market/candles?instId=BTC-USDT&bar=${interval==='1h'?'1H':interval}`;
-    const recent=await getJSON(url+'&limit=300',30000);if(recent.code!=='0'||!recent.data?.length)throw Error('historyUnavailable');
+    const recent=await getJSON(url+'&limit=300',5000);if(recent.code!=='0'||!recent.data?.length)throw Error('historyUnavailable');
     const older=await getJSON(url+`&limit=200&after=${recent.data.at(-1)[0]}`,30000);if(older.code!=='0')throw Error('historyUnavailable');raw=[...recent.data,...older.data];
   }else{
     const minutes=({'1m':'1','5m':'5','15m':'15','1h':'60'})[interval];
@@ -97,19 +98,17 @@ async function sourceCandles(interval,source){
 const sourceOrder=()=>[signalSource,...['Binance','OKX','Bybit'].filter(x=>x!==signalSource)];
 async function candles(interval){for(const source of sourceOrder()){try{return await sourceCandles(interval,source);}catch{}}throw Error('historyUnavailable');}
 const execution=createExecutionService({getBook:()=>exchange('OKX')});
+const marketFlow=startMarketFlow();
+const flowTelemetry=setInterval(()=>{const f=marketFlow.snapshot();console.log(JSON.stringify({event:'public-flow',source:f.source,connected:f.connected,ready:f.ready,reason:f.reason,lastTradeAt:f.lastTradeAt,coverageStart:f.coverageStart,gaps:f.gaps,records:f.recording.records}));},60000);flowTelemetry.unref();
 let signalsPending=null,signalsCache=null;
 async function signalBoard(){
-  if(signalsCache&&Date.now()-signalsCache.generatedAt<3000)return signalsCache;if(signalsPending)return signalsPending;
+  if(signalsCache&&Date.now()-signalsCache.generatedAt<1000)return signalsCache;if(signalsPending)return signalsPending;
   signalsPending=(async()=>{
-    for(const source of sourceOrder()){
-      try{
-        const result=await Promise.all(['5m','15m','1h'].map(tf=>sourceCandles(tf,source))),frames=Object.fromEntries(result.map(x=>[x.interval,x.data]));
-        const book=await exchange(source);if(!book.ok||Date.now()-book.asOf>15000)continue;
-        const signal=confluence(frames,book);if(signal.blocks.includes('history'))continue;
-        signalSource=source;return signalsCache={generatedAt:Date.now(),source,symbol:'BTC-USDT',history:frames,book,signal};
-      }catch{}
-    }
-    return {generatedAt:Date.now(),source:null,symbol:'BTC-USDT',history:{},book:null,signal:confluence({},null)};
+    // Flow, candles and execution book must belong to the same venue. The wider
+    // market monitor retains its independent multi-venue fallback.
+    const result=await Promise.allSettled(['1m','5m','15m'].map(tf=>sourceCandles(tf,'OKX'))),frames=Object.fromEntries(result.filter(x=>x.status==='fulfilled').map(x=>[x.value.interval,x.value.data]));
+    const flow=marketFlow.snapshot(),liveBook=marketFlow.book(),book=liveBook&&Date.now()-liveBook.asOf<=5000?liveBook:await exchange('OKX');
+    return signalsCache={generatedAt:Date.now(),source:'OKX',symbol:'BTC-USDT',history:frames,book,flow,signal:scalpSignal(frames,book,flow)};
   })();try{return await signalsPending;}finally{signalsPending=null;}
 }
 const json=(res,status,data)=>{res.writeHead(status,{'content-type':'application/json; charset=utf-8','cache-control':'no-store'});res.end(JSON.stringify(data));};
@@ -121,7 +120,9 @@ const server=http.createServer(async(req,res)=>{
     const u=new URL(req.url,'http://localhost'),p=u.pathname;
     if(await execution.handle(req,res,u,json))return;
     if(req.method!=='GET'&&req.method!=='HEAD')return json(res,405,{error:'readOnlyAPI',message:'Real-money orders are not enabled.'});
-    if(p==='/api/health')return json(res,200,{ok:true,name:'Fainance Bot',version:VERSION,mode:'paper',execution:execution.summary(),time:Date.now()});
+    if(p==='/api/health'){const f=marketFlow.snapshot();return json(res,200,{ok:true,name:'Fainance Bot',version:VERSION,mode:'paper',execution:execution.summary(),flow:{source:f.source,connected:f.connected,ready:f.ready,reason:f.reason,coverageStart:f.coverageStart,lastTradeAt:f.lastTradeAt,gaps:f.gaps,recording:f.recording},time:Date.now()});}
+    if(p==='/api/flow')return json(res,200,{flow:marketFlow.snapshot(),book:marketFlow.book()});
+    if(p==='/api/flow/export'){res.setHeader('Content-Disposition','attachment; filename="fainance-okx-flow.json"');return json(res,200,marketFlow.export());}
     if(p==='/api/signals')return json(res,200,await signalBoard());
     if(p==='/api/market-board')return json(res,200,{...await marketBoard(),serverNow:Date.now()});
     if(p==='/api/snapshot')return json(res,200,await snapshot());
@@ -133,3 +134,4 @@ const server=http.createServer(async(req,res)=>{
   }catch{return json(res,500,{error:'serviceUnavailable'});}
 });
 server.listen(PORT,'0.0.0.0',()=>console.log(`Fainance Bot ${VERSION} on ${PORT}; public data + device-local paper trading`));
+process.on('SIGTERM',()=>{clearInterval(flowTelemetry);marketFlow.stop();execution.close();server.close(()=>process.exit(0));});

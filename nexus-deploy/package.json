@@ -1,9 +1,9 @@
 {
   "name": "fainance-bot",
-  "version": "3.0.1",
+  "version": "3.1.0",
   "private": true,
   "type": "module",
-  "description": "Bilingual research terminal and local paper trading workspace",
-  "scripts": { "start": "node server.js", "test": "node --test test/*.test.js" },
+  "description": "Bilingual order-flow research and paper execution terminal",
+  "scripts": { "start": "node server.js", "test": "node --test --test-isolation=none test/*.test.js" },
   "engines": { "node": ">=22" }
 }
