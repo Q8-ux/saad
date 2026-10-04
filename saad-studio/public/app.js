@@ -81,3 +81,29 @@ $('#downloadOrder').addEventListener('click',()=>{
  const a=document.createElement('a');a.href=url;a.download='SAAD-STUDIO-order.txt';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
 });
 $('#year').textContent=new Date().getFullYear();
+
+// Watermarks cover the actual contained image, including on responsive previews.
+function positionWatermark(img){
+ const layer=img.parentElement?.querySelector(':scope > .preview-watermark');
+ if(!layer||!img.naturalWidth||!img.clientWidth||!img.clientHeight)return;
+ const scale=Math.min(img.clientWidth/img.naturalWidth,img.clientHeight/img.naturalHeight);
+ const width=img.naturalWidth*scale,height=img.naturalHeight*scale;
+ Object.assign(layer.style,{width:width+'px',height:height+'px',left:(img.offsetLeft+(img.clientWidth-width)/2)+'px',top:(img.offsetTop+(img.clientHeight-height)/2)+'px'});
+ layer.style.setProperty('--watermark-font',Math.max(10,Math.min(40,width/23))+'px');
+}
+function watermarkPreviews(){
+ for(const img of document.querySelectorAll('.sample-image-link img,.card-art img,.hero-samples img')){
+  const parent=img.parentElement;
+  if(!parent.querySelector(':scope > .preview-watermark')){
+   parent.classList.add('watermarked-media');
+   const layer=el('div','preview-watermark');layer.setAttribute('aria-hidden','true');
+   for(let i=0;i<9;i++)layer.append(el('span','','SAAD STUDIO'));
+   parent.append(layer);img.addEventListener('load',()=>positionWatermark(img));
+  }
+  positionWatermark(img);
+ }
+}
+watermarkPreviews();
+new MutationObserver(records=>{if(records.some(r=>[...r.addedNodes].some(n=>n.nodeType===1&&(n.matches?.('img,.sample-card,.card')||n.querySelector?.('img')))))watermarkPreviews()}).observe(document.body,{childList:true,subtree:true});
+new ResizeObserver(watermarkPreviews).observe(document.body);
+window.addEventListener('resize',watermarkPreviews);
