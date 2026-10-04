@@ -1538,6 +1538,41 @@ window.STUDIO_STORE = {
         "المقاس والموعد المطلوب"
       ],
       "variant": 4
+    },
+    {
+      "id": "event-invitation",
+      "category": "events",
+      "title": "دعوة افتتاح وفعالية",
+      "description": "دعوة مخصصة لافتتاح مشروع أو معرض أو مناسبة خاصة، بنصوصك وتفاصيلك.",
+      "size": "A4 أو مقاس رقمي حسب الطلب",
+      "mark": "لحظات\nمرتّبة.",
+      "scope": "دعوة بوجه واحد",
+      "label": "EVENT / INVITATION",
+      "style": "invitation",
+      "tone": "rose",
+      "price": null,
+      "templates": [
+        {
+          "id": "invite-01",
+          "title": "دعوة افتتاح — ليلة الفن",
+          "image": "samples/invite-01.webp"
+        },
+        {
+          "id": "invite-02",
+          "title": "دعوة معرض — مساحة للإلهام",
+          "image": "samples/invite-02.webp"
+        }
+      ],
+      "formats": [
+        "حسب الاستخدام والاتفاق"
+      ],
+      "needs": [
+        "النصوص النهائية والأسماء المطلوبة",
+        "الشعار أو الصور التي تريد استخدامها",
+        "الألوان أو مرجع بصري يعجبك",
+        "المقاس والموعد المطلوب"
+      ],
+      "variant": 4
     }
   ],
   "samples": [
@@ -1744,6 +1779,18 @@ window.STUDIO_STORE = {
       "title": "غلاف تعليمي — تعلّم بذكاء",
       "image": "samples/youtube-06.webp",
       "service": "youtube-thumbnail"
+    },
+    {
+      "id": "invite-01",
+      "title": "دعوة افتتاح — ليلة الفن",
+      "image": "samples/invite-01.webp",
+      "service": "event-invitation"
+    },
+    {
+      "id": "invite-02",
+      "title": "دعوة معرض — مساحة للإلهام",
+      "image": "samples/invite-02.webp",
+      "service": "event-invitation"
     }
   ],
   "printSizes": [

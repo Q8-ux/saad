@@ -8,7 +8,8 @@
     "logo": "DAHXAL7tFLA",
     "print": "DAHXAGhHHiA",
     "cv": "DAHXAYb2dco",
-    "youtube": "DAHXA--TMcw"
+    "youtube": "DAHXA--TMcw",
+    "invite": "DAHXA-oe7rQ"
   },
   "published_samples": [
     {
@@ -214,6 +215,18 @@
       "title": "غلاف تعليمي — تعلّم بذكاء",
       "image": "samples/youtube-06.webp",
       "service": "youtube-thumbnail"
+    },
+    {
+      "id": "invite-01",
+      "title": "دعوة افتتاح — ليلة الفن",
+      "image": "samples/invite-01.webp",
+      "service": "event-invitation"
+    },
+    {
+      "id": "invite-02",
+      "title": "دعوة معرض — مساحة للإلهام",
+      "image": "samples/invite-02.webp",
+      "service": "event-invitation"
     }
   ],
   "quota_blocked": [
@@ -224,6 +237,18 @@
     "websites"
   ],
   "incomplete_categories": {
-    "resumes": "6 of the requested 10 samples available"
-  }
+    "resumes": "6 of the requested 10 samples available",
+    "events": "2 opening/event invitation samples; other occasions remain incomplete"
+  },
+  "adaptations": [
+    {
+      "design_id": "DAHXA-oe7rQ",
+      "source_design_id": "DAHXAGhHHiA",
+      "source_pages": [
+        3,
+        5
+      ],
+      "method": "Copied task-created pages; manually adapted text and typography in Canva, originals retained."
+    }
+  ]
 }
