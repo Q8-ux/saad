@@ -332,7 +332,38 @@ window.STUDIO_STORE = {
       "style": "social",
       "tone": "blue",
       "price": null,
-      "templates": [],
+      "templates": [
+        {
+          "id": "youtube-01",
+          "title": "غلاف يوتيوب — رحلة العمر",
+          "image": "samples/youtube-01.webp"
+        },
+        {
+          "id": "youtube-02",
+          "title": "غلاف يوتيوب — تقنية تستحق التجربة",
+          "image": "samples/youtube-02.webp"
+        },
+        {
+          "id": "youtube-03",
+          "title": "غلاف يوتيوب — سر النكهة",
+          "image": "samples/youtube-03.webp"
+        },
+        {
+          "id": "youtube-04",
+          "title": "غلاف بودكاست — فكرة تصنع الفرق",
+          "image": "samples/youtube-04.webp"
+        },
+        {
+          "id": "youtube-05",
+          "title": "غلاف يوتيوب — قبل وبعد",
+          "image": "samples/youtube-05.webp"
+        },
+        {
+          "id": "youtube-06",
+          "title": "غلاف تعليمي — تعلّم بذكاء",
+          "image": "samples/youtube-06.webp"
+        }
+      ],
       "formats": [
         "حسب الاستخدام والاتفاق"
       ],
@@ -1677,6 +1708,42 @@ window.STUDIO_STORE = {
       "title": "سيرة أكاديمية — بحث وسياسات",
       "image": "samples/cv-06.webp",
       "service": "academic-cv"
+    },
+    {
+      "id": "youtube-01",
+      "title": "غلاف يوتيوب — رحلة العمر",
+      "image": "samples/youtube-01.webp",
+      "service": "youtube-thumbnail"
+    },
+    {
+      "id": "youtube-02",
+      "title": "غلاف يوتيوب — تقنية تستحق التجربة",
+      "image": "samples/youtube-02.webp",
+      "service": "youtube-thumbnail"
+    },
+    {
+      "id": "youtube-03",
+      "title": "غلاف يوتيوب — سر النكهة",
+      "image": "samples/youtube-03.webp",
+      "service": "youtube-thumbnail"
+    },
+    {
+      "id": "youtube-04",
+      "title": "غلاف بودكاست — فكرة تصنع الفرق",
+      "image": "samples/youtube-04.webp",
+      "service": "youtube-thumbnail"
+    },
+    {
+      "id": "youtube-05",
+      "title": "غلاف يوتيوب — قبل وبعد",
+      "image": "samples/youtube-05.webp",
+      "service": "youtube-thumbnail"
+    },
+    {
+      "id": "youtube-06",
+      "title": "غلاف تعليمي — تعلّم بذكاء",
+      "image": "samples/youtube-06.webp",
+      "service": "youtube-thumbnail"
     }
   ],
   "printSizes": [

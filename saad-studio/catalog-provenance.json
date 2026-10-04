@@ -7,7 +7,8 @@
     "story": "DAHXAMKFINk",
     "logo": "DAHXAL7tFLA",
     "print": "DAHXAGhHHiA",
-    "cv": "DAHXAYb2dco"
+    "cv": "DAHXAYb2dco",
+    "youtube": "DAHXA--TMcw"
   },
   "published_samples": [
     {
@@ -177,10 +178,45 @@
       "title": "سيرة أكاديمية — بحث وسياسات",
       "image": "samples/cv-06.webp",
       "service": "academic-cv"
+    },
+    {
+      "id": "youtube-01",
+      "title": "غلاف يوتيوب — رحلة العمر",
+      "image": "samples/youtube-01.webp",
+      "service": "youtube-thumbnail"
+    },
+    {
+      "id": "youtube-02",
+      "title": "غلاف يوتيوب — تقنية تستحق التجربة",
+      "image": "samples/youtube-02.webp",
+      "service": "youtube-thumbnail"
+    },
+    {
+      "id": "youtube-03",
+      "title": "غلاف يوتيوب — سر النكهة",
+      "image": "samples/youtube-03.webp",
+      "service": "youtube-thumbnail"
+    },
+    {
+      "id": "youtube-04",
+      "title": "غلاف بودكاست — فكرة تصنع الفرق",
+      "image": "samples/youtube-04.webp",
+      "service": "youtube-thumbnail"
+    },
+    {
+      "id": "youtube-05",
+      "title": "غلاف يوتيوب — قبل وبعد",
+      "image": "samples/youtube-05.webp",
+      "service": "youtube-thumbnail"
+    },
+    {
+      "id": "youtube-06",
+      "title": "غلاف تعليمي — تعلّم بذكاء",
+      "image": "samples/youtube-06.webp",
+      "service": "youtube-thumbnail"
     }
   ],
   "quota_blocked": [
-    "youtube",
     "events",
     "business",
     "education",
