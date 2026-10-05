@@ -9,6 +9,12 @@ const toastEl = document.getElementById('toast');
 const hintButton = document.getElementById('hintButton');
 const hintCounter = document.getElementById('hintCounter');
 const hintExplanation = document.getElementById('hintExplanation');
+const coachButton = document.getElementById('coachButton');
+const coachPanel = document.getElementById('coachPanel');
+const coachSummary = document.getElementById('coachSummary');
+const coachPlans = document.getElementById('coachPlans');
+const coachMaterial = document.getElementById('coachMaterial');
+const showCoachMove = document.getElementById('showCoachMove');
 const resumeButton = document.getElementById('resumeGame');
 const SAVED_GAME_KEY = 'ai_chess_saved_game_v1';
 const shareButton=document.getElementById('shareGame'),shareModal=document.getElementById('shareModal'),sharePreview=document.getElementById('sharePreview');
@@ -33,6 +39,8 @@ let locked = false;
 let gameGeneration = 0;
 let pendingMoveController = null;
 let pendingLegalController = null;
+let pendingCoachController = null;
+let coachSuggestion = null;
 
 function toast(text){
   toastEl.textContent = text;
@@ -90,13 +98,23 @@ function saveCurrentGame(){
  refreshResumeButton();
 }
 function clearSavedGame(){localStorage.removeItem(SAVED_GAME_KEY);refreshResumeButton()}
+function clearCoach(abortRequest=true){
+ if(abortRequest)pendingCoachController?.abort();
+ pendingCoachController=null;coachSuggestion=null;coachPanel.hidden=true;
+ coachSummary.textContent='';coachPlans.replaceChildren();coachMaterial.textContent='';
+}
+function updateCoachAvailability(){
+ const available=!window.multiplayerGame&&currentTurn()==='white';
+ coachButton.hidden=Boolean(window.multiplayerGame);
+ coachButton.disabled=!available||locked;
+}
 function resumePreviousGame(){
  const saved=savedGame();if(!saved)return;
  try{
    fen=saved.fen;moveHistory=Array.isArray(saved.moveHistory)?saved.moveHistory:[];movePairs=Array.isArray(saved.movePairs)?saved.movePairs:[];lastMove=Array.isArray(saved.lastMove)?saved.lastMove:null;
    if(saved.level&&levelEl.querySelector(`option[value="${saved.level}"]`))levelEl.value=saved.level;
-   aiLevelLabel.textContent=levelEl.options[levelEl.selectedIndex].text;selected=null;legalMoves=[];hintMove=null;locked=false;hintExplanation.hidden=true;
-   renderMoves();renderBoard();updateHintAvailability();refreshResumeButton();statusEl.textContent=t('gameResumed');toast(t('gameResumed'));chessSound.play('transition');
+   aiLevelLabel.textContent=levelEl.options[levelEl.selectedIndex].text;selected=null;legalMoves=[];hintMove=null;locked=false;hintExplanation.hidden=true;clearCoach();
+   renderMoves();renderBoard();updateHintAvailability();updateCoachAvailability();refreshResumeButton();statusEl.textContent=t('gameResumed');toast(t('gameResumed'));chessSound.play('transition');
  }catch(_){clearSavedGame();toast(t('savedGameInvalid'))}
 }
 
@@ -176,7 +194,7 @@ async function onSquareClick(square, piece){
 
 async function playMove(from, to){
   if(window.multiplayerGame){ await window.multiplayerMove(from,to); return; }
-  hintExplanation.hidden=true;
+  hintExplanation.hidden=true;clearCoach();
   const generation = gameGeneration;
   const controller = new AbortController();
   pendingMoveController = controller;
@@ -208,7 +226,7 @@ async function playMove(from, to){
     const wasCapture=(data.player_san||'').includes('x')||(data.ai_san||'').includes('x');
     chessSound.play(wasCapture?'capture':'move');
     selected = null; legalMoves = [];
-    renderMoves(); renderBoard(); updateHintAvailability();
+    renderMoves(); renderBoard(); updateHintAvailability(); updateCoachAvailability();
     saveCurrentGame();
 
     if(data.status === 'game_over'){
@@ -227,7 +245,7 @@ async function playMove(from, to){
     statusEl.textContent = t('yourWhiteTurn');
   }finally{
     if(pendingMoveController === controller) pendingMoveController = null;
-    if(generation === gameGeneration) locked = false;
+    if(generation === gameGeneration){locked = false;updateCoachAvailability();}
   }
 }
 
@@ -263,6 +281,7 @@ async function explainHint(hintFen, uci, generation){
 
 async function requestHint(){
   if(!['beginner','easy'].includes(levelEl.value)||window.multiplayerGame||locked)return;
+  clearCoach();
   if(hintsUsed>=MAX_HINTS){toast(t('noHintsLeft'));return;}
   hintButton.disabled=true;hintButton.textContent=t('findingHint');
   try{
@@ -275,30 +294,75 @@ async function requestHint(){
   finally{hintButton.textContent=t('getHint');updateHintAvailability();}
 }
 
+function renderCoach(data){
+  coachSummary.textContent=data.summary;
+  coachMaterial.textContent=t('materialStatus',{status:data.position.material});
+  coachPlans.replaceChildren(...data.plans.map(plan=>{
+    const item=document.createElement('li');item.textContent=plan;return item;
+  }));
+  coachSuggestion=data.recommended_move;
+  coachPanel.hidden=false;
+}
+
+async function requestCoach(){
+  if(window.multiplayerGame||currentTurn()!=='white'||locked)return;
+  clearCoach();
+  const generation=gameGeneration,coachFen=fen;
+  const controller=new AbortController();pendingCoachController=controller;
+  const timeout=setTimeout(()=>controller.abort(),12000);
+  coachButton.disabled=true;coachButton.textContent=t('analyzingPosition');
+  try{
+    const response=await fetch('/api/coach',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({fen:coachFen,language:window.getLanguage?.()||'ar'}),signal:controller.signal
+    });
+    const data=await response.json();
+    if(generation!==gameGeneration||fen!==coachFen)return;
+    if(!response.ok)throw new Error(data.detail||'coach unavailable');
+    renderCoach(data);chessSound.play('transition');
+  }catch(err){
+    if(err.name!=='AbortError'&&generation===gameGeneration&&fen===coachFen)toast(t('coachUnavailable'));
+  }finally{
+    clearTimeout(timeout);
+    if(pendingCoachController===controller)pendingCoachController=null;
+    coachButton.textContent=t('analyzePosition');updateCoachAvailability();
+  }
+}
+
+function revealCoachMove(){
+  if(!coachSuggestion)return;
+  hintMove={from:coachSuggestion.from_square,to:coachSuggestion.to_square};
+  selected=coachSuggestion.from_square;legalMoves=[coachSuggestion.to_square];
+  renderBoard();toast(t('coachMoveShown'));chessSound.play('check');
+}
+
 function resetGame(playSound=true,clearPrevious=true){
   gameGeneration += 1;
   pendingMoveController?.abort();
   pendingLegalController?.abort();
+  pendingCoachController?.abort();
   pendingMoveController = null;
   pendingLegalController = null;
   fen=START_FEN; selected=null; legalMoves=[]; movePairs=[]; moveHistory=[]; lastMove=null; hintMove=null; hintsUsed=0; locked=false;
-  hintExplanation.hidden=true;hintExplanation.textContent='';
+  hintExplanation.hidden=true;hintExplanation.textContent='';clearCoach(false);
   statusEl.textContent=t('yourWhiteTurn');
-  renderMoves(); renderBoard(); updateHintAvailability();
+  renderMoves(); renderBoard(); updateHintAvailability(); updateCoachAvailability();
   if(clearPrevious)clearSavedGame();else refreshResumeButton();
   if(playSound)chessSound.play('challenge');
 }
 
 resumeButton.addEventListener('click',resumePreviousGame);
 hintButton.addEventListener('click',requestHint);
+coachButton.addEventListener('click',requestCoach);
+showCoachMove.addEventListener('click',revealCoachMove);
 document.getElementById('newGame').addEventListener('click',()=>resetGame(true));
 levelEl.addEventListener('change', ()=>{
   aiLevelLabel.textContent = levelEl.options[levelEl.selectedIndex].text;
   hintsUsed=0; hintMove=null; selected=null; legalMoves=[]; renderBoard(); updateHintAvailability();
-  hintExplanation.hidden=true;
+  hintExplanation.hidden=true;clearCoach();updateCoachAvailability();
   toast(t('levelToast',{level:aiLevelLabel.textContent}));
 });
 
 resetGame(false,false);
 
-window.addEventListener('languagechange',()=>{ aiLevelLabel.textContent=levelEl.options[levelEl.selectedIndex].text; hintButton.textContent=t('getHint'); resumeButton.textContent=t('resumeGame'); updateHintAvailability(); refreshResumeButton(); renderMoves(); if(!window.multiplayerGame && !locked) statusEl.textContent=t('yourWhiteTurn'); });
+window.addEventListener('languagechange',()=>{ aiLevelLabel.textContent=levelEl.options[levelEl.selectedIndex].text; hintButton.textContent=t('getHint'); coachButton.textContent=t('analyzePosition'); resumeButton.textContent=t('resumeGame'); clearCoach(); updateHintAvailability(); updateCoachAvailability(); refreshResumeButton(); renderMoves(); if(!window.multiplayerGame && !locked) statusEl.textContent=t('yourWhiteTurn'); });

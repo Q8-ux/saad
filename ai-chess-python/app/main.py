@@ -11,6 +11,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from .analysis import router as analysis_router
+from .coach import router as coach_router
 from .engine import LEVELS, choose_move
 from .explainer import router as explainer_router
 from .multiplayer import router as multiplayer_router
@@ -19,11 +20,12 @@ BASE_DIR = Path(__file__).resolve().parent
 STATIC_DIR = BASE_DIR / "static"
 MAX_GAME_PLIES = 1024
 
-app = FastAPI(title="AI Chess Arena", version="1.0.1")
+app = FastAPI(title="AI Chess Arena", version="1.1.0")
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 app.include_router(multiplayer_router)
 app.include_router(analysis_router)
 app.include_router(explainer_router)
+app.include_router(coach_router)
 
 
 class LegalMovesRequest(BaseModel):

@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>AI Chess Arena</title>
-  <link rel="stylesheet" href="/static/styles.css?v=20260831-moves-dropdown1" />
+  <link rel="stylesheet" href="/static/styles.css?v=20261006-coach1" />
 </head>
 <body>
   <div class="app-shell">
@@ -68,6 +68,16 @@
         <button id="hintButton" class="hint-btn" data-i18n="getHint">💡 أعطني تلميحًا</button>
         <div id="hintCounter" class="hint-counter"></div>
         <div id="hintExplanation" class="hint-explanation" role="status" aria-live="polite" hidden></div>
+        <button id="coachButton" class="coach-btn" type="button" data-i18n="analyzePosition">🧭 حلل موقفي</button>
+        <section id="coachPanel" class="coach-panel" aria-labelledby="coachTitle" aria-live="polite" hidden>
+          <div class="coach-head">
+            <strong id="coachTitle" data-i18n="matchCoach">مدرب المباراة</strong>
+            <span id="coachMaterial" class="coach-badge"></span>
+          </div>
+          <p id="coachSummary"></p>
+          <ol id="coachPlans" class="coach-plans"></ol>
+          <button id="showCoachMove" type="button" class="coach-move-btn" data-i18n="showSuggestedMove">اعرض النقلة على الرقعة</button>
+        </section>
         <button id="newGame" class="primary-btn" data-i18n="newGame">مباراة جديدة</button>
 
         <div class="info-card">
@@ -143,9 +153,9 @@
   </a>
   <div id="toast" class="toast"></div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="/static/i18n.js?v=20260831-whatsapp1"></script>
+  <script src="/static/i18n.js?v=20261006-coach1"></script>
   <script src="/static/audio.js?v=20260820-platform"></script>
-  <script src="/static/app.js?v=20260831-moves-dropdown1"></script>
+  <script src="/static/app.js?v=20261006-coach1"></script>
   <script src="/static/multiplayer.js?v=20260820-platform"></script>
   <script>document.getElementById("languageSelect").addEventListener("change",e=>setLanguage(e.target.value));</script>
 </body>
