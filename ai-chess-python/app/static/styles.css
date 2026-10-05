@@ -55,3 +55,21 @@ body{min-height:100vh;padding:24px;overflow-x:hidden}.app-shell{width:100%;max-w
 }
 .hint-explanation{margin-top:10px;border:1px solid rgba(94,234,212,.35);border-radius:12px;background:rgba(94,234,212,.08);padding:12px;color:var(--text);font-size:16px;line-height:1.7}
 .hint-explanation[hidden]{display:none}
+
+/* Structured match coach: compact, readable and safe on mobile. */
+.coach-btn{width:100%;margin-top:10px;border:1px solid rgba(96,165,250,.52);border-radius:14px;padding:13px 15px;background:linear-gradient(135deg,rgba(96,165,250,.16),rgba(94,234,212,.08));color:#dbeafe;font:900 16px "Al-Mohanad",sans-serif;cursor:pointer;transition:filter .2s ease,transform .2s ease}
+.coach-btn:hover{filter:brightness(1.14);transform:translateY(-1px)}
+.coach-btn:disabled{opacity:.48;cursor:not-allowed;transform:none}
+.coach-btn[hidden],.coach-panel[hidden]{display:none}
+.coach-panel{margin-top:10px;padding:14px;border:1px solid rgba(96,165,250,.35);border-radius:16px;background:linear-gradient(145deg,rgba(96,165,250,.11),rgba(3,13,25,.76));box-shadow:inset 0 1px 0 rgba(255,255,255,.05)}
+.coach-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.coach-head strong{font-size:18px;color:var(--text)}
+.coach-badge{padding:5px 9px;border:1px solid rgba(94,234,212,.30);border-radius:999px;background:rgba(94,234,212,.09);color:var(--teal);font-size:12px;white-space:nowrap}
+.coach-panel p{margin:11px 0;color:#dbeafe;font-size:15px;line-height:1.75}
+.coach-plans{margin:0;padding-inline-start:22px;color:var(--muted);font-size:14px;line-height:1.75}
+.coach-plans li+li{margin-top:5px}
+.coach-move-btn{width:100%;margin-top:12px;border:1px solid rgba(244,201,107,.38);border-radius:12px;padding:10px 12px;background:rgba(244,201,107,.10);color:#fef3c7;font:900 14px "Al-Mohanad",sans-serif;cursor:pointer}
+.coach-move-btn:hover{background:rgba(244,201,107,.16)}
+button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+@media(max-width:620px){.coach-panel{padding:13px}.coach-panel p{font-size:16px}.coach-plans{font-size:15px}.coach-btn{min-height:48px;font-size:17px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
