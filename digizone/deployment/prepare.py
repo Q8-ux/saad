@@ -36,9 +36,10 @@ def overlay(root, source):
     for name in ("index.html", "styles.css", "app.js", "config.js", "assets/digital-orbit.webp"):
         if not (source / name).is_file() or not (source / name).stat().st_size:
             raise RuntimeError(f"Digizone release is incomplete: {name}")
-    for name in ("assets/al-mohanad.woff", "assets/al-mohanad-bold.woff"):
-        if (source / name).read_bytes()[:4] != b"wOFF":
-            raise RuntimeError("Al Mohanad font is invalid")
+    if (source / "assets/Cairo-Variable.woff2").read_bytes()[:4] != b"wOF2":
+        raise RuntimeError("Cairo font is invalid")
+    if not (source / "assets/Cairo-OFL.txt").is_file():
+        raise RuntimeError("Cairo font license is missing")
     protected = manifest(root)
     if (root / TARGET).exists():
         shutil.rmtree(root / TARGET)
