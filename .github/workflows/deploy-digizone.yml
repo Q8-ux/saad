@@ -1,0 +1,44 @@
+name: Publish Digizone
+on:
+  push:
+    branches: [main]
+    paths: ['digizone/**', '.github/workflows/deploy-digizone.yml']
+  workflow_dispatch:
+  workflow_run:
+    workflows: ['Deploy All GitHub Pages Sites']
+    types: [completed]
+    branches: [main]
+permissions:
+  contents: read
+  actions: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages-v2
+  cancel-in-progress: false
+jobs:
+  publish:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/configure-pages@v5
+      - name: Validate Digizone scripts
+        run: |
+          node --check digizone/app.js
+          node --check digizone/config.js
+      - name: Publish Digizone and preserve existing sites
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python digizone/deployment/prepare.py
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+          retention-days: 30
+      - uses: actions/deploy-pages@v4
+        id: deploy
