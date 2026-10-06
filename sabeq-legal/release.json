@@ -1,9 +1,9 @@
 {
-  "release": "2026-10-01-interface-languages",
-  "clientSource": "bc7d682ac8d9f834e22a44f77e51ae8c030d9c1d",
-  "backendSource": "0ba096e3c90713ef1b14ae4bf20e24f93c11be72",
+  "release": "2026-10-06-fixed-arabic-voice",
+  "clientSource": "8f87bf2ab63da2c1274bdf0f8b9a720f4c176a13",
+  "backendSource": "8f87bf2ab63da2c1274bdf0f8b9a720f4c176a13",
   "assistant": "research-owned-spelling-7",
-  "voice": "streamed-voice-3",
+  "voice": "gulf-male-voice-4",
   "tools": "legal-tools-1",
   "voiceIndicator": "red-wave-estimated-countdown-1",
   "addressFont": "mohanad-900",
@@ -21,11 +21,12 @@
   "finalMemo": "clean-no-review-notes-1",
   "memoResultTools": "bottom-vector-actions-1",
   "memoPreview": "document-derived-clean-text-1",
-  "githubPagesAsset": "index-CU8yHKzt.js",
+  "githubPagesAsset": "index-vEaSYP3X.js",
   "publishedAt": "2026-10-01T16:54:51.380Z",
   "memoLanguage": "ar-KW",
   "memoDirection": "rtl",
   "memoAlignment": "right",
   "interfaceLocalization": "ar-en-ur-tools-guidance-1",
-  "memoProseLanguage": "arabic-with-protected-names-and-identifiers-1"
+  "memoProseLanguage": "arabic-with-protected-names-and-identifiers-1",
+  "builtAt": "2026-10-06T08:02:06Z"
 }
