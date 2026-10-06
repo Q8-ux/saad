@@ -54,7 +54,17 @@ def prepare():
     if not re.fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", repo):
         raise RuntimeError("Invalid repository")
     runs = api(f"repos/{repo}/actions/runs?status=success&per_page=100")["workflow_runs"]
-    candidates = [r for r in runs if r.get("head_branch") == "main" and r.get("path", "").split("@")[0] == WORKFLOW]
+    candidates = []
+    for run in sorted(runs, key=lambda r: r["updated_at"], reverse=True):
+        if run.get("head_branch") != "main":
+            continue
+        jobs = api(f"repos/{repo}/actions/runs/{int(run['id'])}/jobs")["jobs"]
+        deployed = any(step.get("conclusion") == "success" and
+                       ("actions/deploy-pages@" in step.get("name", "") or step.get("name") == "Deploy")
+                       for job in jobs for step in job.get("steps", []))
+        if deployed:
+            candidates.append(run)
+            break
     if not candidates:
         raise RuntimeError("No previously successful Pages deployment; refusing to rebuild unrelated projects")
     previous = max(candidates, key=lambda r: r["updated_at"])
