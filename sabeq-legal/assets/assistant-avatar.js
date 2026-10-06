@@ -38,7 +38,8 @@
     const heading = modal.querySelector("h2");
     const intro = heading ? heading.nextElementSibling : null;
     if (intro && intro.tagName === "P") {
-      if (intro.textContent !== GREETING) intro.textContent = GREETING;
+      intro.hidden = true;
+      intro.style.display = "none";
       intro.classList.add("sabeq-assistant-greeting");
     }
 
