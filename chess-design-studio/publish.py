@@ -53,7 +53,9 @@ def publish():
             break
     if not selected:
         raise RuntimeError('No successful Pages publication to preserve')
+    print('Selected publication:', selected['id'], selected.get('name'), flush=True)
     artifacts=api(f'repos/{repo}/actions/runs/{selected["id"]}/artifacts')['artifacts']
+    print('Publication artifacts:', [(a['name'], a['expired']) for a in artifacts], flush=True)
     artifact=next((a for a in artifacts if a['name']=='github-pages' and not a['expired']),None)
     if not artifact:
         raise RuntimeError('Latest deployed artifact unavailable')
