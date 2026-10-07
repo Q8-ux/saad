@@ -1,0 +1,37 @@
+{
+  "sourceCommit": "a1836025de97b252c68c97ebce9059773ec88591",
+  "version": 91,
+  "width": 800,
+  "height": 1000,
+  "background": "#113241",
+  "photos": [
+    {
+      "name": "abdulaziz-mashaan-navy.png",
+      "sha256": "ae118e27b37a42ad73e6c538e0a293d310c6fe4e6e036a236ed69a422d73e0ab"
+    },
+    {
+      "name": "dr-khalifa-navy.png",
+      "sha256": "483b1d2396f03d4b39a9576f650bef4d5c231fa55a3cf3807a818939617abb27"
+    },
+    {
+      "name": "hamad-almadi-navy.png",
+      "sha256": "c2b132060583fabe01ba357619767a325a14a55a0dc2a7366e705aafa3fca237"
+    },
+    {
+      "name": "khalid-aldhafiri-navy.png",
+      "sha256": "2eab6921a8e9cf086cf3219f5f797c20cffcd26cd2522251078a8dbcec95cd61"
+    },
+    {
+      "name": "khalid-alhabib-navy.png",
+      "sha256": "99d4d09790c2a5abac8d02fed417553a2a43a5f22ed37df192e3e5c8ca576736"
+    },
+    {
+      "name": "mishal-metaab-navy.png",
+      "sha256": "43e359b73ed98cc74abd8e6fc234a030f8ceeaec5036d6f5b3e5c9405bd5973d"
+    },
+    {
+      "name": "mohammed-saheb-navy.png",
+      "sha256": "a8c13f3a2a9dc51977733088c3368b895c444697165c0bbe72e4d7bd7057f5e8"
+    }
+  ]
+}
