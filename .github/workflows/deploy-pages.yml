@@ -14,6 +14,8 @@ on:
       - 'sabeq-admin-preview/**'
       - 'sabeq-legal-system/**'
       - 'sabeq-legal-pro/**'
+      - '!sabeq-legal-pro/demo/index.html'
+      - '!sabeq-legal-pro/demo/demo.js'
       - 'hessa-alobaid/**'
       - 'shalayhna/**'
       - 'zad-restaurants/**'

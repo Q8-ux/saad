@@ -1,0 +1,44 @@
+name: Publish Legal Platform Text
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'sabeq-legal-pro/demo/index.html'
+      - 'sabeq-legal-pro/demo/demo.js'
+      - '.github/scripts/publish-legal-platform.py'
+      - '.github/scripts/test-publish-legal-platform.py'
+      - '.github/workflows/deploy-legal-platform.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages-v2
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/configure-pages@v5
+      - name: Validate platform text and publication isolation
+        run: |
+          node --check sabeq-legal-pro/demo/demo.js
+          python .github/scripts/test-publish-legal-platform.py
+      - name: Update platform text and preserve all other published files
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python .github/scripts/publish-legal-platform.py
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+          retention-days: 30
+      - uses: actions/deploy-pages@v4
+        id: deploy
