@@ -41,7 +41,6 @@ on:
       - 'autoclip-studio/**'
       - 'barcode/**'
       - 'frame-studio/**'
-      - 'dr-hamad-instagram-demo/**'
       - 'muhami-next/**'
       - 'workforce-platform/apps/web/**'
       - '.github/workflows/deploy-pages.yml'
