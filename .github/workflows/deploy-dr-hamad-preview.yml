@@ -1,0 +1,38 @@
+name: Publish Dr Hamad Instagram Preview
+on:
+  push:
+    branches: [main]
+    paths: ['dr-hamad-instagram-demo/**', '.github/scripts/publish-dr-hamad-preview.py', '.github/workflows/deploy-dr-hamad-preview.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+  deployments: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages-v2
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/configure-pages@v5
+      - name: Validate preview
+        run: node --check dr-hamad-instagram-demo/app.js
+      - name: Preserve current websites and add Dr Hamad preview
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python .github/scripts/publish-dr-hamad-preview.py
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+          retention-days: 30
+      - uses: actions/deploy-pages@v4
+        id: deploy
