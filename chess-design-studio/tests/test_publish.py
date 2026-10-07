@@ -9,6 +9,12 @@ spec.loader.exec_module(publish)
 
 
 class PublicationChecks(unittest.TestCase):
+    def test_dispatch_is_not_a_pages_publication(self):
+        jobs=[{'steps':[{'name':'Deploy','conclusion':'success'}]}]
+        self.assertFalse(publish.did_deploy({'path':'.github/workflows/deploy-barcode-pages.yml'},jobs))
+        self.assertTrue(publish.did_deploy({'path':'.github/workflows/deploy-pages.yml'},jobs))
+        self.assertTrue(publish.did_deploy({},[{'steps':[{'name':'Run actions/deploy-pages@v4','conclusion':'success'}]}]))
+
     def test_launcher_preserves_wrapper_and_is_idempotent(self):
         html='<html><head></head><body><iframe title="game"></iframe></body></html>'
         result=publish.add_launcher(html)

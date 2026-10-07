@@ -32,6 +32,14 @@ def add_launcher(html):
     return html.replace('</head>', css+'\n</head>').replace('</body>', link+'\n</body>')
 
 
+def did_deploy(run, jobs):
+    return any(step.get('conclusion') == 'success' and
+               ('actions/deploy-pages@' in step.get('name', '') or
+                (step.get('name') == 'Deploy' and
+                 run.get('path') == '.github/workflows/deploy-pages.yml'))
+               for job in jobs for step in job.get('steps', []))
+
+
 def publish():
     repo=os.environ['GITHUB_REPOSITORY']
     runs=api(f'repos/{repo}/actions/runs?status=success&per_page=100')['workflow_runs']
@@ -40,7 +48,7 @@ def publish():
         if run.get('head_branch') != 'main':
             continue
         jobs=api(f'repos/{repo}/actions/runs/{run["id"]}/jobs')['jobs']
-        if any(step.get('conclusion')=='success' and ('actions/deploy-pages@' in step.get('name','') or step.get('name')=='Deploy') for job in jobs for step in job.get('steps',[])):
+        if did_deploy(run, jobs):
             selected=run
             break
     if not selected:
