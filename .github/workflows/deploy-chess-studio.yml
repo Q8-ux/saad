@@ -1,0 +1,38 @@
+name: Publish Chess Design Studio
+on:
+  push:
+    branches: [main]
+    paths: ['chess-design-studio/**', '.github/workflows/deploy-chess-studio.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages-v2
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: 22}
+      - name: Check chess studio
+        run: |
+          node --check chess-design-studio/app.mjs
+          node --test chess-design-studio/tests/core.test.mjs
+          python -m unittest discover -s chess-design-studio/tests
+      - uses: actions/configure-pages@v5
+      - name: Preserve published sites and add chess studio
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python chess-design-studio/publish.py
+      - uses: actions/upload-pages-artifact@v3
+        with: {path: _site, retention-days: 30}
+      - uses: actions/deploy-pages@v4
+        id: deploy

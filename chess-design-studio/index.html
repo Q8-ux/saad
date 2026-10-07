@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#081626"><title>استوديو الشطرنج</title><meta name="description" content="جهّز بطاقة شطرنج للبوست أو الستوري وصدّرها صورة أو ملف طبقات."><link rel="stylesheet" href="style.css"></head>
+<body>
+<header><a class="brand" href="./"><span aria-hidden="true">♞</span><div><small>AI CHESS KUWAIT</small><strong>استوديو الشطرنج</strong></div></a><a class="game-link" href="../ai-chess-kuwait/">افتح اللعبة</a></header>
+<main><section class="intro"><p class="eyebrow">من الرقعة إلى بطاقة مشاركة</p><h1>جهّز تحدّيك.<br><span>وشاركه بأسلوبك.</span></h1><p>تصميم مستقل للشطرنج، بمقاسات جاهزة وخط عربي واضح.</p></section>
+<div class="workspace"><section class="editor" aria-labelledby="editor-title"><h2 id="editor-title">تفاصيل البطاقة</h2>
+<label for="format">المقاس</label><select id="format"><option value="post">بوست مربع · 1080 × 1080</option><option value="portrait">بوست طولي · 1080 × 1350</option><option value="story">ستوري · 1080 × 1920</option></select>
+<label for="theme">ألوان البطاقة</label><select id="theme"><option value="navy">كحلي وتركواز</option><option value="gold">كحلي وذهبي</option><option value="silver">كحلي وسلفر</option></select>
+<label for="title">العنوان</label><input id="title" value="تحدّاني في الشطرنج" maxlength="48">
+<label for="subtitle">العبارة أسفل العنوان</label><input id="subtitle" value="خطّط لنقلتك. وابدأ التحدّي." maxlength="65">
+<label for="player">اسم اللاعب أو البطولة</label><input id="player" placeholder="اختياري" maxlength="30">
+<label for="fen">وضع الرقعة — FEN</label><textarea id="fen" dir="ltr" rows="3" spellcheck="false"></textarea><small>الصق وضع المباراة لعرضه. البطاقة لا تحلل أفضل نقلة ولا تتحقق من قانونية الموقف.</small>
+<label class="check"><input id="showBoard" type="checkbox" checked> إظهار الرقعة</label>
+<label for="logo">شعار معتمد للشطرنج — اختياري</label><input id="logo" type="file" accept="image/png,image/jpeg,image/webp"><small>تُعالج الصورة على جهازك. لا تُرفع إلى حساب آخر أو تُستخدم كقالب.</small><button id="removeLogo" type="button" class="secondary" hidden>إزالة الشعار</button>
+</section><section class="preview-pane" aria-label="معاينة البطاقة"><div class="preview-top"><span>معاينة مباشرة</span><b id="dimensions">1080 × 1080</b></div><canvas id="preview" width="1080" height="1080" aria-label="معاينة تصميم الشطرنج"></canvas><div class="export-bar"><button id="png" type="button">تنزيل PNG</button><button id="jpg" type="button" class="secondary">تنزيل JPG</button><button id="layers" type="button" class="secondary">تنزيل ملف الطبقات</button></div><p id="status" role="status" aria-live="polite"></p><details><summary>استخدام التصميم في كانفا أو Compositor</summary><p>لكانفا: نزّل PNG وارفعه إلى تصميمك. الصورة المرفوعة تبقى مسطحة؛ يمكنك إضافة النصوص والعناصر داخل كانفا.</p><p>لـCompositor: نزّل ملف الطبقات وفك الضغط، ثم افتح <b dir="ltr">ChessCard.comp</b> على جهاز Mac مناسب. الخلفية والرقعة والنصوص والشعار في طبقات مستقلة؛ النصوص داخل هذا الملف صور نقطية.</p><p>الرفع المباشر إلى حساب كانفا والمزامنة التلقائية غير متاحين في هذه الصفحة.</p></details></section></div>
+<section class="notes"><div><strong>مقاسات دقيقة</strong><p>ثلاثة مقاسات للبوست والستوري.</p></div><div><strong>أصولك تبقى لك</strong><p>لا نستورد مشاريعك الخاصة كقوالب.</p></div><div><strong>ملف قابل لإعادة التركيب</strong><p>طبقات منفصلة للصورة والخلفية والنص.</p></div></section></main>
+<footer>استوديو مواد الشطرنج البصرية · لا يغيّر قواعد المباراة أو تصنيف اللاعبين.</footer><script type="module" src="app.mjs"></script>
+</body></html>
