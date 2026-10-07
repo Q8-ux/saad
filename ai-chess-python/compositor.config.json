@@ -28,8 +28,9 @@
     "upload": "reviewed-raster-assets",
     "reverse_transfer": "manual-export-required",
     "auto_sync": false,
-    "working_design_id": "DAHXXnm1mhY",
-    "autofill_available": false,
-    "working_copy_ready": true
+    "template_source_policy": "licensed generic templates or user-selected templates only; never private projects",
+    "personal_project_templates": false,
+    "project_assets": "own project only",
+    "status": "connector-configured; no personal design assigned as template"
   }
 }

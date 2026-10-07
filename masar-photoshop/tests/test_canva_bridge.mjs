@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import {uploadExports} from '../canva-bridge.mjs';
 const project = {project: 'test', canva: {folder_id: 'verified-folder'}};
-const files = [{path:'/private/export.png', name:'approved', approved:true}];
+const files = [{path:'/private/export.png', name:'approved', approved:true,
+  source:{kind:'project_asset',project:'test'}}];
 const calls = [];
 const connector = {
   async mcp__codex_apps__canva_upload_asset_from_url(args) {
@@ -22,3 +23,7 @@ await assert.rejects(uploadExports({project,files},{...connector,
   async mcp__codex_apps__canva_move_item_to_folder(){throw new Error('move failed');}}),
   error => error.completedUploads[0].media_id === 'media-1');
 console.log('Canva bridge: upload, folder routing, approval, format and partial failure checks passed');
+await assert.rejects(uploadExports({project,files:[{...files[0],source:{kind:'personal_project_template'}}]},connector),/Personal projects/);
+await assert.rejects(uploadExports({project,files:[{...files[0],source:{kind:'project_asset',project:'other'}}]},connector),/own project/);
+await assert.rejects(uploadExports({project,files:[{...files[0],source:{kind:'licensed_generic_template'}}]},connector),/license/);
+console.log('Personal-template and cross-project reuse restrictions passed');

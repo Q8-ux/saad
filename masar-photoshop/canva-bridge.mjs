@@ -11,6 +11,19 @@ export async function uploadExports({project, files}, connector) {
       throw new Error('Provide absolute local PNG/JPEG/WebP paths');
     }
     if (!file.approved) throw new Error('Only visually reviewed exports can be uploaded');
+    const source = file.source;
+    if (!source || source.kind === 'personal_project_template' || source.personal_project_template) {
+      throw new Error('Personal projects cannot be used as templates');
+    }
+    if (source.kind === 'project_asset') {
+      if (source.project !== project.project) throw new Error('Project assets must stay in their own project');
+    } else if (source.kind === 'licensed_generic_template') {
+      if (!source.license_verified) throw new Error('Generic template license must be verified');
+    } else if (source.kind === 'user_selected_template') {
+      if (!source.explicit_template_selection) throw new Error('Template must be explicitly selected by the user');
+    } else {
+      throw new Error('Unsupported template source');
+    }
   }
   const results = [];
   function unwrap(response) {
