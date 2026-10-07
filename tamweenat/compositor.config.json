@@ -21,5 +21,13 @@
     "webp",
     "pdf"
   ],
-  "publishing": "manual-approved-export-only"
+  "publishing": "manual-approved-export-only",
+  "canva": {
+    "folder_id": "FAHXXqEL9K8",
+    "connection": "authenticated-Canva-connector",
+    "bridge": "../masar-photoshop/canva-bridge.mjs",
+    "upload": "reviewed-raster-assets",
+    "reverse_transfer": "manual-export-required",
+    "auto_sync": false
+  }
 }
