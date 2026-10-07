@@ -29,6 +29,9 @@
     "bridge": "../masar-photoshop/canva-bridge.mjs",
     "upload": "reviewed-raster-assets",
     "reverse_transfer": "manual-export-required",
-    "auto_sync": false
+    "auto_sync": false,
+    "working_design_id": "DAHXXkiX-mA",
+    "autofill_available": false,
+    "working_copy_ready": true
   }
 }

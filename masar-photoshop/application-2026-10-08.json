@@ -1,0 +1,106 @@
+{
+  "date": "2026-10-08",
+  "timezone": "Asia/Kuwait",
+  "action": "Prepare actual working copies and import published Sabeq team images",
+  "working_copies": [
+    {
+      "project": "sabeq-legal",
+      "source_design_id": "DAG-TfQSFZo",
+      "working_design_id": "DAHXXkiX-mA",
+      "label": "هوية سابق",
+      "filed": true
+    },
+    {
+      "project": "dr-hamad-instagram-demo",
+      "source_design_id": "DAHW__zSrKo",
+      "working_design_id": "DAHXXtb4B2Q",
+      "label": "السيرة الذاتية للدكتور حمد",
+      "filed": true
+    },
+    {
+      "project": "saad-studio",
+      "source_design_id": "DAHXBb6nI6Q",
+      "working_design_id": "DAHXXhD69C4",
+      "label": "كاروسيل SAAD STUDIO",
+      "filed": true
+    },
+    {
+      "project": "noura-alattal",
+      "source_design_id": "DAGpeuM34kY",
+      "working_design_id": "DAHXXgmlTUA",
+      "label": "تصميم الدكتورة نوره",
+      "filed": true
+    },
+    {
+      "project": "digizone",
+      "source_design_id": "DAHHrWR16As",
+      "working_design_id": "DAHXXmBwbpw",
+      "label": "عرض ديجي زون",
+      "filed": true
+    },
+    {
+      "project": "ant-alshaer",
+      "source_design_id": "DAHT284MqSQ",
+      "working_design_id": "DAHXXv1A0YI",
+      "label": "عرض أنت الشاعر",
+      "filed": true
+    },
+    {
+      "project": "ai-chess-python",
+      "source_design_id": "DAHT3BjAK1A",
+      "working_design_id": "DAHXXnm1mhY",
+      "label": "عرض الشطرنج",
+      "filed": true
+    }
+  ],
+  "team_images": [
+    {
+      "source": "sabeq-legal/images/team/abdulaziz-mashaan-navy.png",
+      "media_id": "MAHXXjgjf0A",
+      "filed": true
+    },
+    {
+      "source": "sabeq-legal/images/team/dr-khalifa-navy.png",
+      "media_id": "MAHXXhMySfQ",
+      "filed": true
+    },
+    {
+      "source": "sabeq-legal/images/team/hamad-almadi-navy.png",
+      "media_id": "MAHXXgU1keI",
+      "filed": true
+    },
+    {
+      "source": "sabeq-legal/images/team/khalid-aldhafiri-navy.png",
+      "media_id": "MAHXXjKpdag",
+      "filed": true
+    },
+    {
+      "source": "sabeq-legal/images/team/khalid-alhabib-navy.png",
+      "media_id": "MAHXXqGrB3c",
+      "filed": true
+    },
+    {
+      "source": "sabeq-legal/images/team/mishal-metaab-navy.png",
+      "media_id": "MAHXXp4RyRo",
+      "filed": true
+    },
+    {
+      "source": "sabeq-legal/images/team/mohammed-saheb-navy.png",
+      "media_id": "MAHXXs7oZWE",
+      "filed": true
+    }
+  ],
+  "autofill_available": false,
+  "websites_modified": false,
+  "faces_modified": false,
+  "unassigned_projects": [
+    "barcode",
+    "frame-studio",
+    "tamweenat"
+  ],
+  "limitations": [
+    "No two-way automatic sync",
+    "No Canva export tool available",
+    "Working copies retain existing contents; no new visual design was requested"
+  ]
+}
