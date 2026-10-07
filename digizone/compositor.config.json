@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "project": "ديجي زون",
+  "module": "../masar-photoshop/compositor.py",
+  "upstream": "https://github.com/robbietilton/Compositor",
+  "use": "service-banners",
+  "font_policy": "existing-project-font",
+  "font_policy_enforcement": "manual-review-of-approved-text-layer",
+  "requires_cutout": false,
+  "review_rules": [
+    "current-brand",
+    "approved-portfolio-images"
+  ],
+  "face_retouch": false,
+  "status": "manual-production-adapter-configured; not wired to live website",
+  "exports": [
+    "comp",
+    "png",
+    "jpg",
+    "webp",
+    "pdf"
+  ],
+  "publishing": "manual-approved-export-only"
+}

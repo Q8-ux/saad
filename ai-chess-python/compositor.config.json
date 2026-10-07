@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "project": "الشطرنج",
+  "module": "../masar-photoshop/compositor.py",
+  "upstream": "https://github.com/robbietilton/Compositor",
+  "use": "marketing-assets",
+  "font_policy": "المهند",
+  "font_policy_enforcement": "manual-review-of-approved-text-layer",
+  "requires_cutout": false,
+  "review_rules": [
+    "marketing-only",
+    "no-game-engine-changes"
+  ],
+  "face_retouch": false,
+  "status": "manual-production-adapter-configured; not wired to live website",
+  "exports": [
+    "comp",
+    "png",
+    "jpg",
+    "webp",
+    "pdf"
+  ],
+  "publishing": "manual-approved-export-only"
+}
