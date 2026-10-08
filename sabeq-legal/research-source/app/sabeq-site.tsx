@@ -1,6 +1,7 @@
 "use client";
 
 import { ASSISTANT_MESSAGE_LIMIT, assistantInputCopy, validateAssistantInput } from "@/lib/assistant-input";
+import { runMemoGeneration, MemoGenerationStopped, memoGenerationCopy } from "@/lib/memo-generation";
 import { readSSE } from "@/lib/intake-stream";
 import { cleanIntakeContext } from "@/lib/intake-context";
 import type { AnalysisStage } from "@/lib/intake-analysis";
@@ -103,14 +104,14 @@ async function memoFetch(path: string, token: string, init: RequestInit = {}) {
       // server deletes its temporary analysis files after each run, so one
       // controlled retry for document analysis is safe and prevents the user
       // from having to choose the files again after a brief connection glitch.
-      const retryableResponse = ["/api/legal/memo", "/api/legal/analyze-documents"].includes(path) && [502, 503, 504].includes(response.status);
+      const retryableResponse = path === "/api/legal/analyze-documents" && [502, 503, 504].includes(response.status);
       if (retryableResponse && attempt < 2) {
         await new Promise((resolve) => window.setTimeout(resolve, 700 * (attempt + 1)));
         continue;
       }
       return response;
     } catch (error) {
-      if (init.signal?.aborted || ["/api/legal/assistant", "/api/legal/transcribe", "/api/legal/speech", "/api/legal/voice-turn", "/api/legal/memo-dictation", "/api/legal/tools"].includes(path)) throw error;
+      if (init.signal?.aborted || ["/api/legal/memo", "/api/legal/assistant", "/api/legal/transcribe", "/api/legal/speech", "/api/legal/voice-turn", "/api/legal/memo-dictation", "/api/legal/tools"].includes(path)) throw error;
       lastError = error;
       if (attempt < 2) await new Promise((resolve) => window.setTimeout(resolve, 550 * (attempt + 1)));
     }
@@ -934,6 +935,18 @@ function MemoWizard({ t, language, token, initialData = null }: { t: SiteCopy; l
   const [step, setStep] = useState(() => isCompleteMemoHandoff(initialData) ? 3 : 0);
   const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
   const [memoError, setMemoError] = useState("");
+  const [memoApproved, setMemoApproved] = useState(false);
+  const [generationSeconds, setGenerationSeconds] = useState(0);
+  const generationRequest = useRef<AbortController | null>(null);
+  const generationMounted = useRef(true);
+  const generationUi = memoGenerationCopy(language);
+  useEffect(() => { generationMounted.current = true; return () => { generationMounted.current = false; generationRequest.current?.abort(); }; }, []);
+  useEffect(() => {
+    if (status !== "loading") return;
+    const start = Date.now(); setGenerationSeconds(0);
+    const interval = window.setInterval(() => setGenerationSeconds(Math.floor((Date.now() - start) / 1000)), 1000);
+    return () => window.clearInterval(interval);
+  }, [status]);
   const [memo, setMemo] = useState("");
   const [memoQuality,setMemoQuality] = useState<{status:string;notices:string[]} | null>(null);
   const [memoDocument,setMemoDocument] = useState<PleadingDocument | null>(null);
@@ -1388,7 +1401,7 @@ function MemoWizard({ t, language, token, initialData = null }: { t: SiteCopy; l
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (voiceEntryBusy) return;
+    if (voiceEntryBusy || generationRequest.current) return;
     const stepData = Object.fromEntries(Array.from(new FormData(event.currentTarget).entries(), ([key, value]) => [key, String(value)]));
     const allParties = analysisParties
       .filter((party) => party.name.trim() || party.role.trim())
@@ -1417,25 +1430,34 @@ function MemoWizard({ t, language, token, initialData = null }: { t: SiteCopy; l
       setStep(missing[1]);
       return;
     }
-    if (!window.confirm(memoApprovalNotice[language])) return;
+    if (!memoApproved) { setStatus("error"); setMemoError(generationUi.required); return; }
+    const controller = new AbortController();
+    generationRequest.current = controller;
     setStatus("loading");
     setMemoError("");
     try {
+      const data = await runMemoGeneration(async (signal) => {
       const response = await memoFetch("/api/legal/memo", token, {
-        method: "POST",
+        method: "POST", signal,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...nextData, interfaceLanguage: language, outputLanguage: "ar" }),
       });
       const data = await readServiceJson<{ memo?: string; document?: PleadingDocument; caseQuality?: {status:string;notices:string[]}; error?: string; analysis?: { sourceCount: number; lawCount: number; cassationCount: number; sources: Array<{ marker: string; title: string; reference: string; kind: "cassation" | "legislation"; officialSource: string; sourceUrl?: string; libraryUpdatedAt?: string | null }> } }>(response);
       if (!response.ok || !data.memo) throw new Error(data.error || t.error);
-      setMemo(data.memo);
+      return data;
+      }, controller);
+      if (!generationMounted.current || generationRequest.current !== controller) return;
+      setMemo(data.memo!);
       setMemoDocument(data.document || null);
       setMemoQuality(data.caseQuality || null);
       setMemoAnalysis(data.analysis || null);
       setStatus("idle");
     } catch (error) {
+      if (!generationMounted.current || generationRequest.current !== controller) return;
       setStatus("error");
-      setMemoError(interfaceError(error, language, t.error));
+      setMemoError(error instanceof MemoGenerationStopped ? (error.reason === "timeout" ? generationUi.timeout : generationUi.cancelled) : interfaceError(error, language, t.error));
+    } finally {
+      if (generationRequest.current === controller) generationRequest.current = null;
     }
   }
 
@@ -1589,9 +1611,11 @@ function MemoWizard({ t, language, token, initialData = null }: { t: SiteCopy; l
           {step === 2 && <div className="research-box"><Search size={30} /><h3>{language === "ar" ? "مسار التحليل القانوني للمذكرة" : t.steps[2]}</h3><p>{language === "ar" ? "يحلّل المحرك الوقائع والطلبات، يصنّف المسائل القانونية، يطابقها مع القوانين والمواد الكويتية، ثم يبحث عن مبادئ وأحكام التمييز المتصلة بذات المسألة والسبب قبل بناء الدفوع بصياغة المحاكم الكويتية." : language === "en" ? "The engine classifies the issues, matches verified Kuwaiti laws and provisions, then retrieves materially related Court of Cassation principles before drafting each argument." : "انجن قانونی مسائل کی درجہ بندی کرتا ہے، مصدقہ کویتی قوانین اور متعلقہ امتیازی عدالتی اصولوں سے مطابقت کرتا ہے، پھر ہر دلیل تیار کرتا ہے۔"}</p><div className="analysis-pipeline"><span>1. {tr(language, "تحليل الوقائع")}</span><span>2. {tr(language, "تحديد المواد")}</span><span>3. {tr(language, "مطابقة أحكام التمييز")}</span><span>4. {tr(language, "بناء الدفوع والطلبات")}</span></div><Field label={language === "ar" ? "ملاحظات قانونية إضافية (اختيارية)" : language === "en" ? "Additional legal notes (optional)" : "اضافی قانونی نوٹس (اختیاری)"}><textarea name="legalIssues" rows={6} defaultValue={memoData.legalIssues} placeholder={tr(language, "اتركها فارغة إن لم تكن لديك ملاحظة؛ سيستنتج النظام المسائل القانونية تلقائياً.")} /></Field><div><ShieldCheck size={18} />{language === "ar" ? "لن تُدرج مادة أو حكم تمييز إلا من مصدر موثق، وسيصرّح النظام عند عدم العثور على تطابق." : language === "en" ? "No law or judgment is included unless it is found in the verified legal database." : "کوئی قانون یا فیصلہ شامل نہیں ہوگا جب تک وہ مصدقہ قانونی ڈیٹابیس میں نہ ہو۔"}</div></div>}
           {step === 3 && <div className="review-box"><FileCheck2 size={34} /><h3>{t.review}</h3><p>{t.arabicOnly}</p><p className="template-badge">{tr(language, "الصيغة")}: {tr(language, selectPleadingKind(memoData) === "appeal" ? "صحيفة استئناف" : selectPleadingKind(memoData) === "claim" ? "صحيفة دعوى" : "مذكرة بدفاع")}</p><p role="note" className="form-notice">{memoApprovalNotice[language]}</p>
             {memoData.conversationTranscript && <dl className="memo-handoff-details">{[[t.caseType, "caseType"], [t.court, "court"], [tr(language, "الدائرة"), "courtCircuit"], [tr(language, "مرحلة القضية"), "caseStage"], [t.clientName, "clientName"], [t.role, "partyRole"], [t.otherParty, "otherParty"], [ui.allParties, "allParties"], [t.facts, "facts"], [t.requests, "requests"]].map(([label, key]) => <div key={key}><dt>{label}</dt><dd>{["caseType", "court", "partyRole", "caseStage"].includes(key) ? interfaceLabel(memoData[key] || "", language) : memoData[key]}</dd></div>)}</dl>}
-            <div><ShieldCheck size={18} />{t.privacy}</div><div><BookOpen size={18} />{t.libraryText}</div></div>}
+            <div><ShieldCheck size={18} />{t.privacy}</div><div><BookOpen size={18} />{t.libraryText}</div>
+            <label className="memo-generation-approval"><input type="checkbox" checked={memoApproved} onChange={event => setMemoApproved(event.target.checked)} disabled={status === "loading"} />{generationUi.approval}</label></div>}
         </div>
-        <div className="memo-actions">{step > 0 ? <button type="button" className="button button-outline" onClick={() => setStep(step - 1)}>{t.previous}</button> : <span />}<button className="button button-primary" disabled={voiceEntryBusy || status === "loading" || analysisStatus === "loading" || Boolean(step === 1 && documents.length && analysisStatus !== "success") || Boolean(recordingField || transcribingField || draftAction)}>{status === "loading" ? t.loading : step === 3 ? t.generate : step === 1 && documents.length === 0 ? ui.continueManual : t.next}<ArrowLeft size={17} /></button></div>
+        <div className="memo-actions">{step > 0 ? <button type="button" className="button button-outline" disabled={status === "loading"} onClick={() => { setMemoApproved(false); setStep(step - 1); }}>{t.previous}</button> : <span />}<button className="button button-primary" disabled={voiceEntryBusy || status === "loading" || analysisStatus === "loading" || Boolean(step === 1 && documents.length && analysisStatus !== "success") || Boolean(recordingField || transcribingField || draftAction)}>{status === "loading" ? t.loading : step === 3 ? t.generate : step === 1 && documents.length === 0 ? ui.continueManual : t.next}<ArrowLeft size={17} /></button></div>
+        {status === "loading" && <div className="memo-generation-pending"><p role="status" aria-live="polite">{generationUi.pending}</p><span>{generationSeconds} {generationUi.seconds}</span><small>{generationUi.limit}</small><button type="button" className="button button-outline" onClick={() => generationRequest.current?.abort()}>{generationUi.cancel}</button></div>}
         {status === "error" && <p className="form-notice error">{memoError || t.error}</p>}
       </form>
     </div>

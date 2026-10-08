@@ -5,7 +5,7 @@ import { arabicMemoInput } from "@/lib/memo-language";
 import { buildPleadingDocument, parsePleadingContent, pleadingContentSchema, pleadingFields, pleadingText, selectPleadingKind, type PleadingContent, type PleadingInput } from "@/lib/pleading-document";
 import { factualRequirements, correctLegalProse, languageReviewInstructions, legalResearchInstructions, removeDelegatedResearch } from "@/lib/legal-language";
 import { formatEvidence, isCassationEvidence, readHandoffEvidence, searchCassationEvidenceAcross, searchLegalEvidenceAcross } from "@/lib/legal-search";
-import { deriveLegalResearchPlan, generateText, openAIErrorResponse } from "@/lib/openai";
+import { deriveLegalResearchPlan, generateText as modelGenerateText, openAIErrorResponse } from "@/lib/openai";
 import { requireMemoUserOrGuest } from "@/lib/public-auth";
 import { enforceUserServiceLimit, recordServiceActivity } from "@/lib/service-records";
 import { requireServiceEnabled } from "@/lib/service-settings";
@@ -45,6 +45,11 @@ function stripInternalMemoLanguage(text: string) {
 export async function POST(request: Request) {
   try {
     assertSameOrigin(request);
+    const signal = AbortSignal.any([request.signal, AbortSignal.timeout(240_000)]);
+    const generateText = (options: Parameters<typeof modelGenerateText>[0]) => {
+      signal.throwIfAborted();
+      return modelGenerateText({ ...options, signal });
+    };
     const user = await requireMemoUserOrGuest(request);
     await requireServiceEnabled("memo");
     const raw = await readJsonObject(request, 200_000);
@@ -79,11 +84,12 @@ export async function POST(request: Request) {
     const researchContext = `نوع القضية: ${caseType}\nالوقائع: ${facts}\nالطلبات: ${requests}\nملاحظات إضافية: ${legalIssues || "لا توجد"}`;
     let searchQueries = [...caseResearchQueries(memoInput), caseType, legalIssues, facts.slice(0, 1_400), requests.slice(0, 800)];
     try {
-      const plan = await deriveLegalResearchPlan(researchContext);
+      const plan = await deriveLegalResearchPlan(researchContext, signal);
       searchQueries = [...plan.searchQueries, ...plan.legalIssues, ...searchQueries];
     } catch (error) {
       console.error("Legal research planning failed; using direct case terms", { kind: error instanceof Error ? error.name : "unknown" });
     }
+    signal.throwIfAborted();
     const [generalEvidence, cassationEvidence, handoffEvidence] = await Promise.all([
       searchLegalEvidenceAcross(searchQueries, 12),
       searchCassationEvidenceAcross(searchQueries, 6),
@@ -145,11 +151,12 @@ export async function POST(request: Request) {
       const document = buildPleadingDocument(template.info,template.definition,kind,memoInput,content);
       const finalMemo = pleadingText(document);
       const sources = evidence.map((item,index)=>({marker:`م${index+1}`,title:item.title,reference:item.reference||"غير محدد",kind:isCassationEvidence(item)?"cassation":"legislation",officialSource:item.officialSource,sourceUrl:item.sourceUrl,libraryUpdatedAt:item.libraryUpdatedAt||null,verification:item.verification,sourceAccess:item.sourceUrl?"original_link":"indexed_upload"})).filter(source=>new RegExp(`[【\\[]${source.marker}[】\\]]`).test(finalMemo));
+      signal.throwIfAborted();
       if(user) await recordServiceActivity({userId:user.id,serviceType:"memo",title:`${document.title} — ${clientName}`,inputText:JSON.stringify({...memoInput,legalIssues}),outputText:finalMemo,metadata:{sourceCount:sources.length,caseNumber,template:template.info,documentKind:document.kind,pageSections:document.pages.length}});
       return privateJson({caseQuality,sourceCoverage:legalSourceCoverage(evidence),memo:finalMemo,document,template:template.info,sourceVerification:officialVerificationSummary(),engineRevision:"case-grounded-memo-1",analysis:{sourceCount:sources.length,lawCount:sources.filter(s=>s.kind==="legislation").length,cassationCount:sources.filter(s=>s.kind==="cassation").length,sources,missingSources:!evidence.length,researchNotice:caseQuality.status==="incomplete"?caseQuality.notices.join(" "):"",...(agentAudit?{agentAudit}:{})}});
     }
     if (agentPipelineEnabled()) {
-      const result = await generateAgentPleading({caseData:{...memoInput,legalIssues},fields:extraFields,documentKind:kind,template:template.info,evidence,casePlan:checkedPlan});
+      const result = await generateAgentPleading({signal,caseData:{...memoInput,legalIssues},fields:extraFields,documentKind:kind,template:template.info,evidence,casePlan:checkedPlan});
       agentAudit = result.audit;
       return await finish(result.content);
     }

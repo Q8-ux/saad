@@ -1,7 +1,7 @@
 {
-  "release": "2026-10-08-khalifa-original-face-no-zoom",
-  "clientSource": "07e3fdabee4aa433fc857a8583e66b6274447fe7",
-  "backendSource": "07e3fdabee4aa433fc857a8583e66b6274447fe7",
+  "release": "2026-10-08-responsive-memo-generation",
+  "clientSource": "665c1e11a4b3142340a32a4c80dff78af953f588",
+  "backendSource": "665c1e11a4b3142340a32a4c80dff78af953f588",
   "assistant": "official-research-sources-1",
   "voice": "gulf-male-voice-4",
   "tools": "legal-tools-1",
@@ -22,14 +22,14 @@
   "memoResultTools": "bottom-vector-actions-1",
   "memoPreview": "document-derived-clean-text-1",
   "githubPagesAsset": "index-CLmr3F3e.js",
-  "publishedAt": "2026-10-08T04:41:19Z",
+  "publishedAt": "2026-10-08T05:41:14Z",
   "memoLanguage": "ar-KW",
   "memoDirection": "rtl",
   "memoAlignment": "right",
   "interfaceLocalization": "ar-en-ur-tools-guidance-1",
   "memoProseLanguage": "arabic-with-protected-names-and-identifiers-1",
   "builtAt": "2026-10-08T03:06:00Z",
-  "backendVersion": 96,
+  "backendVersion": 97,
   "pleadingLayout": "plain-header-wide-pages-1",
   "citationCorrection": "one-bounded-server-retry-before-archive",
   "legalSourceDirectory": "6-catalogues-3-fetched-0-new-citable-pdfs",
@@ -44,5 +44,7 @@
   "assistantInput": "16000-message-60000-context-no-message-truncation",
   "longInputValidation": "42-relevant-tests-and-both-builds-passed-live-model-not-tested",
   "khalifaPortrait": "original-rgb-native-frame-navy-alpha-only-no-hover-zoom",
-  "khalifaValidation": "235000-face-pixels-AE0-both-builds-passed"
+  "khalifaValidation": "235000-face-pixels-AE0-both-builds-passed",
+  "memoInteraction": "inline-approval-single-post-cancel-240s-bounded-wait",
+  "memoInteractionValidation": "21-related-tests-and-both-builds-passed-device-freeze-not-reproduced"
 }

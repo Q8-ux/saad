@@ -1,0 +1,1 @@
+Pure bounded generation runner shared with synthetic tests; wire AbortController, ref guard, progress and inline approval; disable only relevant editing while busy, keep cancel/close usable; exclude memo POST from automatic retries; add cancellation to generator request signal and check before archive; build and publish.

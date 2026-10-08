@@ -206,7 +206,7 @@ export function openAIErrorResponse(error: unknown, fallback: string) {
   return { message, status: error.status };
 }
 
-export async function generateText(options: { instructions: string; input: string; maxOutputTokens?: number; schema?: Record<string,unknown> }) {
+export async function generateText(options: { instructions: string; input: string; maxOutputTokens?: number; schema?: Record<string,unknown>; signal?: AbortSignal }) {
   const { apiKey, model } = getOpenAIEnvironment();
   // max_output_tokens includes hidden reasoning tokens. A small cap can exhaust the
   // entire budget before any user-visible text is produced, so legal drafting gets
@@ -225,7 +225,7 @@ export async function generateText(options: { instructions: string; input: strin
       max_output_tokens: maxOutputTokens,
       store: false,
     }),
-    signal: AbortSignal.timeout(75_000),
+    signal: options.signal ? AbortSignal.any([options.signal, AbortSignal.timeout(75_000)]) : AbortSignal.timeout(75_000),
   });
   if (!response.ok) await throwHttpError(response, "responses");
 
@@ -492,7 +492,7 @@ export async function analyzeLegalDocuments(files: File[], includeReviewText = f
   }
 }
 
-export async function deriveLegalResearchPlan(caseContext: string): Promise<LegalResearchPlan> {
+export async function deriveLegalResearchPlan(caseContext: string, signal?: AbortSignal): Promise<LegalResearchPlan> {
   const { apiKey, model } = getOpenAIEnvironment();
   const response = await openAIFetch("responses", "https://api.openai.com/v1/responses", {
     method: "POST",
@@ -514,7 +514,7 @@ export async function deriveLegalResearchPlan(caseContext: string): Promise<Lega
       max_output_tokens: 4_000,
       store: false,
     }),
-    signal: AbortSignal.timeout(75_000),
+    signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(75_000)]) : AbortSignal.timeout(75_000),
   });
   if (!response.ok) await throwHttpError(response, "responses");
   const payload = await response.json() as OpenAIResponsePayload;

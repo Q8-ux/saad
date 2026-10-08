@@ -3888,3 +3888,5 @@ html[data-theme="dark"] .memo-result-tools .danger { border-color: #7b3d48; colo
 /* Original photographic framing: Dr Khalifa never zooms on hover. */
 .team-grid .team-card-khalifa .team-photo img,
 .team-grid .team-card-khalifa:hover .team-photo img {object-fit:contain;object-position:center;transform:none;transition:none;}
+
+.memo-generation-approval{display:flex;align-items:flex-start;gap:12px;text-align:start;font-size:20px;line-height:1.7}.memo-generation-approval input{flex:0 0 auto;width:24px;height:24px;margin-top:5px}.memo-generation-pending{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:14px;padding:16px;border:1px solid var(--teal);border-radius:14px}.memo-generation-pending p{width:100%;margin:0;font-size:22px}.memo-generation-pending small{flex:1;font-size:16px}

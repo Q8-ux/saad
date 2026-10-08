@@ -16,7 +16,7 @@ export function evidenceSourceId(item: LegalEvidence, index=0) {
   return `legal:${item.documentId}:${item.chunkId || `excerpt-${index}`}`;
 }
 
-export async function generateAgentPleading(input: { caseData: PleadingInput; fields: Record<string,string>; documentKind: "claim" | "appeal" | "memorandum"; template: TemplateInfo; evidence: LegalEvidence[]; casePlan?: CasePlan }, transport: typeof fetch = fetch): Promise<{content:PleadingContent; audit:AgentAudit}> {
+export async function generateAgentPleading(input: { caseData: PleadingInput; fields: Record<string,string>; documentKind: "claim" | "appeal" | "memorandum"; template: TemplateInfo; evidence: LegalEvidence[]; casePlan?: CasePlan; signal?: AbortSignal }, transport: typeof fetch = fetch): Promise<{content:PleadingContent; audit:AgentAudit}> {
   const runtime = env as unknown as AgentEnvironment;
   let url: URL;
   try {
@@ -30,7 +30,7 @@ export async function generateAgentPleading(input: { caseData: PleadingInput; fi
   const payload = {caseReasoning:{revision:"case-grounded-memo-1",instructions:caseReasoningInstructions,plan:input.casePlan||null},sourceCoverage:legalSourceCoverage(input.evidence),requestId,language:"ar",documentKind:input.documentKind,template:{id:input.template.id,version:input.template.version,kind:input.template.kind,title:input.template.title,sourceSha256:input.template.sourceSha256},caseData:input.caseData,fields:input.fields,sources};
   let response: Response;
   try {
-    response = await transport(url, {method:"POST",headers:{"Content-Type":"application/json",Authorization:`Bearer ${token}`},body:JSON.stringify(payload),signal:AbortSignal.timeout(185_000),redirect:"error"});
+    response = await transport(url, {method:"POST",headers:{"Content-Type":"application/json",Authorization:`Bearer ${token}`},body:JSON.stringify(payload),signal:input.signal ? AbortSignal.any([input.signal,AbortSignal.timeout(185_000)]) : AbortSignal.timeout(185_000),redirect:"error"});
   } catch { throw new RequestError("تعذر اتصال مسار الصياغة. احتفظ ببياناتك وأعد المحاولة.",503); }
   if (!response.ok) throw new RequestError("لم يكتمل مسار الصياغة والتحقق. احتفظ ببياناتك وأعد المحاولة.",503);
   try {

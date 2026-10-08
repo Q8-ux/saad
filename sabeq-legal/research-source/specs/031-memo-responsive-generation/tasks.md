@@ -1,0 +1,4 @@
+- [x] Bounded single generation and synthetic timeout/cancel tests
+- [x] Inline consent and responsive pending/cancel UI
+- [x] Backend cancellation checks before archival
+- [ ] Build and publish existing GitHub and service
