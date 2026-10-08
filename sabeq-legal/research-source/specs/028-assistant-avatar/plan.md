@@ -1,0 +1,1 @@
+Replace robot icons with image in React itself, preventing external DOM patch regression. Reuse current avatar asset without editing. Localized greeting in existing intro, circular clipping in CSS. Build and publish current existing project and Sabeq-only GitHub release.

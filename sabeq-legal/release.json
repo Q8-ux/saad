@@ -1,7 +1,7 @@
 {
-  "release": "2026-10-08-case-grounded-memo",
-  "clientSource": "fa489807d735bc3f822128e54e671f5bd2e48a87",
-  "backendSource": "fa489807d735bc3f822128e54e671f5bd2e48a87",
+  "release": "2026-10-08-assistant-avatar-welcome",
+  "clientSource": "7f9b9bc517fc39a3598c75f02cbad0392c9cc01b",
+  "backendSource": "7f9b9bc517fc39a3598c75f02cbad0392c9cc01b",
   "assistant": "official-research-sources-1",
   "voice": "gulf-male-voice-4",
   "tools": "legal-tools-1",
@@ -21,15 +21,15 @@
   "finalMemo": "clean-no-review-notes-1",
   "memoResultTools": "bottom-vector-actions-1",
   "memoPreview": "document-derived-clean-text-1",
-  "githubPagesAsset": "index-C-P29yiZ.js",
-  "publishedAt": "2026-10-08T02:17:26Z",
+  "githubPagesAsset": "index-B-272v7C.js",
+  "publishedAt": "2026-10-08T02:26:00Z",
   "memoLanguage": "ar-KW",
   "memoDirection": "rtl",
   "memoAlignment": "right",
   "interfaceLocalization": "ar-en-ur-tools-guidance-1",
   "memoProseLanguage": "arabic-with-protected-names-and-identifiers-1",
   "builtAt": "2026-10-08T01:46:00Z",
-  "backendVersion": 93,
+  "backendVersion": 94,
   "pleadingLayout": "plain-header-wide-pages-1",
   "citationCorrection": "one-bounded-server-retry-before-archive",
   "legalSourceDirectory": "6-catalogues-3-fetched-0-new-citable-pdfs",
@@ -38,5 +38,7 @@
   "validation": "73-targeted-passing-tests-worker-and-github-builds",
   "memoReasoning": "case-grounded-memo-1",
   "memoAudit": "independent-issue-review-bounded-one-correction",
-  "memoQuality": "incomplete-or-human-review-required"
+  "memoQuality": "incomplete-or-human-review-required",
+  "assistantIdentity": "react-approved-avatar-single-localized-welcome-1",
+  "avatarValidation": "18-localization-and-close-tests-worker-and-github-builds-no-browser-QA"
 }

@@ -1,0 +1,4 @@
+- [x] Reuse approved existing portrait
+- [x] Integrate avatar and one localized welcome in React
+- [x] Build and check localization
+- [ ] Publish backend and GitHub frontend

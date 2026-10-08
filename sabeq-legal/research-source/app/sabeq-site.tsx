@@ -21,7 +21,6 @@ import {
   ArrowLeft,
   ArrowRight,
   BookOpen,
-  Bot,
   BriefcaseBusiness,
   CalendarDays,
   Check,
@@ -537,7 +536,7 @@ export default function SabeqSite() {
         {modal === "media" && <MediaViewer video={mediaVideos[selectedVideo]} language={language} />}
       </ModalShell>}
 
-      <div className="floating"><button onClick={() => showModal("assistant")} aria-label={t.assistant}><Bot size={22} /></button><a href="https://wa.me/96550668449" target="_blank" rel="noreferrer" aria-label={t.whatsapp}><BrandIcon name="whatsapp" /></a></div>
+      <div className="floating"><button className="assistant-avatar-button" onClick={() => showModal("assistant")} aria-label={t.assistant}><span className="assistant-portrait"><img src={assetUrl("/images/sabeq-assistant-avatar.jpg")} alt="" width={64} height={64} decoding="async" /></span></button><a href="https://wa.me/96550668449" target="_blank" rel="noreferrer" aria-label={t.whatsapp}><BrandIcon name="whatsapp" /></a></div>
     </div>
   );
 }
@@ -741,7 +740,7 @@ function Assistant({ t, language, token, initialSession, onSession, openBooking,
   const voiceUi = voiceCopy[language];
   const voiceActive = !["idle", "stopped", "error"].includes(voicePhase);
   const voiceLabel = voicePhase === "listening" ? voiceUi.finish : voicePhase === "blocked" ? voiceUi.play : voiceActive ? voiceUi.stop : voiceUi.start;
-  const intro = language === "ar" ? "اشرح لي ما حدث بطريقتك، وسأسألك خطوة بخطوة حتى تتضح القضية والجهة القضائية والطلبات." : language === "en" ? "Tell me what happened in your own words. I will ask focused questions until the case, likely court, and requested relief are clear." : "جو کچھ ہوا اپنی زبان میں بتائیں۔ میں مرحلہ وار سوالات کروں گا تاکہ مقدمہ، عدالت اور مطالبات واضح ہوں۔";
+  const intro = language === "ar" ? "السلام عليكم، أنا سابق مساعدك القانوني. اشرح لي قضيتك بتأني، وسأساعدك خطوة بخطوة حتى تتضح الوقائع والطلبات." : language === "en" ? "Welcome, I’m Sabeq, your legal assistant. Tell me about your case, and I will help you clarify the facts and requested relief step by step." : "السلام علیکم، میں سابق، آپ کا قانونی معاون ہوں۔ اپنا مقدمہ بتائیں؛ میں حقائق اور مطالبات واضح کرنے میں مرحلہ وار مدد کروں گا۔";
   useEffect(() => {
     voiceRef.current = new LegalVoiceConversation(() => optionsRef.current);
     try { const saved = localStorage.getItem("sabeq-assistant-voice"); if (isLegalVoice(saved)) setSelectedVoice(saved); } catch {}
@@ -860,7 +859,7 @@ function Assistant({ t, language, token, initialSession, onSession, openBooking,
     event.preventDefault(); stopSpeaking();
     try { await submitMessage(question); } catch { /* Error remains beside the preserved input. */ }
   }
-  return <div className="modal-content legal-intake"><div className="modal-icon"><Bot /></div><h2>{t.assistant}</h2><p>{intro}</p>
+  return <div className="modal-content legal-intake"><div className="assistant-opening-identity"><span className="assistant-portrait assistant-header-portrait"><img src={assetUrl("/images/sabeq-assistant-avatar.jpg")} alt="" width={84} height={84} decoding="async" /></span><h2>{t.assistant}</h2></div><p className="assistant-welcome">{intro}</p>
     <div className="intake-progress"><span><b>{intake?.progress || 0}%</b>{` ${tr(language, "اكتمال فهم القضية")}`}</span><i><em style={{ width: `${intake?.progress || 0}%` }} /></i></div>
     <div className="conversation-toolbar" aria-label={tr(language, "أدوات المحادثة")}><button type="button" onClick={newConversation} title={voiceUi.newChat}><Trash2 size={18} /><span>{voiceUi.newChat}</span></button><button type="button" onClick={exportConversation} disabled={!messages.length} title={tr(language, "تصدير المحادثة")}><Download size={18} /><span>{tr(language, "تصدير")}</span></button><button type="button" onClick={shareConversation} disabled={!messages.length} title={tr(language, "إرسال أو مشاركة المحادثة")}><Share2 size={18} /><span>{tr(language, "إرسال")}</span></button></div>
     <LegalToolsPanel key={toolSession} language={language} disabled={loading || voiceActive} request={(path, init) => memoFetch(path, token, init)} caseText={intake ? [...intake.facts, ...intake.requests].join("\n") : ""} onUseText={text => { setQuestion(text); setToolNotice(tr(language, "راجع النص المنقول ثم أرسله. لم يُضف إلى وقائع القضية تلقائياً.")); }} />
