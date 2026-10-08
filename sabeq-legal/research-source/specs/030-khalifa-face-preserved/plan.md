@@ -1,0 +1,1 @@
+Recover supplied original; generate isolation alpha only; compose original RGB with navy; verify protected face pixel equality; add versioned asset and disable member hover scale; build and publish existing Site and GitHub.

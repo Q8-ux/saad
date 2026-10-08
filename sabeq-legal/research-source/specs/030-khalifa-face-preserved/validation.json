@@ -1,0 +1,26 @@
+{
+  "nativeSize": [
+    1191,
+    1536
+  ],
+  "crop": false,
+  "resize": false,
+  "rgbSource": "original photograph",
+  "isolation": "generated alpha only",
+  "protectedFaceEllipse": [
+    550,
+    590,
+    350,
+    360
+  ],
+  "facePixelComparison": {
+    "region": [
+      300,
+      360,
+      500,
+      470
+    ],
+    "changedPixels": 0
+  },
+  "sha256": "8880999ff86a7f6db6e51daace77f28861426e72e49a3127220e98f07762562e"
+}

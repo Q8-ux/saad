@@ -1,0 +1,1 @@
+Original 1191x1536 canvas retained. No photographic RGB generated. 235000 face-region pixels compared: AE=0. Asset visually inspected; original lower clothing now reaches the frame without the previous inset rectangular cut. Browser-specific hover zoom disabled for Khalifa only. GitHub and Worker builds passed. Live asset verification pending publication; no browser QA.

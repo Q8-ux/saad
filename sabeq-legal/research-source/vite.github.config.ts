@@ -11,7 +11,7 @@ const githubBase = "/saad/sabeq-legal/";
 function githubBrandAssets(): Plugin {
   const assets = [
     { source: "/images/sabeq-assistant-avatar.jpg", input: "public/images/sabeq-assistant-avatar.jpg", output: "images/sabeq-assistant-avatar.jpg" },
-    ...["dr-khalifa-navy.png", "khalid-alhabib-navy.png", "mishal-metaab-navy.png", "mohammed-saheb-navy.png", "abdulaziz-mashaan-navy.png", "hamad-almadi-navy.png", "khalid-aldhafiri-navy.png"].map(name => ({ source: `/images/team/${name}`, input: `public/images/team/${name}`, output: `images/team/${name}` })),
+    ...["dr-khalifa-original-navy.png", "khalid-alhabib-navy.png", "mishal-metaab-navy.png", "mohammed-saheb-navy.png", "abdulaziz-mashaan-navy.png", "hamad-almadi-navy.png", "khalid-aldhafiri-navy.png"].map(name => ({ source: `/images/team/${name}`, input: `public/images/team/${name}`, output: `images/team/${name}` })),
     { source: "/fonts/AL-Mohanad.ttf", input: "public/fonts/AL-Mohanad.ttf", output: "assets/al-mohanad.ttf" },
     { source: "/fonts/AL-Mohanad-Bold.ttf", input: "public/fonts/AL-Mohanad-Bold.ttf", output: "assets/al-mohanad-bold.ttf" },
     { source: "/fonts/AL-Mohanad-Extra-Bold.ttf", input: "public/fonts/AL-Mohanad-Extra-Bold.ttf", output: "assets/al-mohanad-extra-bold.ttf" },

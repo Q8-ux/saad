@@ -3884,3 +3884,7 @@ html[data-theme="dark"] .memo-result-tools .danger { border-color: #7b3d48; colo
 @media(max-width:600px){.floating .assistant-avatar-button{width:58px;height:58px}.assistant-header-portrait{width:72px;height:72px}}
 
 .assistant-input-limit{margin:6px 0;font-size:14px;line-height:1.7;color:var(--muted)}
+
+/* Original photographic framing: Dr Khalifa never zooms on hover. */
+.team-grid .team-card-khalifa .team-photo img,
+.team-grid .team-card-khalifa:hover .team-photo img {object-fit:contain;object-position:center;transform:none;transition:none;}

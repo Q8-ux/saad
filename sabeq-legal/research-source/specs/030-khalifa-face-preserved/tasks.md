@@ -1,0 +1,4 @@
+- [x] Isolate background and compose original RGB
+- [x] Verify original dimensions and protected face (0 changed pixels)
+- [x] Integrate member-specific asset and no-zoom rule
+- [ ] Build and publish both frontends
