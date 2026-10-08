@@ -23,7 +23,7 @@ test('success returns once and clears its timeout',async()=>{
 test('native confirmation removed, cancel/unmount wired, memo POST excluded from retries',()=>{
  const ui=readFileSync(new URL('../app/sabeq-site.tsx',import.meta.url),'utf8');
  const submit=ui.slice(ui.indexOf('async function submit(event: FormEvent<HTMLFormElement>)',ui.indexOf('function MemoWizard')),ui.indexOf('if (memo) return'));
- assert.doesNotMatch(submit,/window.confirm/);assert.match(submit,/generationRequest.current/);assert.match(submit,/runMemoGeneration/);assert.match(submit,/method: "POST", signal/);
+ assert.doesNotMatch(ui,/window.confirm\(memoApprovalNotice/);assert.doesNotMatch(submit,/window.confirm/);assert.match(submit,/generationRequest.current/);assert.match(submit,/runMemoGeneration/);assert.match(submit,/method: "POST", signal/);
  assert.match(ui,/generationRequest.current\?\.abort\(\)/);assert.match(ui,/memo-generation-approval/);assert.match(ui,/generationMounted.current = false/);
  assert.match(ui,/retryableResponse = path === "\/api\/legal\/analyze-documents"/);
  const route=readFileSync(new URL('../app/api/legal/memo/route.ts',import.meta.url),'utf8');
