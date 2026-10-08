@@ -20,7 +20,8 @@ with zipfile.ZipFile(io.BytesIO(subprocess.check_output(['gh','api','repos/'+os.
 assert (root/'index.html').is_file()
 dest=root/'tiktok-growth';dest.mkdir(exist_ok=True)
 shutil.copyfile('tiktok-growth/index.html',dest/'index.html')
+shutil.copytree('tiktok-growth/fonts',dest/'fonts',dirs_exist_ok=True)
 assert (dest/'index.html').stat().st_size>10000
-assert (root/'tamweenat/assets/fonts/AL-Mohanad.ttf').is_file()
+assert (dest/'fonts/Cairo-Variable.woff2').is_file()
 (root/'.nojekyll').touch()
-print('Preserved all published sites; overlaid tiktok-growth/index.html only.')
+print('Preserved all published sites; overlaid tiktok-growth page and its Cairo font.')
