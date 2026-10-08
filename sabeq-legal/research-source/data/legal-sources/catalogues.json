@@ -1,0 +1,53 @@
+{
+  "revision": "official-research-sources-1",
+  "sources": [
+    {
+      "id": "moj",
+      "title": "وزارة العدل — التشريعات والقوانين",
+      "url": "https://www.moj.gov.kw/AR/Pages/MojLaws.aspx",
+      "kind": "legislation",
+      "access": "public_catalog",
+      "citable": false
+    },
+    {
+      "id": "gazette",
+      "title": "الكويت اليوم — الجريدة الرسمية",
+      "url": "https://kuwaitalyawm.media.gov.kw/",
+      "kind": "publication",
+      "access": "public_catalog",
+      "citable": false
+    },
+    {
+      "id": "judicial-institute",
+      "title": "معهد الكويت للدراسات القضائية — التشريعات",
+      "url": "https://www.kijls.moj.gov.kw/ar/sections/section4/sub4_section4/research%26translation/pages/stateslegislations.aspx",
+      "kind": "legislation",
+      "access": "public_catalog",
+      "citable": false
+    },
+    {
+      "id": "judicial-library",
+      "title": "معهد الكويت للدراسات القضائية — قاعدة التشريعات والأحكام",
+      "url": "https://www.kijls.moj.gov.kw/ar/sections/section4/sub4_section4/Library%26Statistics/Pages/Library_Services.aspx",
+      "kind": "judgment",
+      "access": "licensed_or_on_site",
+      "citable": false
+    },
+    {
+      "id": "government",
+      "title": "البوابة الرسمية — التشريعات والقوانين",
+      "url": "https://e.gov.kw/sites/kgoarabic/Pages/ApplicationPages/Policies.aspx",
+      "kind": "legislation",
+      "access": "public_catalog",
+      "citable": false
+    },
+    {
+      "id": "cbk",
+      "title": "بنك الكويت المركزي — التشريعات والتعليمات",
+      "url": "https://www.cbk.gov.kw/ar",
+      "kind": "banking",
+      "access": "public_catalog",
+      "citable": false
+    }
+  ]
+}

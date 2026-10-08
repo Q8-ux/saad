@@ -1,0 +1,79 @@
+{
+  "revision": "official-research-sources-1",
+  "checkedAt": "2026-10-08T01:42:37.125777+00:00",
+  "automaticLegalApproval": false,
+  "sources": [
+    {
+      "id": "moj",
+      "title": "وزارة العدل — التشريعات والقوانين",
+      "url": "https://www.moj.gov.kw/AR/Pages/MojLaws.aspx",
+      "kind": "legislation",
+      "access": "public_catalog",
+      "citable": false,
+      "status": "unavailable",
+      "documents": [],
+      "error": "access_challenge"
+    },
+    {
+      "id": "gazette",
+      "title": "الكويت اليوم — الجريدة الرسمية",
+      "url": "https://kuwaitalyawm.media.gov.kw/",
+      "kind": "publication",
+      "access": "public_catalog",
+      "citable": false,
+      "status": "unavailable",
+      "documents": [],
+      "error": "HTTPError"
+    },
+    {
+      "id": "judicial-institute",
+      "title": "معهد الكويت للدراسات القضائية — التشريعات",
+      "url": "https://www.kijls.moj.gov.kw/ar/sections/section4/sub4_section4/research%26translation/pages/stateslegislations.aspx",
+      "kind": "legislation",
+      "access": "public_catalog",
+      "citable": false,
+      "status": "catalogue_fetched",
+      "documents": [],
+      "finalUrl": "https://www.kijls.moj.gov.kw/ar/sections/section4/sub4_section4/research%26translation/pages/stateslegislations.aspx",
+      "sha256": "0c05e9d01595afc7b1ab1acbd44391230fd2c88e964ef720a00632f55f08d299",
+      "discoveredPdfCount": 0
+    },
+    {
+      "id": "judicial-library",
+      "title": "معهد الكويت للدراسات القضائية — قاعدة التشريعات والأحكام",
+      "url": "https://www.kijls.moj.gov.kw/ar/sections/section4/sub4_section4/Library%26Statistics/Pages/Library_Services.aspx",
+      "kind": "judgment",
+      "access": "licensed_or_on_site",
+      "citable": false,
+      "status": "catalogue_fetched",
+      "documents": [],
+      "finalUrl": "https://www.kijls.moj.gov.kw/ar/sections/section4/sub4_section4/Library%26Statistics/Pages/Library_Services.aspx",
+      "sha256": "f2cb6735fc5ff4486b15a570ceca41f298d5555baa2073f45ad3a7dec6410a1f",
+      "discoveredPdfCount": 0
+    },
+    {
+      "id": "government",
+      "title": "البوابة الرسمية — التشريعات والقوانين",
+      "url": "https://e.gov.kw/sites/kgoarabic/Pages/ApplicationPages/Policies.aspx",
+      "kind": "legislation",
+      "access": "public_catalog",
+      "citable": false,
+      "status": "unavailable",
+      "documents": [],
+      "error": "HTTPError"
+    },
+    {
+      "id": "cbk",
+      "title": "بنك الكويت المركزي — التشريعات والتعليمات",
+      "url": "https://www.cbk.gov.kw/ar",
+      "kind": "banking",
+      "access": "public_catalog",
+      "citable": false,
+      "status": "catalogue_fetched",
+      "documents": [],
+      "finalUrl": "https://www.cbk.gov.kw/ar",
+      "sha256": "70ae00b4db50cbf8215b045047fbb2817599ee09c78604d19be501b0d10a70c0",
+      "discoveredPdfCount": 0
+    }
+  ]
+}
