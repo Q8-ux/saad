@@ -1,0 +1,40 @@
+name: Publish TikTok Growth Workspace
+on:
+  push:
+    branches: [main]
+    paths: ['tiktok-growth/**', '.github/workflows/deploy-tiktok-growth.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages-v2
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Check JavaScript syntax
+        run: |
+          python -c "from pathlib import Path; s=Path('tiktok-growth/index.html').read_text(); Path('/tmp/tiktok-growth-check.js').write_text(s.split('<script>')[1].split('</script>')[0])"
+          node --check /tmp/tiktok-growth-check.js
+      - uses: actions/configure-pages@v5
+      - name: Preserve published sites and overlay workspace
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python tiktok-growth/deployment/prepare.py
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+          retention-days: 30
+      - uses: actions/deploy-pages@v4
+        id: deploy
