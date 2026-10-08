@@ -1,0 +1,5 @@
+# Case-grounded memorandum quality
+Authorized scope: improve existing Sabeq generator for any case, not copy one insurance defense.
+Inputs remain allegations, not proven facts. No invented names, amounts, law, cases or procedural facts. No case data in repository/logs.
+Acceptance: shared analysis rules in intake and drafting; structured party/issue/document/opposing-case/alternative-relief plan before drafting; each issue quotes an input fact and selects only retrieved markers; independent semantic audit after drafting; source verification unchanged; incomplete research explicitly outside pleading; audit rejection never archived. Insurance checks settlement scope/timing/payment/subrogation/repair valuation/responsibility without mandatory discount or solidarity. Criminal checks charge elements and evidence without assuming innocence facts.
+Assumptions: current verified statute corpus remains incomplete; metadata and model audits do not prove current amendments or legal correctness. Missing evidence returns incomplete factual draft, not full legal defense. Uploaded documents must already be present in approved case input; no new file storage.

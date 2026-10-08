@@ -1,3 +1,4 @@
+import { caseReasoningInstructions, type CasePlan } from "./case-reasoning";
 import { legalSourceCoverage } from "./legal-source-coverage";
 import { env } from "cloudflare:workers";
 import { parsePleadingContent, type PleadingContent, type PleadingInput, type TemplateInfo } from "./pleading-document";
@@ -15,7 +16,7 @@ export function evidenceSourceId(item: LegalEvidence, index=0) {
   return `legal:${item.documentId}:${item.chunkId || `excerpt-${index}`}`;
 }
 
-export async function generateAgentPleading(input: { caseData: PleadingInput; fields: Record<string,string>; documentKind: "claim" | "appeal" | "memorandum"; template: TemplateInfo; evidence: LegalEvidence[] }, transport: typeof fetch = fetch): Promise<{content:PleadingContent; audit:AgentAudit}> {
+export async function generateAgentPleading(input: { caseData: PleadingInput; fields: Record<string,string>; documentKind: "claim" | "appeal" | "memorandum"; template: TemplateInfo; evidence: LegalEvidence[]; casePlan?: CasePlan }, transport: typeof fetch = fetch): Promise<{content:PleadingContent; audit:AgentAudit}> {
   const runtime = env as unknown as AgentEnvironment;
   let url: URL;
   try {
@@ -26,7 +27,7 @@ export async function generateAgentPleading(input: { caseData: PleadingInput; fi
   if (token.length < 32) throw new RequestError("لم يكتمل إعداد مسار الصياغة. يرجى مراجعة إدارة المجموعة.",503);
   const requestId = crypto.randomUUID();
   const sources = input.evidence.map((item,index)=>({sourceId:evidenceSourceId(item,index),marker:`م${index+1}`,kind:isCassationEvidence(item)?"cassation":"legislation",title:item.title,text:item.text,reference:item.reference||"",sourceUrl:item.sourceUrl||""}));
-  const payload = {sourceCoverage:legalSourceCoverage(input.evidence),requestId,language:"ar",documentKind:input.documentKind,template:{id:input.template.id,version:input.template.version,kind:input.template.kind,title:input.template.title,sourceSha256:input.template.sourceSha256},caseData:input.caseData,fields:input.fields,sources};
+  const payload = {caseReasoning:{revision:"case-grounded-memo-1",instructions:caseReasoningInstructions,plan:input.casePlan||null},sourceCoverage:legalSourceCoverage(input.evidence),requestId,language:"ar",documentKind:input.documentKind,template:{id:input.template.id,version:input.template.version,kind:input.template.kind,title:input.template.title,sourceSha256:input.template.sourceSha256},caseData:input.caseData,fields:input.fields,sources};
   let response: Response;
   try {
     response = await transport(url, {method:"POST",headers:{"Content-Type":"application/json",Authorization:`Bearer ${token}`},body:JSON.stringify(payload),signal:AbortSignal.timeout(185_000),redirect:"error"});

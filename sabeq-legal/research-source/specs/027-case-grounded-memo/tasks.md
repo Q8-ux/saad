@@ -1,0 +1,6 @@
+- [x] Shared general and conditional issue rules
+- [x] Grounded plan + source/quote validation
+- [x] Local/agent independent post-draft audit, bounded retry
+- [x] Incomplete source/quality status in UI
+- [x] Synthetic regression checks and existing safety checks
+- [ ] Build and publication report
