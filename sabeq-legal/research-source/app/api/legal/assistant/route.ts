@@ -1,3 +1,4 @@
+import { ASSISTANT_REQUEST_BYTES, validateAssistantInput } from "@/lib/assistant-input";
 import { legalSourceCoverage, formatSourceCoverage } from "@/lib/legal-source-coverage";
 import { interfaceLabel, interfaceError } from "@/lib/interface-language";
 import { conductLegalIntake, openAIErrorResponse, type LegalIntakeState } from "@/lib/openai";
@@ -7,22 +8,9 @@ import { formatIntakeEvidence, intakePassages, reviewIntakeAnalysis, type Analys
 import { requireMemoUserOrGuest } from "@/lib/public-auth";
 import { enforceUserServiceLimit, recordServiceActivity } from "@/lib/service-records";
 import { requireServiceEnabled } from "@/lib/service-settings";
-import { assertSameOrigin, cleanLanguage, cleanMultiline, corsPreflight, enforceRateLimit, errorResponse, privateJson, readJsonObject, RequestError } from "@/lib/request-security";
+import { assertSameOrigin, cleanLanguage, corsPreflight, enforceRateLimit, errorResponse, privateJson, readJsonObject, RequestError } from "@/lib/request-security";
 
 export const OPTIONS = corsPreflight;
-type IntakeMessage = { role: "user" | "assistant"; content: string };
-
-function cleanMessages(value: unknown): IntakeMessage[] {
-  if (!Array.isArray(value)) return [];
-  return value.slice(-16).flatMap((item) => {
-    if (!item || typeof item !== "object" || Array.isArray(item)) return [];
-    const raw = item as Record<string, unknown>;
-    if (raw.role !== "user" && raw.role !== "assistant") return [];
-    const content = typeof raw.content === "string" ? raw.content.replace(/\u0000/g, " ").trim().slice(0, 2_500) : "";
-    return content ? [{ role: raw.role, content }] : [];
-  });
-}
-
 function guessCaseType(text: string) {
   if (/عمل|عامل|راتب|أجر|اجر|فصل|مكافأة|مكافاه/u.test(text)) return "عمالي";
   if (/طلاق|نفقة|نفقه|حضانة|حضانه|زواج|أسرة|اسرة|ميراث/u.test(text)) return "أحوال شخصية";
@@ -106,11 +94,13 @@ export async function POST(request: Request) {
     assertSameOrigin(request);
     const started = performance.now();
     const [user] = await Promise.all([requireMemoUserOrGuest(request), requireServiceEnabled("assistant")]);
-    const data = await readJsonObject(request, 96_000);
-    await Promise.all([enforceRateLimit(request, "legal-assistant-intake", 30, "hour"), user ? enforceUserServiceLimit(user, "assistant") : Promise.resolve()]);
+    const data = await readJsonObject(request, ASSISTANT_REQUEST_BYTES);
     const language = cleanLanguage(data.language);
-    const message = cleanMultiline(data.message, "الرسالة", { min: 2, max: 2_500 });
-    const messages = [...cleanMessages(data.messages), { role: "user" as const, content: message }].slice(-16);
+    let input;
+    try { input = validateAssistantInput(data.message, data.messages, language); }
+    catch (error) { throw new RequestError(error instanceof Error ? error.message : "الرسالة غير صالحة."); }
+    const { message, messages } = input;
+    await Promise.all([enforceRateLimit(request, "legal-assistant-intake", 30, "hour"), user ? enforceUserServiceLimit(user, "assistant") : Promise.resolve()]);
     const stages: AnalysisStage[] = [];
     const cancellation = new AbortController();
     const signal = AbortSignal.any([request.signal, cancellation.signal]);

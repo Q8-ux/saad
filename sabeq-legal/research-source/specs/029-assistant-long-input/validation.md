@@ -1,0 +1,1 @@
+42 relevant regression tests passed (long-input, connected intake, case reasoning). Worker and GitHub builds passed. tsc reports existing missing Cloudflare/Vite declarations and search/tools implicit-any errors, none in changed files. Full live model generation not tested; release asset verification pending. Browser QA unavailable without required control-browser skill.

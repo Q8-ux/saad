@@ -1,0 +1,4 @@
+- [x] Shared validation and frontend counter
+- [x] Server history and body limits
+- [x] Synthetic regression tests and builds
+- [ ] Publish both deployments and verify GitHub release

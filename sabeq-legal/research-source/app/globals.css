@@ -3882,3 +3882,5 @@ html[data-theme="dark"] .memo-result-tools .danger { border-color: #7b3d48; colo
 .assistant-header-portrait{width:84px;height:84px;border:2px solid var(--blue)}
 .legal-intake .assistant-welcome{font-size:clamp(20px,2.4vw,24px);line-height:1.8;margin-bottom:20px}
 @media(max-width:600px){.floating .assistant-avatar-button{width:58px;height:58px}.assistant-header-portrait{width:72px;height:72px}}
+
+.assistant-input-limit{margin:6px 0;font-size:14px;line-height:1.7;color:var(--muted)}

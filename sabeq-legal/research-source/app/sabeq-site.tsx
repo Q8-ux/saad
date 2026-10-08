@@ -1,5 +1,6 @@
 "use client";
 
+import { ASSISTANT_MESSAGE_LIMIT, assistantInputCopy, validateAssistantInput } from "@/lib/assistant-input";
 import { readSSE } from "@/lib/intake-stream";
 import { cleanIntakeContext } from "@/lib/intake-context";
 import type { AnalysisStage } from "@/lib/intake-analysis";
@@ -815,7 +816,13 @@ function Assistant({ t, language, token, initialSession, onSession, openBooking,
 
   async function submitMessage(rawMessage: string, voiceTurn = false, externalSignal?: AbortSignal): Promise<string> {
     const message = rawMessage.trim();
-    if (!message || busyRef.current) throw new Error(tr(language, "انتظر اكتمال الرد الحالي."));
+    if (busyRef.current) throw new Error(tr(language, "انتظر اكتمال الرد الحالي."));
+    try { validateAssistantInput(message, conversationRef.current.messages, language); }
+    catch (caught) {
+      setQuestion(rawMessage);
+      setError(caught instanceof Error ? caught.message : t.error);
+      throw caught;
+    }
     const operation = ++operationRef.current;
     const request = new AbortController(); requestRef.current = request;
     const signal = externalSignal ? AbortSignal.any([externalSignal, request.signal, AbortSignal.timeout(60_000)]) : AbortSignal.any([request.signal, AbortSignal.timeout(60_000)]);
@@ -882,6 +889,7 @@ function Assistant({ t, language, token, initialSession, onSession, openBooking,
       <textarea aria-label={tr(language, "رسالتك للمساعد القانوني")} value={question} onChange={event => setQuestion(event.target.value)} placeholder={voiceUi.placeholder} rows={4} disabled={voiceActive || loading} />
       <div className="voice-chat-actions"><button type="button" className={`voice-chat-button voice-wave-button phase-${voicePhase}`} onClick={() => { void voiceRef.current?.toggle(); }} disabled={loading && !voiceActive} aria-label={voiceLabel} title={voiceLabel} aria-pressed={voiceActive} aria-describedby="assistant-voice-status"><VoiceWaveform /></button><button type="submit" className="voice-chat-send" aria-label={tr(language, "إرسال الرسالة")} disabled={loading || voiceActive || !question.trim()}><Send size={21} /></button></div>
     </form>
+    <p className="assistant-input-limit" aria-live="polite">{question.trim().length.toLocaleString(language)} / {ASSISTANT_MESSAGE_LIMIT.toLocaleString(language)} — {assistantInputCopy(language).hint}</p>
     <p id="assistant-voice-status" className={`assistant-voice-status phase-${voicePhase}`} role="status" aria-live="polite">{voiceUi.phases[voicePhase]}{voicePhase === "listening" && <small>{voiceUi.hint}</small>}</p>
     {["transcribing", "analyzing", "preparing"].includes(voicePhase) && <VoiceCountdown language={language} />}
     {voicePhase === "listening" && <div className="voice-chat-actions"><button type="button" className="button button-primary" onClick={() => voiceRef.current?.finish()}><Send size={18} />{voiceUi.finish}</button><button type="button" className="text-button" onClick={stopSpeaking}>{voiceUi.stop}</button></div>}

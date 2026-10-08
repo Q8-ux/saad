@@ -1,0 +1,1 @@
+Share pure input validation between frontend/server; validate before service/model work; retain whole messages; display limits; test long Arabic input and rejections; build and publish existing project and GitHub frontend.
