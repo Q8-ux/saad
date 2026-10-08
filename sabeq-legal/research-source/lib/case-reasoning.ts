@@ -32,14 +32,74 @@ export function caseResearchQueries(input:PleadingInput) {
   if (/خيانة|خيانه/.test(text)) queries.push("خيانة الأمانة عناصر الجريمة التسليم القصد الجنائي الأدلة");
   return queries;
 }
+function unwrapFactQuote(value: string) {
+  const text = value.trim();
+  const wrappers: Array<[string,string]> = [["«","»"],["“","”"],["\"","\""],["‘","’"]];
+  const pair = wrappers.find(([start,end]) => text.startsWith(start) && text.endsWith(end));
+  return pair ? text.slice(1,-1).trim() : text;
+}
+function unwrapSourceMarker(value: string) {
+  if (typeof value !== "string") return value;
+  const match = /^(?:【(م[1-9]\d*)】|\[(م[1-9]\d*)\]|(م[1-9]\d*))$/.exec(value.trim());
+  return match ? (match[1] || match[2] || match[3]) : value;
+}
+export type CasePlanFailureCode = "role" | "facts" | "sources" | "citations" | "format";
+export class CasePlanValidationError extends Error {
+  constructor(public code: CasePlanFailureCode) { super(code); this.name = "CasePlanValidationError"; }
+}
+function planFailure(error: unknown): CasePlanFailureCode {
+  const message = error instanceof Error ? error.message : "";
+  return message === "client role changed" ? "role" : message === "ungrounded issue" ? "facts" : message === "unknown plan source" ? "sources" : message === "numeric citation in plan" ? "citations" : "format";
+}
+export function casePlanFailureMessage(code: CasePlanFailureCode) {
+  const reason = {role:"صفة الموكل",facts:"الاقتباسات من الوقائع المدخلة",sources:"مراجع المصادر المتاحة",citations:"عدم إدخال أرقام قانونية غير متحققة",format:"اكتمال بنية خطة التحليل"}[code];
+  return `تعذر اعتماد خطة التحليل بعد محاولة تصحيح داخلية: لم تتحقق مطابقة ${reason}. حُفظت بياناتك في النموذج؛ لم تُنشأ مذكرة غير متحققة.`;
+}
+export function caseFactQuotes(input: PleadingInput): string[] {
+  const quotes: string[] = [];
+  for (const paragraph of approvedCaseFacts(input).split(/\n+|(?<=[.!؟؛])\s+/u)) {
+    let remaining = paragraph.trim();
+    while (remaining.length) {
+      let end = Math.min(180,remaining.length);
+      if (end < remaining.length) { const space = remaining.lastIndexOf(" ",end); if (space > 60) end = space; }
+      const quote = remaining.slice(0,end).trim();
+      if (quote.length >= 4) quotes.push(quote);
+      remaining = remaining.slice(end).trim();
+    }
+  }
+  const unique = [...new Set(quotes)];
+  // At most 64 enum strings / 11520 characters, below structured-output
+  // schema enum size limits. Full approved facts still reach the planner.
+  return unique.length <= 64 ? unique : Array.from({length:64},(_,index)=>unique[Math.floor(index*(unique.length-1)/63)]);
+}
+export async function buildCheckedCasePlan(input: PleadingInput, evidence: LegalEvidence[], sources: string, generate: (options: {instructions:string;input:string;schema:Record<string,unknown>;maxOutputTokens:number}) => Promise<string>): Promise<CasePlan> {
+  const factQuotes = caseFactQuotes(input);
+  if (!factQuotes.length) throw new CasePlanValidationError("facts");
+  const schema = { ...casePlanSchema, properties: { ...casePlanSchema.properties, clientRole: { type: "string", enum: [input.partyRole] }, issues: { ...casePlanSchema.properties.issues, items: { ...casePlanSchema.properties.issues.items, properties: { ...casePlanSchema.properties.issues.items.properties, factQuote: {type:"string",enum:factQuotes} } } } } };
+  let failure: CasePlanFailureCode | null = null;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    // Generation errors are outside the parser catch: do not relabel provider
+    // failures or incomplete model output as an invalid legal defense.
+    const raw = await generate({
+      instructions: `${caseReasoningInstructions}\nأعد خطة تحليل لا مذكرة. clientRole يساوي partyRole حرفياً كما في schema. لكل مسألة اختر factQuote ذا صلة من factQuotes المعتمدة في schema حرفياً دون إعادة صياغة أو حذف كلمات أو نقاط اختصار؛ لا تستشهد بكلام المساعد. لا تضع أرقام مواد أو قوانين في الخطة. sourceMarkers أسماء مثل م1 فقط من المصادر المتاحة؛ عند غياب سند مناسب اتركها فارغة وسجل researchGaps. لا توصف المستندات بأنها مقروءة أو مثبتة دون محتواها المعتمد. لا تفترض الخصم أو التضامن أو البراءة. لا تتجاوز 12 مسألة، واكتب حقول كل مسألة بإيجاز. ${failure ? `المحاولة السابقة رُفضت لسبب ${failure}. أعد بناء الخطة من المدخلات الأصلية وصحح هذا السبب. لا تعتمد الاقتباسات أو الصفات أو المراجع من المحاولة المرفوضة.` : ""}`,
+      input: JSON.stringify({approvedFacts:approvedCaseFacts(input),partyRole:input.partyRole,factQuotes,sources,validationFailure:failure}), schema, maxOutputTokens:8_000,
+    });
+    try { return parseCasePlan(raw,input,evidence); }
+    catch(error) { failure = planFailure(error); }
+  }
+  throw new CasePlanValidationError(failure || "format");
+}
 export function parseCasePlan(raw:string,input:PleadingInput,evidence:LegalEvidence[]):CasePlan {
   const p=JSON.parse(raw) as CasePlan;
   if(!p || ![p.clientRole,p.opponentRole,p.characterization].every(x=>typeof x==="string") || !Array.isArray(p.issues)||!p.issues.length||p.issues.length>12||![p.missingFacts,p.researchGaps].every(a=>Array.isArray(a)&&a.every(x=>typeof x==="string"))) throw Error("invalid case plan");
   if(normalized(p.clientRole)!==normalized(input.partyRole)) throw Error("client role changed");
   const facts=normalized(approvedCaseFacts(input));
   for(const issue of p.issues) {
+    // Remove display wrappers only; spelling, words and numbers stay exact.
+    if (issue && typeof issue.factQuote === "string") issue.factQuote = unwrapFactQuote(issue.factQuote);
+    if (issue && Array.isArray(issue.sourceMarkers)) issue.sourceMarkers = issue.sourceMarkers.map(unwrapSourceMarker);
     if(!issue || !["issue","factQuote","document","application","counterargument","response","proposedRelief","missing"].every(k=>typeof issue[k as keyof typeof issue]==="string") || normalized(issue.factQuote).length<4 || !facts.includes(normalized(issue.factQuote))) throw Error("ungrounded issue");
-    if(!Array.isArray(issue.sourceMarkers)||issue.sourceMarkers.some(m=>!/^م[1-9]\d*$/.test(m)||Number(m.slice(1))>evidence.length)) throw Error("unknown plan source");
+    if(!Array.isArray(issue.sourceMarkers)||issue.sourceMarkers.some(m=>typeof m!=="string"||!/^م[1-9]\d*$/.test(m)||Number(m.slice(1))>evidence.length)) throw Error("unknown plan source");
     // Plans may describe legal questions, but cannot introduce unverified
     // numeric legal citations before the existing citation verifier runs.
     if(/(?:المادة|مادة|قانون رقم|الطعن رقم)\s*[(:：]?\s*[\d٠-٩]/u.test([issue.issue,issue.application,issue.counterargument,issue.response,issue.proposedRelief].join(" "))) throw Error("numeric citation in plan");

@@ -1,7 +1,7 @@
 {
-  "release": "2026-10-08-responsive-memo-generation",
+  "release": "2026-10-08-checked-case-plan-repair",
   "clientSource": "cf02a1d9f14df089392ab7b6a08d24018434ad55",
-  "backendSource": "cf02a1d9f14df089392ab7b6a08d24018434ad55",
+  "backendSource": "cdbc45812977393d20c260d9cfc5e3e591faa801",
   "assistant": "official-research-sources-1",
   "voice": "gulf-male-voice-4",
   "tools": "legal-tools-1",
@@ -22,14 +22,14 @@
   "memoResultTools": "bottom-vector-actions-1",
   "memoPreview": "document-derived-clean-text-1",
   "githubPagesAsset": "index-DjLGKaFD.js",
-  "publishedAt": "2026-10-08T05:44:53Z",
+  "publishedAt": "2026-10-08T05:57:01Z",
   "memoLanguage": "ar-KW",
   "memoDirection": "rtl",
   "memoAlignment": "right",
   "interfaceLocalization": "ar-en-ur-tools-guidance-1",
   "memoProseLanguage": "arabic-with-protected-names-and-identifiers-1",
   "builtAt": "2026-10-08T03:06:00Z",
-  "backendVersion": 98,
+  "backendVersion": 99,
   "pleadingLayout": "plain-header-wide-pages-1",
   "citationCorrection": "one-bounded-server-retry-before-archive",
   "legalSourceDirectory": "6-catalogues-3-fetched-0-new-citable-pdfs",
@@ -46,5 +46,7 @@
   "khalifaPortrait": "original-rgb-native-frame-navy-alpha-only-no-hover-zoom",
   "khalifaValidation": "235000-face-pixels-AE0-both-builds-passed",
   "memoInteraction": "inline-approval-single-post-cancel-240s-bounded-wait",
-  "memoInteractionValidation": "21-related-tests-and-both-builds-passed-device-freeze-not-reproduced"
+  "memoInteractionValidation": "21-related-tests-and-both-builds-passed-device-freeze-not-reproduced",
+  "memoPlan": "pinned-role-verbatim-quote-enum-one-validated-correction-provider-errors-preserved",
+  "memoPlanValidation": "27-related-tests-worker-build-passed-user-case-not-reproduced"
 }

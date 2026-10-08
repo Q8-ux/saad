@@ -40,3 +40,37 @@ test('every output path is audited before archive and source correction preserve
  assert.doesNotMatch(route,/content.requests=memoInput.requests/);
  assert.match(route,/casePlan:checkedPlan/);assert.match(route,/caseQuality,sourceCoverage/);
 });
+
+test('display-only wrappers are normalized without rewriting facts or source identifiers',()=>{
+ const result=api.parseCasePlan(JSON.stringify(plan({issues:[issue({factQuote:'«صلح جزئي وسداد سابق»',sourceMarkers:['【م1】']})]})),input,evidence);
+ assert.equal(result.issues[0].factQuote,'صلح جزئي وسداد سابق');assert.equal(result.issues[0].sourceMarkers[0],'م1');
+ for(const quote of ['صلح جزئي ... وسداد سابق','صلح نهائي وسداد سابق']) assert.throws(()=>api.parseCasePlan(JSON.stringify(plan({issues:[issue({factQuote:quote})]})),input,evidence));
+ assert.throws(()=>api.parseCasePlan(JSON.stringify(plan({issues:[issue({sourceMarkers:['【م99】']})]})),input,evidence));
+});
+test('invalid plan is regenerated once from originals with pinned role and safe reason',async()=>{
+ const calls=[];
+ const result=await api.buildCheckedCasePlan(input,evidence,'synthetic sources',async options=>{calls.push(options);return JSON.stringify(calls.length===1?plan({clientRole:'مدعٍ'}):plan());});
+ assert.equal(calls.length,2);assert.equal(result.clientRole,input.partyRole);
+ assert.equal(calls[0].schema.properties.clientRole.enum[0],input.partyRole);
+ const retry=JSON.parse(calls[1].input);assert.equal(retry.validationFailure,'role');assert.equal(retry.partyRole,input.partyRole);assert.match(retry.approvedFacts,/صلح جزئي/);
+});
+test('persistent invented facts or reversed roles remain blocked after two tries',async()=>{
+ let calls=0;
+ await assert.rejects(api.buildCheckedCasePlan(input,evidence,'synthetic',async()=>{calls++;return JSON.stringify(plan({issues:[issue({factQuote:'حقيقة مختلقة'})]}));}),error=>error.name==='CasePlanValidationError'&&error.code==='facts');
+ assert.equal(calls,2);
+});
+test('provider and incomplete-output failures are never mislabelled as plan validation',async()=>{
+ const outage=new Error('synthetic provider error');let calls=0;
+ await assert.rejects(api.buildCheckedCasePlan(input,evidence,'',async()=>{calls++;throw outage;}),error=>error===outage);assert.equal(calls,1);
+});
+test('malformed JSON can be corrected once while valid plans cost one call',async()=>{
+ let calls=0;await api.buildCheckedCasePlan(input,evidence,'',async()=>++calls===1?'invalid json':JSON.stringify(plan()));assert.equal(calls,2);
+ calls=0;await api.buildCheckedCasePlan(input,evidence,'',async()=>{calls++;return JSON.stringify(plan());});assert.equal(calls,1);
+});
+
+test('planner quote enum is bounded, verbatim and spans the approved input',()=>{
+ const large={...input,facts:('جملة اختبارية طويلة تحتوي مبلغاً وواقعة فقط. '.repeat(800))+'نهاية اختبارية فريدة',requests:'طلب اختباري نهائي'};
+ const quotes=api.caseFactQuotes(large),facts=api.approvedCaseFacts(large);
+ assert.ok(quotes.length<=64);assert.ok(quotes.every(q=>q.length>=4&&q.length<=180&&facts.includes(q)));
+ assert.ok(quotes.join('').length<=11520);
+});

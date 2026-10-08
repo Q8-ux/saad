@@ -1,0 +1,4 @@
+- [x] Checked planner and safe formatting normalization
+- [x] Replace generic plan catch; retain output gates
+- [x] Regression tests and builds
+- [ ] Publish and verify deployed release

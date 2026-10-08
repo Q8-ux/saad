@@ -1,0 +1,1 @@
+Pure checked planner helper wrapping generate and parse; bounded repair on parsing errors only; stable reason codes without case text; route integration; tests no bypass and provider propagation; build and publish existing service/GitHub.

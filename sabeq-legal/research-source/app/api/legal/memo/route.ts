@@ -1,4 +1,4 @@
-import { caseReasoningInstructions, caseResearchQueries, approvedCaseFacts, casePlanSchema, parseCasePlan, caseAuditSchema, parseCaseAudit, caseQualitySummary } from "@/lib/case-reasoning";
+import { caseReasoningInstructions, caseResearchQueries, approvedCaseFacts, buildCheckedCasePlan, CasePlanValidationError, casePlanFailureMessage, caseAuditSchema, parseCaseAudit, caseQualitySummary } from "@/lib/case-reasoning";
 import { legalSourceCoverage, formatSourceCoverage } from "@/lib/legal-source-coverage";
 import { loadApprovedTemplate } from "@/lib/approved-templates";
 import { arabicMemoInput } from "@/lib/memo-language";
@@ -99,14 +99,12 @@ export async function POST(request: Request) {
       [...handoffEvidence, ...cassationEvidence, ...generalEvidence].map((item) => [`${item.documentId}:${item.reference || item.text.slice(0, 80)}`, item]),
     ).values()).slice(0, 16);
     let casePlan;
-    try {
-      casePlan = parseCasePlan(await generateText({
-        instructions: `${caseReasoningInstructions}\nأعد خطة تحليل لا مذكرة. clientRole يساوي صفة الموكل المدخلة حرفياً. لكل مسألة factQuote اقتباس حرفي قصير من approvedFacts؛ لا تستشهد بكلام المساعد. لا تضع أرقام مواد أو قوانين في الخطة. sourceMarkers لا تتضمن إلا مراجع م المتاحة ذات الصلة، واتركها فارغة عند غياب سند مناسب وسجل researchGaps. المستند المذكور يوصف بأنه مذكور، لا مقروء أو مثبت إلا إذا تضمن approvedFacts محتواه. اقترح الدفاع البديل للمراجعة، ولا تفترض الخصم أو التضامن أو البراءة. لا تتجاوز 12 مسألة.`,
-        input: JSON.stringify({approvedFacts:approvedCaseFacts(memoInput),partyRole:memoInput.partyRole,sources:formatEvidence(evidence)}),
-        schema:casePlanSchema,maxOutputTokens:5500,
-      }),memoInput,evidence);
-    } catch {
-      throw new RequestError("لم تجتز خطة الدفاع مطابقة الوقائع والصفات والمصادر. احتفظ بالبيانات وأعد المحاولة؛ لم تُنشأ مذكرة غير متحققة.",422);
+    try { casePlan = await buildCheckedCasePlan(memoInput,evidence,formatEvidence(evidence),generateText); }
+    catch(error) {
+      if (!(error instanceof CasePlanValidationError)) throw error;
+      // Reason codes only; never log the prompt, parties or generated case text.
+      console.warn("Memo case plan validation failed", { code:error.code, attempts:2 });
+      throw new RequestError(casePlanFailureMessage(error.code),422);
     }
     const checkedPlan = casePlan;
     let agentAudit: unknown;
