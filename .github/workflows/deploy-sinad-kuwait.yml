@@ -45,7 +45,7 @@ jobs:
           python sinad-kuwait/deployment/prepare.py
           mkdir -p _site/manhaj
           cp manhaj/index.html _site/manhaj/index.html
-          cp -r manhaj/data _site/manhaj/data
+          python -c "import shutil; shutil.rmtree('_site/manhaj/data', ignore_errors=True); shutil.copytree('manhaj/data', '_site/manhaj/data')"
           mkdir -p _site/manhaj/vendor/pdfjs
           cp /tmp/manhaj-pdf/node_modules/pdfjs-dist/build/pdf.mjs /tmp/manhaj-pdf/node_modules/pdfjs-dist/build/pdf.worker.mjs _site/manhaj/vendor/pdfjs/
           cp -r /tmp/manhaj-pdf/node_modules/pdfjs-dist/cmaps /tmp/manhaj-pdf/node_modules/pdfjs-dist/standard_fonts _site/manhaj/vendor/pdfjs/
