@@ -1,0 +1,384 @@
+{
+  "recordCount": 224,
+  "uniqueSourceFiles": 224,
+  "subjects": 51,
+  "grades": 17,
+  "unknownEditions": 224,
+  "currentYearVerified": 0,
+  "lookupYearParameter": 2023,
+  "sourceErrors": 0,
+  "generatedAt": "2026-10-09T22:49:18.501011+00:00",
+  "scope": "public-general-education-and-computer-catalogue",
+  "coverage": [
+    {
+      "stage": "ابتدائي",
+      "records": 10,
+      "subjects": 1,
+      "grades": 5,
+      "firstTerm": 5,
+      "secondTerm": 5
+    },
+    {
+      "stage": "الإبتدائية",
+      "records": 46,
+      "subjects": 9,
+      "grades": 5,
+      "firstTerm": 46,
+      "secondTerm": 0
+    },
+    {
+      "stage": "الثانوية",
+      "records": 91,
+      "subjects": 22,
+      "grades": 4,
+      "firstTerm": 86,
+      "secondTerm": 5
+    },
+    {
+      "stage": "المتوسط",
+      "records": 42,
+      "subjects": 13,
+      "grades": 4,
+      "firstTerm": 42,
+      "secondTerm": 0
+    },
+    {
+      "stage": "ثانوي",
+      "records": 6,
+      "subjects": 1,
+      "grades": 3,
+      "firstTerm": 3,
+      "secondTerm": 3
+    },
+    {
+      "stage": "رياض الأطفال",
+      "records": 4,
+      "subjects": 1,
+      "grades": 2,
+      "firstTerm": 2,
+      "secondTerm": 2
+    },
+    {
+      "stage": "متوسط",
+      "records": 9,
+      "subjects": 1,
+      "grades": 5,
+      "firstTerm": 5,
+      "secondTerm": 4
+    },
+    {
+      "stage": "مسارات",
+      "records": 16,
+      "subjects": 16,
+      "grades": 1,
+      "firstTerm": 16,
+      "secondTerm": 0
+    }
+  ],
+  "contentAnalysis": "not-performed-metadata-only",
+  "standardsCount": 30,
+  "standards": [
+    {
+      "id": "59",
+      "title": "القرآن الكريم",
+      "stage": "المرحلة الابتدائية",
+      "sourceUrl": "https://elibrary.moe.edu.kw/api/File/download/nationalstandard/59",
+      "sourcePage": "https://elibrary.moe.edu.kw/NationalStandards",
+      "verifiedAt": "2026-10-09T22:51:45.009889+00:00",
+      "contentStatus": "metadata-only",
+      "edition": null
+    },
+    {
+      "id": "60",
+      "title": "القرآن الكريم",
+      "stage": "المرحلة المتوسطة",
+      "sourceUrl": "https://elibrary.moe.edu.kw/api/File/download/nationalstandard/60",
+      "sourcePage": "https://elibrary.moe.edu.kw/NationalStandards",
+      "verifiedAt": "2026-10-09T22:51:45.009889+00:00",
+      "contentStatus": "metadata-only",
+      "edition": null
+    },
+    {
+      "id": "61",
+      "title": "القرآن الكريم",
+      "stage": "المرحلة الثانوية",
+      "sourceUrl": "https://elibrary.moe.edu.kw/api/File/download/nationalstandard/61",
+      "sourcePage": "https://elibrary.moe.edu.kw/NationalStandards",
+      "verifiedAt": "2026-10-09T22:51:45.009889+00:00",
+      "contentStatus": "metadata-only",
+      "edition": null
+    },
+    {
+      "id": "62",
+      "title": "الاجتماعيات ",
+      "stage": "المرحلة الابتدائية",
+      "sourceUrl": "https://elibrary.moe.edu.kw/api/File/download/nationalstandard/62",
+      "sourcePage": "https://elibrary.moe.edu.kw/NationalStandards",
+      "verifiedAt": "2026-10-09T22:51:45.009889+00:00",
+      "contentStatus": "metadata-only",
+      "edition": null
+    },
+    {
+      "id": "63",
+      "title": "الاجتماعيات ",
+      "stage": "المرحلة المتوسطة",
+      "sourceUrl": "https://elibrary.moe.edu.kw/api/File/download/nationalstandard/63",
+      "sourcePage": "https://elibrary.moe.edu.kw/NationalStandards",
+      "verifiedAt": "2026-10-09T22:51:45.009889+00:00",
+      "contentStatus": "metadata-only",
+      "edition": null
+    },
+    {
+      "id": "64",
+      "title": "اللغة الفرنسية",
+      "stage": "المرحلة الثانوية",
+      "sourceUrl": "https://elibrary.moe.edu.kw/api/File/download/nationalstandard/64",
+      "sourcePage": "https://elibrary.moe.edu.kw/NationalStandards",
+      "verifiedAt": "2026-10-09T22:51:45.009889+00:00",
+      "contentStatus": "metadata-only",
+      "edition": null
+    },
+    {
+      "id": "65",
+      "title": "التربية الاسلامية ",
+      "stage": "المرحلة الابتدائية",
+      "sourceUrl": "https://elibrary.moe.edu.kw/api/File/download/nationalstandard/65",
+      "sourcePage": "https://elibrary.moe.edu.kw/NationalStandards",
+      "verifiedAt": "2026-10-09T22:51:45.009889+00:00",
+      "contentStatus": "metadata-only",
+      "edition": null
+    },
+    {
+      "id": "66",
+      "title": "التربية الاسلامية ",
+      "stage": "المرحلة المتوسطة",
+      "sourceUrl": "https://elibrary.moe.edu.kw/api/File/download/nationalstandard/66",
+      "sourcePage": "https://elibrary.moe.edu.kw/NationalStandards",
+      "verifiedAt": "2026-10-09T22:51:45.009889+00:00",
+      "contentStatus": "metadata-only",
+      "edition": null
+    },
+    {
+      "id": "67",
+      "title": "وثيقة المعايير لمادة تكنولوجيا المعلومات والاتصالات ",
+      "stage": "المرحلة الابتدائية",
+      "sourceUrl": "https://elibrary.moe.edu.kw/api/File/download/nationalstandard/67",
+      "sourcePage": "https://elibrary.moe.edu.kw/NationalStandards",
+      "verifiedAt": "2026-10-09T22:51:45.009889+00:00",
+      "contentStatus": "metadata-only",
+      "edition": null
+    },
+    {
+      "id": "68",
+      "title": "وثيقة المعايير لمادة تكنولوجيا المعلومات والاتصالات",
+      "stage": "المرحلة المتوسطة",
+      "sourceUrl": "https://elibrary.moe.edu.kw/api/File/download/nationalstandard/68",
+      "sourcePage": "https://elibrary.moe.edu.kw/NationalStandards",
+      "verifiedAt": "2026-10-09T22:51:45.009889+00:00",
+      "contentStatus": "metadata-only",
+      "edition": null
+    },
+    {
+      "id": "69",
+      "title": "وثيقة المعايير لمادة تكنولوجيا المعلومات والاتصالات ",
+      "stage": "المرحلة الثانوية",
+      "sourceUrl": "https://elibrary.moe.edu.kw/api/File/download/nationalstandard/69",
+      "sourcePage": "https://elibrary.moe.edu.kw/NationalStandards",
+      "verifiedAt": "2026-10-09T22:51:45.009889+00:00",
+      "contentStatus": "metadata-only",
+      "edition": null
+    },
+    {
+      "id": "70",
+      "title": "الاختياري الحر",
+      "stage": "المرحلة الابتدائية",
+      "sourceUrl": "https://elibrary.moe.edu.kw/api/File/download/nationalstandard/70",
+      "sourcePage": "https://elibrary.moe.edu.kw/NationalStandards",
+      "verifiedAt": "2026-10-09T22:51:45.009889+00:00",
+      "contentStatus": "metadata-only",
+      "edition": null
+    },
+    {
+      "id": "71",
+      "title": "الاختياري الحر",
+      "stage": "المرحلة المتوسطة",
+      "sourceUrl": "https://elibrary.moe.edu.kw/api/File/download/nationalstandard/71",
+      "sourcePage": "https://elibrary.moe.edu.kw/NationalStandards",
+      "verifiedAt": "2026-10-09T22:51:45.009889+00:00",
+      "contentStatus": "metadata-only",
+      "edition": null
+    },
+    {
+      "id": "72",
+      "title": "اللغة الإنجليزية",
+      "stage": "المرحلة الثانوية",
+      "sourceUrl": "https://elibrary.moe.edu.kw/api/File/download/nationalstandard/72",
+      "sourcePage": "https://elibrary.moe.edu.kw/NationalStandards",
+      "verifiedAt": "2026-10-09T22:51:45.009889+00:00",
+      "contentStatus": "metadata-only",
+      "edition": null
+    },
+    {
+      "id": "73",
+      "title": "اللغة الانجليزية",
+      "stage": "المرحلة الابتدائية",
+      "sourceUrl": "https://elibrary.moe.edu.kw/api/File/download/nationalstandard/73",
+      "sourcePage": "https://elibrary.moe.edu.kw/NationalStandards",
+      "verifiedAt": "2026-10-09T22:51:45.009889+00:00",
+      "contentStatus": "metadata-only",
+      "edition": null
+    },
+    {
+      "id": "74",
+      "title": "اللغة الانجليزية",
+      "stage": "المرحلة المتوسطة",
+      "sourceUrl": "https://elibrary.moe.edu.kw/api/File/download/nationalstandard/74",
+      "sourcePage": "https://elibrary.moe.edu.kw/NationalStandards",
+      "verifiedAt": "2026-10-09T22:51:45.009889+00:00",
+      "contentStatus": "metadata-only",
+      "edition": null
+    },
+    {
+      "id": "75",
+      "title": "الاقتصاد المنزلي",
+      "stage": "المرحلة المتوسطة",
+      "sourceUrl": "https://elibrary.moe.edu.kw/api/File/download/nationalstandard/75",
+      "sourcePage": "https://elibrary.moe.edu.kw/NationalStandards",
+      "verifiedAt": "2026-10-09T22:51:45.009889+00:00",
+      "contentStatus": "metadata-only",
+      "edition": null
+    },
+    {
+      "id": "76",
+      "title": "العلوم",
+      "stage": "المرحلة الابتدائية",
+      "sourceUrl": "https://elibrary.moe.edu.kw/api/File/download/nationalstandard/76",
+      "sourcePage": "https://elibrary.moe.edu.kw/NationalStandards",
+      "verifiedAt": "2026-10-09T22:51:45.009889+00:00",
+      "contentStatus": "metadata-only",
+      "edition": null
+    },
+    {
+      "id": "77",
+      "title": "العلوم",
+      "stage": "المرحلة المتوسطة",
+      "sourceUrl": "https://elibrary.moe.edu.kw/api/File/download/nationalstandard/77",
+      "sourcePage": "https://elibrary.moe.edu.kw/NationalStandards",
+      "verifiedAt": "2026-10-09T22:51:45.009889+00:00",
+      "contentStatus": "metadata-only",
+      "edition": null
+    },
+    {
+      "id": "78",
+      "title": "العلوم",
+      "stage": "المرحلة الثانوية",
+      "sourceUrl": "https://elibrary.moe.edu.kw/api/File/download/nationalstandard/78",
+      "sourcePage": "https://elibrary.moe.edu.kw/NationalStandards",
+      "verifiedAt": "2026-10-09T22:51:45.009889+00:00",
+      "contentStatus": "metadata-only",
+      "edition": null
+    },
+    {
+      "id": "81",
+      "title": "الرياضيات",
+      "stage": "المرحلة الابتدائية",
+      "sourceUrl": "https://elibrary.moe.edu.kw/api/File/download/nationalstandard/81",
+      "sourcePage": "https://elibrary.moe.edu.kw/NationalStandards",
+      "verifiedAt": "2026-10-09T22:51:45.009889+00:00",
+      "contentStatus": "metadata-only",
+      "edition": null
+    },
+    {
+      "id": "82",
+      "title": "الرياضيات",
+      "stage": "المرحلة المتوسطة",
+      "sourceUrl": "https://elibrary.moe.edu.kw/api/File/download/nationalstandard/82",
+      "sourcePage": "https://elibrary.moe.edu.kw/NationalStandards",
+      "verifiedAt": "2026-10-09T22:51:45.009889+00:00",
+      "contentStatus": "metadata-only",
+      "edition": null
+    },
+    {
+      "id": "84",
+      "title": "مصفوفة المدى و التتابع- المستوى الأول و الثاني ",
+      "stage": "رياض الأطفال",
+      "sourceUrl": "https://elibrary.moe.edu.kw/api/File/download/nationalstandard/84",
+      "sourcePage": "https://elibrary.moe.edu.kw/NationalStandards",
+      "verifiedAt": "2026-10-09T22:51:45.009889+00:00",
+      "contentStatus": "metadata-only",
+      "edition": null
+    },
+    {
+      "id": "85",
+      "title": "اللغة العربية ",
+      "stage": "المرحلة الابتدائية",
+      "sourceUrl": "https://elibrary.moe.edu.kw/api/File/download/nationalstandard/85",
+      "sourcePage": "https://elibrary.moe.edu.kw/NationalStandards",
+      "verifiedAt": "2026-10-09T22:51:45.009889+00:00",
+      "contentStatus": "metadata-only",
+      "edition": null
+    },
+    {
+      "id": "86",
+      "title": "التربية الاسلامية",
+      "stage": "المرحلة المتوسطة",
+      "sourceUrl": "https://elibrary.moe.edu.kw/api/File/download/nationalstandard/86",
+      "sourcePage": "https://elibrary.moe.edu.kw/NationalStandards",
+      "verifiedAt": "2026-10-09T22:51:45.009889+00:00",
+      "contentStatus": "metadata-only",
+      "edition": null
+    },
+    {
+      "id": "87",
+      "title": "مصفوفة المدى والتتابع - التربية الاسلامية الفصل الاول والثاني",
+      "stage": "المرحلة الابتدائية",
+      "sourceUrl": "https://elibrary.moe.edu.kw/api/File/download/nationalstandard/87",
+      "sourcePage": "https://elibrary.moe.edu.kw/NationalStandards",
+      "verifiedAt": "2026-10-09T22:51:45.009889+00:00",
+      "contentStatus": "metadata-only",
+      "edition": null
+    },
+    {
+      "id": "93",
+      "title": "اللغة العربية - الفصل الثاني ",
+      "stage": "المرحلة الابتدائية",
+      "sourceUrl": "https://elibrary.moe.edu.kw/api/File/download/nationalstandard/93",
+      "sourcePage": "https://elibrary.moe.edu.kw/NationalStandards",
+      "verifiedAt": "2026-10-09T22:51:45.009889+00:00",
+      "contentStatus": "metadata-only",
+      "edition": null
+    },
+    {
+      "id": "94",
+      "title": "مصفوفة مهارات اللغة العربية - الفصل الدراسي الثاني",
+      "stage": "المرحلة المتوسطة",
+      "sourceUrl": "https://elibrary.moe.edu.kw/api/File/download/nationalstandard/94",
+      "sourcePage": "https://elibrary.moe.edu.kw/NationalStandards",
+      "verifiedAt": "2026-10-09T22:51:45.009889+00:00",
+      "contentStatus": "metadata-only",
+      "edition": null
+    },
+    {
+      "id": "95",
+      "title": "مصفوفة مهارات اللغة العربية - الفصل الأول ",
+      "stage": "المرحلة المتوسطة",
+      "sourceUrl": "https://elibrary.moe.edu.kw/api/File/download/nationalstandard/95",
+      "sourcePage": "https://elibrary.moe.edu.kw/NationalStandards",
+      "verifiedAt": "2026-10-09T22:51:45.009889+00:00",
+      "contentStatus": "metadata-only",
+      "edition": null
+    },
+    {
+      "id": "96",
+      "title": "القرآن الكريم ",
+      "stage": "المرحلة المتوسطة",
+      "sourceUrl": "https://elibrary.moe.edu.kw/api/File/download/nationalstandard/96",
+      "sourcePage": "https://elibrary.moe.edu.kw/NationalStandards",
+      "verifiedAt": "2026-10-09T22:51:45.009889+00:00",
+      "contentStatus": "metadata-only",
+      "edition": null
+    }
+  ],
+  "rightsSource": "https://www2.moe.edu.kw/news/GetNewsDetail?NewsId=910",
+  "standardsSource": "https://elibrary.moe.edu.kw/NationalStandards"
+}
