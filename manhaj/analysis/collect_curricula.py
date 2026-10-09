@@ -17,9 +17,10 @@ def parallel(fn,jobs):
     results=[]
     with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
         future_map={pool.submit(fn,j):j for j in jobs}
-        for f in concurrent.futures.as_completed(future_map):
+        for index,f in enumerate(concurrent.futures.as_completed(future_map),1):
             try:results.extend(f.result())
             except Exception as e:errors.append({'stage':str(future_map[f])[:150],'error':str(e)[:150]})
+            if index%25==0:print('Source queries:',index,'/',len(jobs),flush=True)
     return results
 def hasob():
     html=request('https://hasobgpt.moe.edu.kw/pages/library?type=student')
