@@ -2,7 +2,7 @@ name: Publish Sinad Kuwait
 on:
   push:
     branches: [main]
-    paths: ['sinad-kuwait/**', '.github/workflows/deploy-sinad-kuwait.yml']
+    paths: ['manhaj/**', 'sinad-kuwait/**', '.github/workflows/deploy-sinad-kuwait.yml']
   workflow_dispatch:
 permissions:
   contents: read
@@ -35,7 +35,11 @@ jobs:
       - name: Preserve published sites and overlay Sinad
         env:
           GH_TOKEN: ${{ github.token }}
-        run: python sinad-kuwait/deployment/prepare.py
+        run: |
+          python sinad-kuwait/deployment/prepare.py
+          mkdir -p _site/manhaj
+          cp manhaj/index.html _site/manhaj/index.html
+          test -s _site/manhaj/index.html
       - uses: actions/upload-pages-artifact@v3
         with: {path: _site, retention-days: 30}
       - uses: actions/deploy-pages@v4
