@@ -9,3 +9,6 @@ The storefront is the default empty-hash entry. Existing deep links, the workspa
 This release is a teacher template/workspace portal. There is no active checkout, subscription billing, shared cloud storage or licensed Ministry book import. A commercial store would need verified product prices, fulfillment terms and a payment backend before those operations can be activated.
 
 Validation: `node manhaj/storefront-check.cjs`; local integration check `node manhaj/analysis/ui-check.cjs` verifies preview/favorites/search, no template autosave, all prior routes and unchanged existing records. Managed preview/browser QA is unavailable in this environment; real-device visual and printing verification remains required.
+
+## إصلاح الأقسام
+كل قسم رئيسي يفتح صفحة مستقلة ورابطًا ثابتًا: `#category-planning`، `#category-teacher`، `#category-administration`، `#category-activities`، `#category-occasions`، `#category-design`. تتضمن كل صفحة مقدمة خاصة وأدوات فعلية ونماذج محصورة في القسم وخطوات عمل مختلفة. الصفحة الرئيسية لا تتكرر داخل الأقسام. اختبارات DOM تتحقق من اختلاف الصفحات والمحتوى وربط الأدوات وحفظ السجلات والتنقل المباشر بالرابط.
