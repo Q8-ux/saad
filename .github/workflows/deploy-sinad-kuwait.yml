@@ -39,6 +39,7 @@ jobs:
           node manhaj/analysis/check.cjs
           node manhaj/language-check.cjs
           node manhaj/reader-check.cjs
+          node manhaj/storefront-check.cjs
       - uses: actions/configure-pages@v5
       - name: Preserve published sites and overlay Sinad
         env:
