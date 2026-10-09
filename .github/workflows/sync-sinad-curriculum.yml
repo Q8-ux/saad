@@ -1,0 +1,33 @@
+name: Refresh Sinad Ministry curriculum index
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: write
+concurrency:
+  group: sinad-curriculum-sync
+  cancel-in-progress: false
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Read Ministry metadata
+        run: |
+          python sinad-kuwait/scripts/sync_moe.py
+          python sinad-kuwait/scripts/check_catalog.py
+      - name: Commit public catalog only
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add sinad-kuwait/data/catalog.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'Refresh Sinad public Ministry curriculum metadata'
+            git push
+          fi
+      - name: Publish updated catalog
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run deploy-sinad-kuwait.yml --ref main

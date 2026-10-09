@@ -1,0 +1,39 @@
+name: Publish Sinad Kuwait
+on:
+  push:
+    branches: [main]
+    paths: ['sinad-kuwait/**', '.github/workflows/deploy-sinad-kuwait.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages-v2
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: 22}
+      - name: Check sources
+        run: |
+          node --check sinad-kuwait/app.js
+          node sinad-kuwait/scripts/check_app.cjs
+          python -m py_compile sinad-kuwait/scripts/*.py sinad-kuwait/deployment/*.py
+          python sinad-kuwait/scripts/check_catalog.py
+      - uses: actions/configure-pages@v5
+      - name: Preserve published sites and overlay Sinad
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python sinad-kuwait/deployment/prepare.py
+      - uses: actions/upload-pages-artifact@v3
+        with: {path: _site, retention-days: 30}
+      - uses: actions/deploy-pages@v4
+        id: deploy
