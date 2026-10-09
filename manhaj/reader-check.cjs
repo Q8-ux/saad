@@ -1,0 +1,2 @@
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');const ctx=vm.createContext({});vm.runInContext(fs.readFileSync('manhaj/reader.js','utf8').split('(function(){')[0],ctx);
+for(const [w,h] of [[595,842],[100000,20],[20,100000],[50000,50000]]){const s=ctx.readerScale(w,h,1600);assert.ok(w*s<=8192&&h*s<=8192);assert.ok(w*h*s*s<=16000001)}assert.throws(()=>ctx.readerScale(0,10,1600));console.log('PDF original-page rendering size and pixel limits: PASS');

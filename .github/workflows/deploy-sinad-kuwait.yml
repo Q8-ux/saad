@@ -38,6 +38,7 @@ jobs:
           python -c "from scrapling.parser import Selector; assert Selector('<p>ready</p>').css('p::text').get() == 'ready'"
           node manhaj/analysis/check.cjs
           node manhaj/language-check.cjs
+          node manhaj/reader-check.cjs
       - uses: actions/configure-pages@v5
       - name: Preserve published sites and overlay Sinad
         env:
