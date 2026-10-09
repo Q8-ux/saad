@@ -20,7 +20,7 @@ with zipfile.ZipFile(io.BytesIO(subprocess.check_output(['gh','api','repos/'+os.
 assert (root/'index.html').is_file()
 dest=root/'sinad-kuwait'
 dest.mkdir(exist_ok=True)
-for name in ('index.html','app.js','data'):
+for name in ('index.html','app.js','workflows.js','data'):
     src=pathlib.Path('sinad-kuwait')/name
     if src.is_dir(): shutil.copytree(src,dest/name,dirs_exist_ok=True)
     else: shutil.copyfile(src,dest/name)

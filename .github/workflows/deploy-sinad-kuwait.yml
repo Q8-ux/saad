@@ -21,10 +21,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: {node-version: 22}
+        with: {node-version: 24}
       - name: Check sources
         run: |
           node --check sinad-kuwait/app.js
+          node --check sinad-kuwait/workflows.js
+          node sinad-kuwait/scripts/check_workflows.cjs
+          node --test sinad-kuwait/backend/server.test.mjs
           node sinad-kuwait/scripts/check_app.cjs
           python -m py_compile sinad-kuwait/scripts/*.py sinad-kuwait/deployment/*.py
           python sinad-kuwait/scripts/check_catalog.py

@@ -1,0 +1,25 @@
+# Apply only after the owner selects the Render workspace.
+# Free Postgres is for a 30-day trial, not long-term school records.
+services:
+  - type: web
+    name: manhaj-school-api
+    runtime: node
+    plan: free
+    region: frankfurt
+    buildCommand: npm --prefix sinad-kuwait/backend install --omit=dev
+    startCommand: node sinad-kuwait/backend/server.mjs
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: 24
+      - key: ALLOWED_ORIGIN
+        value: https://q8-ux.github.io
+      - key: DATABASE_URL
+        fromDatabase:
+          name: manhaj-school-db
+          property: connectionString
+databases:
+  - name: manhaj-school-db
+    plan: free
+    region: frankfurt
+    databaseName: manhaj
