@@ -249,41 +249,29 @@ window.ManhajCurriculum={refresh:refreshDocuments,async getDocument(id){return (
 window.ManhajCurriculum.ready=init().catch(e=>{setStatus('التخزين المحلي غير متاح: '+e.message);$('catalogStatus').textContent='تعذر فتح قاعدة المتصفح. تحقق من السماح بالتخزين.'});refreshRecords();show(initialViewKey||location.hash.slice(1));
 })();
 
-/* Local teacher assistant with deliberate turn-taking, continuous dictation and spoken replies. */
+/* Local teacher assistant with deliberate turn-taking and continuous dictation. */
 function teacherIntent(text){
  const s=normalizeArabic(text);
  const routes=[['lessons',/درس|تحضير|حصه/],['meetings',/اجتماع|محضر/],['projects',/مشروع/],['workplans',/خطه|خطة|خطط/],['tasks',/مهمه|مهمة|مهام/],['studio',/تصميم|فوتوشوب|ملصق/],['evidence',/شاهد|شواهد|انجاز/],['reports',/تقرير|تقارير/],['schedule',/تقويم|جدول|مواعيد/],['analysis',/تحليل|منهج|مناهج|مصدر|ابحث/],['reader',/اقرا|قارئ|قراء|مستند|كتاب/],['resources',/مرجع|مراجع|رابط/],['settings',/نسخ|اعدادات/]];
  return routes.find(([,pattern])=>pattern.test(s))?.[0]||'';
 }
 (function(){
- let flow=null,returnFocus=null,recognition=null,listening=false,restartTimer=null,pending=false,turnId=0,thinkTimers=[],thinkingResolve=null,voiceEnabled=true,currentSpeech=null,committedTranscript='';
+ let flow=null,returnFocus=null,recognition=null,listening=false,restartTimer=null,pending=false,turnId=0,thinkTimers=[],thinkingResolve=null,committedTranscript='';
  const launcher=document.createElement('button');
  launcher.id='teacherLauncher';launcher.className='btn';launcher.textContent='✦ مساعد المعلم';launcher.setAttribute('aria-expanded','false');launcher.setAttribute('aria-controls','teacherAssistant');document.body.append(launcher);
  const panel=document.createElement('aside');
  panel.id='teacherAssistant';panel.hidden=true;panel.setAttribute('role','dialog');panel.setAttribute('aria-labelledby','teacherAssistantTitle');panel.setAttribute('aria-busy','false');
- panel.innerHTML=`<header class="teacher-head"><div><strong id="teacherAssistantTitle">مساعد المعلم</strong><small>يستمع، يفهم الطلب، ثم يجيبك كتابةً وصوتًا</small></div><button type="button" class="btn secondary" id="teacherClose" aria-label="إغلاق مساعد المعلم">×</button></header><p class="teacher-note">تحدّث بالمدة التي تحتاجها، وراجع النص، ثم اضغط «إرسال الحديث». الردود الحالية تعتمد على أدوات الموقع وسجلاتك ولا تُرسل محتواك إلى خدمة ذكاء اصطناعي خارجية. قد يعالج المتصفح الإملاء الصوتي حسب إعداداته.</p><div class="teacher-chips"><button data-teacher-start="lessons">تحضير درس</button><button data-teacher-start="workplans">إعداد خطة</button><button data-teacher-start="projects">مشروع</button><button data-teacher-start="meetings">اجتماع</button><button data-teacher-go="analysis">تحليل المناهج</button><button data-teacher-go="studio">تصميم</button></div><div id="teacherMessages" role="log" aria-live="polite" aria-relevant="additions"></div><div id="teacherThinking" class="teacher-thinking" role="status" aria-live="polite" hidden><span class="teacher-thinking-dot" aria-hidden="true"></span><strong id="teacherThinkingText">أفهم طلبك…</strong><span id="teacherCountdown" aria-label="الوقت التقديري"></span></div><div class="teacher-controls"><button class="btn secondary" id="teacherCancel" type="button">إلغاء المسودة</button><button class="btn secondary" id="teacherNew" type="button">محادثة جديدة</button><button class="btn secondary" id="teacherVoice" type="button" aria-pressed="true">🔊 الرد الصوتي مفعّل</button></div><form id="teacherChat"><label class="sr-only" for="teacherInput">طلبك للمساعد</label><textarea id="teacherInput" data-language-skip="true" rows="3" maxlength="6000" placeholder="اكتب طلبك أو اضغط الميكروفون وتحدّث…"></textarea><p id="teacherListenStatus" class="teacher-listen-status" role="status">الميكروفون جاهز. لن يُرسل شيء قبل ضغط زر الإرسال.</p><div class="teacher-send"><button class="btn teacher-submit" id="teacherSubmit" type="submit">إرسال الحديث</button><button class="btn secondary teacher-mic" id="teacherMic" type="button" aria-label="بدء الحديث الصوتي" aria-pressed="false">🎙 بدء الحديث</button></div></form>`;
+ panel.innerHTML=`<header class="teacher-head"><div><strong id="teacherAssistantTitle">مساعد المعلم</strong><small>يستمع إلى طلبك ثم يجيبك بوضوح</small></div><button type="button" class="btn secondary" id="teacherClose" aria-label="إغلاق مساعد المعلم">×</button></header><p class="teacher-note">تحدّث بالمدة التي تحتاجها، وراجع النص، ثم اضغط «إرسال الحديث». أوقفنا صوت المتصفح الآلي؛ تظهر الإجابة نصيًا بوضوح إلى أن يُربط صوت خليجي طبيعي عبر خدمة صوت آمنة. الردود الحالية تعتمد على أدوات الموقع وسجلاتك ولا تُرسل محتواك إلى خدمة ذكاء اصطناعي خارجية. قد يعالج المتصفح الإملاء الصوتي حسب إعداداته.</p><div class="teacher-chips"><button data-teacher-start="lessons">تحضير درس</button><button data-teacher-start="workplans">إعداد خطة</button><button data-teacher-start="projects">مشروع</button><button data-teacher-start="meetings">اجتماع</button><button data-teacher-go="analysis">تحليل المناهج</button><button data-teacher-go="studio">تصميم</button></div><div id="teacherMessages" role="log" aria-live="polite" aria-relevant="additions"></div><div id="teacherThinking" class="teacher-thinking" role="status" aria-live="polite" hidden><span class="teacher-thinking-dot" aria-hidden="true"></span><strong id="teacherThinkingText">أفهم طلبك…</strong><span id="teacherCountdown" aria-label="الوقت التقديري"></span></div><div class="teacher-controls"><button class="btn secondary" id="teacherCancel" type="button">إلغاء المسودة</button><button class="btn secondary" id="teacherNew" type="button">محادثة جديدة</button></div><form id="teacherChat"><label class="sr-only" for="teacherInput">طلبك للمساعد</label><textarea id="teacherInput" data-language-skip="true" rows="3" maxlength="6000" placeholder="اكتب طلبك أو اضغط الميكروفون وتحدّث…"></textarea><p id="teacherListenStatus" class="teacher-listen-status" role="status">الميكروفون جاهز. لن يُرسل شيء قبل ضغط زر الإرسال.</p><div class="teacher-send"><button class="btn teacher-submit" id="teacherSubmit" type="submit">إرسال الحديث</button><button class="btn secondary teacher-mic" id="teacherMic" type="button" aria-label="بدء الحديث الصوتي" aria-pressed="false">🎙 بدء الحديث</button></div></form>`;
  document.body.append(panel);
 
  const input=$('teacherInput'),mic=$('teacherMic'),submit=$('teacherSubmit'),thinking=$('teacherThinking'),thinkingText=$('teacherThinkingText'),countdown=$('teacherCountdown'),listenStatus=$('teacherListenStatus');
  const waitStep=Number.isFinite(Number(window.MANHAJ_ASSISTANT_THINK_MS))?Math.max(0,Number(window.MANHAJ_ASSISTANT_THINK_MS)):650;
- function cleanSpeech(text){return String(text).replace(/[✓•✦]/g,'').replace(/\s+/g,' ').trim()}
- function stopSpeaking(){if(window.speechSynthesis)window.speechSynthesis.cancel();currentSpeech=null}
- function bestArabicVoice(voices){
-  const male=/(hamed|maged|majid|majed|tarik|tariq|omar|ali|zayd|fahd|male|حامد|ماجد|طارق|عمر|علي)/i,female=/(mariam|maryam|laila|layla|hoda|salma|female|مريم|ليلى|هدى|سلمى)/i,natural=/(natural|neural|premium|enhanced|google|microsoft)/i;
-  return voices.filter(v=>/^ar(?:[-_]|$)/i.test(v.lang||'')).sort((a,b)=>{const score=v=>(/^ar[-_]SA$/i.test(v.lang||'')?12:0)+(natural.test(v.name||'')?8:0)+(male.test(v.name||'')?16:0)-(female.test(v.name||'')?16:0)+(v.localService?2:0);return score(b)-score(a)})[0]||null;
- }
- function speak(text){
-  if(!voiceEnabled||!window.speechSynthesis||!window.SpeechSynthesisUtterance)return;
-  const value=cleanSpeech(text);if(!value)return;stopSpeaking();
-  const utterance=new SpeechSynthesisUtterance(value),voice=bestArabicVoice(window.speechSynthesis.getVoices?.()||[]);utterance.voice=voice;utterance.lang=voice?.lang||'ar-SA';utterance.rate=1;utterance.pitch=.94;$('teacherVoice').title=voice?'الصوت العربي المستخدم: '+voice.name:'سيستخدم الجهاز صوته العربي الافتراضي';
-  utterance.onend=utterance.onerror=()=>{if(currentSpeech===utterance)currentSpeech=null};currentSpeech=utterance;window.speechSynthesis.speak(utterance);
- }
- function say(text,user=false,actions=[],read=true){
+ function say(text,user=false,actions=[]){
   const row=document.createElement('div');row.className='teacher-message '+(user?'teacher-user':'teacher-reply');
   const p=document.createElement('p');p.textContent=text;row.append(p);
   for(const a of actions){const b=document.createElement('button');b.className='btn secondary';b.textContent=a.label;b.onclick=a.run;row.append(b)}
   $('teacherMessages').append(row);$('teacherMessages').scrollTop=$('teacherMessages').scrollHeight;
-  if(!user&&read)speak(text);return row;
+  return row;
  }
  function clearThinking(){
   for(const timer of thinkTimers)clearTimeout(timer);thinkTimers=[];const resolve=thinkingResolve;thinkingResolve=null;thinking.hidden=true;countdown.textContent='';panel.setAttribute('aria-busy','false');resolve?.();
@@ -309,13 +297,13 @@ function teacherIntent(text){
  }
  function startListening(){
   if(!recognition){say('التسجيل الصوتي غير مدعوم في هذا المتصفح. يمكنك الكتابة أو استخدام ميكروفون لوحة المفاتيح.');return}
-  stopSpeaking();committedTranscript=input.value.trim();updateListening(true);startRecognition();
+  committedTranscript=input.value.trim();updateListening(true);startRecognition();
  }
  function open(){
   returnFocus=document.activeElement;panel.hidden=false;launcher.setAttribute('aria-expanded','true');
   input.focus();
  }
- function close(){turnId++;stopListening();clearThinking();stopSpeaking();pending=false;submit.disabled=false;mic.disabled=!recognition;input.disabled=false;panel.hidden=true;launcher.setAttribute('aria-expanded','false');returnFocus?.focus()}
+ function close(){turnId++;stopListening();clearThinking();pending=false;submit.disabled=false;mic.disabled=!recognition;input.disabled=false;panel.hidden=true;launcher.setAttribute('aria-expanded','false');returnFocus?.focus()}
  launcher.onclick=()=>panel.hidden?open():close();$('teacherClose').onclick=close;panel.addEventListener('keydown',e=>{if(e.key==='Escape')close()});
 
  function latinDigits(value){return String(value).replace(/[٠-٩۰-۹]/g,c=>String('٠١٢٣٤٥٦٧٨٩'.includes(c)?'٠١٢٣٤٥٦٧٨٩'.indexOf(c):'۰۱۲۳۴۵۶۷۸۹'.indexOf(c)))}
@@ -354,7 +342,7 @@ function teacherIntent(text){
  }
  function reviewContext(kind,text){
   const draft=flow={kind,values:contextDraft(kind,text),ready:true},lines=hubConfig[kind].fields.map(([key,label])=>label+': '+(draft.values[key]||'لم يُذكر في السياق'));
-  say('استخرجت المسودة من حديثك دون طلب عنوان أو تاريخ منفصل:\n'+lines.join('\n'),false,[{label:'اعتماد وحفظ السجل',run:()=>commit(draft)},{label:'مراجعة في النموذج',run:()=>{if(flow!==draft)return;fillForm(draft);flow=null;say('فتحت المسودة في النموذج. عدّل ما تريد ثم احفظها.')}}],false);speak('جهزت المسودة من حديثك. راجعها ثم اختر اعتماد وحفظ السجل، أو مراجعتها في النموذج.');
+  say('استخرجت المسودة من حديثك دون طلب عنوان أو تاريخ منفصل:\n'+lines.join('\n'),false,[{label:'اعتماد وحفظ السجل',run:()=>commit(draft)},{label:'مراجعة في النموذج',run:()=>{if(flow!==draft)return;fillForm(draft);flow=null;say('فتحت المسودة في النموذج. عدّل ما تريد ثم احفظها.')}}]);
  }
  function start(kind,text=''){if(text)return reviewContext(kind,text);flow={kind,ready:false,awaitingContext:true};say('صف '+hubConfig[kind].singular+' كاملًا في رسالة واحدة كما تتحدث عادة. سأستخرج العنوان والموعد وبقية التفاصيل من السياق، ولا تحتاج إلى صيغة محددة.')}
  function fillForm(draft){resetHubForm(draft.kind);for(const [key,value] of Object.entries(draft.values))$(draft.kind+'_'+key).value=value;show(draft.kind)}
@@ -392,8 +380,7 @@ function teacherIntent(text){
  panel.querySelectorAll('[data-teacher-start]').forEach(b=>b.onclick=()=>{if(pending)return;if(flow){say('ألغِ المسودة الحالية أولًا أو أكملها.');return}start(b.dataset.teacherStart)});
  panel.querySelectorAll('[data-teacher-go]').forEach(b=>b.onclick=()=>{if(!pending)show(b.dataset.teacherGo)});
  $('teacherCancel').onclick=()=>{flow=null;say('أُلغيت المسودة؛ لم تُحفظ بياناتها.')};
- $('teacherNew').onclick=()=>{turnId++;stopListening();clearThinking();stopSpeaking();pending=false;submit.disabled=false;mic.disabled=!recognition;input.disabled=false;flow=null;$('teacherMessages').replaceChildren();open()};
- $('teacherVoice').onclick=()=>{voiceEnabled=!voiceEnabled;$('teacherVoice').setAttribute('aria-pressed',String(voiceEnabled));$('teacherVoice').textContent=voiceEnabled?'🔊 الرد الصوتي مفعّل':'🔇 الرد الصوتي متوقف';if(!voiceEnabled)stopSpeaking()};
+ $('teacherNew').onclick=()=>{turnId++;stopListening();clearThinking();pending=false;submit.disabled=false;mic.disabled=!recognition;input.disabled=false;flow=null;$('teacherMessages').replaceChildren();open()};
 
  const Speech=window.SpeechRecognition||window.webkitSpeechRecognition;
  if(Speech){
@@ -406,8 +393,8 @@ function teacherIntent(text){
   recognition.onend=()=>{if(listening&&!panel.hidden&&!pending){committedTranscript=input.value.trim();clearTimeout(restartTimer);restartTimer=setTimeout(startRecognition,250)}else updateListening(false)};
   mic.onclick=()=>listening?stopListening():startListening();
  }else{mic.disabled=true;mic.title='التسجيل الصوتي غير مدعوم في هذا المتصفح';listenStatus.textContent='التسجيل الصوتي غير مدعوم هنا؛ يمكنك الكتابة أو استخدام ميكروفون لوحة المفاتيح.'}
- document.addEventListener('visibilitychange',()=>{if(document.hidden){stopListening();stopSpeaking()}});
- window.ManhajTeacher={teacherIntent,open,close,startListening,stopListening,stopSpeaking,contextDate,contextDraft,bestArabicVoice};
+ document.addEventListener('visibilitychange',()=>{if(document.hidden)stopListening()});
+ window.ManhajTeacher={teacherIntent,open,close,startListening,stopListening,contextDate,contextDraft};
 })();
 
 /* Local language and editorial rules, with review before any field changes. */
