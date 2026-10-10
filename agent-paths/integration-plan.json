@@ -1,0 +1,108 @@
+{
+  "schema_version": 1,
+  "status": "proposed_not_installed",
+  "note": "Planning manifest only. No dependencies, deployment, credentials, or production runtime changed.",
+  "modules": {
+    "M01": "https://github.com/langchain-ai/langgraph",
+    "M02": "https://github.com/pydantic/pydantic-ai",
+    "M03": "https://github.com/mastra-ai/mastra",
+    "M04": "https://github.com/agno-agi/agno",
+    "M05": "https://github.com/topoteretes/cognee",
+    "M06": "https://github.com/getzep/graphiti",
+    "M07": "https://github.com/browser-use/browser-use",
+    "M08": "https://github.com/e2b-dev/E2B",
+    "M09": "https://github.com/langfuse/langfuse",
+    "M10": "https://github.com/confident-ai/deepeval"
+  },
+  "projects": {
+    "sabeq-legal": [
+      "M01",
+      "M02",
+      "M04",
+      "M05",
+      "M07",
+      "M09",
+      "M10"
+    ],
+    "manhaj": [
+      "M03",
+      "M02",
+      "M05",
+      "M06",
+      "M09",
+      "M10"
+    ],
+    "ant-alshaer": [
+      "M01",
+      "M02",
+      "M05",
+      "M09",
+      "M10"
+    ],
+    "ai-chess-kuwait": [
+      "M01",
+      "M02",
+      "M09",
+      "M10"
+    ],
+    "saad-studio": [
+      "M03",
+      "M07",
+      "M08",
+      "M09",
+      "M10"
+    ],
+    "tamweenat-admin": [
+      "M03",
+      "M02",
+      "M06",
+      "M09"
+    ],
+    "noura-alattal": [
+      "M03",
+      "M05",
+      "M09"
+    ],
+    "english-kuwait": [
+      "M03",
+      "M05",
+      "M06",
+      "M10"
+    ],
+    "alsaqaf-school": [
+      "M03",
+      "M05",
+      "M07",
+      "M09"
+    ],
+    "livestock-vax-kw": [
+      "M03",
+      "M02",
+      "M06",
+      "M09"
+    ],
+    "digizone": [
+      "M03",
+      "M04",
+      "M07",
+      "M09"
+    ],
+    "project-command-center": [
+      "M01",
+      "M04",
+      "M05",
+      "M07",
+      "M08",
+      "M09",
+      "M10"
+    ]
+  },
+  "rollout": [
+    "inventory existing code and backend",
+    "create feature branches",
+    "implement adapters with feature flags",
+    "add privacy and security tests",
+    "run evaluation and performance benchmarks",
+    "review and deploy incrementally"
+  ]
+}
