@@ -13,8 +13,21 @@ function teacherIntent(text){
  panel.innerHTML=`<header class="teacher-head"><div><strong id="teacherAssistantTitle">مساعد المعلم</strong><small>يستمع إلى طلبك ثم يجيبك بوضوح</small></div><button type="button" class="btn secondary" id="teacherClose" aria-label="إغلاق مساعد المعلم">×</button></header><p class="teacher-note">تحدّث بالمدة التي تحتاجها، وراجع النص، ثم اضغط «إرسال الحديث». أوقفنا صوت المتصفح الآلي؛ تظهر الإجابة نصيًا بوضوح إلى أن يُربط صوت خليجي طبيعي عبر خدمة صوت آمنة. الردود الحالية تعتمد على أدوات الموقع وسجلاتك ولا تُرسل محتواك إلى خدمة ذكاء اصطناعي خارجية. قد يعالج المتصفح الإملاء الصوتي حسب إعداداته.</p><div class="teacher-chips"><button data-teacher-start="lessons">تحضير درس</button><button data-teacher-start="workplans">إعداد خطة</button><button data-teacher-start="projects">مشروع</button><button data-teacher-start="meetings">اجتماع</button><button data-teacher-go="analysis">تحليل المناهج</button><button data-teacher-go="studio">تصميم</button></div><div id="teacherMessages" role="log" aria-live="polite" aria-relevant="additions"></div><div id="teacherThinking" class="teacher-thinking" role="status" aria-live="polite" hidden><span class="teacher-thinking-dot" aria-hidden="true"></span><strong id="teacherThinkingText">أفهم طلبك…</strong><span id="teacherCountdown" aria-label="الوقت التقديري"></span></div><div class="teacher-controls"><button class="btn secondary" id="teacherCancel" type="button">إلغاء المسودة</button><button class="btn secondary" id="teacherNew" type="button">محادثة جديدة</button></div><form id="teacherChat"><label class="sr-only" for="teacherInput">طلبك للمساعد</label><textarea id="teacherInput" data-language-skip="true" rows="3" maxlength="6000" placeholder="اكتب طلبك أو اضغط الميكروفون وتحدّث…"></textarea><p id="teacherListenStatus" class="teacher-listen-status" role="status">الميكروفون جاهز. لن يُرسل شيء قبل ضغط زر الإرسال.</p><div class="teacher-send"><button class="btn teacher-submit" id="teacherSubmit" type="submit">إرسال الحديث</button><button class="btn secondary teacher-mic" id="teacherMic" type="button" aria-label="بدء الحديث الصوتي" aria-pressed="false">🎙 بدء الحديث</button></div></form>`;
  document.body.append(panel);
 
+ const chat=$('teacherChat'),rawInput=$('teacherInput'),attachmentList=document.createElement('div'),inputRow=document.createElement('div'),addButton=document.createElement('button'),attachmentMenu=document.createElement('div');
+ attachmentList.id='teacherAttachments';attachmentList.className='teacher-attachments';attachmentList.hidden=true;inputRow.className='teacher-input-row';addButton.id='teacherAdd';addButton.type='button';addButton.className='btn secondary teacher-add';addButton.textContent='+';addButton.setAttribute('aria-label','إضافة صورة أو ملف PDF');addButton.setAttribute('aria-expanded','false');addButton.setAttribute('aria-controls','teacherAttachMenu');
+ attachmentMenu.id='teacherAttachMenu';attachmentMenu.className='teacher-attach-menu';attachmentMenu.hidden=true;attachmentMenu.setAttribute('role','menu');attachmentMenu.innerHTML='<button type="button" data-attach-picker="camera">📷 تصوير بالكاميرا</button><button type="button" data-attach-picker="images">🖼 رفع صور</button><button type="button" data-attach-picker="pdf">PDF رفع ملف</button>';
+ const cameraInput=document.createElement('input'),imagesInput=document.createElement('input'),pdfInput=document.createElement('input');
+ cameraInput.id='teacherCamera';cameraInput.type='file';cameraInput.accept='image/jpeg,image/png,image/webp';cameraInput.setAttribute('capture','environment');imagesInput.id='teacherImages';imagesInput.type='file';imagesInput.accept='image/jpeg,image/png,image/webp';imagesInput.multiple=true;pdfInput.id='teacherPdf';pdfInput.type='file';pdfInput.accept='application/pdf,.pdf';pdfInput.multiple=true;for(const field of [cameraInput,imagesInput,pdfInput]){field.hidden=true;field.setAttribute('aria-hidden','true')}
+ rawInput.before(attachmentList,inputRow,attachmentMenu);inputRow.append(addButton,rawInput);chat.append(cameraInput,imagesInput,pdfInput);
+
  const input=$('teacherInput'),mic=$('teacherMic'),submit=$('teacherSubmit'),thinking=$('teacherThinking'),thinkingText=$('teacherThinkingText'),countdown=$('teacherCountdown'),listenStatus=$('teacherListenStatus');
  const waitStep=Number.isFinite(Number(window.MANHAJ_ASSISTANT_THINK_MS))?Math.max(0,Number(window.MANHAJ_ASSISTANT_THINK_MS)):650;
+ const attachmentManager=window.ManhajAssistantAttachments.create({list:attachmentList,onStatus:(message,busy)=>{listenStatus.textContent=message;if(pending&&busy)thinkingText.textContent=message}});
+ function hideAttachmentMenu(){attachmentMenu.hidden=true;addButton.setAttribute('aria-expanded','false')}
+ addButton.onclick=()=>{attachmentMenu.hidden=!attachmentMenu.hidden;addButton.setAttribute('aria-expanded',String(!attachmentMenu.hidden))};
+ attachmentMenu.querySelector('[data-attach-picker="camera"]').onclick=()=>{hideAttachmentMenu();cameraInput.click()};attachmentMenu.querySelector('[data-attach-picker="images"]').onclick=()=>{hideAttachmentMenu();imagesInput.click()};attachmentMenu.querySelector('[data-attach-picker="pdf"]').onclick=()=>{hideAttachmentMenu();pdfInput.click()};
+ async function addAttachments(files){try{await attachmentManager.addFiles(files)}catch(e){listenStatus.textContent=e.message||'تعذر إضافة المرفق.'}}
+ for(const field of [cameraInput,imagesInput,pdfInput])field.onchange=async()=>{const files=field.files;field.value='';await addAttachments(files)};
  function say(text,user=false,actions=[]){
   const row=document.createElement('div');row.className='teacher-message '+(user?'teacher-user':'teacher-reply');
   const p=document.createElement('p');p.textContent=text;row.append(p);
@@ -52,7 +65,7 @@ function teacherIntent(text){
   returnFocus=document.activeElement;panel.hidden=false;launcher.setAttribute('aria-expanded','true');
   input.focus();
  }
- function close(){turnId++;stopListening();clearThinking();pending=false;submit.disabled=false;mic.disabled=!recognition;input.disabled=false;panel.hidden=true;launcher.setAttribute('aria-expanded','false');returnFocus?.focus()}
+ function close(){turnId++;stopListening();clearThinking();pending=false;submit.disabled=false;mic.disabled=!recognition;addButton.disabled=false;input.disabled=false;hideAttachmentMenu();panel.hidden=true;launcher.setAttribute('aria-expanded','false');returnFocus?.focus()}
  launcher.onclick=()=>panel.hidden?open():close();$('teacherClose').onclick=close;panel.addEventListener('keydown',e=>{if(e.key==='Escape')close()});
 
  function latinDigits(value){return String(value).replace(/[٠-٩۰-۹]/g,c=>String('٠١٢٣٤٥٦٧٨٩'.includes(c)?'٠١٢٣٤٥٦٧٨٩'.indexOf(c):'۰۱۲۳۴۵۶۷۸۹'.indexOf(c)))}
@@ -105,7 +118,27 @@ function teacherIntent(text){
   if(hits.length){say('وجدت شواهد لفظية في المستندات المضافة. سأعرضها مع أرقام الصفحات لتراجعها في مصدرها.');for(const h of hits)say(h.title+' — صفحة '+h.page+'\n'+h.text,false,[],false)}
   else say('لم أجد شاهدًا مطابقًا في المستندات المضافة. أضف ملف المنهج النصي أو استخدم قسم التحليل.',false,[{label:'فتح التحليل والمناهج',run:()=>show('analysis')}]);
  }
- function handle(text){
+ function attachmentSource(text,report){return (text+'\n\nمحتوى مستخرج من المرفقات:\n'+report.excerpt).slice(0,7800)}
+ function attachmentSummary(report){
+  const files=report.items.length+' مرفق'+(report.items.length>1?'ات':''),read=report.ready.length+' مقروء',pages=report.pageCount+' صفحة/صورة',words=report.wordCount+' كلمة';let value='حللت المرفقات محليًا: '+[files,read,pages,words].join(' • ')+'.';
+  if(report.suggestedLabel)value+='\nالنوع المرجح: '+report.suggestedLabel+'.';if(report.keyLines.length)value+='\n\nأبرز ما استخرجته:\n• '+report.keyLines.slice(0,5).join('\n• ');if(report.evidence.length)value+='\n\nشواهد مرتبطة بطلبك:\n• '+report.evidence.slice(0,3).map(v=>v.source+' — صفحة '+v.page+': '+v.text.trim()).join('\n• ');if(report.warnings.length)value+='\n\nتنبيهات القراءة:\n• '+report.warnings.slice(0,4).join('\n• ');return value;
+ }
+ async function saveAttachmentReport(report){
+  const api=window.ManhajCurriculum;if(!api?.importAssistantAttachment){say('تعذر ربط المرفقات بقاعدة التحليل في هذه النسخة.');return}
+  try{let saved=0;for(const item of report.ready){if(!item.pages.some(p=>p.text?.trim()))continue;await api.importAssistantAttachment(item);saved++}if(!saved){say('لا يوجد نص مقروء لحفظه في قاعدة التحليل.');return}say('حُفظ '+saved+' من المرفقات في قاعدة التحليل المحلية على هذا الجهاز.',false,[{label:'فتح التحليل والمناهج',run:()=>show('analysis')}])}catch(e){say('تعذر حفظ المرفقات: '+(e.message||'خطأ غير معروف'))}
+ }
+ function attachmentActions(report,text){
+  const labels={lessons:'تحضير درس',workplans:'إعداد خطة',meetings:'إعداد اجتماع أو محضر',projects:'إنشاء مشروع',tasks:'إنشاء مهمة'},kinds=[report.suggestedKind,'lessons','workplans','meetings'].filter((v,i,a)=>v&&a.indexOf(v)===i),source=attachmentSource(text,report),actions=kinds.slice(0,4).map(kind=>({label:labels[kind],run:()=>{if(flow){say('ألغِ المسودة الحالية أولًا أو أكملها.');return}reviewContext(kind,source)}}));
+  if(report.ready.length)actions.push({label:'حفظ في قاعدة التحليل',run:()=>saveAttachmentReport(report)});return actions;
+ }
+ function handleAttachments(text,report){
+  if(!report.usable){say('أضفت المرفقات، لكن لم أستخرج منها نصًا كافيًا للتحليل. لم أنشئ استنتاجات غير موثوقة. جرّب صورة أوضح أو PDF نصيًا.'+(report.warnings.length?'\n'+report.warnings.join('\n'):''));return}
+  const source=attachmentSource(text,report);if(flow){if(flow.ready)say('المسودة الحالية جاهزة. اعتمدها أو ألغها قبل استخدام المرفقات.');else if(flow.awaitingContext)reviewContext(flow.kind,source);return}
+  const kind=teacherIntent(text);if(hubConfig[kind]&&kind!=='resources'){say(attachmentSummary(report),false,[{label:'حفظ المرفقات في قاعدة التحليل',run:()=>saveAttachmentReport(report)}]);reviewContext(kind,source);return}
+  say(attachmentSummary(report),false,attachmentActions(report,text));
+ }
+ function handle(text,attachmentReport=null){
+  if(attachmentReport)return handleAttachments(text,attachmentReport);
   if(flow){if(flow.ready)say('المسودة جاهزة للمراجعة. اختر اعتمادها أو افتحها في النموذج، ويمكنك إلغاء المسودة والبدء من جديد.');else if(flow.awaitingContext)reviewContext(flow.kind,text);return}
   const kind=teacherIntent(text),normalized=normalizeArabic(text);
   if(hubConfig[kind]&&/راجع|مراجعه|مراجعة/.test(normalized)){
@@ -119,17 +152,17 @@ function teacherIntent(text){
   say('فهمت طلبك على أنه يحتاج حوارًا تربويًا أوسع من أدوات الموقع الحالية. أستطيع الآن إعداد درس أو خطة أو مشروع أو اجتماع أو مهمة، ومراجعة سجلاتك والبحث في المناهج التي أضفتها. اذكر نوع العمل والمادة والصف والهدف لأساعدك بدقة أكبر.');
  }
  $('teacherChat').onsubmit=async e=>{
-  e.preventDefault();if(pending)return;const text=input.value.trim();if(!text){listenStatus.textContent='تحدّث أو اكتب طلبك أولًا، ثم اضغط إرسال الحديث.';return}
-  const myTurn=++turnId;stopListening();input.value='';committedTranscript='';say(text,true);pending=true;submit.disabled=true;mic.disabled=true;input.disabled=true;
-  await deliberate();clearThinking();
+  e.preventDefault();if(pending)return;const typed=input.value.trim(),hasAttachments=attachmentManager.count()>0;if(!typed&&!hasAttachments){listenStatus.textContent='اكتب طلبك أو أضف صورة أو PDF أولًا، ثم اضغط إرسال الحديث.';return}const text=typed||'حلّل المرفقات واستنتج نوع العمل المناسب للمعلم.';
+  const names=attachmentManager.snapshot().map(item=>item.name);const myTurn=++turnId;stopListening();input.value='';committedTranscript='';say((typed||'تحليل المرفقات')+(names.length?'\nالمرفقات: '+names.join('، '):''),true);pending=true;submit.disabled=true;mic.disabled=true;addButton.disabled=true;input.disabled=true;
+  await Promise.all([deliberate(),attachmentManager.wait()]);clearThinking();
   if(panel.hidden||myTurn!==turnId){pending=false;return}
-  try{handle(text)}catch{say('تعذر تجهيز الرد. أعد المحاولة أو افتح الأداة المطلوبة من القائمة.')}
-  finally{pending=false;submit.disabled=false;mic.disabled=!recognition;input.disabled=false;input.focus()}
+  try{const report=hasAttachments?attachmentManager.analyze(text):null;handle(text,report);if(hasAttachments)attachmentManager.clear()}catch{say('تعذر تجهيز الرد. أعد المحاولة أو افتح الأداة المطلوبة من القائمة.')}
+  finally{pending=false;submit.disabled=false;mic.disabled=!recognition;addButton.disabled=false;input.disabled=false;input.focus()}
  };
  panel.querySelectorAll('[data-teacher-start]').forEach(b=>b.onclick=()=>{if(pending)return;if(flow){say('ألغِ المسودة الحالية أولًا أو أكملها.');return}start(b.dataset.teacherStart)});
  panel.querySelectorAll('[data-teacher-go]').forEach(b=>b.onclick=()=>{if(!pending)show(b.dataset.teacherGo)});
  $('teacherCancel').onclick=()=>{flow=null;say('أُلغيت المسودة؛ لم تُحفظ بياناتها.')};
- $('teacherNew').onclick=()=>{turnId++;stopListening();clearThinking();pending=false;submit.disabled=false;mic.disabled=!recognition;input.disabled=false;flow=null;$('teacherMessages').replaceChildren();open()};
+ $('teacherNew').onclick=()=>{turnId++;stopListening();clearThinking();pending=false;submit.disabled=false;mic.disabled=!recognition;addButton.disabled=false;input.disabled=false;flow=null;attachmentManager.clear();hideAttachmentMenu();$('teacherMessages').replaceChildren();open()};
 
  const Speech=window.SpeechRecognition||window.webkitSpeechRecognition;
  if(Speech){
@@ -143,5 +176,5 @@ function teacherIntent(text){
   mic.onclick=()=>listening?stopListening():startListening();
  }else{mic.disabled=true;mic.title='التسجيل الصوتي غير مدعوم في هذا المتصفح';listenStatus.textContent='التسجيل الصوتي غير مدعوم هنا؛ يمكنك الكتابة أو استخدام ميكروفون لوحة المفاتيح.'}
  document.addEventListener('visibilitychange',()=>{if(document.hidden)stopListening()});
- window.ManhajTeacher={teacherIntent,open,close,startListening,stopListening,contextDate,contextDraft};
+ window.ManhajTeacher={teacherIntent,open,close,startListening,stopListening,contextDate,contextDraft,addAttachments,attachmentSnapshot:attachmentManager.snapshot};
 })();
