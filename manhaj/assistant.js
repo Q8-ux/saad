@@ -5,7 +5,7 @@ function teacherIntent(text){
  return routes.find(([,pattern])=>pattern.test(s))?.[0]||'';
 }
 (function(){
- let flow=null,welcome=false,returnFocus=null,recognition=null,listening=false,restartTimer=null,pending=false,turnId=0,thinkTimers=[],thinkingResolve=null,voiceEnabled=true,currentSpeech=null,committedTranscript='';
+ let flow=null,returnFocus=null,recognition=null,listening=false,restartTimer=null,pending=false,turnId=0,thinkTimers=[],thinkingResolve=null,voiceEnabled=true,currentSpeech=null,committedTranscript='';
  const launcher=document.createElement('button');
  launcher.id='teacherLauncher';launcher.className='btn';launcher.textContent='✦ مساعد المعلم';launcher.setAttribute('aria-expanded','false');launcher.setAttribute('aria-controls','teacherAssistant');document.body.append(launcher);
  const panel=document.createElement('aside');
@@ -20,7 +20,7 @@ function teacherIntent(text){
  function speak(text){
   if(!voiceEnabled||!window.speechSynthesis||!window.SpeechSynthesisUtterance)return;
   const value=cleanSpeech(text);if(!value)return;stopSpeaking();
-  const utterance=new SpeechSynthesisUtterance(value);utterance.lang='ar-KW';utterance.rate=.88;utterance.pitch=.98;
+  const utterance=new SpeechSynthesisUtterance(value);utterance.lang='ar-KW';utterance.rate=1.02;utterance.pitch=1;
   const voices=window.speechSynthesis.getVoices?.()||[];utterance.voice=voices.find(v=>/^ar(-|_)/i.test(v.lang)&&/KW/i.test(v.lang))||voices.find(v=>/^ar(-|_)/i.test(v.lang))||null;
   utterance.onend=utterance.onerror=()=>{if(currentSpeech===utterance)currentSpeech=null};currentSpeech=utterance;window.speechSynthesis.speak(utterance);
  }
@@ -59,7 +59,6 @@ function teacherIntent(text){
  }
  function open(){
   returnFocus=document.activeElement;panel.hidden=false;launcher.setAttribute('aria-expanded','true');
-  if(!welcome){say('أهلًا بك. تحدّث براحتك أو اكتب طلبك، ولن أبدأ الرد حتى تضغط إرسال الحديث. أساعدك في إعداد الدروس والخطط والمشاريع والاجتماعات والبحث في مستنداتك.');welcome=true}
   input.focus();
  }
  function close(){turnId++;stopListening();clearThinking();stopSpeaking();pending=false;submit.disabled=false;mic.disabled=!recognition;input.disabled=false;panel.hidden=true;launcher.setAttribute('aria-expanded','false');returnFocus?.focus()}
@@ -118,8 +117,8 @@ function teacherIntent(text){
  panel.querySelectorAll('[data-teacher-start]').forEach(b=>b.onclick=()=>{if(pending)return;if(flow){say('ألغِ المسودة الحالية أولًا أو أكملها.');return}start(b.dataset.teacherStart)});
  panel.querySelectorAll('[data-teacher-go]').forEach(b=>b.onclick=()=>{if(!pending)show(b.dataset.teacherGo)});
  $('teacherCancel').onclick=()=>{flow=null;say('أُلغيت المسودة؛ لم تُحفظ بياناتها.')};
- $('teacherNew').onclick=()=>{turnId++;stopListening();clearThinking();stopSpeaking();pending=false;submit.disabled=false;mic.disabled=!recognition;input.disabled=false;flow=null;$('teacherMessages').replaceChildren();welcome=false;open()};
- $('teacherVoice').onclick=()=>{voiceEnabled=!voiceEnabled;$('teacherVoice').setAttribute('aria-pressed',String(voiceEnabled));$('teacherVoice').textContent=voiceEnabled?'🔊 الرد الصوتي مفعّل':'🔇 الرد الصوتي متوقف';if(!voiceEnabled)stopSpeaking();else say('تم تشغيل الرد الصوتي.',false,[],true)};
+ $('teacherNew').onclick=()=>{turnId++;stopListening();clearThinking();stopSpeaking();pending=false;submit.disabled=false;mic.disabled=!recognition;input.disabled=false;flow=null;$('teacherMessages').replaceChildren();open()};
+ $('teacherVoice').onclick=()=>{voiceEnabled=!voiceEnabled;$('teacherVoice').setAttribute('aria-pressed',String(voiceEnabled));$('teacherVoice').textContent=voiceEnabled?'🔊 الرد الصوتي مفعّل':'🔇 الرد الصوتي متوقف';if(!voiceEnabled)stopSpeaking()};
 
  const Speech=window.SpeechRecognition||window.webkitSpeechRecognition;
  if(Speech){
