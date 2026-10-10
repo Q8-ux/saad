@@ -62,11 +62,11 @@
  function renderCleanNavigation(){
   const groups=[
    ['البداية',['home','teacherPath','dashboard']],
-   ['أعمالي',['projects','workplans','meetings','lessons','tasks','schedule']],
+   ['أعمالي',['activity','projects','workplans','meetings','lessons','tasks','schedule']],
    ['المحتوى والإنجاز',['analysis','studio','evidence','reports']],
    ['الحساب',['settings']]
   ];
-  const labels={home:'الرئيسية',dashboard:'ملخص أعمالي',analysis:'المناهج والتحليل'};
+  const labels={home:'الرئيسية',dashboard:'ملخص أعمالي',analysis:'المناهج والتحليل',activity:'المراحل والحصص والتكليفات'};
   $('nav').innerHTML=groups.map(([title,items])=>`<div class="nav-label">${title}</div>${items.map(key=>`<button class="nav-btn${key===route?' teacher-path-nav':''}" data-go="${key}">${uiIcon(key==='teacherPath'?'lessons':key)}<span>${labels[key]||pages[key]}</span></button>`).join('')}`).join('');
  }
  renderCleanNavigation();
