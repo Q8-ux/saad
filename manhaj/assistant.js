@@ -117,8 +117,8 @@ function teacherIntent(text){
   const kind=teacherIntent(text),normalized=normalizeArabic(text);
   if(hubConfig[kind]&&/راجع|مراجعه|مراجعة/.test(normalized)){const records=data.hub[kind].slice(-5);if(!records.length){say('لا توجد سجلات في هذا القسم بعد.');return}say('اختر السجل الذي تريد مراجعته.',false,records.map(r=>({label:r.name,run:()=>{const review=reviewTeacherRecord(kind,r,data.hub.tasks);say(r.name+'\n'+review.checks.map(c=>(c.ok?'✓ ':'• ')+c.message).join('\n')+'\n'+review.scope)}})));return}
   if(kind&&/اعرض|كم|متابعه|متابعة|مواعيد|تقارير/.test(normalized)){say(hubConfig[kind]?hubConfig[kind].title+': '+data.hub[kind].length+' سجل.':'يمكنني عرض التفاصيل هنا عندما تحدد نوع العمل أو الفترة المطلوبة.');return}
-  if(/ابحث|مصدر|ما هي|ماهي|اشرح|نواتج|اهداف/.test(normalized)){search(text);return}
   if(hubConfig[kind]&&kind!=='resources'){completeTeacherWork(kind,text);return}
+  if(/ابحث|مصدر|ما هي|ماهي|اشرح|نواتج|اهداف/.test(normalized)){search(text);return}
   if(kind==='analysis'){search(text);return}
   if(kind==='studio'){say('حللت طلب التصميم. أضف المقاس والنص أو صورة مرجعية هنا، وسأرتب لك المحتوى والتوجيه البصري داخل المحادثة.');return}
   if(kind){say('فهمت الأداة المطلوبة. اكتب ما الذي تريد إنجازه فيها، وسأعرض النتيجة هنا دون نقلك إلى صفحة أخرى.');return}
