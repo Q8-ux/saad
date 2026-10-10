@@ -1,0 +1,57 @@
+.teacher-path-view{max-width:1180px;margin:0 auto}
+.teacher-path-shell{display:grid;gap:22px;padding-bottom:28px}
+.teacher-path-hero{position:relative;overflow:hidden;display:grid;grid-template-columns:minmax(0,1fr) 190px;align-items:center;gap:28px;padding:34px 38px;border-radius:24px;background:linear-gradient(125deg,#0c716f 0%,#0d5f69 52%,#173c58 100%);color:#fff;box-shadow:0 18px 44px rgba(16,61,81,.16)}
+.teacher-path-hero:after{content:"";position:absolute;inset:auto -90px -130px auto;width:310px;height:310px;border:54px solid rgba(255,255,255,.055);border-radius:50%;pointer-events:none}
+.teacher-path-kicker{display:inline-flex;align-items:center;gap:9px;font-size:13px;font-weight:800;color:#9bf0d9}
+.teacher-path-kicker:before{content:"";width:22px;height:2px;border-radius:2px;background:currentColor}
+.teacher-path-hero h2{max-width:720px;margin:8px 0 10px;font-size:clamp(1.75rem,3vw,2.65rem);line-height:1.45;letter-spacing:-.7px}
+.teacher-path-hero p{max-width:710px;color:#d3e7eb;font-size:15px}
+.teacher-path-pills{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px}
+.teacher-path-pills span{padding:7px 12px;border:1px solid rgba(255,255,255,.18);border-radius:999px;background:rgba(255,255,255,.07);font-size:12px;color:#e8f7f7}
+.teacher-path-day{position:relative;z-index:1;display:grid;justify-items:center;text-align:center;padding:20px 16px;border:1px solid rgba(255,255,255,.18);border-radius:20px;background:rgba(255,255,255,.1);backdrop-filter:blur(10px)}
+.teacher-path-day>small{font-size:14px;color:#d8eff1}
+.teacher-path-day>strong{font-size:52px;line-height:1.15;font-weight:800;font-variant-numeric:tabular-nums}
+.teacher-path-day>span{font-size:14px;color:#c4e0e4}
+.teacher-path-day>div{width:100%;display:grid;grid-template-columns:auto 1fr;align-items:center;gap:10px;text-align:right;margin-top:15px;padding-top:13px;border-top:1px solid rgba(255,255,255,.17)}
+.teacher-path-day b{font-size:24px;color:#9bf0d9}
+.teacher-path-day div small{font-size:11px;line-height:1.5;color:#d1e7ea}
+.teacher-path-card{padding:28px;border:1px solid var(--color-border);border-radius:20px;background:var(--color-surface);box-shadow:var(--shadow-sm)}
+.teacher-path-card>header{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:22px}
+.teacher-path-card>header>div{min-width:0}
+.teacher-path-card h3{display:inline-block;margin:0 9px 3px 0;font-size:21px;font-weight:800}
+.teacher-path-card header p{margin-top:4px;color:var(--color-text-muted);font-size:14px}
+.teacher-path-step{display:inline-grid;place-items:center;min-width:34px;height:30px;border-radius:9px;background:var(--color-primary-highlight);color:var(--color-primary);font-size:12px;font-weight:800;font-variant-numeric:tabular-nums}
+.teacher-path-profile{max-width:420px;padding:9px 13px;border:1px solid var(--color-border);border-radius:10px;background:var(--color-surface-2);color:var(--color-text-muted);font-size:12px}
+#teacherPathSetup fieldset{border:0;min-width:0}
+#teacherPathSetup legend{margin-bottom:10px;color:var(--color-text-muted);font-size:13px;font-weight:700}
+.teacher-path-stages{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:18px}
+.teacher-path-stages label{position:relative;cursor:pointer}
+.teacher-path-stages input{position:absolute;opacity:0;pointer-events:none}
+.teacher-path-stages span{display:flex;align-items:center;justify-content:center;min-height:54px;padding:10px 15px;border:1px solid var(--color-border);border-radius:13px;background:var(--color-surface-2);font-size:14px;font-weight:700;transition:border-color .15s,background .15s,color .15s,transform .15s}
+.teacher-path-stages input:checked+span{border-color:#21a695;background:#e7f7f3;color:#086d65;box-shadow:inset 0 0 0 1px #21a695}
+.teacher-path-stages label:hover span{transform:translateY(-1px);border-color:#8fcac0}
+.teacher-path-stages input:focus-visible+span{outline:3px solid #cf9335;outline-offset:3px}
+.teacher-path-fields{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.teacher-path-fields .field-language-tools{flex-wrap:nowrap;overflow-x:auto}
+.teacher-path-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:20px}
+.teacher-path-actions [role=status]{color:var(--color-primary);font-size:13px;font-weight:700}
+.teacher-path-services{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}
+.teacher-path-services>button{position:relative;display:grid;grid-template-columns:46px minmax(0,1fr) 24px;align-items:center;gap:13px;min-height:105px;padding:17px;text-align:right;border:1px solid var(--color-border);border-radius:15px;background:var(--color-surface-2);transition:transform .15s,border-color .15s,box-shadow .15s,background .15s}
+.teacher-path-services>button:hover{transform:translateY(-2px);border-color:#91cfc5;box-shadow:0 10px 24px rgba(14,98,94,.08)}
+.teacher-path-services>button.active{border-color:#1da190;background:linear-gradient(135deg,#edf9f6,#f8fbfd);box-shadow:inset 0 0 0 1px #1da190}
+.teacher-path-service-icon{display:grid;place-items:center;width:46px;height:46px;border-radius:13px;background:#e3f3ef;color:#087b70}
+.teacher-path-service-icon .ui-icon{width:24px;height:24px}
+.teacher-path-services strong{display:block;font-size:14px;color:var(--color-text)}
+.teacher-path-services small{display:block;margin-top:3px;color:var(--color-text-muted);font-size:11px;line-height:1.65}
+.teacher-path-service-check{display:grid;place-items:center;width:22px;height:22px;border:1px solid var(--color-border);border-radius:50%;color:transparent;font-size:12px}
+.teacher-path-services>button.active .teacher-path-service-check{border-color:#1da190;background:#1da190;color:#fff}
+.teacher-path-runner{border-color:#b8dcd5;background:linear-gradient(145deg,var(--color-surface),color-mix(in srgb,var(--color-primary-highlight) 42%,var(--color-surface)))}
+.teacher-path-runner>.field textarea{min-height:120px;background:var(--color-surface)}
+.teacher-path-context{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}
+.teacher-path-context span{padding:6px 10px;border-radius:8px;background:var(--color-primary-highlight);color:var(--color-primary);font-size:12px;font-weight:700}
+.teacher-path-note{padding:0 8px;color:var(--color-text-muted);font-size:12px;text-align:center}
+.teacher-path-nav:after{content:"جديد";margin-inline-start:auto;padding:2px 6px;border-radius:6px;background:#1d9b8a;color:#fff;font-size:10px}
+[data-theme="dark"] .teacher-path-stages input:checked+span,[data-theme="dark"] .teacher-path-services>button.active{background:#153b3c;color:#8ce2d2}
+[data-theme="dark"] .teacher-path-service-icon{background:#173f40;color:#8ce2d2}
+@media(max-width:1050px){.teacher-path-services{grid-template-columns:repeat(2,minmax(0,1fr))}.teacher-path-fields{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:720px){.teacher-path-view{max-width:none}.teacher-path-shell{gap:15px}.teacher-path-hero{grid-template-columns:1fr;padding:25px 21px;border-radius:18px}.teacher-path-hero h2{font-size:27px}.teacher-path-day{grid-template-columns:auto auto 1fr;justify-items:start;text-align:right;gap:9px;padding:14px 16px}.teacher-path-day>strong{font-size:35px}.teacher-path-day>div{grid-column:1/-1}.teacher-path-card{padding:20px 16px;border-radius:17px}.teacher-path-card>header{display:grid}.teacher-path-card h3{font-size:19px}.teacher-path-profile{max-width:none}.teacher-path-stages{grid-template-columns:1fr}.teacher-path-fields{grid-template-columns:1fr}.teacher-path-services{grid-template-columns:1fr}.teacher-path-services>button{min-height:92px;padding:14px}.teacher-path-actions{align-items:stretch}.teacher-path-actions .btn{width:100%}.teacher-path-actions [role=status]{width:100%;text-align:center}}

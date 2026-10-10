@@ -124,6 +124,12 @@ function teacherIntent(text){
   if(kind){say('فهمت الأداة المطلوبة. اكتب ما الذي تريد إنجازه فيها، وسأعرض النتيجة هنا دون نقلك إلى صفحة أخرى.');return}
   say('أستطيع إنجاز درس أو خطة أو مشروع أو اجتماع أو مهمة، وتحليل صورة أو PDF. اذكر العمل المطلوب بطريقتك العادية وسأكمله مباشرة.');
  }
+ async function run(text){
+  text=String(text??'').trim();if(!text||pending)return false;open();const myTurn=++turnId;stopListening();input.value='';committedTranscript='';say(text,true);pending=true;submit.disabled=true;mic.disabled=true;addButton.disabled=true;input.disabled=true;
+  await deliberate();clearThinking();if(panel.hidden||myTurn!==turnId){pending=false;return false}
+  try{await handle(text);return true}catch{say('تعذر تجهيز النتيجة. أعد المحاولة مع وصف أقصر أو أوضح.');return false}
+  finally{pending=false;submit.disabled=false;mic.disabled=!recognition;addButton.disabled=false;input.disabled=false;input.focus();scrollConversation()}
+ }
  $('teacherChat').onsubmit=async e=>{
   e.preventDefault();if(pending)return;const typed=input.value.trim(),hasAttachments=attachmentManager.count()>0;if(!typed&&!hasAttachments){listenStatus.textContent='اكتب طلبك أو أضف صورة أو PDF أولًا، ثم اضغط إرسال.';return}const text=typed||'حلّل المرفقات واستنتج نوع العمل المناسب للمعلم.';
   const names=attachmentManager.snapshot().map(item=>item.name),myTurn=++turnId;stopListening();input.value='';committedTranscript='';say((typed||'تحليل المرفقات')+(names.length?'\nالمرفقات: '+names.join('، '):''),true);pending=true;submit.disabled=true;mic.disabled=true;addButton.disabled=true;input.disabled=true;
@@ -144,5 +150,5 @@ function teacherIntent(text){
   mic.onclick=()=>listening?stopListening():startListening();
  }else{mic.disabled=true;mic.title='التسجيل الصوتي غير مدعوم في هذا المتصفح';listenStatus.textContent='التسجيل الصوتي غير مدعوم هنا؛ يمكنك الكتابة أو استخدام ميكروفون لوحة المفاتيح.'}
  document.addEventListener('visibilitychange',()=>{if(document.hidden){if(recognitionActive)try{recognition.stop()}catch{};if(listening)listenStatus.textContent='التسجيل متوقف مؤقتًا لأن التطبيق في الخلفية، وسيستأنف عند عودتك.'}else if(listening){listenStatus.textContent='التسجيل مستمر؛ اضغط إيقاف عندما تنتهي.';startRecognition()}});
- window.ManhajTeacher={teacherIntent,open,close,startListening,stopListening,contextDate,contextDraft,addAttachments,attachmentSnapshot:attachmentManager.snapshot};
+ window.ManhajTeacher={teacherIntent,open,close,run,startListening,stopListening,contextDate,contextDraft,addAttachments,attachmentSnapshot:attachmentManager.snapshot};
 })();
