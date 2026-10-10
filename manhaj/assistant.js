@@ -17,11 +17,14 @@ function teacherIntent(text){
  const waitStep=Number.isFinite(Number(window.MANHAJ_ASSISTANT_THINK_MS))?Math.max(0,Number(window.MANHAJ_ASSISTANT_THINK_MS)):650;
  function cleanSpeech(text){return String(text).replace(/[✓•✦]/g,'').replace(/\s+/g,' ').trim()}
  function stopSpeaking(){if(window.speechSynthesis)window.speechSynthesis.cancel();currentSpeech=null}
+ function bestArabicVoice(voices){
+  const male=/(hamed|maged|majid|majed|tarik|tariq|omar|ali|zayd|fahd|male|حامد|ماجد|طارق|عمر|علي)/i,female=/(mariam|maryam|laila|layla|hoda|salma|female|مريم|ليلى|هدى|سلمى)/i,natural=/(natural|neural|premium|enhanced|google|microsoft)/i;
+  return voices.filter(v=>/^ar(?:[-_]|$)/i.test(v.lang||'')).sort((a,b)=>{const score=v=>(/^ar[-_]SA$/i.test(v.lang||'')?12:0)+(natural.test(v.name||'')?8:0)+(male.test(v.name||'')?16:0)-(female.test(v.name||'')?16:0)+(v.localService?2:0);return score(b)-score(a)})[0]||null;
+ }
  function speak(text){
   if(!voiceEnabled||!window.speechSynthesis||!window.SpeechSynthesisUtterance)return;
   const value=cleanSpeech(text);if(!value)return;stopSpeaking();
-  const utterance=new SpeechSynthesisUtterance(value);utterance.lang='ar-KW';utterance.rate=1.02;utterance.pitch=1;
-  const voices=window.speechSynthesis.getVoices?.()||[];utterance.voice=voices.find(v=>/^ar(-|_)/i.test(v.lang)&&/KW/i.test(v.lang))||voices.find(v=>/^ar(-|_)/i.test(v.lang))||null;
+  const utterance=new SpeechSynthesisUtterance(value),voice=bestArabicVoice(window.speechSynthesis.getVoices?.()||[]);utterance.voice=voice;utterance.lang=voice?.lang||'ar-SA';utterance.rate=1;utterance.pitch=.94;$('teacherVoice').title=voice?'الصوت العربي المستخدم: '+voice.name:'سيستخدم الجهاز صوته العربي الافتراضي';
   utterance.onend=utterance.onerror=()=>{if(currentSpeech===utterance)currentSpeech=null};currentSpeech=utterance;window.speechSynthesis.speak(utterance);
  }
  function say(text,user=false,actions=[],read=true){
@@ -64,24 +67,45 @@ function teacherIntent(text){
  function close(){turnId++;stopListening();clearThinking();stopSpeaking();pending=false;submit.disabled=false;mic.disabled=!recognition;input.disabled=false;panel.hidden=true;launcher.setAttribute('aria-expanded','false');returnFocus?.focus()}
  launcher.onclick=()=>panel.hidden?open():close();$('teacherClose').onclick=close;panel.addEventListener('keydown',e=>{if(e.key==='Escape')close()});
 
- function start(kind){flow={kind,index:0,values:{}};say('لنعدّ '+hubConfig[kind].singular+' معًا. اكتب «تخطي» للحقل الاختياري، أو ألغِ المسودة.');ask()}
- function ask(){
-  const f=hubConfig[flow.kind].fields[flow.index];
-  if(!f){const draft=flow;flow.ready=true;say('راجع المسودة قبل الحفظ:\n'+hubConfig[draft.kind].fields.map(([k,label])=>label+': '+(draft.values[k]||'—')).join('\n'),false,[{label:'اعتماد وحفظ السجل',run:()=>commit(draft)},{label:'مراجعة في النموذج',run:()=>{if(flow!==draft)return;fillForm(draft);flow=null;say('فتحت المسودة في نموذج الخدمة. راجعها ثم احفظها من هناك.')}}]);return}
-  const [key,label,type,optional]=f,current=flow,index=flow.index;const guarded=v=>{if(flow===current&&flow.index===index&&!flow.ready)answer(v)};
-  const actions=Array.isArray(type)?type.map(v=>({label:v,run:()=>guarded(v)})):[];
-  if(type==='project'){actions.push({label:'مهمة مستقلة',run:()=>guarded('تخطي')});for(const p of data.hub.projects.slice(0,12))actions.push({label:p.name,run:()=>guarded(p.id)})}
-  say(label+(type==='date'?' — بصيغة YYYY-MM-DD':type==='datetime-local'?' — بصيغة YYYY-MM-DDTHH:mm بتوقيت الكويت':'')+(optional?' (اختياري)':''),false,actions);
+ function latinDigits(value){return String(value).replace(/[٠-٩۰-۹]/g,c=>String('٠١٢٣٤٥٦٧٨٩'.includes(c)?'٠١٢٣٤٥٦٧٨٩'.indexOf(c):'۰۱۲۳۴۵۶۷۸۹'.indexOf(c)))}
+ function kuwaitDate(delta=0){const parts=new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Kuwait',year:'numeric',month:'numeric',day:'numeric'}).formatToParts(new Date()),get=t=>Number(parts.find(p=>p.type===t)?.value);const d=new Date(Date.UTC(get('year'),get('month')-1,get('day')+delta));return d.toISOString().slice(0,10)}
+ function validDate(y,m,d){const value=new Date(Date.UTC(y,m-1,d));return value.getUTCFullYear()===y&&value.getUTCMonth()===m-1&&value.getUTCDate()===d}
+ function contextDate(text,withTime=false){
+  const raw=latinDigits(text),normalized=normalizeArabic(raw);let y,m,d,match,delta=null;
+  if(match=raw.match(/\b(20\d{2})[\/.\-](\d{1,2})[\/.\-](\d{1,2})\b/))[,y,m,d]=match.map(Number);
+  else if(match=raw.match(/\b(\d{1,2})[\/.\-](\d{1,2})[\/.\-](20\d{2})\b/)){d=Number(match[1]);m=Number(match[2]);y=Number(match[3])}
+  else if(/بعد باجر|بعد بكره|بعد غد/.test(normalized))delta=2;
+  else if(/باجر|بكره|غدا/.test(normalized))delta=1;
+  else if(/الاسبوع القادم|الاسبوع المقبل|بعد اسبوع/.test(normalized))delta=7;
+  else if(/اليوم/.test(normalized))delta=0;
+  if(y&&!validDate(y,m,d))return '';
+  let date=y?String(y).padStart(4,'0')+'-'+String(m).padStart(2,'0')+'-'+String(d).padStart(2,'0'):delta!==null?kuwaitDate(delta):'';
+  if(!date){const names=[['الاحد',0],['الاثنين',1],['الثلاثاء',2],['الاربعاء',3],['الخميس',4],['الجمعه',5],['السبت',6]],found=names.find(([name])=>normalized.includes(name));if(found){const base=new Date(kuwaitDate()+'T12:00:00Z'),add=(found[1]-base.getUTCDay()+7)%7||7;date=kuwaitDate(add)}}
+  if(!date||!withTime)return date;
+  let hour=9,minute=0;if(match=raw.match(/الساع(?:ة|ه)\s*(\d{1,2})(?:[:٫](\d{1,2}))?\s*(ص|م|صباح|صباحا|مساء|مساءً|الظهر)?/)){hour=Number(match[1]);minute=Number(match[2]||0);if(/^(م|مساء|مساءً|الظهر)$/.test(match[3]||'')&&hour<12)hour+=12;if(/^(ص|صباح|صباحا)$/.test(match[3]||'')&&hour===12)hour=0;if(hour>23||minute>59){hour=9;minute=0}}
+  return date+'T'+String(hour).padStart(2,'0')+':'+String(minute).padStart(2,'0');
  }
- function answer(text){
-  if(!flow||flow.ready)return;const [key,label,type,optional]=hubConfig[flow.kind].fields[flow.index];let value=text==='تخطي'?'':text;
-  if(!value&&!optional){say('هذا الحقل مطلوب: '+label);return}
-  if(type==='date'&&!/^\d{4}-\d{2}-\d{2}$/.test(value)||type==='datetime-local'&&!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(value)){say('استخدم صيغة التاريخ المطلوبة.');return}
-  if((type==='date'||type==='datetime-local')&&!Number.isFinite(Date.parse(value))){say('راجع التاريخ المدخل.');return}
-  if(Array.isArray(type)&&!type.includes(value)){say('اختر إحدى القيم المعروضة.');return}
-  if(type==='project'&&value&&!data.hub.projects.some(p=>p.id===value)){say('اختر المشروع من الأزرار أو اختر مهمة مستقلة.');return}
-  flow.values[key]=value;flow.index++;ask();
+ function contextValue(text,pattern){const match=text.match(pattern);return match?.[1]?.trim().replace(/[.،؛]+$/,'').slice(0,200)||''}
+ function contextTitle(kind,text){
+  let title=contextValue(text,/(?:بعنوان|العنوان|اسمه|اسمها)\s*[:\-]?\s*([^،؛.\n]+)/i)||contextValue(text,/(?:عن|حول|بخصوص)\s+([^،؛.\n]+)/i);
+  if(title)title=title.split(/\s+(?:اليوم|باجر|بكرة|غدًا|غدا|الأسبوع|الاسبوع|بتاريخ|يوم|والمسؤول|بحضور|للصف)\b/)[0].trim();
+  if(!title){title=text.replace(/^(?:أريد|اريد|أبي|ابي|اعمل|أنشئ|انشئ|جهز|سو|سوي|إعداد|اعداد)\s+(?:لي\s+)?/i,'').trim().slice(0,80)}
+  return title||hubConfig[kind].singular+' جديد';
  }
+ function contextDraft(kind,text){
+  const name=contextTitle(kind,text),owner=contextValue(text,/(?:المسؤول|يتولاه|يقوم به|إعداد|اعداد)\s*(?:هو|:)?\s*([^،؛.\n]+)/i)||'المعلم',state=/مكتمل|منجز/.test(text)?(kind==='tasks'?'منجزة':kind==='projects'?'مكتمل':'مكتملة'):/قيد التنفيذ/.test(text)?'قيد التنفيذ':'';
+  if(kind==='projects'){const goal=contextValue(text,/(?:الهدف|وهدفه|هدفه)\s*(?:هو|أن|ان|:)?\s*([^،؛.\n]+)/i)||text;return {name,date:contextDate(text),owner,goal,state:state||'لم يبدأ'}}
+  if(kind==='workplans'){const type=['أسبوعية','شهرية','فصلية','سنوية','علاجية','تطوير مهني'].find(v=>normalizeArabic(text).includes(normalizeArabic(v)))||'أسبوعية';return {name,date:contextDate(text),type,goal:text,steps:'تنفيذ ما ورد في وصف المعلم ومراجعته وفق النتائج.',state:state||'مسودة'}}
+  if(kind==='meetings'){const attendees=contextValue(text,/(?:بحضور|الحضور|المشاركون)\s*[:\-]?\s*([^،؛.\n]+)/i);return {name,date:contextDate(text,true),attendees,agenda:text,minutes:'',decisions:'',state:/عقد|تم الاجتماع/.test(text)?'عُقد':'مجدول'}}
+  if(kind==='tasks'){const priority=/عاجل|عالية/.test(text)?'عالية':/منخفضة/.test(text)?'منخفضة':'متوسطة';return {name,date:contextDate(text),owner,project:'',priority,state:state||'لم تبدأ'}}
+  if(kind==='lessons'){const subjects=['اللغة العربية','اللغة الإنجليزية','الرياضيات','العلوم','الاجتماعيات','التربية الإسلامية','الحاسوب','اللغة الفرنسية'],subject=subjects.find(v=>normalizeArabic(text).includes(normalizeArabic(v)))||'',grade=contextValue(latinDigits(text),/(?:للصف|الصف)\s+((?:الأول|الثاني|الثالث|الرابع|الخامس|السادس|السابع|الثامن|التاسع|العاشر|الحادي عشر|الثاني عشر|\d+)(?:\s+(?:الابتدائي|المتوسط|الثانوي))?)/i);return {name,date:contextDate(text),subject,grade,goal:text,steps:'تنفيذ الحصة وفق السياق الذي ذكره المعلم، مع تدرج واضح للأنشطة.',assessment:'تقويم قبلي وتكويني وختامي مرتبط بنواتج التعلم.',materials:''}}
+  return Object.fromEntries(hubConfig[kind].fields.map(([key])=>[key,'']));
+ }
+ function reviewContext(kind,text){
+  const draft=flow={kind,values:contextDraft(kind,text),ready:true},lines=hubConfig[kind].fields.map(([key,label])=>label+': '+(draft.values[key]||'لم يُذكر في السياق'));
+  say('استخرجت المسودة من حديثك دون طلب عنوان أو تاريخ منفصل:\n'+lines.join('\n'),false,[{label:'اعتماد وحفظ السجل',run:()=>commit(draft)},{label:'مراجعة في النموذج',run:()=>{if(flow!==draft)return;fillForm(draft);flow=null;say('فتحت المسودة في النموذج. عدّل ما تريد ثم احفظها.')}}],false);speak('جهزت المسودة من حديثك. راجعها ثم اختر اعتماد وحفظ السجل، أو مراجعتها في النموذج.');
+ }
+ function start(kind,text=''){if(text)return reviewContext(kind,text);flow={kind,ready:false,awaitingContext:true};say('صف '+hubConfig[kind].singular+' كاملًا في رسالة واحدة كما تتحدث عادة. سأستخرج العنوان والموعد وبقية التفاصيل من السياق، ولا تحتاج إلى صيغة محددة.')}
  function fillForm(draft){resetHubForm(draft.kind);for(const [key,value] of Object.entries(draft.values))$(draft.kind+'_'+key).value=value;show(draft.kind)}
  function commit(draft){
   if(flow!==draft||!draft.ready)return;const item={id:crypto.randomUUID(),...draft.values};const hub=upsertHub(data.hub,draft.kind,item);
@@ -94,7 +118,7 @@ function teacherIntent(text){
   else say('لم أجد شاهدًا مطابقًا في المستندات المضافة. أضف ملف المنهج النصي أو استخدم قسم التحليل.',false,[{label:'فتح التحليل والمناهج',run:()=>show('analysis')}]);
  }
  function handle(text){
-  if(flow){if(flow.ready)say('راجع المسودة واضغط اعتماد وحفظ، أو ألغِ المسودة للبدء مجددًا.');else answer(text);return}
+  if(flow){if(flow.ready)say('المسودة جاهزة للمراجعة. اختر اعتمادها أو افتحها في النموذج، ويمكنك إلغاء المسودة والبدء من جديد.');else if(flow.awaitingContext)reviewContext(flow.kind,text);return}
   const kind=teacherIntent(text),normalized=normalizeArabic(text);
   if(hubConfig[kind]&&/راجع|مراجعه|مراجعة/.test(normalized)){
    const records=data.hub[kind].slice(-5);if(!records.length){say('لا توجد سجلات في هذا القسم بعد.');return}
@@ -102,7 +126,7 @@ function teacherIntent(text){
   }
   if(kind&&/اعرض|كم|متابعه|متابعة|مواعيد|تقارير/.test(normalized)){say(hubConfig[kind]?hubConfig[kind].title+': '+data.hub[kind].length+' سجل.':'افتح '+pages[kind]+' لعرض بيانات عملك.',false,[{label:'فتح '+pages[kind],run:()=>show(kind)}]);return}
   if(/ابحث|مصدر|ما هي|ماهي|اشرح|نواتج|اهداف/.test(normalized)){search(text);return}
-  if(hubConfig[kind]&&kind!=='resources'){start(kind);return}
+  if(hubConfig[kind]&&kind!=='resources'){start(kind,text);return}
   if(kind){say('يمكنك استخدام '+pages[kind]+'.',false,[{label:'فتح '+pages[kind],run:()=>show(kind)}]);return}
   say('فهمت طلبك على أنه يحتاج حوارًا تربويًا أوسع من أدوات الموقع الحالية. أستطيع الآن إعداد درس أو خطة أو مشروع أو اجتماع أو مهمة، ومراجعة سجلاتك والبحث في المناهج التي أضفتها. اذكر نوع العمل والمادة والصف والهدف لأساعدك بدقة أكبر.');
  }
@@ -132,5 +156,5 @@ function teacherIntent(text){
   mic.onclick=()=>listening?stopListening():startListening();
  }else{mic.disabled=true;mic.title='التسجيل الصوتي غير مدعوم في هذا المتصفح';listenStatus.textContent='التسجيل الصوتي غير مدعوم هنا؛ يمكنك الكتابة أو استخدام ميكروفون لوحة المفاتيح.'}
  document.addEventListener('visibilitychange',()=>{if(document.hidden){stopListening();stopSpeaking()}});
- window.ManhajTeacher={teacherIntent,open,close,startListening,stopListening,stopSpeaking};
+ window.ManhajTeacher={teacherIntent,open,close,startListening,stopListening,stopSpeaking,contextDate,contextDraft,bestArabicVoice};
 })();
