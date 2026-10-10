@@ -82,3 +82,7 @@ html.sahel,html.sahel.storefront{
 @media(max-width:430px){.sahel-services{grid-template-columns:1fr}.sahel-service{min-height:98px}.sahel-service small{font-size:11px}.kuwait-hero-actions{grid-template-columns:1fr}.kuwait-preview-top{align-items:flex-start;flex-direction:column}.kuwait-preview-stats strong{font-size:19px}}
 @media(prefers-reduced-motion:reduce){.sahel-service,.teams-connect-card{transition:none!important}}
 @media print{.kuwait-home-hero,.teams-connect-card{box-shadow:none}.sahel body{background:#fff}}
+html.sahel .kuwait-hero-actions .btn{border-color:#fff;background:#fff;color:var(--kuwait-green)}
+html.sahel .kuwait-hero-actions .btn:hover{background:#f8f7f3;color:var(--kuwait-green-deep)}
+html.sahel .kuwait-hero-actions .btn.secondary{border-color:rgba(255,255,255,.25);background:rgba(255,255,255,.07);color:#fff}
+html.sahel .kuwait-hero-actions .btn.secondary:hover{background:rgba(255,255,255,.13);color:#fff}
