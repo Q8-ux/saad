@@ -1,3 +1,4 @@
+import {scanOpportunity} from './lib/saad-trading-path.js';
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -126,6 +127,7 @@ const server=http.createServer(async(req,res)=>{
     if(p==='/api/signals')return json(res,200,await signalBoard());
     if(p==='/api/market-board')return json(res,200,{...await marketBoard(),serverNow:Date.now()});
     if(p==='/api/snapshot')return json(res,200,await snapshot());
+    if(p==='/api/stp/opportunities'){try{const interval=u.searchParams.get('interval')||'1h';if(!['1m','5m','15m','1h'].includes(interval))return json(res,400,{error:'invalidInterval'});const feed=await candles(interval);const result=scanOpportunity(feed.symbol,feed.data);return json(res,200,{engine:'Saad Trading Path',mode:'READ_ONLY',source:feed.source,interval,asOf:feed.asOf,opportunities:[result],note:'BTC/USDT only until verified US and Kuwait OHLCV feeds are configured; no trade execution'});}catch{return json(res,503,{error:'verifiedDataUnavailable'});}}
     if(p==='/api/candles') {try{return json(res,200,await candles(u.searchParams.get('interval')||'5m'));}catch{return json(res,503,{error:'historyUnavailable'});}}
     if(p.startsWith('/api/'))return json(res,404,{error:'notFound'});
     const relative=decodeURIComponent(p==='/'?'/index.html':p);const file=path.resolve(PUBLIC,'.'+relative);
