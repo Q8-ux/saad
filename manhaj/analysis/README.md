@@ -1,6 +1,6 @@
 # Teacher assistant and curriculum analysis
 
-The floating Arabic assistant guides teachers through existing project, plan, lesson, meeting and task forms. It previews every new record and writes through the existing validated local persistence only after explicit approval. It routes to design, evidence, calendar, reports, resources and settings. Closing the assistant does not close or hide the current site view. Microphone input uses optional browser SpeechRecognition; its processing may use the browser provider's speech service.
+The floating Arabic assistant guides teachers through projects, plans, lessons, meetings and tasks without leaving the conversation. A submitted request is analyzed, turned into a complete result card and written through the existing validated local persistence automatically. Images and PDFs are analyzed in the same sequence and usable extracted text is added to the local analysis database. Closing the assistant does not close or hide the current site view. Microphone input uses optional browser SpeechRecognition; the recording indicator stays active across recognition restarts until the teacher explicitly stops or submits, and processing may use the browser provider's speech service.
 
 This release has no LLM provider, API calls, model-generated educational advice, semantic search, or shared cloud teacher database. Assistant evidence search uses the document selected in analysis, or the last five locally added documents. Lexical excerpts show document title and page number. Record analysis checks field completeness and simple measurable verbs; teachers approve educational conclusions.
 
@@ -8,7 +8,7 @@ Public curriculum metadata comes from Ministry public APIs and the computer libr
 
 PDF.js 5.6.205 is installed by the publishing workflow and served from the same site. PDF/TXT/Markdown extracted text is stored in IndexedDB on the teacher's device, separate from the public metadata database. Scanned PDFs require OCR, which is not implemented. Local extracted-document backup is separate from the teacher workspace backup; original PDF files are retained for new uploads and read by the local reader.
 
-Checks: `node manhaj/analysis/check.cjs`. Local DOM integration check requires jsdom and fake-indexeddb at the paths used by `ui-check.cjs`; it verifies route initialization, isolated close/reopen, preview-before-save, duplicate prevention and catalogue preservation after saving.
+Checks: `node manhaj/analysis/check.cjs`. Local DOM integration check requires jsdom and fake-indexeddb at the paths used by `ui-check.cjs`; it verifies route initialization, isolated close/reopen, visibly continuous recording, automatic assistant completion and save, attachment analysis/import and catalogue preservation.
 
 ## Curriculum source audit
 
