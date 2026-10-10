@@ -1,0 +1,84 @@
+/* Professional Kuwait edition refresh. Visual only: no official or payment claims. */
+html.sahel,html.sahel.storefront{
+ --color-bg:#f8f7f3;--color-surface:#fff;--color-surface-2:#f4f3ee;--color-border:#dde3de;
+ --color-text:#143c30;--color-text-muted:#687a73;--color-primary:#0f513d;--color-primary-hover:#0b3f30;
+ --color-primary-highlight:#e9f1ec;--color-success:#16705a;--color-warning:#956c2b;
+ --kuwait-green:#0f513d;--kuwait-green-deep:#0b3529;--kuwait-gold:#c6a15b;--kuwait-gold-soft:#f5eddd;
+ --kuwait-shadow:0 18px 55px rgba(22,61,48,.08);--shadow-sm:0 7px 26px rgba(22,61,48,.055);
+ color-scheme:light
+}
+.sahel body{background:radial-gradient(circle at 9% 7%,rgba(198,161,91,.08),transparent 24rem),#f8f7f3;color:var(--color-text);padding-top:92px;padding-bottom:102px}
+.sahel .app,.sahel.storefront .app{min-height:calc(100dvh - 194px)}
+.sahel .main{width:100%;max-width:1240px;padding:30px 30px 58px}
+.sahel .sahel-header{height:92px;background:rgba(248,247,243,.92);color:var(--color-text);border-bottom:1px solid rgba(15,81,61,.09);box-shadow:0 8px 30px rgba(18,55,43,.035);backdrop-filter:blur(18px)}
+.sahel-header-inner{height:100%;max-width:1240px;padding:12px 30px}
+.sahel-heading{display:flex;align-items:center;gap:13px}
+.sahel-logo{display:grid;place-items:center;width:45px;height:45px;border-radius:14px;background:var(--kuwait-green);color:#fff;font-size:20px;font-weight:900;box-shadow:0 8px 18px rgba(15,81,61,.18)}
+.sahel-brand{display:flex;align-items:center;gap:8px;color:var(--kuwait-green);font-size:19px;font-weight:900;line-height:1.25}
+.sahel-brand small{padding:3px 8px;border:1px solid rgba(198,161,91,.35);border-radius:999px;background:var(--kuwait-gold-soft);color:#826222;font-size:10px;font-weight:800}
+.sahel-header h1{color:var(--color-text-muted);font-size:12px;font-weight:700;line-height:1.5}
+.sahel-header-actions{gap:9px}
+.sahel-header-actions button{display:flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:7px 13px;border:1px solid var(--color-border);border-radius:13px;background:#fff;color:var(--kuwait-green);font-size:15px;font-weight:800;box-shadow:0 4px 13px rgba(17,54,42,.035)}
+.sahel-header-actions button:hover{border-color:rgba(15,81,61,.28);background:var(--color-primary-highlight)}
+.sahel-header-actions .ui-icon{width:21px;height:21px}.sahel-action-icon{display:grid;place-items:center}.sahel-action-label{font-size:13px}
+.sahel #appMenu{width:46px;padding:0;font-size:22px}
+.sahel #homeView{max-width:1180px}
+.kuwait-home-hero{position:relative;isolation:isolate;overflow:hidden;display:grid;grid-template-columns:minmax(0,1.25fr) minmax(300px,.75fr);gap:28px;align-items:center;padding:40px;border:1px solid rgba(15,81,61,.12);border-radius:26px;background:linear-gradient(126deg,#0c3e30 0%,#0f513d 62%,#1a604a 100%);color:#fff;box-shadow:0 22px 60px rgba(15,61,46,.16)}
+.kuwait-home-hero:before{content:"";position:absolute;z-index:-1;inset:auto -100px -180px auto;width:430px;height:430px;border:72px solid rgba(255,255,255,.045);border-radius:50%}
+.kuwait-home-hero:after{content:"";position:absolute;z-index:-1;inset:-110px auto auto -120px;width:310px;height:310px;border-radius:50%;background:rgba(198,161,91,.11);filter:blur(4px)}
+.kuwait-edition{display:inline-flex;align-items:center;gap:9px;padding:7px 12px;border:1px solid rgba(255,255,255,.15);border-radius:999px;background:rgba(255,255,255,.075);color:#f4e7cc;font-size:12px;font-weight:800}
+.kuwait-edition i{width:20px;height:4px;border-radius:5px;background:var(--kuwait-gold);box-shadow:0 6px 0 rgba(255,255,255,.8)}
+.kuwait-hero-copy h2{margin:17px 0 9px;color:#fff;font-size:clamp(2rem,4.1vw,3.45rem);font-weight:900;line-height:1.34;letter-spacing:-1.2px}
+.kuwait-hero-copy h2 em{color:#dfc38a;font-style:normal}
+.kuwait-hero-copy>p{max-width:690px;color:rgba(255,255,255,.72);font-size:15px;line-height:2}
+.kuwait-hero-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:23px}
+.sahel .kuwait-hero-actions .btn{border:1px solid #fff;background:#fff;color:var(--kuwait-green);border-radius:999px;padding-inline:22px}
+.sahel .kuwait-hero-actions .btn.secondary{border-color:rgba(255,255,255,.22);background:rgba(255,255,255,.07);color:#fff}
+.kuwait-trust{display:flex;gap:8px;flex-wrap:wrap;margin-top:22px;color:rgba(255,255,255,.62);font-size:11px}
+.kuwait-trust span{display:flex;align-items:center;gap:6px}.kuwait-trust span:before{content:"✓";display:grid;place-items:center;width:17px;height:17px;border-radius:50%;background:rgba(198,161,91,.18);color:#efdba9;font-weight:900}
+.kuwait-work-preview{position:relative;padding:20px;border:1px solid rgba(255,255,255,.15);border-radius:21px;background:rgba(255,255,255,.095);backdrop-filter:blur(13px);box-shadow:0 15px 40px rgba(4,30,21,.12)}
+.kuwait-preview-top{display:flex;align-items:center;justify-content:space-between;gap:10px;color:#fff;font-size:12px;font-weight:800}
+.kuwait-preview-top>span{display:flex;align-items:center;gap:7px}.kuwait-preview-top i{width:8px;height:8px;border-radius:50%;background:#d9bc80;box-shadow:0 0 0 4px rgba(217,188,128,.13)}
+.kuwait-preview-top small{color:rgba(255,255,255,.55);font-size:10px;font-weight:600}
+.kuwait-preview-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:17px}
+.kuwait-preview-stats div{padding:13px 8px;border-radius:13px;background:#fff;color:var(--kuwait-green);text-align:center}
+.kuwait-preview-stats strong{display:block;font-size:22px;font-weight:900;line-height:1.35}.kuwait-preview-stats span{display:block;color:#77877f;font-size:9px;font-weight:700}
+.kuwait-next{display:grid;gap:4px;margin-top:10px;padding:13px 14px;border-radius:13px;background:rgba(255,255,255,.085)}
+.kuwait-next span{color:#e1c98f;font-size:10px;font-weight:800}.kuwait-next strong{overflow:hidden;color:#fff;font-size:13px;white-space:nowrap;text-overflow:ellipsis}.kuwait-next small{color:rgba(255,255,255,.57);font-size:10px}
+.kuwait-private{margin-top:10px;color:rgba(255,255,255,.55);font-size:10px;text-align:center}
+.teams-connect-card{margin:16px 0 8px;padding:14px 17px;border:1px solid #dedfe9;border-right:4px solid #6264a7;border-radius:15px;background:#fff;color:var(--color-text);box-shadow:0 6px 22px rgba(24,45,58,.035)}
+.teams-connect-card:hover{border-color:#c9cae0;background:#fbfbfe;transform:translateY(-1px)}
+.teams-connect-icon{border-radius:11px}.teams-connect-card strong{font-size:16px}.teams-connect-card small{color:var(--color-text-muted)}
+.sahel-search-area{padding:19px 0 13px}.sahel-search-area>input{min-height:56px;padding:12px 19px;border:1px solid var(--color-border);border-radius:15px;background:#fff;color:var(--color-text);font-size:16px;box-shadow:0 6px 22px rgba(22,61,48,.025)}
+.sahel-search-area>input:focus{outline:3px solid rgba(198,161,91,.25);border-color:var(--kuwait-gold)}
+.sahel-home-heading{margin-top:25px;padding:0 3px}.sahel-home-heading h2{color:var(--color-text);font-size:22px;font-weight:900}.sahel-home-heading>span{padding:4px 10px;border-radius:999px;background:var(--kuwait-gold-soft);color:#836326;font-size:11px;font-weight:800}
+.sahel-services{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;border:0;border-radius:0;background:transparent;overflow:visible}
+.sahel-service{position:relative;display:grid;grid-template-columns:48px minmax(0,1fr);align-items:start;gap:13px;min-height:150px;padding:20px;border:1px solid var(--color-border)!important;border-radius:17px;background:#fff;color:var(--color-text);box-shadow:0 8px 28px rgba(22,61,48,.035);transition:transform .18s,border-color .18s,box-shadow .18s}
+.sahel-service:hover{border-color:rgba(15,81,61,.28)!important;background:#fff;box-shadow:var(--kuwait-shadow);transform:translateY(-3px)}
+.sahel-service:focus-visible{outline:3px solid rgba(198,161,91,.55);outline-offset:2px}
+.sahel-service-icon,.sahel-service:nth-child(3n+2) .sahel-service-icon,.sahel-service:nth-child(3n) .sahel-service-icon{display:grid;place-items:center;width:48px;height:48px;border-radius:14px;background:var(--color-primary-highlight);color:var(--kuwait-green)}
+.sahel-service:nth-child(3n+2) .sahel-service-icon{background:var(--kuwait-gold-soft);color:#896829}.sahel-service strong{font-size:16px;font-weight:900}.sahel-service small{margin-top:5px;color:var(--color-text-muted);font-size:12px;line-height:1.8}.sahel-service-action{position:absolute;inset:auto auto 13px 15px;display:grid;place-items:center;width:28px;height:28px;padding:0;border-radius:50%;background:var(--color-surface-2);color:var(--kuwait-green);font-size:17px}
+.sahel-model-access{justify-content:center;margin:20px 0 10px}.sahel .btn,.sahel.storefront .btn{min-height:46px;border-radius:12px;background:var(--kuwait-green);font-size:14px}.sahel .btn:hover{background:var(--kuwait-green-deep)}.sahel .btn.secondary,.sahel.storefront .btn.secondary{border-color:var(--color-border);background:#fff;color:var(--color-text)}
+.sahel .panel{border-color:var(--color-border);border-radius:18px;box-shadow:var(--shadow-sm)}
+.sahel .field input,.sahel .field select,.sahel .field textarea{border-color:var(--color-border);border-radius:12px;background:var(--color-surface-2);color:var(--color-text)}
+.sahel .field input:focus,.sahel .field select:focus,.sahel .field textarea:focus{outline:3px solid rgba(198,161,91,.2);border-color:var(--kuwait-gold);background:#fff}
+.sahel .dashboard-hero,.sahel .hero-card{background:linear-gradient(125deg,#0c3e30,#0f513d 65%,#1b5e49)}
+.sahel .hero-card .eyebrow{color:#e7ca8e}.sahel .hero-card .eyebrow:before{background:#e7ca8e}.sahel .hero-card .btn{background:#fff;color:var(--kuwait-green)}
+.sahel .metric .metric-icon{background:var(--color-primary-highlight);color:var(--kuwait-green)}.sahel .metric:nth-child(2) .metric-icon{background:var(--kuwait-gold-soft);color:#8b6928}
+.sahel .quick-card:hover{border-color:rgba(15,81,61,.3);box-shadow:var(--shadow-sm)}.sahel .quick-icon{background:var(--color-primary-highlight);color:var(--kuwait-green)}
+.teacher-path-hero{background:linear-gradient(125deg,#0c3e30,#0f513d 62%,#1b5e49);box-shadow:0 18px 44px rgba(15,61,46,.16)}
+.teacher-path-kicker,.teacher-path-day b{color:#e7ca8e}.teacher-path-card{border-color:var(--color-border);box-shadow:var(--shadow-sm)}
+.teacher-path-stages input:checked+span{border-color:var(--kuwait-green);background:var(--color-primary-highlight);color:var(--kuwait-green)}
+.teacher-path-services>button:hover{border-color:rgba(15,81,61,.35);box-shadow:var(--shadow-sm)}.teacher-path-services>button.active{border-color:var(--kuwait-green);background:linear-gradient(135deg,#edf4ef,#fff);box-shadow:inset 0 0 0 1px var(--kuwait-green)}
+.teacher-path-service-icon{background:var(--color-primary-highlight);color:var(--kuwait-green)}.teacher-path-services>button.active .teacher-path-service-check{border-color:var(--kuwait-green);background:var(--kuwait-green)}
+.teacher-path-runner{border-color:#cbded5;background:linear-gradient(145deg,#fff,#f3f6f1)}
+.sahel .sahel-tabs{min-height:82px;padding:9px 8px max(9px,env(safe-area-inset-bottom));border-top:1px solid rgba(15,81,61,.12);background:rgba(255,255,255,.95);box-shadow:0 -10px 35px rgba(16,54,41,.06);backdrop-filter:blur(15px)}
+.sahel-tabs button{max-width:170px;color:#89958f;font-size:12px}.sahel-tabs .ui-icon{width:25px;height:25px}.sahel-tabs button.active{color:var(--kuwait-green);font-weight:900}.sahel-tabs button.active:before{content:"";position:absolute;top:-9px;width:36px;height:3px;border-radius:0 0 5px 5px;background:var(--kuwait-gold)}.sahel-tabs button{position:relative}
+.sahel #teacherLauncher{background:var(--kuwait-green);box-shadow:0 10px 30px rgba(15,81,61,.25)}
+.sahel .sidebar.open,.sahel.storefront .sidebar.open{inset:92px 0 92px auto;background:#0d3c2e;color:#fff}.sahel .mobile-overlay.visible{inset:92px 0 92px;background:rgba(5,28,20,.56)}
+#teamsConnectDialog{border-color:var(--color-border);border-radius:20px;color:var(--color-text)}#teamsConnectDialog::backdrop{background:rgba(7,39,29,.65)}
+@media(max-width:900px){.kuwait-home-hero{grid-template-columns:1fr;padding:30px}.kuwait-work-preview{display:grid;grid-template-columns:1fr 1fr;gap:10px}.kuwait-preview-top,.kuwait-preview-stats{grid-column:1/-1}.kuwait-next{margin-top:0}.kuwait-private{display:grid;align-items:center;margin:0}.sahel-services{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){.sahel body{padding-top:80px}.sahel .sahel-header{height:80px}.sahel-header-inner{padding:10px 15px}.sahel-logo{width:40px;height:40px;border-radius:12px}.sahel-brand{font-size:17px}.sahel-brand small{display:none}.sahel-action-label{display:none}.sahel-header-actions button{width:42px;min-height:42px;padding:0}.sahel .main{padding:14px 12px 42px}.kuwait-home-hero{gap:20px;padding:25px 20px;border-radius:20px}.kuwait-hero-copy h2{font-size:30px;line-height:1.45}.kuwait-hero-copy>p{font-size:13px}.kuwait-hero-actions{display:grid;grid-template-columns:1fr 1fr}.sahel .kuwait-hero-actions .btn{padding-inline:10px;font-size:12px}.kuwait-trust{gap:7px 12px}.kuwait-work-preview{display:block;padding:16px}.kuwait-preview-stats{margin-top:14px}.kuwait-next{margin-top:9px}.kuwait-private{margin-top:9px}.teams-connect-action{display:none}.sahel-services{gap:10px}.sahel-service{display:flex;min-height:124px;padding:15px;gap:10px}.sahel-service-icon,.sahel-service:nth-child(3n+2) .sahel-service-icon,.sahel-service:nth-child(3n) .sahel-service-icon{width:42px;height:42px;flex:0 0 42px}.sahel-service strong{font-size:14px}.sahel-service small{font-size:10px;line-height:1.65}.sahel-service-action{width:24px;height:24px;bottom:10px;left:10px}.sahel-search-area{padding-top:14px}.sahel-home-heading{margin-top:18px}.sahel-home-heading h2{font-size:19px}.sahel .sidebar.open,.sahel.storefront .sidebar.open{inset:80px 0 92px auto}.sahel .mobile-overlay.visible{inset:80px 0 92px}.teacher-path-hero{border-radius:20px}}
+@media(max-width:430px){.sahel-services{grid-template-columns:1fr}.sahel-service{min-height:98px}.sahel-service small{font-size:11px}.kuwait-hero-actions{grid-template-columns:1fr}.kuwait-preview-top{align-items:flex-start;flex-direction:column}.kuwait-preview-stats strong{font-size:19px}}
+@media(prefers-reduced-motion:reduce){.sahel-service,.teams-connect-card{transition:none!important}}
+@media print{.kuwait-home-hero,.teams-connect-card{box-shadow:none}.sahel body{background:#fff}}
