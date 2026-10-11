@@ -72,7 +72,9 @@ export function storyboardSvg(type='medium'){
  const scale=(type==='wide'||type==='master')?.75:type==='close'?1.4:1;
  let paths='';
  for(let i=0;i<figures;i++){const x=figures===1?85:figures===2?55+i*65:35+i*50;paths+=`<g transform="translate(${x} 47) scale(${scale})"><path d="M-10-16c-1-17 20-17 20 0s-20 17-20 0M-1 1l-8 32 21 0-11-32M-7 12l-14 16M7 12l18 13M-6 33l-5 24M10 33l8 24"/></g>`;}
- if(type==='insert'||type==='overhead')paths='<path d="M30 33l91-3 9 54-94 2zM45 47l58-2m-55 17 39-1m-47 34 86-2M138 53l11 29m-5-35 6 7"/>';
+ if(type==='insert'||type==='overhead'||type==='pov')paths='<path d="M30 33l91-3 9 54-94 2zM45 47l58-2m-55 17 39-1m-47 34 86-2M138 53l11 29m-5-35 6 7"/>';
+ if(type==='close')paths='<path d="M57 41c-2-41 67-43 67 0 1 40-66 45-67 0M77 78l-3 14m28-14 4 14M74 91l-38 15m70-15 31 15M76 35l4 0m24 0 4 0m-25 22q9 7 19-1"/>';
+ if(type==='ots')paths='<path d="M28 24c-1-24 34-26 35 0 2 23-34 26-35 0M35 47l-12 16L9 81v29h63M114 41c-1-19 25-19 25 0 0 19-25 19-25 0M125 57l-11 31 22 0-11-31m-7 14-15 13m29-12 16 11m-29 6-6 20m20-20 7 20"/>';
  return `<svg class="cinema-sketch" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 120" role="img" aria-label="رسم تخطيطي لحجم اللقطة"><g fill="none" stroke="#26458a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 9l162-1 1 102-161 1zM12 12l153-1"/>${paths}<path stroke="#b43844" d="M14 16l12 0m-12 0 0 11M157 93l0 10-12 0"/></g></svg>`;
 }
 export function cinemaText(project,scenes){const c=project.cinematic;return [`${project.title} — التصور السينمائي`,`مرجع الاستمرارية: ${c.bible}`,...scenes.map(s=>{const p=c.plans.find(p=>p.sceneId===s.id);return p?[`المشهد ${s.number}: ${s.title}`,`الوظيفة: ${p.purpose}`,`وجهة النظر: ${p.observer}`,`حد المعرفة: ${p.guard}`,p.notes,...p.shots.map((shot,i)=>`${i+1}. ${SHOTS.find(t=>t.id===shot.type)?.ar}\n${shot.visual}\nالغاية: ${shot.purpose}\nالحركة: ${shot.movement}\nالإضاءة: ${shot.lighting}\nالصوت: ${shot.sound}\n${promptForShot(s,p,shot,c,'video')}`)].join('\n\n'):'';})].filter(Boolean).join('\n\n');}
