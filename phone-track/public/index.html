@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="حلّل رقم الهاتف لمعرفة دولة الترقيم ونوعه وتنسيقه والمشغل الأصلي والمنطقة الزمنية عند توفر البيانات. تحليل محلي دون حفظ الأرقام.">
+  <meta name="theme-color" content="#f4f7f6">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
+  <title>مسار الهاتف | بيانات الرقم المتاحة</title>
+  <link rel="icon" href="./assets/icon.svg" type="image/svg+xml">
+  <link rel="preload" href="./assets/Cairo-Variable.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="./assets/styles.css">
+  <script src="./assets/app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#phone">انتقل إلى إدخال الرقم</a>
+  <header class="site-header wrap">
+    <a class="brand" href="./" aria-label="مسار الهاتف، الصفحة الرئيسية">
+      <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 40 40"><rect x="12" y="6" width="16" height="28" rx="5"/><path d="M17 10h6M18 29h4"/></svg></span>
+      <span>مسار الهاتف<span class="brand-sub">بيانات الرقم، بوضوح</span></span>
+    </a>
+    <span class="privacy-pill"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4 6v6c0 5 8 9 8 9s8-4 8-9V6l-8-3Z"/><path d="m8 12 3 3 5-6"/></svg>التحليل على جهازك</span>
+  </header>
+
+  <main class="wrap">
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <p class="eyebrow"><span></span>أداة تحليل أرقام الهاتف</p>
+        <h1 id="hero-title">كل البيانات المتاحة<br>عن <span>رقم الهاتف.</span></h1>
+        <p class="hero-description">أدخل الرقم واعرف دولة الترقيم، نوع الخط، تنسيقه والبيانات الإضافية التي تتوفر عنه.</p>
+      </div>
+      <div class="hero-note"><span class="note-number">01</span><p>رقم واحد.<br><strong>تقرير واضح.</strong></p><span class="note-caption">بدون تسجيل أو اشتراك</span></div>
+    </section>
+
+    <div class="workspace">
+      <section class="input-panel panel" aria-labelledby="input-title">
+        <div class="panel-heading"><span class="section-index">01 / الإدخال</span><span class="small-tag">الكويت افتراضياً</span></div>
+        <h2 id="input-title">ابدأ برقم الهاتف</h2>
+        <p class="panel-description">اختر دولة الرقم المحلي، أو اكتب المفتاح الدولي في بداية الرقم.</p>
+        <form id="phone-form" novalidate autocomplete="off">
+          <label for="country">دولة الرقم المحلي</label>
+          <select id="country" name="country" aria-describedby="country-hint"><option value="KW">الكويت (+965)</option></select>
+          <p id="country-hint" class="field-hint">عند إدخال + أو 00 نقرأ المفتاح الدولي من الرقم نفسه.</p>
+          <label for="phone">رقم الهاتف</label>
+          <div class="phone-field"><input id="phone" name="phone" type="tel" dir="ltr" inputmode="tel" maxlength="64" placeholder="+965 …" aria-describedby="phone-hint error-message" spellcheck="false" autocapitalize="off"><span class="phone-field-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M10 5h4m-3 13h2"/></svg></span></div>
+          <p id="phone-hint" class="field-hint">تُقبل الأرقام العربية والإنجليزية والمسافات.</p>
+          <p id="error-message" class="error-message" role="alert" hidden></p>
+          <button id="analyze" class="primary-button" type="submit" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10" cy="10" r="6"/><path d="m15 15 5 5"/></svg><span id="analyze-label">تحميل الأداة…</span></button>
+          <button id="clear" class="clear-button" type="button">مسح الرقم والنتيجة</button>
+        </form>
+        <div class="local-note"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3m-4 5v2"/></svg><p>لا نحفظ رقمك ولا نرسله إلى خدمة بحث خارجية. يتم التحليل داخل المتصفح.</p></div>
+      </section>
+
+      <section class="results-panel panel" aria-labelledby="result-title" aria-busy="false">
+        <div class="panel-heading"><span class="section-index">02 / التقرير</span><span id="report-status" class="small-tag">بانتظار الرقم</span></div>
+        <h2 id="result-title">بيانات الرقم</h2>
+        <div id="empty-state" class="empty-state">
+          <div class="empty-illustration" aria-hidden="true"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><span class="orbit-dot dot-one"></span><span class="orbit-dot dot-two"></span><svg viewBox="0 0 80 80"><rect x="25" y="10" width="30" height="59" rx="8"/><path d="M34 18h12M37 59h6"/><path class="check-mark" d="m33 39 5 5 11-12"/></svg></div>
+          <h3>بياناتك تبدأ من هنا</h3>
+          <p>اكتب رقم الهاتف واضغط «تحليل الرقم»<br>ليظهر تقريره في هذه المساحة.</p>
+          <div class="preview-tags"><span>دولة الترقيم</span><span>نوع الرقم</span><span>المشغل الأصلي</span><span>التنسيق الدولي</span></div>
+        </div>
+        <div id="report" hidden>
+          <div class="number-summary"><p id="result-number" dir="ltr"></p><div class="summary-line"><span id="result-country"></span><span id="valid-badge" class="valid-badge"></span></div><p id="valid-description" class="summary-description"></p></div>
+          <div class="data-grid">
+            <div class="data-card"><span>دولة الرقم</span><strong id="country-value"></strong><small>دولة الترقيم، وقد تختلف عن مكان المستخدم</small></div>
+            <div class="data-card"><span>المفتاح الدولي</span><strong id="calling-code-value" dir="ltr"></strong><small>مفتاح الاتصال المرتبط بالرقم</small></div>
+            <div class="data-card"><span>نوع الرقم</span><strong id="type-value"></strong><small>التصنيف حسب بيانات الترقيم</small></div>
+            <div class="data-card"><span>المشغل الأصلي</span><strong id="carrier-value"></strong><small>قد يختلف عن المشغل الحالي بعد نقل الرقم</small></div>
+            <div class="data-card wide"><span>منطقة تخصيص الرقم</span><strong id="area-value"></strong><small>ارتباط جغرافي في خطة الترقيم؛ لا يمثل موقع الجهاز</small></div>
+            <div class="data-card wide"><span>المناطق الزمنية المحتملة</span><strong id="timezone-value" class="timezone-value" dir="ltr"></strong><small>مرتبطة بترقيم الرقم، وليست توقيت موقع صاحبه الحالي</small></div>
+          </div>
+          <p id="metadata-message" class="metadata-message" role="status"></p>
+          <details class="technical-details"><summary>التنسيقات والتفاصيل الفنية</summary><dl class="technical-list">
+            <div><dt>التنسيق الدولي</dt><dd id="international-value" dir="ltr"></dd></div>
+            <div><dt>التنسيق المحلي</dt><dd id="national-value" dir="ltr"></dd></div>
+            <div><dt>التنسيق الموحد E.164</dt><dd id="e164-value" dir="ltr"></dd></div>
+            <div><dt>الرقم المحلي دون المفتاح</dt><dd id="national-number-value" dir="ltr"></dd></div>
+            <div><dt>صيغة رابط الاتصال</dt><dd id="uri-value" dir="ltr"></dd></div>
+            <div><dt>عدد الأرقام المحلية</dt><dd id="length-value"></dd></div>
+            <div><dt>إجمالي الأرقام الدولية</dt><dd id="international-length-value"></dd></div>
+            <div><dt>الطول ممكن</dt><dd id="possible-value"></dd></div>
+            <div><dt>رمز الدولة</dt><dd id="iso-value" dir="ltr"></dd></div>
+            <div><dt>ملكية الرقم</dt><dd>لم يتم التحقق</dd></div>
+            <div><dt>حالة تشغيل الخط</dt><dd>لم يتم التحقق</dd></div>
+          </dl></details>
+          <div class="report-actions"><button id="copy-report" type="button" class="secondary-button">نسخ التقرير</button><button id="download-report" type="button" class="secondary-button">تنزيل التقرير</button></div>
+        </div>
+      </section>
+    </div>
+
+    <section class="limits-panel" aria-labelledby="limits-title"><span class="info-symbol" aria-hidden="true">i</span><div><h2 id="limits-title">ما الذي يوضحه الرقم؟</h2><p>الرقم يوضح بيانات الترقيم. اسم المالك، موقعه الحالي، حساباته الشخصية وحالة تشغيل الخط لا تتوفر من خلال هذه الأداة. مطابقة خطة الترقيم لا تثبت ملكية الرقم أو أنه يعمل.</p></div></section>
+    <section class="method-panel"><div><p class="eyebrow">عن النتائج</p><h2>مصدر واضح لكل معلومة</h2></div><div><p>نعتمد على بيانات خطط الترقيم في libphonenumber، وبيانات المشغل والمناطق الزمنية في phonenumbers. تظهر «غير متوفر» عندما لا توجد معلومة يمكن الاعتماد عليها.</p><p class="source-links"><a href="https://github.com/catamphetamine/libphonenumber-js" target="_blank" rel="noopener noreferrer">مكتبة الترقيم</a><a href="https://github.com/daviddrysdale/python-phonenumbers" target="_blank" rel="noopener noreferrer">بيانات الأرقام</a><a href="https://github.com/google/libphonenumber/blob/master/FAQ.md" target="_blank" rel="noopener noreferrer">حدود البيانات</a></p></div></section>
+    <noscript><p class="error-message">فعّل JavaScript في المتصفح حتى تتمكن من تحليل الأرقام محلياً.</p></noscript>
+  </main>
+  <footer class="wrap site-footer"><p>مسار الهاتف<span>أرقام واضحة. نتائج مفهومة.</span></p><a href="https://github.com/Q8-ux/saad/tree/main/phone-track" target="_blank" rel="noopener noreferrer">المشروع على GitHub</a></footer>
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+</body>
+</html>

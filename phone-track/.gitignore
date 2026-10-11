@@ -1,0 +1,8 @@
+node_modules/
+__pycache__/
+*.pyc
+public/data/
+public/assets/app.js
+public/assets/Cairo-Variable.woff2
+public/assets/LICENSE-*.txt
+tests/fixtures.json

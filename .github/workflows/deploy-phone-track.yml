@@ -1,0 +1,54 @@
+name: Publish Phone Path
+on:
+  push:
+    branches: [main]
+    paths: ['phone-track/**', '.github/workflows/deploy-phone-track.yml']
+  workflow_dispatch:
+  workflow_run:
+    workflows: ['Deploy All GitHub Pages Sites']
+    types: [completed]
+permissions:
+  contents: read
+  actions: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages-v2
+  cancel-in-progress: false
+jobs:
+  publish:
+    if: github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: main}
+      - uses: actions/setup-node@v4
+        with: {node-version: 24}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Prepare static phone metadata and sources
+        working-directory: phone-track
+        run: |
+          npm ci --no-audit --no-fund
+          python -m pip install -r requirements-data.txt
+          python scripts/generate_data.py
+          python scripts/generate_fixtures.py
+          cp ../ant-alshaer/fonts/Cairo-Variable.woff2 public/assets/Cairo-Variable.woff2
+          cp ../ant-alshaer/fonts/Cairo-OFL.txt public/assets/LICENSE-Cairo.txt
+          npm run build
+          npm test
+          npm run check
+          python -m py_compile deployment/preserve.py
+      - uses: actions/configure-pages@v5
+      - name: Preserve published sites and add phone page
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python phone-track/deployment/preserve.py
+      - uses: actions/upload-pages-artifact@v3
+        with: {path: _site, retention-days: 30}
+      - name: Deploy
+        id: deploy
+        uses: actions/deploy-pages@v4
