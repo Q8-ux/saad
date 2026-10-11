@@ -68,4 +68,7 @@ test('guided foundation, approval, plan gates, cancellation, metadata and full r
   const cid=active().story.characters[0].id;input(`[data-character-id="${cid}"][data-character-field="name"]`,'جابر الجديد');window.dispatchEvent(new dom.window.Event('beforeunload'));
   assert.equal(active().story.relationships[0].from,'جابر الجديد');assert.equal($('[data-relation-field="from"]').value,'جابر الجديد');assert.ok(!isApproved(active()));
   click('#exportButton');assert.equal($('#printStyleInput').value,'ink');$('#printStyleInput').value='classic';$('#printStyleInput').dispatchEvent(new dom.window.Event('change',{bubbles:true}));assert.equal(active().printStyle,'classic');$('#exportDialog').close();
+  const loadedFonts=[];let printed=false;Object.defineProperty(document,'fonts',{configurable:true,value:{load:async(font,text)=>loadedFonts.push({font,text}),ready:Promise.resolve()}});window.print=()=>{printed=true;};
+  click('#exportButton');$('#printStyleInput').value='ink';$('#printStyleInput').dispatchEvent(new dom.window.Event('change',{bubbles:true}));click('[data-export="pdf"]');await pause(20);
+  assert.ok(printed);assert.equal(loadedFonts[0].font,'16px InkArabic');assert.equal($('#printArea').dataset.printStyle,'ink');assert.equal($('#printArea').getAttribute('aria-hidden'),'true');
 });

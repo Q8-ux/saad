@@ -223,7 +223,8 @@ function initEvents(){
       if(kind==='storytxt')download(storyText(p),fileName()+'-story.txt');
       if(kind==='pdf'||kind==='storypdf'){
         $('#printArea').dataset.printStyle=p.printStyle;$('#printArea').innerHTML=kind==='storypdf'?printStoryBody(p):printBody(p);$('#printArea').dir=kind==='storypdf'?'rtl':p.language==='en'?'ltr':'rtl';$('#printArea').setAttribute('aria-hidden','false');
-        await document.fonts?.ready;const oldTitle=document.title;document.title=p.title;window.print();document.title=oldTitle;$('#printArea').setAttribute('aria-hidden','true');
+        try{if(p.printStyle==='ink')await document.fonts?.load('16px InkArabic','السيناريو');await document.fonts?.ready;}catch{toast('تعذر تحميل خط الحبر. أعد المحاولة بعد اكتمال الاتصال.',true);$('#printArea').setAttribute('aria-hidden','true');return;}
+        const oldTitle=document.title;document.title=p.title;window.print();document.title=oldTitle;$('#printArea').setAttribute('aria-hidden','true');
       }
       return;
     }
