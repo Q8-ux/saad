@@ -14,3 +14,17 @@ body>header,body>main,body>dialog,body>input,body>.toast,body>noscript{display:n
 .script-dialogue{width:62%;margin-inline:20% 18%!important;margin-bottom:2mm!important}
 .script-parenthetical{width:55%;margin-inline:24% 21%!important;text-align:center;font-size:11pt;break-after:avoid;margin-bottom:0!important}
 .script-transition{text-align:end;font-weight:700;margin-top:4mm!important}.script-general{text-align:center}
+.story-report{direction:rtl;line-height:1.8;font-size:12pt;overflow-wrap:anywhere}.story-report p{margin:0 0 3mm;white-space:pre-wrap;orphans:3;widows:3}.story-report .report-gap{height:5mm}.story-report{color:#111}.story-report p:first-child{font-weight:700;font-size:16pt}
+.story-report h2{font-size:16pt;line-height:1.8;margin:5mm 0 3mm;border-bottom:1px solid #ddd;break-after:avoid;page-break-after:avoid}.story-report p{unicode-bidi:plaintext}
+#printArea[data-print-style="ink"]{font-family:InkArabic,Cairo,sans-serif;font-size:15pt;line-height:1.65;color:#203b7b;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+#printArea[data-print-style="ink"] .print-title{background:url('./ink-sketch.svg') center 142mm/44mm auto no-repeat}
+#printArea[data-print-style="ink"] .print-title h1{color:#233d82;font-size:36pt;text-decoration:underline;text-decoration-color:#b43844;text-underline-offset:5mm}
+#printArea[data-print-style="ink"] .print-title p{font-size:18pt}
+#printArea[data-print-style="ink"] .script-scene-heading{color:#a5273b;border-bottom:1px solid #a5273b;padding-bottom:2mm}
+#printArea[data-print-style="ink"] .script-character{color:#276b4a;font-size:17pt}
+#printArea[data-print-style="ink"] .script-dialogue{font-size:15pt}
+#printArea[data-print-style="ink"] .script-parenthetical{color:#8a3e60;font-size:13pt}
+#printArea[data-print-style="ink"] .script-transition{color:#a5273b}
+#printArea[data-print-style="ink"] .story-report{font-size:15pt;color:#203b7b}
+#printArea[data-print-style="ink"] .story-report h2{color:#a5273b;border-color:#a5273b;font-size:19pt}
+#printArea[data-print-style="ink"] .draft-date{color:#276b4a}

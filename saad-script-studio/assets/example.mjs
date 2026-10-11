@@ -1,0 +1,18 @@
+import {newProject,block,validatePlan} from './core.mjs?v=3';
+import {newCharacter,newBeat,planFromBeats,dramaForScene} from './story.mjs?v=3';
+// A fictional public example written for this tool, independent of private projects.
+export function exampleProject() {
+  const p=newProject('الوثيقة الأخيرة');p.sceneCount=2;
+  p.idea='يجد جابر وثيقة تثبت حق أهل الحي في المبنى القديم، وعليه استعادتها من خالد قبل انتهاء مهلة الاعتراض.';
+  Object.assign(p.pillars,{hero:'جابر، أمين الأرشيف',goal:'استعادة الوثيقة الأصلية وتسليمها',obstacle:'خالد يرفض إعادتها خوفًا من اتهامه',stakes:'يضيع حق أهل الحي في المبنى',ending:'يسجل الحق في المهلة ويعترف جابر بخطئه'});
+  Object.assign(p.story,{problem:'الوثيقة الأصلية ليست في ملف الاعتراض',need:'إثبات الحق قبل إغلاق الملف',urgency:'تنتهي المهلة مساء اليوم',stageGoal:'معرفة من يحتفظ بالوثيقة',means:'معرفته بسجل الأرشيف واختياره الاعتراف بخطئه',conflictNature:'دراما مواجهة: حماية السمعة في صراع مع تحمل المسؤولية',logline:'قبل انتهاء مهلة الاعتراض، يسعى أمين أرشيف لاستعادة وثيقة من زميل يخشى الاتهام، وإلا ضاع حق أهل الحي في المبنى القديم.',opening:'جابر يخفي خطأه في فهرسة الوثيقة',inciting:'يصل إشعار بأن مهلة الاعتراض تنتهي مساء اليوم',entryPoint:'ندخل الحكاية عند قراءة جابر لإشعار المهلة'});
+  p.story.characters=[Object.assign(newCharacter(),{role:'hero',name:'جابر',goal:'حماية حق أهل الحي',need:'تحمل مسؤولية خطئه',motive:'خطؤه في الفهرسة وضع الحق في خطر',knowledge:'يعرف رقم الملف والمهلة، ولا يعرف مكان الأصل',arc:'يتوقف عن الاختباء خلف الإجراء ويعترف'}),Object.assign(newCharacter(),{role:'opponent',name:'خالد',goal:'حماية اسمه',need:'مواجهة خوفه من الاتهام',motive:'يخشى أن ينسب إليه خطأ زميله',knowledge:'يعرف أن الوثيقة في خزانته',arc:'يتخلى عن الاحتفاظ بالوثيقة عندما يتحمل جابر المسؤولية'})];
+  p.story.beats=[Object.assign(newBeat('opening'),{character:'جابر',heading:'داخلي - الأرشيف - نهار',event:'يقرأ جابر الإشعار ويواجه خالد بشأن الوثيقة',goal:'معرفة مكان الوثيقة',obstacle:'خالد يرفض التعاون',attempt:'يعرض سجل الفهرسة ويعترف بأنه سبب الخطأ',result:'يكشف خالد مكان الوثيقة ويعيدها',decision:'يقرر جابر تسليمها وتوقيع اعترافه',cause:'حصوله على الأصل يسمح بالتوجه إلى مكتب التسجيل قبل المهلة',stakes:'آخر فرصة لحماية حق أهل الحي',knowledge:'يعرف رقم الملف وموعد الإغلاق'}),Object.assign(newBeat('ending'),{character:'جابر',heading:'داخلي - مكتب التسجيل - مساء',event:'يسلم الوثيقة ويوقع اعترافه أمام الموظفة',result:'يسجل الحق قبل إغلاق المكتب',knowledge:'يعرف مكان الأصل وسبب خوف خالد'})];
+  p.plan=validatePlan(planFromBeats(p));
+  p.plan.scenes[0].knowledgeAfter='يعرف مكان الأصل وسبب احتفاظ خالد به';p.plan.scenes[1].knowledgeAfter='يعرف أن الحق سجل وأنه تحمل المسؤولية';p.plan.scenes.forEach(s=>s.written=true);
+  const content=[
+    [block('Action','يتوقف جابر أمام إشعار الإغلاق. ينظر إلى الساعة، ثم يضع سجل الفهرسة أمام خالد.'),block('Character','جابر'),block('Dialogue','المهلة تنتهي اليوم. أين الأصل؟'),block('Character','خالد'),block('Dialogue','لا تجعلني أدفع ثمن خطئك.'),block('Action','يسحب جابر ورقة الإقرار ويكتب اسمه.'),block('Character','جابر'),block('Dialogue','سأوقع أنني وضعت الملف في المكان الخطأ.'),block('Action','يفتح خالد الخزانة. يمد الوثيقة إليه.'),block('Character','خالد'),block('Dialogue','إذن خذها بنفسك.'),block('Action','يمسك جابر الوثيقة وورقة الإقرار، ويخرج.')],
+    [block('Action','تخفض الموظفة مصراع النافذة. يضع جابر الأصل وورقة الإقرار تحتها قبل أن تغلق.'),block('Character','الموظفة'),block('Dialogue','هذه الورقة ليست مطلوبة للاعتراض.'),block('Character','جابر'),block('Dialogue','مطلوبة مني.'),block('Action','تقرأ الموظفة الإقرار، ثم تختم استلام الوثيقة. يحتفظ جابر بالإيصال وينظر إلى توقيعه، ثم يغادر.')]
+  ];
+  p.blocks=p.plan.scenes.flatMap((s,i)=>[block('Scene Heading',s.heading,{summary:s.summary,drama:dramaForScene(s)}),...content[i]]);return p;
+}
