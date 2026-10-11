@@ -4,6 +4,7 @@ from pathlib import Path
 import tarfile
 import tempfile
 import unittest
+import urllib.request
 import zipfile
 
 spec = importlib.util.spec_from_file_location('preserve', Path(__file__).with_name('preserve.py'))
@@ -24,6 +25,11 @@ def fixture(files):
     return output.getvalue()
 
 class PreservationTest(unittest.TestCase):
+    def test_authentication_is_not_forwarded_to_artifact_storage(self):
+        req = urllib.request.Request('https://api.github.com/repos/a/b/actions/artifacts/1/zip', headers={'Authorization':'Bearer fake-test-token'})
+        redirected = preserve.SafeRedirect().redirect_request(req, None, 302, 'Found', {}, 'https://example.blob.core.windows.net/artifact?sig=signed')
+        self.assertIsNone(redirected.get_header('Authorization'))
+        self.assertEqual(req.get_header('Authorization'), 'Bearer fake-test-token')
     def test_existing_sites_are_byte_identical_after_overlay(self):
         with tempfile.TemporaryDirectory() as folder:
             destination = Path(folder) / '_site'

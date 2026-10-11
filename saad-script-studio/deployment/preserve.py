@@ -7,6 +7,8 @@ import os
 from pathlib import Path
 import shutil
 import tarfile
+import time
+import urllib.parse
 import urllib.request
 import zipfile
 
@@ -15,14 +17,29 @@ REPO = 'Q8-ux/saad'
 SOURCE = Path(__file__).resolve().parents[1]
 LIMIT = 256 * 1024 * 1024
 
+class SafeRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        if urllib.parse.urlsplit(newurl).scheme != 'https':
+            raise RuntimeError('Refusing a non-HTTPS artifact redirect.')
+        redirected = super().redirect_request(req, fp, code, msg, headers, newurl)
+        if urllib.parse.urlsplit(newurl).netloc != urllib.parse.urlsplit(req.full_url).netloc:
+            redirected.remove_header('Authorization')
+        return redirected
+
 def request(url, token, binary=False):
+    if urllib.parse.urlsplit(url).hostname != 'api.github.com':
+        raise RuntimeError('Authenticated requests must target the GitHub API.')
+    if binary:
+        url += ('&' if '?' in url else '?') + 'fresh=' + str(time.time_ns())
     req = urllib.request.Request(url, headers={
         'Authorization': f'Bearer {token}',
         'Accept': 'application/vnd.github+json',
         'X-GitHub-Api-Version': '2022-11-28',
         'User-Agent': 'saad-script-studio-publisher',
+        'Cache-Control': 'no-cache',
     })
-    with urllib.request.urlopen(req, timeout=90) as response:
+    opener = urllib.request.build_opener(SafeRedirect())
+    with opener.open(req, timeout=90) as response:
         data = response.read(LIMIT + 1)
     if len(data) > LIMIT:
         raise RuntimeError('Pages archive exceeds the safe extraction limit.')
