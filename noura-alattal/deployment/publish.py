@@ -58,7 +58,7 @@ def main():
         shutil.rmtree(noura_target)
     shutil.copytree("noura-alattal", noura_target)
     page = (target / "noura-alattal/index.html").read_text()
-    if 'id="courses"' not in page or "20261004-courses-v2" not in page or "</html>" not in page:
+    if 'id="courses"' not in page or "20261011-image-inspiration-v1" not in page or "</html>" not in page:
         raise RuntimeError("Noura release is incomplete")
     for name in ["navigation.js", "admin-reference.js"]:
         if not (target / "noura-alattal/assets" / name).is_file():
