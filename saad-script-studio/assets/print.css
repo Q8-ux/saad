@@ -1,0 +1,16 @@
+@page{size:A4;margin:22mm 22mm 20mm 25mm;@bottom-center{content:counter(page);font-family:Cairo,sans-serif;font-size:9pt;color:#555}}
+@page:first{counter-reset:page 0;@bottom-center{content:none}}
+html,body{background:white!important;font-family:Cairo,Tahoma,sans-serif;color:#111;font-size:12pt;line-height:1.65}
+body>header,body>main,body>dialog,body>input,body>.toast,body>noscript{display:none!important}
+#printArea{display:block!important;direction:rtl;color:#111}
+.print-title{height:240mm;display:block;width:100%;padding-top:60mm;text-align:center;break-after:page;page-break-after:always;line-height:2}
+.print-title h1{font-size:30pt;margin:15mm 0 18mm;font-weight:700}
+.print-title p{font-size:15pt;margin:0}.print-kicker{letter-spacing:1pt;font-size:11pt!important}.draft-date{margin-top:30mm!important;font-size:11pt!important;color:#555}
+.print-script p{margin:0 0 4mm;white-space:pre-wrap;overflow-wrap:anywhere;orphans:3;widows:3}
+.print-script[dir="ltr"]{font-family:'Courier New',monospace;line-height:1.5}
+.script-scene-heading{font-weight:700;margin-top:7mm!important;margin-bottom:4mm!important;break-after:avoid;page-break-after:avoid}
+.scene-number{display:inline-block;margin-inline-end:6mm;font-size:10pt}
+.script-character{font-weight:700;text-align:center;width:62%;margin-inline:20% 18%!important;margin-top:4mm!important;margin-bottom:0!important;break-after:avoid;page-break-after:avoid}
+.script-dialogue{width:62%;margin-inline:20% 18%!important;margin-bottom:2mm!important}
+.script-parenthetical{width:55%;margin-inline:24% 21%!important;text-align:center;font-size:11pt;break-after:avoid;margin-bottom:0!important}
+.script-transition{text-align:end;font-weight:700;margin-top:4mm!important}.script-general{text-align:center}

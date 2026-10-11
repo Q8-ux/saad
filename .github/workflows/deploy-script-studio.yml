@@ -1,0 +1,48 @@
+name: Publish Saad Script Studio
+on:
+  push:
+    branches: [main]
+    paths: ['saad-script-studio/**', '.github/workflows/deploy-script-studio.yml']
+  workflow_dispatch:
+  workflow_run:
+    workflows: ['Deploy All GitHub Pages Sites']
+    types: [completed]
+permissions:
+  contents: read
+  actions: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages-v2
+  cancel-in-progress: false
+jobs:
+  publish:
+    if: github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: main}
+      - uses: actions/setup-node@v4
+        with: {node-version: 24}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Check screenplay conversion, persistence and AI cancellation
+        working-directory: saad-script-studio
+        run: |
+          npm ci --no-audit --no-fund
+          npm test
+          npm run check
+          python -m unittest discover -s deployment -p 'test_*.py'
+      - uses: actions/configure-pages@v5
+      - name: Preserve published sites and add Script Studio
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python saad-script-studio/deployment/preserve.py
+      - uses: actions/upload-pages-artifact@v3
+        with: {path: _site, retention-days: 30}
+      - name: Deploy
+        id: deploy
+        uses: actions/deploy-pages@v4

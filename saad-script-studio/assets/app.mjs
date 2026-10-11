@@ -1,0 +1,243 @@
+import {TYPES,LABELS,id,block,newProject,validateProject,parseText,scenes,moveScene,stats,review,toFdx,fromFdx,toFountain,printBody,validatePlan,validateScene,promptForPlan,promptForScene,snapshot,escapeHtml as esc} from './core.mjs';
+import {makeGemini} from './ai.mjs';
+const $=selector=>document.querySelector(selector);
+const $$=selector=>[...document.querySelectorAll(selector)];
+const STORAGE='saad.script-studio.v1';
+const ai=makeGemini();
+let projects=[],activeId='',focusedId='',currentView='editor',saveTimer,toastTimer,busy=false,controller=null,models=[];
+let undoStack=[],redoStack=[];
+function toast(message,error=false){const el=$('#toast');el.textContent=message;el.classList.remove('hidden');el.classList.toggle('error',error);clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.add('hidden'),error?11000:5500);}
+function current(){return projects.find(p=>p.id===activeId);}
+function load(){
+  let raw;
+  try{raw=localStorage.getItem(STORAGE);if(raw){const data=JSON.parse(raw);if(!Array.isArray(data.projects)||data.projects.length>40)throw new Error('بيانات المشاريع غير صالحة.');projects=data.projects.map(validateProject);activeId=projects.some(p=>p.id===data.activeId)?data.activeId:projects[0]?.id;}}
+  catch{if(raw){try{localStorage.setItem(`${STORAGE}.recovery`,raw);}catch{}setTimeout(()=>toast('تعذّر فتح البيانات السابقة. احتُفظ ببيانات الاستعادة إن سمحت مساحة المتصفح. استورد آخر ملف مشروع محفوظ.',true),400);}}
+  if(!projects.length){const p=newProject();projects=[p];activeId=p.id;}
+}
+function saveNow(){
+  clearTimeout(saveTimer);
+  try{localStorage.setItem(STORAGE,JSON.stringify({projects,activeId}));$('#saveStatus').textContent='تم الحفظ على جهازك';$('#saveStatus').style.color='';}
+  catch{$('#saveStatus').textContent='تعذّر الحفظ · صدّر المشروع';$('#saveStatus').style.color='#a94037';toast('مساحة التخزين غير كافية أو الحفظ محظور. صدّر ملف المشروع الآن لحماية عملك.',true);}
+}
+function scheduleSave(){current().updatedAt=new Date().toISOString();$('#saveStatus').textContent='جارٍ الحفظ…';clearTimeout(saveTimer);saveTimer=setTimeout(saveNow,450);}
+function structuralChange(fn){undoStack.push(structuredClone(current().blocks));undoStack=undoStack.slice(-30);redoStack=[];fn();scheduleSave();renderEditor();renderMeta();}
+function empty(message){return `<div class="empty-state">${esc(message)}</div>`;}
+function renderMeta(){
+  const p=current();const s=stats(p);
+  $('#projectTitle').value=p.title;$('#paperTitle').textContent=p.title;
+  $('#sceneStat').textContent=s.sceneCount;$('#characterStat').textContent=s.characters.length;$('#wordStat').textContent=s.words.toLocaleString('ar-KW');$('#pageStat').textContent=s.estimatedPages;
+  renderProjects();renderSceneList();
+  if(currentView==='board')renderBoard();if(currentView==='review')renderReview();
+}
+function renderProjects(){
+  $('#projectList').innerHTML=projects.map(p=>`<div class="project-item ${p.id===activeId?'active':''}"><button class="project-open" data-project="${esc(p.id)}">${esc(p.title)}</button><button class="icon-button delete-project" data-delete-project="${esc(p.id)}" aria-label="حذف المشروع ${esc(p.title)}">×</button></div>`).join('');
+}
+function renderSceneList(){
+  const list=scenes(current());$('#sceneList').innerHTML=list.length?list.map(s=>`<button class="scene-item" data-jump="${esc(s.id)}"><span>${esc(s.number)}</span><span>${esc(s.title)}</span></button>`).join(''):empty('أضف عنوان مشهد لتبدأ.');
+}
+function autoSize(el){el.style.height='0px';el.style.height=Math.max(50,el.scrollHeight)+'px';}
+function renderEditor(focus=null,position=null){
+  const p=current();const dir=p.language==='en'?'ltr':'rtl';$('#blocksEditor').dir=dir;
+  $('#blocksEditor').innerHTML=p.blocks.map(b=>`<div class="script-block type-${b.type.toLowerCase().replace(/ /g,'-')}" data-block="${esc(b.id)}"><span class="block-tag">${esc(LABELS[b.type])}</span><textarea rows="1" data-id="${esc(b.id)}" dir="${dir}" aria-label="${esc(LABELS[b.type])}" placeholder="${esc(placeholder(b.type))}" ${busy?'disabled':''}>${esc(b.text)}</textarea></div>`).join('');
+  requestAnimationFrame(()=>{
+    $$('#blocksEditor textarea').forEach(autoSize);
+    if(focus){const el=$$('#blocksEditor textarea').find(t=>t.dataset.id===focus);if(el){el.focus({preventScroll:true});if(position!==null)el.setSelectionRange(position,position);el.scrollIntoView({block:'nearest',behavior:'auto'});focusedId=focus;updateTypeButtons();}}
+  });
+  updateTypeButtons();
+}
+function placeholder(type){return {'Scene Heading':'داخلي - المكان - نهار',Action:'ما الذي نراه ونسمعه في المشهد؟',Character:'اسم الشخصية',Dialogue:'اكتب الحوار هنا…',Parenthetical:'(توجيه أداء مختصر)',Transition:'قطع إلى:',General:'نص عام'}[type];}
+function updateTypeButtons(){const b=current().blocks.find(b=>b.id===focusedId)||current().blocks[0];$$('.type-button').forEach(btn=>{const active=btn.dataset.type===b?.type;btn.classList.toggle('active',active);btn.setAttribute('aria-pressed',String(active));});$('#undoButton').disabled=busy||!undoStack.length;$('#redoButton').disabled=busy||!redoStack.length;}
+function focusBlock(bid){showView('editor');requestAnimationFrame(()=>{const t=$$('#blocksEditor textarea').find(el=>el.dataset.id===bid);if(t){t.focus({preventScroll:true});t.scrollIntoView({behavior:'smooth',block:'center'});focusedId=bid;updateTypeButtons();}});}
+function addBlock(type='Action'){
+  if(busy)return;
+  const p=current();const at=p.blocks.findIndex(b=>b.id===focusedId);const b=block(type);
+  structuralChange(()=>p.blocks.splice(at>=0?at+1:p.blocks.length,0,b));renderEditor(b.id,0);
+}
+function renderBoard(){
+  const list=scenes(current());
+  $('#sceneBoard').innerHTML=list.length?list.map((s,i)=>`<article class="scene-card"><div class="scene-card-head"><span>${esc(s.number)}</span><span>${s.blocks.filter(b=>b.type==='Dialogue').length} فقرات حوار</span></div><h3>${esc(s.title)}</h3><textarea data-summary="${esc(s.id)}" rows="3" aria-label="وظيفة المشهد ${i+1}" placeholder="ما الذي يتغير في هذا المشهد؟" ${busy?'disabled':''}>${esc(s.summary)}</textarea><div class="card-actions"><button class="text-button" data-jump="${esc(s.id)}">افتح المشهد</button><div class="card-move"><button class="icon-button" data-move="${esc(s.id)}" data-delta="-1" aria-label="نقل المشهد إلى الأعلى" ${i===0||busy?'disabled':''}>↑</button><button class="icon-button" data-move="${esc(s.id)}" data-delta="1" aria-label="نقل المشهد إلى الأسفل" ${i===list.length-1||busy?'disabled':''}>↓</button></div></div></article>`).join(''):empty('ابدأ بمشهد في المحرر، أو حوّل نصك إلى سيناريو.');
+}
+function fillStoryForm(){
+  const p=current();for(const [selector,key] of [['#ideaInput','idea'],['#formatInput','format'],['#languageInput','language'],['#genreInput','genre'],['#dialectInput','dialect'],['#sceneCountInput','sceneCount'],['#authorInput','author']])$(selector).value=p[key];
+  $$('[data-pillar]').forEach(el=>el.value=p.pillars[el.dataset.pillar]||'');renderPlan();updateConnection();
+}
+function renderPlan(){
+  const plan=current().plan;$('#planPanel').classList.toggle('hidden',!plan);if(!plan){$('#planPanel').innerHTML='';return;}
+  const started=plan.scenes.some(s=>s.written);const done=plan.scenes.every(s=>s.written);
+  $('#planPanel').innerHTML=`<div class="plan-heading"><div><span class="eyebrow">الخطة المقترحة · ${plan.scenes.length} مشاهد</span><h2>${esc(plan.title)}</h2><p>${esc(plan.logline)}</p><p>${esc(plan.synopsis)}</p><p class="field-help">${started?'المشاهد المكتملة محفوظة. يمكن استكمال الباقي أو إنشاء خطة جديدة.':'عدّل العناوين والملخصات قبل اعتمادها. عند الكتابة تُحفظ مسودتك الحالية كنسخة، ثم تُكتب المشاهد في المحرر.'}</p></div><button id="writeScenes" class="button" ${busy||done?'disabled':''}>${done?'اكتملت كتابة المشاهد':started?'استكمل المشاهد':'اعتمد الخطة واكتب المشاهد'}</button></div><div class="plan-cards">${plan.scenes.map((s,i)=>`<article class="plan-card"><div class="eyebrow"><span>المشهد ${i+1}</span><span>${s.written?'✓ مكتمل':'بانتظار الكتابة'}</span></div><input data-plan-heading="${i}" value="${esc(s.heading)}" aria-label="عنوان المشهد ${i+1}" maxlength="5000" ${started||busy?'disabled':''}><textarea data-plan-summary="${i}" aria-label="ملخص المشهد ${i+1}" rows="4" maxlength="5000" ${started||busy?'disabled':''}>${esc(s.summary)}</textarea><p class="plan-detail"><strong>الهدف:</strong> ${esc(s.goal)}</p><p class="plan-detail"><strong>العائق:</strong> ${esc(s.obstacle)}</p><p class="plan-detail"><strong>التغير:</strong> ${esc(s.turn)}</p></article>`).join('')}</div>`;
+}
+function renderReview(){
+  const p=current();const notes=review(p);
+  $('#reviewList').innerHTML=notes.length?notes.map(n=>`<div class="review-note"><span>○</span><button data-jump="${esc(n.id)}">${esc(n.message)}</button></div>`).join(''):empty('لم تظهر ملاحظات على بنية الفقرات. اقرأ الحبكة والحوار قبل التسليم.');
+  $('#snapshotList').innerHTML=p.snapshots.length?[...p.snapshots].reverse().map(s=>`<div class="snapshot-item"><div><strong>${esc(s.name)}</strong><small>${esc(new Date(s.date).toLocaleString('ar-KW'))}</small></div><button class="button subtle" data-restore="${esc(s.id)}">استعادة</button></div>`).join(''):empty('احفظ نسخة عند إكمال مرحلة مهمة من الكتابة.');
+  const cs=stats(p).characters;$('#characterList').innerHTML=cs.length?`<table class="characters-table"><thead><tr><th>الشخصية</th><th>فقرات الحوار</th><th>كلمات الحوار</th></tr></thead><tbody>${cs.map(c=>`<tr><td>${esc(c.name)}</td><td>${c.speeches}</td><td>${c.words}</td></tr>`).join('')}</tbody></table>`:empty('ستظهر الشخصيات بعد إضافة أسماء المتحدثين والحوار.');
+}
+function showView(view){
+  currentView=view;$$('.view').forEach(el=>el.classList.add('hidden'));$(`#${view}View`).classList.remove('hidden');$$('.nav-button').forEach(btn=>btn.classList.toggle('active',btn.dataset.view===view));$('#sidebar').classList.remove('open');
+  if(view==='editor')renderEditor();if(view==='board')renderBoard();if(view==='story')fillStoryForm();if(view==='review')renderReview();
+}
+function switchProject(pid){if(busy){toast('أوقف الكاتب المساعد قبل تغيير المشروع.');return;}saveNow();activeId=pid;focusedId=current().blocks[0]?.id;undoStack=[];redoStack=[];renderMeta();showView('editor');saveNow();}
+function addProject(p){if(projects.length>=40){toast('لديك ٤٠ مشروعاً على هذا الجهاز. صدّر أحدها واحذفه قبل إضافة مشروع.',true);return false;}p.id=id();projects.push(p);activeId=p.id;focusedId=p.blocks[0]?.id;undoStack=[];redoStack=[];renderMeta();showView('editor');saveNow();return true;}
+function download(data,name,type='text/plain;charset=utf-8'){const url=URL.createObjectURL(new Blob([data],{type}));const a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);}
+function fileName(){return (current().title.replace(/[\\/:*?"<>|\u0000-\u001F]/g,'').trim()||'screenplay').slice(0,100);}
+async function copyText(text){try{await navigator.clipboard.writeText(text);toast('تم نسخ البرومبت.');}catch{download(text,`${fileName()}-prompt.txt`);toast('تم تنزيل البرومبت كملف نصي.');}}
+function confirmAction({title,text,input=false,initial='',label='متابعة'}){
+  const dialog=$('#confirmDialog');$('#confirmTitle').textContent=title;$('#confirmText').textContent=text;$('#confirmInputLabel').classList.toggle('hidden',!input);$('#confirmInput').value=initial;$('#confirmAccept').textContent=label;dialog.returnValue='';dialog.showModal();
+  return new Promise(resolve=>{const onClose=()=>{dialog.removeEventListener('close',onClose);resolve(dialog.returnValue==='ok'?(input?$('#confirmInput').value.trim():true):null);};dialog.addEventListener('close',onClose);});
+}
+function setBusy(value){
+  busy=value;$('#generationProgress').classList.toggle('hidden',!value);
+  for(const selector of ['#planButton','#connectButton','#disconnectButton','#convertButton','#sampleButton','#importButton','#newProject','#addScene','#addBlock','#removeBlock','#saveSnapshot','#projectTitle'])$(selector).disabled=value;
+  $$('#blocksEditor textarea, #storyForm input, #storyForm textarea, #storyForm select').forEach(el=>el.disabled=value);
+  updateTypeButtons();renderPlan();
+  if(value){$('#busyCancel').classList.remove('hidden');}else{$('#busyCancel').classList.add('hidden');controller=null;}
+}
+function updateConnection(){
+  $('#aiState').textContent=ai.connected?'الكاتب المساعد متصل':'الكاتب المساعد غير متصل';$('#aiState').classList.toggle('connected',ai.connected);
+  $('#writerTitle').textContent=ai.connected?'الكاتب المساعد جاهز':'الكتابة تبدأ منك';
+  $('#writerMessage').textContent=ai.connected?'أنشئ الخطة من فكرتك، ثم راجعها واعتمد كتابة المشاهد. يمكنك الإيقاف واستكمال الكتابة لاحقاً.':'المحرر والتنسيق والتصدير يعملون دون مفتاح. لتطوير القصة تلقائياً، اربط حساب Gemini من إعدادات الكاتب.';
+  $('#storySettings').textContent=ai.connected?'إعدادات الاتصال':'ربط الكاتب المساعد';
+  const u=ai.usage;$('#usageStats').textContent=u.requests?`طلبات هذه الجلسة: ${u.requests} · رموز الإدخال: ${u.promptTokens.toLocaleString()} · رموز النص الناتج: ${u.outputTokens.toLocaleString()} · هذه أعداد من المزوّد، وليست تكلفة بالدولار.`:'لم يُنفّذ أي طلب توليد في هذه الجلسة.';
+}
+function settings(){if(busy)return;$('#settingsDialog').showModal();$('#apiKey').value='';$('#modelField').classList.toggle('hidden',!ai.connected);}
+async function generatePlan(event){
+  event.preventDefault();if(busy)return;
+  const p=current();if(p.idea.trim().length<30){toast('أدخل فكرة أو معالجة من ٣٠ حرفاً على الأقل، وحدد ثوابت القصة.',true);$('#ideaInput').focus();return;}
+  if(!ai.connected){settings();return;}
+  controller=new AbortController();setBusy(true);$('#progressBar').max=1;$('#progressBar').value=0;$('#progressText').textContent='الكاتب يطوّر الشخصيات وتسلسل المشاهد…';
+  try{
+    const plan=validatePlan(await ai.generate(promptForPlan(p),controller.signal));
+    if(plan.scenes.length!==p.sceneCount)throw new Error(`أعاد الكاتب ${plan.scenes.length} مشاهد بدلاً من ${p.sceneCount}. لم تُستبدل الخطة؛ أعد المحاولة.`);
+    if(p.plan)snapshot(p,'قبل إنشاء خطة جديدة');p.plan=plan;
+    if(p.title==='سيناريو جديد')p.title=plan.title;
+    saveNow();renderMeta();toast('الخطة جاهزة. راجع عناوين المشاهد وملخصاتها، ثم اعتمد الكتابة.');
+  }catch(e){toast(e.message,true);}
+  finally{setBusy(false);updateConnection();renderPlan();$('#planPanel').scrollIntoView({behavior:'smooth',block:'start'});}
+}
+async function writeScenes(){
+  if(busy)return;if(!ai.connected){settings();return;}
+  const p=current();const plan=p.plan;if(!plan)return;
+  if(plan.scenes.every(s=>s.written)){toast('اكتملت هذه الخطة. يمكنك تعديل السيناريو في المحرر.');return;}
+  const existing=plan.scenes.some(s=>s.written);let started=existing;
+  controller=new AbortController();setBusy(true);$('#progressBar').max=plan.scenes.length;
+  try{
+    for(let i=0;i<plan.scenes.length;i++){
+      if(plan.scenes[i].written)continue;
+      $('#progressBar').value=plan.scenes.filter(s=>s.written).length;$('#progressText').textContent=`كتابة المشهد ${i+1} من ${plan.scenes.length}: ${plan.scenes[i].heading}`;
+      const context=started?p:{...p,blocks:[]};
+      const result=await ai.generate(promptForScene(context,i),controller.signal);
+      if(controller.signal.aborted)throw new Error('تم إيقاف الكتابة. المشاهد المكتملة محفوظة.');
+      const fresh=validateScene(result,plan.scenes[i].heading);fresh[0].summary=plan.scenes[i].summary;
+      if(!started){snapshot(p,'قبل كتابة المشاهد من الخطة');p.blocks=[];started=true;}
+      p.blocks.push(...fresh);plan.scenes[i].written=true;p.updatedAt=new Date().toISOString();saveNow();renderMeta();renderEditor();renderPlan();updateConnection();
+    }
+    $('#progressBar').value=plan.scenes.length;toast('اكتملت مسودة المشاهد. راجع القصة والحوار قبل التصدير.');
+  }catch(e){toast(e.message,true);}
+  finally{setBusy(false);updateConnection();renderPlan();renderEditor();}
+}
+function sample(){
+  const p=newProject('مفتاح أخير');p.author='';p.idea='تجد موظفة محطة قديمة مفتاحاً تركه مسافر، فتكتشف أن إعادته تحتاج إلى اتخاذ قرار صعب قبل انطلاق القطار.';
+  p.blocks=parseText('داخلي - محطة قطار قديمة - مساء\nتنظر ريم إلى مفتاح صغير تحت المقعد. صفير القطار يقترب.\nريم: هذا ليس مفتاح باب.\nسالم: أعرف صاحبه، لكن القطار لن ينتظر.\n(ينظر إلى الساعة)\nريم: إذن علينا أن نختار الآن.\n\nخارجي - رصيف المحطة - مساء\nتركض ريم نحو آخر عربة، ثم تتوقف أمام طفل يفتش جيوبه.\nالطفل: هل وجد أحد مفتاحي؟\nريم: أظن أنه وجدك.').blocks;
+  addProject(p);toast('هذا مثال تخيلي لتجربة التنسيق والتصدير.');
+}
+function initEvents(){
+  $('#typeButtons').innerHTML=TYPES.map(t=>`<button class="type-button" data-type="${t}" aria-pressed="false">${LABELS[t]}</button>`).join('');
+  const cancel=document.createElement('button');cancel.id='busyCancel';cancel.className='button danger hidden';cancel.textContent='إيقاف الكتابة';cancel.addEventListener('click',()=>controller?.abort());$('.document-actions').append(cancel);
+  $$('.nav-button').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.view)));
+  $('#openSidebar').addEventListener('click',()=>$('#sidebar').classList.add('open'));$('#closeSidebar').addEventListener('click',()=>$('#sidebar').classList.remove('open'));
+  $('#projectTitle').addEventListener('input',e=>{current().title=e.target.value||'سيناريو جديد';$('#paperTitle').textContent=current().title;renderProjects();scheduleSave();});
+  $('#newProject').addEventListener('click',()=>{if(!busy)addProject(newProject());});
+  $('#addScene').addEventListener('click',()=>{showView('editor');addBlock('Scene Heading');});
+  $('#addBlock').addEventListener('click',()=>addBlock());
+  $('#removeBlock').addEventListener('click',()=>{if(busy)return;const p=current();const at=p.blocks.findIndex(b=>b.id===focusedId);if(at<0)return;structuralChange(()=>{p.blocks.splice(at,1);if(!p.blocks.length)p.blocks.push(block('Action'));focusedId=p.blocks[Math.max(0,at-1)]?.id;});renderEditor(focusedId,0);});
+  $('#typeButtons').addEventListener('click',e=>{const btn=e.target.closest('[data-type]');if(!btn||busy)return;const b=current().blocks.find(b=>b.id===focusedId)||current().blocks[0];structuralChange(()=>b.type=btn.dataset.type);renderEditor(b.id);});
+  $('#blocksEditor').addEventListener('focusin',e=>{if(e.target.dataset.id){focusedId=e.target.dataset.id;updateTypeButtons();}});
+  let metaTimer;
+  $('#blocksEditor').addEventListener('input',e=>{
+    const b=current().blocks.find(b=>b.id===e.target.dataset.id);if(!b)return;b.text=e.target.value;autoSize(e.target);scheduleSave();clearTimeout(metaTimer);metaTimer=setTimeout(renderMeta,200);
+  });
+  $('#blocksEditor').addEventListener('keydown',e=>{
+    const p=current();const at=p.blocks.findIndex(b=>b.id===e.target.dataset.id);if(at<0||busy)return;const b=p.blocks[at];
+    if(e.key==='Tab'){
+      e.preventDefault();const n=(TYPES.indexOf(b.type)+(e.shiftKey?-1:1)+TYPES.length)%TYPES.length;structuralChange(()=>b.type=TYPES[n]);renderEditor(b.id,e.target.selectionStart);return;
+    }
+    if(e.altKey&&/^[1-7]$/.test(e.key)){e.preventDefault();structuralChange(()=>b.type=TYPES[Number(e.key)-1]);renderEditor(b.id);return;}
+    if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){
+      e.preventDefault();const start=e.target.selectionStart;const end=e.target.selectionEnd;const nextType={'Scene Heading':'Action',Action:'Action',Character:'Dialogue',Parenthetical:'Dialogue',Dialogue:'Action',Transition:'Scene Heading',General:'Action'}[b.type];
+      const rest=b.text.slice(end);const fresh=block(start<b.text.length?b.type:nextType,rest);
+      structuralChange(()=>{b.text=b.text.slice(0,start);p.blocks.splice(at+1,0,fresh);});renderEditor(fresh.id,0);
+    }
+    if(e.key==='Backspace'&&e.target.selectionStart===0&&e.target.selectionEnd===0&&!b.text&&p.blocks.length>1){e.preventDefault();const previous=p.blocks[Math.max(0,at-1)];structuralChange(()=>p.blocks.splice(at,1));renderEditor(previous.id,previous.text.length);}
+  });
+  $('#undoButton').addEventListener('click',()=>{if(busy||!undoStack.length)return;redoStack.push(structuredClone(current().blocks));current().blocks=undoStack.pop();scheduleSave();renderEditor();renderMeta();});
+  $('#redoButton').addEventListener('click',()=>{if(busy||!redoStack.length)return;undoStack.push(structuredClone(current().blocks));current().blocks=redoStack.pop();scheduleSave();renderEditor();renderMeta();});
+  document.addEventListener('click',async e=>{
+    const close=e.target.closest('[data-close]');if(close){close.closest('dialog')?.close();return;}
+    const project=e.target.closest('[data-project]');if(project){switchProject(project.dataset.project);return;}
+    const del=e.target.closest('[data-delete-project]');if(del){if(busy)return;const p=projects.find(p=>p.id===del.dataset.deleteProject);const ok=await confirmAction({title:'حذف المشروع',text:`سيُحذف «${p.title}» ونسخه من هذا الجهاز. صدّر ملف المشروع إذا كنت تريد الاحتفاظ به.`,label:'حذف المشروع'});if(ok){projects=projects.filter(x=>x.id!==p.id);if(!projects.length)projects.push(newProject());if(activeId===p.id)activeId=projects[0].id;undoStack=[];redoStack=[];renderMeta();showView('editor');saveNow();}return;}
+    const jump=e.target.closest('[data-jump]');if(jump){focusBlock(jump.dataset.jump);return;}
+    const move=e.target.closest('[data-move]');if(move){if(busy)return;structuralChange(()=>moveScene(current(),move.dataset.move,Number(move.dataset.delta)));renderBoard();return;}
+    const restore=e.target.closest('[data-restore]');if(restore){if(busy)return;const p=current();const s=p.snapshots.find(s=>s.id===restore.dataset.restore);if(!s)return;const chosen=structuredClone(s);const ok=await confirmAction({title:'استعادة نسخة المسودة',text:'ستُحفظ النسخة الحالية أولاً، ثم تُستعاد النسخة المختارة.',label:'استعادة'});if(ok){snapshot(p,'قبل الاستعادة');p.blocks=structuredClone(chosen.blocks);p.plan=chosen.plan?structuredClone(chosen.plan):null;saveNow();renderMeta();showView('editor');toast('تمت استعادة النسخة وحفظ المسودة السابقة.');}return;}
+    const exp=e.target.closest('[data-export]');if(exp){
+      const p=current();const kind=exp.dataset.export;
+      if(kind!=='project'&&!p.blocks.some(b=>b.text.trim())){toast('أضف نصاً إلى السيناريو قبل التصدير.',true);return;}
+      $('#exportDialog').close();saveNow();
+      if(kind==='fdx')download(toFdx(p),fileName()+'.fdx','application/xml;charset=utf-8');
+      if(kind==='fountain')download(toFountain(p),fileName()+'.fountain');
+      if(kind==='project')download(JSON.stringify(p,null,2),fileName()+'.script.json','application/json;charset=utf-8');
+      if(kind==='txt')download(p.title+'\n'+p.author+'\n\n'+p.blocks.map(b=>b.text).join('\n'),fileName()+'.txt');
+      if(kind==='pdf'){
+        $('#printArea').innerHTML=printBody(p);$('#printArea').dir=p.language==='en'?'ltr':'rtl';$('#printArea').setAttribute('aria-hidden','false');
+        await document.fonts?.ready;const oldTitle=document.title;document.title=p.title;window.print();document.title=oldTitle;$('#printArea').setAttribute('aria-hidden','true');
+      }
+      return;
+    }
+    if(e.target.closest('#writeScenes'))writeScenes();
+  });
+  $('#sceneBoard').addEventListener('input',e=>{const sid=e.target.dataset.summary;if(sid){const b=current().blocks.find(b=>b.id===sid);if(b)b.summary=e.target.value;scheduleSave();}});
+  $('#storyForm').addEventListener('input',e=>{
+    const p=current();const map={ideaInput:'idea',formatInput:'format',languageInput:'language',genreInput:'genre',dialectInput:'dialect',sceneCountInput:'sceneCount',authorInput:'author'};
+    if(e.target.dataset.pillar)p.pillars[e.target.dataset.pillar]=e.target.value;
+    else if(map[e.target.id])p[map[e.target.id]]=e.target.id==='sceneCountInput'?Math.max(2,Math.min(24,Number(e.target.value)||6)):e.target.value;
+    scheduleSave();
+  });
+  $('#planPanel').addEventListener('input',e=>{const p=current();if(e.target.dataset.planHeading!==undefined)p.plan.scenes[Number(e.target.dataset.planHeading)].heading=e.target.value;if(e.target.dataset.planSummary!==undefined)p.plan.scenes[Number(e.target.dataset.planSummary)].summary=e.target.value;scheduleSave();});
+  $('#storyForm').addEventListener('submit',generatePlan);$('#promptButton').addEventListener('click',()=>copyText(promptForPlan(current())));
+  $('#cancelGeneration').addEventListener('click',()=>controller?.abort());
+  $('#convertButton').addEventListener('click',()=>{$('#rawInput').value='';$('#convertDialog').showModal();});
+  $('#pasteImport').addEventListener('click',()=>{
+    try{const result=parseText($('#rawInput').value);if(!result.blocks.length)throw new Error('أدخل النص الذي تريد تحويله.');const p=newProject();p.blocks=result.blocks;if(addProject(validateProject(p))){$('#convertDialog').close();toast('تم تحويل النص. راجع نوع كل فقرة من شريط التنسيق.');}}catch(e){toast(e.message,true);}
+  });
+  $('#sampleButton').addEventListener('click',sample);
+  $('#exportButton').addEventListener('click',()=>$('#exportDialog').showModal());
+  $('#importButton').addEventListener('click',()=>$('#fileInput').click());
+  $('#fileInput').addEventListener('change',async e=>{
+    const file=e.target.files[0];if(!file)return;
+    try{
+      if(file.size>10000000)throw new Error('الحد الأقصى للاستيراد ١٠ ميغابايت.');
+      const text=await file.text();let p,result;
+      if(/\.json$/i.test(file.name)){p=validateProject(JSON.parse(text));}
+      else{
+        result=/\.fdx$/i.test(file.name)?fromFdx(text):parseText(text,{fountain:/\.fountain$/i.test(file.name)});
+        if(!result.blocks.length)throw new Error('لا يوجد نص سيناريو قابل للاستيراد.');
+        p=newProject(result.metadata.title||file.name.replace(/\.[^.]+$/,''));p.author=result.metadata.author||'';p.blocks=result.blocks;p=validateProject(p);
+      }
+      if(addProject(p))toast(result?.warning||'تم استيراد السيناريو في مشروع مستقل.');
+    }catch(e){toast(e instanceof SyntaxError?'ملف JSON غير صالح؛ لم تُستبدل مشاريعك.':e.message,true);}finally{e.target.value='';}
+  });
+  $('#saveSnapshot').addEventListener('click',async()=>{if(busy)return;const name=await confirmAction({title:'حفظ نسخة المسودة',text:'اختر اسماً يوضح المرحلة أو سبب التعديل.',input:true,initial:`مسودة ${current().snapshots.length+1}`,label:'حفظ النسخة'});if(name){snapshot(current(),name);saveNow();renderReview();toast('تم حفظ نسخة المسودة.');}});
+  $('#confirmAccept').addEventListener('click',()=>$('#confirmDialog').close('ok'));
+  $('#settingsButton').addEventListener('click',settings);$('#storySettings').addEventListener('click',settings);
+  $('#keyForm').addEventListener('submit',async e=>{
+    e.preventDefault();if(busy)return;const value=$('#apiKey').value;$('#apiKey').value='';$('#connectButton').disabled=true;$('#connectionMessage').textContent='جارٍ التحقق من المفتاح والنماذج المتاحة…';
+    try{models=await ai.connect(value);$('#modelInput').innerHTML=models.map(m=>`<option value="${esc(m.name)}">${esc(m.label)}</option>`).join('');$('#modelInput').value=ai.model;$('#modelField').classList.remove('hidden');$('#connectionMessage').textContent='تم الاتصال. اختر نموذج الكتابة ثم أغلق الإعدادات. المفتاح محفوظ في ذاكرة الصفحة حتى إغلاقها.';toast('الكاتب المساعد متصل.');}
+    catch(e){$('#connectionMessage').textContent=e.message;toast(e.message,true);}
+    finally{$('#connectButton').disabled=false;updateConnection();}
+  });
+  $('#disconnectButton').addEventListener('click',()=>{ai.disconnect();$('#apiKey').value='';$('#modelField').classList.add('hidden');$('#connectionMessage').textContent='تم قطع الاتصال ومسح المفتاح من ذاكرة الكاتب.';updateConnection();});
+  $('#modelInput').addEventListener('change',e=>{const m=models.find(m=>m.name===e.target.value);if(m)ai.select(m.name,m.limit);});
+  document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='s'){e.preventDefault();saveNow();toast('تم طلب حفظ المشروع على جهازك.');}if(e.key==='Escape')$('#sidebar').classList.remove('open');});
+  window.addEventListener('beforeunload',saveNow);
+  window.addEventListener('resize',()=>{if(currentView==='editor')$$('#blocksEditor textarea').forEach(autoSize);});
+}
+load();initEvents();focusedId=current().blocks[0]?.id;renderMeta();renderEditor();updateConnection();

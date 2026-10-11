@@ -1,0 +1,48 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import {setTimeout as pause} from 'node:timers/promises';
+import {JSDOM} from 'jsdom';
+const html=await readFile(new URL('../index.html',import.meta.url),'utf8');
+const dom=new JSDOM(html,{url:'https://q8-ux.github.io/saad/saad-script-studio/',pretendToBeVisual:true});
+Object.assign(globalThis,{window:dom.window,document:dom.window.document,localStorage:dom.window.localStorage,DOMParser:dom.window.DOMParser});
+Object.defineProperty(globalThis,'navigator',{value:dom.window.navigator,configurable:true});
+const timers=new Set();const realTimeout=globalThis.setTimeout;
+globalThis.setTimeout=(fn,ms,...args)=>{const t=realTimeout(fn,ms,...args);timers.add(t);return t;};
+globalThis.requestAnimationFrame=fn=>globalThis.setTimeout(fn,0);
+dom.window.HTMLElement.prototype.scrollIntoView=function(){};
+dom.window.HTMLDialogElement.prototype.showModal=function(){this.setAttribute('open','');};
+dom.window.HTMLDialogElement.prototype.close=function(value=''){this.returnValue=value;this.removeAttribute('open');this.dispatchEvent(new dom.window.Event('close'));};
+const $=s=>document.querySelector(s);const click=s=>$(s).click();const input=(s,v)=>{$(s).value=v;$(s).dispatchEvent(new dom.window.Event('input',{bubbles:true}));};
+const state=()=>JSON.parse(localStorage.getItem('saad.script-studio.v1'));
+const active=()=>{const s=state();return s.projects.find(p=>p.id===s.activeId);};
+let mockFetch=async()=>{throw new Error('Unexpected network request in UI test');};
+globalThis.fetch=(...args)=>mockFetch(...args);
+await import('../assets/app.mjs');
+test.after(()=>{for(const t of timers)clearTimeout(t);globalThis.setTimeout=realTimeout;dom.window.close();});
+test('working conversion creates a separate project and saves the original',async()=>{
+  click('#sampleButton');await pause(20);const original=active();
+  click('#convertButton');input('#rawInput','داخلي - غرفة - نهار\nيفتح جابر النافذة.\nجابر: أين خالد؟');click('#pasteImport');await pause(20);
+  assert.equal(state().projects.length,3);assert.equal(active().blocks[0].type,'Scene Heading');
+  assert.equal(active().blocks.find(b=>b.type==='Dialogue').text,'أين خالد؟');
+  assert.deepEqual(state().projects.find(p=>p.id===original.id).blocks,original.blocks);
+});
+test('writer key stays out of stored projects; cancellation keeps completed scenes and resume works',async()=>{
+  let phase=0,holdSecond=true;
+  const plan={title:'الرسالة',logline:'رسالة تغيّر قرار جابر.',synopsis:'يقرأ جابر رسالة ثم يواجه خالد.',characters:[{name:'جابر',goal:'فهم الرسالة',arc:'يواجه مخاوفه'}],scenes:[{heading:'داخلي - غرفة - نهار',summary:'يقرأ الرسالة',goal:'فهم الحقيقة',obstacle:'نص غامض',turn:'يقرر المواجهة'},{heading:'خارجي - باب البيت - ليل',summary:'يواجه خالد',goal:'الحقيقة',obstacle:'الصمت',turn:'يتصالحان'}]};
+  mockFetch=async(url,options)=>{
+    if(!url.includes(':generateContent'))return {ok:true,status:200,json:async()=>({models:[{name:'models/gemini-test-flash',supportedGenerationMethods:['generateContent'],outputTokenLimit:16000}]})};
+    phase++;
+    if(phase===3&&holdSecond)return new Promise((resolve,reject)=>options.signal.addEventListener('abort',()=>reject(new Error('cancelled')),{once:true}));
+    const result=phase===1?plan:{blocks:[{type:'Action',text:'ينظر جابر إلى الورقة.'},{type:'Character',text:'جابر'},{type:'Dialogue',text:'سأعرف الحقيقة اليوم.'}]};
+    return {ok:true,status:200,json:async()=>({candidates:[{finishReason:'STOP',content:{parts:[{text:JSON.stringify(result)}]}}],usageMetadata:{promptTokenCount:10,candidatesTokenCount:20}})};
+  };
+  click('#settingsButton');input('#apiKey','test-key-not-a-real-secret');$('#keyForm').dispatchEvent(new dom.window.Event('submit',{bubbles:true,cancelable:true}));await pause(20);
+  assert.equal($('#apiKey').value,'');assert.ok(!localStorage.getItem('saad.script-studio.v1').includes('test-key-not-a-real-secret'));
+  $('#settingsDialog').close();click('[data-view="story"]');input('#ideaInput','يجد جابر رسالة غامضة تقوده إلى مواجهة صديقه خالد وكشف الحقيقة.');input('#sceneCountInput','2');$('#storyForm').dispatchEvent(new dom.window.Event('submit',{bubbles:true,cancelable:true}));await pause(20);
+  assert.equal(active().plan.scenes.length,2);click('#writeScenes');await pause(20);click('#busyCancel');await pause(20);
+  assert.equal(active().plan.scenes.filter(s=>s.written).length,1);assert.equal(active().blocks.filter(b=>b.type==='Scene Heading').length,1);assert.ok(active().snapshots.length>=1);
+  holdSecond=false;click('#writeScenes');await pause(30);
+  assert.equal(active().plan.scenes.filter(s=>s.written).length,2);assert.equal(active().blocks.filter(b=>b.type==='Scene Heading').length,2);
+  assert.ok(!localStorage.getItem('saad.script-studio.v1').includes('test-key-not-a-real-secret'));
+});

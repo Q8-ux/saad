@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="استوديو سعد للسيناريو: محرر عربي للمشاهد والحوار، تخطيط القصة، وتصدير FDX وFountain وPDF.">
+  <meta name="theme-color" content="#11282c">
+  <meta name="referrer" content="no-referrer">
+  <title>استوديو سعد للسيناريو</title>
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="assets/print.css" media="print">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="استوديو سعد للسيناريو"><span class="brand-mark" aria-hidden="true">س</span><span><strong>استوديو السيناريو</strong><small>SAAD SCRIPT STUDIO</small></span></a>
+    <div class="top-actions"><span id="saveStatus" class="save-state" role="status">الحفظ على هذا الجهاز</span><button id="importButton" class="button subtle">استيراد</button><button id="exportButton" class="button dark">تصدير السيناريو <span aria-hidden="true">↗</span></button></div>
+  </header>
+  <main class="workspace">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-heading"><span class="eyebrow">مساحة الكاتب</span><button id="closeSidebar" class="icon-button mobile-only" aria-label="إغلاق القائمة">×</button></div>
+      <nav class="main-nav" aria-label="أقسام الاستوديو">
+        <button class="nav-button active" data-view="editor"><span aria-hidden="true">▤</span> كتابة السيناريو</button>
+        <button class="nav-button" data-view="board"><span aria-hidden="true">▦</span> لوحة المشاهد</button>
+        <button class="nav-button" data-view="story"><span aria-hidden="true">✦</span> القصة والكاتب المساعد</button>
+        <button class="nav-button" data-view="review"><span aria-hidden="true">✓</span> مراجعة ونسخ</button>
+      </nav>
+      <div class="project-section"><div class="section-label"><h2>مشاريعي</h2><button id="newProject" class="icon-button" aria-label="إنشاء مشروع جديد">+</button></div><div id="projectList"></div></div>
+      <div class="scene-section"><div class="section-label"><h2>المشاهد</h2><button id="addScene" class="icon-button" aria-label="إضافة مشهد">+</button></div><div id="sceneList"></div></div>
+      <div class="sidebar-footer"><span id="aiState" class="connection-state">الكاتب المساعد غير متصل</span><button id="settingsButton" class="text-button">إعدادات الكاتب</button><a href="https://github.com/Q8-ux/saad/tree/main/saad-script-studio" target="_blank" rel="noopener">المشروع على GitHub ↗</a></div>
+    </aside>
+    <section class="main-content">
+      <div class="document-bar"><button id="openSidebar" class="icon-button mobile-only" aria-label="فتح القائمة">☰</button><div class="document-heading"><span class="eyebrow">من الفكرة إلى المشهد</span><input id="projectTitle" aria-label="عنوان السيناريو" maxlength="150" value="سيناريو جديد"></div><div class="document-actions"><button id="convertButton" class="button accent">حوّل نصاً إلى سيناريو</button><button id="sampleButton" class="button subtle">تجربة بمثال</button></div></div>
+      <div class="stats-strip" aria-label="إحصاءات السيناريو"><span><strong id="sceneStat">0</strong> مشاهد</span><span><strong id="characterStat">0</strong> شخصيات</span><span><strong id="wordStat">0</strong> كلمة</span><span class="page-estimate"><strong id="pageStat">0</strong> صفحات تقديرية</span><span class="storage-note">حفظ تلقائي على جهازك</span></div>
+      <section id="editorView" class="view">
+        <div class="formatbar"><div id="typeButtons" class="type-buttons" aria-label="نوع الفقرة"></div><button id="addBlock" class="text-button">+ فقرة</button><button id="removeBlock" class="icon-button" aria-label="حذف الفقرة المحددة">×</button><button id="undoButton" class="icon-button" aria-label="التراجع عن التعديل البنيوي">↶</button><button id="redoButton" class="icon-button" aria-label="إعادة التعديل البنيوي">↷</button></div>
+        <div class="editor-canvas"><article class="script-paper" id="scriptPaper"><div class="paper-head"><span id="paperTitle">سيناريو جديد</span><span>مسودة العمل</span></div><div id="blocksEditor" class="blocks-editor" aria-label="محرر السيناريو"></div><div class="paper-bottom">Enter لفقرة جديدة · Shift + Enter لسطر داخل الفقرة · Tab لتغيير نوع الفقرة</div></article></div>
+      </section>
+      <section id="boardView" class="view hidden"><div class="view-intro"><span class="eyebrow">المشهد يصنع الحركة</span><h1>قصتك، مشهداً بعد مشهد</h1><p>دوّن وظيفة كل مشهد، وغيّر ترتيبه مع الاحتفاظ بأحداثه وحواره.</p></div><div id="sceneBoard" class="scene-board"></div></section>
+      <section id="storyView" class="view hidden">
+        <div class="view-intro"><span class="eyebrow">غرفة الكتابة</span><h1>ما الحكاية التي تريد روايتها؟</h1><p>أدخل الفكرة وثوابتك. راجع الخطة أولاً، ثم اطلب كتابة المشاهد.</p></div>
+        <div class="story-grid"><form id="storyForm" class="panel story-form">
+          <label for="ideaInput">الفكرة أو المعالجة</label><textarea id="ideaInput" rows="7" maxlength="40000" placeholder="من هو البطل؟ ماذا يريد؟ وما الذي يحدث ليغيّر حياته؟"></textarea>
+          <div class="field-grid"><label>صيغة العمل<select id="formatInput"><option value="short">فيلم قصير</option><option value="feature">فيلم طويل</option><option value="tv">حلقة تلفزيونية</option></select></label><label>لغة السيناريو<select id="languageInput"><option value="ar">العربية</option><option value="en">English</option></select></label><label>النوع الدرامي<input id="genreInput" maxlength="100" placeholder="دراما، إثارة، كوميديا…"></label><label>لهجة الحوار<input id="dialectInput" maxlength="100" placeholder="فصحى، كويتية، خليجية…"></label><label>عدد مشاهد هذه الدفعة<input id="sceneCountInput" type="number" min="2" max="24" value="6"></label><label>اسم الكاتب<input id="authorInput" maxlength="150" placeholder="يظهر في صفحة الغلاف"></label></div>
+          <details open><summary>ثوابت القصة</summary><div class="pillars-grid"><label>البطل<input data-pillar="hero" maxlength="3000" placeholder="من يقود الحكاية؟"></label><label>الهدف<input data-pillar="goal" maxlength="3000" placeholder="ماذا يريد تحديداً؟"></label><label>العائق<input data-pillar="obstacle" maxlength="3000" placeholder="ما الذي يعطّله؟"></label><label>المخاطر<input data-pillar="stakes" maxlength="3000" placeholder="ماذا سيخسر؟"></label><label class="wide">النهاية أو الحل<input data-pillar="ending" maxlength="3000" placeholder="اختياري: النهاية التي تريد الحفاظ عليها"></label></div></details>
+          <div class="form-actions"><button id="planButton" type="submit" class="button dark">✦ أنشئ خطة المشاهد</button><button id="promptButton" type="button" class="button subtle">نسخ برومبت الخطة</button></div><p class="field-help">التوليد يحتاج مفتاح Gemini API. عدد المشاهد يحدد دفعة الكتابة؛ طول الفيلم النهائي يحتاج تطويراً ومراجعة.</p>
+        </form><aside class="panel writing-status"><span class="eyebrow">اتصال الكاتب</span><h2 id="writerTitle">الكتابة تبدأ منك</h2><p id="writerMessage">المحرر والتنسيق والتصدير يعملون دون مفتاح. لتطوير القصة تلقائياً، اربط حساب Gemini من إعدادات الكاتب.</p><button id="storySettings" class="button subtle">ربط الكاتب المساعد</button><div id="generationProgress" class="hidden"><progress id="progressBar" value="0" max="1"></progress><p id="progressText" role="status"></p><button id="cancelGeneration" class="button danger">إيقاف الكتابة</button></div><div id="usageStats" class="usage-stats">لم يُنفّذ أي طلب توليد في هذه الجلسة.</div><hr><p class="field-help">مفتاحك يبقى في ذاكرة الصفحة. ترسل الأداة الفكرة والخطة والنص إلى Google فقط عند طلب التوليد.</p></aside></div>
+        <div id="planPanel" class="plan-panel hidden"></div>
+      </section>
+      <section id="reviewView" class="view hidden"><div class="view-intro"><span class="eyebrow">قبل التسليم</span><h1>راجع النص واحتفظ بنسخه</h1><p>هذه مراجعة لبنية السيناريو. تقييم الحبكة والحوار يحتاج قراءة درامية.</p></div><div class="review-grid"><div class="panel"><h2>ملاحظات التنسيق</h2><div id="reviewList"></div></div><div class="panel"><div class="section-label"><h2>نسخ المسودة</h2><button id="saveSnapshot" class="button subtle">حفظ نسخة</button></div><p class="field-help">تحتفظ الأداة بآخر ١٢ نسخة على هذا الجهاز. صدّر ملف المشروع للاحتفاظ بنسخة خارج المتصفح.</p><div id="snapshotList"></div></div></div><div class="panel characters-panel"><h2>الشخصيات والحوار</h2><div id="characterList"></div></div></section>
+    </section>
+  </main>
+  <dialog id="convertDialog"><div class="dialog-head"><div><span class="eyebrow">ابدأ من نصك</span><h2>تحويل النص إلى سيناريو</h2></div><button class="icon-button" data-close aria-label="إغلاق">×</button></div><p>استخدم «داخلي - المكان - نهار» لعناوين المشاهد، و«سالم: الحوار» أو ‎@سالم‎ للشخصيات. يمكن تعديل التصنيف بعد التحويل.</p><textarea id="rawInput" rows="11" maxlength="5000000" placeholder="داخلي - غرفة انتظار - نهار&#10;يجلس سالم قرب الباب.&#10;سالم: هل وصل أحد قبلي؟&#10;ريم: أنت أول من وصل."></textarea><div class="dialog-actions"><button id="pasteImport" class="button dark">تحويل إلى مشروع جديد</button><button class="button subtle" data-close>إلغاء</button></div><p class="field-help">يُنشأ مشروع مستقل ويحافظ المشروع الحالي على نصه. التحويل ينسّق النص الذي أدخلته.</p></dialog>
+  <dialog id="exportDialog"><div class="dialog-head"><div><span class="eyebrow">جاهز للمشاركة</span><h2>تصدير السيناريو</h2></div><button class="icon-button" data-close aria-label="إغلاق">×</button></div><div class="export-options"><button data-export="fdx"><strong>Final Draft · FDX</strong><span>النص وأنواع فقرات السيناريو</span></button><button data-export="pdf"><strong>PDF</strong><span>صفحة غلاف ومشاهد بخط عربي واضح</span></button><button data-export="fountain"><strong>Fountain</strong><span>نص مفتوح قابل للتحرير</span></button><button data-export="project"><strong>ملف المشروع</strong><span>المشاهد والخطة والنسخ المحفوظة</span></button><button data-export="txt"><strong>نص بسيط</strong><span>نسخة للقراءة والمراجعة</span></button></div><p class="field-help">FDX يحفظ النص العربي، لكن عرضه داخل Final Draft يعتمد على دعم البرنامج للعربية. للمشاركة بالعربية، راجع PDF. تصدير PDF يفتح نافذة الطباعة؛ اختر «حفظ كملف PDF» وأوقف ترويسة المتصفح.</p></dialog>
+  <dialog id="settingsDialog"><div class="dialog-head"><div><span class="eyebrow">الكاتب المساعد</span><h2>اتصال Gemini</h2></div><button class="icon-button" data-close aria-label="إغلاق">×</button></div><p>أدخل مفتاح Gemini API الخاص بك. يُستخدم في هذه الصفحة ولا يُحفظ في المشروع أو المتصفح. التوليد يستهلك حصة حسابك لدى المزوّد.</p><form id="keyForm"><label for="apiKey">مفتاح API</label><input id="apiKey" type="password" autocomplete="off" spellcheck="false" dir="ltr" placeholder="Gemini API key"><div class="dialog-actions"><button id="connectButton" class="button dark" type="submit">تحقق واتصل</button><button id="disconnectButton" class="button subtle" type="button">قطع الاتصال</button></div></form><div id="modelField" class="hidden"><label for="modelInput">نموذج الكتابة المتاح لحسابك</label><select id="modelInput"></select></div><p id="connectionMessage" class="field-help" role="status">اختر مفتاحاً مخصصاً لهذه الأداة وبحصة استخدام مناسبة.</p></dialog>
+  <dialog id="confirmDialog"><div class="dialog-head"><h2 id="confirmTitle">تأكيد الإجراء</h2><button class="icon-button" data-close aria-label="إغلاق">×</button></div><p id="confirmText"></p><label id="confirmInputLabel" class="hidden">اسم النسخة<input id="confirmInput" maxlength="150"></label><div class="dialog-actions"><button id="confirmAccept" class="button dark">متابعة</button><button data-close class="button subtle">إلغاء</button></div></dialog>
+  <input id="fileInput" type="file" accept=".json,.fdx,.fountain,.txt,.md" hidden>
+  <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+  <div id="printArea" aria-hidden="true"></div>
+  <noscript><p class="noscript">يرجى تفعيل JavaScript لتشغيل محرر السيناريو.</p></noscript>
+  <script type="module" src="assets/app.mjs"></script>
+</body>
+</html>
