@@ -1,15 +1,16 @@
-import {TYPES,LABELS,id,block,newProject,validateProject,parseText,scenes,moveScene,stats,review,toFdx,fromFdx,toFountain,printBody,validatePlan,validateScene,promptForPlan,promptForScene,snapshot,escapeHtml as esc} from './core.mjs?v=3';
-import {makeGemini} from './ai.mjs?v=3';
-import {exampleProject} from './example.mjs?v=3';
-import {METHOD,STAGES,DRAMA_FIELDS,storyChecks,storyFingerprint,isApproved,planIssues,planFromBeats,promptForFoundation,validateFoundation,mergeFoundation,dramaForScene,sceneReview,storyText,printStoryBody} from './story.mjs?v=3';
-import {makeStoryUI,dramaInputs} from './story-ui.mjs?v=3';
+import {TYPES,LABELS,id,block,newProject,validateProject,parseText,scenes,moveScene,stats,review,toFdx,fromFdx,toFountain,printBody,validatePlan,validateScene,promptForPlan,promptForScene,snapshot,escapeHtml as esc} from './core.mjs?v=4';
+import {makeGemini} from './ai.mjs?v=4';
+import {exampleProject} from './example.mjs?v=4';
+import {METHOD,STAGES,DRAMA_FIELDS,storyChecks,storyFingerprint,isApproved,planIssues,planFromBeats,promptForFoundation,validateFoundation,mergeFoundation,dramaForScene,sceneReview,storyText,printStoryBody} from './story.mjs?v=4';
+import {makeStoryUI,dramaInputs} from './story-ui.mjs?v=4';
+import {makeCinemaUI} from './cinematic-ui.mjs?v=4';
 const $=selector=>document.querySelector(selector);
 const $$=selector=>[...document.querySelectorAll(selector)];
 const STORAGE='saad.script-studio.v1';
 const ai=makeGemini();
 let projects=[],activeId='',focusedId='',currentView='editor',saveTimer,toastTimer,busy=false,controller=null,models=[];
 let undoStack=[],redoStack=[];
-let storyUI;
+let storyUI,cinemaUI;
 function toast(message,error=false){const el=$('#toast');el.textContent=message;el.classList.remove('hidden');el.classList.toggle('error',error);clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.add('hidden'),error?11000:5500);}
 function current(){return projects.find(p=>p.id===activeId);}
 function load(){
@@ -33,6 +34,7 @@ function renderMeta(){
   renderProjects();renderSceneList();
   if(currentView==='board')renderBoard();if(currentView==='review')renderReview();
   if(currentView==='story')storyUI?.refresh();
+  if(currentView==='cinema')cinemaUI?.refresh();
 }
 function renderProjects(){
   $('#projectList').innerHTML=projects.map(p=>`<div class="project-item ${p.id===activeId?'active':''}"><button class="project-open" data-project="${esc(p.id)}">${esc(p.title)}</button><button class="icon-button delete-project" data-delete-project="${esc(p.id)}" aria-label="حذف المشروع ${esc(p.title)}">×</button></div>`).join('');
@@ -91,12 +93,19 @@ function renderReview(){
 function showView(view){
   currentView=view;$$('.view').forEach(el=>el.classList.add('hidden'));$(`#${view}View`).classList.remove('hidden');$$('.nav-button').forEach(btn=>btn.classList.toggle('active',btn.dataset.view===view));$('#sidebar').classList.remove('open');
   if(view==='editor')renderEditor();if(view==='board')renderBoard();if(view==='story')fillStoryForm();if(view==='review')renderReview();
+  if(view==='cinema')cinemaUI?.render();
 }
 function switchProject(pid){if(busy){toast('أوقف الكاتب المساعد قبل تغيير المشروع.');return;}saveNow();activeId=pid;focusedId=current().blocks[0]?.id;undoStack=[];redoStack=[];renderMeta();storyUI?.select('dna');showView(current().blocks.some(b=>b.text.trim())?'editor':'story');saveNow();}
 function addProject(p){if(projects.length>=40){toast('لديك ٤٠ مشروعاً على هذا الجهاز. صدّر أحدها واحذفه قبل إضافة مشروع.',true);return false;}p.id=id();projects.push(p);activeId=p.id;focusedId=p.blocks[0]?.id;undoStack=[];redoStack=[];renderMeta();storyUI?.select('dna');showView(p.blocks.some(b=>b.text.trim())?'editor':'story');saveNow();return true;}
 function download(data,name,type='text/plain;charset=utf-8'){const url=URL.createObjectURL(new Blob([data],{type}));const a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);}
 function fileName(){return (current().title.replace(/[\\/:*?"<>|\u0000-\u001F]/g,'').trim()||'screenplay').slice(0,100);}
 async function copyText(text){try{await navigator.clipboard.writeText(text);toast('تم نسخ البرومبت.');}catch{download(text,`${fileName()}-prompt.txt`);toast('تم تنزيل البرومبت كملف نصي.');}}
+async function printCinema(body){
+  const p=current();saveNow();$('#printArea').dataset.printStyle=p.printStyle;$('#printArea').innerHTML=body;$('#printArea').dir='rtl';$('#printArea').setAttribute('aria-hidden','false');
+  try{if(p.printStyle==='ink')await document.fonts?.load('16px InkArabic','الحروف العربية متصلة');await document.fonts?.ready;const title=document.title;document.title=p.title+' — التصور السينمائي';window.print();document.title=title;}
+  catch{toast('تعذر تجهيز الطباعة بخط الحبر. أعد المحاولة بعد تحميل الخط.',true);}
+  finally{$('#printArea').setAttribute('aria-hidden','true');}
+}
 function confirmAction({title,text,input=false,initial='',label='متابعة'}){
   const dialog=$('#confirmDialog');$('#confirmTitle').textContent=title;$('#confirmText').textContent=text;$('#confirmInputLabel').classList.toggle('hidden',!input);$('#confirmInput').value=initial;$('#confirmAccept').textContent=label;dialog.returnValue='';dialog.showModal();
   return new Promise(resolve=>{const onClose=()=>{dialog.removeEventListener('close',onClose);resolve(dialog.returnValue==='ok'?(input?$('#confirmInput').value.trim():true):null);};dialog.addEventListener('close',onClose);});
@@ -280,4 +289,4 @@ function initEvents(){
   window.addEventListener('beforeunload',saveNow);
   window.addEventListener('resize',()=>{if(currentView==='editor')$$('#blocksEditor textarea').forEach(autoSize);});
 }
-load();initEvents();storyUI=makeStoryUI({current,save:scheduleSave,toast,isBusy:()=>busy,checkpoint:name=>snapshot(current(),name),manualPlan,develop:developStory,copyPrompt:()=>copyText(promptForFoundation(current())),showEditor:()=>showView('editor')});focusedId=current().blocks[0]?.id;renderMeta();showView('story');updateConnection();
+load();initEvents();storyUI=makeStoryUI({current,save:scheduleSave,toast,isBusy:()=>busy,checkpoint:name=>snapshot(current(),name),manualPlan,develop:developStory,copyPrompt:()=>copyText(promptForFoundation(current())),showEditor:()=>showView('editor')});cinemaUI=makeCinemaUI({current,save:scheduleSave,toast,isBusy:()=>busy,checkpoint:name=>snapshot(current(),name),copy:copyText,download:value=>download(value,fileName()+'-cinematic.txt'),print:printCinema,openScene:focusBlock});focusedId=current().blocks[0]?.id;renderMeta();showView('story');updateConnection();

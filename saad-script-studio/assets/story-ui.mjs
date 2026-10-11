@@ -1,5 +1,5 @@
-import {escapeHtml as esc} from './core.mjs?v=3';
-import {STAGES,DIRECTIONS,BEAT_TYPES,CHARACTER_FIELDS,RELATION_FIELDS,BEAT_FIELDS,DRAMA_FIELDS,REFERENCE_NOTES,newCharacter,newRelation,newBeat,seedBeats,storyChecks,storyFingerprint,isApproved,proposeLogline,directionFor} from './story.mjs?v=3';
+import {escapeHtml as esc} from './core.mjs?v=4';
+import {STAGES,DIRECTIONS,BEAT_TYPES,CHARACTER_FIELDS,RELATION_FIELDS,BEAT_FIELDS,DRAMA_FIELDS,REFERENCE_NOTES,newCharacter,newRelation,newBeat,seedBeats,storyChecks,storyFingerprint,isApproved,proposeLogline,directionFor} from './story.mjs?v=4';
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const roles={hero:'البطل',opponent:'المعارض',support:'شخصية مساندة'};
 const options=(map,value)=>Object.entries(map).map(([k,v])=>`<option value="${esc(k)}" ${k===value?'selected':''}>${esc(v)}</option>`).join('');

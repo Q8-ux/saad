@@ -5,7 +5,7 @@ body>header,body>main,body>dialog,body>input,body>.toast,body>noscript{display:n
 #printArea{display:block!important;direction:rtl;color:#111}
 .print-title{height:240mm;display:block;width:100%;padding-top:60mm;text-align:center;break-after:page;page-break-after:always;line-height:2}
 .print-title h1{font-size:30pt;margin:15mm 0 18mm;font-weight:700}
-.print-title p{font-size:15pt;margin:0}.print-kicker{letter-spacing:1pt;font-size:11pt!important}.draft-date{margin-top:30mm!important;font-size:11pt!important;color:#555}
+.print-title p{font-size:15pt;margin:0}.print-kicker{letter-spacing:0;font-size:11pt!important}.draft-date{margin-top:30mm!important;font-size:11pt!important;color:#555}
 .print-script p{margin:0 0 4mm;white-space:pre-wrap;overflow-wrap:anywhere;orphans:3;widows:3}
 .print-script[dir="ltr"]{font-family:'Courier New',monospace;line-height:1.5}
 .script-scene-heading{font-weight:700;margin-top:7mm!important;margin-bottom:4mm!important;break-after:avoid;page-break-after:avoid}
@@ -28,3 +28,5 @@ body>header,body>main,body>dialog,body>input,body>.toast,body>noscript{display:n
 #printArea[data-print-style="ink"] .story-report{font-size:15pt;color:#203b7b}
 #printArea[data-print-style="ink"] .story-report h2{color:#a5273b;border-color:#a5273b;font-size:19pt}
 #printArea[data-print-style="ink"] .draft-date{color:#276b4a}
+
+.cinema-report{font-family:inherit;direction:rtl;letter-spacing:0;line-height:1.7}.cinema-report h2{color:#a5273b;font-size:19pt;border-bottom:1px solid #a5273b;margin:5mm 0;break-after:avoid}.cinema-report h3{color:#276b4a;font-size:17pt;margin:4mm 0 2mm;break-after:avoid}.cinema-report p{white-space:pre-wrap;margin:0 0 3mm;overflow-wrap:anywhere;orphans:3;widows:3}.cinema-print-scene{break-before:page}.cinema-print-shot{break-inside:avoid;border-bottom:1px solid #a8b5ce;padding-bottom:5mm;margin-bottom:5mm}.cinema-report .cinema-sketch{max-height:40mm;width:65mm;display:block;margin:4mm auto}.cinema-warning{color:#a5273b;font-size:12pt}#printArea{letter-spacing:0;font-feature-settings:normal}

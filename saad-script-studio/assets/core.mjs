@@ -1,4 +1,5 @@
-import {METHOD,newStory,normalizeStory,normalizeDrama,foundationContext,BEAT_FIELDS,DRAMA_FIELDS,CHARACTER_FIELDS} from './story.mjs?v=3';
+import {METHOD,newStory,normalizeStory,normalizeDrama,foundationContext,BEAT_FIELDS,DRAMA_FIELDS,CHARACTER_FIELDS} from './story.mjs?v=4';
+import {newCinematic,normalizeCinematic} from './cinematic.mjs?v=4';
 export const TYPES = ['Scene Heading', 'Action', 'Character', 'Parenthetical', 'Dialogue', 'Transition', 'General'];
 export const LABELS = {'Scene Heading':'عنوان مشهد',Action:'وصف الحدث',Character:'الشخصية',Parenthetical:'توجيه الأداء',Dialogue:'الحوار',Transition:'انتقال',General:'نص عام'};
 export const MAX_BLOCKS = 12000;
@@ -6,7 +7,7 @@ export const id = () => globalThis.crypto?.randomUUID?.() || `s-${Date.now().toS
 export const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export const block = (type='Action', text='', extra={}) => ({id:id(),type,text,...extra});
 export function newProject(title='سيناريو جديد') {
-  return {version:2,id:id(),title,author:'',language:'ar',format:'short',genre:'دراما',dialect:'فصحى',printStyle:'ink',sceneCount:6,idea:'',pillars:{hero:'',goal:'',obstacle:'',stakes:'',ending:''},story:newStory(),blocks:[block('Scene Heading')],plan:null,snapshots:[],updatedAt:new Date().toISOString()};
+  return {version:2,id:id(),title,author:'',language:'ar',format:'short',genre:'دراما',dialect:'فصحى',printStyle:'ink',sceneCount:6,idea:'',pillars:{hero:'',goal:'',obstacle:'',stakes:'',ending:''},story:newStory(),cinematic:newCinematic(),blocks:[block('Scene Heading')],plan:null,snapshots:[],updatedAt:new Date().toISOString()};
 }
 export function validateProject(value) {
   if (!value || typeof value !== 'object' || !Array.isArray(value.blocks)) throw new Error('ملف المشروع لا يحتوي على سيناريو صالح.');
@@ -32,12 +33,13 @@ export function validateProject(value) {
   p.printStyle = value.printStyle==='classic'?'classic':'ink';
   for(const key of Object.keys(p.pillars)) p.pillars[key]=String(value.pillars?.[key]??'').slice(0,3000);
   p.story=normalizeStory(value.story);
+  p.cinematic=normalizeCinematic(value.cinematic);
   p.blocks = blocks.length ? blocks : [block('Scene Heading')];
   if (value.plan) p.plan = validatePlan(value.plan);
   p.snapshots = Array.isArray(value.snapshots) ? value.snapshots.slice(-12).map(s=>{
     if(!s||typeof s.name!=='string'||!Array.isArray(s.blocks))throw new Error('إحدى نسخ المسودة في الملف غير صالحة.');
     const result={id:id(),name:s.name.slice(0,200),date:String(s.date??''),blocks:validateProject({blocks:s.blocks}).blocks,plan:s.plan?validatePlan(s.plan):null};
-    if(s.basis){const basis=validateProject({...s.basis,blocks:[]});result.basis=Object.fromEntries(['idea','pillars','story','genre','format','language','dialect','sceneCount'].map(k=>[k,basis[k]]));}
+    if(s.basis){const basis=validateProject({...s.basis,blocks:[]});result.basis=Object.fromEntries(['idea','pillars','story','cinematic','genre','format','language','dialect','sceneCount'].map(k=>[k,basis[k]]));}
     return result;
   }) : [];
   return p;
@@ -179,6 +181,6 @@ export function promptForScene(project,index) {
   return `اكتب مشهدًا سينمائيًا واحدًا من الخطة المعتمدة وفق الخريطة الذهنية لبناء القصة. لغة الوصف: ${project.language==='en'?'English':'العربية'}. لهجة الحوار: ${project.dialect}.\nجوهر القصة والشخصيات وورقة الإيقاع: ${JSON.stringify(foundationContext(project))}\nالخطة الكاملة: ${JSON.stringify(plan)}\nالمشهد الحالي ${index+1}: ${JSON.stringify(scene)}\nآخر أحداث مكتوبة للحفاظ على الاستمرارية: ${project.blocks.map(b=>b.text).join('\n').slice(-7000)}\nجسّد هدف الشخصية وعائقها ومحاولتها ونتيجة المحاولة والقرار الجديد داخل أفعال قابلة للتصوير، لا كشرح نظري. يجب أن تؤدي النتيجة سببيًا إلى المشهد التالي حسب cause. رد الفعل يتبع دوافع الشخصية وما تعرفه قبل المشهد؛ لا تكشف معلومات قبل موعدها. وسائل الحل تأتي من اختيارات وقدرات القصة، دون مصادفة تحل العائق بلا تمهيد. حافظ على الخسارة المحتملة وسبب الاستعجال. في ending أو bridge يكفي الإغلاق أو التأمل المقصود في الخطة؛ لا تفتعل صراعًا. التزم بالنوع الدرامي والسطر التمهيدي وبداية القصة ونهايتها.\nاكتب حوارًا مقتصدًا يميز الشخصيات. لا تضف عناوين أو شرحًا خارج المشهد. لا تكتب اسم الشخصية داخل فقرة Dialogue؛ ضعه في Character قبل الحوار. أعِد JSON فقط: {"blocks":[{"type":"Action","text":"وصف"},{"type":"Character","text":"اسم"},{"type":"Dialogue","text":"حوار"}]}. الأنواع المسموحة Action, Character, Dialogue, Parenthetical, Transition. اكتب المشهد كاملًا في حدود ٢٥٠ إلى ٦٠٠ كلمة، وتجنب تلخيص الحوار.`;
 }
 export function snapshot(project,name) {
-  project.snapshots.push({id:id(),name,date:new Date().toISOString(),blocks:structuredClone(project.blocks),plan:project.plan?structuredClone(project.plan):null,basis:structuredClone(Object.fromEntries(['idea','pillars','story','genre','format','language','dialect','sceneCount'].map(k=>[k,project[k]])))});
+  project.snapshots.push({id:id(),name,date:new Date().toISOString(),blocks:structuredClone(project.blocks),plan:project.plan?structuredClone(project.plan):null,basis:structuredClone(Object.fromEntries(['idea','pillars','story','cinematic','genre','format','language','dialect','sceneCount'].map(k=>[k,project[k]])))});
   project.snapshots=project.snapshots.slice(-12);
 }

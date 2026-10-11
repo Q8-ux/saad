@@ -72,3 +72,12 @@ test('guided foundation, approval, plan gates, cancellation, metadata and full r
   click('#exportButton');$('#printStyleInput').value='ink';$('#printStyleInput').dispatchEvent(new dom.window.Event('change',{bubbles:true}));click('[data-export="pdf"]');await pause(20);
   assert.ok(printed);assert.equal(loadedFonts[0].font,'16px InkArabic');assert.equal($('#printArea').dataset.printStyle,'ink');assert.equal($('#printArea').getAttribute('aria-hidden'),'true');
 });
+test('cinematic cards, saved edits, source-change notices, copy and printing work without an API request',async()=>{
+  click('#convertButton');input('#rawInput','داخلي - غرفة - نهار\nيفتح جابر رسالة على الطاولة.\nجابر: وين الموعد؟\nخالد: على الورقة.\n\nيمسك جابر هاتفه.');click('#pasteImport');await pause(30);
+  const before=structuredClone(active().blocks);let copied='';Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async value=>{copied=value;}}});
+  click('[data-view="cinema"]');assert.ok(!$('#cinemaView').classList.contains('hidden'));input('#cinemaBible','الغرفة نفسها والملابس نفسها طوال المشهد.');click('[data-cinema-action="all"]');window.dispatchEvent(new dom.window.Event('beforeunload'));
+  assert.equal(active().cinematic.plans.length,1);assert.deepEqual(active().blocks,before);input('[data-cinema-plan="purpose"]','يثبت موعد اللقاء.');input('[data-shot-field="visual"]','جابر يقرأ الموعد على الورقة.');window.dispatchEvent(new dom.window.Event('beforeunload'));assert.equal(active().cinematic.plans[0].purpose,'يثبت موعد اللقاء.');assert.equal(active().cinematic.plans[0].shots[0].visual,'جابر يقرأ الموعد على الورقة.');
+  click('[data-shot-prompt][data-kind="video"]');await pause(20);assert.ok(copied.includes('جابر يقرأ الموعد'));assert.ok(copied.includes('Camera movement'));
+  const planId=active().cinematic.plans[0].sceneId;click('[data-cinema-action="source"]');input(`[data-id="${active().blocks.find(b=>b.type==='Dialogue').id}"]`,'الموعد تغير.');await pause(250);click('[data-view="cinema"]');assert.ok($('#cinemaNotice').textContent.includes('تغير نص المشهد'));click('[data-cinema-action="reviewed"]');assert.ok(!$('#cinemaNotice').textContent.includes('تغير نص المشهد'));
+  let printed=0;window.print=()=>printed++;click('[data-cinema-action="pdf"]');await pause(25);assert.equal(printed,1);assert.ok($('#printArea').textContent.includes('جابر يقرأ الموعد'));assert.ok($('#printArea .cinema-sketch'));assert.equal(active().cinematic.plans[0].sceneId,planId);
+});
