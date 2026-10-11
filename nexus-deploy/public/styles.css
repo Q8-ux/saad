@@ -29,3 +29,12 @@ td.num{display:table-cell} .source-link svg{width:19px;height:19px;flex:none}
 @media(max-width:1100px){.flow-indicators{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:420px){.flow-indicators .indicator-card strong{font-size:18px}}
 @media(max-width:760px){.sidebar:not(.open){display:none}.topbar .crumb{min-width:0;flex:1;gap:7px}.topbar .crumb>b{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.topbar .mobile-toggle{flex:none}.top-actions{flex-shrink:0}.topbar #liveConnection{display:none}}
+
+
+/* Stock dashboard: supplied dark cards, adapted to existing design tokens */
+.stock-detail-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-top:24px}
+.stock-detail-card{background:#121a2b;border:1px solid #24314d;border-radius:16px;padding:20px;min-width:0}
+.stock-detail-label{color:#9fb0d0;font-size:15px;margin-bottom:10px}
+.stock-detail-value{font-size:30px;font-weight:800;font-variant-numeric:tabular-nums;margin-bottom:12px}
+.stock-detail-value.positive{color:#20c997}.stock-detail-value.negative{color:#ff6b6b}
+@media(max-width:600px){.stock-detail-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.stock-detail-card{padding:14px}.stock-detail-value{font-size:24px}}
