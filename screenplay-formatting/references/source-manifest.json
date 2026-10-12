@@ -1,0 +1,69 @@
+{
+  "reference_type": "user_supplied_photographs",
+  "date": "2026-10-12",
+  "count": 10,
+  "font_identity": "unverified",
+  "measurement_status": "inferred",
+  "files": [
+    {
+      "filename": "1000401790.jpg",
+      "sha256": "ecc4ab477b09f35e399142fec882afcd223c1c0dee739719d2d2d7e2ed7d63eb",
+      "width": 1152,
+      "height": 1536
+    },
+    {
+      "filename": "1000401791.jpg",
+      "sha256": "00dbcd4edad11de19120abaee47f41c9afd7e1e78151fe1d4c254d242b1a7224",
+      "width": 1091,
+      "height": 1536
+    },
+    {
+      "filename": "1000401792.jpg",
+      "sha256": "f9ccd9c2621726972504f3b920a5c180a731974e09648f9009cca4b3756baf0f",
+      "width": 1083,
+      "height": 1536
+    },
+    {
+      "filename": "1000401793.jpg",
+      "sha256": "f9ccd9c2621726972504f3b920a5c180a731974e09648f9009cca4b3756baf0f",
+      "width": 1083,
+      "height": 1536
+    },
+    {
+      "filename": "1000401794.jpg",
+      "sha256": "a2f58f5e829a385bba09fcd78e61414dba3c5b72f5c3ebfb800f76f3f3f5d654",
+      "width": 1152,
+      "height": 1536
+    },
+    {
+      "filename": "1000401795.jpg",
+      "sha256": "7b031ade427c14df3a359587fd212157c3750c037bd00169f28f5a7efd6bdb20",
+      "width": 1152,
+      "height": 1536
+    },
+    {
+      "filename": "1000401796.jpg",
+      "sha256": "817bd78fd25dcfc386b4a772abe09f340058a91a7b25e8facb11731967056eb4",
+      "width": 1152,
+      "height": 1536
+    },
+    {
+      "filename": "1000401798.jpg",
+      "sha256": "0713b898bd4a5310a293bec7127637f61ac69dd5bb095afa35b24f030d5b23a0",
+      "width": 1270,
+      "height": 1536
+    },
+    {
+      "filename": "1000401799.jpg",
+      "sha256": "0e3fbf81d6f6e441db4594cf1e9eda50d4bde6e26169fb39ae76c90ba6f70fec",
+      "width": 1085,
+      "height": 1536
+    },
+    {
+      "filename": "1000401797.jpg",
+      "sha256": "bc8452c98b1509f3183cdfb64559d7ec6eeb4df1fbae3162faccfc71d15f4ba8",
+      "width": 1045,
+      "height": 1536
+    }
+  ]
+}

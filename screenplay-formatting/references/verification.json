@@ -1,0 +1,41 @@
+{
+  "source_preserved": true,
+  "docx_text_preserved": true,
+  "input_sha256": "449a1895e0114bc31cbd7cb6c7e70125f381d3b84684b941c592258f9199dcd4",
+  "profile": "reference",
+  "expected_pages": 5,
+  "visual_review": {
+    "status": "passed",
+    "pages_checked": 5,
+    "date": "2026-10-12"
+  },
+  "original_font_verified": false,
+  "measurements": "inferred_from_photographs",
+  "pdf_text_extraction": "not_guaranteed; use source.json for machine-readable Arabic",
+  "pdf_pages": 5,
+  "embedded_fonts": {
+    "BAAAAA+Amiri-Bold": true,
+    "CAAAAA+Amiri-Bold": true,
+    "DAAAAA+Amiri-Bold": true,
+    "EAAAAA+Amiri-Bold": true,
+    "FAAAAA+Amiri-Regular": true,
+    "GAAAAA+Amiri-Bold": true,
+    "HAAAAA+Amiri-Regular": true,
+    "IAAAAA+Amiri-Regular": true,
+    "JAAAAA+Amiri-Bold": true,
+    "KAAAAA+Amiri-Regular": true,
+    "LAAAAA+Amiri-Regular": true,
+    "MAAAAA+Amiri-Regular": true
+  },
+  "pdf_errors": [],
+  "pdf_pass": true,
+  "automated_pass": true,
+  "independent_forward_test": {
+    "episodes": 2,
+    "scenes": 4,
+    "pages": 10,
+    "checks_passed": 10,
+    "long_dialogue_words": 530,
+    "arabic_rtl_and_mixed_text": "passed"
+  }
+}

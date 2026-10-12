@@ -1,0 +1,17 @@
+{
+  "id": "screenplay-formatting",
+  "name_ar": "مسار تنسيق السيناريو",
+  "version": "1.0.0",
+  "kind": "offline-formatting",
+  "entrypoint": "scripts/format_screenplay.py",
+  "inputs": ["episode-json-v1", "saad-script-studio-v1", "saad-script-studio-v2", "final-draft-fdx"],
+  "outputs": ["docx", "pdf", "source-json", "layout-json", "qa-json"],
+  "profiles": ["reference", "large"],
+  "api_key_required": false,
+  "text_rewriting": false,
+  "optional_review": {"module": "last-line-path", "automated_indicators": 5, "changes_text": false},
+  "original_font_verified": false,
+  "measurement_status": "inferred",
+  "required_native_dependency": "LibreOffice",
+  "github": "https://github.com/Q8-ux/saad/tree/main/screenplay-formatting"
+}

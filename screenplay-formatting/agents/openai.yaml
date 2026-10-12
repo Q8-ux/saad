@@ -1,0 +1,4 @@
+interface:
+  display_name: "مسار تنسيق السيناريو"
+  short_description: "تنسيق عربي للسيناريو والحوار وتصدير Word وPDF"
+  default_prompt: "استخدم $screenplay-formatting لتنسيق سيناريو المسلسل وفق القالب المرجعي مع الحفاظ على النص."
