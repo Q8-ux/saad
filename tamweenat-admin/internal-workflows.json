@@ -1,0 +1,46 @@
+{
+  "version": "2.4",
+  "visibility": "backend_only",
+  "admin_ui_exposure": false,
+  "customer_ui_exposure": false,
+  "approval_required_for": [
+    "prices",
+    "credit",
+    "orders",
+    "supplier_changes",
+    "account_status"
+  ],
+  "tracks": [
+    {
+      "name": "spec-kit",
+      "purpose": "change specification and acceptance criteria"
+    },
+    {
+      "name": "google-analysis",
+      "purpose": "orchestration and review"
+    },
+    {
+      "name": "agent-workflows",
+      "purpose": "inventory credit and procurement recommendations"
+    },
+    {
+      "name": "engineering-qa",
+      "purpose": "performance accessibility and regression checks"
+    },
+    {
+      "name": "codewiki",
+      "purpose": "code ownership and data source mapping"
+    },
+    {
+      "name": "masar-analysis",
+      "purpose": "sourced market research"
+    }
+  ],
+  "rules": {
+    "single_source_of_truth": "backend_catalog",
+    "no_auto_write": true,
+    "no_public_keys": true,
+    "no_voice": true,
+    "rtl_mobile_qa": true
+  }
+}
