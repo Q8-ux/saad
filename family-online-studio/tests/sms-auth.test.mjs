@@ -8,12 +8,13 @@ import {createGateway} from '../backend/server.mjs';
 const account='AC'+'a'.repeat(32),service='VA'+'b'.repeat(32),verification='VE'+'c'.repeat(32);
 const phone='+96550000000';
 const config={ownerPhone:phone,twilioAccountSid:account,twilioAuthToken:'synthetic-test-credential',twilioVerifyServiceSid:service,sessionSecret:'synthetic-session-secret-not-used-in-production'};
-function fixture(overrides={}){
+function fixture(overrides={},configOverrides={}){
  let now=overrides.now??Date.parse('2026-10-14T12:00:00Z');const calls=[];
- const state={type:'Trial',status:'active',created:now-24*60*60_000,code:'123456',providerStatus:'pending',approvedTo:phone,...overrides};
+ const state={type:'Trial',status:'active',created:now-24*60*60_000,code:'123456',providerStatus:'pending',approvedTo:phone,services:[{sid:service,account_sid:account,code_length:6}],...overrides};
  const mock=async(url,init)=>{
   calls.push({url:String(url),method:init.method,body:init.body?Object.fromEntries(init.body):undefined});
   if(String(url).includes('/Accounts/'))return Response.json({sid:account,owner_account_sid:account,type:state.type,status:state.status,date_created:new Date(state.created).toUTCString()});
+  if(String(url)==='https://verify.twilio.com/v2/Services?PageSize=2')return Response.json({services:state.services,meta:{next_page_url:state.nextPage??null}});
   if(String(url).endsWith('/Verifications')){
    if(state.sendFailure)return Response.json({error:'failure'},{status:502});
    return Response.json({sid:verification,to:phone,service_sid:service,status:state.providerStatus,date_created:new Date(now).toUTCString()});
@@ -21,7 +22,7 @@ function fixture(overrides={}){
   if(String(url).endsWith('/VerificationCheck'))return Response.json({sid:verification,to:state.approvedTo,service_sid:service,status:init.body.get('Code')===state.code?'approved':'pending'});
   return Response.json({doc:{test:true}});
  };
- const auth=createSmsAuth(config,mock,()=>now);
+ const auth=createSmsAuth({...config,...configOverrides},mock,()=>now);
  return {auth,mock,calls,state,advance:ms=>now+=ms};
 }
 test('Kuwaiti, international and Arabic phone input is normalized',()=>{
@@ -108,4 +109,59 @@ test('legacy code remains available until SMS is configured',async t=>{
  const options=await fetch(base+'/api/auth/options',{headers});assert.equal((await options.json()).legacyAvailable,true);
  const request=await fetch(base+'/api/auth/sms/request',{method:'POST',headers,body:JSON.stringify({phone})});assert.equal(request.status,503);
  const login=await fetch(base+'/api/auth',{method:'POST',headers,body:JSON.stringify({code})});assert.equal(login.status,200);assert.ok((await login.json()).token);
+});
+test('one existing six-digit service is discovered without sending or creating anything',async()=>{
+ const f=fixture({},{twilioVerifyServiceSid:''});assert.equal(f.auth.ready,false);
+ assert.equal(await f.auth.prepare(),true);assert.equal(f.auth.ready,true);
+ assert.deepEqual(f.calls.map(c=>c.method),['GET','GET']);
+ await f.auth.prepare();assert.equal(f.calls.length,2);
+ const c=await f.auth.begin({phone});assert.equal(c.sent,true);
+ assert.equal(f.calls.at(-1).url,'https://verify.twilio.com/v2/Services/'+service+'/Verifications');
+ const accepted=await f.auth.check({challenge:c.challenge,code:'123456'});assert.equal(accepted.approved,true);
+});
+test('service discovery rejects paid, suspended and expired accounts before listing services',async()=>{
+ for(const state of [{type:'Full'},{status:'suspended'},{created:Date.parse('2026-01-01')}]){
+  const f=fixture(state,{twilioVerifyServiceSid:''});await assert.rejects(f.auth.prepare(),e=>e.status===503);
+  assert.equal(f.auth.ready,false);assert.equal(f.calls.length,1);assert.equal(f.calls[0].method,'GET');
+ }
+});
+test('discovery refuses empty, ambiguous, foreign and incompatible service responses',async()=>{
+ const one={sid:service,account_sid:account,code_length:6};
+ for(const state of [{services:[]},{services:[one,{...one,sid:'VA'+'d'.repeat(32)}]},{nextPage:'https://attacker.example/credentials'},{services:[{...one,account_sid:'AC'+'d'.repeat(32)}]},{services:[{...one,code_length:4}]},{services:[{...one,sid:'invalid'}]},{services:null}]){
+  const f=fixture(state,{twilioVerifyServiceSid:''});await assert.rejects(f.auth.prepare(),e=>[502,503].includes(e.status));
+  assert.equal(f.auth.ready,false);assert.equal(f.calls.length,2);assert.ok(f.calls.every(c=>c.method==='GET'));
+  assert.ok(f.calls.every(c=>!c.url.includes('attacker.example')));
+ }
+});
+test('concurrent discovery is shared, and failures wait one minute before retrying',async()=>{
+ const f=fixture({},{twilioVerifyServiceSid:''});await Promise.all([f.auth.prepare(),f.auth.prepare(),f.auth.prepare()]);
+ assert.equal(f.calls.length,2);
+ const g=fixture({services:[]},{twilioVerifyServiceSid:''});await assert.rejects(g.auth.prepare(),e=>e.status===503);
+ g.state.services=[{sid:service,account_sid:account,code_length:6}];await assert.rejects(g.auth.prepare(),e=>e.status===503);
+ assert.equal(g.calls.length,2);g.advance(60_001);assert.equal(await g.auth.prepare(),true);assert.equal(g.calls.length,4);
+});
+test('missing credentials and invalid explicit service IDs are not silently replaced',async()=>{
+ const missing=createSmsAuth({},async()=>{assert.fail('must not contact provider');});assert.equal(await missing.prepare(),false);
+ const f=fixture({},{twilioVerifyServiceSid:'invalid'});assert.equal(await f.auth.prepare(),false);
+ await assert.rejects(f.auth.begin({phone}),e=>e.status===503);assert.equal(f.calls.length,0);
+ const g=fixture({},{twilioVerifyServiceSid:''});await assert.rejects(g.auth.begin({phone:'+96551111111'}),e=>e.status===401);assert.equal(g.calls.length,0);
+});
+test('SMS-only gateway can discover its service before issuing a verified login session',async t=>{
+ const f=fixture({now:Date.now()},{twilioVerifyServiceSid:''});
+ const server=createGateway({...config,twilioVerifyServiceSid:'',allowedOrigin:'https://writer.example',upstreamOrigin:'https://private.example',siteToken:'synthetic-site-token',bridgeKey:'synthetic-bridge-key'},f.mock);
+ await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));t.after(()=>new Promise(resolve=>server.close(resolve)));
+ const base='http://127.0.0.1:'+server.address().port,headers={Origin:'https://writer.example','Content-Type':'application/json'};
+ assert.equal((await fetch(base+'/api/auth/options',{headers:{Origin:'https://attacker.example'}})).status,403);assert.equal(f.calls.length,0);
+ const options=await fetch(base+'/api/auth/options',{headers});assert.deepEqual(await options.json(),{smsConfigured:true,legacyAvailable:false,channel:'sms',trialOnly:true});assert.equal(f.calls.filter(c=>c.method==='POST').length,0);
+ const sent=await fetch(base+'/api/auth/sms/request',{method:'POST',headers,body:JSON.stringify({phone})});assert.equal(sent.status,200);const challenge=await sent.json();assert.equal(challenge.token,undefined);
+ const checked=await fetch(base+'/api/auth/sms/verify',{method:'POST',headers,body:JSON.stringify({challenge:challenge.challenge,code:'123456'})});assert.equal(checked.status,200);assert.ok((await checked.json()).token);
+});
+test('discovery failure preserves legacy access without sending an SMS',async t=>{
+ const code='synthetic-private-code-only-for-tests',f=fixture({now:Date.now(),services:[]},{twilioVerifyServiceSid:''});
+ const server=createGateway({...config,twilioVerifyServiceSid:'',accessHash:createHash('sha256').update(code).digest('hex'),allowedOrigin:'https://writer.example',upstreamOrigin:'https://private.example',siteToken:'synthetic-site-token',bridgeKey:'synthetic-bridge-key'},f.mock);
+ await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));t.after(()=>new Promise(resolve=>server.close(resolve)));
+ const base='http://127.0.0.1:'+server.address().port,headers={Origin:'https://writer.example','Content-Type':'application/json'};
+ const options=await fetch(base+'/api/auth/options',{headers});assert.deepEqual(await options.json(),{smsConfigured:false,legacyAvailable:true,channel:'sms',trialOnly:true});
+ const login=await fetch(base+'/api/auth',{method:'POST',headers,body:JSON.stringify({code})});assert.equal(login.status,200);assert.ok((await login.json()).token);
+ assert.equal(f.calls.filter(c=>c.method==='POST').length,0);
 });

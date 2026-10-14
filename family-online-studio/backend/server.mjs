@@ -10,7 +10,7 @@ const maxBytes=9_000_000;
 export function createGateway(config,fetchImpl=fetch){
  const {allowedOrigin,upstreamOrigin,siteToken,bridgeKey,accessHash,sessionSecret}=config;
  const sms=createSmsAuth(config,fetchImpl);
- const ready=!!(allowedOrigin&&upstreamOrigin&&siteToken&&bridgeKey&&(accessHash||sms.ready)&&sessionSecret);
+ const ready=!!(allowedOrigin&&upstreamOrigin&&siteToken&&bridgeKey&&(accessHash||sms.credentialsReady)&&sessionSecret);
  if(ready&&(!/^https:\/\//.test(allowedOrigin)||!/^https:\/\//.test(upstreamOrigin)))throw new Error('HTTPS configuration required');
  const pacing=new Map();
  function limited(key,limit){const now=Date.now(),old=pacing.get(key);if(pacing.size>2000){for(const [id,v]of pacing)if(v.exp<now)pacing.delete(id);if(pacing.size>2000)return true;}if(!old||old.exp<now){pacing.set(key,{n:1,exp:now+60000});return false;}old.n++;return old.n>limit;}
@@ -30,7 +30,10 @@ export function createGateway(config,fetchImpl=fetch){
    if(req.method==='OPTIONS'){res.writeHead(204,headers);return res.end();}
    if(Number(req.headers['content-length']||0)>maxBytes)return send(413,{error:'الملف كبير جداً.'});
    const peer=(req.headers['x-forwarded-for']||req.socket.remoteAddress||'unknown').split(',').at(-1).trim();
-   if(u.pathname==='/api/auth/options'&&req.method==='GET')return send(200,{smsConfigured:sms.ready,legacyAvailable:!!accessHash&&!sms.ready,channel:'sms',trialOnly:true});
+   if(u.pathname==='/api/auth/options'&&req.method==='GET'){
+    try{await sms.prepare();}catch{/* Keep existing access available while provider setup is incomplete. */}
+    return send(200,{smsConfigured:sms.ready,legacyAvailable:!!accessHash&&!sms.ready,channel:'sms',trialOnly:true});
+   }
    if(['/api/auth/sms/request','/api/auth/sms/verify'].includes(u.pathname)&&req.method==='POST'){
     if(limited('sms:'+u.pathname+':'+peer,8))return send(429,{error:'انتظر دقيقة قبل إعادة محاولة الدخول.',retryAfter:60});
     if(Number(req.headers['content-length']||0)>2048)return send(413,{error:'حجم طلب غير صالح.'});
