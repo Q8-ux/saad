@@ -1,0 +1,46 @@
+name: Publish Family Writing Studio
+on:
+  push:
+    branches: [main]
+    paths: ['family-online-studio/**', '.github/workflows/deploy-family-writing-studio.yml']
+  workflow_dispatch:
+  workflow_run:
+    workflows: ['Deploy All GitHub Pages Sites']
+    types: [completed]
+permissions:
+  contents: read
+  actions: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages-v2
+  cancel-in-progress: false
+jobs:
+  publish:
+    if: github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: main}
+      - uses: actions/setup-node@v4
+        with: {node-version: 24}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Validate isolated studio package
+        run: |
+          node --check family-online-studio/assets/app.mjs
+          node --check family-online-studio/backend/server.mjs
+          node family-online-studio/deployment/validate.mjs --ready
+      - uses: actions/configure-pages@v5
+      - name: Preserve other published projects
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python family-online-studio/deployment/preserve.py
+      - uses: actions/upload-pages-artifact@v3
+        with: {path: _site, retention-days: 30}
+      - name: Deploy
+        id: deploy
+        uses: actions/deploy-pages@v4
