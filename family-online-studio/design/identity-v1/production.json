@@ -1,0 +1,37 @@
+{
+  "project": "family-online-studio",
+  "sources": [
+    {
+      "role": "artwork",
+      "sha256": "894d9e9af3ecf552f2c0658d1c1d4735bafa183a81a78bc6f86db374ac6eb03c",
+      "name": "stamp.png",
+      "source_size": [
+        256,
+        256
+      ]
+    },
+    {
+      "role": "artwork",
+      "sha256": "cc707c8911926a7006831e7ea52807487431492deab76a6a33e9739eee917138",
+      "name": "lines.png",
+      "source_size": [
+        256,
+        256
+      ]
+    },
+    {
+      "role": "artwork",
+      "sha256": "58eb70ad25aeedf23e1c693a47f52e849437c4f5997db52566bc85f146cf1917",
+      "name": "nib.png",
+      "source_size": [
+        256,
+        256
+      ]
+    }
+  ],
+  "face_retouch": false,
+  "background_removal": "provided mask or existing transparency only",
+  "text": "approved raster layers; text is not editable in this adapter",
+  "status": "visual review passed for the exported pen mark",
+  "visual_review": {"transparency": "passed", "bounds": "passed", "layer_separation": "passed", "mac_application_tested": false}
+}

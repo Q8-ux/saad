@@ -1,0 +1,10 @@
+{
+  "size": [256, 256],
+  "dpi": 96,
+  "matte": "#F6F3EC",
+  "layers": [
+    {"name": "Ink stamp", "file": "layers/stamp.png", "box": [0, 0, 256, 256]},
+    {"name": "Editorial lines", "file": "layers/lines.png", "box": [0, 0, 256, 256]},
+    {"name": "Pen nib", "file": "layers/nib.png", "box": [0, 0, 256, 256]}
+  ]
+}

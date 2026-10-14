@@ -1,0 +1,26 @@
+{
+  "project": "family-online-studio",
+  "status": "implemented",
+  "canva": {
+    "design_id": "DAHYBp4UCgI",
+    "design_url": "https://canva.link/x6h556aexssgjdk",
+    "pages": ["desktop", "mobile"],
+    "use": "Editable project-specific visual reference; translated into responsive HTML and CSS.",
+    "private_manuscript_shared": false,
+    "thumbnail_used_as_final_asset": false
+  },
+  "compositor": {
+    "workflow": "masar-photoshop",
+    "implementation": "https://github.com/Q8-ux/saad/tree/main/masar-photoshop",
+    "asset": "studio/pen-mark.webp",
+    "editable_project": "identity-v1/design.comp.zip",
+    "layers": ["Ink stamp", "Editorial lines", "Pen nib"],
+    "source_kind": "original vector artwork for this project",
+    "originals_retained": true,
+    "mac_application_tested": false
+  },
+  "interface": ["ivory writing canvas", "ink sidebar", "right-side workspace navigation", "large Arabic headings", "mobile full-width editing", "clear save state", "assistant access", "reduced motion"],
+  "source_content_and_exports": "unchanged",
+  "access": "existing direct-open model preserved",
+  "new_runtime_dependencies": []
+}

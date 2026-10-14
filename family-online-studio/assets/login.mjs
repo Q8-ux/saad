@@ -28,8 +28,10 @@ export function createStudioLogin({React,Studio,config}){
   const retry=()=>h('button',{type:'button',className:'primary',disabled:busy,onClick:openStudio},busy?'جارٍ الاتصال…':'إعادة المحاولة');
   return h(React.Fragment,null,
    token?h(Studio,{userKey:'external-private-owner'}):h('main',{className:'external-login',dir:'rtl'},h('section',null,
+    h('img',{src:new URL('./studio/pen-mark.webp',import.meta.url).href,width:80,height:80,alt:'',className:'studio-loading-mark'}),
     h('p',{className:'eyebrow'},'مساحتك، حكايتك.'),h('h1',null,'استوديو الكتابة'),
     error?h('p',{role:'alert',className:'error-text'},error):h('p',{role:'status'},'جارٍ فتح مساحة الكتابة…'),
+    !error&&h('span',{className:'opening-progress','aria-hidden':true},h('i')),
     error&&retry())),
    token&&error&&h('aside',{className:'external-session-error',dir:'rtl',role:'alert'},h('p',null,error),retry()));
  };

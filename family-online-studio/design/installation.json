@@ -13,7 +13,8 @@
     {"name":"Performance and QA","implementation":["reuse existing React/Tailwind/Lucide stack","no additional runtime dependency","asset size budgets","protected manuscript and export hashes","type checking and production build"]}
   ],
   "componentSelection":{"strategy":"original components using the existing stack","remoteComponentCodeCopied":false,"newRuntimeDependencies":[],"threeDimensionalEffects":"not selected for a text editing workflow"},
-  "sourceFiles":["app/studio-design.css","lib/studio-design.ts","app/use-panel-focus.ts","app/studio.tsx","app/scenarist-panel.tsx"],
+  "visualProduction":{"reference":"Canva desktop and mobile concept DAHYBp4UCgI","layers":"masar-photoshop Compositor adapter; original pen mark; three retained layers","manifest":"canva-compositor.json"},
+  "sourceFiles":["app/studio-design.css","app/studio-workspace.css","lib/studio-design.ts","app/use-panel-focus.ts","app/studio.tsx","app/scenarist-panel.tsx"],
   "qualityCommands":["node scripts/check-design.mjs","node scripts/check-studio.mjs","node node_modules/typescript/bin/tsc --noEmit","node deployment/validate.mjs --ready"],
   "verificationLimit":"Automated contract checks do not constitute full WCAG conformance or device/browser visual verification."
 }
