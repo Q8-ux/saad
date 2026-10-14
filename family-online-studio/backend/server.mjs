@@ -9,11 +9,12 @@ const routes=new Map([['/api/manuscript',['GET','PUT']],['/api/versions',['GET',
 const maxBytes=9_000_000;
 export function createGateway(config,fetchImpl=fetch){
  const {allowedOrigin,upstreamOrigin,siteToken,bridgeKey,accessHash,sessionSecret}=config;
+ const openAccess=config.authMode==='open';
  const passwordOnly=config.authMode==='password';
  const remotePassword=passwordOnly&&config.passwordVerification==='upstream';
- const sessionTag=passwordOnly?'studio-password-session\n':'studio-session\n';
+ const sessionTag=openAccess?'studio-open-session\n':passwordOnly?'studio-password-session\n':'studio-session\n';
  const sms=createSmsAuth(config,fetchImpl);
- const ready=!!(allowedOrigin&&upstreamOrigin&&siteToken&&bridgeKey&&(remotePassword|| (passwordOnly?accessHash:(accessHash||sms.credentialsReady)))&&sessionSecret);
+ const ready=!!(allowedOrigin&&upstreamOrigin&&siteToken&&bridgeKey&&(openAccess||remotePassword||(passwordOnly?accessHash:(accessHash||sms.credentialsReady)))&&sessionSecret);
  if(ready&&(!/^https:\/\//.test(allowedOrigin)||!/^https:\/\//.test(upstreamOrigin)))throw new Error('HTTPS configuration required');
  const pacing=new Map();
  function limited(key,limit){const now=Date.now(),old=pacing.get(key);if(pacing.size>2000){for(const [id,v]of pacing)if(v.exp<now)pacing.delete(id);if(pacing.size>2000)return true;}if(!old||old.exp<now){pacing.set(key,{n:1,exp:now+60000});return false;}old.n++;return old.n>limit;}
@@ -39,12 +40,13 @@ export function createGateway(config,fetchImpl=fetch){
    if(Number(req.headers['content-length']||0)>maxBytes)return send(413,{error:'الملف كبير جداً.'});
    const peer=(req.headers['x-forwarded-for']||req.socket.remoteAddress||'unknown').split(',').at(-1).trim();
    if(u.pathname==='/api/auth/options'&&req.method==='GET'){
+    if(openAccess)return send(200,{mode:'open',smsConfigured:false,channel:'automatic'});
     if(passwordOnly)return send(200,{mode:'password',smsConfigured:false,legacyAvailable:!!accessHash,channel:'password',passwordMinLength:4});
     try{await sms.prepare();}catch{/* Keep existing access available while provider setup is incomplete. */}
     return send(200,{smsConfigured:sms.ready,legacyAvailable:!!accessHash&&!sms.ready,channel:'sms',trialOnly:true});
    }
    if(['/api/auth/sms/request','/api/auth/sms/verify'].includes(u.pathname)&&req.method==='POST'){
-    if(passwordOnly)return send(403,{error:'الدخول بكلمة المرور فقط.'});
+    if(openAccess||passwordOnly)return send(403,{error:openAccess?'يفتح الاستوديو مباشرة دون رمز دخول.':'الدخول بكلمة المرور فقط.'});
     if(limited('sms:'+u.pathname+':'+peer,8))return send(429,{error:'انتظر دقيقة قبل إعادة محاولة الدخول.',retryAfter:60});
     if(Number(req.headers['content-length']||0)>2048)return send(413,{error:'حجم طلب غير صالح.'});
     const raw=await bytes(req);if(raw.length>2048)return send(413,{error:'حجم طلب غير صالح.'});
@@ -55,9 +57,10 @@ export function createGateway(config,fetchImpl=fetch){
     return send(200,{token:session(),expiresIn:7200,deviceToken:result.deviceToken});
    }
    if(u.pathname==='/api/auth'&&req.method==='POST'){
-    if(!passwordOnly&&sms.ready)return send(403,{error:'استخدم رمز الرسالة للدخول إلى الاستوديو.'});
+    if(!openAccess&&!passwordOnly&&sms.ready)return send(403,{error:'استخدم رمز الرسالة للدخول إلى الاستوديو.'});
     if(limited('login:'+peer,8))return send(429,{error:'انتظر دقيقة قبل إعادة محاولة الدخول.'});
     const raw=await bytes(req);if(raw.length>2048)return send(413,{error:'حجم طلب غير صالح.'});
+    if(openAccess)return send(200,{token:session(),expiresIn:7200});
     let code;try{code=JSON.parse(raw).code;}catch{return send(400,{error:'طلب غير صالح.'});}
     if(passwordOnly&&typeof code==='string')code=code.trim().replace(/[٠-٩]/g,c=>String(c.charCodeAt(0)-1632)).replace(/[۰-۹]/g,c=>String(c.charCodeAt(0)-1776));
     if(typeof code!=='string'||code.length<(passwordOnly?4:20)||code.length>160)return send(401,{error:passwordOnly?'كلمة المرور غير صحيحة.':'رمز الدخول غير صحيح.'});
@@ -68,7 +71,7 @@ export function createGateway(config,fetchImpl=fetch){
     }else if(!same(hash(code),accessHash))return send(401,{error:passwordOnly?'كلمة المرور غير صحيحة.':'رمز الدخول غير صحيح.'});
     return send(200,{token:session(),expiresIn:7200});
    }
-   if(!authenticated(req.headers.authorization))return send(401,{error:passwordOnly?'أدخل كلمة المرور للدخول إلى الاستوديو.':'انتهت جلسة الدخول. تحقّق من هاتفك للدخول مجدداً.'});
+   if(!authenticated(req.headers.authorization))return send(401,{error:openAccess?'جارٍ تجديد الاتصال بالاستوديو.':passwordOnly?'أدخل كلمة المرور للدخول إلى الاستوديو.':'انتهت جلسة الدخول. تحقّق من هاتفك للدخول مجدداً.'});
    if(!routes.get(u.pathname)?.includes(req.method))return send(404,{error:'not_found'});
    if(limited('request:'+peer,100))return send(429,{error:'طلبات كثيرة؛ انتظر قليلاً.'});
    const body=await bytes(req),route=u.pathname+u.search,type=req.headers['content-type']||'';
@@ -79,7 +82,8 @@ export function createGateway(config,fetchImpl=fetch){
   }catch(e){if(res.headersSent)return res.end();if(e instanceof AuthError)return send(e.status,{error:e.message,...(e.retryAfter?{retryAfter:e.retryAfter}:{})});send(e.status===413?413:502,{error:e.status===413?'الملف كبير جداً.':'لم يكتمل الاتصال. مسودتك المحلية لا تزال متاحة.'});}
  });
 }
-export function fromEnvironment(env=process.env){return {authMode:env.STUDIO_AUTH_MODE||'password',passwordVerification:'upstream',allowedOrigin:env.STUDIO_ALLOWED_ORIGIN,upstreamOrigin:env.STUDIO_UPSTREAM_ORIGIN,siteToken:env.STUDIO_SITE_TOKEN,bridgeKey:env.STUDIO_BRIDGE_KEY,accessHash:env.STUDIO_ACCESS_SHA256,sessionSecret:env.STUDIO_SESSION_SECRET,ownerPhone:env.STUDIO_OWNER_PHONE,twilioAccountSid:env.TWILIO_ACCOUNT_SID,twilioAuthToken:env.TWILIO_AUTH_TOKEN,twilioVerifyServiceSid:env.TWILIO_VERIFY_SERVICE_SID};}
+// This deployment opens directly, regardless of obsolete password/SMS settings.
+export function fromEnvironment(env=process.env){return {authMode:'open',allowedOrigin:env.STUDIO_ALLOWED_ORIGIN,upstreamOrigin:env.STUDIO_UPSTREAM_ORIGIN,siteToken:env.STUDIO_SITE_TOKEN,bridgeKey:env.STUDIO_BRIDGE_KEY,sessionSecret:env.STUDIO_SESSION_SECRET};}
 if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href){
  const server=createGateway(fromEnvironment());server.requestTimeout=100000;server.headersTimeout=15000;server.listen(Number(process.env.PORT)||10000,'0.0.0.0');
  console.log('Private studio gateway listening.');
