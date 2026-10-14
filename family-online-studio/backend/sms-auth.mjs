@@ -17,12 +17,14 @@ export class AuthError extends Error{
 // Only a primary, active Trial account is accepted. No production billing mode.
 export function createSmsAuth(config,fetchImpl=fetch,clock=Date.now){
  const phone=normalizePhone(config.ownerPhone);
- const account=config.twilioAccountSid||'',verify=config.twilioVerifyServiceSid||'';
- const ready=!!(phone&&config.sessionSecret&&/^AC[0-9a-f]{32}$/i.test(account)&&/^VA[0-9a-f]{32}$/i.test(verify)&&config.twilioAuthToken);
+ const account=config.twilioAccountSid||'';
+ let verify=config.twilioVerifyServiceSid||'';
+ const credentialsReady=!!(phone&&config.sessionSecret&&/^AC[0-9a-f]{32}$/i.test(account)&&config.twilioAuthToken);
+ const ready=()=>credentialsReady&&/^VA[0-9a-f]{32}$/i.test(verify);
  const authorization='Basic '+Buffer.from(account+':'+(config.twilioAuthToken||'')).toString('base64');
  const recipient=createHmac('sha256',config.sessionSecret||'unconfigured').update('sms-recipient\n'+phone).digest('hex');
  const challenges=new Map(),sendTimes=[];
- let inFlight=false;
+ let inFlight=false,discovery=null,discoveryRetryAt=0,discoveryError=null;
  const fail=(status,message,retry)=>{throw new AuthError(status,message,retry);};
  function unpackDevice(value){
   if(typeof value!=='string'||value.length>1500)return false;
@@ -56,10 +58,32 @@ export function createSmsAuth(config,fetchImpl=fetch,clock=Date.now){
   if(!Number.isFinite(created)||created>clock()+60_000||expires<=clock())fail(503,'انتهت التجربة المجانية. لم يُحوّل الدخول إلى خدمة مدفوعة.');
   return expires;
  }
+ // Reuse one existing six-digit service. Discovery never creates resources or sends SMS.
+ async function prepare(){
+  if(ready())return true;
+  if(!credentialsReady||verify)return false;
+  if(discovery)return discovery;
+  if(discoveryError&&clock()<discoveryRetryAt)throw discoveryError;
+  discovery=(async()=>{
+   await trial();
+   const result=await provider('https://verify.twilio.com/v2/Services?PageSize=2');
+   if(!Array.isArray(result?.services))fail(502,'لم يكتمل اكتشاف خدمة الرسائل. أعد المحاولة لاحقاً.');
+   if(!result.services.length)fail(503,'أكمل تهيئة Verify التجريبي في حساب Twilio أولاً.');
+   if(result.services.length!==1||result.meta?.next_page_url)fail(503,'توجد عدة خدمات Verify. حدد معرّف الخدمة المقصودة في إعدادات الخادم.');
+   const selected=result.services[0];
+   if(!selected||selected.account_sid!==account||!/^VA[0-9a-f]{32}$/i.test(selected.sid)||selected.code_length!==6)fail(503,'لم تُعثر على خدمة تحقق تابعة للحساب برمز من ستة أرقام.');
+   verify=selected.sid;
+   discoveryError=null;
+   return true;
+  })();
+  try{return await discovery;}
+  catch(error){discoveryError=error;discoveryRetryAt=clock()+60_000;throw error;}
+  finally{discovery=null;}
+ }
  function clean(){for(const [id,c]of challenges)if(c.expiresAt<=clock())challenges.delete(id);while(sendTimes.length&&sendTimes[0]<=clock()-24*60*60_000)sendTimes.shift();}
  function publicChallenge(id,c,sent){return {challenge:id,sent,reused:!sent,expiresIn:Math.max(0,Math.floor((c.expiresAt-clock())/1000)),resendAfter:Math.max(0,Math.ceil((c.sentAt+60_000-clock())/1000)),destination:'•••• '+phone.slice(-2),channel:'sms',trialExpiresAt:new Date(c.trialExpires).toISOString()};}
  async function begin(input={}){
-  if(!ready)fail(503,'لم تُربط خدمة الرسائل ورقم الهاتف بعد.');
+  if(!credentialsReady)fail(503,'لم تُربط خدمة الرسائل ورقم الهاتف بعد.');
   if(!input||typeof input!=='object'||(!unpackDevice(input.device)&&!same(normalizePhone(input.phone),phone)))fail(401,'أدخل رقم الهاتف المعتمد لهذا الاستوديو.');
   clean();
   if(inFlight)fail(429,'جارٍ طلب الرمز. انتظر قليلاً.',60);
@@ -70,6 +94,8 @@ export function createSmsAuth(config,fetchImpl=fetch,clock=Date.now){
   if(sendTimes.filter(t=>t>clock()-60*60_000).length>=5||sendTimes.length>=20)fail(429,'وصلت إلى الحد الآمن لإرسال الرسائل. حاول لاحقاً.',3600);
   inFlight=true;
   try{
+   await prepare();
+   if(!ready())fail(503,'لم تُربط خدمة الرسائل ورقم الهاتف بعد.');
    const trialExpires=await trial();
    sendTimes.push(clock());
    const result=await provider('https://verify.twilio.com/v2/Services/'+verify+'/Verifications',{To:phone,Channel:'sms',Locale:'ar'});
@@ -82,7 +108,7 @@ export function createSmsAuth(config,fetchImpl=fetch,clock=Date.now){
   }finally{inFlight=false;}
  }
  async function check(input={}){
-  if(!ready)fail(503,'لم تُربط خدمة الرسائل ورقم الهاتف بعد.');
+  if(!ready())fail(503,'لم تُربط خدمة الرسائل ورقم الهاتف بعد.');
   clean();
   const c=input&&challenges.get(input.challenge);
   if(!c)fail(401,'انتهت صلاحية الرمز. اطلب رمزاً جديداً.');
@@ -101,5 +127,5 @@ export function createSmsAuth(config,fetchImpl=fetch,clock=Date.now){
   }catch(e){if(c.attempts>=5||e.status===401&&/انتهت/.test(e.message))challenges.delete(input.challenge);throw e;}
   finally{c.busy=false;}
  }
- return {ready,begin,check};
+ return {get ready(){return ready();},credentialsReady,prepare,begin,check};
 }
