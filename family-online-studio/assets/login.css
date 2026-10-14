@@ -1,5 +1,5 @@
 .external-login button:disabled{opacity:.6;cursor:not-allowed}
-.external-login button:focus-visible,.external-session-error button:focus-visible{outline:3px solid #775b72;outline-offset:3px}
+.external-login button:focus-visible,.external-session-error button:focus-visible{outline:3px solid #087f7c;outline-offset:3px}
 .external-session-error{position:fixed;z-index:200;bottom:max(16px,env(safe-area-inset-bottom));inset-inline:16px;margin-inline:auto;max-width:640px;padding:16px;background:#fff5f3;color:#682f2c;border:1px solid #c7867e;border-radius:16px;box-shadow:0 4px 24px #0002;font-size:18px}
 .external-session-error p{margin:0 0 12px}
 .external-session-error button{min-height:44px;padding:8px 18px}

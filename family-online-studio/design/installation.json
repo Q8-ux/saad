@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "project": "family-online-studio",
+  "workflow": "مسار أدوات التصميم",
+  "status": "implemented",
+  "sequence": ["Project Analyzer", "Design Router", "Component Search", "Compatibility/License Gate", "Design Composer", "Motion Layer", "3D/Effects Layer", "RTL/Responsive/Accessibility/Performance QA"],
+  "routes": [
+    {"name":"UI/UX and navigation","implementation":["larger tool text","scene groups by act","collapsible inspector","persistent save status","explicit public-link indicator"]},
+    {"name":"Design system","implementation":["three original color palettes","light and dark modes","16/18/20 px interface settings","local preferences with legacy migration","shared buttons, panels and cards"]},
+    {"name":"RTL and responsive","implementation":["right-side Arabic navigation","phone and tablet reflow through 1100px","inspector overlay through 1439px","physical A4 layout retained"]},
+    {"name":"Accessibility","implementation":["visible focus","modal panel focus containment and restoration","Escape dismissal","selected-view and progress semantics","text palette contrast checks","large touch controls"]},
+    {"name":"Motion","implementation":["short state transitions","reduced-motion CSS","assistant scrolling respects reduced motion"]},
+    {"name":"Performance and QA","implementation":["reuse existing React/Tailwind/Lucide stack","no additional runtime dependency","asset size budgets","protected manuscript and export hashes","type checking and production build"]}
+  ],
+  "componentSelection":{"strategy":"original components using the existing stack","remoteComponentCodeCopied":false,"newRuntimeDependencies":[],"threeDimensionalEffects":"not selected for a text editing workflow"},
+  "sourceFiles":["app/studio-design.css","lib/studio-design.ts","app/use-panel-focus.ts","app/studio.tsx","app/scenarist-panel.tsx"],
+  "qualityCommands":["node scripts/check-design.mjs","node scripts/check-studio.mjs","node node_modules/typescript/bin/tsc --noEmit","node deployment/validate.mjs --ready"],
+  "verificationLimit":"Automated contract checks do not constitute full WCAG conformance or device/browser visual verification."
+}

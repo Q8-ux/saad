@@ -10,8 +10,12 @@ assert.ok(!/current-password|studio-password|onSignOut|\/api\/auth\/sms\//.test(
 assert.ok(!/h\(['"](?:input|form)['"]/.test(login));assert.ok(loginCss.includes(':focus-visible'));
 assert.ok(html.includes('lang="ar" dir="rtl"'));assert.ok(html.includes('noindex,nofollow'));
 assert.ok(app.includes('السينارست'));assert.ok(!/sk-proj-[A-Za-z0-9_-]{20,}/.test(app+config));assert.ok(!config.includes('chatgpt.site'));
+assert.ok(app.includes('المظهر وراحة القراءة')&&app.includes('حبر وبحر'));
+assert.ok(css.includes('--ui-size')&&css.includes('prefers-reduced-motion')&&css.includes('max-width:1100px'));
+assert.ok(Buffer.byteLength(app)<440000,'Client bundle exceeds writing workspace budget');
+assert.ok(Buffer.byteLength(css)<130000,'Stylesheet exceeds writing workspace budget');
 assert.ok(css.includes('66fr 22fr 8fr 74fr')||css.includes('66fr 22fr 8fr 74fr'.replaceAll(' ',''))||/66fr\s+22fr\s+8fr\s+74fr/.test(css));
 for(const file of ['Amiri-Regular.ttf','Amiri-Bold.ttf','OFL.txt'])assert.ok((await readFile(path.join(root,'assets/fonts',file))).length>1000);
 const match=config.match(/window.STUDIO_CONFIG = (\{.*\});/);assert.ok(match);const parsed=JSON.parse(match[1]);
 if(process.argv.includes('--ready'))assert.ok(parsed.apiBase&&new URL(parsed.apiBase).protocol==='https:','Backend must be configured before publication');
-console.log(JSON.stringify({staticPackage:'passed',backendConfigured:!!parsed.apiBase}));
+console.log(JSON.stringify({staticPackage:'passed',backendConfigured:!!parsed.apiBase,clientBytes:Buffer.byteLength(app),styleBytes:Buffer.byteLength(css),designContract:'passed'}));
