@@ -9,7 +9,8 @@ export function createStudioLogin({React,Studio,config}){
    const controller=new AbortController();request.current=controller;
    setBusy(true);setError('');
    try{
-    const response=await fetch(new URL('/api/auth',config.apiBase),{method:'POST',headers:{'Content-Type':'application/json'},body:'{}',credentials:'omit',signal:AbortSignal.any([controller.signal,AbortSignal.timeout(70_000)])});
+    // Public protocol marker for older gateways; it is not an access credential.
+    const response=await fetch(new URL('/api/auth',config.apiBase),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:'open'}),credentials:'omit',signal:AbortSignal.any([controller.signal,AbortSignal.timeout(70_000)])});
     const data=await response.json();
     if(!response.ok||typeof data.token!=='string'||!data.token)throw new Error(data.error||'تعذر فتح الاستوديو. حاول مرة أخرى.');
     if(controller.signal.aborted)return;

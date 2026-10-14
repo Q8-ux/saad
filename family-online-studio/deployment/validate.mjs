@@ -5,7 +5,7 @@ const root=path.resolve(import.meta.dirname,'..');
 const html=await readFile(path.join(root,'index.html'),'utf8'),app=await readFile(path.join(root,'assets/app.mjs'),'utf8'),css=await readFile(path.join(root,'assets/style.css'),'utf8'),config=await readFile(path.join(root,'assets/config.js'),'utf8');
 const login=await readFile(path.join(root,'assets/login.mjs'),'utf8'),loginCss=await readFile(path.join(root,'assets/login.css'),'utf8');
 assert.ok(app.includes('createStudioLogin'));assert.ok(html.includes('./assets/login.css'));
-assert.ok(login.includes('openStudio();')&&login.includes("body:'{}'"));
+assert.ok(login.includes('openStudio();')&&login.includes("code:'open'"));
 assert.ok(!/current-password|studio-password|onSignOut|\/api\/auth\/sms\//.test(login));
 assert.ok(!/h\(['"](?:input|form)['"]/.test(login));assert.ok(loginCss.includes(':focus-visible'));
 assert.ok(html.includes('lang="ar" dir="rtl"'));assert.ok(html.includes('noindex,nofollow'));
