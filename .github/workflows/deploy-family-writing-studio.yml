@@ -32,7 +32,9 @@ jobs:
       - name: Validate isolated studio package
         run: |
           node --check family-online-studio/assets/app.mjs
+          node --check family-online-studio/assets/login.mjs
           node --check family-online-studio/backend/server.mjs
+          node --test family-online-studio/tests/sms-auth.test.mjs
           node family-online-studio/deployment/validate.mjs --ready
       - uses: actions/configure-pages@v5
       - name: Preserve other published projects
@@ -44,3 +46,4 @@ jobs:
       - name: Deploy
         id: deploy
         uses: actions/deploy-pages@v4
+
