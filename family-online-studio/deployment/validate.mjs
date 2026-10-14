@@ -4,7 +4,10 @@ import assert from 'node:assert/strict';
 const root=path.resolve(import.meta.dirname,'..');
 const html=await readFile(path.join(root,'index.html'),'utf8'),app=await readFile(path.join(root,'assets/app.mjs'),'utf8'),css=await readFile(path.join(root,'assets/style.css'),'utf8'),config=await readFile(path.join(root,'assets/config.js'),'utf8');
 const login=await readFile(path.join(root,'assets/login.mjs'),'utf8'),loginCss=await readFile(path.join(root,'assets/login.css'),'utf8');
-assert.ok(app.includes('createStudioLogin'));assert.ok(html.includes('./assets/login.css'));assert.ok(login.includes('current-password'));assert.ok(!login.includes('/api/auth/sms/'));assert.ok(loginCss.includes(':focus-visible'));
+assert.ok(app.includes('createStudioLogin'));assert.ok(html.includes('./assets/login.css'));
+assert.ok(login.includes('openStudio();')&&login.includes("body:'{}'"));
+assert.ok(!/current-password|studio-password|onSignOut|\/api\/auth\/sms\//.test(login));
+assert.ok(!/h\(['"](?:input|form)['"]/.test(login));assert.ok(loginCss.includes(':focus-visible'));
 assert.ok(html.includes('lang="ar" dir="rtl"'));assert.ok(html.includes('noindex,nofollow'));
 assert.ok(app.includes('السينارست'));assert.ok(!/sk-proj-[A-Za-z0-9_-]{20,}/.test(app+config));assert.ok(!config.includes('chatgpt.site'));
 assert.ok(css.includes('66fr 22fr 8fr 74fr')||css.includes('66fr 22fr 8fr 74fr'.replaceAll(' ',''))||/66fr\s+22fr\s+8fr\s+74fr/.test(css));
@@ -12,4 +15,3 @@ for(const file of ['Amiri-Regular.ttf','Amiri-Bold.ttf','OFL.txt'])assert.ok((aw
 const match=config.match(/window.STUDIO_CONFIG = (\{.*\});/);assert.ok(match);const parsed=JSON.parse(match[1]);
 if(process.argv.includes('--ready'))assert.ok(parsed.apiBase&&new URL(parsed.apiBase).protocol==='https:','Backend must be configured before publication');
 console.log(JSON.stringify({staticPackage:'passed',backendConfigured:!!parsed.apiBase}));
-
