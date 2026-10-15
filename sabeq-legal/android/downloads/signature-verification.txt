@@ -1,0 +1,17 @@
+Verifies
+Verified using v1 scheme (JAR signing): false
+Verified using v2 scheme (APK Signature Scheme v2): true
+Verified using v3 scheme (APK Signature Scheme v3): true
+Verified using v3.1 scheme (APK Signature Scheme v3.1): false
+Verified using v4 scheme (APK Signature Scheme v4): false
+Verified for SourceStamp: false
+Number of signers: 1
+Signer #1 certificate DN: CN=Sabeq Legal, OU=Digital Products, O=Sabeq Legal Group, L=Kuwait City, ST=Kuwait, C=KW
+Signer #1 certificate SHA-256 digest: c7d6ea20b6bce80b784056c3e6307758955a1dc352b62143a54f6a95a90b537d
+Signer #1 certificate SHA-1 digest: 3de205f63d934c81200a5e9c67d57311aab37100
+Signer #1 certificate MD5 digest: 57ecfdf6cde9bb411e1dcbf512815c74
+Signer #1 key algorithm: RSA
+Signer #1 key size (bits): 3072
+Signer #1 public key SHA-256 digest: 9ec3e4046f1c9e8cc6e619b522677764a5a7af92e08741e012c8830a2c8f2e1f
+Signer #1 public key SHA-1 digest: c78693f96afe6064bc5fd7cca4f8845e8586da12
+Signer #1 public key MD5 digest: d054e9b72687ea57857385d1531f21ba

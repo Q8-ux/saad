@@ -1,0 +1,31 @@
+{
+  "name": "مجموعة سابق القانونية",
+  "version": "1.0.0",
+  "package": "legal.sabeq.app",
+  "minimum_android": "8.0",
+  "min_sdk": 26,
+  "target_sdk": 35,
+  "web_url": "https://q8-ux.github.io/saad/sabeq-legal/",
+  "source_commit": "1ad1fbcdce9a9cbcdeb4eba5dbed6df03e8dfe74",
+  "build_run": "https://github.com/Q8-ux/saad/actions/runs/38757051400",
+  "apk_bytes": 941342,
+  "apk_sha256": "47044a199e4068e02f5901fc3be14a0b645863f8a8bc2752ddd4a49bb2b4da5b",
+  "android_unit_tests": 3,
+  "javascript_protocol_tests": 3,
+  "lint": "passed",
+  "signature_v2": true,
+  "signature_v3": true,
+  "physical_device_tested": false,
+  "microphone_device_tested": false,
+  "google_play_published": false,
+  "runtime": "connected_webview",
+  "permissions": [
+    "INTERNET",
+    "RECORD_AUDIO"
+  ],
+  "download_limit_mib": 10,
+  "external_keys_in_apk": false,
+  "existing_owner_signing_key_reused": true,
+  "signing_certificate_sha256": "c7d6ea20b6bce80b784056c3e6307758955a1dc352b62143a54f6a95a90b537d",
+  "previous_installed_package_version_verified": false
+}
