@@ -1,4 +1,4 @@
-import { EVENT, shareText } from './event.mjs?v=invitation-v10';
+import { EVENT, shareText } from './event.mjs?v=invitation-v11';
 
 const $ = selector => document.querySelector(selector);
 let toastTimer;
