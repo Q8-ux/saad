@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {EVENT, whatsappUrl, daysToEvent, countdownText, googleCalendarUrl, calendarIcs, shareText} from '../dist/assets/event.mjs';
+import {EVENT, whatsappUrl, daysToEvent, countdownText, shareText} from '../dist/assets/event.mjs';
 
 test('all four invitation numbers open their own Kuwaiti WhatsApp conversation', () => {
   assert.deepEqual(EVENT.contacts, ['65505654','99732147','50168888','66002205']);
@@ -25,21 +25,6 @@ test('day countdown follows Kuwait midnight rather than the device timezone', ()
   assert.match(countdownText(new Date('2026-10-19T18:00:00Z')),/غدًا/);
   assert.match(countdownText(new Date('2026-10-20T10:00:00Z')),/اليوم/);
   assert.match(countdownText(new Date('2026-10-21T10:00:00Z')),/شكرًا/);
-});
-
-test('calendar preserves an unspecified evening time and uses an exclusive next-day end', () => {
-  const url = new URL(googleCalendarUrl());
-  assert.equal(url.searchParams.get('dates'),'20261020/20261021');
-  assert.equal(url.searchParams.get('ctz'),'Asia/Kuwait');
-  assert.match(url.searchParams.get('details'),/مساء الثلاثاء/);
-  assert.match(url.searchParams.get('details'),/لم تُحدَّد/);
-  assert.match(url.searchParams.get('location'),/شارع 24/);
-  const ics = calendarIcs();
-  assert.match(ics,/DTSTART;VALUE=DATE:20261020\r\n/);
-  assert.match(ics,/DTEND;VALUE=DATE:20261021\r\n/);
-  assert.doesNotMatch(ics,/DTSTART.*T\d{6}/);
-  for (const line of ics.split('\r\n')) assert.ok(Buffer.byteLength(line,'utf8')<=75,'ICS line exceeds 75 octets');
-  assert.equal(readFileSync(new URL('../dist/hamad-wedding.ics',import.meta.url),'utf8'),ics);
 });
 
 test('map pin is the QR redirect destination, not its map camera center', () => {

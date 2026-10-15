@@ -94,7 +94,7 @@ def overlay(destination,base_run):
     if target.exists():
         shutil.rmtree(target)
     shutil.copytree(SOURCE,target)
-    for name in ['index.html','assets/app.mjs','assets/event.mjs','assets/invitation-original.jpg','hamad-wedding.ics']:
+    for name in ['index.html','assets/app.mjs','assets/event.mjs','assets/invitation-original.jpg']:
         if not (target/name).is_file():
             raise RuntimeError('Invitation package incomplete')
     (target/'deployment.json').write_text(json.dumps({

@@ -22,19 +22,17 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="preload" href="assets/fonts/Amiri-Regular.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="assets/venue-background.jpg" as="image">
-  <link rel="stylesheet" href="assets/style.css?v=contacts-v6">
+  <link rel="stylesheet" href="assets/style.css?v=invitation-v7">
   <title>أفراح الماضي — حفل زفاف حمد</title>
-  <script type="module" src="assets/app.mjs?v=contacts-v6"></script>
+  <script type="module" src="assets/app.mjs?v=invitation-v7"></script>
 </head>
 <body class="venue-theme">
   <div class="venue-backdrop" aria-hidden="true"></div>
   <a class="skip-link" href="#invitation">انتقل إلى الدعوة</a>
   <svg class="icon-definitions" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
     <symbol id="i-share" viewBox="0 0 24 24"><path d="M12 16V3m-4 4 4-4 4 4M6 11H4v10h16V11h-2"/></symbol>
-    <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M7 3v4m10-4v4M3 11h18m-13 4h2m4 0h2m-8 3h2"/></symbol>
     <symbol id="i-location" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></symbol>
     <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M19 12H5m6-6-6 6 6 6"/></symbol>
-    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
     <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M6 18 18 6"/></symbol>
     <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="13" height="13" rx="3"/><path d="M16 8V6a3 3 0 0 0-3-3H6a3 3 0 0 0-3 3v7a3 3 0 0 0 3 3h2"/></symbol>
     <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8" cy="8" r="1.5"/><path d="m3 17 6-6 5 5 3-3 4 4"/></symbol>
@@ -44,7 +42,6 @@
     <symbol id="i-phone" viewBox="0 0 24 24"><path d="M6 3H3c-1 10 7 18 18 18v-4l-5-2-2 2c-4-2-5-4-7-7l2-2Z"/></symbol>
     <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20.7 13A9 9 0 0 1 11 3a9 9 0 1 0 9.7 10Z"/></symbol>
     <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5"/></symbol>
-    <symbol id="i-heart" viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z"/></symbol>
   </defs></svg>
 
   <header class="topbar">
@@ -81,10 +78,9 @@
 
     <section class="event-layout" aria-label="تفاصيل حفل الزفاف">
       <article class="glass-card date-card">
-        <div class="card-heading"><span class="section-kicker">احفظ الموعد</span><svg><use href="#i-calendar"/></svg></div>
-        <div class="date-main"><div class="calendar-number" aria-hidden="true"><span>أكتوبر</span><b>20</b><small>2026</small></div><div><h2>مساء الثلاثاء</h2><p>20 أكتوبر 2026</p><span class="subtle">بتوقيت الكويت</span></div></div>
+        <div class="card-heading"><span class="section-kicker">موعد الفرح</span><svg><use href="#i-moon"/></svg></div>
+        <div class="date-main"><div class="date-badge" aria-hidden="true"><span>أكتوبر</span><b>20</b><small>2026</small></div><div><h2>مساء الثلاثاء</h2><p>20 أكتوبر 2026</p><span class="subtle">بتوقيت الكويت</span></div></div>
         <div class="countdown" aria-live="polite"><span class="countdown-dot" aria-hidden="true"></span><span id="countdown-label">نلتقي يوم الثلاثاء 20 أكتوبر</span></div>
-        <button class="text-button" data-action="calendar">أضف الموعد إلى تقويمك<svg><use href="#i-arrow"/></svg></button>
       </article>
 
       <article id="location" class="glass-card location-card">
@@ -104,7 +100,7 @@
     </section>
 
     <section class="closing" aria-label="ختام الدعوة"><div class="closing-symbol" aria-hidden="true">✦</div><p>فرحتنا لا تكتمل إلا بكم</p><h2>حياكم الله</h2><p class="no-gifts">نعتذر عن قبول العانية</p><div class="closing-actions"><button class="text-button" data-action="original"><svg><use href="#i-image"/></svg>بطاقة الدعوة الأصلية</button><button class="text-button" data-action="invitation-qr"><svg><use href="#i-qr"/></svg>رمز مشاركة الدعوة</button></div></section>
-    <noscript><p class="noscript-note">يمكنك التواصل من الأرقام أعلاه وفتح رابط الموقع مباشرة. <a href="hamad-wedding.ics" download>تنزيل الموعد للتقويم</a> · <a href="assets/invitation-original.jpg">عرض البطاقة الأصلية</a></p></noscript>
+    <noscript><p class="noscript-note">يمكنك التواصل من الأرقام أعلاه وفتح رابط الموقع مباشرة. <a href="assets/invitation-original.jpg">عرض البطاقة الأصلية</a></p></noscript>
   </main>
 
   <footer class="footer"><span>أفراح الماضي</span><span dir="ltr">20 · 10 · 2026</span></footer>
@@ -112,7 +108,6 @@
   <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
 
-  <dialog id="calendar-dialog" aria-labelledby="calendar-title" class="dialog compact-dialog"><button class="icon-button dialog-close" data-close aria-label="إغلاق"><svg><use href="#i-close"/></svg></button><span class="dialog-emblem"><svg><use href="#i-calendar"/></svg></span><h2 id="calendar-title">احفظ ليلة الفرح</h2><p>الثلاثاء 20 أكتوبر 2026، مساءً</p><p class="form-note">ساعة الحفل غير محددة في البطاقة. سيُحفظ الموعد كتذكير طوال اليوم، وتفاصيله تذكر أن الحفل مساءً.</p><div class="dialog-actions"><a class="button button-gold" href="hamad-wedding.ics" download><svg><use href="#i-download"/></svg>تقويم Apple أو Outlook</a><a id="google-calendar" class="button button-outline" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=%D8%B2%D9%81%D8%A7%D9%81%20%D8%AD%D9%85%D8%AF&amp;dates=20261020%2F20261021&amp;ctz=Asia%2FKuwait" target="_blank" rel="noopener noreferrer">تقويم Google<svg><use href="#i-arrow"/></svg></a></div></dialog>
 
   <dialog id="share-dialog" aria-labelledby="share-title" class="dialog compact-dialog"><button class="icon-button dialog-close" data-close aria-label="إغلاق"><svg><use href="#i-close"/></svg></button><span class="dialog-emblem"><svg><use href="#i-share"/></svg></span><h2 id="share-title">شارك الفرحة</h2><p>دعوة واحدة تجمعنا في ليلة جميلة</p><div class="dialog-actions"><button class="button button-gold" data-action="native-share"><svg><use href="#i-share"/></svg>مشاركة الدعوة</button><a id="whatsapp-share" class="button button-outline" href="https://wa.me/?text=https%3A%2F%2Fq8-ux.github.io%2Fsaad%2Fhamad-wedding%2F" target="_blank" rel="noopener noreferrer"><svg><use href="#i-whatsapp"/></svg>مشاركة عبر واتساب</a><button class="button button-outline" data-action="copy-link"><svg><use href="#i-copy"/></svg>نسخ رابط الدعوة</button></div><div class="copy-fallback" id="copy-fallback" hidden><label for="share-link">انسخ الرابط من هنا</label><input id="share-link" dir="ltr" readonly value="https://q8-ux.github.io/saad/hamad-wedding/"></div></dialog>
 

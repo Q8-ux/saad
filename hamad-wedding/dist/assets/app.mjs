@@ -1,4 +1,4 @@
-import { EVENT, countdownText, googleCalendarUrl, shareText } from './event.mjs?v=contacts-v6';
+import { EVENT, countdownText, shareText } from './event.mjs?v=invitation-v7';
 
 const $ = selector => document.querySelector(selector);
 let toastTimer;
@@ -16,7 +16,6 @@ function openDialog(id, trigger) {
   const dialog = document.getElementById(id);
   if (!dialog || typeof dialog.showModal !== 'function') {
     if (id === 'original-dialog') location.href = 'assets/invitation-original.jpg';
-    else if (id === 'calendar-dialog') location.href = 'hamad-wedding.ics';
     else if (id === 'qr-dialog') location.href = EVENT.mapUrl;
     else if (id === 'share-dialog') location.href = `https://wa.me/?text=${encodeURIComponent(shareText())}`;
     return;
@@ -75,8 +74,7 @@ document.addEventListener('click', event => {
   const trigger = event.target.closest('[data-action]');
   if (!trigger) return;
   const action = trigger.dataset.action;
-  if (action === 'calendar') openDialog('calendar-dialog', trigger);
-  else if (action === 'share') openDialog('share-dialog', trigger);
+  if (action === 'share') openDialog('share-dialog', trigger);
   else if (action === 'original') openDialog('original-dialog', trigger);
   else if (action === 'location-qr') showQr('location', trigger);
   else if (action === 'invitation-qr') showQr('invitation', trigger);
@@ -98,7 +96,6 @@ document.querySelectorAll('dialog').forEach(dialog => {
 });
 
 document.querySelectorAll('.location-link').forEach(a => { a.href = EVENT.mapUrl; });
-$('#google-calendar').href = googleCalendarUrl();
 $('#whatsapp-share').href = `https://wa.me/?text=${encodeURIComponent(shareText())}`;
 
 function refreshCountdown() { $('#countdown-label').textContent = countdownText(new Date()); }
@@ -120,6 +117,6 @@ if (guest?.trim()) {
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(() => {});
+    navigator.serviceWorker.register('./sw.js', { scope: './', updateViaCache: 'none' }).catch(() => {});
   });
 }

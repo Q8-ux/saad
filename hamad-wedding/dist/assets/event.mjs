@@ -4,7 +4,6 @@ export const EVENT = Object.freeze({
   family: 'عائلة الماضي',
   hosts: 'ناصر ماضي راضي الشمري وإخوانه',
   date: '2026-10-20',
-  nextDate: '2026-10-21',
   timeLabel: 'مساءً',
   timeZone: 'Asia/Kuwait',
   venue: 'ديوان الماضي',
@@ -43,48 +42,7 @@ export function countdownText(now) {
   return days <= 10 ? `باقي ${number} أيام على ليلة الفرح` : `باقي ${number} يومًا على ليلة الفرح`;
 }
 
-export function googleCalendarUrl() {
-  const details = [
-    `${EVENT.family} — ${EVENT.hosts}`,
-    'مساء الثلاثاء 20 أكتوبر 2026، بتوقيت الكويت. ساعة البداية لم تُحدَّد في البطاقة الأصلية.',
-    'نعتذر عن قبول العانية.', `الموقع: ${EVENT.mapUrl}`, `الدعوة: ${EVENT.publicUrl}`,
-  ].join('\n');
-  const params = new URLSearchParams({
-    action: 'TEMPLATE', text: EVENT.title, dates: '20261020/20261021',
-    ctz: EVENT.timeZone, location: `${EVENT.venue}، ${EVENT.address}`, details,
-  });
-  return `https://calendar.google.com/calendar/render?${params}`;
-}
-
 export function shareText() {
   return 'أفراح الماضي ✨\nتتشرف عائلة الماضي بدعوتكم لحضور حفل زفاف حمد\nالثلاثاء 20 أكتوبر 2026 مساءً\nديوان الماضي — سعد العبدالله\nبحضوركم يتم الفرح والسرور\n' + EVENT.publicUrl;
 }
 
-function foldIcsLine(line) {
-  const result = [];
-  let current = '';
-  let size = 0;
-  for (const character of line) {
-    const length = new TextEncoder().encode(character).length;
-    if (size + length > 75) { result.push(current); current = ' '; size = 1; }
-    current += character;
-    size += length;
-  }
-  result.push(current);
-  return result.join('\r\n');
-}
-
-export function calendarIcs() {
-  const escape = value => value.replace(/\\/g, '\\\\').replace(/\n/g, '\\n').replace(/,/g, '\\,').replace(/;/g, '\\;');
-  const description = `${EVENT.family} — ${EVENT.hosts}\nمساء الثلاثاء 20 أكتوبر 2026 بتوقيت الكويت. ساعة البداية غير محددة في البطاقة الأصلية.\nنعتذر عن قبول العانية.\nالموقع: ${EVENT.mapUrl}\nالدعوة: ${EVENT.publicUrl}`;
-  return [
-    'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Al Madi//Hamad Wedding//AR',
-    'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', 'X-WR-TIMEZONE:Asia/Kuwait',
-    'BEGIN:VEVENT', 'UID:hamad-almadi-20261020@q8-ux.github.io',
-    'DTSTAMP:20261015T185319Z', `DTSTART;VALUE=DATE:${EVENT.date.replaceAll('-', '')}`,
-    `DTEND;VALUE=DATE:${EVENT.nextDate.replaceAll('-', '')}`, `SUMMARY:${escape(EVENT.title)}`,
-    `LOCATION:${escape(`${EVENT.venue}، ${EVENT.address}`)}`, `DESCRIPTION:${escape(description)}`,
-    `GEO:${EVENT.latitude};${EVENT.longitude}`, `URL:${EVENT.publicUrl}`,
-    'STATUS:CONFIRMED', 'TRANSP:TRANSPARENT', 'END:VEVENT', 'END:VCALENDAR', '',
-  ].map(foldIcsLine).join('\r\n');
-}
