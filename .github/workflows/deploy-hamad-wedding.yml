@@ -1,0 +1,52 @@
+name: Publish Hamad Wedding Invitation
+
+on:
+  push:
+    branches: [main]
+    paths: ['hamad-wedding/**', '.github/workflows/deploy-hamad-wedding.yml']
+  workflow_dispatch:
+  workflow_run:
+    workflows: ['Deploy All GitHub Pages Sites']
+    types: [completed]
+
+permissions:
+  contents: read
+  actions: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages-v2
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: main}
+      - uses: actions/setup-node@v4
+        with: {node-version: 24}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Verify invitation behavior and package
+        run: |
+          node --check hamad-wedding/dist/assets/app.mjs
+          node --check hamad-wedding/dist/sw.js
+          node --test hamad-wedding/tests/event.test.mjs
+          python hamad-wedding/deployment/validate.py
+          python hamad-wedding/tests/test_publication.py
+      - uses: actions/configure-pages@v5
+      - name: Preserve published projects and add the invitation
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python hamad-wedding/deployment/publish.py
+      - uses: actions/upload-pages-artifact@v3
+        with: {path: _site, retention-days: 30}
+      - name: Deploy
+        id: deploy
+        uses: actions/deploy-pages@v4

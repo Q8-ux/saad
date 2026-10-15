@@ -1,0 +1,9 @@
+{
+  "qr_url": "https://q.me-qr.com/4vy1rdpc",
+  "resolved_maps_url": "https://www.google.com/maps/place/29%C2%B019'05.3%22N+47%C2%B042'42.7%22E/@29.3181267,47.7092972,17z/data=!3m1!4b1!4m4!3m3!8m2!3d29.3181267!4d47.7118721?entry=tts&g_ep=EgoyMDI2MTAwNy4wIPu8ASoASAFQAw%3D%3D&skid=9e0fd266-8fcd-4cdb-a0fe-7a284718f689",
+  "latitude": 29.3181267,
+  "longitude": 47.7118721,
+  "verification": "QR decoded from uploaded invitation, then followed its redirect to Google Maps. Google blocked automated map display with HTTP 429; the destination coordinates were recovered from its redirect URL.",
+  "source_image": "assets/invitation-original.jpg",
+  "source_sha256": "f88f4e9c8a40f4a790387f456fd535e7e1d5c8e6a06984e0932d43fdcd6f6b42"
+}

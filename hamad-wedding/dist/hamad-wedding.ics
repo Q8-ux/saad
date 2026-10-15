@@ -1,0 +1,26 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Al Madi//Hamad Wedding//AR
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+X-WR-TIMEZONE:Asia/Kuwait
+BEGIN:VEVENT
+UID:hamad-almadi-20261020@q8-ux.github.io
+DTSTAMP:20261015T185319Z
+DTSTART;VALUE=DATE:20261020
+DTEND;VALUE=DATE:20261021
+SUMMARY:حفل زفاف حمد — أفراح الماضي
+LOCATION:ديوان الماضي، منطقة سعد العبدالله، 
+ قطعة 8، شارع 24، مقابل المعسكر، الكويت
+DESCRIPTION:عائلة الماضي — ناصر ماضي راضي الشم
+ ري وإخوانه\nمساء الثلاثاء 20 أكتوبر 2026 بتو
+ قيت الكويت. ساعة البداية غير محددة في الب
+ طاقة الأصلية.\nنعتذر عن قبول العانية.\nالم
+ وقع: https://www.google.com/maps/search/?api=1&query=29.3181267%2C47.71
+ 18721\nالدعوة: https://q8-ux.github.io/saad/hamad-wedding/
+GEO:29.3181267;47.7118721
+URL:https://q8-ux.github.io/saad/hamad-wedding/
+STATUS:CONFIRMED
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR
