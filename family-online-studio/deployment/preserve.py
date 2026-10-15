@@ -13,6 +13,8 @@ import urllib.request
 import zipfile
 
 PROJECT = 'family-online-studio'
+WEB_APP = 'family-online-iphone'
+OWNED_PROJECTS = {PROJECT, WEB_APP}
 REPO = 'Q8-ux/saad'
 SOURCE = Path(__file__).resolve().parents[1]
 LIMIT = 256 * 1024 * 1024
@@ -84,7 +86,7 @@ def restore(data, destination):
 def fingerprints(destination):
     return {str(p.relative_to(destination)): hashlib.sha256(p.read_bytes()).hexdigest()
             for p in destination.rglob('*') if p.is_file()
-            and p.relative_to(destination).parts[0] != PROJECT}
+            and p.relative_to(destination).parts[0] not in OWNED_PROJECTS}
 
 def overlay(destination):
     before = fingerprints(destination)
@@ -96,9 +98,17 @@ def overlay(destination):
     shutil.copytree(SOURCE / 'assets', target / 'assets')
     if not (target / 'assets' / 'app.mjs').is_file():
         raise RuntimeError('Incomplete screenplay application.')
+    web_source = SOURCE.parent / WEB_APP
+    web_target = destination / WEB_APP
+    if web_target.exists():
+        shutil.rmtree(web_target)
+    web_target.mkdir()
+    for filename in ['index.html', 'manifest.webmanifest', 'install.css', 'launch.mjs']:
+        shutil.copy2(web_source / filename, web_target / filename)
+    shutil.copytree(web_source / 'icons', web_target / 'icons')
     if before != fingerprints(destination):
         raise RuntimeError('A site outside this application changed. Refusing publication.')
-    print(f'Prepared {PROJECT}; verified preservation of {len(before)} existing files.')
+    print(f'Prepared {PROJECT} and {WEB_APP}; verified preservation of {len(before)} existing files.')
 
 def main():
     parser = argparse.ArgumentParser()

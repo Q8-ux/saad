@@ -2,7 +2,7 @@ name: Publish Family Writing Studio
 on:
   push:
     branches: [main]
-    paths: ['family-online-studio/**', '.github/workflows/deploy-family-writing-studio.yml']
+    paths: ['family-online-studio/**', 'family-online-iphone/**', '.github/workflows/deploy-family-writing-studio.yml']
   workflow_dispatch:
   workflow_run:
     workflows: ['Deploy All GitHub Pages Sites']
