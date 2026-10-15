@@ -3,6 +3,7 @@
 import argparse
 import hashlib
 import json
+import re
 import socket
 import sqlite3
 from pathlib import Path
@@ -69,6 +70,28 @@ def audit(db, source=None):
         check("image_transcription_reviews_bound_to_exact_images",all(r["source_image_sha256"]==r["sha256"] and r["source_sha256"]==source_row["sha256"] and hashlib.sha256(r["text"].encode()).hexdigest()==r["text_sha256"] and r["review_method"]=="direct_source_image_inspection" for r in reviewed))
         table=json.loads(conn.execute("SELECT cells_json FROM image_transcriptions WHERE pdf_page=1670").fetchone()[0])
         check("judicial_table_dashes_are_not_zero_years",len(table)==9 and all(r["minimum_years"] is None for r in table[:3]) and table[-1]["minimum_years"]==4)
+    if conn.execute("SELECT 1 FROM sqlite_master WHERE name='heading_overrides'").fetchone():
+        reviewed=conn.execute("SELECT h.*,p.logical_text FROM heading_overrides h JOIN pdf_pages p USING(pdf_page)").fetchall()
+        check("reviewed_heading_spans_match_source",len(reviewed)==4 and all(r["heading"]==r["logical_text"][r["char_start"]:r["char_end"]] and r["source_sha256"]==source_row["sha256"] for r in reviewed))
+        overlap=conn.execute("SELECT count(*) FROM inline_annotations n JOIN article_segments s ON s.pdf_page=n.pdf_page AND s.char_start<n.char_end AND s.char_end>n.char_start").fetchone()[0]
+        check("same_line_footnote_is_outside_article_segments",overlap==0)
+        notices=conn.execute("SELECT n.*,p.logical_text FROM article_range_notices n JOIN pdf_pages p USING(pdf_page)").fetchall()
+        check("range_notices_are_exact_source_evidence",len(notices)==4 and all(r["text"]==r["logical_text"][json.loads(r["evidence_json"])["char_start"]:json.loads(r["evidence_json"])["char_end"]] and r["number_from"]<=r["number_to"] and r["source_sha256"]==source_row["sha256"] for r in notices))
+        appendix=conn.execute("SELECT s.*,p.role FROM page_subsections s JOIN pdf_pages p USING(pdf_page)").fetchall()
+        check("regulation_appendices_are_separate_from_provisions",len(appendix)==3 and all(r["role"]=="appendix" for r in appendix) and conn.execute("SELECT count(*) FROM article_segments WHERE pdf_page BETWEEN 1708 AND 1710").fetchone()[0]==0)
+        unexplained=[]
+        for d in conn.execute("SELECT id FROM compendium_documents").fetchall():
+            numbers={int(r[0]) for r in conn.execute("SELECT number FROM article_units WHERE document_id=?",(d[0],)) if r[0].isdigit()}
+            if not numbers:
+                continue
+            for n in set(range(1,max(numbers)+1))-numbers:
+                notice=conn.execute("SELECT 1 FROM article_range_notices WHERE document_id=? AND ? BETWEEN number_from AND number_to",(d[0],n)).fetchone()
+                issue=conn.execute("SELECT 1 FROM source_issues WHERE document_id=? AND article_number=?",(d[0],str(n))).fetchone()
+                if not notice and not issue:
+                    unexplained.append((d[0],n))
+        check("internal_number_gaps_have_explicit_source_evidence",not unexplained,unexplained)
+        issues=conn.execute("SELECT * FROM source_issues").fetchall()
+        check("source_issue_evidence_is_hash_bound",len(issues)==6 and all(r["source_sha256"]==source_row["sha256"] and all(e["page_text_sha256"]==conn.execute("SELECT text_sha256 FROM pdf_pages WHERE pdf_page=?",(e["pdf_page"],)).fetchone()[0] for e in json.loads(r["evidence_json"])) for r in issues))
     check("arabic_heading_parser",article_number("مادة ١٥")=="15" and article_number("املادة 7 مكرر (أ) (((")=="7 مكرر أ" and article_number("املادة السابقة") is None)
     check("glyph_aliases_preserve_original_option","الاعلان" in glyph_variants("الاعلان") and "االعالن" in glyph_variants("الاعلان"))
     first=conn.execute("SELECT document_id,number,pdf_page FROM article_fragments ORDER BY pdf_page,line_start LIMIT 1").fetchone()
@@ -105,6 +128,43 @@ def audit(db, source=None):
             check("unreviewed_chemical_ocr_does_not_become_answer_text",chemical["result_count"]==0 and chemical["candidate_count"]>0 and chemical["answer_status"]=="needs_image_review" and all(not r["answer_eligible"] for r in chemical["unreviewed_ocr_candidates"]))
             judicial=query_corpus(db,"search",query="وكيل نيابة",limit=3)
             check("reviewed_judicial_image_is_searchable",any(r["pdf_page"]==1670 and r.get("reviewed_image_transcriptions") for r in judicial["results"]))
+            if conn.execute("SELECT 1 FROM sqlite_master WHERE name='heading_overrides'").fetchone():
+                restored=[]
+                for start,n,page_num in [(113,'57',122),(930,'30',936),(945,'455',1013),(1690,'38',1702)]:
+                    found=query_corpus(db,"article",document_id=f"{source_prefix}-d{start:04d}",number=n)
+                    restored.append(found["result_count"]==1 and found["results"][0]["start_page"]==page_num)
+                check("merged_and_damaged_heading_labels_retrievable",all(restored))
+                p57=query_corpus(db,"article",document_id=f"{source_prefix}-d0113",number="57")["results"][0]
+                check("article57_continues_without_side_note",p57["end_page"]==123 and all(y not in p57["text"] for y in ['2007','2009','2010']) and p57["inline_page_annotations"])
+                p38=query_corpus(db,"article",document_id=f"{source_prefix}-d1690",number="38")["results"][0]
+                check("damaged_source_label_preserved_verbatim",p38["heading"].strip()=="ادة 38" and not p38["complete_article_verified"])
+                p60=query_corpus(db,"article",document_id=f"{source_prefix}-d1690",number="60")["results"][0]
+                check("last_notary_article_excludes_appended_tables",p60["end_page"]==1707 and p60["boundary_method"]=="source_appendix")
+                civil_service=query_corpus(db,"article",document_id=f"{source_prefix}-d0819",number="40")["results"][0]
+                check("royal_signature_title_not_left_in_article",not civil_service["text"].rstrip().endswith("امري البالد") and civil_service["boundary_method"]=="signature")
+                medical_end=query_corpus(db,"article",document_id=f"{source_prefix}-d0761",number="87")["results"][0]
+                check("inline_royal_signature_separated_from_article",not re.search(r"(?:أمير|أمري|امير|امري)\s+الكويت",medical_end["text"]) and medical_end["boundary_method"]=="signature")
+                aliases=[query_corpus(db,"article",document_id=f"{source_prefix}-d0945",number=n)["results"] for n in ['519 مكرر ج','٥١٩ مكرر (ج)','519 مكررا ج']]
+                check("article_suffix_formatting_aliases_share_identity",all(len(r)==1 for r in aliases) and len({r[0]["id"] for r in aliases})==1)
+                wrong=query_corpus(db,"article",document_id=f"{source_prefix}-d0945",number="5-19")
+                check("number_ranges_are_not_collapsed_into_article_numbers",wrong["not_found"])
+                recall=query_corpus(db,"search",query="قانون المرافعات",limit=100)
+                check("glyph_matches_not_suppressed_by_exact_results",recall["total_match_count"]>recall["exact_match_count"]>0 and recall["glyph_variant_match_count"]>0 and any(r["match_mode"]=="pdf_glyph_search_variants" for r in recall["results"]) and len({r["pdf_page"] for r in recall["results"]})==recall["result_count"])
+                filtered=query_corpus(db,"documents",query="اللائحة التنفيذية")
+                check("document_titles_use_observed_glyph_aliases",any(r["id"]==f"{source_prefix}-d1690" for r in filtered["results"]))
+                repealed=query_corpus(db,"article",document_id=f"{source_prefix}-d1261",number="٦٠٠")
+                check("article_inside_bulk_notice_is_not_silently_missing",not repealed["not_found"] and not repealed["article_text_available"] and repealed["answer_status"]=="source_range_notice" and repealed["article_range_notices"][0]["pdf_page"]==1349)
+                incomplete=query_corpus(db,"article",document_id=f"{source_prefix}-d0341",number="69")
+                check("truncated_original_is_reported_as_incomplete",incomplete["answer_status"]=="source_incomplete" and incomplete["results"][0]["source_completeness"]=="truncated_in_supplied_pdf" and not incomplete["results"][0]["complete_article_verified"])
+                gap=query_corpus(db,"article",document_id=f"{source_prefix}-d0761",number="25")
+                check("missing_visible_label_is_not_invented",gap["answer_status"]=="source_gap" and not gap["article_text_available"] and gap["source_issues"])
+                repeated=query_corpus(db,"article",document_id=f"{source_prefix}-d1541",number="22")
+                missing21=query_corpus(db,"article",document_id=f"{source_prefix}-d1541",number="21")
+                check("printed_duplicate_is_not_renumbered",repeated["result_count"]==2 and repeated["requires_article_selection"] and repeated["source_issues"] and not missing21["article_text_available"])
+                excluded=query_corpus(db,"article",document_id=f"{source_prefix}-d1261",number="600",article_id="nonexistent")
+                check("invalid_occurrence_filter_does_not_return_unselected_notice",excluded["not_found"] and not excluded["article_range_notices"])
+                zones=query_corpus(db,"page",page=1274)["results"][0]["page_content_zones"]
+                check("content_zones_are_contiguous_nonoverlapping_spans",all(a["line_end"]<b["line_start"] for a,b in zip(zones,zones[1:])) and any(z["kind"]=="range_notice" for z in zones))
     check("queries_do_not_mutate_database",before==hashlib.sha256(Path(db).read_bytes()).hexdigest())
     check("distinct_printed_page_preserved",conn.execute("SELECT count(*) FROM pdf_pages WHERE printed_page IS NOT NULL AND CAST(printed_page AS INT)!=pdf_page").fetchone()[0]>0)
     conn.close()

@@ -9,6 +9,9 @@
     "section_classification",
     "article_and_reference_detection",
     "article_continuation_assembly",
+    "hash_bound_structure_reviews",
+    "source_gap_and_range_notice_detection",
+    "union_of_exact_and_glyph_search_matches",
     "separate_ocr_review_layers",
     "local_sqlite_index",
     "source_and_quality_review"

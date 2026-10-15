@@ -48,6 +48,10 @@ def apply(db,reviews,output_dir):
         conn.execute("INSERT OR REPLACE INTO corpus_stats VALUES (?,?)",(k,json.dumps(v)))
     conn.commit()
     root=Path(output_dir)
+    analysis=root/"analysis.json"
+    if analysis.exists():
+        value=json.loads(analysis.read_text(encoding="utf8"));value.update(stats)
+        analysis.write_text(json.dumps(value,ensure_ascii=False,indent=2),encoding="utf8")
     (root/"assembled_articles.jsonl").write_text("".join(json.dumps(dict(r),ensure_ascii=False)+"\n" for r in conn.execute("SELECT * FROM article_units ORDER BY start_page,id")),encoding="utf8")
     conn.close()
     return stats

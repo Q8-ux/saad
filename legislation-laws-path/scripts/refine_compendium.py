@@ -15,6 +15,7 @@ from pathlib import Path
 
 from import_compendium import article_number, clean
 from legal_index import normalize
+from source_reviews import prepare_reviews,apply_line_reviews
 
 
 def digest(value):
@@ -60,6 +61,8 @@ def classify_page(conn, page):
                 label = "header"
             elif geom and geom["max_size"]<.70*body_size and geom["bbox"][1]>.45*height:
                 label, confidence = "footnote", "source_font_geometry"
+            elif re.fullmatch(r"[()«»\s]+",value) and value.strip():
+                label, confidence = "footnote_marker", "isolated_source_marker"
             elif re.match(r"^(?:الباب|الفصل|الفرع|القسم|الكتاب)\s+", value.strip()) and len(value.strip())<95:
                 if geom and geom["bbox"][0]>.10*width and geom["bbox"][2]<.90*width:
                     label, confidence = "structural_heading", "source_text_and_geometry"
@@ -91,17 +94,30 @@ def classify_page(conn, page):
 
 def signature_start(lines, i):
     key = normalize(lines[i]["text"])
-    if key not in ("امير الكويت", "امري الكويت", "امير دولة الكويت", "امري دولة الكويت", "رئيس مجلس الوزراء"):
+    titles=("امير الكويت","امري الكويت","امير دولة الكويت","امري دولة الكويت","نائب امير الكويت","نائب امري الكويت","نائب امير دولة الكويت","نائب امري دولة الكويت","امير البلاد","امري البالد","امير البالد","امري البلاد","نائب امير البلاد","نائب امري البالد","رئيس مجلس الوزراء","ولي العهد","ويل العهد","حاكم الكويت")
+    is_date=bool(re.match(r"^صدر\s+(?:(?:في|يف)\s+)?(?:ب?قصر|ب?قرص|بتاريخ)",key) or re.match(r"^صدر\s+(?:في|يف)\s+[0-9]",key))
+    if is_date:
+        return True
+    minister=bool(re.fullmatch(r"وز(?:ير|ر)\s+[\u0621-\u064a ]{2,35}",key))
+    royal_prefix=bool(re.match(r"^(?:نائب\s+)?(?:امير|امري)\s+(?:دولة\s+)?(?:الكويت|البلاد|البالد)\b",key)) and len(key)<75
+    if key not in titles and not minister and not royal_prefix:
         return False
     following=[]
     for line in lines[i+1:i+18]:
         if article_number(line["text"]):
             break
         following.append(normalize(line["text"]))
-    return any("صدر" in s and ("قصر" in s or "قرص" in s) for s in following)
+    dated=any(("صدر" in s) or re.search(r"(?:19|20)[0-9]{2}",s) for s in following)
+    geom=lines[i].get("geometry")
+    centered=geom and geom["bbox"][0]>100 and geom["bbox"][2]<1150
+    if key in titles and key!="رئيس مجلس الوزراء" and centered:
+        return True
+    if royal_prefix and centered and (dated or i>len(lines)*.6):
+        return True
+    return bool(centered and (dated or i>len(lines)*.6)) if minister else dated
 
 
-def refine(db, output_dir):
+def refine(db, output_dir, structure_reviews=None):
     root=Path(output_dir);root.mkdir(parents=True,exist_ok=True)
     conn=sqlite3.connect(db);conn.row_factory=sqlite3.Row
     source=dict(conn.execute("SELECT * FROM source_documents LIMIT 1").fetchone())
@@ -123,6 +139,7 @@ def refine(db, output_dir):
     CREATE TABLE article_annotations(article_id TEXT,pdf_page INTEGER,line_no INTEGER,kind TEXT,text TEXT);
     CREATE TABLE commentary_headings(document_id TEXT,pdf_page INTEGER,line_no INTEGER,number TEXT,text TEXT);
     """)
+    prepare_reviews(conn,source,root,structure_reviews)
     pages={p["pdf_page"]:dict(p) for p in conn.execute("SELECT * FROM pdf_pages ORDER BY pdf_page")}
     all_lines={}
     memo_doc=None
@@ -144,6 +161,19 @@ def refine(db, output_dir):
                 signing=False
             if signing and line["kind"] in ("body","structural_heading"):
                 line["kind"]="signature"
+        # A minister's signature can have the name immediately above its title.
+        for i,line in enumerate(lines):
+            if line["kind"]!="signature" or not re.match(r"^وز(?:ير|ر)\s",normalize(line["text"])):
+                continue
+            for before in reversed(lines[max(0,i-3):i]):
+                if before["kind"]=="blank":
+                    continue
+                g=before["geometry"]
+                if before["kind"]=="body" and not article_number(before["text"]) and g and g["bbox"][0]>.2*page["width"] and g["bbox"][2]<.8*page["width"] and len(before["text"].strip())<50:
+                    before["kind"]="signature"
+                else:
+                    break
+        apply_line_reviews(conn,p,lines)
         # Short centred text immediately before an article is section context.
         for i,line in enumerate(lines):
             if not article_number(line["text"]) or line["kind"]!="body":
@@ -165,11 +195,12 @@ def refine(db, output_dir):
         if page["role"]!="body" or not page["document_id"]:
             continue
         for line in all_lines[p]:
-            number=article_number(line["text"])
+            override=conn.execute("SELECT * FROM heading_overrides WHERE pdf_page=? AND line_no=?",(p,line["line_no"])).fetchone()
+            number=override["number"] if override else article_number(line["text"])
             if number and line["kind"]=="commentary":
                 conn.execute("INSERT INTO commentary_headings VALUES (?,?,?,?,?)",(page["document_id"],p,line["line_no"],number,line["text"].strip()))
             elif number and line["kind"]=="body":
-                headings.append({"page":p,"line":line["line_no"],"number":number,"heading":line["text"].strip(),"document_id":page["document_id"]})
+                headings.append({"page":p,"line":line["line_no"],"number":number,"heading":override["heading"] if override else line["text"].strip(),"document_id":page["document_id"],"first_line_end":override["first_line_end"] if override else None})
             elif line["kind"]=="body" and len(line["text"].strip())<65 and re.match(r"^(?:المادة|املادة|مادة|ماده)\b",line["text"].strip()):
                 unparsed.append({"pdf_page":p,"line":line["line_no"],"text":line["text"].strip()})
     run=0;previous_doc=None;previous_base=None;previous_unit=None
@@ -180,6 +211,9 @@ def refine(db, output_dir):
         fragment_end=same_page-1 if same_page else len(all_lines[p])
         ftext="\n".join(l["text"] for l in all_lines[p][n-1:fragment_end]).strip()
         ftext=re.split(r"\n[^\n]*(?:الصفحة الرئيسية|فهرس القانون|فهرس الدستور|فهرس الئحة)",ftext)[0].rstrip()
+        if h["first_line_end"] is not None:
+            ftext=pages[p]["logical_text"][all_lines[p][n-1]["start"]:h["first_line_end"]].strip()
+            fragment_end=n
         fragments.append({"id":original_id,"document_id":h["document_id"],"number":h["number"],"pdf_page":p,"line_start":n,"line_end":fragment_end,"heading":h["heading"],"text":ftext,"boundary_status":"provisional_page_fragment"})
         next_h=headings[index+1] if index+1<len(headings) else None
         next_same=next_h and next_h["document_id"]==h["document_id"]
@@ -189,17 +223,19 @@ def refine(db, output_dir):
         stopped=False
         for q in range(p,end_page+1):
             if pages[q]["document_id"]!=h["document_id"] or pages[q]["role"]!="body":
-                boundary="non_body_page_boundary";break
+                boundary="source_appendix" if pages[q]["role"]=="appendix" else "non_body_page_boundary";break
             # Do not silently flow article prose through a scanned annex.
             if q>p and conn.execute("SELECT 1 FROM image_occurrences o JOIN image_assets a USING(xref) WHERE o.pdf_page=? AND a.width>700 AND a.height>700",(q,)).fetchone():
                 boundary="source_image_boundary";break
             start=n if q==p else 1
             end=next_h["line"]-1 if next_same and q==next_h["page"] else len(all_lines[q])
             for line in all_lines[q][start-1:end]:
-                if line["kind"] in ("signature","commentary_start","commentary"):
-                    boundary="signature" if line["kind"]=="signature" else "commentary_start"
+                if line["kind"] in ("signature","commentary_start","commentary","range_notice"):
+                    boundary={"signature":"signature","range_notice":"source_range_notice"}.get(line["kind"],"commentary_start")
                     stopped=True;break
                 if line["kind"] in ("body","blank"):
+                    if q==p and line["line_no"]==n and h["first_line_end"] is not None:
+                        line=dict(line,end=h["first_line_end"],text=pages[p]["logical_text"][line["start"]:h["first_line_end"]])
                     included.append((q,line))
                 elif line["kind"] not in ("header","navigation"):
                     excluded.append((q,line))
@@ -209,7 +245,7 @@ def refine(db, output_dir):
             included.pop()
         groups=[]
         for q,line in included:
-            if groups and groups[-1][-1][0]==q and groups[-1][-1][1]["line_no"]==line["line_no"]-1:
+            if groups and groups[-1][-1][0]==q and groups[-1][-1][1]["line_no"]==line["line_no"]-1 and not pages[q]["logical_text"][groups[-1][-1][1]["end"]:line["start"]].strip():
                 groups[-1].append((q,line))
             else:
                 groups.append([(q,line)])
@@ -255,6 +291,7 @@ def refine(db, output_dir):
         identities=collections.Counter((f["document_id"],f["number"]) for f in fragments)
         duplicates=[{"document_id":k[0],"number":k[1],"occurrences":v} for k,v in identities.items() if v>1]
         stats.update(article_identity_candidates=len(identities),duplicate_article_identities=len(duplicates))
+        stats.update(reviewed_heading_overrides=conn.execute("SELECT count(*) FROM heading_overrides").fetchone()[0],source_range_notices=conn.execute("SELECT count(*) FROM article_range_notices").fetchone()[0],source_issues=conn.execute("SELECT count(*) FROM source_issues").fetchone()[0],separate_appendix_tables=conn.execute("SELECT count(*) FROM page_subsections").fetchone()[0])
         conn.execute("DELETE FROM qa_findings WHERE category IN ('unparsed_article_like_line','repeated_article_number')")
         for item in unparsed:
             conn.execute("INSERT INTO qa_findings(scope,location,category,detail) VALUES (?,?,?,?)",("page",f"{item['pdf_page']}:{item['line']}","unparsed_article_like_line",item["text"]))
@@ -262,7 +299,7 @@ def refine(db, output_dir):
             conn.execute("INSERT INTO qa_findings(scope,location,category,detail) VALUES (?,?,?,?)",("article",item["document_id"]+":"+item["number"],"repeated_article_number",json.dumps(item,ensure_ascii=False)))
         for k,v in stats.items():
             conn.execute("INSERT OR REPLACE INTO corpus_stats VALUES (?,?)",(k,json.dumps(v,ensure_ascii=False)))
-        conn.execute("PRAGMA user_version=4")
+        conn.execute("PRAGMA user_version=5")
     for name,rows in (("assembled_articles.jsonl",units),("legal_records.jsonl",records)):
         (root/name).write_text("".join(json.dumps(u,ensure_ascii=False)+"\n" for u in rows),encoding="utf8")
     (root/"repeated-article-numbers.json").write_text(json.dumps(duplicates,ensure_ascii=False,indent=2),encoding="utf8")
@@ -271,6 +308,11 @@ def refine(db, output_dir):
     value=json.loads(analysis.read_text());value.update(stats)
     value["limitations"]=[s for s in value.get("limitations",[]) if not s.startswith("Article records are page fragments")]
     value["limitations"].append("Articles have source-grounded continuations and separate annotations; inferred boundaries and unreviewed glyphs must not be presented as fully verified transcription.")
+    value["limitations"]=list(dict.fromkeys(value["limitations"]))
+    value["parser_revision"]="5; source-aware article assembly, structural reviews and exact/glyph search union"
+    for key in ("limitations","parser_revision"):
+        conn.execute("INSERT OR REPLACE INTO corpus_stats VALUES (?,?)",(key,json.dumps(value[key],ensure_ascii=False)))
+    conn.commit()
     analysis.write_text(json.dumps(value,ensure_ascii=False,indent=2),encoding="utf8")
     conn.close()
     return stats
@@ -280,5 +322,6 @@ if __name__=="__main__":
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--db",required=True)
     parser.add_argument("--output-dir",required=True)
+    parser.add_argument("--structure-reviews")
     args=parser.parse_args()
-    print(json.dumps(refine(args.db,args.output_dir),ensure_ascii=False,indent=2))
+    print(json.dumps(refine(args.db,args.output_dir,args.structure_reviews),ensure_ascii=False,indent=2))
