@@ -1,0 +1,26 @@
+{
+  "name": "مسار التشريعات",
+  "technical_id": "legislation-laws-path",
+  "scope": "bound_file_only",
+  "external_legal_search": false,
+  "pipeline": [
+    "document_analysis",
+    "full_page_extraction",
+    "section_classification",
+    "article_and_reference_detection",
+    "local_sqlite_index",
+    "source_and_quality_review"
+  ],
+  "entrypoints": {
+    "import": "scripts/import_compendium.py",
+    "query": "scripts/corpus_query.py",
+    "audit": "scripts/test_corpus.py",
+    "ocr": "scripts/ocr_compendium_images.py"
+  },
+  "integration": {
+    "target": "sabeq",
+    "state": "prepared_for_later_integration",
+    "production_modified": false
+  },
+  "data_policy": "Keep the bound source, corpus and credentials private; publish reusable code only."
+}
