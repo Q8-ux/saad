@@ -63,6 +63,12 @@
 			"path" = "Sources/WritingStudio/Resources/native-bridge.js";
 			"sourceTree" = "<group>";
 		};
+		"96ED5C5789B174A01557791C" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "text.xml";
+			"path" = "Sources/WritingStudio/Resources/PrivacyInfo.xcprivacy";
+			"sourceTree" = "<group>";
+		};
 		"82103C82A4F70E52845B5087" = {
 			"isa" = "PBXFileReference";
 			"lastKnownFileType" = "sourcecode.swift";
@@ -94,6 +100,7 @@
 				"59BD0A3FF43B32849B319E64",
 				"3685E330EC5277A9DD5661C6",
 				"2FA1981B4A9A7A3E2F129435",
+				"96ED5C5789B174A01557791C",
 			);
 			"sourceTree" = "<group>";
 		};
@@ -142,12 +149,17 @@
 			"isa" = "PBXBuildFile";
 			"fileRef" = "2FA1981B4A9A7A3E2F129435";
 		};
+		"A39309C4376B4D66A5739C05" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "96ED5C5789B174A01557791C";
+		};
 		"8ECC8B5D05B79F879ACDF1A2" = {
 			"isa" = "PBXResourcesBuildPhase";
 			"buildActionMask" = "2147483647";
 			"files" = (
 				"716E9590E60B3AFA6E62BF18",
 				"72A9924771690D6993ED19A7",
+				"A39309C4376B4D66A5739C05",
 			);
 			"runOnlyForDeploymentPostprocessing" = "0";
 		};

@@ -12,6 +12,8 @@ assert 'message.frameInfo.isMainFrame' in sources
 assert 'StudioPolicy.appURL(webView.url)' in sources
 assert not re.search(r'sk-(?:proj-)?[A-Za-z0-9_-]{20,}',sources)
 assert 'serverTrust' not in sources
+privacy=plistlib.loads((root/'Sources/WritingStudio/Resources/PrivacyInfo.xcprivacy').read_bytes())
+assert privacy['NSPrivacyAccessedAPITypes']==[{'NSPrivacyAccessedAPIType':'NSPrivacyAccessedAPICategoryFileTimestamp','NSPrivacyAccessedAPITypeReasons':['C617.1']}]
 assert not list(root.rglob('*.p12')) and not list(root.rglob('*.mobileprovision'))
 icons=json.loads((root/'Sources/WritingStudio/Assets.xcassets/AppIcon.appiconset/Contents.json').read_text())
 for item in icons['images']: assert (root/'Sources/WritingStudio/Assets.xcassets/AppIcon.appiconset'/item['filename']).is_file()

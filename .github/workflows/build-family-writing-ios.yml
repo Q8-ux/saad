@@ -14,7 +14,7 @@ permissions:
   contents: read
 concurrency:
   group: family-writing-ios
-  cancel-in-progress: false
+  cancel-in-progress: true
 jobs:
   build-and-test:
     runs-on: macos-15
@@ -77,6 +77,18 @@ jobs:
           ditto -c -k --keepParent build/DerivedData/Build/Products/Debug-iphonesimulator/WritingStudio.app "$package/writing-studio-ios-simulator.app.zip"
           cp build/xcode-version.txt build/project-info.json build/simulator-test.log build/iphone-archive.log "$package/"
           plutil -p build/WritingStudio.xcarchive/Products/Applications/WritingStudio.app/Info.plist > "$package/compiled-info.txt"
+          python3 - <<'PY'
+          import plistlib,json,pathlib
+          app=pathlib.Path('build/WritingStudio.xcarchive/Products/Applications/WritingStudio.app')
+          info=plistlib.loads((app/'Info.plist').read_bytes())
+          privacy=plistlib.loads((app/'PrivacyInfo.xcprivacy').read_bytes())
+          assert int(info['DTXcode'])>=2600
+          assert int(info['DTSDKName'].removeprefix('iphoneos').split('.')[0])>=26
+          assert privacy['NSPrivacyAccessedAPITypes'][0]['NSPrivacyAccessedAPITypeReasons']==['C617.1']
+          result={'xcode_build_setting':info['DTXcode'],'sdk':info['DTSDKName'],'minimum_ios':info['MinimumOSVersion'],'privacy_manifest_embedded':True}
+          pathlib.Path('build/archive-verification.json').write_text(json.dumps(result,indent=2)+'\n')
+          PY
+          cp build/archive-verification.json "$package/"
           file build/WritingStudio.xcarchive/Products/Applications/WritingStudio.app/WritingStudio > "$package/compiled-binary.txt"
           printf '%s\n' "$GITHUB_SHA" > "$package/source-commit.txt"
           printf '%s\n' 'Unsigned archive: requires Apple signing/provisioning before installing on an iPhone. Not a TestFlight release.' > "$package/DISTRIBUTION-STATUS.txt"
