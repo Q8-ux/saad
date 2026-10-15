@@ -43,6 +43,11 @@ jobs:
           node tools/pwa.test.mjs
           swiftc Sources/WritingStudio/StudioPolicy.swift tools/PolicySelfTest.swift -o build/policy-check
           build/policy-check
+      - name: Archive an unsigned iPhone release
+        run: |
+          xcodebuild -project WritingStudio.xcodeproj -scheme WritingStudio -configuration Release \
+            -destination 'generic/platform=iOS' -archivePath build/WritingStudio.xcarchive \
+            -derivedDataPath build/ReleaseDerivedData CODE_SIGNING_ALLOWED=NO archive > build/iphone-archive.log 2>&1 || { tail -n 100 build/iphone-archive.log; exit 1; }
       - name: Select an available iPhone simulator
         run: |
           xcrun simctl list devices available --json > build/simulators.json
@@ -64,11 +69,6 @@ jobs:
             -destination "platform=iOS Simulator,id=$STUDIO_SIMULATOR" \
             -derivedDataPath build/DerivedData -resultBundlePath build/Smoke.xcresult \
             -parallel-testing-enabled NO CODE_SIGNING_ALLOWED=NO test > build/simulator-test.log 2>&1 || { tail -n 100 build/simulator-test.log; exit 1; }
-      - name: Archive an unsigned iPhone release
-        run: |
-          xcodebuild -project WritingStudio.xcodeproj -scheme WritingStudio -configuration Release \
-            -destination 'generic/platform=iOS' -archivePath build/WritingStudio.xcarchive \
-            -derivedDataPath build/ReleaseDerivedData CODE_SIGNING_ALLOWED=NO archive > build/iphone-archive.log 2>&1 || { tail -n 100 build/iphone-archive.log; exit 1; }
       - name: Package verified build evidence
         run: |
           package="$RUNNER_TEMP/family-writing-ios"
