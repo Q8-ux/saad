@@ -1,4 +1,4 @@
-import { EVENT, countdownText, googleCalendarUrl, shareText } from './event.mjs?v=details-v4';
+import { EVENT, countdownText, googleCalendarUrl, shareText } from './event.mjs?v=contacts-v6';
 
 const $ = selector => document.querySelector(selector);
 let toastTimer;

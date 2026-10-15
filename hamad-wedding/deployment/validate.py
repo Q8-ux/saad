@@ -56,7 +56,7 @@ def main():
     for reference in page.references:
         path = DIST / unquote(urlsplit(reference).path)
         assert path.is_file(), 'Missing local reference: '+reference
-    expected = {'https://wa.me/965'+n for n in ['65005654','99732147','50168888','66002205']}
+    expected = {'https://wa.me/965'+n for n in ['65505654','99732147','50168888','66002205']}
     assert set(page.whatsapp) == expected
     assert len(page.whatsapp) == 4
     assert page.maps and all('29.3181267%2C47.7118721' in url for url in page.maps)

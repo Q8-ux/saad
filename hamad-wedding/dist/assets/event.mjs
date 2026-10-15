@@ -14,7 +14,7 @@ export const EVENT = Object.freeze({
   longitude: 47.7118721,
   mapUrl: 'https://www.google.com/maps/search/?api=1&query=29.3181267%2C47.7118721',
   publicUrl: 'https://q8-ux.github.io/saad/hamad-wedding/',
-  contacts: Object.freeze(['65005654', '99732147', '50168888', '66002205']),
+  contacts: Object.freeze(['65505654', '99732147', '50168888', '66002205']),
 });
 
 export function whatsappUrl(phone, message = '') {

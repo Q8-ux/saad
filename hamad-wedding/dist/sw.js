@@ -1,5 +1,5 @@
-const CACHE = 'hamad-wedding-v4';
-const ASSETS = ['./','./index.html','./assets/style.css','./assets/style.css?v=details-v4','./assets/app.mjs','./assets/app.mjs?v=details-v4','./assets/event.mjs','./assets/event.mjs?v=details-v4','./assets/invitation-original.jpg','./assets/venue-background.jpg','./assets/location-qr.svg','./assets/invitation-qr.svg','./assets/fonts/Amiri-Regular.woff2','./assets/fonts/Amiri-Bold.woff2','./assets/icon.svg','./assets/apple-touch-icon.png','./assets/icon-192.png','./assets/icon-512.png','./manifest.webmanifest','./hamad-wedding.ics'];
+const CACHE = 'hamad-wedding-v6';
+const ASSETS = ['./','./index.html','./assets/style.css','./assets/style.css?v=contacts-v6','./assets/app.mjs','./assets/app.mjs?v=contacts-v6','./assets/event.mjs','./assets/event.mjs?v=contacts-v6','./assets/invitation-original.jpg','./assets/venue-background.jpg','./assets/location-qr.svg','./assets/invitation-qr.svg','./assets/fonts/Amiri-Regular.woff2','./assets/fonts/Amiri-Bold.woff2','./assets/icon.svg','./assets/apple-touch-icon.png','./assets/icon-192.png','./assets/icon-512.png','./manifest.webmanifest','./hamad-wedding.ics'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(ASSETS)).then(() => self.skipWaiting()));
 });

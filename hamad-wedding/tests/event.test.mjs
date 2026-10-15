@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 import {EVENT, whatsappUrl, daysToEvent, countdownText, googleCalendarUrl, calendarIcs, shareText} from '../dist/assets/event.mjs';
 
 test('all four invitation numbers open their own Kuwaiti WhatsApp conversation', () => {
-  assert.deepEqual(EVENT.contacts, ['65005654','99732147','50168888','66002205']);
+  assert.deepEqual(EVENT.contacts, ['65505654','99732147','50168888','66002205']);
   for (const number of EVENT.contacts) {
     const url = new URL(whatsappUrl(number, 'مبارك لكم 🌷'));
     assert.equal(url.hostname, 'wa.me');
@@ -13,7 +13,7 @@ test('all four invitation numbers open their own Kuwaiti WhatsApp conversation',
   }
   // The photography studio number is not a wedding contact.
   assert.throws(() => whatsappUrl('55009914'), RangeError);
-  assert.throws(() => whatsappUrl('65005654?text=other'), RangeError);
+  assert.throws(() => whatsappUrl('65505654?text=other'), RangeError);
 });
 
 test('day countdown follows Kuwait midnight rather than the device timezone', () => {
