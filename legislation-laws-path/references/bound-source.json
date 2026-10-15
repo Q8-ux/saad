@@ -1,0 +1,10 @@
+{
+  "alias": "user-legislation-source",
+  "provider": "google_drive",
+  "file_id": null,
+  "url": null,
+  "access_status": "not_configured_in_public_mirror",
+  "contents_imported": false,
+  "legal_currency_verified": false,
+  "configuration": "Configure the source privately in the installed skill. The user-specific source binding is intentionally not published."
+}
