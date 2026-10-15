@@ -1,7 +1,7 @@
 {
   "name": "استوديو الكتابة",
   "version": "1.0.0",
-  "created_utc": "2026-10-15T14:17:31.732485+00:00",
+  "created_utc": "2026-10-15T14:32:03.140698+00:00",
   "web_app": {
     "url": "https://q8-ux.github.io/saad/family-online-iphone/",
     "installation": "Safari > Share > Add to Home Screen",
@@ -18,10 +18,10 @@
     "minimum_ios": "17.4",
     "architecture": "arm64",
     "version": "1.0.0",
-    "xcode": "16.4 (16F6)",
-    "source_commit": "f3296ad386d3d0358e2847201518266105aa9cd8",
-    "build_run": "https://github.com/Q8-ux/saad/actions/runs/38748846285",
-    "build_artifact_id": 11980611523,
+    "xcode": "26.3",
+    "source_commit": "92705933a1bdeff948426559029e6ca701e05ee4",
+    "build_run": "https://github.com/Q8-ux/saad/actions/runs/38751116057",
+    "build_artifact_id": 11981607247,
     "source_checks": "passed",
     "swift_policy_checks": "passed",
     "javascript_protocol_checks": "passed",
@@ -34,7 +34,10 @@
     "physical_device_tested": false,
     "microphone_device_tested": false,
     "printing_device_tested": false,
-    "next_distribution_step": "Owner Apple Developer team, certificate and provisioning; sign and upload through App Store Connect"
+    "next_distribution_step": "Owner Apple Developer team, certificate and provisioning; sign and upload through App Store Connect",
+    "sdk": "iphoneos26.2",
+    "privacy_manifest_embedded": true,
+    "file_timestamp_reason": "C617.1"
   },
   "publication": {
     "source_commit": "399c94449dc3bdccea4c353385101a9819e065ac",
@@ -43,12 +46,12 @@
   },
   "downloads": {
     "writing-studio-ios-source-1.0.0.zip": {
-      "bytes": 99329,
-      "sha256": "a421cee43bf88906afd360a8bb44e016059e25d09632a05c045afb45395bf85c"
+      "bytes": 100855,
+      "sha256": "6897d03e988f06e2daa1a17513104e48e57722c74f3969fea2c9c2001da1a236"
     },
     "writing-studio-ios-unsigned.xcarchive.zip": {
-      "bytes": 946334,
-      "sha256": "210d3413b9c06098d83643c37e7bebce0b607b8e9d81a5bdca5a668e74f922cb"
+      "bytes": 945201,
+      "sha256": "ffd051f85a3dbafc822fd9a6d68300e266e7258f8f1dd78babb7c5f6b147f753"
     }
   }
 }

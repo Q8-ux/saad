@@ -2,7 +2,7 @@
 
 مشروع iOS أصلي بـSwiftUI وWKWebView، متصل بالمحرر نفسه على https://q8-ux.github.io/saad/family-online-studio/ . الحد الأدنى iOS/iPadOS 17.4. لا كلمة مرور إضافية، ولا نصوص مسرحية أو مفاتيح خادم داخل الحزمة.
 
-الإصدار 1.0.0 اجتاز البناء واختبار تشغيل عربي أساسي على محاكي iPhone، وبُني أرشيف Release لمعالج arm64 باستخدام Xcode 16.4. [سجل البناء والتحقق](https://github.com/Q8-ux/saad/actions/runs/38748846285). نتائج التحقق وحدودها في [بيانات الإصدار](./downloads/release.json).
+الإصدار 1.0.0 بُني لمعالج arm64 باستخدام Xcode 26.3 وSDK iOS 26.2، مع بقاء الحد الأدنى للهاتف iOS 17.4. [سجل البناء واختبار التشغيل العربي الأساسي](https://github.com/Q8-ux/saad/actions/runs/38751116057). نتائج التحقق وحدودها في [بيانات الإصدار](./downloads/release.json).
 
 [تنزيل مشروع Xcode كاملًا — ZIP](https://github.com/Q8-ux/saad/raw/refs/heads/main/family-online-ios/downloads/writing-studio-ios-source-1.0.0.zip)
 
@@ -24,7 +24,7 @@
 
 ## البناء
 
-افتح `WritingStudio.xcodeproj` في Xcode، واختر scheme `WritingStudio`. يوجد مشروع مولّد حتميًا عبر `python3 tools/generate-project.py` دون تبعيات بناء خارجية. لا تغيّر المعرّف `com.saadrawdan.writingstudio` بعد أول إصدار موقّع.
+افتح `WritingStudio.xcodeproj` في Xcode 26.3 أو أحدث، واختر scheme `WritingStudio`. يوجد مشروع مولّد حتميًا عبر `python3 tools/generate-project.py` دون تبعيات بناء خارجية. لا تغيّر المعرّف `com.saadrawdan.writingstudio` بعد أول إصدار موقّع.
 
 يشغّل workflow `Build Family Writing iOS` فحوص المصدر، وسياسات الروابط وأسماء الملفات، وبروتوكول التصدير، واختبار تشغيل عربي على محاكي آيفون بصفحة اختبار محلية. ثم يبني archive **غير موقّع** للآيفون. لا يستدعي اختبار الواجهة المسودة الحقيقية ولا يعدّلها. لا تعادل هذه الفحوص تجربة الميكروفون والطباعة وحفظ الملفات على هاتف فعلي.
 
@@ -33,5 +33,7 @@
 المشروع وأرشيف Xcode غير الموقّع ليسا ملف تثبيت للمستخدم. لم يُنشر التطبيق الأصلي على TestFlight أو App Store، ولا توجد شهادة Apple أو provisioning profile داخل المستودع أو Actions. توزيع النسخة الأصلية يتطلب حساب Apple Developer للمالك، وإعداد Team والتوقيع، ثم رفع build إلى App Store Connect. لا ترسل كلمة مرور Apple أو شهادتها إلى مستودع عام.
 
 يمكن فتح المشروع في Xcode وتحديد فريق المالك لتوقيع Archive صالح للتوزيع. لا يلزم شراء اشتراك أو توقيع لاستخدام نسخة Safari.
+
+تتضمن الحزمة `PrivacyInfo.xcprivacy` مع السبب `C617.1` لقراءة تواريخ ملفات التصدير المؤقتة داخل حاوية التطبيق وحذف القديم منها. هذا التصريح يخص واجهات النظام المستخدمة؛ تُستكمل إفصاحات App Store Connect عن النصوص والتسجيلات المرسلة للخادم وسياسة الخصوصية عند النشر. لا يتضمن التصريح ادعاءً بعدم جمع البيانات.
 
 مراجع Apple: https://support.apple.com/guide/iphone/open-as-web-app-iphea86e5236/ios وhttps://developer.apple.com/documentation/xcode/distributing-your-app-for-beta-testing-and-releases
