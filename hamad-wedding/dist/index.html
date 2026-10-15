@@ -22,9 +22,9 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="preload" href="assets/fonts/Amiri-Regular.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="assets/venue-background.jpg" as="image">
-  <link rel="stylesheet" href="assets/style.css?v=invitation-v11">
+  <link rel="stylesheet" href="assets/style.css?v=invitation-v12">
   <title>أفراح الماضي — حفل زفاف حمد</title>
-  <script type="module" src="assets/app.mjs?v=invitation-v11"></script>
+  <script type="module" src="assets/app.mjs?v=invitation-v12"></script>
 </head>
 <body class="venue-theme">
   <div class="venue-backdrop" aria-hidden="true"></div>
@@ -48,7 +48,7 @@
     <a class="brand" href="#invitation" aria-label="أفراح الماضي، بداية الدعوة"><span>أفراح الماضي<small>دعوة حفل زفاف</small></span></a>
     <nav class="toolbar" aria-label="أدوات الدعوة">
       <button class="icon-button" data-action="theme" aria-label="تفعيل المظهر الليلي" aria-pressed="false"><svg><use href="#i-moon"/></svg></button>
-      <button class="share-button" data-action="share" aria-label="مشاركة الدعوة"><svg><use href="#i-share"/></svg><span>شارك الفرحة</span></button>
+      <button class="icon-button" data-action="share" aria-label="مشاركة الدعوة"><svg><use href="#i-share"/></svg></button>
     </nav>
   </header>
 
@@ -105,7 +105,7 @@
 
 
 
-  <dialog id="share-dialog" aria-labelledby="share-title" class="dialog compact-dialog"><button class="icon-button dialog-close" data-close aria-label="إغلاق"><svg><use href="#i-close"/></svg></button><span class="dialog-emblem"><svg><use href="#i-share"/></svg></span><h2 id="share-title">شارك الفرحة</h2><p>دعوة واحدة تجمعنا في ليلة جميلة</p><div class="dialog-actions"><button class="button button-gold" data-action="native-share"><svg><use href="#i-share"/></svg>مشاركة الدعوة</button><a id="whatsapp-share" class="button button-outline" href="https://wa.me/?text=https%3A%2F%2Fq8-ux.github.io%2Fsaad%2Fhamad-wedding%2F" target="_blank" rel="noopener noreferrer"><svg><use href="#i-whatsapp"/></svg>مشاركة عبر واتساب</a><button class="button button-outline" data-action="copy-link"><svg><use href="#i-copy"/></svg>نسخ رابط الدعوة</button></div><div class="copy-fallback" id="copy-fallback" hidden><label for="share-link">انسخ الرابط من هنا</label><input id="share-link" dir="ltr" readonly value="https://q8-ux.github.io/saad/hamad-wedding/"></div></dialog>
+  <dialog id="share-dialog" aria-label="مشاركة الدعوة" class="dialog compact-dialog"><button class="icon-button dialog-close" data-close aria-label="إغلاق"><svg><use href="#i-close"/></svg></button><span class="dialog-emblem"><svg><use href="#i-share"/></svg></span><div class="dialog-actions"><button class="button button-gold" data-action="native-share"><svg><use href="#i-share"/></svg>مشاركة الدعوة</button><a id="whatsapp-share" class="button button-outline" href="https://wa.me/?text=https%3A%2F%2Fq8-ux.github.io%2Fsaad%2Fhamad-wedding%2F" target="_blank" rel="noopener noreferrer"><svg><use href="#i-whatsapp"/></svg>مشاركة عبر واتساب</a><button class="button button-outline" data-action="copy-link"><svg><use href="#i-copy"/></svg>نسخ رابط الدعوة</button></div><div class="copy-fallback" id="copy-fallback" hidden><label for="share-link">انسخ الرابط من هنا</label><input id="share-link" dir="ltr" readonly value="https://q8-ux.github.io/saad/hamad-wedding/"></div></dialog>
 
   <dialog id="qr-dialog" aria-labelledby="qr-title" class="dialog compact-dialog"><button class="icon-button dialog-close" data-close aria-label="إغلاق"><svg><use href="#i-close"/></svg></button><p class="section-kicker">قرّب كاميرا جوالك</p><h2 id="qr-title">موقع الديوان</h2><img id="qr-image" class="qr-image" src="assets/location-qr.svg" alt="رمز موقع ديوان الماضي" width="260" height="260"><p id="qr-description">امسح الرمز لفتح الموقع الموجود في البطاقة الأصلية</p><a id="qr-link" class="button button-gold full-width" href="https://q.me-qr.com/4vy1rdpc" target="_blank" rel="noopener noreferrer">افتح الرابط<svg><use href="#i-arrow"/></svg></a></dialog>
 
