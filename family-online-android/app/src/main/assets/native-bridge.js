@@ -10,7 +10,7 @@
   const send = value => { if (!port) throw new Error('Native connection not ready'); port.postMessage(JSON.stringify(value)); };
   window.addEventListener('message', event => {
     // Android posts from a native, opaque source; targetOrigin is pinned in Java.
-    const nativeSource = event.source == null && (event.origin === 'null' || event.origin === '');
+    const nativeSource = event.source == null && ['null', '', 'https://q8-ux.github.io'].includes(event.origin);
     const samePageSource = event.source === window && event.origin === 'https://q8-ux.github.io';
     if ((!nativeSource && !samePageSource) || event.data !== 'fo-native-port' || !event.ports?.[0]) return;
     port?.close(); port = event.ports[0];

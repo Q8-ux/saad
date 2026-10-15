@@ -25,6 +25,7 @@ vm.runInContext("__listeners.message({source:null,origin:'null',data:'fo-native-
 vm.runInContext("speechSynthesis.cancel()",sandbox);
 assert.equal(messages.at(-1).type,'tts-stop');
 vm.runInContext("__listeners.message({source:null,origin:'',data:'fo-native-port',ports:[nativePort]})",sandbox);
+vm.runInContext("__listeners.message({source:null,origin:'https://q8-ux.github.io',data:'fo-native-port',ports:[nativePort]})",sandbox);
 const bytes=Uint8Array.from({length:70001},(_,i)=>i%251);context.testBlob=new Blob([bytes],{type:'application/json'});
 vm.runInContext("const link=new HTMLAnchorElement();link.href=URL.createObjectURL(testBlob);link.download='نص التجربة.json';link.click();URL.revokeObjectURL(link.href)",sandbox);
 const until=Date.now()+5000;while(!messages.some(x=>x.type==='export-end') && Date.now()<until)await new Promise(r=>setTimeout(r,5));
