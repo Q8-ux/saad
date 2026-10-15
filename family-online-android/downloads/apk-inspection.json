@@ -1,0 +1,17 @@
+{
+  "package": "com.saadrawdan.writingstudio",
+  "version_name": "1.0.0",
+  "version_code": 1,
+  "min_sdk": 26,
+  "target_sdk": 36,
+  "debuggable": false,
+  "allow_backup": false,
+  "cleartext_network": false,
+  "permissions": [
+    "android.permission.ACCESS_NETWORK_STATE",
+    "android.permission.INTERNET",
+    "android.permission.RECORD_AUDIO"
+  ],
+  "zip_integrity": true,
+  "dex_present": true
+}

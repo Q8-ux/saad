@@ -1,0 +1,33 @@
+{
+  "name": "استوديو الكتابة",
+  "version_name": "1.0.0",
+  "version_code": 1,
+  "application_id": "com.saadrawdan.writingstudio",
+  "minimum_android": "8.0",
+  "min_sdk": 26,
+  "target_sdk": 36,
+  "apk": "writing-studio-1.0.0.apk",
+  "apk_bytes": 37692,
+  "apk_sha256": "42f8895f706cfc8d144f239f56d45ad87001d86ff5c90a2cb1a2fb4a003aadbe",
+  "certificate_sha256": "76b9b5df71c29abe2f695fd4fdb3819d7e5b074dcb8c1991468b640b2a28cba7",
+  "source_commit": "fdefe4eeb438bd5280a1b5e4633582abc7df3c6c",
+  "build_run": "https://github.com/Q8-ux/saad/actions/runs/38744728130",
+  "build_artifact_id": 11978315396,
+  "editor_url": "https://q8-ux.github.io/saad/family-online-studio/",
+  "download_url": "https://github.com/Q8-ux/saad/raw/refs/heads/main/family-online-android/downloads/writing-studio-1.0.0.apk",
+  "internet_required": true,
+  "password_required": false,
+  "verified": [
+    "release build",
+    "JVM navigation and filename policy",
+    "native file protocol in Node VM",
+    "APK v2 and v3 signature",
+    "compiled APK permissions and flags",
+    "live automatic access HTTP 200",
+    "live manuscript load HTTP 200"
+  ],
+  "physical_device_tested": false,
+  "microphone_device_tested": false,
+  "printing_device_tested": false,
+  "created_utc": "2026-10-15T13:42:22.098231+00:00"
+}
