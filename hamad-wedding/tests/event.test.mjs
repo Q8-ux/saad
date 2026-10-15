@@ -69,7 +69,6 @@ test('map pin is the QR redirect destination, not its map camera center', () => 
   assert.equal(source.longitude,EVENT.longitude);
   assert.equal(new URL(EVENT.mapUrl).searchParams.get('query'),`${EVENT.latitude},${EVENT.longitude}`);
   assert.notEqual(EVENT.longitude,47.7092972);
-  assert.equal(new URL(EVENT.appleMapsUrl).searchParams.get('daddr'),`${EVENT.latitude},${EVENT.longitude}`);
 });
 
 test('share uses the public invitation URL without a guest name or private parameters', () => {

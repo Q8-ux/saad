@@ -41,7 +41,7 @@ class PublicationTests(unittest.TestCase):
                 if not path.startswith('hamad-wedding/'):
                     self.assertEqual((destination/path).read_bytes(),content)
             self.assertIn('أفراح الماضي',(destination/'hamad-wedding/index.html').read_text())
-            self.assertTrue((destination/'hamad-wedding/assets/fonts/al-mohanad.woff').is_file())
+            self.assertTrue((destination/'hamad-wedding/assets/fonts/Amiri-Regular.woff2').is_file())
 
     def test_unsafe_archives_are_rejected(self):
         for data in [package({'../outside':b'escape'}),package({'index.html':b'x'},symlink='link')]:

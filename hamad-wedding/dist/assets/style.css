@@ -1,6 +1,6 @@
-@font-face{font-family:Mohanad;src:url('fonts/al-mohanad.woff') format('woff');font-style:normal;font-weight:400;font-display:swap}
-@font-face{font-family:Mohanad;src:url('fonts/al-mohanad-bold.woff') format('woff');font-style:normal;font-weight:700;font-display:swap}
-:root{color-scheme:light;--paper:#f7f4ee;--card:rgba(255,255,255,.72);--ink:#292723;--muted:#726b60;--gold:#987a42;--gold-deep:#715322;--gold-soft:#e9dec8;--line:#d9d1c2;--soft:#eee9df;--green:#27724f;--shadow:0 16px 50px #5c492010;--font:Mohanad,"Geeza Pro",Tahoma,Arial,sans-serif}
+@font-face{font-family:Amiri;src:url('fonts/Amiri-Regular.woff2') format('woff2');font-style:normal;font-weight:400;font-display:swap}
+@font-face{font-family:Amiri;src:url('fonts/Amiri-Bold.woff2') format('woff2');font-style:normal;font-weight:700;font-display:swap}
+:root{color-scheme:light;--paper:#f7f4ee;--card:rgba(255,255,255,.72);--ink:#292723;--muted:#726b60;--gold:#987a42;--gold-deep:#715322;--gold-soft:#e9dec8;--line:#d9d1c2;--soft:#eee9df;--green:#27724f;--shadow:0 16px 50px #5c492010;--font:Amiri,"Geeza Pro",Tahoma,Arial,sans-serif}
 *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:30px}body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--font);font-size:22px;line-height:1.6;-webkit-font-smoothing:antialiased;background-image:radial-gradient(ellipse at 95% 12%,#dfd0b329,transparent 36%),radial-gradient(ellipse at 2% 55%,#e3dac12b,transparent 40%)}
 body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.22;z-index:-1;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Cpath fill='%23a99c80' opacity='.15' filter='url(%23n)' d='M0 0h180v180H0z'/%3E%3C/svg%3E")}
 button,input,a{-webkit-tap-highlight-color:transparent}button,input{font:inherit}button,a{touch-action:manipulation}button{cursor:pointer}a{color:inherit;text-decoration:none}button{color:inherit}button:disabled{cursor:default;opacity:.5}svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.65;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}img{display:block;max-width:100%}p,h1,h2{margin:0}h1,h2{font-weight:700;line-height:1.25}h2{font-size:32px}button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #477f9c;outline-offset:5px}::selection{background:var(--gold-soft)}[hidden]{display:none!important}.icon-definitions{position:absolute;width:0;height:0;overflow:hidden}.skip-link{position:fixed;top:10px;right:15px;background:var(--ink);color:var(--paper);padding:10px 24px;z-index:100;transform:translateY(-200%);border-radius:12px}.skip-link:focus{transform:none}
@@ -18,3 +18,36 @@ html[data-theme=dark]{color-scheme:dark;--paper:#1d1e1c;--card:#292a27bd;--ink:#
 @media print{.topbar,.hero-actions,.text-button,.mobile-dock,.location-actions,.footer,.closing-actions,.toast,dialog{display:none!important}body{background:white;color:#222;font-size:18px}main{max-width:none}.hero{min-height:0;gap:20px;padding:15px 0}.hero h1{font-size:80px}.hero-visual{max-width:250px}.event-layout{grid-template-columns:1fr 1fr}.glass-card{box-shadow:none;break-inside:avoid}.contact-section{padding-top:25px}.contacts{grid-template-columns:repeat(4,1fr)}.contact-link{padding:10px;display:block}.contact-link b{font-size:23px}.wa-icon,.contact-action{display:none}.closing{padding:20px 0}.closing h2{font-size:35px}}
 
 .location-actions{flex-wrap:wrap}.apple-maps-link{font-size:17px;color:var(--gold-deep);min-height:44px;display:flex;align-items:center;flex-basis:100%}.apple-maps-link:hover{text-decoration:underline;text-underline-offset:4px}
+
+/* The host's real venue photograph forms the invitation background. */
+body.venue-theme{isolation:isolate;min-height:100vh;background:transparent}
+.venue-backdrop{position:fixed;inset:0;z-index:-2;pointer-events:none;background:linear-gradient(180deg,rgba(22,17,7,.15),rgba(22,17,7,.35)),url('venue-background.jpg') center 32% / cover no-repeat}
+.venue-theme .topbar,.venue-theme .hero-copy,.venue-theme .section-intro,.venue-theme .closing,.venue-theme .glass-card{background:rgba(255,252,245,.94);border:1px solid rgba(255,241,206,.7);box-shadow:0 16px 44px rgba(20,14,3,.16);backdrop-filter:blur(14px)}
+.venue-theme .topbar{width:calc(100% - 60px);margin:24px auto 0;padding:16px 24px;border-radius:24px}
+.venue-theme .hero-copy{padding:30px 20px;border-radius:28px}
+.venue-theme .section-intro{padding:22px 24px;border-radius:24px}
+.venue-theme .contact-link{background:rgba(255,252,245,.95);border-color:rgba(255,241,206,.75);box-shadow:0 6px 24px rgba(20,14,3,.1)}
+.venue-theme .closing{margin-top:32px;padding:38px 22px;border-radius:28px}
+.venue-theme .portrait-caption{color:#fff1c9;text-shadow:0 2px 12px #000b}
+.venue-theme .photo-aura{border-color:#f2dfb4ad}
+.venue-theme .photo-aura::after{border-color:#f2dfb466}
+.venue-theme .photo-corner{background:#f1d896}
+.venue-theme .section-divider{color:#fff1c9}
+.venue-theme .section-divider span{background:linear-gradient(90deg,transparent,#f1d896b3)}
+.venue-theme .footer{color:#fff1cf;border-color:#f2dfb477;text-shadow:0 2px 10px #0008}
+html[data-theme=dark] body.venue-theme{background:transparent}
+html[data-theme=dark] .venue-backdrop{background-image:linear-gradient(180deg,rgba(12,10,5,.5),rgba(12,10,5,.72)),url('venue-background.jpg')}
+html[data-theme=dark] .venue-theme .topbar,html[data-theme=dark] .venue-theme .hero-copy,html[data-theme=dark] .venue-theme .section-intro,html[data-theme=dark] .venue-theme .closing,html[data-theme=dark] .venue-theme .glass-card,html[data-theme=dark] .venue-theme .contact-link{background:rgba(29,29,25,.94);border-color:#c4aa714d}
+@media(max-width:720px){.venue-theme .topbar{width:calc(100% - 28px);margin-top:14px;padding:14px 15px;border-radius:20px}.venue-theme .hero{padding-top:32px;gap:22px}.venue-theme .hero-copy{padding:24px 15px;border-radius:24px}.venue-theme .section-intro{padding:20px;border-radius:22px}.venue-theme .closing{padding:32px 16px;border-radius:24px}.venue-backdrop{background-position:52% 28%}}
+@media(max-width:370px){.venue-theme .topbar{width:calc(100% - 20px);padding:13px}.venue-theme .hero-copy{padding-right:12px;padding-left:12px}.venue-theme .hero-actions .button{padding-right:9px;padding-left:9px;font-size:19px}.venue-theme .hero-date{font-size:18px}}
+@media print{.venue-backdrop{display:none!important}body.venue-theme{background:white}.venue-theme .topbar,.venue-theme .hero-copy,.venue-theme .section-intro,.venue-theme .closing,.venue-theme .glass-card,.venue-theme .contact-link{background:white;box-shadow:none;backdrop-filter:none;border-color:#ddd}.venue-theme .portrait-caption,.venue-theme .section-divider,.venue-theme .footer{color:#715322;text-shadow:none}.venue-theme .hero-copy{padding:10px}.venue-theme .section-intro{padding:10px}.venue-theme .closing{margin-top:15px;padding:15px}}
+
+/* Give Amiri's calligraphic forms comfortable Arabic line spacing. */
+body{line-height:1.8}h1,h2{line-height:1.45}.hero h1{line-height:1.3;letter-spacing:0}.button{line-height:1.65}.brand{line-height:1.35}.hosts,.invitation-line,.hero-message{line-height:1.8}.contact-link b{line-height:1.4}.recipient-grid span{line-height:1.65}.field-label,fieldset legend{line-height:1.6}
+
+/* A live venue map and one clear location action. */
+.location-card{display:flex;flex-direction:column}.venue-map{height:240px;flex:none;background:#e8e5dc;border-bottom:1px solid var(--line);scroll-margin-top:24px}.venue-map iframe{display:block;width:100%;height:100%;border:0}.location-content{padding:24px}.location-actions .button{flex:1;flex-basis:auto}.location-actions .icon-button{flex:none}.location-content p{margin-top:8px}
+@media(max-width:720px){.venue-map{height:240px}.location-content{padding:24px}.location-actions .button{flex-basis:auto;font-size:21px}.location-actions .icon-button{min-height:54px}}
+@media print{.venue-map{display:none}}
+
+@media(max-width:480px){.venue-theme .toolbar .share-button span{display:none}.venue-theme .toolbar .share-button{width:44px;height:44px;padding:10px}.venue-theme .topbar{gap:10px}}

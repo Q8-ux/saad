@@ -1,5 +1,5 @@
-const CACHE = 'hamad-wedding-v1';
-const ASSETS = ['./','./index.html','./assets/style.css','./assets/app.mjs','./assets/event.mjs','./assets/invitation-original.jpg','./assets/location-qr.svg','./assets/invitation-qr.svg','./assets/fonts/al-mohanad.woff','./assets/fonts/al-mohanad-bold.woff','./assets/icon.svg','./assets/apple-touch-icon.png','./assets/icon-192.png','./assets/icon-512.png','./manifest.webmanifest','./hamad-wedding.ics'];
+const CACHE = 'hamad-wedding-v3';
+const ASSETS = ['./','./index.html','./assets/style.css','./assets/style.css?v=amiri-v3','./assets/app.mjs','./assets/event.mjs','./assets/invitation-original.jpg','./assets/venue-background.jpg','./assets/location-qr.svg','./assets/invitation-qr.svg','./assets/fonts/Amiri-Regular.woff2','./assets/fonts/Amiri-Bold.woff2','./assets/icon.svg','./assets/apple-touch-icon.png','./assets/icon-192.png','./assets/icon-512.png','./manifest.webmanifest','./hamad-wedding.ics'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(ASSETS)).then(() => self.skipWaiting()));
 });

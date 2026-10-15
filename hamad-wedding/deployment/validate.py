@@ -72,18 +72,18 @@ def main():
             assert (DIST/'assets'/value).is_file(), 'Missing CSS asset: '+value
     sw = (DIST/'sw.js').read_text()
     for value in re.findall(r"'((?:\./)[^']*)'",sw.split('self.addEventListener')[0]):
-        assert (DIST / value).exists(), 'Offline cache references missing asset: '+value
+        assert (DIST / urlsplit(value).path).exists(), 'Offline cache references missing asset: '+value
     manifest = json.loads((DIST/'manifest.webmanifest').read_text())
     assert manifest['scope'] == './' and manifest['start_url'] == './'
     for icon in manifest['icons']:
         assert (DIST/icon['src']).is_file()
-    assert (DIST/'assets/fonts/al-mohanad.woff').read_bytes()[:4] == b'wOFF'
-    assert (DIST/'assets/fonts/al-mohanad-bold.woff').read_bytes()[:4] == b'wOFF'
+    assert (DIST/'assets/fonts/Amiri-Regular.woff2').read_bytes()[:4] == b'wOF2'
+    assert (DIST/'assets/fonts/Amiri-Bold.woff2').read_bytes()[:4] == b'wOF2'
     # The uploaded portrait/poster must be byte-for-byte the supplied file.
     digest = hashlib.sha256((DIST/'assets/invitation-original.jpg').read_bytes()).hexdigest()
     source = json.loads((ROOT/'location-source.json').read_text())
     assert digest == source['source_sha256']
-    assert sum(p.stat().st_size for p in DIST.rglob('*') if p.is_file()) < 700_000, 'Invitation is unexpectedly heavy'
+    assert sum(p.stat().st_size for p in DIST.rglob('*') if p.is_file()) < 1_000_000, 'Invitation is unexpectedly heavy'
     print(f'PASS: Arabic RTL, {len(page.references)} local references, four WhatsApp links, map coordinates, fonts, offline assets, image integrity.')
 
 if __name__ == '__main__':
