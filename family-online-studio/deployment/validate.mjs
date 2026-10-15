@@ -13,6 +13,11 @@ assert.ok(app.includes('السينارست'));assert.ok(!/sk-proj-[A-Za-z0-9_-]{
 assert.ok(app.includes('المظهر وراحة القراءة')&&app.includes('حبر وبحر'));
 assert.ok(css.includes('--ui-size')&&css.includes('prefers-reduced-motion')&&css.includes('max-width:1100px'));
 assert.ok(Buffer.byteLength(app)<440000,'Client bundle exceeds writing workspace budget');
+const modules=JSON.parse(await readFile(path.join(root,'assets/export-modules.json'),'utf8'));
+assert.ok(modules.initial.reduce((sum,item)=>sum+item.bytes,0)<440000,'Initial modules exceed writing workspace budget');
+for(const item of [...modules.initial,...modules.deferred])assert.ok((await readFile(path.join(root,item.file))).length>0);
+assert.ok(modules.deferred.some(item=>item.file.includes('pdf-export')),'Direct PDF exporter must load on demand');
+assert.ok(app.includes('تحميل PDF'),'Direct PDF download button missing');
 assert.ok(Buffer.byteLength(css)<130000,'Stylesheet exceeds writing workspace budget');
 assert.ok(css.includes('66fr 22fr 8fr 74fr')||css.includes('66fr 22fr 8fr 74fr'.replaceAll(' ',''))||/66fr\s+22fr\s+8fr\s+74fr/.test(css));
 for(const file of ['Amiri-Regular.ttf','Amiri-Bold.ttf','OFL.txt'])assert.ok((await readFile(path.join(root,'assets/fonts',file))).length>1000);

@@ -1,0 +1,38 @@
+{
+  "initial": [
+    {
+      "file": "assets/app.mjs",
+      "bytes": 319608
+    },
+    {
+      "file": "assets/chunks/chunk-X3E27P5A.mjs",
+      "bytes": 64525
+    },
+    {
+      "file": "assets/chunks/chunk-2V77MTNA.mjs",
+      "bytes": 605
+    }
+  ],
+  "deferred": [
+    {
+      "file": "assets/chunks/html2canvas-ABGFJWJ3.mjs",
+      "bytes": 202424
+    },
+    {
+      "file": "assets/chunks/purify.es-KZCYCWOQ.mjs",
+      "bytes": 30173
+    },
+    {
+      "file": "assets/chunks/index.es-JC5LCQCP.mjs",
+      "bytes": 159757
+    },
+    {
+      "file": "assets/chunks/pdf-export-ZX2UXM4G.mjs",
+      "bytes": 422658
+    },
+    {
+      "file": "assets/chunks/chunk-3YV2JGDK.mjs",
+      "bytes": 272
+    }
+  ]
+}
