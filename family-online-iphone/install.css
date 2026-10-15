@@ -1,0 +1,24 @@
+body.iphone-install{margin:0;background:#edf2f4;color:#142b3e;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;font-size:20px;line-height:1.7;min-height:100svh}
+#installation{max-width:620px;margin:auto;padding:max(32px,env(safe-area-inset-top)) max(24px,env(safe-area-inset-right)) max(32px,env(safe-area-inset-bottom)) max(24px,env(safe-area-inset-left));box-sizing:border-box}
+#installation[hidden]{display:none}
+#installation .brand{display:flex;align-items:center;gap:16px;font-size:25px;font-weight:750}
+#installation .brand img{border-radius:22px;box-shadow:0 8px 24px #142b3e19}
+#installation .brand-sub{display:block;font-size:16px;font-weight:400;color:#526b7a}
+#installation .eyebrow{color:#087f7c;font-size:17px;font-weight:700;letter-spacing:.03em;margin:40px 0 10px}
+#installation h1{font-size:clamp(34px,8vw,48px);line-height:1.42;letter-spacing:-.04em;margin:0 0 20px}
+#installation h1 span{font-weight:400}
+#installation .intro{font-size:21px;color:#415e6f;margin:0 0 28px}
+#installation .steps{padding:24px;background:#fff;border-radius:24px;border:1px solid #dbe5e9}
+#installation h2{font-size:24px;margin:0 0 22px}
+#installation ol{list-style:none;margin:0;padding:0;display:grid;gap:22px}
+#installation li{display:flex;gap:14px;align-items:flex-start}
+#installation li>span{background:#e6f4f0;color:#087f7c;min-width:38px;height:38px;text-align:center;border-radius:12px;font-size:21px;font-weight:700}
+#installation strong{display:block;font-size:20px;line-height:1.6}
+#installation li p{font-size:17px;line-height:1.7;color:#526b7a;margin:4px 0 0}
+#open-editor{display:flex;justify-content:space-between;align-items:center;width:100%;margin-top:24px;padding:18px 22px;background:#087f7c;color:#fff;border:0;border-radius:16px;font:700 22px system-ui;cursor:pointer;min-height:64px}
+#open-editor:focus-visible,#installation a:focus-visible{outline:3px solid #d0a04c;outline-offset:4px}
+#open-editor:disabled{opacity:.65;cursor:wait}
+#installation #launch-status{color:#943b2c;font-size:18px;min-height:0;margin:12px 0}
+#installation .footnote{font-size:17px;color:#526b7a}
+#installation .source-link{display:inline-block;color:#087f7c;font-size:16px;margin-top:8px;text-underline-offset:5px}
+@media(prefers-reduced-motion:no-preference){#open-editor{transition:background .15s ease}#open-editor:hover{background:#066763}}

@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import {assetURL,entryAssets} from '../../family-online-iphone/launch.mjs';
+assert.equal(assetURL('./assets/app.mjs?v=123').href,'https://q8-ux.github.io/saad/family-online-studio/assets/app.mjs?v=123');
+for(const value of ['https://evil.example/app.mjs','https://q8-ux.github.io.evil.example/saad/family-online-studio/assets/app.mjs','/saad/other/app.mjs','javascript:alert(1)'])assert.throws(()=>assetURL(value));
+const node=attrs=>({getAttribute:key=>attrs[key]??null});
+const doc={querySelectorAll:selector=>selector.startsWith('link')?[node({href:'./assets/style.css?v=current'}),node({href:'./assets/login.css?v=current'})]:[node({src:'./assets/config.js'}),node({src:'./assets/app.mjs?v=current',type:'module'})]};
+const assets=entryAssets(doc);assert.equal(assets.styles.length,2);assert.equal(assets.app.search,'?v=current');
+assert.throws(()=>entryAssets({querySelectorAll:()=>[]}));
+const manifest=JSON.parse(await readFile('../family-online-iphone/manifest.webmanifest','utf8'));
+const base='https://q8-ux.github.io/saad/family-online-iphone/';
+assert.ok(new URL(manifest.start_url,base).href.startsWith(new URL(manifest.scope,base).href));
+assert.equal(manifest.display,'standalone');assert.equal(manifest.dir,'rtl');
+console.log('iPhone web app asset pinning, shared-editor entry and installation manifest passed (no Safari UI test)');
