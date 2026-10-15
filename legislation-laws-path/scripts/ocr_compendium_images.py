@@ -17,6 +17,7 @@ from pathlib import Path
 
 from PIL import Image
 from legal_index import normalize
+from review_image_layers import rebuild_search_layers
 
 
 def main():
@@ -59,15 +60,9 @@ def main():
             conn.execute("INSERT OR REPLACE INTO image_ocr VALUES (?,?,?,?,?,?,?,?,?,?)",(item["pdf_page"],item["xref"],text,confidence,len(words),engine,"ara+eng","needs_review",json.dumps(words,ensure_ascii=False),item["sha256"]))
             conn.commit()
             print(f"OCR images {n}/{len(items)}; PDF {item['pdf_page']}; words {len(words)}",flush=True)
-    # Rebuild search text from immutable digital text plus independent OCR layers.
+    # Keep unreviewed OCR in the candidate index, never in the answer text index.
     with conn:
-        conn.execute("DROP TABLE IF EXISTS pages_vocab")
-        conn.execute("DROP TABLE pages_fts")
-        conn.execute("CREATE VIRTUAL TABLE pages_fts USING fts5(pdf_page UNINDEXED,body)")
-        for row in conn.execute("SELECT pdf_page,logical_text FROM pdf_pages").fetchall():
-            ocr="\n".join(r[0] for r in conn.execute("SELECT text FROM image_ocr WHERE pdf_page=? ORDER BY xref",(row["pdf_page"],)))
-            conn.execute("INSERT INTO pages_fts(rowid,pdf_page,body) VALUES (?,?,?)",(row["pdf_page"],row["pdf_page"],normalize(row["logical_text"]+"\n"+ocr)))
-        conn.execute("CREATE VIRTUAL TABLE pages_vocab USING fts5vocab(pages_fts,'row')")
+        rebuild_search_layers(conn)
         stats={"image_pages_ocr":len({r["pdf_page"] for r in results}),"image_ocr_assets":len(results),"image_ocr_characters":sum(r["characters"] for r in results),"ocr_engine":engine,"ocr_language":"ara+eng","ocr_review_status":"needs_review","ocr_network_used":False}
         for key,value in stats.items():
             conn.execute("INSERT OR REPLACE INTO corpus_stats VALUES (?,?)",(key,json.dumps(value,ensure_ascii=False)))

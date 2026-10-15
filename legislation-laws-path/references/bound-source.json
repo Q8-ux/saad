@@ -3,10 +3,9 @@
   "provider": "google_drive",
   "file_id": null,
   "url": null,
+  "access_status": "configure_privately",
   "scope": "bound_file_only",
   "external_legal_search": false,
-  "access_status": "configure_privately",
   "corpus_library": null,
-  "configuration": "The actual source binding and derived database references are saved in the user private installed skill. Configure local private references when installing this public module.",
-  "sabeq_integration": "prepared_for_later_integration"
+  "public_mirror_policy": "Configure the bound source and corpus IDs privately. Do not publish source bytes, private bindings, credentials, or derived records."
 }

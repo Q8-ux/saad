@@ -8,6 +8,8 @@
     "full_page_extraction",
     "section_classification",
     "article_and_reference_detection",
+    "article_continuation_assembly",
+    "separate_ocr_review_layers",
     "local_sqlite_index",
     "source_and_quality_review"
   ],
@@ -15,7 +17,11 @@
     "import": "scripts/import_compendium.py",
     "query": "scripts/corpus_query.py",
     "audit": "scripts/test_corpus.py",
-    "ocr": "scripts/ocr_compendium_images.py"
+    "ocr": "scripts/ocr_compendium_images.py",
+    "refine": "scripts/refine_compendium.py",
+    "review_extraction": "scripts/apply_extraction_reviews.py",
+    "review_images": "scripts/review_image_layers.py",
+    "structure_images": "scripts/structure_image_tables.py"
   },
   "integration": {
     "target": "sabeq",

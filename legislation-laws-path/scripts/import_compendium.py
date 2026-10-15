@@ -25,7 +25,7 @@ from legal_index import ingest, normalize
 
 BIDI = re.compile(r"[\u202a-\u202e\u2066-\u2069\u200e\u200f]")
 DIGITS = str.maketrans("٠١٢٣٤٥٦٧٨٩۰۱۲۳۴۵۶۷۸۹", "01234567890123456789")
-ARTICLE = re.compile(r"^(?:المادة|املادة|مادة|ماده)\s*[:(（\[]*\s*(?P<number>[0-9]{1,4})\s*[)）\]]*\s*(?P<suffix>مكرر(?:ا)?(?:\s*[«(]?\s*[0-9أابجدهوزحطيك]+\s*[») ]*)?)?\s*[:.\-]*\s*$")
+ARTICLE = re.compile(r"^(?:المادة|املادة|مادة|ماده)\s*[:(（\[]*\s*(?P<number>[0-9]{1,4})\s*[)）\]]*\s*(?P<suffix>مكرر(?:ا)?(?:\s*[«(]?\s*(?:[0-9أابجدهوزحطيك]+|أولا|اولا|ثانيا|ثاني|ثالثا|رابعا)\s*[») ]*)?)?\s*[)）\]]*\s*[:.\-]*\s*$")
 ORDINALS = {"اولى":"1", "أولى":"1", "أويل":"1", "أوىل":"1", "االولى":"1", "األولى":"1", "ثانية":"2", "الثانية":"2", "ثالثة":"3", "الثالثة":"3", "رابعة":"4", "الرابعة":"4", "خامسة":"5", "الخامسة":"5", "سادسة":"6", "السادسة":"6", "سابعة":"7", "السابعة":"7", "ثامنة":"8", "الثامنة":"8", "تاسعة":"9", "التاسعة":"9", "عاشرة":"10", "العاشرة":"10"}
 
 
@@ -38,7 +38,13 @@ def line_key(text):
 
 
 def article_number(line):
-    value = line_key(line)
+    # Heading recognition only. Keep the unmodified source line for display.
+    value = re.sub(r"[\u0610-\u061a\u064b-\u065f\u0670]", "", line_key(line))
+    value = re.sub(r"^(المادة|املادة|مادة|ماده)\s+رقم\s*", r"\1 ", value)
+    value = re.sub(r"\(\s*\)", " ", value)
+    value = re.sub(r"\s*\(?\s*(?:اصدار|إصدار)\s*\)?\s*$", "", value)
+    value = re.sub(r"مكررا?\s*-\s*", "مكرر ", value)
+    value = re.sub(r"\b(ثاني|ثالث|رابع)\s+ا\b", r"\1ا", value)
     value = re.sub(r"\s*\({2,}\s*$", "", value)
     match = ARTICLE.fullmatch(value)
     if match:
@@ -47,7 +53,12 @@ def article_number(line):
         suffix = " ".join(suffix.split())
         return str(int(match["number"])) + (" " + suffix if suffix else "")
     match = re.fullmatch(r"(?:المادة|املادة|مادة|ماده)\s+([^:]+)\s*:?(?:\s*\({2,})?", value)
-    return ORDINALS.get(match[1].strip()) if match else None
+    if not match:
+        return None
+    ordinal = normalize(match[1].strip())
+    ordinal = ordinal[2:] if ordinal.startswith("ال") else ordinal
+    ordinal = {"اوىل":"اولى", "اويل":"اولى", "االولى":"اولى", "االوىل":"اولى", "اخلامسة":"خامسة", "عارشة":"عاشرة", "حادية عرش":"حادية عشر"}.get(ordinal, ordinal)
+    return {"اولى":"1", "ثانية":"2", "ثالثة":"3", "رابعة":"4", "خامسة":"5", "سادسة":"6", "سابعة":"7", "ثامنة":"8", "تاسعة":"9", "عاشرة":"10", "حادية عشر":"11", "حادية عشرة":"11"}.get(ordinal)
 
 
 def source_labels(page, rect, data):

@@ -1,4 +1,14 @@
 interface:
-  display_name: "مسار التشريعات"
-  short_description: "تحليل ملف التشريعات وبناء قاعدة بحث داخلية موثقة بالصفحات"
-  default_prompt: "استخدم $legislation-laws-path لتحليل ملف التشريعات المرتبط والبحث داخله وبناء قاعدة بيانات منه وحده، ثم جهز الوحدة للتركيب على سابق لاحقاً."
+  display_name: مسار التشريعات
+  short_description: تحليل ملف التشريعات وبناء قاعدة بحث داخلية موثقة بالصفحات
+  default_prompt: استخدم $legislation-laws-path لتحليل ملف التشريعات المرتبط والبحث
+    داخله وبناء قاعدة بيانات منه وحده، ثم جهز الوحدة للتركيب على سابق لاحقاً.
+  icon_small: assets/icon.svg
+  icon_large: assets/icon.svg
+policy:
+  products:
+  - chatgpt
+  - codex
+  - api
+  - atlas
+  allow_implicit_invocation: true
