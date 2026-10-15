@@ -1,4 +1,4 @@
-import { EVENT, whatsappUrl, replyMessage, countdownText, googleCalendarUrl, shareText } from './event.mjs';
+import { EVENT, countdownText, googleCalendarUrl, shareText } from './event.mjs?v=details-v4';
 
 const $ = selector => document.querySelector(selector);
 let toastTimer;
@@ -17,7 +17,6 @@ function openDialog(id, trigger) {
   if (!dialog || typeof dialog.showModal !== 'function') {
     if (id === 'original-dialog') location.href = 'assets/invitation-original.jpg';
     else if (id === 'calendar-dialog') location.href = 'hamad-wedding.ics';
-    else if (id === 'rsvp-dialog') location.href = whatsappUrl(EVENT.contacts[0], 'السلام عليكم، بخصوص دعوة زفاف حمد يوم الثلاثاء 20 أكتوبر 2026 مساءً.');
     else if (id === 'qr-dialog') location.href = EVENT.mapUrl;
     else if (id === 'share-dialog') location.href = `https://wa.me/?text=${encodeURIComponent(shareText())}`;
     return;
@@ -73,17 +72,10 @@ function setTheme(theme) {
 document.addEventListener('click', event => {
   const close = event.target.closest('[data-close]');
   if (close) { close.closest('dialog').close(); return; }
-  const counter = event.target.closest('[data-count]');
-  if (counter) {
-    const field = $('#guest-count');
-    field.value = Math.min(20, Math.max(1, (Number(field.value) || 1) + Number(counter.dataset.count)));
-    return;
-  }
   const trigger = event.target.closest('[data-action]');
   if (!trigger) return;
   const action = trigger.dataset.action;
-  if (action === 'rsvp') openDialog('rsvp-dialog', trigger);
-  else if (action === 'calendar') openDialog('calendar-dialog', trigger);
+  if (action === 'calendar') openDialog('calendar-dialog', trigger);
   else if (action === 'share') openDialog('share-dialog', trigger);
   else if (action === 'original') openDialog('original-dialog', trigger);
   else if (action === 'location-qr') showQr('location', trigger);
@@ -103,27 +95,6 @@ document.querySelectorAll('dialog').forEach(dialog => {
     document.body.style.overflow = '';
     lastDialogTrigger?.focus?.();
   });
-});
-
-const form = $('#rsvp-form');
-form.addEventListener('change', () => {
-  const going = form.elements.response.value === 'going';
-  $('#guest-count-field').hidden = !going;
-  $('#guest-count').disabled = !going;
-  $('#rsvp-feedback').hidden = true;
-});
-form.addEventListener('submit', event => {
-  event.preventDefault();
-  if (!form.reportValidity()) return;
-  const data = new FormData(form);
-  try {
-    const message = replyMessage({ name: data.get('name'), response: data.get('response'), count: data.get('count') || 1 });
-    const url = whatsappUrl(String(data.get('recipient')), message);
-    const feedback = $('#rsvp-feedback');
-    feedback.hidden = false;
-    feedback.textContent = 'تابع في واتساب واضغط إرسال لإيصال ردّك للعائلة.';
-    window.location.assign(url);
-  } catch (error) { toast(error.message); }
 });
 
 document.querySelectorAll('.location-link').forEach(a => { a.href = EVENT.mapUrl; });

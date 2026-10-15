@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {EVENT, whatsappUrl, replyMessage, daysToEvent, countdownText, googleCalendarUrl, calendarIcs, shareText} from '../dist/assets/event.mjs';
+import {EVENT, whatsappUrl, daysToEvent, countdownText, googleCalendarUrl, calendarIcs, shareText} from '../dist/assets/event.mjs';
 
 test('all four invitation numbers open their own Kuwaiti WhatsApp conversation', () => {
   assert.deepEqual(EVENT.contacts, ['65005654','99732147','50168888','66002205']);
@@ -14,27 +14,6 @@ test('all four invitation numbers open their own Kuwaiti WhatsApp conversation',
   // The photography studio number is not a wedding contact.
   assert.throws(() => whatsappUrl('55009914'), RangeError);
   assert.throws(() => whatsappUrl('65005654?text=other'), RangeError);
-});
-
-test('reply includes the actual guest, event and attendance count without claiming it was sent', () => {
-  const message = replyMessage({name:'  سعد   النبهان  ',response:'going',count:3});
-  assert.match(message, /معكم سعد النبهان/);
-  assert.match(message, /حمد يوم الثلاثاء 20 أكتوبر 2026 مساءً/);
-  assert.match(message, /عدد الحضور بما فيهم أنا: 3/);
-  assert.doesNotMatch(message, /تم تأكيد|تم إرسال/);
-  const url = new URL(whatsappUrl('66002205',message));
-  assert.equal(url.searchParams.get('text'),message);
-});
-
-test('declining or confirming later omits the attendance count', () => {
-  for (const response of ['maybe','declined']) {
-    assert.doesNotMatch(replyMessage({name:'ضيف',response,count:0}),/عدد الحضور/);
-  }
-  assert.throws(() => replyMessage({name:' ',response:'going',count:1}),TypeError);
-  for (const count of [0,-1,21,1.5,NaN,Infinity]) {
-    assert.throws(() => replyMessage({name:'ضيف',response:'going',count}),RangeError);
-  }
-  assert.throws(() => replyMessage({name:'ضيف',response:'unknown'}),TypeError);
 });
 
 test('day countdown follows Kuwait midnight rather than the device timezone', () => {

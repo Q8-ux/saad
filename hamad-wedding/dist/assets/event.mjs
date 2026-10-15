@@ -23,27 +23,6 @@ export function whatsappUrl(phone, message = '') {
   return message ? `${base}?text=${encodeURIComponent(message)}` : base;
 }
 
-export function replyMessage({ name, response, count = 1 }) {
-  const guest = String(name || '').trim().replace(/\s+/g, ' ').slice(0, 60);
-  if (!guest) throw new TypeError('يرجى كتابة اسمك الكريم');
-  const status = {
-    going: 'بإذن الله سأحضر وأشارككم فرحتكم.',
-    maybe: 'يسعدني استقبال دعوتكم، وسأؤكد حضوري لاحقًا.',
-    declined: 'أعتذر عن الحضور، وأبارك لكم هذا الزواج المبارك.',
-  }[response];
-  if (!status) throw new TypeError('يرجى اختيار ردّك على الدعوة');
-  const total = Number(count);
-  if (response === 'going' && (!Number.isInteger(total) || total < 1 || total > 20)) {
-    throw new RangeError('يرجى اختيار عدد حضور بين 1 و20');
-  }
-  return [
-    'السلام عليكم،', `معكم ${guest}.`,
-    'بخصوص دعوة زفاف حمد يوم الثلاثاء 20 أكتوبر 2026 مساءً في ديوان الماضي،',
-    status, response === 'going' ? `عدد الحضور بما فيهم أنا: ${total}.` : '',
-    'بارك الله لهما وبارك عليهما وجمع بينهما في خير.',
-  ].filter(Boolean).join('\n');
-}
-
 export function daysToEvent(now = new Date()) {
   const parts = new Intl.DateTimeFormat('en-US', {
     timeZone: EVENT.timeZone, year: 'numeric', month: '2-digit', day: '2-digit',

@@ -22,9 +22,9 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="preload" href="assets/fonts/Amiri-Regular.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="assets/venue-background.jpg" as="image">
-  <link rel="stylesheet" href="assets/style.css?v=amiri-v3">
+  <link rel="stylesheet" href="assets/style.css?v=details-v4">
   <title>أفراح الماضي — حفل زفاف حمد</title>
-  <script type="module" src="assets/app.mjs"></script>
+  <script type="module" src="assets/app.mjs?v=details-v4"></script>
 </head>
 <body class="venue-theme">
   <div class="venue-backdrop" aria-hidden="true"></div>
@@ -72,7 +72,7 @@
         <h1 id="groom-name">حمد</h1>
         <p class="hero-message">بحضوركم يتم الفرح والسرور</p>
         <div class="hero-date"><span class="small-star" aria-hidden="true">✦</span><time datetime="2026-10-20">الثلاثاء، 20 أكتوبر 2026</time><span class="date-separator">/</span><span>مساءً</span></div>
-        <div class="hero-actions"><button class="button button-gold" data-action="rsvp"><svg><use href="#i-check"/></svg>تأكيد الحضور</button><a class="button button-outline" href="#location"><svg><use href="#i-location"/></svg>موقع الحفل</a></div>
+        <div class="hero-actions"><a class="button button-outline" href="#location"><svg><use href="#i-location"/></svg>موقع الحفل</a></div>
         <p class="hero-footnote">حضوركم أجمل ما يكمّل فرحتنا</p>
       </div>
     </section>
@@ -108,21 +108,9 @@
   </main>
 
   <footer class="footer"><span>أفراح الماضي</span><span dir="ltr">20 · 10 · 2026</span></footer>
-  <div class="mobile-dock"><button class="button button-gold" data-action="rsvp"><svg><use href="#i-check"/></svg>تأكيد الحضور</button><a class="dock-location location-link" href="https://www.google.com/maps/search/?api=1&amp;query=29.3181267%2C47.7118721" target="_blank" rel="noopener noreferrer"><svg><use href="#i-location"/></svg><span>الموقع</span></a><button class="dock-location" data-action="share"><svg><use href="#i-share"/></svg><span>مشاركة</span></button></div>
+  <div class="mobile-dock"><a class="dock-location location-link" href="https://www.google.com/maps/search/?api=1&amp;query=29.3181267%2C47.7118721" target="_blank" rel="noopener noreferrer"><svg><use href="#i-location"/></svg><span>الموقع</span></a><button class="dock-location" data-action="share"><svg><use href="#i-share"/></svg><span>مشاركة</span></button></div>
   <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
-  <dialog id="rsvp-dialog" aria-labelledby="rsvp-title" class="dialog">
-    <button class="icon-button dialog-close" data-close aria-label="إغلاق"><svg><use href="#i-close"/></svg></button>
-    <span class="dialog-emblem"><svg><use href="#i-heart"/></svg></span><p class="section-kicker">نفرح بشوفتكم</p><h2 id="rsvp-title">تأكيد الحضور</h2><p class="dialog-description">أرسل ردّك للعائلة عبر واتساب</p>
-    <form id="rsvp-form">
-      <label class="field-label" for="guest-name">اسمك الكريم</label><input id="guest-name" name="name" autocomplete="name" maxlength="60" placeholder="اكتب اسمك" required>
-      <fieldset class="response-options"><legend>ردّك على الدعوة</legend><label><input type="radio" name="response" value="going" checked><span>بإذن الله أحضر</span></label><label><input type="radio" name="response" value="maybe"><span>أؤكد لاحقًا</span></label><label><input type="radio" name="response" value="declined"><span>أعتذر عن الحضور</span></label></fieldset>
-      <div id="guest-count-field" class="guest-count-field"><label class="field-label" for="guest-count">عدد الحضور <span>(بما فيهم أنت)</span></label><div class="stepper"><button type="button" data-count="-1" aria-label="تقليل عدد الحضور">−</button><input id="guest-count" name="count" type="number" inputmode="numeric" min="1" max="20" value="1" aria-label="عدد الحضور"><button type="button" data-count="1" aria-label="زيادة عدد الحضور">+</button></div></div>
-      <fieldset class="recipient-options"><legend>أرسل الرد إلى</legend><div class="recipient-grid"><label><input type="radio" name="recipient" value="65005654" checked><span dir="ltr">65005654</span></label><label><input type="radio" name="recipient" value="99732147"><span dir="ltr">99732147</span></label><label><input type="radio" name="recipient" value="50168888"><span dir="ltr">50168888</span></label><label><input type="radio" name="recipient" value="66002205"><span dir="ltr">66002205</span></label></div></fieldset>
-      <p class="form-note">سيفتح واتساب برسالتك لتراجعها وتضغط إرسال.</p><button class="button button-gold full-width" type="submit"><svg><use href="#i-whatsapp"/></svg>متابعة إلى واتساب</button>
-      <p id="rsvp-feedback" class="form-feedback" role="status" hidden></p>
-    </form>
-  </dialog>
 
   <dialog id="calendar-dialog" aria-labelledby="calendar-title" class="dialog compact-dialog"><button class="icon-button dialog-close" data-close aria-label="إغلاق"><svg><use href="#i-close"/></svg></button><span class="dialog-emblem"><svg><use href="#i-calendar"/></svg></span><h2 id="calendar-title">احفظ ليلة الفرح</h2><p>الثلاثاء 20 أكتوبر 2026، مساءً</p><p class="form-note">ساعة الحفل غير محددة في البطاقة. سيُحفظ الموعد كتذكير طوال اليوم، وتفاصيله تذكر أن الحفل مساءً.</p><div class="dialog-actions"><a class="button button-gold" href="hamad-wedding.ics" download><svg><use href="#i-download"/></svg>تقويم Apple أو Outlook</a><a id="google-calendar" class="button button-outline" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=%D8%B2%D9%81%D8%A7%D9%81%20%D8%AD%D9%85%D8%AF&amp;dates=20261020%2F20261021&amp;ctz=Asia%2FKuwait" target="_blank" rel="noopener noreferrer">تقويم Google<svg><use href="#i-arrow"/></svg></a></div></dialog>
 
