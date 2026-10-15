@@ -1,4 +1,4 @@
-import { EVENT, countdownText, shareText } from './event.mjs?v=invitation-v9';
+import { EVENT, shareText } from './event.mjs?v=invitation-v10';
 
 const $ = selector => document.querySelector(selector);
 let toastTimer;
@@ -97,11 +97,6 @@ document.querySelectorAll('dialog').forEach(dialog => {
 
 document.querySelectorAll('.location-link').forEach(a => { a.href = EVENT.mapUrl; });
 $('#whatsapp-share').href = `https://wa.me/?text=${encodeURIComponent(shareText())}`;
-
-function refreshCountdown() { $('#countdown-label').textContent = countdownText(new Date()); }
-refreshCountdown();
-setInterval(refreshCountdown, 60000);
-document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshCountdown(); });
 
 try {
   const stored = localStorage.getItem('hamad-invitation-theme');

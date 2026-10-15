@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {EVENT, whatsappUrl, daysToEvent, countdownText, shareText} from '../dist/assets/event.mjs';
+import {EVENT, whatsappUrl, shareText} from '../dist/assets/event.mjs';
 
 test('all four invitation numbers open their own Kuwaiti WhatsApp conversation', () => {
   assert.deepEqual(EVENT.contacts, ['65505654','99732147','50168888','66002205']);
@@ -14,17 +14,6 @@ test('all four invitation numbers open their own Kuwaiti WhatsApp conversation',
   // The photography studio number is not a wedding contact.
   assert.throws(() => whatsappUrl('55009914'), RangeError);
   assert.throws(() => whatsappUrl('65505654?text=other'), RangeError);
-});
-
-test('day countdown follows Kuwait midnight rather than the device timezone', () => {
-  assert.equal(daysToEvent(new Date('2026-10-15T18:53:19Z')),5);
-  assert.equal(daysToEvent(new Date('2026-10-18T20:59:59Z')),2);
-  assert.equal(daysToEvent(new Date('2026-10-18T21:00:00Z')),1);
-  assert.equal(daysToEvent(new Date('2026-10-19T21:00:00Z')),0);
-  assert.equal(daysToEvent(new Date('2026-10-20T21:00:00Z')),-1);
-  assert.match(countdownText(new Date('2026-10-19T18:00:00Z')),/غدًا/);
-  assert.match(countdownText(new Date('2026-10-20T10:00:00Z')),/اليوم/);
-  assert.match(countdownText(new Date('2026-10-21T10:00:00Z')),/شكرًا/);
 });
 
 test('map pin is the QR redirect destination, not its map camera center', () => {

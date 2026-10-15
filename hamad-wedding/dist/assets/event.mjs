@@ -22,26 +22,6 @@ export function whatsappUrl(phone, message = '') {
   return message ? `${base}?text=${encodeURIComponent(message)}` : base;
 }
 
-export function daysToEvent(now = new Date()) {
-  const parts = new Intl.DateTimeFormat('en-US', {
-    timeZone: EVENT.timeZone, year: 'numeric', month: '2-digit', day: '2-digit',
-  }).formatToParts(now);
-  const part = type => parts.find(p => p.type === type).value;
-  const today = Date.UTC(+part('year'), +part('month') - 1, +part('day'));
-  const eventDate = Date.parse(`${EVENT.date}T00:00:00Z`);
-  return Math.round((eventDate - today) / 86400000);
-}
-
-export function countdownText(now) {
-  const days = daysToEvent(now);
-  if (days < 0) return 'دامت الأفراح… وشكرًا لكل من شاركنا فرحتنا';
-  if (days === 0) return 'اليوم فرحتنا… حياكم الله مساءً';
-  if (days === 1) return 'غدًا نلتقي… حياكم الله';
-  if (days === 2) return 'باقي يومان على ليلة الفرح';
-  const number = new Intl.NumberFormat('ar-KW').format(days);
-  return days <= 10 ? `باقي ${number} أيام على ليلة الفرح` : `باقي ${number} يومًا على ليلة الفرح`;
-}
-
 export function shareText() {
   return 'أفراح الماضي ✨\nتتشرف عائلة الماضي بدعوتكم لحضور حفل زفاف حمد\nالثلاثاء 20 أكتوبر 2026 مساءً\nديوان الماضي — سعد العبدالله\nبحضوركم يتم الفرح والسرور\n' + EVENT.publicUrl;
 }
