@@ -1,0 +1,44 @@
+name: Build Sabeq Android
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'sabeq-legal/android/**'
+      - '.github/workflows/sabeq-android.yml'
+permissions:
+  contents: read
+concurrency:
+  group: sabeq-android-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.11.1'
+      - name: Unit tests, lint and release build
+        working-directory: sabeq-legal/android
+        run: gradle --no-daemon testDebugUnitTest lintDebug assembleRelease
+      - name: Export unsigned APK and build evidence
+        shell: bash
+        run: |
+          mkdir -p android-output
+          cp sabeq-legal/android/app/build/outputs/apk/release/app-release-unsigned.apk android-output/
+          cp "$ANDROID_HOME/build-tools/35.0.0/lib/apksigner.jar" android-output/
+          cp "$ANDROID_HOME/build-tools/35.0.0/NOTICE.txt" android-output/Android-Build-Tools-NOTICE.txt
+          "$ANDROID_HOME/build-tools/35.0.0/aapt2" dump badging android-output/app-release-unsigned.apk > android-output/apk-badging.txt
+          cp -R sabeq-legal/android/app/build/test-results android-output/
+          cp sabeq-legal/android/app/build/reports/lint-results-debug.html android-output/
+          printf '%s\n' "$GITHUB_SHA" > android-output/source-commit.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sabeq-android-unsigned-${{ github.run_number }}
+          path: android-output/
+          retention-days: 14
