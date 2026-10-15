@@ -2,6 +2,12 @@
 
 مشروع iOS أصلي بـSwiftUI وWKWebView، متصل بالمحرر نفسه على https://q8-ux.github.io/saad/family-online-studio/ . الحد الأدنى iOS/iPadOS 17.4. لا كلمة مرور إضافية، ولا نصوص مسرحية أو مفاتيح خادم داخل الحزمة.
 
+الإصدار 1.0.0 اجتاز البناء واختبار تشغيل عربي أساسي على محاكي iPhone، وبُني أرشيف Release لمعالج arm64 باستخدام Xcode 16.4. [سجل البناء والتحقق](https://github.com/Q8-ux/saad/actions/runs/38748846285). نتائج التحقق وحدودها في [بيانات الإصدار](./downloads/release.json).
+
+[تنزيل مشروع Xcode كاملًا — ZIP](https://github.com/Q8-ux/saad/raw/refs/heads/main/family-online-ios/downloads/writing-studio-ios-source-1.0.0.zip)
+
+[تنزيل أرشيف iPhone غير موقّع للمطوّر — ليس ملف تثبيت](https://github.com/Q8-ux/saad/raw/refs/heads/main/family-online-ios/downloads/writing-studio-ios-unsigned.xcarchive.zip)
+
 ## الاستخدام الفوري
 
 [صفحة التثبيت على الشاشة الرئيسية من Safari](https://q8-ux.github.io/saad/family-online-iphone/)
