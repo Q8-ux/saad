@@ -25,6 +25,7 @@ import java.util.Collections;
 public class MainActivity extends Activity {
  private static final int MIC=71, PICK=72, SAVE=73, MAX_EXPORT=10*1024*1024;
  private WebView web;
+ private WebView printView;
  private LinearLayout error;
  private ProgressBar progress;
  private PermissionRequest microphone;
@@ -51,7 +52,7 @@ public class MainActivity extends Activity {
     if(!mainFrame||!LinkPolicy.trusted(web.getUrl())||!"https".equals(origin.getScheme())||!"q8-ux.github.io".equals(origin.getHost()))return;
     String text=message.getData();if(text==null||text.length()>14_100_000){toast("الملف أكبر من حد الحفظ داخل التطبيق (10 ميجابايت).");exportRequested=false;return;}
     try{JSONObject data=new JSONObject(text);
-     if("print".equals(data.optString("action"))){PrintManager pm=(PrintManager)getSystemService(PRINT_SERVICE);pm.print("مذكرة سابق",web.createPrintDocumentAdapter("سابق"),null);return;}
+     if("print".equals(data.optString("action"))){printHtml(data.optString("html"));return;}
      if(!exportRequested)return;exportRequested=false;
      if(data.has("error")){toast("تعذر حفظ الملف. أعد التصدير أو افتح الموقع في المتصفح.");return;}
      String value=data.getString("data");int split=value.indexOf(',');String mime=split<0?null:LinkPolicy.exportMime(value.substring(5,split).replace(";base64",""));
@@ -64,7 +65,7 @@ public class MainActivity extends Activity {
   web.setWebViewClient(new WebViewClient(){
    @Override public boolean shouldOverrideUrlLoading(WebView view,WebResourceRequest request){String u=request.getUrl().toString();if(LinkPolicy.trusted(u))return false;if(request.isForMainFrame()&&LinkPolicy.external(u))external(u);return true;}
    @Override public void onPageStarted(WebView view,String url,android.graphics.Bitmap icon){if(LinkPolicy.trusted(url))pendingUrl=url;progress.setVisibility(View.VISIBLE);}
-   @Override public void onPageFinished(WebView view,String url){progress.setVisibility(View.GONE);if(LinkPolicy.trusted(url)&&WebViewFeature.isFeatureSupported(WebViewFeature.WEB_MESSAGE_LISTENER))web.evaluateJavascript("window.print=function(){window.SabeqFile.postMessage(JSON.stringify({action:'print'}));};",null);}
+   @Override public void onPageFinished(WebView view,String url){progress.setVisibility(View.GONE);if(LinkPolicy.trusted(url)&&WebViewFeature.isFeatureSupported(WebViewFeature.WEB_MESSAGE_LISTENER))installNativeBridge();}
    @Override public void onReceivedError(WebView view,WebResourceRequest req,WebResourceError e){if(req.isForMainFrame())error.setVisibility(View.VISIBLE);}
    @Override public void onReceivedHttpError(WebView view,WebResourceRequest req,WebResourceResponse res){if(req.isForMainFrame()&&res.getStatusCode()>=400)error.setVisibility(View.VISIBLE);}
    @Override public void onReceivedSslError(WebView view,SslErrorHandler handler,SslError e){handler.cancel();error.setVisibility(View.VISIBLE);}
@@ -92,11 +93,22 @@ public class MainActivity extends Activity {
    if(exportRequested||exportBytes!=null){toast("أكمل حفظ الملف الحالي أولاً.");return;}
    if(!WebViewFeature.isFeatureSupported(WebViewFeature.WEB_MESSAGE_LISTENER)){toast("حدّث Android System WebView لحفظ الملفات داخل التطبيق.");return;}
    exportRequested=true;
-   String js="(async()=>{try{const r=await fetch("+JSONObject.quote(url)+",{credentials:'same-origin'});if(!r.ok)throw Error('download');const b=await r.blob();if(b.size>10485760)throw Error('size');const f=new FileReader();f.onload=()=>window.SabeqFile.postMessage(JSON.stringify({data:f.result}));f.onerror=()=>window.SabeqFile.postMessage(JSON.stringify({error:true}));f.readAsDataURL(b);}catch(e){window.SabeqFile.postMessage(JSON.stringify({error:true}));}})();";
+   String js="(async()=>{try{const u="+JSONObject.quote(url)+";let b=window.__sabeqExportBlobs?.get(u);if(!b){const r=await fetch(u,{credentials:'same-origin'});if(!r.ok)throw Error('download');b=await r.blob();}if(b.size>10485760)throw Error('size');const f=new FileReader();f.onload=()=>window.SabeqFile.postMessage(JSON.stringify({data:f.result}));f.onerror=()=>window.SabeqFile.postMessage(JSON.stringify({error:true}));f.readAsDataURL(b);}catch(e){window.SabeqFile.postMessage(JSON.stringify({error:true}));}})();";
    web.evaluateJavascript(js,null);
   });
   // Do not persist a case or page history in Activity bundles.
   web.loadUrl(LinkPolicy.HOME);
+ }
+ private void installNativeBridge(){try(java.io.InputStream in=getAssets().open("native-bridge.js");java.io.InputStreamReader reader=new java.io.InputStreamReader(in,java.nio.charset.StandardCharsets.UTF_8)){StringBuilder source=new StringBuilder();char[] buffer=new char[4096];int size;while((size=reader.read(buffer))!=-1)source.append(buffer,0,size);web.evaluateJavascript(source.toString(),null);}catch(java.io.IOException e){toast("تعذر تجهيز الحفظ والطباعة.");}}
+ private void printHtml(String html){
+  if(html.isEmpty()||html.length()>1000000){toast("تعذر تجهيز المستند للطباعة.");return;}
+  if(printView!=null){((android.view.ViewGroup)printView.getParent()).removeView(printView);printView.destroy();}
+  printView=new WebView(this);printView.getSettings().setJavaScriptEnabled(false);printView.getSettings().setAllowFileAccess(false);printView.getSettings().setAllowContentAccess(false);
+  ((android.view.ViewGroup)web.getParent()).addView(printView,new FrameLayout.LayoutParams(1,1));
+  printView.setWebViewClient(new WebViewClient(){
+   @Override public WebResourceResponse shouldInterceptRequest(WebView view,WebResourceRequest request){String url=request.getUrl().toString();if(LinkPolicy.trusted(url)&&url.matches("https://q8-ux\\.github\\.io/saad/sabeq-legal/(?:assets/|fonts/)[^?]*\\.(?:ttf|woff2?)"))return null;return new WebResourceResponse("text/plain","UTF-8",new java.io.ByteArrayInputStream(new byte[0]));}
+   @Override public void onPageFinished(WebView view,String url){PrintManager manager=(PrintManager)getSystemService(PRINT_SERVICE);manager.print("مذكرة سابق",view.createPrintDocumentAdapter("سابق"),null);}
+  });printView.loadDataWithBaseURL(LinkPolicy.HOME,html,"text/html","UTF-8",null);
  }
  private void external(String url){try{startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse(url)));}catch(ActivityNotFoundException e){toast("لا يوجد تطبيق لفتح الرابط.");}}
  private void toast(String value){Toast.makeText(this,value,Toast.LENGTH_LONG).show();}
@@ -109,5 +121,5 @@ public class MainActivity extends Activity {
  @SuppressWarnings("deprecation") @Override public void onBackPressed(){if(web.canGoBack())web.goBack();else new AlertDialog.Builder(this).setMessage("هل تريد إغلاق تطبيق سابق؟").setPositiveButton("إغلاق",(d,w)->finish()).setNegativeButton("متابعة",null).show();}
  @Override protected void onPause(){web.onPause();super.onPause();}
  @Override protected void onResume(){super.onResume();if(web!=null)web.onResume();}
- @Override protected void onDestroy(){if(microphone!=null)microphone.deny();if(files!=null)files.onReceiveValue(null);exportBytes=null;web.destroy();super.onDestroy();}
+ @Override protected void onDestroy(){if(microphone!=null)microphone.deny();if(files!=null)files.onReceiveValue(null);exportBytes=null;if(printView!=null)printView.destroy();web.destroy();super.onDestroy();}
 }

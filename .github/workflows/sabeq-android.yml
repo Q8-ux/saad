@@ -25,7 +25,9 @@ jobs:
           gradle-version: '8.11.1'
       - name: Unit tests, lint and release build
         working-directory: sabeq-legal/android
-        run: gradle --no-daemon testDebugUnitTest lintDebug assembleRelease
+        run: |
+          node --test tests/native-bridge.test.mjs
+          gradle --no-daemon testDebugUnitTest lintDebug assembleRelease
       - name: Export unsigned APK and build evidence
         shell: bash
         run: |
