@@ -94,7 +94,7 @@ def overlay(destination,base_run):
     if target.exists():
         shutil.rmtree(target)
     shutil.copytree(SOURCE,target)
-    for name in ['index.html','style.css','core.js','app.js']+[f'audio/{word}.mp3' for word in ['hot','sit','ant','go','bag','cry','garden']]:
+    for name in ['index.html','style.css','core.js','app.js','avatar-v1.png']+[f'audio/{word}.mp3' for word in ['hot','sit','ant','go','bag','cry','garden']]:
         if not (target/name).is_file():
             raise RuntimeError('Spelling workbook package incomplete')
     (target/'deployment.json').write_text(json.dumps({

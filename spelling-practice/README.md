@@ -19,11 +19,13 @@ node --check spelling-practice/core.js
 node --check spelling-practice/app.js
 node --test spelling-practice/tests/*.test.cjs
 mkdir -p spelling-practice/dist
-cp spelling-practice/index.html spelling-practice/style.css spelling-practice/core.js spelling-practice/app.js spelling-practice/dist/
+cp spelling-practice/index.html spelling-practice/style.css spelling-practice/core.js spelling-practice/app.js spelling-practice/avatar-v1.png spelling-practice/dist/
 cp -R spelling-practice/audio spelling-practice/dist/
 python spelling-practice/tests/test_publication.py
 ```
 
 Runtime has no third-party dependencies or network-loaded fonts. UI, pointer and native-audio behavior are covered with a simulated DOM, canvas and audio element; real-device touch/stylus, speakers and browser print pagination should also be checked on the student's device.
+
+The circular avatar was generated from the user's supplied portrait and is used in the page header, browser icon and home-screen shortcut. Only the generated icon is included in this repository; the original photograph is not part of the project. The production PNG preserves transparency and is optimized to 256 × 256 pixels.
 
 Audio clips were synthesized locally with CMU Flite's English `slt` voice, slowed to 85% tempo with FFmpeg without changing pitch. They are generated media included in this repository, rather than calls to an external speech service.
