@@ -12,7 +12,7 @@ function setup(saved=null,failStorage=false,hash=''){
     constructor(id){this.id=id;this.events={};this.attributes={};this.dataset={};this.children=[];this.checked=false;this.hidden=false;this._html='';const classes=new Set();this.classList={add:v=>classes.add(v),remove:v=>classes.delete(v),toggle:(v,on)=>on?classes.add(v):classes.delete(v),contains:v=>classes.has(v)};}
     addEventListener(t,cb){(this.events[t]??=[]).push(cb)}
     fire(type,props={}){const e={type,button:0,pointerId:1,pointerType:'touch',clientX:50,clientY:100,pressure:.5,preventDefault(){},...props};for(const cb of this.events[type]??[])cb(e)}
-    setAttribute(k,v){this.attributes[k]=v}appendChild(c){this.children.push(c)}
+    setAttribute(k,v){this.attributes[k]=v}getAttribute(k){return this.attributes[k]??null}appendChild(c){this.children.push(c)}
     set innerHTML(v){this._html=v;this.children=[]}get innerHTML(){return this._html}
     getBoundingClientRect(){return this.rect??{left:10,top:20,width:340,height:397.8}}
     setPointerCapture(id){this.capture=id}hasPointerCapture(id){return this.capture===id}releasePointerCapture(){this.capture=null}
@@ -21,6 +21,7 @@ function setup(saved=null,failStorage=false,hash=''){
   const colors=C.COLORS.map(color=>{const e=new Element();e.dataset.color=color;return e});
   const drawOps=[];let operation='source-over';const ctx={save(){},restore(){},setTransform(){},clearRect(){},beginPath(){},arc(){},moveTo(){},lineTo(){},fill(){drawOps.push(operation)},stroke(){drawOps.push(operation)},set globalCompositeOperation(v){operation=v}};
   nodes.ink.getContext=()=>ctx;
+  const player=nodes.pronunciation;player.currentTime=0;player.paused=true;player.plays=0;player.loads=0;player.pause=()=>{player.paused=true;player.fire('pause')};player.load=()=>{player.loads++};player.play=()=>{player.plays++;player.paused=false;player.fire('playing');return Promise.resolve()};
   const store=new Map(saved?[[C.STORAGE_KEY,saved]]:[]);
   const document={hidden:false,getElementById(id){assert.ok(nodes[id],`HTML node missing: ${id}`);return nodes[id]},querySelectorAll:()=>colors,createElement:()=>new Element(),addEventListener(){}};
   const location={hash};const events={};const window={SpellingCore:C,devicePixelRatio:2,addEventListener(t,f){events[t]=f},print(){window.printed=true}};
@@ -64,4 +65,18 @@ test('completed status persists, controls stop at boundaries, six words print',(
   const a=setup();assert.equal(a.nodes.previous.disabled,true);a.nodes.complete.fire('click');assert.equal(a.state().completed.hot,true);assert.equal(a.nodes.complete.attributes['aria-pressed'],'true');
   a.nodes.wordTabs.children[5].fire('click');assert.equal(a.nodes.wordTitle.textContent,'cry');assert.equal(a.nodes.next.disabled,true);
   a.nodes.printAll.fire('click');assert.equal(a.window.printed,true);assert.equal((a.nodes.printArea.innerHTML.match(/class="print-sheet"/g)||[]).length,6);
+});
+test('bundled MP3 plays on the tap without speech synthesis; repeat restarts it',()=>{
+  const a=setup();const player=a.nodes.pronunciation;assert.equal('speechSynthesis'in a.window,false);assert.equal(player.getAttribute('src'),'audio/hot.mp3?v=2');
+  a.nodes.listen.fire('click');assert.equal(player.plays,1);assert.equal(player.paused,false);assert.equal(a.nodes.listenLabel.textContent,'أسمع وأتعلّم');
+  player.currentTime=.5;a.nodes.listen.fire('click');assert.equal(player.plays,2);assert.equal(player.currentTime,0);
+  player.fire('ended');assert.equal(a.nodes.listenLabel.textContent,'اسمع الكلمة');
+});
+test('navigating stops old audio and selects the correct clip in recall mode',()=>{
+  const a=setup();a.nodes.listen.fire('click');a.nodes.next.fire('click');assert.equal(a.nodes.pronunciation.paused,true);assert.equal(a.nodes.pronunciation.getAttribute('src'),'audio/sit.mp3?v=2');
+  a.nodes.recallMode.fire('click');a.nodes.listen.fire('click');assert.equal(a.nodes.pronunciation.getAttribute('src'),'audio/sit.mp3?v=2');assert.equal(a.nodes.wordTitle.textContent,'أكتب من الذاكرة');
+});
+test('blocked playback exposes native controls and stale rejections do not affect another word',async()=>{
+  const a=setup();a.nodes.pronunciation.play=()=>Promise.reject(Error('blocked'));a.nodes.listen.fire('click');await Promise.resolve();assert.equal(a.nodes.pronunciation.hidden,false);assert.ok(a.nodes.toast.textContent.includes('مشغّل الصوت'));
+  const b=setup();let reject;b.nodes.pronunciation.play=()=>new Promise((_,r)=>{reject=r});b.nodes.pronunciation.hidden=true;b.nodes.listen.fire('click');b.nodes.next.fire('click');reject(Error('old'));await Promise.resolve();assert.equal(b.nodes.pronunciation.hidden,true);
 });

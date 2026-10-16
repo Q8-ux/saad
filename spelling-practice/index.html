@@ -7,9 +7,9 @@
   <meta name="description" content="دفتر إملاء تفاعلي للكلمات الست المحددة: hot, sit, ant, go, bag, cry. تتبّع الحروف المنقّطة بإصبعك أو بقلم الشاشة.">
   <title>دفتر الإملاء · أتتبّع وأكتب</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Crect width='80' height='80' rx='20' fill='%23123f43'/%3E%3Cpath d='M23 55 28 39 51 16 64 29 41 52Z' fill='%23ffc86b'/%3E%3Cpath d='m23 55 18-3-13-13Z' fill='white'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="style.css?v=1">
+  <link rel="stylesheet" href="style.css?v=2">
   <script src="core.js?v=1" defer></script>
-  <script src="app.js?v=1" defer></script>
+  <script src="app.js?v=2" defer></script>
 </head>
 <body>
   <a href="#workbook" class="skip-link">الانتقال إلى التمرين</a>
@@ -25,7 +25,8 @@
 
       <section class="workbook" aria-label="صفحة الكلمة">
         <div class="page-topline"><span class="page-label">تدريب الإملاء</span><span id="pageCount" class="page-count"></span></div>
-        <div class="word-heading"><div><p class="word-caption" id="wordCaption">أقرأ الكلمة</p><h3 id="wordTitle" dir="ltr" lang="en"></h3><p id="meaning" class="meaning"></p></div><button class="listen-button" id="listen" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m11 4-5 4H2v8h4l5 4V4Zm5 4a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/></svg><span>اسمع الكلمة</span></button></div>
+        <div class="word-heading"><div><p class="word-caption" id="wordCaption">أقرأ الكلمة</p><h3 id="wordTitle" dir="ltr" lang="en"></h3><p id="meaning" class="meaning"></p></div><button class="listen-button" id="listen" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m11 4-5 4H2v8h4l5 4V4Zm5 4a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/></svg><span id="listenLabel">اسمع الكلمة</span></button></div>
+        <audio id="pronunciation" class="fallback-player" preload="auto" controls playsinline hidden aria-label="نطق كلمة التدريب"></audio>
         <div class="mode-switch" role="group" aria-label="طريقة التدريب"><button type="button" id="traceMode" aria-pressed="true">أتتبّع النقاط</button><button type="button" id="recallMode" aria-pressed="false">أكتب من الذاكرة</button></div>
         <p class="writing-hint" id="writingHint">اكتب فوق النقاط بإصبعك أو بقلم الشاشة، من اليسار إلى اليمين.</p>
 
@@ -40,7 +41,7 @@
 
       <div class="lesson-footer"><button type="button" id="complete" class="complete-button" aria-pressed="false"><span aria-hidden="true">✓</span><span id="completeLabel">أنهيت التدريب</span></button><p>تتبّع الكلمة، ثم جرّب كتابتها من الذاكرة.</p></div>
       <div class="print-options"><button type="button" id="printOne">طباعة هذه الكلمة</button><span aria-hidden="true">·</span><button type="button" id="printAll">طباعة الكلمات الست</button></div>
-      <p class="parent-note">إتمام التدريب يُحدَّد يدويًا. النطق حسب الأصوات المتاحة في جهازك.</p>
+      <p class="parent-note">اضغط «اسمع الكلمة» لسماع نطقها. إتمام التدريب يُحدَّد يدويًا.</p>
       <p class="storage-note">الكتابة محفوظة في هذا المتصفح فقط؛ حذف بيانات المتصفح يحذفها.</p>
     </main>
     <nav class="page-navigation" aria-label="التنقل بين الصفحات"><button type="button" id="previous">السابقة</button><span id="navCount" aria-live="polite"></span><button type="button" id="next" class="next-button">الكلمة التالية</button></nav>

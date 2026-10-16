@@ -1,13 +1,17 @@
 (function(){
   'use strict';
-  const C=window.SpellingCore,$=id=>document.getElementById(id),canvas=$('ink'),ctx=canvas.getContext('2d');
+  const C=window.SpellingCore,$=id=>document.getElementById(id),canvas=$('ink'),ctx=canvas.getContext('2d'),player=$('pronunciation');
   const digits=n=>String(n).replace(/\d/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]);
-  let state=C.emptyState(),tool='pen',active=null,lastClear=null,toastTimer,storageFailed=false;
+  let state=C.emptyState(),tool='pen',active=null,lastClear=null,toastTimer,storageFailed=false,playAttempt=0,audioTimer;
   try{state=C.normalizeState(JSON.parse(localStorage.getItem(C.STORAGE_KEY)));}catch{storageFailed=true;}
   let requested='';try{requested=decodeURIComponent(location.hash.slice(1));}catch{/* Ignore malformed link fragments. */}
   const requestedIndex=C.WORDS.findIndex(w=>w.id===requested);if(requestedIndex>=0)state.index=requestedIndex;
   function strokes(){const key=C.pageKey(state);return state.pages[key]||(state.pages[key]=[]);}
   function message(text){$('toast').textContent=text;$('toast').hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').hidden=true,4500);}
+  function listening(on){$('listen').classList.toggle('playing',on);$('listenLabel').textContent=on?'أسمع وأتعلّم':'اسمع الكلمة';$('listen').setAttribute('aria-pressed',String(on));}
+  function stopAudio(){playAttempt++;clearTimeout(audioTimer);player.pause();try{player.currentTime=0;}catch{}listening(false);}
+  function prepareAudio(){const src='audio/'+C.WORDS[state.index].id+'.mp3?v=2';if(player.getAttribute('src')!==src){stopAudio();player.setAttribute('src',src);player.load();}}
+  function audioFallback(attempt){if(attempt!==playAttempt)return;clearTimeout(audioTimer);listening(false);player.hidden=false;message('اضغط زر التشغيل في مشغّل الصوت أسفل الكلمة.');}
   function save(){
     try{localStorage.setItem(C.STORAGE_KEY,JSON.stringify(state));storageFailed=false;$('saveState').textContent='حُفظ التدريب على هذا الجهاز';$('saveState').classList.remove('error');}
     catch{storageFailed=true;$('saveState').textContent='تعذّر الحفظ؛ أبقِ الصفحة مفتوحة';$('saveState').classList.add('error');}
@@ -24,6 +28,7 @@
   }
   function render(){
     const w=C.WORDS[state.index],recall=state.mode==='recall';
+    prepareAudio();
     $('wordTitle').textContent=recall?'أكتب من الذاكرة':w.word;$('wordTitle').classList.toggle('recall-title',recall);$('wordTitle').lang=recall?'ar':'en';$('wordTitle').dir=recall?'rtl':'ltr';
     $('meaning').textContent=recall?'أتذكّر الحروف وأكتبها وحدي.':w.meaning;$('wordCaption').textContent=recall?'أجرّب بنفسي':'أقرأ الكلمة';
     $('pageCount').textContent='صفحة '+digits(state.index+1)+' من '+digits(C.WORDS.length);$('navCount').textContent=digits(state.index+1)+' / '+digits(C.WORDS.length);
@@ -50,7 +55,7 @@
     save();updateTools();
   }
   function navigate(index){
-    if(index<0||index>=C.WORDS.length)return;finish();if('speechSynthesis'in window)window.speechSynthesis.cancel();state.index=index;lastClear=null;save();render();
+    if(index<0||index>=C.WORDS.length)return;finish();stopAudio();state.index=index;lastClear=null;save();render();
   }
   canvas.addEventListener('pointerdown',event=>{
     if(active||event.button>0||($('penOnly').checked&&event.pointerType!=='pen'))return;
@@ -81,18 +86,22 @@
   $('penOnly').addEventListener('change',()=>{finish();if($('penOnly').checked)message('الكتابة بقلم الشاشة فقط. أزل العلامة للكتابة بالإصبع.');});
   $('complete').addEventListener('click',()=>{finish();const id=C.WORDS[state.index].id;state.completed[id]=!state.completed[id];save();render();if(state.completed[id])message(Object.values(state.completed).filter(Boolean).length===C.WORDS.length?'أحسنت! أكملت تدريب الكلمات الست.':'أحسنت! يمكنك الانتقال إلى الكلمة التالية.');});
   $('listen').addEventListener('click',()=>{
-    if(!('speechSynthesis'in window)||!('SpeechSynthesisUtterance'in window)){message('النطق غير متاح هنا. جرّب فتح الصفحة في Chrome أو Safari.');return;}
+    stopAudio();prepareAudio();const attempt=++playAttempt;
     try{
-      const speech=window.speechSynthesis;const voices=speech.getVoices();const voice=voices.find(v=>/^en[-_]GB/i.test(v.lang))||voices.find(v=>/^en[-_]/i.test(v.lang));
-      const utterance=new SpeechSynthesisUtterance(C.WORDS[state.index].word);utterance.lang=voice?.lang||'en-GB';utterance.rate=.72;if(voice)utterance.voice=voice;
-      utterance.onerror=e=>{if(!['canceled','interrupted'].includes(e.error))message('تعذّر تشغيل النطق. تأكّد من توفر صوت إنجليزي ومن مستوى الصوت.');};speech.cancel();speech.speak(utterance);
-    }catch{message('تعذّر تشغيل صوت الكلمة في هذا المتصفح.');}
+      // Keep play() in the student's tap handler so mobile audio policies allow it.
+      const playing=player.play();if(playing&&typeof playing.catch==='function')playing.catch(()=>audioFallback(attempt));
+      audioTimer=setTimeout(()=>{if(attempt===playAttempt&&player.paused)audioFallback(attempt);},6000);
+    }catch{audioFallback(attempt);}
   });
+  player.addEventListener('playing',()=>{clearTimeout(audioTimer);listening(true);});
+  player.addEventListener('ended',()=>{clearTimeout(audioTimer);listening(false);});
+  player.addEventListener('pause',()=>listening(false));
+  player.addEventListener('error',()=>{clearTimeout(audioTimer);listening(false);player.hidden=false;message('تعذّر تحميل صوت الكلمة. أعد المحاولة بعد اتصال الإنترنت.');});
   function print(words){finish();$('printArea').innerHTML=C.printMarkup(words);window.print();}
   $('printOne').addEventListener('click',()=>print([C.WORDS[state.index]]));$('printAll').addEventListener('click',()=>print(C.WORDS));
   window.addEventListener('beforeprint',()=>{if(!$('printArea').innerHTML)$('printArea').innerHTML=C.printMarkup([C.WORDS[state.index]]);});
   window.addEventListener('afterprint',()=>$('printArea').innerHTML='');
-  document.addEventListener('visibilitychange',()=>{if(document.hidden){finish();save();}});window.addEventListener('pagehide',()=>{finish();save();});
+  document.addEventListener('visibilitychange',()=>{if(document.hidden){finish();save();stopAudio();}});window.addEventListener('pagehide',()=>{finish();save();stopAudio();});
   window.addEventListener('hashchange',()=>{const id=location.hash.slice(1),i=C.WORDS.findIndex(w=>w.id===id);if(i>=0&&i!==state.index)navigate(i);});
   window.addEventListener('resize',resize);if('ResizeObserver'in window)new ResizeObserver(resize).observe($('paper'));
   render();
