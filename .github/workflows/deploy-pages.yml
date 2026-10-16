@@ -59,6 +59,19 @@ jobs:
         env:
           BEFORE_SHA: ${{ github.event.before }}
         run: python sabeq-legal/deployment/release.py scope
+      - name: Detect Tamweenat-only update
+        id: tamweenat
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+        run: |
+          echo "only=false" >> "$GITHUB_OUTPUT"
+          if [[ "$GITHUB_EVENT_NAME" == "push" && "$BEFORE_SHA" =~ ^[0-9a-f]{40}$ ]]; then
+            git fetch --no-tags --depth=1 origin "$BEFORE_SHA"
+            changed="$(git diff --name-only "$BEFORE_SHA" "$GITHUB_SHA")"
+            if [[ -n "$changed" ]] && ! echo "$changed" | grep -Ev '^(tamweenat/|tamweenat-admin/|zad-restaurants/|\.github/workflows/deploy-pages\.yml$)' ; then
+              echo "only=true" >> "$GITHUB_OUTPUT"
+            fi
+          fi
       - name: Validate Sabeq publication safety
         if: steps.scope.outputs.sabeq_only == 'true'
         run: python sabeq-legal/deployment/test_release.py
@@ -69,31 +82,31 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: python sabeq-legal/deployment/release.py prepare
       - uses: actions/setup-node@v4
-        if: steps.scope.outputs.sabeq_only != 'true'
+        if: steps.scope.outputs.sabeq_only != 'true' && steps.tamweenat.outputs.only != 'true'
         with: { node-version: 22 }
       - name: Validate AutoClip Studio
-        if: steps.scope.outputs.sabeq_only != 'true'
+        if: steps.scope.outputs.sabeq_only != 'true' && steps.tamweenat.outputs.only != 'true'
         working-directory: autoclip-studio
         run: npm test && npm run check
       - name: Validate Tamweenat assistant
-        if: steps.scope.outputs.sabeq_only != 'true'
+        if: steps.scope.outputs.sabeq_only != 'true' && steps.tamweenat.outputs.only != 'true'
         run: |
           node --check tamweenat/assets/support-runtime.js
           node --check tamweenat/assets/voice-assistant.js
           node tamweenat/tests/voice-order-parser.test.cjs
           node tamweenat/tests/assistant-integration.test.cjs
       - name: Validate ETF learning paths
-        if: steps.scope.outputs.sabeq_only != 'true'
+        if: steps.scope.outputs.sabeq_only != 'true' && steps.tamweenat.outputs.only != 'true'
         run: node --test etf-academy/tests/*.test.cjs
       - name: Install English audio dependency
-        if: steps.scope.outputs.sabeq_only != 'true'
+        if: steps.scope.outputs.sabeq_only != 'true' && steps.tamweenat.outputs.only != 'true'
         run: sudo apt-get update -y && sudo apt-get install -y espeak
       - name: Install workforce dependencies
-        if: steps.scope.outputs.sabeq_only != 'true'
+        if: steps.scope.outputs.sabeq_only != 'true' && steps.tamweenat.outputs.only != 'true'
         working-directory: workforce-platform/apps/web
         run: npm install --no-audit --no-fund
       - name: Build workforce platform
-        if: steps.scope.outputs.sabeq_only != 'true'
+        if: steps.scope.outputs.sabeq_only != 'true' && steps.tamweenat.outputs.only != 'true'
         working-directory: workforce-platform/apps/web
         env:
           GITHUB_PAGES: 'true'
@@ -104,7 +117,7 @@ jobs:
           NEXT_PUBLIC_INTERFACE_VERSION: 'smart-assistant-flags-v23'
         run: rm -rf .next out && npm run build
       - name: Prepare combined site
-        if: steps.scope.outputs.sabeq_only != 'true'
+        if: steps.scope.outputs.sabeq_only != 'true' && steps.tamweenat.outputs.only != 'true'
         run: |
           rm -rf _site && mkdir -p _site
           cp index.html 404.html cyber-archive.css cyber-archive.js cyber-data.js sabeq.html _site/
@@ -119,7 +132,7 @@ jobs:
           echo 'smart-assistant-flags-v23' > _site/interface-version.txt
           touch _site/.nojekyll
       - name: Validate combined site
-        if: steps.scope.outputs.sabeq_only != 'true'
+        if: steps.scope.outputs.sabeq_only != 'true' && steps.tamweenat.outputs.only != 'true'
         run: |
           test -s _site/404.html
           test -s _site/etf-academy/index.html
@@ -147,6 +160,11 @@ jobs:
       - name: Verify Sabeq publication and preserved sites
         if: steps.scope.outputs.sabeq_only == 'true'
         run: python sabeq-legal/deployment/release.py verify
+      - name: Restore published site and update Tamweenat only
+        if: steps.tamweenat.outputs.only == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python tamweenat/scripts/deploy-only.py
       - uses: actions/upload-pages-artifact@v3
         with: { path: _site, retention-days: 30 }
       - name: Deploy
@@ -158,7 +176,7 @@ jobs:
           echo 'Sabeq deployment succeeded for commit '\"$GITHUB_SHA\" >> "$GITHUB_STEP_SUMMARY"
           echo 'Unrelated sites preserved from the previous successful Pages artifact.' >> "$GITHUB_STEP_SUMMARY"
       - name: Record deployment status
-        if: steps.scope.outputs.sabeq_only != 'true'
+        if: steps.scope.outputs.sabeq_only != 'true' && steps.tamweenat.outputs.only != 'true'
         run: |
           printf 'status=deployed\nversion=smart-assistant-flags-v23\nrun_id=%s\ncommit=%s\npage_url=%s\ntime=%s\n' "$GITHUB_RUN_ID" "$GITHUB_SHA" '${{ steps.deployment.outputs.page_url }}' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > live-dashboard-status.txt
           git config user.name github-actions[bot]
