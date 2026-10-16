@@ -33,7 +33,7 @@ function setup(saved=null,failStorage=false,hash=''){
 function draw(app,props={}){app.nodes.ink.fire('pointerdown',props);app.nodes.ink.fire('pointermove',{clientX:100,clientY:160,...props});app.nodes.ink.fire('pointerup',{clientX:110,clientY:170,...props});}
 
 test('finger drawing saves the final position, reloads, and survives resizing',()=>{
-  const a=setup();assert.equal(a.nodes.wordTabs.children.length,6);draw(a);
+  const a=setup();assert.equal(a.nodes.wordTabs.children.length,7);draw(a);
   const stroke=a.state().pages['hot:trace'][0];assert.equal(stroke.points.length,3);assert.equal(stroke.points.at(-1).x,294.1);
   a.nodes.ink.rect={left:0,top:0,width:700,height:819};a.events.resize();assert.equal(a.nodes.ink.width,1400);assert.deepEqual(a.state().pages['hot:trace'][0],stroke);
   const b=setup(a.saved());assert.equal(b.nodes.wordTitle.textContent,'hot');assert.ok(b.drawOps.length);assert.equal(b.nodes.undo.disabled,false);
@@ -61,10 +61,10 @@ test('blocked/corrupt storage and malformed links do not prevent training',()=>{
   const a=setup(null,true,'#%broken');draw(a);assert.ok(a.drawOps.length);assert.ok(a.nodes.saveState.textContent.includes('تعذّر'));
   const b=setup('{bad');assert.equal(b.nodes.wordTitle.textContent,'hot');draw(b);assert.equal(b.state().version,1);
 });
-test('completed status persists, controls stop at boundaries, six words print',()=>{
+test('completed status persists, controls stop at boundaries, seven words print',()=>{
   const a=setup();assert.equal(a.nodes.previous.disabled,true);a.nodes.complete.fire('click');assert.equal(a.state().completed.hot,true);assert.equal(a.nodes.complete.attributes['aria-pressed'],'true');
-  a.nodes.wordTabs.children[5].fire('click');assert.equal(a.nodes.wordTitle.textContent,'cry');assert.equal(a.nodes.next.disabled,true);
-  a.nodes.printAll.fire('click');assert.equal(a.window.printed,true);assert.equal((a.nodes.printArea.innerHTML.match(/class="print-sheet"/g)||[]).length,6);
+  a.nodes.wordTabs.children[6].fire('click');assert.equal(a.nodes.wordTitle.textContent,'garden');assert.equal(a.nodes.next.disabled,true);assert.equal(a.nodes.pronunciation.getAttribute('src'),'audio/garden.mp3?v=2');
+  a.nodes.printAll.fire('click');assert.equal(a.window.printed,true);assert.equal((a.nodes.printArea.innerHTML.match(/class="print-sheet"/g)||[]).length,7);
 });
 test('bundled MP3 plays on the tap without speech synthesis; repeat restarts it',()=>{
   const a=setup();const player=a.nodes.pronunciation;assert.equal('speechSynthesis'in a.window,false);assert.equal(player.getAttribute('src'),'audio/hot.mp3?v=2');

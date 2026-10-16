@@ -84,7 +84,7 @@
   function setMode(mode){finish();state.mode=mode;lastClear=null;save();render();}
   $('traceMode').addEventListener('click',()=>setMode('trace'));$('recallMode').addEventListener('click',()=>setMode('recall'));
   $('penOnly').addEventListener('change',()=>{finish();if($('penOnly').checked)message('الكتابة بقلم الشاشة فقط. أزل العلامة للكتابة بالإصبع.');});
-  $('complete').addEventListener('click',()=>{finish();const id=C.WORDS[state.index].id;state.completed[id]=!state.completed[id];save();render();if(state.completed[id])message(Object.values(state.completed).filter(Boolean).length===C.WORDS.length?'أحسنت! أكملت تدريب الكلمات الست.':'أحسنت! يمكنك الانتقال إلى الكلمة التالية.');});
+  $('complete').addEventListener('click',()=>{finish();const id=C.WORDS[state.index].id;state.completed[id]=!state.completed[id];save();render();if(state.completed[id])message(Object.values(state.completed).filter(Boolean).length===C.WORDS.length?'أحسنت! أكملت تدريب جميع الكلمات.':'أحسنت! يمكنك الانتقال إلى الكلمة التالية.');});
   $('listen').addEventListener('click',()=>{
     stopAudio();prepareAudio();const attempt=++playAttempt;
     try{
