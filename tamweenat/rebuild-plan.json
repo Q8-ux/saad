@@ -1,0 +1,27 @@
+{
+  "version": "3.0",
+  "scope": [
+    "public_site",
+    "restaurant_login",
+    "restaurant_account",
+    "admin_dashboard",
+    "backend",
+    "deployment"
+  ],
+  "requirements": [
+    "vegetables_only_public_catalog",
+    "restaurant_orders_and_tracking",
+    "credit_and_direct_payment",
+    "invoices",
+    "contracts_contacts_users",
+    "responsive_rtl",
+    "no_visible_ai_tools"
+  ],
+  "rules": [
+    "do_not_delete_existing_database",
+    "no_fake_payments",
+    "no_hardcoded_admin_password",
+    "verify_deployment_before_claiming_live"
+  ],
+  "status": "rebuild_in_progress"
+}
