@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#123f43">
+  <meta name="description" content="دفتر إملاء تفاعلي للكلمات الست المحددة: hot, sit, ant, go, bag, cry. تتبّع الحروف المنقّطة بإصبعك أو بقلم الشاشة.">
+  <title>دفتر الإملاء · أتتبّع وأكتب</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Crect width='80' height='80' rx='20' fill='%23123f43'/%3E%3Cpath d='M23 55 28 39 51 16 64 29 41 52Z' fill='%23ffc86b'/%3E%3Cpath d='m23 55 18-3-13-13Z' fill='white'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css?v=1">
+  <script src="core.js?v=1" defer></script>
+  <script src="app.js?v=1" defer></script>
+</head>
+<body>
+  <a href="#workbook" class="skip-link">الانتقال إلى التمرين</a>
+  <div class="app-shell" id="app">
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="m7 25 3-10L23 2l7 7-13 13Z" fill="currentColor"/><path d="m7 25 10-3-7-7Z" fill="#fff"/></svg></span><div><h1>دفتر الإملاء</h1><p>أتتبّع النقاط… وأكتب بنفسي</p></div></div>
+      <span class="grade">الصف الأول <span lang="en" dir="ltr">GRADE 1</span></span>
+    </header>
+
+    <main id="workbook">
+      <div class="lesson-heading"><div><span class="eyebrow">رحلتي مع الكلمات</span><h2>كلمة واحدة، خطوة بخطوة.</h2></div><span class="progress-pill" id="progressCount">٠ / ٦ مكتملة</span></div>
+      <nav class="word-tabs" id="wordTabs" aria-label="اختيار كلمة التدريب"></nav>
+
+      <section class="workbook" aria-label="صفحة الكلمة">
+        <div class="page-topline"><span class="page-label">تدريب الإملاء</span><span id="pageCount" class="page-count"></span></div>
+        <div class="word-heading"><div><p class="word-caption" id="wordCaption">أقرأ الكلمة</p><h3 id="wordTitle" dir="ltr" lang="en"></h3><p id="meaning" class="meaning"></p></div><button class="listen-button" id="listen" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m11 4-5 4H2v8h4l5 4V4Zm5 4a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/></svg><span>اسمع الكلمة</span></button></div>
+        <div class="mode-switch" role="group" aria-label="طريقة التدريب"><button type="button" id="traceMode" aria-pressed="true">أتتبّع النقاط</button><button type="button" id="recallMode" aria-pressed="false">أكتب من الذاكرة</button></div>
+        <p class="writing-hint" id="writingHint">اكتب فوق النقاط بإصبعك أو بقلم الشاشة، من اليسار إلى اليمين.</p>
+
+        <div class="toolbar" aria-label="أدوات الكتابة">
+          <div class="tool-group"><button type="button" id="pen" class="tool active" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 20 2-7L16 3l5 5-10 10-7 2Zm10-15 5 5M6 13l5 5"/></svg>قلم</button><button type="button" id="eraser" class="tool" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 14 9-10a2 2 0 0 1 3 0l6 5a2 2 0 0 1 0 3l-7 8H8l-5-4a2 2 0 0 1 0-2Zm3-3 10 9M13 20h9"/></svg>ممحاة</button></div>
+          <div class="colors" role="group" aria-label="لون القلم"><button type="button" class="color-dot active" data-color="#1769aa" style="--ink:#1769aa" aria-label="أزرق" aria-pressed="true"></button><button type="button" class="color-dot" data-color="#17846e" style="--ink:#17846e" aria-label="أخضر" aria-pressed="false"></button><button type="button" class="color-dot" data-color="#aa4b79" style="--ink:#aa4b79" aria-label="بنفسجي" aria-pressed="false"></button></div>
+          <div class="tool-group secondary-tools"><button type="button" id="undo" class="text-tool">تراجع</button><button type="button" id="clear" class="text-tool">مسح الصفحة</button></div>
+        </div>
+        <div class="paper" id="paper"><div class="guide" id="guide" aria-hidden="true"></div><canvas id="ink" aria-label="مساحة الكتابة بالإصبع أو قلم الشاشة" aria-describedby="writingHint"></canvas></div>
+        <div class="page-bottom"><label class="pen-only"><input type="checkbox" id="penOnly"> قلم الشاشة فقط <span>(لتجاهل لمس اليد)</span></label><span class="save-state" id="saveState" role="status">يُحفظ التدريب على هذا الجهاز</span></div>
+      </section>
+
+      <div class="lesson-footer"><button type="button" id="complete" class="complete-button" aria-pressed="false"><span aria-hidden="true">✓</span><span id="completeLabel">أنهيت التدريب</span></button><p>تتبّع الكلمة، ثم جرّب كتابتها من الذاكرة.</p></div>
+      <div class="print-options"><button type="button" id="printOne">طباعة هذه الكلمة</button><span aria-hidden="true">·</span><button type="button" id="printAll">طباعة الكلمات الست</button></div>
+      <p class="parent-note">إتمام التدريب يُحدَّد يدويًا. النطق حسب الأصوات المتاحة في جهازك.</p>
+      <p class="storage-note">الكتابة محفوظة في هذا المتصفح فقط؛ حذف بيانات المتصفح يحذفها.</p>
+    </main>
+    <nav class="page-navigation" aria-label="التنقل بين الصفحات"><button type="button" id="previous">السابقة</button><span id="navCount" aria-live="polite"></span><button type="button" id="next" class="next-button">الكلمة التالية</button></nav>
+  </div>
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+  <div id="printArea" dir="ltr"></div>
+  <noscript><p class="no-script">فعّل JavaScript في المتصفح لفتح دفتر الإملاء والكتابة عليه.</p></noscript>
+</body>
+</html>

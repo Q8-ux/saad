@@ -1,0 +1,53 @@
+name: Publish Spelling Practice
+
+on:
+  push:
+    branches: [main]
+    paths: ['spelling-practice/**', '.github/workflows/deploy-spelling-practice.yml']
+  workflow_dispatch:
+  workflow_run:
+    workflows: ['Deploy All GitHub Pages Sites']
+    types: [completed]
+
+permissions:
+  contents: read
+  actions: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages-v2
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: main}
+      - uses: actions/setup-node@v4
+        with: {node-version: 24}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Verify handwriting and prepare files
+        run: |
+          node --check spelling-practice/core.js
+          node --check spelling-practice/app.js
+          node --test spelling-practice/tests/*.test.cjs
+          mkdir -p spelling-practice/dist
+          cp spelling-practice/index.html spelling-practice/style.css spelling-practice/core.js spelling-practice/app.js spelling-practice/dist/
+          python spelling-practice/tests/test_publication.py
+      - uses: actions/configure-pages@v5
+      - name: Preserve published projects and add spelling workbook
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python spelling-practice/deployment/publish.py
+      - uses: actions/upload-pages-artifact@v3
+        with: {path: _site, retention-days: 30}
+      - name: Deploy
+        id: deploy
+        uses: actions/deploy-pages@v4

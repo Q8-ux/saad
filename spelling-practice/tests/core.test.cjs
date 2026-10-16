@@ -1,0 +1,43 @@
+const test=require('node:test');
+const assert=require('node:assert/strict');
+const C=require('../core.js');
+
+test('only the six checked words appear, in the photographed order',()=>{
+  assert.deepEqual(C.WORDS.map(w=>w.word),['hot','sit','ant','go','bag','cry']);
+  assert.equal(new Set(C.WORDS.map(w=>w.id)).size,6);
+  for(const {word} of C.WORDS)for(const letter of word)assert.ok(C.GLYPHS[letter]);
+});
+test('center-line dot guides fit every word and disappear in recall mode',()=>{
+  for(const {word} of C.WORDS){
+    const l=C.wordLayout(word);assert.ok(l.x>=60);assert.ok(l.x+l.width*l.scale<=940);
+    const trace=C.sheetSvg(word);assert.equal((trace.match(/stroke-dasharray="0.01 6.3"/g)||[]).length,2);
+    assert.equal((C.sheetSvg(word,'recall').match(/stroke-dasharray="0.01 6.3"/g)||[]).length,0);
+  }
+  assert.throws(()=>C.wordLayout('<script>'));
+});
+test('touch/stylus coordinates stay aligned when the board resizes',()=>{
+  const wide=C.pointerPoint({clientX:510,clientY:605,pointerType:'touch'}, {left:10,top:20,width:1000,height:1170});
+  const narrow=C.pointerPoint({clientX:180,clientY:218.9,pointerType:'touch'}, {left:10,top:20,width:340,height:397.8});
+  assert.equal(wide.x,500);assert.equal(wide.y,585);assert.equal(narrow.x,500);assert.equal(narrow.y,585);
+  const outside=C.pointerPoint({clientX:-100,clientY:9999,pointerType:'pen',pressure:.8}, {left:0,top:0,width:340,height:397.8});
+  assert.deepEqual(outside,{x:0,y:1170,p:.8});
+});
+test('restored strokes are bounded, validated and kept separate by word and mode',()=>{
+  const good={tool:'pen',color:C.COLORS[1],width:9,points:[{x:12,y:24,p:.7}]};
+  const raw={version:1,index:99,color:'javascript:bad',mode:'recall',completed:{hot:true,sit:'true',garden:true},pages:{'hot:trace':[good], 'hot:recall':[{tool:'eraser',color:'bad',width:200,points:[{x:-5,y:9999,p:5},null,{x:'bad',y:2}]}], 'garden:trace':[good]}};
+  const s=C.normalizeState(raw);assert.equal(s.index,5);assert.equal(s.mode,'recall');assert.equal(s.color,C.COLORS[0]);assert.deepEqual(s.completed,{hot:true});
+  assert.deepEqual(s.pages['hot:trace'][0],good);assert.equal(s.pages['hot:recall'][0].width,50);assert.deepEqual(s.pages['hot:recall'][0].points,[{x:0,y:1170,p:1}]);assert.equal(s.pages['garden:trace'],undefined);
+  assert.deepEqual(C.normalizeState(null),C.emptyState());
+});
+test('eraser removes ink on its own layer; no background is painted',()=>{
+  let operation='source-over';const operations=[];
+  const ctx={save(){},restore(){},beginPath(){},arc(){},fill(){operations.push(operation)},moveTo(){},lineTo(){},stroke(){operations.push(operation)},set globalCompositeOperation(v){operation=v}};
+  C.drawStroke(ctx,{tool:'eraser',color:C.COLORS[0],width:30,points:[{x:4,y:6,p:.5},{x:9,y:10,p:.6}]});
+  C.drawStroke(ctx,{tool:'pen',color:C.COLORS[0],width:9,points:[{x:4,y:6,p:.5}]});
+  assert.deepEqual(operations,['destination-out','source-over']);
+});
+test('printing produces exactly one page per checked word and no student ink',()=>{
+  const all=C.printMarkup(C.WORDS);assert.equal((all.match(/class="print-sheet"/g)||[]).length,6);assert.equal((all.match(/<h1>/g)||[]).length,6);
+  assert.equal((C.printMarkup([C.WORDS[3]]).match(/class="print-sheet"/g)||[]).length,1);
+  assert.ok(!all.includes('garden'));assert.ok(all.includes('<h1>cry</h1>'));
+});
