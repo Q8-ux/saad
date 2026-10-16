@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+*.apk
+*.aab
+*.apks
+*.dex
+*.jks
+*.keystore
+reports/
+work/
