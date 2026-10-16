@@ -21,7 +21,8 @@
       document.head.append(style);
       const moduleUrl = URL.createObjectURL(new Blob([js], { type: "text/javascript" }));
       try {
-        await import(moduleUrl);\n        window.dispatchEvent(new Event("tamweenat-app-loaded"));
+        await import(moduleUrl);
+        window.dispatchEvent(new Event("tamweenat-app-loaded"));
       } finally {
         URL.revokeObjectURL(moduleUrl);
       }
