@@ -1,5 +1,5 @@
 {
-  "release": "2026-10-17-home-memo-entry",
+  "release": "2026-10-17-assistant-memo-card",
   "clientSource": "cf02a1d9f14df089392ab7b6a08d24018434ad55",
   "backendSource": "cdbc45812977393d20c260d9cfc5e3e591faa801",
   "assistant": "official-research-sources-1",
@@ -21,7 +21,7 @@
   "finalMemo": "clean-no-review-notes-1",
   "memoResultTools": "bottom-vector-actions-1",
   "memoPreview": "document-derived-clean-text-1",
-  "githubPagesAsset": "index-9aa6067e20ec.js",
+  "githubPagesAsset": "index-f7213fdf2bbb.js",
   "publishedAt": "2026-10-08T05:57:01Z",
   "memoLanguage": "ar-KW",
   "memoDirection": "rtl",
@@ -50,6 +50,6 @@
   "memoPlan": "pinned-role-verbatim-quote-enum-one-validated-correction-provider-errors-preserved",
   "memoPlanValidation": "27-related-tests-worker-build-passed-user-case-not-reproduced",
   "homeLayout": "brand-heading-only-no-lower-slogan",
-  "memoEntry": "physical-right-assistant-with-rounded-memo-button",
-  "homeLayoutBaseCommit": "79ff1820f83942892d14f09dfaeb4edac5037a3d"
+  "memoEntry": "avatar-inside-rounded-card-two-distinct-actions-mohanad-caption-title",
+  "homeLayoutBaseCommit": "7d226f9dbcf76050e67fc8c2ce532fbeb035bad3"
 }

@@ -535,7 +535,10 @@ export default function SabeqSite() {
 
       <div className="floating">
         <button type="button" className="assistant-avatar-button" onClick={() => showModal("assistant")} aria-label={t.assistant} aria-haspopup="dialog"><span className="assistant-portrait"><img src={assetUrl("/images/sabeq-assistant-avatar.jpg")} alt="" width={64} height={64} decoding="async" /></span></button>
-        <button type="button" className="memo-system-button" onClick={() => showModal("memo")} aria-haspopup="dialog">{language === "ar" ? "اضغط هنا للدخول على نظام كتابة المذكرات" : language === "en" ? "Click here to enter the memorandum writing system" : "قانونی یادداشت لکھنے کے نظام میں داخل ہونے کے لیے یہاں کلک کریں"}</button>
+        <button type="button" className="memo-system-button" dir={t.dir} onClick={() => showModal("memo")} aria-haspopup="dialog" aria-label={language === "ar" ? "اضغط هنا للدخول على نظام كتابة المذكرات" : language === "en" ? "Click here to enter the memorandum writing system" : "قانونی یادداشت لکھنے کے نظام میں داخل ہونے کے لیے یہاں کلک کریں"}>
+          <span className="memo-entry-caption">{language === "ar" ? "اضغط هنا للدخول على" : language === "en" ? "Click here to enter the" : "یہاں کلک کریں"}</span>
+          <strong className="memo-entry-title">{language === "ar" ? "نظام كتابة المذكرات" : language === "en" ? "Memorandum writing system" : "قانونی یادداشت لکھنے کا نظام"}</strong>
+        </button>
       </div>
       <a className="floating-whatsapp" href="https://wa.me/96550668449" target="_blank" rel="noreferrer" aria-label={t.whatsapp}><BrandIcon name="whatsapp" /></a>
     </div>
