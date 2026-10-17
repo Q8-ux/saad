@@ -4,13 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#123f43">
-  <meta name="description" content="دفتر إملاء تفاعلي للكلمات السبع: hot, sit, ant, go, bag, cry, garden. تتبّع الحروف المنقّطة بإصبعك أو بقلم الشاشة.">
+  <meta name="description" content="تدريب إملاء تفاعلي لجميع كلمات الإنجليزي والعلوم والاجتماعيات: ٤١ كلمة بالحروف المنقّطة والنطق، للكتابة بالإصبع أو بقلم الشاشة.">
   <title>دفتر الإملاء · أتتبّع وأكتب</title>
   <link rel="icon" type="image/png" sizes="256x256" href="avatar-v1.png">
   <link rel="apple-touch-icon" href="avatar-v1.png">
-  <link rel="stylesheet" href="style.css?v=4">
-  <script src="core.js?v=3" defer></script>
-  <script src="app.js?v=3" defer></script>
+  <link rel="stylesheet" href="style.css?v=5">
+  <script src="core.js?v=5" defer></script>
+  <script src="app.js?v=5" defer></script>
 </head>
 <body>
   <a href="#workbook" class="skip-link">الانتقال إلى التمرين</a>
@@ -21,11 +21,12 @@
     </header>
 
     <main id="workbook">
-      <div class="lesson-heading"><div><span class="eyebrow">رحلتي مع الكلمات</span><h2>كلمة واحدة، خطوة بخطوة.</h2></div><span class="progress-pill" id="progressCount">٠ / ٧ مكتملة</span></div>
+      <div class="lesson-heading"><div><span class="eyebrow">رحلتي مع الكلمات</span><h2>كلمة واحدة، خطوة بخطوة.</h2></div><span class="progress-pill" id="progressCount">٠ / ٤١ مكتملة</span></div>
+      <nav class="subject-tabs" id="subjectTabs" aria-label="اختيار المادة"></nav>
       <nav class="word-tabs" id="wordTabs" aria-label="اختيار كلمة التدريب"></nav>
 
       <section class="workbook" aria-label="صفحة الكلمة">
-        <div class="page-topline"><span class="page-label">تدريب الإملاء</span><span id="pageCount" class="page-count"></span></div>
+        <div class="page-topline"><span class="page-label" id="subjectLabel">تدريب الإملاء</span><span id="pageCount" class="page-count"></span></div>
         <div class="word-heading"><div><p class="word-caption" id="wordCaption">أقرأ الكلمة</p><h3 id="wordTitle" dir="ltr" lang="en"></h3><p id="meaning" class="meaning"></p></div><button class="listen-button" id="listen" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m11 4-5 4H2v8h4l5 4V4Zm5 4a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/></svg><span id="listenLabel">اسمع الكلمة</span></button></div>
         <audio id="pronunciation" class="fallback-player" preload="auto" controls playsinline hidden aria-label="نطق كلمة التدريب"></audio>
         <div class="mode-switch" role="group" aria-label="طريقة التدريب"><button type="button" id="traceMode" aria-pressed="true">أتتبّع النقاط</button><button type="button" id="recallMode" aria-pressed="false">أكتب من الذاكرة</button></div>
@@ -41,7 +42,7 @@
       </section>
 
       <div class="lesson-footer"><button type="button" id="complete" class="complete-button" aria-pressed="false"><span aria-hidden="true">✓</span><span id="completeLabel">أنهيت التدريب</span></button><p>تتبّع الكلمة، ثم جرّب كتابتها من الذاكرة.</p></div>
-      <div class="print-options"><button type="button" id="printOne">طباعة هذه الكلمة</button><span aria-hidden="true">·</span><button type="button" id="printAll">طباعة الكلمات السبع</button></div>
+      <div class="print-options"><button type="button" id="printOne">طباعة هذه الكلمة</button><button type="button" id="printSubject">طباعة كلمات المادة</button><button type="button" id="printAll">طباعة كل الكلمات</button></div>
       <p class="parent-note">اضغط «اسمع الكلمة» لسماع نطقها. إتمام التدريب يُحدَّد يدويًا.</p>
       <p class="storage-note">الكتابة محفوظة في هذا المتصفح فقط؛ حذف بيانات المتصفح يحذفها.</p>
     </main>

@@ -8,22 +8,71 @@
     {id:'go',word:'go',meaning:'يذهب'},
     {id:'bag',word:'bag',meaning:'حقيبة'},
     {id:'cry',word:'cry',meaning:'يبكي'},
-    {id:'garden',word:'garden',meaning:'حديقة'}
+    {id:'garden',word:'garden',meaning:'حديقة'},
+    {id:'down',word:'down',meaning:'أسفل'},
+    {id:'left',word:'left',meaning:'يسار'},
+    {id:'play',word:'play',meaning:'يلعب'},
+    {id:'kind',word:'kind',meaning:'لطيف'},
+    {id:'read',word:'read',meaning:'يقرأ'},
+    {id:'sleep',word:'sleep',meaning:'ينام'},
+    {id:'wash',word:'wash',meaning:'يغسل'},
+    {id:'creeper',word:'creeper',meaning:'نبات زاحف'},
+    {id:'climber',word:'climber',meaning:'نبات متسلّق'},
+    {id:'buds',word:'buds',meaning:'براعم'},
+    {id:'energy',word:'energy',meaning:'طاقة'},
+    {id:'grow',word:'grow',meaning:'ينمو'},
+    {id:'plants',word:'plants',meaning:'نباتات'},
+    {id:'air',word:'air',meaning:'هواء'},
+    {id:'animals',word:'animals',meaning:'حيوانات'},
+    {id:'sunlight',word:'sunlight',meaning:'ضوء الشمس'},
+    {id:'soil',word:'soil',meaning:'تربة'},
+    {id:'water',word:'water',meaning:'ماء'},
+    {id:'flower',word:'flower',meaning:'زهرة'},
+    {id:'leaf',word:'leaf',meaning:'ورقة نبات'},
+    {id:'healthy',word:'healthy',meaning:'صحيّ'},
+    {id:'apple',word:'apple',meaning:'تفاحة'},
+    {id:'orange',word:'orange',meaning:'برتقالة'},
+    {id:'carrot',word:'carrot',meaning:'جزرة'},
+    {id:'potato',word:'potato',meaning:'بطاطا'},
+    {id:'pilot',word:'pilot',meaning:'طيّار'},
+    {id:'nurse',word:'nurse',meaning:'ممرّض / ممرّضة'},
+    {id:'chef',word:'chef',meaning:'طاهٍ'},
+    {id:'kuwait',word:'Kuwait',meaning:'الكويت'},
+    {id:'parents',word:'parents',meaning:'الوالدان'},
+    {id:'children',word:'children',meaning:'أطفال'},
+    {id:'soap',word:'soap',meaning:'صابون'},
+    {id:'comb',word:'comb',meaning:'مشط'},
+    {id:'learn',word:'learn',meaning:'يتعلّم'}
   ]);
+  const SUBJECTS=Object.freeze([
+    {id:'english',label:'الإنجليزي',ids:['hot','sit','ant','garden','go','bag','cry','down','left','play','kind','read','sleep','wash']},
+    {id:'science',label:'العلوم',ids:['creeper','climber','buds','energy','grow','plants','air','animals','sunlight','soil','water','flower','leaf','healthy']},
+    {id:'social',label:'الاجتماعيات',ids:['apple','orange','carrot','potato','pilot','nurse','chef','kuwait','parents','children','soap','water','comb','learn']}
+  ]);
+  function subjectWords(id){return (SUBJECTS.find(s=>s.id===id)||SUBJECTS[0]).ids.map(id=>WORDS.find(w=>w.id===id));}
+  function subjectForWord(id,preferred='english'){return SUBJECTS.find(s=>s.id===preferred&&s.ids.includes(id))?.id||SUBJECTS.find(s=>s.ids.includes(id))?.id||'english';}
   const GLYPHS=Object.freeze({
+    K:{w:76,p:['M12 12V100','M66 12L12 61','M30 45L68 100']},
     a:{w:64,p:['M52 72C52 36 8 36 8 72C8 110 52 110 52 72','M52 46V100']},
     b:{w:64,p:['M10 12V100','M10 72C10 36 54 36 54 72C54 110 10 110 10 72']},
     c:{w:58,p:['M49 52C25 32 8 51 8 73C8 96 29 110 50 93']},
     d:{w:64,p:['M52 72C52 36 8 36 8 72C8 110 52 110 52 72','M52 12V100']},
     e:{w:60,p:['M8 72H51C52 35 8 35 8 72C8 99 34 111 53 93']},
+    f:{w:48,p:['M39 15C24 5 16 18 16 34V100','M4 47H36']},
     g:{w:64,p:['M52 72C52 36 8 36 8 72C8 110 52 110 52 72','M52 46V112C52 138 20 140 12 122']},
     h:{w:64,p:['M10 12V100','M10 69C10 38 53 35 53 66V100']},
     i:{w:30,p:['M14 47V100'],dot:[14,24]},
+    k:{w:60,p:['M10 12V100','M50 46L10 80','M29 64L53 100']},
+    l:{w:30,p:['M14 12V100']},
+    m:{w:96,p:['M10 46V100','M10 69C10 38 48 35 48 66V100','M48 69C48 38 86 35 86 66V100']},
     n:{w:64,p:['M10 46V100','M10 69C10 38 53 35 53 66V100']},
     o:{w:64,p:['M32 44C0 44 0 101 32 101C64 101 64 44 32 44']},
+    p:{w:64,p:['M10 46V134','M10 72C10 36 54 36 54 72C54 110 10 110 10 72']},
     r:{w:46,p:['M10 46V100','M10 69C10 49 27 38 39 48']},
     s:{w:56,p:['M47 51C28 36 5 47 10 61C14 74 46 71 47 86C49 105 21 109 7 94']},
     t:{w:44,p:['M20 20V87C20 100 29 104 38 97','M6 47H37']},
+    u:{w:64,p:['M10 46V80C10 108 53 108 53 79V46','M53 79V100']},
+    w:{w:88,p:['M6 46L22 100L44 55L64 100L82 46']},
     y:{w:64,p:['M7 46L31 100','M55 46L23 122C20 131 14 135 7 131']}
   });
   const COLORS=Object.freeze(['#1769aa','#17846e','#aa4b79']);
@@ -51,10 +100,11 @@
     }
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${WIDTH} ${HEIGHT}" role="img" aria-label="Handwriting practice">${content}</svg>`;
   }
-  function emptyState(){return {version:1,index:0,color:COLORS[0],mode:'trace',pages:{},completed:{}};}
+  function emptyState(){return {version:1,index:0,subject:'english',color:COLORS[0],mode:'trace',pages:{},completed:{}};}
   function normalizeState(raw){
     const state=emptyState();if(!raw||raw.version!==1)return state;
     state.index=clamp(Math.trunc(Number(raw.index)||0),0,WORDS.length-1);
+    state.subject=subjectForWord(WORDS[state.index].id,raw.subject);
     if(COLORS.includes(raw.color))state.color=raw.color;
     if(raw.mode==='recall')state.mode='recall';
     for(const {id} of WORDS){
@@ -79,5 +129,5 @@
     for(let i=Math.max(1,from);i<s.points.length;i++){const a=s.points[i-1],b=s.points[i];ctx.lineWidth=s.width*(.65+(a.p+b.p)*.35);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}ctx.restore();
   }
   function printMarkup(words){return words.map((w,i)=>`<article class="print-sheet"><header class="print-meta"><span>MY SPELLING BOOK · GRADE 1</span><span>${i+1} / ${words.length}</span></header><h1>${w.word}</h1><p class="print-instruction">Read. Trace the dots. Write on your own.</p>${sheetSvg(w.word,'trace',true)}<footer><span>Name: ___________________</span><span>Date: ______________</span></footer></article>`).join('');}
-  return {WORDS,GLYPHS,COLORS,WIDTH,HEIGHT,STORAGE_KEY,wordLayout,wordPaths,sheetSvg,emptyState,normalizeState,pointerPoint,pageKey,drawStroke,printMarkup};
+  return {WORDS,SUBJECTS,subjectWords,subjectForWord,GLYPHS,COLORS,WIDTH,HEIGHT,STORAGE_KEY,wordLayout,wordPaths,sheetSvg,emptyState,normalizeState,pointerPoint,pageKey,drawStroke,printMarkup};
 });

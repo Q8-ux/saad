@@ -33,7 +33,7 @@ function setup(saved=null,failStorage=false,hash=''){
 function draw(app,props={}){app.nodes.ink.fire('pointerdown',props);app.nodes.ink.fire('pointermove',{clientX:100,clientY:160,...props});app.nodes.ink.fire('pointerup',{clientX:110,clientY:170,...props});}
 
 test('finger drawing saves the final position, reloads, and survives resizing',()=>{
-  const a=setup();assert.equal(a.nodes.wordTabs.children.length,7);draw(a);
+  const a=setup();assert.equal(a.nodes.wordTabs.children.length,14);assert.equal(a.nodes.subjectTabs.children.length,3);draw(a);
   const stroke=a.state().pages['hot:trace'][0];assert.equal(stroke.points.length,3);assert.equal(stroke.points.at(-1).x,294.1);
   a.nodes.ink.rect={left:0,top:0,width:700,height:819};a.events.resize();assert.equal(a.nodes.ink.width,1400);assert.deepEqual(a.state().pages['hot:trace'][0],stroke);
   const b=setup(a.saved());assert.equal(b.nodes.wordTitle.textContent,'hot');assert.ok(b.drawOps.length);assert.equal(b.nodes.undo.disabled,false);
@@ -61,10 +61,11 @@ test('blocked/corrupt storage and malformed links do not prevent training',()=>{
   const a=setup(null,true,'#%broken');draw(a);assert.ok(a.drawOps.length);assert.ok(a.nodes.saveState.textContent.includes('تعذّر'));
   const b=setup('{bad');assert.equal(b.nodes.wordTitle.textContent,'hot');draw(b);assert.equal(b.state().version,1);
 });
-test('completed status persists, controls stop at boundaries, seven words print',()=>{
+test('subject navigation stops at boundaries and printing covers all words or one subject',()=>{
   const a=setup();assert.equal(a.nodes.previous.disabled,true);a.nodes.complete.fire('click');assert.equal(a.state().completed.hot,true);assert.equal(a.nodes.complete.attributes['aria-pressed'],'true');
-  a.nodes.wordTabs.children[6].fire('click');assert.equal(a.nodes.wordTitle.textContent,'garden');assert.equal(a.nodes.next.disabled,true);assert.equal(a.nodes.pronunciation.getAttribute('src'),'audio/garden.mp3?v=2');
-  a.nodes.printAll.fire('click');assert.equal(a.window.printed,true);assert.equal((a.nodes.printArea.innerHTML.match(/class="print-sheet"/g)||[]).length,7);
+  a.nodes.wordTabs.children[13].fire('click');assert.equal(a.nodes.wordTitle.textContent,'wash');assert.equal(a.nodes.next.disabled,true);assert.equal(a.nodes.pronunciation.getAttribute('src'),'audio/wash.mp3?v=2');
+  a.nodes.printAll.fire('click');assert.equal(a.window.printed,true);assert.equal((a.nodes.printArea.innerHTML.match(/class="print-sheet"/g)||[]).length,41);
+  a.nodes.printSubject.fire('click');assert.equal((a.nodes.printArea.innerHTML.match(/class="print-sheet"/g)||[]).length,14);
 });
 test('bundled MP3 plays on the tap without speech synthesis; repeat restarts it',()=>{
   const a=setup();const player=a.nodes.pronunciation;assert.equal('speechSynthesis'in a.window,false);assert.equal(player.getAttribute('src'),'audio/hot.mp3?v=2');
@@ -79,4 +80,19 @@ test('navigating stops old audio and selects the correct clip in recall mode',()
 test('blocked playback exposes native controls and stale rejections do not affect another word',async()=>{
   const a=setup();a.nodes.pronunciation.play=()=>Promise.reject(Error('blocked'));a.nodes.listen.fire('click');await Promise.resolve();assert.equal(a.nodes.pronunciation.hidden,false);assert.ok(a.nodes.toast.textContent.includes('مشغّل الصوت'));
   const b=setup();let reject;b.nodes.pronunciation.play=()=>new Promise((_,r)=>{reject=r});b.nodes.pronunciation.hidden=true;b.nodes.listen.fire('click');b.nodes.next.fire('click');reject(Error('old'));await Promise.resolve();assert.equal(b.nodes.pronunciation.hidden,true);
+});
+test('subject switches select words and audio from the photographed columns',()=>{
+  const a=setup();draw(a);a.nodes.subjectTabs.children[1].fire('click');assert.equal(a.nodes.wordTitle.textContent,'creeper');assert.equal(a.nodes.pronunciation.getAttribute('src'),'audio/creeper.mp3?v=2');assert.equal(a.nodes.previous.disabled,true);assert.equal(a.nodes.wordTabs.children.length,14);
+  a.nodes.next.fire('click');assert.equal(a.nodes.wordTitle.textContent,'climber');
+  a.nodes.subjectTabs.children[2].fire('click');assert.equal(a.nodes.wordTitle.textContent,'apple');a.nodes.wordTabs.children[7].fire('click');assert.equal(a.nodes.wordTitle.textContent,'Kuwait');assert.equal(a.nodes.wordTitle.classList.contains('long-word'),true);
+  a.nodes.subjectTabs.children[0].fire('click');assert.equal(a.nodes.wordTitle.textContent,'hot');assert.equal(a.nodes.clear.disabled,false);
+});
+test('water is shared across science and social without losing handwriting',()=>{
+  const a=setup();a.nodes.subjectTabs.children[1].fire('click');a.nodes.wordTabs.children[10].fire('click');draw(a);assert.equal(a.nodes.wordTitle.textContent,'water');
+  a.nodes.subjectTabs.children[2].fire('click');assert.equal(a.nodes.wordTitle.textContent,'water');assert.equal(a.nodes.clear.disabled,false);assert.equal(a.nodes.navCount.textContent,'١٢ / ١٤');
+  assert.equal(a.state().pages['water:trace'].length,1);
+});
+test('direct links open the corresponding subject and retain the circular avatar',()=>{
+  const a=setup(null,false,'#sunlight');assert.equal(a.nodes.wordTitle.textContent,'sunlight');assert.ok(a.nodes.subjectLabel.textContent.includes('العلوم'));assert.equal(a.nodes.pronunciation.getAttribute('src'),'audio/sunlight.mp3?v=2');
+  assert.ok(html.includes('avatar-v1.png'));assert.ok(html.includes('داخل دائرة'));
 });
