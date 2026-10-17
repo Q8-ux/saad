@@ -1,0 +1,11 @@
+node_modules
+.env
+.env.*
+!.env.example
+data
+uploads
+private-case-files
+agents/.venv
+agents/**/__pycache__
+agents/.pytest_cache
+*.log
