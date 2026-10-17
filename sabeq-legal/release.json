@@ -1,7 +1,7 @@
 {
   "release": "2026-10-17-assistant-memo-card",
   "clientSource": "cf02a1d9f14df089392ab7b6a08d24018434ad55",
-  "backendSource": "cdbc45812977393d20c260d9cfc5e3e591faa801",
+  "backendSource": "49f6c9fd109abcbc93d1bf59739b2dbf51738c12",
   "assistant": "official-research-sources-1",
   "voice": "gulf-male-voice-4",
   "tools": "legal-tools-1",
@@ -29,7 +29,7 @@
   "interfaceLocalization": "ar-en-ur-tools-guidance-1",
   "memoProseLanguage": "arabic-with-protected-names-and-identifiers-1",
   "builtAt": "2026-10-08T03:06:00Z",
-  "backendVersion": 99,
+  "backendVersion": 110,
   "pleadingLayout": "plain-header-wide-pages-1",
   "citationCorrection": "one-bounded-server-retry-before-archive",
   "legalSourceDirectory": "6-catalogues-3-fetched-0-new-citable-pdfs",
@@ -51,5 +51,12 @@
   "memoPlanValidation": "27-related-tests-worker-build-passed-user-case-not-reproduced",
   "homeLayout": "brand-heading-only-no-lower-slogan",
   "memoEntry": "avatar-inside-rounded-card-two-distinct-actions-mohanad-caption-title",
-  "homeLayoutBaseCommit": "7d226f9dbcf76050e67fc8c2ce532fbeb035bad3"
+  "homeLayoutBaseCommit": "7d226f9dbcf76050e67fc8c2ce532fbeb035bad3",
+  "cassationRetrieval": "source-page-matched-uploaded-digests-only",
+  "cassationReviewedPrinciples": 3,
+  "cassationCollectionPages": 5108,
+  "cassationAnalogy": "checked-fact-quote-issue-reason-and-material-differences",
+  "cassationVerification": "source-page-match-not-full-judgment-or-current-authority",
+  "cassationValidation": "92-targeted-tests-pass;159-full-suite-pass;6-pre-existing-failures-confirmed",
+  "cassationPublishedAt": "2026-10-17T19:07:22.671927+00:00"
 }

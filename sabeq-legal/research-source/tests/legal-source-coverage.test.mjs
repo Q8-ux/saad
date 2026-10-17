@@ -6,18 +6,18 @@ import {load} from './template-harness.mjs';
 const judge=s=>/احكام|أحكام|قضائ|تمييز/.test(s.title+' '+s.documentType);
 const coverage=load('../lib/legal-source-coverage.ts',{'./legal-search':{isJudgmentEvidence:judge}});
 const search=load('../lib/legal-search.ts',{'@/db':{getD1:()=>{throw Error('not needed');}}});
-test('catalogue URLs never count as statutory evidence or certify completeness',()=>{
+test('internal source coverage separates reviewed judicial sample from whole collections',()=>{
  const c=coverage.legalSourceCoverage([]);
- assert.equal(c.sources.length,6); assert.equal(c.status,'no_matching_verified_passage');
- assert.equal(c.legislationPassages,0);assert.equal(c.completeCoverage,false);assert.equal(c.currentConsolidationVerified,false);
+ assert.equal(c.sources.length,0);assert.equal(c.scope,"bound_file_and_reviewed_judgments"); assert.equal(c.status,'no_matching_verified_passage');
+ assert.equal(c.judicialReview.sourceMatchedPrinciples,3);assert.equal(c.judicialReview.completeCollectionsReviewed,false);assert.equal(c.judicialReview.collectionPages,5108);assert.equal(c.legislationPassages,0);assert.equal(c.completeCoverage,false);assert.equal(c.currentConsolidationVerified,false);
  for(const s of c.sources){assert.equal(s.citable,false);assert.match(s.url,/^https:\/\//);}
- assert.match(coverage.formatSourceCoverage([]),/ليست نصوصاً أو أسانيد/);
+ assert.match(coverage.formatSourceCoverage([]),/ملف التشريعات/);
 });
 test('connection failure and partial retrieval are distinguishable; unreviewed laws do not inflate coverage',()=>{
  assert.equal(coverage.legalSourceCoverage([],true).status,'lookup_failed');
  const fake={title:'قانون افتراضي',documentType:'قانون'};
  assert.equal(coverage.legalSourceCoverage([fake]).legislationPassages,0);
- const c=coverage.legalSourceCoverage([{...fake,verification:{status:'source_verified'}}]);
+ const c=coverage.legalSourceCoverage([{...fake,corpus:{scope:'bound_file_only'}}]);
  assert.equal(c.status,'partial_passages'); assert.equal(c.legislationPassages,1);assert.equal(c.judgmentPassages,0);
 });
 test('Arabic prefixed query terms retain original and searchable canonical variants',()=>{

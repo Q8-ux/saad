@@ -8,7 +8,7 @@ import { spawnSync } from 'node:child_process';
 function load(path, dependencies = {}, globals = {}) {
   const exports = {};
   const js = ts.transpileModule(readFileSync(new URL(path, import.meta.url), 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, esModuleInterop: true } }).outputText;
-  vm.runInNewContext(js, { exports, require: name => { if(name.endsWith("/case-reasoning")) return load("../lib/case-reasoning.ts"); if(name.endsWith('/legal-voice')) return load('../lib/legal-voice.ts'); if(name === '@/data/legal-sources/reviewed.json') return JSON.parse(readFileSync(new URL('../data/legal-sources/reviewed.json',import.meta.url),'utf8')); if(name.endsWith('/official-legislation')||name === './official-legislation') return load('../lib/official-legislation.ts'); if(name.endsWith('/legal-citation-review')||name === './legal-citation-review') return load('../lib/legal-citation-review.ts'); if (name.endsWith('/memo-language')) return load('../lib/memo-language.ts'); if (name.endsWith('/interface-language')) return load('../lib/interface-language.ts'); if (name === './pleading-document' || name === '@/lib/pleading-document') return load('../lib/pleading-document.ts'); if (name === './legal-language' || name === '@/lib/legal-language') return load('../lib/legal-language.ts'); if (!(name in dependencies)) throw new Error('Missing test dependency: ' + name); return dependencies[name]; }, console, URL, TextDecoder, AbortSignal, setTimeout, ...globals });
+  vm.runInNewContext(js, { exports, require: name => {if(name.endsWith("/judgment-evidence"))return load("../lib/judgment-evidence.ts"); if(name.endsWith("/matter-facts")||name==="./matter-facts")return load("../lib/matter-facts.ts");if(name.endsWith("/bound-draft")||name==="./bound-draft")return load("../lib/bound-draft.ts");if(name.endsWith("/case-reasoning")) return load("../lib/case-reasoning.ts"); if(name.endsWith('/legal-voice')) return load('../lib/legal-voice.ts'); if(name === '@/data/legal-sources/reviewed.json') return JSON.parse(readFileSync(new URL('../data/legal-sources/reviewed.json',import.meta.url),'utf8')); if(name.endsWith('/official-legislation')||name === './official-legislation') return load('../lib/official-legislation.ts'); if(name.endsWith('/legal-citation-review')||name === './legal-citation-review') return load('../lib/legal-citation-review.ts'); if (name.endsWith('/memo-language')) return load('../lib/memo-language.ts'); if (name.endsWith('/interface-language')) return load('../lib/interface-language.ts'); if (name === './pleading-document' || name === '@/lib/pleading-document') return load('../lib/pleading-document.ts'); if (name === './legal-language' || name === '@/lib/legal-language') return load('../lib/legal-language.ts'); if (!(name in dependencies)) throw new Error('Missing test dependency: ' + name); return dependencies[name]; }, console, URL, TextDecoder, AbortSignal, setTimeout, ...globals });
   return exports;
 }
 const context = load('../lib/intake-context.ts');
@@ -38,6 +38,7 @@ test('an actual first-instance judgment supports review of appeal but not an aut
 
 test('precedent comparison accepts only retrieved Cassation passages and preserves differences', () => {
   const sources = [{ documentId: 91, chunkId: 901, title: 'مبادئ محكمة التمييز في العمل', documentType: 'مبادئ قضائية', text: 'مقطع اصطناعي لا يمثل حكماً حقيقياً ويستخدم لاختبار وصل المرجع فقط.', sourceUrl: 'https://example.org/synthetic', officialSource: 'اختبار' }];
+  sources[0].judgment={scope:'uploaded_judgments_only',recordId:'synthetic-test-only',sourceKind:'judicial_digest',sourceBook:'مصدر اصطناعي للاختبار',sourceSha256:'a'.repeat(64),pdfPage:1,printedPage:1,appealNumber:1,appealYear:2000,decisionDate:'2001-01-01',chamber:'اختبار',court:'محكمة التمييز',quote:sources[0].text,quoteSha256:'b'.repeat(64),reviewStatus:'source_page_matched',reviewedAt:'2026-10-17',currentAuthorityVerified:false};
   const match = { passageId: 'م1:1', similarity: 'المسألة العمالية', differences: 'الوقائع غير مكتملة', relevance: 'analogous' };
   const result = review.reviewIntakeAnalysis(baseState({ precedentMatches: [match, { ...match, passageId: 'م99:1' }] }), sources, false, 'ar');
   assert.equal(result.precedentMatches.length, 1); assert.equal(result.precedentMatches[0].chunkId, 901); assert.equal(result.precedentMatches[0].quote, sources[0].text); assert.equal(result.precedentMatches[0].differences, match.differences);
@@ -156,24 +157,14 @@ test('missing source and library outage stay explicit and strip fabricated numer
   }
 });
 
-test('actual SQL excludes OCR-only law, unpublished text and private archives, retaining public judgments', async () => {
-  const script = `import sqlite3,json,sys
-p=json.load(sys.stdin); c=sqlite3.connect(':memory:'); c.row_factory=sqlite3.Row
-c.executescript("""CREATE TABLE legal_documents(id,title,category,document_type,law_number,law_year,search_text,source_url,official_source,source_type,has_verified_text,status,updated_at);
-CREATE TABLE legal_chunks(id,document_id,reference,text,search_terms,quality_score,verified);
-CREATE TABLE service_records(id,output_text);
-INSERT INTO legal_documents VALUES(1,'قانون العمل','عمالي','قانون',NULL,NULL,'العمل العامل اجر','https://example.org/law','اصطناعي','test',1,'ready','2026-01-01'),(2,'احكام التمييز العمالية','عمالي','مبادئ قضائية',NULL,NULL,'العمل العامل اجر','https://example.org/judgment','اصطناعي','test',1,'ready','2026-01-01'),(3,'غير مفهرس','عمالي','قانون',NULL,NULL,'العمل العامل اجر','https://example.org/unverified','اصطناعي','test',0,'ready','2026-01-01'),(4,'مستند محذوف','عمالي','قانون',NULL,NULL,'العمل العامل اجر','https://example.org/removed','اصطناعي','test',1,'deleted','2026-01-01');
-INSERT INTO legal_chunks VALUES(1,1,'اختبار','نص العامل والعمل اصطناعي','العمل العامل اجر',90,1),(2,2,'اختبار','حكم اصطناعي للاختبار فقط','العمل العامل اجر',90,1),(3,3,'اختبار','DO NOT RETRIEVE UNVERIFIED','العمل العامل اجر',100,0),(4,4,'اختبار','DO NOT RETRIEVE DELETED','العمل العامل اجر',100,1);
-INSERT INTO service_records VALUES(1,'PRIVATE CASE CONTENT');""")
-print(json.dumps([dict(row) for row in c.execute(p['sql'],p['bindings'])]))`;
-  const db = { prepare(sql) { return { bind(...bindings) { return { async all() { const r = spawnSync('python', ['-c', script], { input: JSON.stringify({ sql, bindings }), encoding: 'utf8' }); assert.equal(r.status, 0, r.stderr); return { results: JSON.parse(r.stdout) }; } }; } }; } };
-  const actual = load('../lib/legal-search.ts', { '@/db': { getD1: () => db } });
-  const found = await actual.searchIntakeLibrary(['العمل العامل اجر']);
-  assert.deepEqual(Array.from(found, row => row.documentId), [2]); assert.doesNotMatch(JSON.stringify(found), /PRIVATE|UNVERIFIED|DELETED/);
-  const transferred = await actual.readHandoffEvidence('[1,3,4,"1 OR 1=1",-2]');
-  assert.deepEqual(Array.from(transferred, row => row.documentId), []); assert.doesNotMatch(JSON.stringify(transferred), /PRIVATE|UNVERIFIED|DELETED/);
+test('legislation and reviewed-judgment adapters never call the legacy/private case database', async()=>{
+ let calls=0,judgmentCalls=0;
+ const bound={searchBoundEvidence:async(_q,_n,kind)=>{calls++;return kind==='judgment'?[]:[{chunkId:1000000001,documentId:1000001,title:'قسم من ملف المستخدم',documentType:'تشريع',text:'نص اصطناعي لاختبار العقد',reference:'صفحة PDF 4'}];},readBoundEvidence:async ids=>ids.filter(id=>id===1000000001).map(chunkId=>({chunkId,text:'نص أعاد الخادم قراءته'}))};
+ const actual=load('../lib/legal-search.ts',{'@/db':{getD1:()=>{throw Error('must not access legacy or private cases');}},'./bound-legislation':bound,'./reviewed-judgments':{searchReviewedJudgments:async()=>{judgmentCalls++;return [];},readReviewedJudgments:async()=>[]}});
+ const found=await actual.searchIntakeLibrary(['موضوع اصطناعي']);assert.equal(found.length,1);assert.equal(found[0].chunkId,1000000001);assert.ok(calls>=1);assert.ok(judgmentCalls>=1);
+ assert.equal((await actual.searchCassationEvidenceAcross(['موضوع اصطناعي'])).length,0);
+ const transferred=await actual.readHandoffEvidence('[1000000001,3,4,"1 OR 1=1",-2]');assert.equal(transferred.length,1);assert.equal(transferred[0].chunkId,1000000001);
 });
-
 
 test('explicit judgments, negative answers and known relationships remain factual', () => {
   const actual = context.proceduralFacts('صدر حكم ابتدائي من المحكمة الكلية وأريد الاعتراض على الحكم');

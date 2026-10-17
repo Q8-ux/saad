@@ -1,0 +1,16 @@
+{
+  "revision": "reviewed-cassation-20261017",
+  "scope": "bound_file_and_reviewed_judgments",
+  "collectionCount": 7,
+  "collectionPages": 5108,
+  "sourceMatchedPrinciples": 3,
+  "completeCollectionsReviewed": false,
+  "originalJudgmentsVerified": false,
+  "currentAuthorityVerified": false,
+  "limitations": [
+    "مراجعة ثلاثة مبادئ من ثلاث صفحات فقط؛ لا تعني اعتماد كامل المجموعات.",
+    "بعض النصوص والأرقام المستخرجة مشوهة أو معكوسة؛ لا تعتمد آلياً.",
+    "تعذر التحقق البصري من عينة الجزاء بسبب خطوط عربية غير مضمنة.",
+    "تجميع المبادئ لا يعادل الحكم الكامل أو مراجعة سريانه والأحكام اللاحقة."
+  ]
+}

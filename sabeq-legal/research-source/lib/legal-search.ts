@@ -1,7 +1,10 @@
 import { getD1 } from "@/db";
 import { attachOfficialVerification, reviewedChunkIds, type SourceVerification } from "./official-legislation";
+import {judgmentContext,type JudgmentReference} from './judgment-evidence';
 
 export type LegalEvidence = {
+  judgment?:JudgmentReference;
+  corpus?: {scope:string;sourceId:string;sourceSha256:string;databaseSha256:string;recordId:string;continuationPage?:number|null;textSha256:string;page:number;printedPage:string|null;documentId:string;documentTitle:string;articleNumber:string|null;detectedArticleNumber:string|null;articleIdentityUnique:boolean;completeArticleVerified:boolean;currentLawVerified:boolean;reviewStatus:string;editionClaim:string;lawIdentity?:{number:number;year:number;header:string;reviewStatus:string}|null;context:{previousPage:number|null;nextPage:number|null};previousText:string;nextText:string;ocr:unknown};
   chunkId?: number;
   documentId: number;
   title: string;
@@ -80,7 +83,13 @@ function safeUrl(value: string) {
   }
 }
 
-export async function searchLegalEvidence(query: string, limit = 8, kind?: "legislation" | "judgment", cassationOnly = false): Promise<LegalEvidence[]> {
+export async function searchLegalEvidence(query:string,limit=8,kind?:"legislation"|"judgment",_cassationOnly=false):Promise<LegalEvidence[]> {
+ const legislation=kind==='judgment'?[]:await(await import('./bound-legislation')).searchBoundEvidence(query,limit,'legislation') as LegalEvidence[];
+ const judgments=kind==='legislation'?[]:await(await import('./reviewed-judgments')).searchReviewedJudgments(query,limit);
+ return [...judgments,...legislation].slice(0,Math.max(1,Math.min(limit,12)));
+}
+
+async function searchLegacyLegalEvidence(query: string, limit = 8, kind?: "legislation" | "judgment", cassationOnly = false): Promise<LegalEvidence[]> {
   const tokens = queryTokens(query);
   if (!tokens.length) return [];
   const clauses = tokens.map(() => "(c.search_terms LIKE ? OR d.search_text LIKE ?)").join(" OR ");
@@ -201,8 +210,8 @@ export async function readHandoffEvidence(value: unknown): Promise<LegalEvidence
   if (typeof value === "string") { try { raw = JSON.parse(value.slice(0, 1200)); } catch { return []; } }
   const ids = Array.isArray(raw) ? [...new Set(raw.filter(id => Number.isSafeInteger(id) && id > 0))].slice(0, 6) : [];
   if (!ids.length) return [];
-  const rows = await getD1().prepare(`SELECT c.id AS chunkId, c.document_id AS documentId, d.title, d.category, d.document_type AS documentType, d.law_number AS lawNumber, d.law_year AS lawYear, c.reference, c.text, d.source_url AS sourceUrl, d.official_source AS officialSource, d.source_type AS sourceType, c.quality_score AS qualityScore, d.updated_at AS libraryUpdatedAt FROM legal_chunks c JOIN legal_documents d ON d.id=c.document_id WHERE c.verified=1 AND d.has_verified_text=1 AND d.status='ready' AND c.id IN (${ids.map(() => "?").join(",")})`).bind(...ids).all<LegalEvidence>();
-  return (rows.results || []).map((row: LegalEvidence) => attachOfficialVerification({ ...row, sourceUrl: safeUrl(row.sourceUrl) })).filter((row:LegalEvidence)=>isJudgmentEvidence(row)||Boolean(row.verification)).map((row:LegalEvidence)=>({...row,text:row.text.slice(0,1800)}));
+  const [legislation,judgments]=await Promise.all([(await import('./bound-legislation')).readBoundEvidence(ids),(await import('./reviewed-judgments')).readReviewedJudgments(ids)]);
+  return [...legislation,...judgments] as LegalEvidence[];
 }
 
 export async function searchLegalEvidenceAcross(queries: string[], limit = 10) {
@@ -217,7 +226,12 @@ export async function searchLegalEvidenceAcross(queries: string[], limit = 10) {
   return Array.from(unique.values()).slice(0, Math.max(1, Math.min(limit, 12)));
 }
 
-export async function searchLegalDocuments(query: string, limit = 12) {
+export async function searchLegalDocuments(query:string,limit=12) {
+ const evidence=await (await import("./bound-legislation")).searchBoundEvidence(query,limit);
+ return evidence.map(item=>({...item,summary:item.text.slice(0,650),hasVerifiedText:false}));
+}
+
+async function searchLegacyLegalDocuments(query: string, limit = 12) {
   const tokens = queryTokens(query);
   if (!tokens.length) return [];
   const clauses = tokens.map(() => "(search_text LIKE ? OR title LIKE ?)").join(" OR ");
@@ -240,6 +254,8 @@ export async function searchLegalDocuments(query: string, limit = 12) {
 export function formatEvidence(evidence: LegalEvidence[]) {
   return evidence.map((item, index) => {
     const number = item.lawNumber && item.lawYear ? `رقم ${item.lawNumber} لسنة ${item.lawYear}` : "";
-    return `[م${index + 1}]\nالعنوان: ${item.title}${number ? ` (${number})` : ""}\nنوع المصدر: ${isJudgmentEvidence(item) && isCassationEvidence(item) ? "مبدأ/حكم تمييز" : item.documentType || "تشريع"}\nالتصنيف: ${item.category}\nالمرجع الداخلي: ${item.reference || "غير محدد"}\nالجهة/المصدر: ${item.officialSource}\nرابط الأصل: ${item.sourceUrl || "ملف مفهرس من المكتبة المرفوعة؛ لا يتوفر رابط عام للأصل"}\nتاريخ تحديث الفهرسة (ليس إثبات السريان): ${item.libraryUpdatedAt || "غير متاح"}\n${item.verification ? `المادة المعتمدة: ${item.verification.articleNumber}. القانون صاحب المادة: ${item.lawNumber}/${item.lawYear}. النص المنشور في: ${item.verification.sourceLawNumber}/${item.verification.sourceLawYear}. صفحة المصدر: ${item.verification.page}. تاريخ مطابقة النص: ${item.verification.checkedAt}. الحالة: مطابقة المصدر المنشور؛ اكتمال التعديلات والانطباق الزمني يحتاجان مراجعة.\n` : ""}درجة الجودة: ${item.qualityScore}/100\nالنص الموثق:\n${item.text}`;
+    return `[م${index + 1}]\nالعنوان: ${item.title}${number ? ` (${number})` : ""}\nنوع المصدر: ${isJudgmentEvidence(item) && isCassationEvidence(item) ? "مبدأ/حكم تمييز" : item.documentType || "تشريع"}\nالتصنيف: ${item.category}\nالمرجع الداخلي: ${item.reference || "غير محدد"}\nالجهة/المصدر: ${item.officialSource}\nرابط الأصل: ${item.sourceUrl || "ملف مفهرس من المكتبة المرفوعة؛ لا يتوفر رابط عام للأصل"}\nتاريخ تحديث الفهرسة (ليس إثبات السريان): ${item.libraryUpdatedAt || "غير متاح"}\n${corpusContext(item)}${item.verification ? `المادة المعتمدة: ${item.verification.articleNumber}. القانون صاحب المادة: ${item.lawNumber}/${item.lawYear}. النص المنشور في: ${item.verification.sourceLawNumber}/${item.verification.sourceLawYear}. صفحة المصدر: ${item.verification.page}. تاريخ مطابقة النص: ${item.verification.checkedAt}. الحالة: مطابقة المصدر المنشور؛ اكتمال التعديلات والانطباق الزمني يحتاجان مراجعة.\n` : ""}درجة الجودة: ${item.qualityScore}/100\nالنص المسترجع (حالة الاعتماد في بيانات المصدر):\n${item.text}`;
   }).join("\n\n---\n\n");
 }
+
+export function corpusContext(item:{corpus?:unknown;judgment?:JudgmentReference;text?:string}){return item.judgment?judgmentContext(item as LegalEvidence):item.corpus?`\nبيانات مسار التشريعات (ليست اعتماداً رسمياً): ${JSON.stringify(item.corpus)}\nرقم المادة يحدد موضعاً في القسم فقط؛ لا تعيّن رقم القانون وسنته من الذاكرة؛ يجوز الرقم والسنة فقط عند وجود lawIdentity المستخرج من ترويسة الصفحة والمطابق لبيانات قسم المصدر. استمرار النص والهوامش يخضعان للمراجعة.\n`:"";}
