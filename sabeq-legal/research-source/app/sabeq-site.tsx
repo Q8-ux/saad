@@ -63,6 +63,7 @@ import {
   Zap,
 } from "lucide-react";
 import { FormEvent, ReactNode, useEffect, useMemo, useRef, useState } from "react";
+import { startVisitorAnalytics } from "@/lib/visitor-analytics";
 import { apiUrl, assetUrl } from "@/lib/runtime-urls";
 import { copy, Language, mediaVideos, SiteCopy, team } from "./site-content";
 import { interfaceText as tr, interfaceLabel, interfaceError, canonicalLegalValue } from "@/lib/interface-language";
@@ -213,6 +214,7 @@ function BrandIcon({ name }: { name: BrandName }) {
 }
 
 export default function SabeqSite() {
+  useEffect(() => startVisitorAnalytics(), []);
   const [language, setLanguage] = useState<Language>("ar");
   const [theme, setTheme] = useState<ColorTheme>("light");
   const [mobileMenu, setMobileMenu] = useState(false);
@@ -280,11 +282,13 @@ export default function SabeqSite() {
   }, [modal, mobileMenu]);
 
   function scrollTo(id: string) {
+    window.dispatchEvent(new CustomEvent("sabeq-analytics-section", { detail: id }));
     setMobileMenu(false);
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   function showModal(name: ModalName) {
+    window.dispatchEvent(new CustomEvent("sabeq-analytics-section", { detail: name }));
     setFormStatus("idle");
     if (name === "memo") setAssistantMemoPrefill(null);
     if (name === "memo" || name === "assistant") {
@@ -869,7 +873,7 @@ function Assistant({ t, language, token, initialSession, onSession, openBooking,
     event.preventDefault(); stopSpeaking();
     try { await submitMessage(question); } catch { /* Error remains beside the preserved input. */ }
   }
-  return <div className="modal-content legal-intake"><div className="assistant-opening-identity"><span className="assistant-portrait assistant-header-portrait"><img src={assetUrl("/images/sabeq-assistant-avatar.jpg")} alt="" width={84} height={84} decoding="async" /></span><h2>{t.assistant}</h2></div><p className="assistant-welcome">{intro}</p>
+  return <div className="modal-content legal-intake"><div className="assistant-opening-identity"><span className="assistant-portrait assistant-header-portrait"><img src={assetUrl("/images/sabeq-assistant-avatar.jpg")} alt="" width={84} height={84} decoding="async" /></span><h2>{t.assistant}</h2></div>
     <div className="intake-progress"><span><b>{intake?.progress || 0}%</b>{` ${tr(language, "اكتمال فهم القضية")}`}</span><i><em style={{ width: `${intake?.progress || 0}%` }} /></i></div>
     <div className="conversation-toolbar" aria-label={tr(language, "أدوات المحادثة")}><button type="button" onClick={newConversation} title={voiceUi.newChat}><Trash2 size={18} /><span>{voiceUi.newChat}</span></button><button type="button" onClick={exportConversation} disabled={!messages.length} title={tr(language, "تصدير المحادثة")}><Download size={18} /><span>{tr(language, "تصدير")}</span></button><button type="button" onClick={shareConversation} disabled={!messages.length} title={tr(language, "إرسال أو مشاركة المحادثة")}><Share2 size={18} /><span>{tr(language, "إرسال")}</span></button></div>
     <LegalToolsPanel key={toolSession} language={language} disabled={loading || voiceActive} request={(path, init) => memoFetch(path, token, init)} caseText={intake ? [...intake.facts, ...intake.requests].join("\n") : ""} onUseText={text => { setQuestion(text); setToolNotice(tr(language, "راجع النص المنقول ثم أرسله. لم يُضف إلى وقائع القضية تلقائياً.")); }} />
