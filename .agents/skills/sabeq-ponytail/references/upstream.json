@@ -1,0 +1,60 @@
+{
+  "name_ar": "مسار التبسيط والتدقيق البرمجي",
+  "project": "Sabeq Legal",
+  "scope": [
+    "sabeq-legal/",
+    "legal-memo-platform/"
+  ],
+  "upstream": {
+    "repository": "https://github.com/DietrichGebert/ponytail",
+    "version": "5.3.2",
+    "commit": "16352ac229eb08a9598dcae48fe9f2b342567d86",
+    "license": "MIT"
+  },
+  "installed_at": "2026-10-17",
+  "installation": "Repository-local instruction and skill adapters for Codex and Claude Code",
+  "default_level": "full",
+  "adaptations": [
+    "Namespace the four skill names and descriptions for Sabeq only.",
+    "Normalize frontmatter to name and description for host compatibility.",
+    "Add Sabeq privacy, file-only legislation, Arabic/RTL, validation and reporting requirements.",
+    "Scope review, audit and debt defaults to Sabeq frontend and backend.",
+    "Use Arabic reports by default; respect prior authorization when saving debt reports.",
+    "Use repository-local skill links for Claude Code.",
+    "Translate report labels and restrict mixed-project diffs and the default audit target to Sabeq.",
+    "Scan tracked, untracked and non-ignored hidden Sabeq files with ripgrep, respecting ignore rules."
+  ],
+  "not_installed": [
+    "Upstream lifecycle hooks",
+    "Cost band and dashboard",
+    "Global user plugin",
+    "Runtime website changes"
+  ],
+  "files": [
+    {
+      "upstream_path": "skills/ponytail/SKILL.md",
+      "upstream_blob_sha": "d64edd32265ba21cbf5270158f04e97d96925f27",
+      "installed_path": ".agents/skills/sabeq-ponytail/SKILL.md",
+      "installed_sha256": "a6bc1642bdc5af3487510c798b3ba9021aee5ba9862b33570ef379d4ec6a4dad"
+    },
+    {
+      "upstream_path": "skills/ponytail-review/SKILL.md",
+      "upstream_blob_sha": "a50e3ac6ded6fccc9edae34ce37877bbce11e3fa",
+      "installed_path": ".agents/skills/sabeq-ponytail-review/SKILL.md",
+      "installed_sha256": "d0483557d4dcf82948cd653114c2194ddd840044948c2aac873348c29a39bd13"
+    },
+    {
+      "upstream_path": "skills/ponytail-audit/SKILL.md",
+      "upstream_blob_sha": "ff9a95480700600fe2664d2d0906a4d750b2da0b",
+      "installed_path": ".agents/skills/sabeq-ponytail-audit/SKILL.md",
+      "installed_sha256": "f181b331842183dc86054e4f9b72c0beeb8dac65870f3dc1b4ded756a5866b86"
+    },
+    {
+      "upstream_path": "skills/ponytail-debt/SKILL.md",
+      "upstream_blob_sha": "3124f520a65d2a4fa75a2f5db6225c38ebdb8620",
+      "installed_path": ".agents/skills/sabeq-ponytail-debt/SKILL.md",
+      "installed_sha256": "4c92f8eefa4a4f27552179ecae3cac49c76d1d2f0fe9961b46927ba85b74ad9f"
+    }
+  ],
+  "license_blob_sha": "715d483338cea4365f0d91a27799cf61226d6bcf"
+}
