@@ -31,20 +31,24 @@
   function render(){
     const w=C.WORDS[state.index],recall=state.mode==='recall';
     prepareAudio();
-    $('wordTitle').textContent=recall?'أكتب من الذاكرة':w.word;$('wordTitle').classList.toggle('recall-title',recall);$('wordTitle').lang=recall?'ar':'en';$('wordTitle').dir=recall?'rtl':'ltr';
-    $('wordTitle').classList.toggle('long-word',!recall&&w.word.length>=5);
+    const arabic=w.lang==='ar';
+    $('wordTitle').textContent=recall?'أكتب من الذاكرة':(w.trace||w.word);$('wordTitle').classList.toggle('recall-title',recall);$('wordTitle').lang=recall||arabic?'ar':'en';$('wordTitle').dir=recall||arabic?'rtl':'ltr';
+    $('wordTitle').classList.toggle('arabic-word',!recall&&arabic);
+    $('wordTitle').classList.toggle('long-word',!recall&&!arabic&&(w.word.length>=5||Boolean(w.number)));
     $('meaning').textContent=recall?'أتذكّر الحروف وأكتبها وحدي.':w.meaning;$('wordCaption').textContent=recall?'أجرّب بنفسي':'أقرأ الكلمة';
+    if(!recall&&w.number)$('wordCaption').textContent='أقرأ العدد وأكتب اسمه';
     const items=visibleWords(),position=visiblePosition();
     $('pageCount').textContent='صفحة '+digits(position+1)+' من '+digits(items.length);$('navCount').textContent=digits(position+1)+' / '+digits(items.length);
     $('subjectLabel').textContent=C.SUBJECTS.find(s=>s.id===state.subject).label+' · تدريب الإملاء';
     $('subjectTabs').innerHTML='';
     for(const subject of C.SUBJECTS){const b=document.createElement('button');b.type='button';b.textContent=subject.label+' '+digits(subject.ids.length);b.setAttribute('aria-pressed',String(state.subject===subject.id));b.addEventListener('click',()=>setSubject(subject.id));$('subjectTabs').appendChild(b);}
     $('traceMode').setAttribute('aria-pressed',String(!recall));$('recallMode').setAttribute('aria-pressed',String(recall));
-    $('writingHint').textContent=recall?'اكتب الكلمة من الذاكرة. يمكنك سماعها بالضغط على «اسمع الكلمة».':'اكتب فوق النقاط بإصبعك أو بقلم الشاشة، من اليسار إلى اليمين.';
-    $('guide').innerHTML=C.sheetSvg(w.word,state.mode);
+    $('writingHint').textContent=recall?'اكتب الكلمة من الذاكرة. يمكنك سماعها بالضغط على «اسمع الكلمة».':(arabic?'اكتب فوق النقاط بإصبعك أو بقلم الشاشة، من اليمين إلى اليسار.':'اكتب فوق النقاط بإصبعك أو بقلم الشاشة، من اليسار إلى اليمين.');
+    $('subjectNote').hidden=!arabic;
+    $('guide').innerHTML=C.sheetSvg(w.trace||w.word,state.mode);
     $('wordTabs').innerHTML='';
     for(const [i,item] of items.entries()){
-      const b=document.createElement('button');b.type='button';b.className='word-tab'+(state.completed[item.id]?' completed':'');b.textContent=recall?'كلمة '+digits(i+1):item.word;b.lang=recall?'ar':'en';b.dir=recall?'rtl':'ltr';
+      const b=document.createElement('button');b.type='button';b.className='word-tab'+(state.completed[item.id]?' completed':'');b.textContent=recall?'كلمة '+digits(i+1):item.word;b.lang=recall||item.lang==='ar'?'ar':'en';b.dir=recall||item.lang==='ar'?'rtl':'ltr';
       b.setAttribute('aria-label',recall?'الكلمة '+digits(i+1):item.word);if(item.id===w.id)b.setAttribute('aria-current','page');
       b.addEventListener('click',()=>navigate(C.WORDS.findIndex(w=>w.id===item.id)));$('wordTabs').appendChild(b);
     }

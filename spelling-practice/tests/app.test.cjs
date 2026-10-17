@@ -33,7 +33,7 @@ function setup(saved=null,failStorage=false,hash=''){
 function draw(app,props={}){app.nodes.ink.fire('pointerdown',props);app.nodes.ink.fire('pointermove',{clientX:100,clientY:160,...props});app.nodes.ink.fire('pointerup',{clientX:110,clientY:170,...props});}
 
 test('finger drawing saves the final position, reloads, and survives resizing',()=>{
-  const a=setup();assert.equal(a.nodes.wordTabs.children.length,14);assert.equal(a.nodes.subjectTabs.children.length,3);draw(a);
+  const a=setup();assert.equal(a.nodes.wordTabs.children.length,14);assert.equal(a.nodes.subjectTabs.children.length,5);draw(a);
   const stroke=a.state().pages['hot:trace'][0];assert.equal(stroke.points.length,3);assert.equal(stroke.points.at(-1).x,294.1);
   a.nodes.ink.rect={left:0,top:0,width:700,height:819};a.events.resize();assert.equal(a.nodes.ink.width,1400);assert.deepEqual(a.state().pages['hot:trace'][0],stroke);
   const b=setup(a.saved());assert.equal(b.nodes.wordTitle.textContent,'hot');assert.ok(b.drawOps.length);assert.equal(b.nodes.undo.disabled,false);
@@ -64,8 +64,8 @@ test('blocked/corrupt storage and malformed links do not prevent training',()=>{
 test('subject navigation stops at boundaries and printing covers all words or one subject',()=>{
   const a=setup();assert.equal(a.nodes.previous.disabled,true);a.nodes.complete.fire('click');assert.equal(a.state().completed.hot,true);assert.equal(a.nodes.complete.attributes['aria-pressed'],'true');
   a.nodes.wordTabs.children[13].fire('click');assert.equal(a.nodes.wordTitle.textContent,'wash');assert.equal(a.nodes.next.disabled,true);assert.equal(a.nodes.pronunciation.getAttribute('src'),'audio/wash.mp3?v=2');
-  a.nodes.printAll.fire('click');assert.equal(a.window.printed,true);assert.equal((a.nodes.printArea.innerHTML.match(/class="print-sheet"/g)||[]).length,41);
-  a.nodes.printSubject.fire('click');assert.equal((a.nodes.printArea.innerHTML.match(/class="print-sheet"/g)||[]).length,14);
+  a.nodes.printAll.fire('click');assert.equal(a.window.printed,true);assert.equal((a.nodes.printArea.innerHTML.match(/class="print-sheet(?: arabic-sheet)?"/g)||[]).length,59);
+  a.nodes.printSubject.fire('click');assert.equal((a.nodes.printArea.innerHTML.match(/class="print-sheet(?: arabic-sheet)?"/g)||[]).length,14);
 });
 test('bundled MP3 plays on the tap without speech synthesis; repeat restarts it',()=>{
   const a=setup();const player=a.nodes.pronunciation;assert.equal('speechSynthesis'in a.window,false);assert.equal(player.getAttribute('src'),'audio/hot.mp3?v=2');
@@ -95,4 +95,12 @@ test('water is shared across science and social without losing handwriting',()=>
 test('direct links open the corresponding subject and retain the circular avatar',()=>{
   const a=setup(null,false,'#sunlight');assert.equal(a.nodes.wordTitle.textContent,'sunlight');assert.ok(a.nodes.subjectLabel.textContent.includes('العلوم'));assert.equal(a.nodes.pronunciation.getAttribute('src'),'audio/sunlight.mp3?v=2');
   assert.ok(html.includes('avatar-v1.png'));assert.ok(html.includes('داخل دائرة'));
+});
+test('Arabic practice changes language, direction and hint and uses its own audio',()=>{
+  const a=setup(null,false,'#ardaras');assert.equal(a.nodes.wordTitle.textContent,'دَرَسَ');assert.equal(a.nodes.wordTitle.lang,'ar');assert.equal(a.nodes.wordTitle.dir,'rtl');assert.ok(a.nodes.writingHint.textContent.includes('اليمين إلى اليسار'));assert.equal(a.nodes.wordTabs.children.length,8);assert.equal(a.nodes.subjectNote.hidden,false);assert.equal(a.nodes.pronunciation.getAttribute('src'),'audio/ardaras.mp3?v=2');
+  draw(a);a.nodes.recallMode.fire('click');assert.ok(!a.nodes.guide.innerHTML.includes('data-guide="arabic"'));a.nodes.traceMode.fire('click');assert.equal(a.nodes.clear.disabled,false);a.nodes.printSubject.fire('click');assert.equal((a.nodes.printArea.innerHTML.match(/class="print-sheet(?: arabic-sheet)?"/g)||[]).length,8);
+});
+test('number pages show and print the digit and English name, and keep their boundaries',()=>{
+  const a=setup(null,false,'#numone');assert.equal(a.nodes.wordTitle.textContent,'1 = One');assert.equal(a.nodes.wordTitle.dir,'ltr');assert.equal(a.nodes.wordTabs.children.length,10);assert.equal(a.nodes.previous.disabled,true);assert.equal(a.nodes.subjectNote.hidden,true);
+  a.nodes.wordTabs.children[9].fire('click');assert.equal(a.nodes.wordTitle.textContent,'10 = Ten');assert.equal(a.nodes.next.disabled,true);assert.equal(a.nodes.pronunciation.getAttribute('src'),'audio/numten.mp3?v=2');a.nodes.printSubject.fire('click');assert.equal((a.nodes.printArea.innerHTML.match(/class="print-sheet(?: arabic-sheet)?"/g)||[]).length,10);
 });

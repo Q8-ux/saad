@@ -13,3 +13,6 @@
 @media(max-width:600px){.subject-tabs{gap:6px}.subject-tabs button{font-size:15px;min-height:49px;padding:9px 4px}.word-heading h3.long-word{font-size:clamp(34px,10.5vw,52px);letter-spacing:1px}.word-tab{font-size:19px}.word-heading{gap:12px}.listen-button{flex:0 0 auto}.print-options button{font-size:13px}}
 
 @media(max-width:600px){.word-tabs{grid-template-columns:repeat(auto-fit,minmax(78px,1fr));max-height:310px}}
+
+.word-heading h3.arabic-word{font-family:Tahoma,Arial,sans-serif;letter-spacing:0;text-align:right;line-height:1.6;font-size:84px;min-width:155px}.subject-note{font-size:14px;line-height:1.8;color:var(--muted);background:#fff1cf;border-radius:9px;padding:9px 12px}.subject-note[hidden]{display:none}.arabic-sheet h1{font-family:Tahoma,Arial,sans-serif;letter-spacing:0;line-height:1.5}
+@media(max-width:600px){.word-heading{flex-wrap:wrap}.word-heading h3.arabic-word{font-size:64px;min-width:140px}.subject-note{font-size:12px}}
