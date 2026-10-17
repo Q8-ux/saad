@@ -386,16 +386,11 @@ export default function SabeqSite() {
       <main id="main-content">
         <section className="hero" id="home">
           <div className="hero-brand-block" dir={t.dir}>
-            <p className="hero-brand-title">{t.brand}</p>
+            <h1 className="hero-brand-title">{t.brand}</h1>
             <p className="hero-brand-tagline">
               <span>{language === "ar" ? "خبرة قانونية راسخة" : language === "en" ? "Established legal experience" : "مستحکم قانونی تجربہ"}</span>
               <span>{language === "ar" ? "تلتقي بالتقنية الحديثة" : language === "en" ? "meets modern technology" : "جدید ٹیکنالوجی کے ساتھ"}</span>
             </p>
-          </div>
-          <div className="container hero-layout">
-            <div className="hero-copy">
-              <h1>{t.heroTitle}<em>{t.heroAccent}</em></h1>
-            </div>
           </div>
         </section>
 
@@ -538,7 +533,11 @@ export default function SabeqSite() {
         {modal === "media" && <MediaViewer video={mediaVideos[selectedVideo]} language={language} />}
       </ModalShell>}
 
-      <div className="floating"><button className="assistant-avatar-button" onClick={() => showModal("assistant")} aria-label={t.assistant}><span className="assistant-portrait"><img src={assetUrl("/images/sabeq-assistant-avatar.jpg")} alt="" width={64} height={64} decoding="async" /></span></button><a href="https://wa.me/96550668449" target="_blank" rel="noreferrer" aria-label={t.whatsapp}><BrandIcon name="whatsapp" /></a></div>
+      <div className="floating">
+        <button type="button" className="assistant-avatar-button" onClick={() => showModal("assistant")} aria-label={t.assistant} aria-haspopup="dialog"><span className="assistant-portrait"><img src={assetUrl("/images/sabeq-assistant-avatar.jpg")} alt="" width={64} height={64} decoding="async" /></span></button>
+        <button type="button" className="memo-system-button" onClick={() => showModal("memo")} aria-haspopup="dialog">{language === "ar" ? "اضغط هنا للدخول على نظام كتابة المذكرات" : language === "en" ? "Click here to enter the memorandum writing system" : "قانونی یادداشت لکھنے کے نظام میں داخل ہونے کے لیے یہاں کلک کریں"}</button>
+      </div>
+      <a className="floating-whatsapp" href="https://wa.me/96550668449" target="_blank" rel="noreferrer" aria-label={t.whatsapp}><BrandIcon name="whatsapp" /></a>
     </div>
   );
 }
