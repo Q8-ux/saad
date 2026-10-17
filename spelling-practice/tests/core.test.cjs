@@ -68,7 +68,16 @@ test('saved pages and completion for the original seven words survive expansion'
 });
 test('Arabic examples preserve all eight three-letter words and fathas',()=>{
   const words=C.subjectWords('arabic');assert.deepEqual(words.map(w=>w.word),['دَرَسَ','صَعَدَ','خَطَرَ','عَطَسَ','شَعَرَ','سَطَعَ','خَدَعَ','زَرَعَ']);
-  for(const w of words){assert.equal(w.lang,'ar');assert.equal(w.word.replace(/\p{M}/gu,'').length,3);assert.equal((w.word.match(/َ/g)||[]).length,3);const page=C.sheetSvg(w.word);assert.ok(page.includes('direction="rtl"'));assert.equal((page.match(/data-guide="arabic"/g)||[]).length,2);assert.ok(!C.sheetSvg(w.word,'recall').includes('data-guide="arabic"'));}
+  const guides=require('../arabic-guides.js');
+  for(const w of words){
+    assert.equal(w.lang,'ar');assert.equal(w.word.replace(/\p{M}/gu,'').length,3);assert.equal((w.word.match(/َ/g)||[]).length,3);
+    assert.deepEqual(w.meaning.split(' · '),w.word.match(/.َ/gu));
+    const marks=[...guides[w.word].markup.matchAll(/data-diacritic="fatha" d="M([\d.]+) ([\d.]+)L([\d.]+) ([\d.]+)"/g)];
+    assert.equal(marks.length,3,w.word+' must show all three fathas');
+    for(const [,x1,y1,x2,y2] of marks){assert.ok(Number(x2)>Number(x1));assert.ok(Number(y2)<Number(y1),'a fatha rises to the right');}
+    const page=C.sheetSvg(w.word);assert.ok(page.includes('direction="rtl"'));assert.equal((page.match(/data-guide="arabic"/g)||[]).length,2);assert.equal((page.match(/data-diacritic="fatha"/g)||[]).length,6);
+    assert.equal((C.printMarkup([w]).match(/data-diacritic="fatha"/g)||[]).length,6);assert.ok(!C.sheetSvg(w.word,'recall').includes('data-guide="arabic"'));
+  }
 });
 test('number practice matches the supplied 1–10 names and traces digits too',()=>{
   const words=C.subjectWords('numbers');assert.deepEqual(words.map(w=>w.word),['One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten']);

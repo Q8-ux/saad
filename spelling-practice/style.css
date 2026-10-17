@@ -16,3 +16,4 @@
 
 .word-heading h3.arabic-word{font-family:Tahoma,Arial,sans-serif;letter-spacing:0;text-align:right;line-height:1.6;font-size:84px;min-width:155px}.subject-note{font-size:14px;line-height:1.8;color:var(--muted);background:#fff1cf;border-radius:9px;padding:9px 12px}.subject-note[hidden]{display:none}.arabic-sheet h1{font-family:Tahoma,Arial,sans-serif;letter-spacing:0;line-height:1.5}
 @media(max-width:600px){.word-heading{flex-wrap:wrap}.word-heading h3.arabic-word{font-size:64px;min-width:140px}.subject-note{font-size:12px}}
+.word-tab[lang="ar"]{font-family:Tahoma,Arial,sans-serif;line-height:1.8;font-size:28px;padding-block:10px}.word-heading h3.arabic-word+.meaning{font-size:24px;line-height:1.8;color:#385e57}

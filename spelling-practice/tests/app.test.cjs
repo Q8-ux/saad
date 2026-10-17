@@ -98,6 +98,7 @@ test('direct links open the corresponding subject and retain the circular avatar
 });
 test('Arabic practice changes language, direction and hint and uses its own audio',()=>{
   const a=setup(null,false,'#ardaras');assert.equal(a.nodes.wordTitle.textContent,'دَرَسَ');assert.equal(a.nodes.wordTitle.lang,'ar');assert.equal(a.nodes.wordTitle.dir,'rtl');assert.ok(a.nodes.writingHint.textContent.includes('اليمين إلى اليسار'));assert.equal(a.nodes.wordTabs.children.length,8);assert.equal(a.nodes.subjectNote.hidden,false);assert.equal(a.nodes.pronunciation.getAttribute('src'),'audio/ardaras.mp3?v=2');
+  assert.equal(a.nodes.meaning.textContent,'دَ · رَ · سَ');assert.equal((a.nodes.guide.innerHTML.match(/data-diacritic="fatha"/g)||[]).length,6);
   draw(a);a.nodes.recallMode.fire('click');assert.ok(!a.nodes.guide.innerHTML.includes('data-guide="arabic"'));a.nodes.traceMode.fire('click');assert.equal(a.nodes.clear.disabled,false);a.nodes.printSubject.fire('click');assert.equal((a.nodes.printArea.innerHTML.match(/class="print-sheet(?: arabic-sheet)?"/g)||[]).length,8);
 });
 test('number pages show and print the digit and English name, and keep their boundaries',()=>{

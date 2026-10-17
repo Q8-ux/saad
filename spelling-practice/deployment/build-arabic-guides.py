@@ -34,12 +34,22 @@ def build(font_path,output):
         ImageDraw.Draw(im).text((pad-x0,baseline),word,font=font,fill=255,anchor='ls',direction='rtl',language='ar')
         mask=np.asarray(im)>96
         labels,total=label(mask,structure=np.ones((3,3)))
-        bodies=np.zeros_like(mask);marks=np.zeros_like(mask)
+        bodies=np.zeros_like(mask);marks=np.zeros_like(mask);fathas=[]
         for i,box in enumerate(find_objects(labels),1):
             if box is None:continue
             component=labels==i
-            if box[0].stop-box[0].start<34:marks|=component
+            height=box[0].stop-box[0].start;width=box[1].stop-box[1].start
+            if height<34 and width>=height*3 and width>20:
+                # Cairo's flat fatha is replaced by the clear rising stroke in the reference.
+                left=(box[1].start-pad)*factor
+                right=(box[1].stop-pad)*factor
+                center=100+((box[0].start+box[0].stop)/2-baseline)*factor
+                rise=(right-left)*.28
+                fathas.append(f'<path data-diacritic="fatha" d="M{left:.2f} {center+rise/2:.2f}L{right:.2f} {center-rise/2:.2f}" fill="none" stroke="#385e57" stroke-width="2.8" stroke-linecap="round"/>')
+            elif height<34:marks|=component
             else:bodies|=component
+        if len(fathas)!=word.count('َ'):
+            raise ValueError(f'Expected three clear fathas for {word}; found {len(fathas)}')
         skeleton=thin(bodies)
         spacing=5.5/factor;grid={};points=[]
         for y,x in np.argwhere(skeleton):
@@ -56,8 +66,8 @@ def build(font_path,output):
             for run in np.split(xs,np.flatnonzero(np.diff(xs)>1)+1):
                 x=round((int(run[0])-pad)*factor,2);yy=round(100+(y-baseline)*factor,2);width=round(len(run)*factor,2)
                 runs.append(f'M{x} {yy}h{width}v{factor}h-{width}z')
-        markup=f'<path d="{dots}" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"/><path d="{" ".join(runs)}" fill="currentColor"/>'
-        guides[word]={'width':round((x1-x0)*factor,2),'markup':markup,'points':len(points)}
+        markup=f'<path d="{dots}" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"/><path d="{" ".join(runs)}" fill="currentColor"/>'+''.join(fathas)
+        guides[word]={'width':round((x1-x0)*factor,2),'markup':markup,'points':len(points),'fathas':len(fathas)}
     source='(function(root){const guides='+json.dumps(guides,ensure_ascii=False,separators=(',',':'))+';if(typeof module==="object"&&module.exports)module.exports=guides;else root.SpellingArabicGuides=guides;})(typeof globalThis!=="undefined"?globalThis:this);\n'
     output.write_text(source)
     print(json.dumps({w:{'width':g['width'],'points':g['points']} for w,g in guides.items()},ensure_ascii=False))
