@@ -1,6 +1,6 @@
 export type PostArtwork = { src: string; width: number; height: number };
 
-// Unmodified original artwork for actual news only. Guidance is excluded.
+// Original public artwork for verified case results only.
 export const groupPostArtworks: Record<string, PostArtwork> = {
   "DdoBZ65AguI": {
     "src": "/images/posts/DdoBZ65AguI.jpg",
@@ -16,5 +16,20 @@ export const groupPostArtworks: Record<string, PostArtwork> = {
     "src": "/images/posts/DdWSqBrg19a.jpg",
     "width": 480,
     "height": 640
+  },
+  "DbIv9QSgRzf": {
+    "src": "/images/posts/DbIv9QSgRzf.jpg",
+    "width": 1448,
+    "height": 1931
+  },
+  "DaabrqsguOJ": {
+    "src": "/images/posts/DaabrqsguOJ.jpg",
+    "width": 1448,
+    "height": 1931
+  },
+  "DaYIFrmK8kH": {
+    "src": "/images/posts/DaYIFrmK8kH.jpg",
+    "width": 1448,
+    "height": 1929
   }
 };

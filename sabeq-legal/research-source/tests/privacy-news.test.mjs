@@ -36,21 +36,21 @@ test('policy and notices have local, readable routes for every site language',()
 test('original post images retain their sources and show judgment dates only',()=>{
  const data=module('app/group-news.ts'),artworks=module('app/group-post-artworks.ts');
  const posts=module('app/group-posts.ts',{'./group-news':data,'./group-post-artworks':artworks});
- assert.equal(data.groupNews.length,3);assert.equal(new Set(data.groupNews.map(n=>n.source)).size,3);
- assert.deepEqual(Array.from(data.groupNews,n=>n.id).sort(),['DdWSqBrg19a','Ddgy2L5geSN','DdoBZ65AguI'].sort());
+ assert.equal(data.groupNews.length,6);assert.equal(new Set(data.groupNews.map(n=>n.source)).size,6);
+ assert.deepEqual(Array.from(data.groupNews,n=>n.id).sort(),['DdWSqBrg19a','Ddgy2L5geSN','DdoBZ65AguI','DbIv9QSgRzf','DaabrqsguOJ','DaYIFrmK8kH'].sort());
  assert.ok(data.groupNews.every(n=>n.kind==='case-result'&&n.eventDate));
- assert.equal(posts.groupPosts.length,3);
+ assert.equal(posts.groupPosts.length,6);
  for(const post of posts.groupPosts){
   assert.ok(post.source.includes('/p/'));assert.equal(post.artwork.src,`/images/posts/${post.id}.jpg`);
-  assert.equal(post.artwork.width,480);assert.equal(post.artwork.height,640);
+  assert.ok(post.artwork.width>=480);assert.ok(post.artwork.height>=640);
   const bytes=readFileSync(new URL('../public'+post.artwork.src,import.meta.url));assert.equal(bytes[0],0xff);assert.equal(bytes[1],0xd8);assert.ok(bytes.length>1000);
  }
  const strip=module('app/group-posts-strip.tsx',{'./group-posts':posts,'../lib/runtime-urls':{assetUrl:path=>path}}).default;
  for(const language of ['ar','en','ur']){
   const html=renderToStaticMarkup(React.createElement(strip,{language}));
   const dates=[...html.matchAll(/<time dateTime="([^"]+)"/g)].map(m=>m[1]);
-  assert.deepEqual(dates.sort(),['2026-09-14','2026-09-20','2026-09-21']);
-  assert.equal((html.match(/<article/g)||[]).length,3);assert.equal((html.match(/<img /g)||[]).length,3);
+  assert.deepEqual(dates.sort(),['2026-06-24','2026-07-01','2026-07-22','2026-09-14','2026-09-20','2026-09-21']);
+  assert.equal((html.match(/<article/g)||[]).length,6);assert.equal((html.match(/<img /g)||[]).length,6);
   assert.doesNotMatch(html,/<(?:img|iframe)[^>]+(?:src|srcset)="https?:/);assert.doesNotMatch(html,/2026-09-28|2026-09-23|2026-09-19|2026-09-16/);
   assert.match(html,/<dialog[^>]+aria-labelledby="group-post-dialog-title"/);
   for(const post of posts.groupPosts)assert.ok(html.includes(post.artwork.src));

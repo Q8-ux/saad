@@ -54,4 +54,20 @@ export const groupNews: News[] = [
     },
     "kind": "case-result"
   }
+  ,{
+    kind: "case-result", id: "DbIv9QSgRzf", publishedAt: "2026-07-23", eventDate: "2026-07-22",
+    source: "https://www.instagram.com/sabik_legal/p/DbIv9QSgRzf/",
+    title: {ar: "إلغاء حكم غيابي بالحبس والقضاء مجدداً بالامتناع عن النطق بالعقاب", en: "Prison judgment set aside; court refrains from pronouncing punishment", ur: "غیابی قید کا فیصلہ منسوخ، سزا سنانے سے گریز کا نیا فیصلہ"},
+    summary: {ar: "بحسب منشور المجموعة، ألغت محكمة الجنايات، الدائرة السابعة، حكماً غيابياً بالحبس ثلاث سنوات وقضت مجدداً بالامتناع عن النطق بالعقاب، بعد تقديم الدفاع من المحامي الدكتور خليفة محمد الخليفة.", en: "The Group reports that Criminal Court Circuit Seven set aside an in absentia three-year prison judgment and refrained from pronouncing punishment following advocacy by Dr Khalifa Mohammed Al-Khalifa.", ur: "گروپ کے مطابق ڈاکٹر خلیفہ محمد الخلیفہ کی وکالت کے بعد تین سال قید کا غیابی فیصلہ منسوخ کرکے سزا سنانے سے گریز کا فیصلہ دیا گیا۔"}
+  },{
+    kind: "case-result", id: "DaabrqsguOJ", publishedAt: "2026-07-05", eventDate: "2026-07-01",
+    source: "https://www.instagram.com/sabik_legal/p/DaabrqsguOJ/",
+    title: {ar: "حكم بالبراءة في قضية جنايات لانتفاء أركان الجريمة", en: "Acquittal where the elements of the offence were not established", ur: "جرم کے عناصر ثابت نہ ہونے پر فوجداری مقدمے میں براءت"},
+    summary: {ar: "أعلنت المجموعة أن محكمة الجنايات، الدائرة الثانية عشرة، قضت بالبراءة في قضية جلب حشيش من مطار الكويت لانتفاء أركان الجريمة، بعد تقديم الدفاع من المحامي حمد ناصر الماضي.", en: "The Group reports an acquittal by Criminal Court Circuit Twelve in a cannabis importation case at Kuwait Airport because the elements of the offence were not established, following advocacy by Hamad Nasser Al-Madhi.", ur: "گروپ کے مطابق حمد ناصر الماضی کی وکالت کے بعد کویت ایئرپورٹ سے حشیش لانے کے مقدمے میں جرم کے عناصر ثابت نہ ہونے پر براءت دی گئی۔"}
+  },{
+    kind: "case-result", id: "DaYIFrmK8kH", publishedAt: "2026-07-04", eventDate: "2026-06-24",
+    source: "https://www.instagram.com/sabik_legal/p/DaYIFrmK8kH/",
+    title: {ar: "تأييد أحقية الموكل بالتكليف برعاية معاق", en: "Client’s entitlement to assignment as a disability caregiver upheld", ur: "معذور شخص کی دیکھ بھال پر تقرری کا موکل کا حق برقرار"},
+    summary: {ar: "بحسب منشور المجموعة، أيدت محكمة الاستئناف، الدائرة الإدارية الثامنة، حكم أول درجة بأحقية الموكل بالتكليف برعاية معاق رغم تقاعد المكلف السابق، بعد تقديم الدفاع من المحامي الدكتور خليفة محمد الخليفة.", en: "The Group reports that Administrative Appeal Circuit Eight upheld the client’s entitlement to assignment as a disability caregiver despite the previous caregiver’s retirement, following advocacy by Dr Khalifa Mohammed Al-Khalifa.", ur: "گروپ کے مطابق ڈاکٹر خلیفہ محمد الخلیفہ کی وکالت کے بعد سابق دیکھ بھال کنندہ کی ریٹائرمنٹ کے باوجود موکل کی تقرری کا حق برقرار رہا۔"}
+  }
 ];
