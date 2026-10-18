@@ -38,7 +38,7 @@ jobs:
         working-directory: social-request-radar
         run: |
           node --test tests/*.test.mjs
-          node node_modules/typescript/bin/tsc --noEmit --incremental false
+          node node_modules/typescript/bin/tsc --project github-pages/tsconfig.json --noEmit
           node scripts/verify-github-pages.mjs
       - uses: actions/configure-pages@v5
       - name: Preserve published projects and add request radar
