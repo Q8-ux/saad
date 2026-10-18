@@ -1,0 +1,13 @@
+{
+  "serviceId": "srv-dbajoilg1s2s73cchmb0",
+  "url": "https://saad-social-request-radar-api.onrender.com",
+  "repository": "https://github.com/Q8-ux/saad",
+  "branch": "social-request-radar-api",
+  "sourceCommit": "0e38ed3cf3ee158e812df2e31360f4a7f3194c4d",
+  "plan": "free",
+  "region": "frankfurt",
+  "autoDeploy": true,
+  "deploymentId": "dep-dbajojtg1s2s73cchrvg",
+  "deploymentStatus": "build_failed",
+  "blocker": "Render workspace build pipeline minutes exhausted. No paid limit was changed."
+}

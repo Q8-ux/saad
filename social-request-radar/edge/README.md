@@ -1,0 +1,11 @@
+# Supabase collection function
+
+The independent `social-request-radar` Supabase project hosts this stateless HTTP function. It does not query a database, change tables, use Supabase Auth or share data with other projects. The API contract matches the Node edition in `server/README.md`, and the public frontend remains on GitHub Pages.
+
+Deploy `edge/index.ts` as `comment-radar`, including its relative dependencies. JWT gateway verification is disabled because `/api/search` and credential status authenticate the server-sealed provider capability themselves. The public configure route seals the caller's own provider key; it makes no provider calls and grants access to no shared account. CORS alone is not authorization.
+
+Prefer a dedicated server secret `RADAR_SEAL_KEY` when independently configuring secrets. Without one, the entry point derives a context-specific 256-bit encryption key with HMAC-SHA256 from the platform's server-only `SUPABASE_SECRET_KEYS.default`, falling back to its legacy service-role secret. It never sends these platform secrets to any client, includes them in deployment source, uses them to access a database, or prints them. Rotating the backing secret invalidates saved provider credentials, which must then be configured again. The server cryptography is the same authenticated AES-256-GCM implementation as the Node edition.
+
+Credentials authorize provider usage and are saved encrypted in the device's IndexedDB. Actual plaintext is decrypted transiently only inside the function during collection. The platform's free wall-clock limit is 150 seconds; collection uses an overall 110-second fetch deadline, 12-request and 20-estimated-credit caps. In-memory concurrency, rate and deduplication limits are per isolate and reset as instances restart or scale; they are not a durable billing ledger or a guarantee against cross-isolate duplicate charges. There are no automatic retries.
+
+Free hosting has usage limits and may be paused by the platform. Provider data credits are independent of hosting. Deployment success does not establish that a supplied provider account can read any particular social platform; verify an actual non-empty read before making that claim.

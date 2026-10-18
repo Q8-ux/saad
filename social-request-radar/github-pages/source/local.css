@@ -13,4 +13,10 @@
 .source-availability article span,.source-availability article small{font-size:14px;color:#586d79}
 .exclusion-summary{display:flex;flex-wrap:wrap;gap:10px 22px;padding:20px;background:#fff;border:1px solid var(--line);border-radius:10px;font-size:15px}
 .exclusion-summary strong{flex-basis:100%}
+.connector-form{border:1px solid var(--line);background:#fff;border-radius:12px;padding:25px;margin:24px 0}
+.connector-form .section-heading p{font-size:16px;color:var(--muted);margin-top:8px;line-height:1.9}
+.connector-actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.connector-actions a{display:inline-flex;align-items:center;gap:6px;font-size:16px}
+.connector-verified{margin-top:18px;color:var(--teal);font-size:15px}
+@media(max-width:700px){.connector-form{padding:20px 17px}.connector-actions{align-items:stretch;flex-direction:column}.connector-actions .primary-button{white-space:normal}}
 @media(max-width:700px){.search-readiness{flex-wrap:wrap;padding:17px;gap:10px}.search-readiness>div{flex:1;min-width:200px}.search-readiness .secondary-button{width:100%;justify-content:center;margin:4px 0 0}.search-readiness strong{font-size:20px}.source-availability{padding:20px 17px}.source-availability>div{grid-template-columns:repeat(2,minmax(0,1fr))}.platform-state{font-size:11px}}

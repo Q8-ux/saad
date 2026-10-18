@@ -4,16 +4,18 @@
     "app/radar.css": "219fe96391baabbe008aa87f0e45ce13a9f7335fce051c388de2ddfe962d18c5",
     "github-pages/index.html": "2786d08b4467e23233b5f00f2ae4a7fa44460b611cbb0bc3d18ea1dc586c8328",
     "github-pages/vite.config.ts": "ef97fb0e839cf3c8f9174583668cf814cd346915097f3a4a145815953f93a19f",
-    "github-pages/source/main.tsx": "60aa3e942614a763a267ffb739651cc2f46d01c9ac464747fce071b8f642d2ae",
-    "github-pages/source/workspace.mjs": "58aff6a91f0e57848917f0ff374606ca2185603332f76b4a47f8067be618fc63",
-    "github-pages/source/search-state.mjs": "f4391ddc28af97a3438d958fa3d9b505822cd4b0efbb2f8f03980ea7e6a24fdc",
-    "github-pages/source/local.css": "8bcd2daebae03cdfa59ff5080f5679081fccac7cd14d6de50f9660705a723cbe",
-    "github-pages/source/radar-dashboard.tsx": "b2914fe38c555774f9ca0deb1335f460174eb0b83f4b3d06718cffd6b9ecf58e"
+    "github-pages/source/main.tsx": "4c86ba227db63118600477d9d3f1b672c831b858ecef4abfd748fe854ab83235",
+    "github-pages/source/workspace.mjs": "c5284ee1bd8887302b0cf2af8b642c008b8adf6a48241aef581d13eb40f3cff7",
+    "github-pages/source/search-state.mjs": "d9969d4694070258ef6f8ddb8993877e72be2edc576fca46f2cf068ed96edd0d",
+    "github-pages/source/connector.mjs": "e3a759249e2205119e889981f313b77c5cfb67e1f99bb2004b61d5b61b96bb79",
+    "github-pages/source/backend-config.mjs": "66c76e25e1e8a27147be80978156e3e17a6df3c7adfe259c91dafdbf6c05d7fc",
+    "github-pages/source/local.css": "440db3729e16aa1e89200fd4a8a87e0b4dbe8c3c570b63b8127c6a923b28999b",
+    "github-pages/source/radar-dashboard.tsx": "af9c5911776e4c5790ee7607dbe94365905d2168e57290053a65b2df11b5d090"
   },
   "assets": {
-    "index.html": "37534b548fb4a2a0c3b81f2b56438f4241cb4717098eb4474ef5e2353a919b4a",
+    "index.html": "c4d82effe91440b1777b2b2fffce2ddece3b953328b816c223fcaa928b1ad1d4",
     "favicon.svg": "1ecbb96e3d87afd70c5f095d47b380357fbac22eb8ceca5b4c7ad4b16cba5e79",
-    "assets/index-BibmPc3H.css": "1286efeb5a508071836c75a86828ec2cbcfbd9d4add5e7a1908940366227d0f3",
-    "assets/radar-BM2fkTea.js": "d6546cf5670bf9de6c6e5e36e9080dc26be6cf7798c53002c2b82a6d6be25198"
+    "assets/index-DFF0R2Yk.css": "230719130cf280bcd250c4499e75babf283366ae5014eed0cd4ff873c15e113c",
+    "assets/radar-BAuvb7MO.js": "bd72bc8b4905c0639c2d813ade07b64bee480688675fecdaf7cb4a3c445c7382"
   }
 }

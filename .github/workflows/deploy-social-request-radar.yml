@@ -32,7 +32,7 @@ jobs:
       - name: Verify research, growth and browser-local workspace
         working-directory: social-request-radar
         run: |
-          node --test tests/radar.test.mjs tests/pages-workspace.test.mjs
+          node --test tests/radar.test.mjs tests/pages-workspace.test.mjs tests/server.test.mjs tests/edge.test.mjs
           node scripts/verify-github-pages.mjs
       - uses: actions/configure-pages@v5
       - name: Preserve published projects and add request radar

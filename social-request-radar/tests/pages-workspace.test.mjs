@@ -2,7 +2,7 @@ import test from 'node:test';import assert from 'node:assert/strict';
 import {createLocalApi} from '../github-pages/source/workspace.mjs';
 import {searchReadiness,searchOutcome} from '../github-pages/source/search-state.mjs';
 const fixture={id:'sample_1',text:'أبي استشارة بالكويت',author:'local_test',sourceUrl:'https://www.instagram.com/p/TEST_ONLY/'};
-function setup(){const map=new Map();return createLocalApi({all:async()=>[...map.values()],put:async d=>map.set(d.key,d),remove:async key=>map.delete(key)});}
+function setup(options){const map=new Map();return createLocalApi({all:async()=>[...map.values()],put:async d=>map.set(d.key,d),remove:async key=>map.delete(key)},options);}
 test('device workspace begins empty without invented leads',async()=>{const s=await setup()('workspace');assert.equal(s.connected,false);assert.equal(s.saved.length,0);assert.equal(s.datasets.length,0);});
 test('import, Arabic search, save, refresh and remove work in a browser-local store',async()=>{const api=setup();const imported=await api('import',{platform:'instagram',records:[fixture],name:'test.json'});assert.equal(imported.count,1);const run=await api('search',{mode:'library',query:'استشارة',terms:'استشارة',country:'KW',platforms:['instagram']});assert.equal(run.results.length,1);await api('save',{record:run.results[0]});assert.equal((await api('workspace')).saved.length,1);await api('save',{record:run.results[0],remove:true});assert.equal((await api('workspace')).saved.length,0);await api('delete',{kind:'dataset',id:imported.id});assert.equal((await api('workspace')).datasets.length,0);});
 test('live search explicitly remains unconnected',async()=>{await assert.rejects(()=>setup()('search',{mode:'live'}),/ربط مصدر البيانات/);});
@@ -60,4 +60,26 @@ test('each of the six platforms searches only its imported records and reports m
   const partial=setup();await partial('import',{platform:'instagram',records:[fixture]});
   const result=await partial('search',{mode:'library',query:'استشارة',country:'KW',platforms:['instagram','youtube']});
   assert.equal(result.report.sources.find(p=>p.platform==='youtube').status,'not_collected');
+});
+
+test('connector setup stores only a sealed credential, routes live searches and disconnects',async()=>{
+  const secret='fixture-plaintext-provider-key';let received;
+  const remote={endpoint:'https://example.onrender.com',configure:async key=>{assert.equal(key,secret);return {credential:'sealed-test-packet',verified:false};},search:async(body,credential)=>{received={body,credential};return {id:'remote-run',state:'completed',scanned:1,spec:body,createdAt:'2026-10-18T00:00:00Z',results:[],report:{calls:1},collectedRecords:[{...fixture,platform:'instagram'}]};}};
+  const api=setup({remote});assert.equal((await api('workspace')).backendConfigured,true);assert.equal((await api('workspace')).connected,false);
+  await api('connect',{apiKey:secret});assert.equal((await api('workspace')).connected,true);
+  const run=await api('search',{mode:'live',query:'استشارة'});assert.equal(received.credential,'sealed-test-packet');assert.equal(run.report.calls,1);
+  const workspace=await api('workspace');assert.equal(workspace.datasets.length,1);assert.ok(workspace.sourceVerifiedAt);assert.ok(!JSON.stringify(workspace).includes(secret));assert.ok(!JSON.stringify(workspace.searches).includes('sealed-test-packet'));
+  await api('disconnect');assert.equal((await api('workspace')).connected,false);
+});
+
+test('a configured endpoint is not treated as a running backend and readiness can recover',async()=>{
+  let online=false;const remote={endpoint:'https://example.onrender.com',initialBlocker:'fixture: build quota exhausted',status:async()=>{if(!online)throw Error('unavailable');return {ok:true,keyConfigured:false};},configure:async()=>({credential:'sealed-fixture'})};
+  const api=setup({remote});let workspace=await api('workspace');
+  assert.equal(workspace.backendConfigured,true);assert.equal(workspace.backendReady,false);assert.equal(workspace.connected,false);
+  assert.equal(searchReadiness(workspace,'live',['instagram']).ready,false);
+  await assert.rejects(()=>api('connection-status'),/unavailable/);
+  assert.equal((await api('workspace')).backendError,'fixture: build quota exhausted');
+  online=true;await api('connection-status');workspace=await api('workspace');
+  assert.equal(workspace.backendReady,true);assert.equal(workspace.backendError,'');assert.equal(workspace.connected,false);
+  await api('connect',{apiKey:'fixture-only-key'});assert.equal((await api('workspace')).connected,true);
 });

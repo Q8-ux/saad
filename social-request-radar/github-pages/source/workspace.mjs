@@ -6,10 +6,24 @@ export function indexedStore(){
   async function run(mode,action){const database=await db();return new Promise((resolve,reject)=>{const tx=database.transaction('documents',mode);let value;const r=action(tx.objectStore('documents'));r.onsuccess=()=>{value=r.result;};tx.oncomplete=()=>resolve(value);tx.onerror=()=>reject(Error('تعذر حفظ البيانات على هذا الجهاز. صدّر ملفك وراجع مساحة التخزين.'));tx.onabort=()=>reject(Error('لم يكتمل حفظ البيانات.'));});}
   return {all:()=>run('readonly',s=>s.getAll()),put:doc=>run('readwrite',s=>s.put(doc)),remove:key=>run('readwrite',s=>s.delete(key))};
 }
-export function createLocalApi(store){return async function api(action,body){
+/** @param {any} store @param {{remote?:any}} [options] */
+export function createLocalApi(store,{remote=null}={}){let backendReady=false,backendError=remote?.initialBlocker||'';return async function api(action,body){
   const all=await store.all();const list=kind=>all.filter(d=>d.kind===kind).sort((a,b)=>b.updatedAt.localeCompare(a.updatedAt)).map(d=>d.payload);
   const put=async(key,kind,payload)=>{await store.put({key,kind,payload,updatedAt:new Date().toISOString()});return payload;};
-  if(action==='workspace')return {connected:false,deviceLocal:true,searches:list('search').slice(0,20),saved:list('saved'),metrics:list('metric'),datasets:list('dataset').map(d=>({id:d.id,name:d.name,count:d.records.length,platformCounts:platformCounts(d.records),createdAt:d.createdAt}))};
+  const connection=list('connector')[0];
+  if(action==='workspace')return {connected:!!remote&&backendReady&&!!connection?.credential,backendConfigured:!!remote,backendReady,backendError,backendUrl:remote?.endpoint||'',sourceVerifiedAt:connection?.verifiedAt||null,deviceLocal:true,searches:list('search').slice(0,20),saved:list('saved'),metrics:list('metric'),datasets:list('dataset').map(d=>({id:d.id,name:d.name,count:d.records.length,platformCounts:platformCounts(d.records),createdAt:d.createdAt}))};
+  if(action==='connect'){
+    if(!remote)throw Error('خادم البحث غير مُعدّ لهذه النسخة.');
+    const response=await remote.configure(body?.apiKey);
+    if(!response.credential||typeof response.credential!=='string')throw Error('لم يؤكد الخادم حفظ المفتاح.');
+    backendReady=true;backendError='';
+    await put('connector:scrapecreators','connector',{credential:response.credential,configuredAt:new Date().toISOString(),verifiedAt:null});return {configured:true,verified:false};
+  }
+  if(action==='disconnect'){await store.remove('connector:scrapecreators');return {ok:true};}
+  if(action==='connection-status'){
+    if(!remote)throw Error('خادم البحث غير مُعدّ لهذه النسخة.');
+    try{const status=await remote.status(connection?.credential);backendReady=status.ok===true;if(!backendReady)throw Error('لم يؤكد خادم البحث جاهزيته.');backendError='';return status;}catch(error){backendReady=false;backendError=backendError||error.message;throw error;}
+  }
   if(action==='import'){
     if(!Array.isArray(body?.records)||!body.records.length||body.records.length>2000)throw Error('استورد من تعليق واحد إلى ٢٠٠٠ تعليق.');
     const records=importRecords(body.records,body.platform,body.postUrl);if(!records.length)throw Error('لا توجد نصوص قابلة للبحث.');
@@ -17,7 +31,13 @@ export function createLocalApi(store){return async function api(action,body){
     await put('dataset:'+item.id,'dataset',item);return {id:item.id,count:records.length};
   }
   if(action==='search'){
-    if(body?.mode==='live')throw Error('البحث المباشر يحتاج ربط مصدر البيانات بالخادم الآمن. اختر «ملفاتي» للبحث في التعليقات المستوردة.');
+    if(body?.mode==='live'){
+      if(!remote||!connection?.credential)throw Error('البحث المباشر يحتاج ربط مصدر البيانات بالخادم الآمن. أضف مفتاح المزود من «مصادر البيانات».');
+      const reply=await remote.search(body,connection.credential);const {collectedRecords=[],...result}=reply;
+      if(!result.id||!Array.isArray(result.results)||!result.report)throw Error('لم يُعد الخادم تقرير بحث صالحًا.');
+      if(collectedRecords.length){const id=crypto.randomUUID();await put('dataset:'+id,'dataset',{id,name:'جمع مباشر · '+body.query,records:collectedRecords,createdAt:result.createdAt});await put('connector:scrapecreators','connector',{...connection,verifiedAt:new Date().toISOString()});}
+      await put('search:'+result.id,'search',result);return result;
+    }
     const spec=prepareSpec(body);const records=list('dataset').flatMap(d=>d.records).filter(r=>spec.platforms.includes(r.platform));
     if(!records.length)throw Error('لم يبدأ البحث: لا توجد تعليقات مستوردة للمنصات المحددة. أضف ملف تعليقات من «مصادر البيانات».');
     const counts=platformCounts(records);

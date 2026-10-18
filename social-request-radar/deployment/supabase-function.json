@@ -1,0 +1,20 @@
+{
+  "projectId": "wvzkpazvtnclcghjrjvv",
+  "projectName": "social-request-radar",
+  "functionName": "comment-radar",
+  "functionId": "012c5650-e537-4cf7-b4ac-641b6e012667",
+  "version": 2,
+  "url": "https://wvzkpazvtnclcghjrjvv.supabase.co/functions/v1/comment-radar",
+  "status": "ACTIVE",
+  "healthVerified": true,
+  "credentialEncryptionVerified": true,
+  "liveProviderReadVerified": false,
+  "sourceHashes": {
+    "edge/index.ts": "02dddb3384cf26ca57683fbcca7ebc7ff4d2d55017a075771ea98f705cb09a0d",
+    "edge/handler.mjs": "983f53eaa6201833eb232814a6ae02a6b8bf6d60735ee5262ede2afc4e558264",
+    "edge/deno.json": "b3315cd8aefa9bb3d26e4b6de28fc450e4e9860484eecf613eef7111632d9878",
+    "server/credentials.mjs": "48d287d4deb00f81882669e976b3dfd36ae07c1d8bafc1cfc3de57c7fa75e80f",
+    "lib/radar-core.mjs": "6a3702aaf0a75f24fc709fb9ae37a066582722f357ca4e6e626721f78e8e24fc",
+    "lib/providers.mjs": "e81d17a24b31832a2ca501e27f885836210117d3235e00667ec3cc1beaf43e0b"
+  }
+}
