@@ -8,7 +8,6 @@ import type { AnalysisStage } from "@/lib/intake-analysis";
 import IntakeAnalysisView, { IntakeStages, type ConnectedIntakeState } from "./intake-analysis-view";
 import VoiceWaveform from "./voice-waveform";
 import PrivacyNotice, { PrivacyLink } from "./privacy-notice";
-import AnalyticsConsentSettings from "./analytics-consent";
 import GroupPostsStrip from "./group-posts-strip";
 import MemoVoiceInput from "./memo-voice-input";
 import PleadingPreview from "./pleading-preview";
@@ -390,7 +389,6 @@ export default function SabeqSite() {
         </div>
       )}
 
-      <AnalyticsConsentSettings language={language} />
       <main id="main-content">
         <section className="hero" id="home">
           <div className="hero-brand-block" dir={t.dir}>
@@ -529,10 +527,10 @@ export default function SabeqSite() {
       <footer className="footer">
         <div className="container footer-grid">
           <div className="footer-brand"><Image src="/images/brand/sabeq-logo.png" alt="" width={92} height={92} unoptimized /><span><strong>{t.brand}</strong><small>SABEQ LEGAL GROUP</small><p>{t.footer}</p></span></div>
-          <div><h3>{t.quick}</h3><PrivacyLink language={language} />{t.nav.map((item, index) => <button key={item} onClick={() => scrollTo(sectionIds[index])}>{item}</button>)}</div>
+          <div><h3>{t.quick}</h3>{t.nav.map((item, index) => <button key={item} onClick={() => scrollTo(sectionIds[index])}>{item}</button>)}</div>
           <div className="footer-contact-list"><h3>{t.contactTitle}</h3><a href="tel:+96522400420"><PhoneCall size={16} /><span dir="ltr">22400420</span></a><a href="tel:+96522020188"><PhoneCall size={16} /><span dir="ltr">22020188</span></a><a href="mailto:info@sabeq.legal"><Mail size={16} /><span dir="ltr">info@sabeq.legal</span></a><a href="https://wa.me/96550668449" target="_blank" rel="noreferrer"><BrandIcon name="whatsapp" /><span dir="ltr">5066 8449</span></a><a href="https://maps.app.goo.gl/cvPGfK3hvwaV5bnH8" target="_blank" rel="noreferrer"><MapPin size={16} /><span>{t.map}</span></a></div>
         </div>
-        <div className="container footer-bottom"><span>© {year} {t.brand}. {t.rights}.</span><a href="https://wa.me/96551231313" target="_blank" rel="noreferrer">{tr(language, "تصميم وتطوير")} <span className="digizone-name">DigiZone</span></a></div>
+        <div className="container footer-bottom"><span>© {year} {t.brand}. {t.rights}.</span><PrivacyLink language={language} /><a href="https://wa.me/96551231313" target="_blank" rel="noreferrer">{tr(language, "تصميم وتطوير")} <span className="digizone-name">DigiZone</span></a></div>
       </footer>
 
       {modal && <ModalShell language={language} onClose={() => { if (modal === "auth") setPendingService(null); setModal(null); }} large={modal === "memo"} media={modal === "media"}>
