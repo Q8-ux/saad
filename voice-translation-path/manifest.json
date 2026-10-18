@@ -1,7 +1,7 @@
 {
   "id": "voice-translation-path",
   "name_ar": "مسار الترجمة الذكية",
-  "status": "implementation_in_feature_branch_not_deployed",
+  "status": "implemented_in_repository_not_deployed",
   "repository": "https://github.com/Q8-ux/saad",
   "upstream_reference": "https://github.com/abus-aikorea/voice-pro",
   "upstream_embedded": false,
