@@ -121,3 +121,4 @@ window.isBarcodeEpisodeCurrent=n=>active.series.id==='barcode'&&active.episode==
 $('show-characters').onclick=()=>showReference('characters');$('show-story').onclick=()=>showReference('story');$('export-project').onclick=exportProject;
 window.addEventListener('hashchange',()=>{if(!guardUnsaved()){updateRoute();return;}active=readRoute(location.hash);showSeries();});
 window.addEventListener('beforeunload',event=>{if($('reader').querySelector('.editing')){event.preventDefault();event.returnValue='';}});
+document.documentElement.dataset.seriesReady='1';

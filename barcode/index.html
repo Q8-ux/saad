@@ -32,4 +32,4 @@ function fixRTL(body){body.setAttribute('dir','rtl');body.querySelectorAll('.act
 function go(){const user=document.getElementById('u').value.trim().toLowerCase();const pass=document.getElementById('p').value.trim();if(user==='saad'&&pass==='XX51231313'){sessionStorage.setItem('barcode_auth','1');document.getElementById('login').style.display='none';document.getElementById('app').style.display='block';render()}else{document.getElementById('err').textContent='اسم المستخدم أو كلمة المرور غير صحيحة'}}
 function logout(){sessionStorage.removeItem('barcode_auth');location.reload()}
 document.addEventListener('DOMContentLoaded',function(){if(sessionStorage.getItem('barcode_auth')==='1'){document.getElementById('login').style.display='none';document.getElementById('app').style.display='block';render()}})
-</script><script type="module" src="assets/app.mjs?v=series-1"></script></body></html>
+</script><script type="module" src="assets/app.mjs?v=series-2"></script></body></html>
