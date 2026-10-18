@@ -1,49 +1,51 @@
 # راصد الطلبات ونمو الحسابات
 
-Private Arabic RTL research workspace for Saad. Discover public requests for a service by topic and country evidence; turn the observed questions into content ideas and measure account growth.
+[افتح الموقع](https://q8-ux.github.io/saad/social-request-radar/) · [إعداد المصدر](https://q8-ux.github.io/saad/social-request-radar/?setup=1) · [المسارات وخطة التطوير](docs/development-paths.md)
 
-## Implemented
+مساحة عربية RTL للبحث في التعليقات العامة المتاحة عن طلب خدمة أو سؤال، مع قرائن الدولة، وحفظ النتائج، وتحويل الأسئلة إلى أفكار محتوى وقياسات لنمو الحساب.
 
-- Topic, country, platform and date filters; normalized Arabic keyword matching and explicit request/ad rules.
-- Source post URL, native comment ID when available, original text, collection time and auditable location evidence. A country mentioned in a comment does not establish the author's residence. Unknown countries remain separate.
-- Bounded live provider adapters for Instagram, TikTok, YouTube, Reddit and indexed public X posts. Facebook takes explicit post URLs. Each source reports failures, uncollected cursors, request counts and estimated/reported credit usage.
-- JSON, JSONL and CSV imports; nested replies in `answers`/`replies`; duplicate detection; saved opportunities and CSV export.
-- Growth section: topic groups grounded in collected quotations, proposed content hooks and calls to follow, matched-content experiment guidance, and persistent per-account growth measurements.
-- Private hosted access, authenticated API routes, same-origin mutations, and owner-scoped D1 records. Provider keys stay server-side. No outbound messaging, automatic following or social publishing.
+## الحالة الفعلية
 
-## Source connection and coverage
+واجهة GitHub Pages مربوطة بخادم Supabase Edge مستقل. اختُبرت صحة الخادم وCORS وتشفير مفتاح صناعي وحالة غياب المفتاح عبر HTTP. لم يُربط حساب مزود بيانات حقيقي ولم يُختبر جمع تعليقات حية؛ أدخل مفتاح ScrapeCreators الخاص بك في «مصادر البيانات» لتشغيل جولة محدودة. حفظ المفتاح لا يستدعي المزود ولا يثبت رصيده أو صلاحية الوصول.
 
-Set `SCRAPECREATORS_API_KEY` in the hosting secret manager. No credential is included and no provider account has been connected or live-tested in the initial build. Import/search works without a provider key. Live calls are initiated only by an authenticated search submission. Credit limits are conservative estimates; actual provider charging is external and may differ. There are no automatic retries or paid calls during builds/tests.
+الاستيراد والبحث في الملفات يعملان دون مفتاح. يبدأ الموقع فارغًا، ويميز بين مصدر غير مربوط، أو مصدر تعطل، أو عدم وجود بيانات، أو فحص بيانات فعلية دون تطابق. لا تُعرض نتائج أو حسابات تجريبية كأنها حقيقية.
 
-Instagram keyword discovery is limited to Google-indexed reels returned by the provider, followed by bounded comment retrieval. Explicit post/Reel URLs are also supported. X uses the provider's indexed-public-post search; it is not a complete reply search. TikTok/YouTube discover a bounded set of videos and fetch a comment page per selected video. Reddit uses the provider's comment search. These are not exhaustive social-platform indexes. Older pages and complete child reply threads may remain uncollected; the run report records this.
+محاولة Render السابقة فشلت لنفاد دقائق البناء في مساحة العمل؛ لم تُرفع حدود الإنفاق، وRender ليس الخادم النشط. [حالة الخادم وبصمات مصدره](deployment/supabase-function.json) تحفظ الإصدار الفعلي.
 
-`score` is a transparent keyword/request/location match heuristic, not the probability that a person will buy or follow. Content grouping is a preliminary keyword grouping, not an installed BERTopic model. Follower/profile-visit ratios are proxies, since follows can happen away from a profile page. Missing denominators show unavailable.
+## ما يعمل في هذه النسخة
 
-## GitHub Pages edition
+- موضوع ودولة ومنصات وفترة، مع مطابقة عربية للكلمات والعبارات وبادئات محددة. قرائن للأسئلة وطلبات الخدمة والتوصية والإعلانات؛ القواعد والدرجة تساعدان على المراجعة وليستا احتمالات شراء أو متابعة.
+- النص الأصلي ورابط المنشور ومعرّف التعليق الأصلي أو معرّف محلي واضح. جمع التعليق واستيراده لهما وقتان منفصلان؛ الوقت المجهول يبقى غير مسجل. إعادة الاستيراد لا تضاعف بادئة المنصة ولا تغيّر الهوية.
+- JSON/JSONL/CSV، وكائنات records/comments، وملفات yt-dlp ذات comments وwebpage_url، وردود answers/replies، وحقول Instaloader/instagrapi المراجعة. حد ٢٠٠٠ تعليق ورد لكل ملف و١٫٨ ميجابايت من واجهة الرفع.
+- حفظ الفرص، وتصدير JSON للنص والبيانات الأصلية، وCSV بخلايا مهيأة للاستخدام في الجداول. عرض البطاقات على دفعات ٢٤، مع تصدير كل النتائج المحددة.
+- نمو الحساب: مجموعات كلمات تدعمها حتى ثلاثة أسئلة أصلية مختلفة مع الروابط، وزوايا محتوى وتجربة مقترحة. قياسات بفترة وحساب ومنصة ومقامات واضحة؛ لا توجد معادلة تضمن المتابعات.
+- قسم «المسارات والتطوير» يوضح ما فُعّل وما بقي مقترحًا. تمت مراجعة عشرة مستودعات؛ المكتبات والنماذج الاختيارية لم تُثبت تلقائيًا. [تفاصيل التوافق والتراخيص والأولويات](docs/development-paths.md).
 
-The `github-pages/` entry point reuses the research core and dashboard with device-local records and a separately deployed collection API. Imports, searches, saved items and account growth measurements are stored in IndexedDB on the current browser. It starts empty. Configure the provider in «مصادر البيانات»: enter the ScrapeCreators API key, which is sent over HTTPS to the API and returned as an AES-256-GCM sealed credential. Only this opaque credential is persisted in the browser; the server encryption secret stays in the Supabase Edge runtime. Configuration performs no provider calls or access verification. Platform access is checked during an explicit live search. No shared provider account has been connected by the initial deployment, and live data reads have not been verified without a user key. The public interface does not host shared user records. See `edge/README.md` and `server/README.md` for credential scope, shared-origin trust and credit limits.
+## التغطية
 
-Search submissions are blocked when the selected platforms have no imported records or the live source has no configured credential. A platform availability panel distinguishes unconnected live access from imported data. Historical zero-scanned searches display as uncollected, with no zero-match count. A genuine zero-match result is shown only after at least one record was examined; exclusion reasons help review the country, topic, date and request filters.
+Instagram: اكتشاف عدد محدود من الريلز المفهرسة ثم تعليقاتها، أو روابط منشورات/Reels تضيفها. X: منشورات عامة مفهرسة، وليس بحثًا كاملًا في الردود. TikTok وYouTube: فيديوهات محدودة وصفحة تعليقات لكل فيديو مختار. Reddit: بحث تعليقات المزود. Facebook: روابط منشورات محددة. قد تبقى صفحات وردود غير مجموعة؛ يوضح التقرير المؤشرات المتبقية والأخطاء والطلبات والكريدتس.
 
-Build with `node scripts/build-github-pages.mjs`, then verify with `node scripts/verify-github-pages.mjs` and `node --test tests/radar.test.mjs tests/pages-workspace.test.mjs tests/server.test.mjs tests/edge.test.mjs`. The publication workflow overlays the verified `pages-dist/` folder onto the latest successfully deployed Pages snapshot and checks that every unrelated file is byte-identical.
+الدولة المذكورة في النص أو الموقع المعلن في الملف قرينة منفصلة؛ لا تثبت الإقامة أو الجنسية. لا يُستنتج البلد من اللهجة أو حساب صاحب المنشور. النتائج مجهولة الدولة تبقى منفصلة عند طلب إظهارها. لا يوجد فهرس شامل لكل تعليقات الإنترنت أو قوائم المتابعين.
 
-## Development
+## البيانات والربط
 
-Use Node 22.13+. Install with the included Sites dependency helper or the repository's pnpm lockfile. Run `node --test tests/radar.test.mjs` and `node node_modules/typescript/bin/tsc --noEmit`. Run `npm run db:generate` after schema changes. Build through the included Sites build integration. The app requires D1 binding `DB` and the hosting authentication boundary; the public GitHub source is not itself a private live backend.
+نسخة GitHub Pages تحفظ الملفات والجولات والمحفوظات والقياسات في IndexedDB بالمتصفح الحالي؛ لا تزامن بين الأجهزة. المفتاح يُرسل عبر HTTPS إلى الخادم ويعاد كبيان مشفر AES-256-GCM؛ لا يُحفظ نصه في المتصفح. سر التشفير يبقى في بيئة Supabase ولا يدخل ملفات البناء. لا يوجد حساب مزود مشترك أو تخزين سحابي للتعليقات في هذه النسخة.
 
-## Audited primary sources (2026-10-18)
+حد الخادم ١٢ طلبًا و٢٠ كريدت تقديريًا للجولة؛ قد تختلف رسوم المزود الفعلية. لا إعادة محاولات تلقائية أو اتصالات مدفوعة أثناء البناء والاختبارات. التخزين المؤقت ومنع تكرار الطلبات لكل isolate؛ لا يُدّعى وجود سجل إنفاق يومي دائم أو ضمان عالمي لعدم التكرار.
 
-- [Agent-Reach](https://github.com/Panniantong/Agent-Reach): routing and diagnostics; its OpenCLI `instagram search` searches users.
-- [OpenCLI Instagram adapter](https://github.com/jackwener/OpenCLI/blob/main/docs/adapters/browser/instagram.md): profiles, posts, followers/following. `comment` is a write operation; follower completeness is not established by the command's existence.
-- [instagrapi](https://github.com/subzeroid/instagrapi): comment and reply APIs; optional Python collector route, not part of this Worker runtime.
-- [Instaloader](https://github.com/instaloader/instaloader): `Post.get_comments()` and reply iterators; alternate archival route.
-- [BERTopic](https://github.com/MaartenGr/BERTopic): optional future semantic topic analysis; not installed in this release.
-- Provider API specifications: `/v2/instagram/reels/search`, `/v2/instagram/post/comments`, `/v1/twitter/search/posts`, `/v1/tiktok/search/keyword`, `/v1/tiktok/video/comments`, `/v1/youtube/search`, `/v1/youtube/video/comments`, `/v1/reddit/search`, `/v1/facebook/post/comments` on the provider's official API documentation.
+راجع [خادم Edge](edge/README.md) و[محوّل Node البديل](server/README.md) لتفاصيل النطاق المشترك ومدة البيان المشفر وتدوير المفاتيح. CORS ليس وسيلة مصادقة؛ بيان المفتاح المشفر هو صلاحية تنفيذ بحث بحساب صاحبه.
 
-Native platform inspiration: Meta's public ranking explanation, Instagram Trial Reels, TikTok Comment Insights, and YouTube native title/thumbnail experiments. The app's editorial suggestions do not claim access to proprietary ranking formulas.
+المصدر الأصلي الخاص موجود أيضًا في app/components مع مسارات مصادقة وملكية D1؛ لم يُعد نشر تلك النسخة ضمن تحديث GitHub Pages. إعداد SCRAPECREATORS_API_KEY في سر استضافة تلك النسخة يخصها، ولا يربط نسخة GitHub Pages تلقائيًا. لا توجد رسائل صادرة أو متابعة جماعية أو نشر آلي.
 
-## Current deployment
+## التطوير والتحقق
 
-The public GitHub Pages interface calls `comment-radar` in the independent `social-request-radar` Supabase project. HTTP health, CORS, a clearly synthetic credential encryption round trip, and the missing-provider-key guard were verified against the deployed function. No real data-provider call was made, and no user provider key is configured. Add a real provider key through «مصادر البيانات» to begin a bounded search; configuration alone does not verify platform access.
+Node 22.13+ واعتماديات lockfile الحالية؛ لم تُضف مكتبة جديدة لهذا التحديث.
 
-The source fingerprints and native function version are recorded in `deployment/supabase-function.json`. The earlier Render attempt remains recorded as failed because that workspace exhausted build pipeline minutes; Render is not the active collection backend. No workspace billing limit was increased.
+```bash
+node --test tests/radar.test.mjs tests/pages-workspace.test.mjs tests/server.test.mjs tests/edge.test.mjs
+node node_modules/typescript/bin/tsc --noEmit --incremental false
+node scripts/build-github-pages.mjs
+node scripts/verify-github-pages.mjs
+```
+
+تختبر الحالات المنطق والحفظ والتشفير والمصادر والأخطاء والاستيراد ببيانات صناعية محلية؛ لا تقيس دقة التصنيف على جمهور حقيقي. يتحقق البناء من بصمات المصدر والأصول. النشر يضيف هذا المشروع فقط إلى آخر نسخة GitHub Pages ناجحة، مع تحقق أن ملفات المشاريع الأخرى مطابقة بايتًا ببايت. الفحص البصري التفاعلي غير متاح في بيئة التنفيذ؛ لا ندّعي اجتيازه.

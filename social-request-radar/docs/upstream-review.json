@@ -1,0 +1,139 @@
+{
+  "reviewedAt": "2026-10-18T21:57:01.141204+00:00",
+  "scope": "Read-only primary source and license review. No external repository or ML model was installed; no social-platform session or provider call was used.",
+  "repositories": [
+    {
+      "repository": "yt-dlp/yt-dlp",
+      "url": "https://github.com/yt-dlp/yt-dlp",
+      "license": "Unlicense",
+      "defaultBranch": "master",
+      "commit": "897341241f2bfb2439fe0367f4c7c9ccd29a3828",
+      "pushedAt": "2026-10-10T21:15:52Z",
+      "archived": false,
+      "sourceLinks": [
+        "https://github.com/yt-dlp/yt-dlp/blob/897341241f2bfb2439fe0367f4c7c9ccd29a3828/README.md",
+        "https://github.com/yt-dlp/yt-dlp/blob/897341241f2bfb2439fe0367f4c7c9ccd29a3828/LICENSE"
+      ]
+    },
+    {
+      "repository": "instaloader/instaloader",
+      "url": "https://github.com/instaloader/instaloader",
+      "license": "MIT",
+      "defaultBranch": "master",
+      "commit": "7efa2de6fe2a33d542dec78c7fef9b51414516ec",
+      "pushedAt": "2026-10-14T20:07:43Z",
+      "archived": false,
+      "sourceLinks": [
+        "https://github.com/instaloader/instaloader/blob/7efa2de6fe2a33d542dec78c7fef9b51414516ec/README.md",
+        "https://github.com/instaloader/instaloader/blob/7efa2de6fe2a33d542dec78c7fef9b51414516ec/LICENSE"
+      ]
+    },
+    {
+      "repository": "subzeroid/instagrapi",
+      "url": "https://github.com/subzeroid/instagrapi",
+      "license": "NOASSERTION",
+      "defaultBranch": "master",
+      "commit": "f22be21a2e669915f2fa270ae4f26ebe24b15ba8",
+      "pushedAt": "2026-10-18T18:29:20Z",
+      "archived": false,
+      "reviewedLicense": "MIT",
+      "licenseReviewNote": "GitHub metadata returns NOASSERTION; the pinned LICENSE begins MIT License and retains upstream copyright notices.",
+      "licenseSha256": "0324209ff1cf0d6e125bfb30e2fff795e5f274ba74022154b7789733e0c74cd4",
+      "sourceLinks": [
+        "https://github.com/subzeroid/instagrapi/blob/f22be21a2e669915f2fa270ae4f26ebe24b15ba8/README.md",
+        "https://github.com/subzeroid/instagrapi/blob/f22be21a2e669915f2fa270ae4f26ebe24b15ba8/LICENSE"
+      ]
+    },
+    {
+      "repository": "Panniantong/Agent-Reach",
+      "url": "https://github.com/Panniantong/Agent-Reach",
+      "license": "MIT",
+      "defaultBranch": "main",
+      "commit": "94f06c1969dfc1834001269d79d3ad0972d9dee6",
+      "pushedAt": "2026-10-15T11:34:42Z",
+      "archived": false,
+      "sourceLinks": [
+        "https://github.com/Panniantong/Agent-Reach/blob/94f06c1969dfc1834001269d79d3ad0972d9dee6/README.md",
+        "https://github.com/Panniantong/Agent-Reach/blob/94f06c1969dfc1834001269d79d3ad0972d9dee6/LICENSE"
+      ]
+    },
+    {
+      "repository": "lucaong/minisearch",
+      "url": "https://github.com/lucaong/minisearch",
+      "license": "MIT",
+      "defaultBranch": "master",
+      "commit": "3d239d1c3ae7aef1bf5d8945dd7b5f0709f646f5",
+      "pushedAt": "2025-09-16T12:43:59Z",
+      "archived": false,
+      "sourceLinks": [
+        "https://github.com/lucaong/minisearch/blob/3d239d1c3ae7aef1bf5d8945dd7b5f0709f646f5/README.md",
+        "https://github.com/lucaong/minisearch/blob/3d239d1c3ae7aef1bf5d8945dd7b5f0709f646f5/LICENSE"
+      ]
+    },
+    {
+      "repository": "TanStack/virtual",
+      "url": "https://github.com/TanStack/virtual",
+      "license": "MIT",
+      "defaultBranch": "main",
+      "commit": "28ff2cab7a970f4e0908229d65a0da8803903900",
+      "pushedAt": "2026-10-17T22:15:13Z",
+      "archived": false,
+      "sourceLinks": [
+        "https://github.com/TanStack/virtual/blob/28ff2cab7a970f4e0908229d65a0da8803903900/README.md",
+        "https://github.com/TanStack/virtual/blob/28ff2cab7a970f4e0908229d65a0da8803903900/LICENSE"
+      ]
+    },
+    {
+      "repository": "huggingface/transformers.js",
+      "url": "https://github.com/huggingface/transformers.js",
+      "license": "Apache-2.0",
+      "defaultBranch": "main",
+      "commit": "511bb61a7c46b73e33f1af3fb308fbd1afe98c02",
+      "pushedAt": "2026-10-15T06:39:00Z",
+      "archived": false,
+      "sourceLinks": [
+        "https://github.com/huggingface/transformers.js/blob/511bb61a7c46b73e33f1af3fb308fbd1afe98c02/README.md",
+        "https://github.com/huggingface/transformers.js/blob/511bb61a7c46b73e33f1af3fb308fbd1afe98c02/LICENSE"
+      ]
+    },
+    {
+      "repository": "huggingface/sentence-transformers",
+      "url": "https://github.com/huggingface/sentence-transformers",
+      "license": "Apache-2.0",
+      "defaultBranch": "main",
+      "commit": "1fa45b4212a53e7d6c8d3c2682f88743338179fb",
+      "pushedAt": "2026-10-16T15:14:52Z",
+      "archived": false,
+      "sourceLinks": [
+        "https://github.com/huggingface/sentence-transformers/blob/1fa45b4212a53e7d6c8d3c2682f88743338179fb/README.md",
+        "https://github.com/huggingface/sentence-transformers/blob/1fa45b4212a53e7d6c8d3c2682f88743338179fb/LICENSE"
+      ]
+    },
+    {
+      "repository": "MaartenGr/BERTopic",
+      "url": "https://github.com/MaartenGr/BERTopic",
+      "license": "MIT",
+      "defaultBranch": "master",
+      "commit": "9036123c97aaa9a6cc4bec4a6db1a7caf9209df6",
+      "pushedAt": "2026-10-18T06:36:45Z",
+      "archived": false,
+      "sourceLinks": [
+        "https://github.com/MaartenGr/BERTopic/blob/9036123c97aaa9a6cc4bec4a6db1a7caf9209df6/README.md",
+        "https://github.com/MaartenGr/BERTopic/blob/9036123c97aaa9a6cc4bec4a6db1a7caf9209df6/LICENSE"
+      ]
+    },
+    {
+      "repository": "CAMeL-Lab/camel_tools",
+      "url": "https://github.com/CAMeL-Lab/camel_tools",
+      "license": "MIT",
+      "defaultBranch": "master",
+      "commit": "28e5100ad5923dd25425f95ec7131fc5f3feb17a",
+      "pushedAt": "2026-10-14T17:27:54Z",
+      "archived": false,
+      "sourceLinks": [
+        "https://github.com/CAMeL-Lab/camel_tools/blob/28e5100ad5923dd25425f95ec7131fc5f3feb17a/README.md",
+        "https://github.com/CAMeL-Lab/camel_tools/blob/28e5100ad5923dd25425f95ec7131fc5f3feb17a/LICENSE"
+      ]
+    }
+  ]
+}

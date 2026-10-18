@@ -1,0 +1,49 @@
+{
+  "skill": "frontend-taste-path",
+  "display_name": "مسار ذوق الواجهات",
+  "project": "generic",
+  "project_name": "مشروع عام",
+  "brief": "لوحة عربية RTL للبحث في تعليقات عامة، حالة المصادر، وفهم أسئلة الجمهور ونمو الحسابات. الحفاظ على الكحلي والتركواز والوضوح والنص الكبير.",
+  "mode": "review",
+  "surface": "app",
+  "depth": "lean",
+  "locale": "ar",
+  "direction": "rtl",
+  "primary_reference": "vendor/variants/redesign.md",
+  "style_reference": "vendor/variants/minimalist.md",
+  "local_design_controls": {
+    "DESIGN_VARIANCE": 5,
+    "MOTION_INTENSITY": 1,
+    "VISUAL_DENSITY": 6
+  },
+  "controls_scope": "local-planning-only",
+  "max_visual_fix_rounds": 1,
+  "priorities": [
+    "وضوح المهمة الأساسية",
+    "الهوية الحالية",
+    "الجوال وإمكانية الوصول"
+  ],
+  "component_stage": "Use مسار أدوات التصميم if available; otherwise inspect existing compatible components.",
+  "quality_reference": "references/arabic-quality.md",
+  "required_checks": [
+    "identity and actual font",
+    "responsive rendered screenshots",
+    "primary task and states",
+    "RTL and mixed text",
+    "contrast and focus",
+    "reduced motion",
+    "repository build and relevant checks"
+  ],
+  "upstream_runtime": {
+    "draw": null,
+    "inspector": "vendor/taste-skill/scripts/inspect.mjs",
+    "preconditions": [
+      "Node 22+ and installed Chromium-family browser for inspector",
+      "network only for external media discovery"
+    ]
+  },
+  "notes": [
+    "One visual fix round; no imagery quota, decorative video or new animation dependency."
+  ],
+  "execution_status": "plan-only; no project changes, deployment or checks executed"
+}

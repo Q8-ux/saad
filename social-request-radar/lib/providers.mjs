@@ -17,7 +17,7 @@ export async function gather(spec,key,fetcher=fetch) {
     if(Number.isFinite(Number(body.credits_remaining)))remaining=Number(body.credits_remaining);
     return body;
   }
-  function add(items,p,url,kind='comment',parent=null){for(const item of items){const row=normalizeRecord(item,p,url,kind,parent);if(row)records.push(row);if(Array.isArray(item.replies)&&row)add(item.replies,p,url,'reply',row.nativeId||row.id);}}
+  function add(items,p,url,kind='comment',parent=null){for(const item of items){const row=normalizeRecord({...item,collectedAt:new Date().toISOString(),collectionMethod:'ScrapeCreators'},p,url,kind,parent);if(row)records.push(row);if(Array.isArray(item.replies)&&row)add(item.replies,p,url,'reply',row.nativeId||row.id);}}
   // Sequential sources keep a strict shared request/credit reservation. No retries or hidden background polling.
   const country=spec.country==='ALL'?'':countryName(spec.country);
   for(const platform of spec.platforms){
