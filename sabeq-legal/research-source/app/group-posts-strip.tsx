@@ -90,7 +90,6 @@ export default function GroupPostsStrip({ language, posts = groupPosts }: { lang
     <div className={`group-posts-viewport${canScroll ? "" : " no-overflow"}`} ref={viewport} tabIndex={canScroll ? 0 : undefined} aria-label={t.title} onPointerDown={() => setPaused(true)} onWheel={() => setPaused(true)} onKeyDown={event => { if (canScroll && (event.key === "ArrowRight" || event.key === "ArrowLeft")) { event.preventDefault(); move((event.key === "ArrowRight") === rtl ? -1 : 1); } }}>
       {posts.map(post => <article className="group-post" key={post.id}>
         <button type="button" className="group-post-artwork" onClick={() => setSelected(post)} aria-label={`${t.open}: ${post.title[language]}`} aria-haspopup="dialog"><span className="group-post-image"><img src={assetUrl(post.artwork.src)} alt={post.title[language]} width={post.artwork.width} height={post.artwork.height} loading="lazy" decoding="async" /></span><span className="group-post-open"><ZoomIn size={20} aria-hidden="true" />{t.open}</span></button>
-        <h3>{post.title[language]}</h3>{post.eventDate && <p className="group-post-date">{t.date}: <time dateTime={post.eventDate}>{date(post.eventDate)}</time></p>}
       </article>)}
     </div>
     <dialog ref={dialog} className="group-post-dialog" aria-labelledby="group-post-dialog-title" onClose={() => setSelected(null)} onClick={event => { if (event.target === event.currentTarget) dialog.current?.close(); }}>

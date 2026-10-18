@@ -33,12 +33,13 @@ test('policy and notices have local, readable routes for every site language',()
   if(language==='en')assert.doesNotMatch(rendered,/[\u0600-\u06ff]/);
  }
 });
-test('original post images retain their sources and show judgment dates only',()=>{
+test('original news artwork is shown without repeated captions and retains judgment dates in its data',()=>{
  const data=module('app/group-news.ts'),artworks=module('app/group-post-artworks.ts');
  const posts=module('app/group-posts.ts',{'./group-news':data,'./group-post-artworks':artworks});
  assert.equal(data.groupNews.length,6);assert.equal(new Set(data.groupNews.map(n=>n.source)).size,6);
  assert.deepEqual(Array.from(data.groupNews,n=>n.id).sort(),['DdWSqBrg19a','Ddgy2L5geSN','DdoBZ65AguI','DbIv9QSgRzf','DaabrqsguOJ','DaYIFrmK8kH'].sort());
  assert.ok(data.groupNews.every(n=>n.kind==='case-result'&&n.eventDate));
+ assert.deepEqual(Array.from(data.groupNews,n=>n.eventDate).sort(),['2026-06-24','2026-07-01','2026-07-22','2026-09-14','2026-09-20','2026-09-21']);
  assert.equal(posts.groupPosts.length,6);
  for(const post of posts.groupPosts){
   assert.ok(post.source.includes('/p/'));assert.equal(post.artwork.src,`/images/posts/${post.id}.jpg`);
@@ -49,7 +50,7 @@ test('original post images retain their sources and show judgment dates only',()
  for(const language of ['ar','en','ur']){
   const html=renderToStaticMarkup(React.createElement(strip,{language}));
   const dates=[...html.matchAll(/<time dateTime="([^"]+)"/g)].map(m=>m[1]);
-  assert.deepEqual(dates.sort(),['2026-06-24','2026-07-01','2026-07-22','2026-09-14','2026-09-20','2026-09-21']);
+  assert.deepEqual(dates,[]);assert.doesNotMatch(html,/<h3|group-post-date/);
   assert.equal((html.match(/<article/g)||[]).length,6);assert.equal((html.match(/<img /g)||[]).length,6);
   assert.doesNotMatch(html,/<(?:img|iframe)[^>]+(?:src|srcset)="https?:/);assert.doesNotMatch(html,/2026-09-28|2026-09-23|2026-09-19|2026-09-16/);
   assert.match(html,/<dialog[^>]+aria-labelledby="group-post-dialog-title"/);
