@@ -8,6 +8,7 @@ import type { AnalysisStage } from "@/lib/intake-analysis";
 import IntakeAnalysisView, { IntakeStages, type ConnectedIntakeState } from "./intake-analysis-view";
 import VoiceWaveform from "./voice-waveform";
 import PrivacyNotice, { PrivacyLink } from "./privacy-notice";
+import AnalyticsConsentSettings from "./analytics-consent";
 import GroupPostsStrip from "./group-posts-strip";
 import MemoVoiceInput from "./memo-voice-input";
 import PleadingPreview from "./pleading-preview";
@@ -389,6 +390,7 @@ export default function SabeqSite() {
         </div>
       )}
 
+      <AnalyticsConsentSettings language={language} />
       <main id="main-content">
         <section className="hero" id="home">
           <div className="hero-brand-block" dir={t.dir}>

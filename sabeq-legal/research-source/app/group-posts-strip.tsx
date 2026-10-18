@@ -17,7 +17,6 @@ export default function GroupPostsStrip({ language, posts = groupPosts }: { lang
   const rtl = language !== "en";
   const viewport = useRef<HTMLDivElement>(null);
   const dialog = useRef<HTMLDialogElement>(null);
-  const [index, setIndex] = useState(0);
   const [selected, setSelected] = useState<GroupPost | null>(null);
   const [paused, setPaused] = useState(false);
   const [hovered, setHovered] = useState(false);
@@ -55,26 +54,27 @@ export default function GroupPostsStrip({ language, posts = groupPosts }: { lang
 
   useEffect(() => {
     if (!canScroll || posts.length < 2 || paused || hovered || focused || selected || !visible || reducedMotion) return;
-    const timer = window.setInterval(() => setIndex(current => (current + 1) % posts.length), 7000);
+    const timer = window.setInterval(() => move(1, false), 7000);
     return () => window.clearInterval(timer);
-  }, [posts.length, canScroll, paused, hovered, focused, selected, visible, reducedMotion]);
-
-  useEffect(() => {
-    const element = viewport.current;
-    const card = element?.children[index] as HTMLElement | undefined;
-    if (!element || !card) return;
-    const parent = element.getBoundingClientRect(), child = card.getBoundingClientRect();
-    element.scrollTo({ left: element.scrollLeft + (rtl ? child.right - parent.right : child.left - parent.left), behavior: reducedMotion ? "instant" : "smooth" });
-  }, [index, rtl, reducedMotion]);
+  }, [posts.length, canScroll, paused, hovered, focused, selected, visible, reducedMotion, rtl]);
 
   useEffect(() => {
     if (selected && dialog.current && !dialog.current.open) { setZoomed(false); dialog.current.showModal(); }
     if (!selected && dialog.current?.open) dialog.current.close();
   }, [selected]);
 
-  function move(delta: number) {
-    setPaused(true);
-    setIndex(current => (current + delta + posts.length) % posts.length);
+  function move(delta: number, manual = true) {
+    if (manual) setPaused(true);
+    const element = viewport.current;
+    if (!element || !element.children.length) return;
+    const cards = Array.from(element.children) as HTMLElement[];
+    const parent = element.getBoundingClientRect();
+    const distance = (card: HTMLElement) => Math.abs(rtl ? card.getBoundingClientRect().right - parent.right : card.getBoundingClientRect().left - parent.left);
+    let current = cards.reduce((nearest, card, at) => distance(card) < distance(cards[nearest]) ? at : nearest, 0);
+    // At the clamped end, the final card cannot always reach the leading edge.
+    if (Math.abs(element.scrollLeft) >= element.scrollWidth - element.clientWidth - 2) current = cards.length - 1;
+    const card = cards[(current + delta + cards.length) % cards.length].getBoundingClientRect();
+    element.scrollTo({ left: element.scrollLeft + (rtl ? card.right - parent.right : card.left - parent.left), behavior: reducedMotion ? "instant" : "smooth" });
   }
 
   const date = (value: string) => new Intl.DateTimeFormat(language, { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(`${value}T00:00:00Z`));

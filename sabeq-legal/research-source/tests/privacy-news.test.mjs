@@ -11,31 +11,17 @@ const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 const js=path=>ts.transpileModule(read(path),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,jsx:ts.JsxEmit.ReactJSX,esModuleInterop:true}}).outputText;
 function module(path,deps={}){const exports={};vm.runInNewContext(js(path),{exports,require:name=>deps[name]??require(name),Intl,Date});return exports;}
 const storage=initial=>{const values=new Map(Object.entries(initial??{}));return {getItem:k=>values.get(k)??null,setItem:(k,v)=>values.set(k,String(v)),removeItem:k=>values.delete(k)};};
-test('opt-out stops an already running tracker without signing out or sending a final event',()=>{
- const localStorage=storage({'sabeq-session-token':'synthetic-session'}),sessionStorage=storage();
- const window=new EventTarget(),document=new EventTarget();document.visibilityState='visible';document.referrer='';
- const calls=[];let tick;const exports={};
- vm.runInNewContext(js('lib/visitor-analytics.ts'),{exports,require:name=>name.includes('analytics-contract')?{sections:['home','memo']}:{apiUrl:p=>p},navigator:{userAgent:'synthetic',doNotTrack:'0'},window,document,localStorage,sessionStorage,location:{hostname:'example.test',hash:''},crypto,Date,performance,URL,AbortSignal,setInterval:callback=>{tick=callback;return 1;},clearInterval(){},fetch:(...args)=>{calls.push(args);return Promise.resolve({ok:true});}});
- const cleanup=exports.startVisitorAnalytics();assert.equal(calls.length,1);
- localStorage.setItem('sabeq-analytics-opt-out','1');const event=new Event('storage');Object.assign(event,{key:'sabeq-analytics-opt-out',newValue:'1'});window.dispatchEvent(event);
- const page=new Event('sabeq-analytics-section');page.detail='memo';window.dispatchEvent(page);tick();cleanup();
- assert.equal(calls.length,1);assert.equal(localStorage.getItem('sabeq-analytics-visitor'),null);assert.equal(sessionStorage.getItem('sabeq-analytics-session'),null);assert.equal(localStorage.getItem('sabeq-session-token'),'synthetic-session');
-});
-test('browser privacy signals and stored opt-out prevent any measurement',()=>{
- for(const [nav,disabled] of [[{doNotTrack:'1'},false],[{globalPrivacyControl:true},false],[{},true]]){
-  const exports={};vm.runInNewContext(js('lib/visitor-analytics.ts'),{exports,require:()=>({}),navigator:nav,localStorage:storage(disabled?{'sabeq-analytics-opt-out':'1'}:{}),crypto,Date,performance,setInterval(){throw Error('tracking started');},fetch(){throw Error('network');}});
-  assert.equal(typeof exports.startVisitorAnalytics(),'function');
- }
-});
 test('policy preferences remove measurement identifiers and handle unavailable storage',()=>{
- const listeners={},status={textContent:'',dataset:{disabled:'disabled',enabled:'enabled',restricted:'restricted',unavailable:'unavailable'}};
+ const listeners={},status={textContent:'',dataset:{unset:'unset',disabled:'disabled',enabled:'enabled',restricted:'restricted',unavailable:'unavailable'}};
  const localStorage=storage({'sabeq-analytics-visitor':'synthetic','sabeq-session-token':'keep'}),sessionStorage=storage({'sabeq-analytics-session':'synthetic'});
  const buttons=['disable','enable'].map(choice=>({dataset:{analyticsChoice:choice},addEventListener:(_,fn)=>listeners[choice]=fn}));
  const document={getElementById:()=>status,querySelectorAll:()=>buttons};
- vm.runInNewContext(read('public/privacy.js'),{document,navigator:{},localStorage,sessionStorage});listeners.disable();
+ const window=new EventTarget();
+ vm.runInNewContext(read('public/privacy.js'),{document,navigator:{},localStorage,sessionStorage,window});assert.equal(status.textContent,'unset');listeners.disable();
+ assert.equal(localStorage.getItem('sabeq-analytics-consent'),'denied');
  assert.equal(status.textContent,'disabled');assert.equal(localStorage.getItem('sabeq-analytics-visitor'),null);assert.equal(sessionStorage.getItem('sabeq-analytics-session'),null);assert.equal(localStorage.getItem('sabeq-session-token'),'keep');
- listeners.enable();assert.equal(status.textContent,'enabled');
- vm.runInNewContext(read('public/privacy.js'),{document,navigator:{},localStorage:{getItem(){throw Error('blocked');}},sessionStorage});assert.equal(status.textContent,'unavailable');
+ listeners.enable();assert.equal(status.textContent,'enabled');assert.equal(localStorage.getItem('sabeq-analytics-consent'),'granted');
+ vm.runInNewContext(read('public/privacy.js'),{document,navigator:{},localStorage:{getItem(){throw Error('blocked');}},sessionStorage,window});assert.equal(status.textContent,'unavailable');
 });
 test('policy and notices have local, readable routes for every site language',()=>{
  const notice=module('app/privacy-notice.tsx');

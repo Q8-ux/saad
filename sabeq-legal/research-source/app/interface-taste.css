@@ -565,6 +565,18 @@ html[data-theme="dark"] .button-primary {
 .privacy-notice p { margin: 0; }
 .privacy-link { display: inline-flex; align-items: center; min-height: 44px; color: #006367; font-weight: 700; text-decoration: underline; text-underline-offset: 4px; }
 .footer .privacy-link { color: #fff; }
+.analytics-consent { margin-block: 20px; padding: 18px; border: 1px solid #548389; border-radius: 10px; background: #f0f8f8; color: #183e49; font-size: 20px; line-height: 1.8; overflow-wrap: anywhere; scroll-margin-top: 150px; }
+.analytics-consent h2 { margin: 0 0 6px; font-size: 24px; line-height: 1.6; }
+.analytics-consent p { margin: 6px 0 12px; }
+.analytics-consent-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.analytics-consent-actions button { min-height: 48px; padding: 10px 18px; border: 1px solid #006367; border-radius: 7px; background: #006367; color: #fff; font: inherit; cursor: pointer; }
+.analytics-consent-actions button:hover { background: #084c51; }
+.analytics-consent-actions button:focus-visible { outline: 3px solid #006367; outline-offset: 4px; }
+.analytics-consent-actions button:disabled { opacity: .65; cursor: default; }
+[data-theme="dark"] .analytics-consent { background: #102e38; color: #edf7f7; }
+[data-theme="dark"] .analytics-consent .privacy-link { color: #9ae4df; }
+[data-theme="dark"] .analytics-consent-actions button:focus-visible { outline-color: #9ae4df; }
+@media (max-width: 480px) { .analytics-consent-actions button { flex: 1 1 100%; } }
 [data-theme="dark"] .privacy-notice { background: #102e38; color: #edf7f7; border-color: #548389; }
 [data-theme="dark"] .privacy-notice .privacy-link { color: #9ae4df; }
 
