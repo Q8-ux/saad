@@ -1,4 +1,5 @@
 import {prepareSpec,analyze,importRecords,normalizeRecord,growthMetrics,platformNames} from '../../lib/radar-core.mjs';
+import {platformCounts} from './search-state.mjs';
 export function indexedStore(){
   let connection;
   async function db(){if(!connection)connection=new Promise((resolve,reject)=>{if(!globalThis.indexedDB)return reject(Error('تخزين المتصفح غير متاح. افتح الموقع في متصفح يدعم IndexedDB.'));const r=indexedDB.open('saad-request-radar-device-v1',1);r.onupgradeneeded=()=>r.result.createObjectStore('documents',{keyPath:'key'});r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(Error('تعذر فتح بيانات هذا المتصفح.'));});return connection;}
@@ -8,7 +9,7 @@ export function indexedStore(){
 export function createLocalApi(store){return async function api(action,body){
   const all=await store.all();const list=kind=>all.filter(d=>d.kind===kind).sort((a,b)=>b.updatedAt.localeCompare(a.updatedAt)).map(d=>d.payload);
   const put=async(key,kind,payload)=>{await store.put({key,kind,payload,updatedAt:new Date().toISOString()});return payload;};
-  if(action==='workspace')return {connected:false,deviceLocal:true,searches:list('search').slice(0,20),saved:list('saved'),metrics:list('metric'),datasets:list('dataset').map(d=>({id:d.id,name:d.name,count:d.records.length,createdAt:d.createdAt}))};
+  if(action==='workspace')return {connected:false,deviceLocal:true,searches:list('search').slice(0,20),saved:list('saved'),metrics:list('metric'),datasets:list('dataset').map(d=>({id:d.id,name:d.name,count:d.records.length,platformCounts:platformCounts(d.records),createdAt:d.createdAt}))};
   if(action==='import'){
     if(!Array.isArray(body?.records)||!body.records.length||body.records.length>2000)throw Error('استورد من تعليق واحد إلى ٢٠٠٠ تعليق.');
     const records=importRecords(body.records,body.platform,body.postUrl);if(!records.length)throw Error('لا توجد نصوص قابلة للبحث.');
@@ -18,7 +19,9 @@ export function createLocalApi(store){return async function api(action,body){
   if(action==='search'){
     if(body?.mode==='live')throw Error('البحث المباشر يحتاج ربط مصدر البيانات بالخادم الآمن. اختر «ملفاتي» للبحث في التعليقات المستوردة.');
     const spec=prepareSpec(body);const records=list('dataset').flatMap(d=>d.records).filter(r=>spec.platforms.includes(r.platform));
-    const result={id:crypto.randomUUID(),state:'completed',spec,mode:'library',createdAt:new Date().toISOString(),...analyze(records,spec),report:{provider:'ملفات هذا المتصفح',calls:0,creditsUsed:0,sources:[],collectedAt:new Date().toISOString(),coverage:'الملفات المستوردة في هذا المتصفح فقط'}};
+    if(!records.length)throw Error('لم يبدأ البحث: لا توجد تعليقات مستوردة للمنصات المحددة. أضف ملف تعليقات من «مصادر البيانات».');
+    const counts=platformCounts(records);
+    const result={id:crypto.randomUUID(),state:'completed',spec,mode:'library',createdAt:new Date().toISOString(),...analyze(records,spec),report:{provider:'ملفات هذا المتصفح',calls:0,creditsUsed:0,sources:spec.platforms.map(platform=>({platform,status:counts[platform]?'completed':'not_collected',records:counts[platform],pages:0,remainingCursors:[],error:counts[platform]?null:{message:'لا توجد بيانات مستوردة لهذه المنصة؛ لم تُفحص.'}})),collectedAt:new Date().toISOString(),coverage:'فحص للملفات المستوردة فقط؛ لم تُجرَ طلبات إلى المنصات'}};
     await put('search:'+result.id,'search',result);return result;
   }
   if(action==='save'){

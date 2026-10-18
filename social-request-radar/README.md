@@ -23,6 +23,8 @@ Instagram keyword discovery is limited to Google-indexed reels returned by the p
 
 The `github-pages/` entry point reuses the research core and dashboard in a browser-only edition. Imports, searches, saved items and account growth measurements are stored in IndexedDB on the current browser. It starts empty; no account is authenticated and no live provider is connected. This edition is a public application interface, while its local records remain on the current device. Direct platform searches require a separately connected secure backend and are explicitly unavailable here.
 
+Search submissions are blocked when the selected platforms have no imported records or the live source is unconnected. A platform availability panel distinguishes unconnected live access from imported data. Historical zero-scanned searches display as uncollected, with no zero-match count. A genuine zero-match result is shown only after at least one record was examined; exclusion reasons help review the country, topic, date and request filters.
+
 Build with `node scripts/build-github-pages.mjs`, then verify with `node scripts/verify-github-pages.mjs` and `node --test tests/radar.test.mjs tests/pages-workspace.test.mjs`. The publication workflow overlays the verified `pages-dist/` folder onto the latest successfully deployed Pages snapshot and checks that every unrelated file is byte-identical.
 
 ## Development
