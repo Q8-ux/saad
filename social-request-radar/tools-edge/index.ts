@@ -11,7 +11,7 @@ async function rest(path:string,method='GET',body?:unknown){
   if(root.startsWith('eyJ'))headers.Authorization='Bearer '+root;
   const response=await fetch(base+'/rest/v1/'+path,{method,headers,body:body===undefined?undefined:JSON.stringify(body),signal:AbortSignal.timeout(12000)});
   const text=await response.text();
-  if(!response.ok){if(text.includes('RADAR_QUEUE_LIMIT'))throw Object.assign(Error('وصل العامل إلى حد المهام: ٨ في الساعة أو ٣ قيد التنفيذ. انتظر قبل جولة جديدة.'),{status:429});throw Error('Database request failed');}
+  if(!response.ok){if(text.includes('RADAR_QUEUE_LIMIT'))throw Object.assign(Error('وصل العامل إلى حد المهام: ٨ في الساعة أو ٣ قيد التنفيذ. انتظر قبل جولة جديدة.'),{status:429});if(text.includes('RADAR_CLAIM_INVALID'))throw Object.assign(Error('انتهت المهمة أو حُذفت.'),{status:409});throw Error('Database request failed');}
   return text?JSON.parse(text):null;
 }
 const db={

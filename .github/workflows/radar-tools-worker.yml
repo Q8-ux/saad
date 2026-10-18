@@ -10,7 +10,7 @@ on:
         options: ['15', '5', '20']
   push:
     branches: [main]
-    paths: ['social-request-radar/worker/**', 'social-request-radar/tools-edge/**', '.github/workflows/radar-tools-worker.yml']
+    paths: ['social-request-radar/worker/**']
 permissions:
   contents: read
   id-token: write

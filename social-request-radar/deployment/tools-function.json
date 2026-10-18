@@ -1,18 +1,18 @@
 {
   "projectRef": "wvzkpazvtnclcghjrjvv",
   "function": "radar-tools",
-  "version": 2,
+  "version": 3,
   "verifyJwt": false,
   "authentication": "GitHub OIDC for workers; random per-job capability for result access",
   "url": "https://wvzkpazvtnclcghjrjvv.supabase.co/functions/v1/radar-tools",
   "schemaApplied": true,
   "sourceHashes": {
     "tools-edge/deno.json": "e8923f73459c5ea8ea5211207d920979fd7d6675ec0bbb7356c2e0f52f7104a6",
-    "tools-edge/handler.mjs": "1fde0cd180d3c915d749e880090300b58f1c8dfaf81fa2e372c8e6ae9e497dfd",
-    "tools-edge/index.ts": "8cc8bdb234d318d30af4834e6d829885985043d2cff0a49c9d6f11898ceadddc",
+    "tools-edge/handler.mjs": "8c703edd3e74937d1e57530356b2006e436559055632e4dce215c4b2b5e23eb5",
+    "tools-edge/index.ts": "af06aa4e253b485cb31a516682927753bd52922b4ab50399e958022270217f58",
     "tools-edge/oidc.mjs": "d6bcb52ebc5608a4d4c7dd31bd3d8890262f43294814d12e4308f465e5fa3738",
     "tools-edge/vault.mjs": "4b5060a6f0ec2b65d6bd1dc9634744a6ce877b15194c4d55d467ccc86a346986"
   },
   "liveProviderAccessVerified": false,
-  "bundleSha256": "31d70231348f00055c18261c34aba11f4df4676ea0998313119d2c8ef57639a1"
+  "bundleSha256": "188070a44aff5c6431cd9c26c799e9f4262ac746cba1e16aa2fe39c7f857b170"
 }

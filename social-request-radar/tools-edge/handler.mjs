@@ -53,7 +53,7 @@ export function createToolsHandler({sealKey,db,verifyWorker=githubVerifier(),now
         if(body.operation==='claim'){const job=await db.claim(identity.runId);return send(200,{job:job?{id:job.id,payload:JSON.parse(vault.open(job.payload_cipher))}:null});}
         if(body.operation==='complete'){
           if(!/^[a-f0-9-]{36}$/.test(body.id||'')||!body.result||JSON.stringify(body.result).length>300000)throw error(400,'نتيجة المهمة غير صالحة.');
-          await db.complete(body.id,identity.runId,vault.seal(JSON.stringify(body.result)));return send(200,{ok:true});
+          try{await db.complete(body.id,identity.runId,vault.seal(JSON.stringify(body.result)));}catch(cause){if(cause.status===409)return send(200,{ok:true,discarded:true});throw cause;}return send(200,{ok:true});
         }
         throw error(400,'عملية العامل غير صالحة.');
       }

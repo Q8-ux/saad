@@ -73,5 +73,92 @@
   "nodeTestCount": 53,
   "pythonTestCount": 5,
   "browserVisualQA": false,
-  "livePlatformAccessVerified": false
+  "livePlatformAccessVerified": false,
+  "githubWorkerRunId": "39172210585",
+  "githubWorkerOidcConnected": true,
+  "pythonToolsVerifiedOnGitHub": true,
+  "endToEnd": {
+    "synthetic": true,
+    "realGitHubOidc": true,
+    "encryptedQueueRoundtrip": true,
+    "analysisCount": 12,
+    "groups": 4,
+    "pairs": 12,
+    "tools": [
+      "Sentence Transformers",
+      "BERTopic",
+      "CAMeL Tools"
+    ],
+    "payloadOver1800Bytes": true,
+    "remotePayloadRemoved": true,
+    "livePlatformReadVerified": false
+  },
+  "publishedAssets": [
+    {
+      "path": "index.html",
+      "status": 200,
+      "bytes": 577,
+      "sha256Matches": true
+    },
+    {
+      "path": "favicon.svg",
+      "status": 200,
+      "bytes": 338,
+      "sha256Matches": true
+    },
+    {
+      "path": "assets/index-CZi1BD37.css",
+      "status": 200,
+      "bytes": 32828,
+      "sha256Matches": true
+    },
+    {
+      "path": "assets/radar-C-0Pjj0x.js",
+      "status": 200,
+      "bytes": 334237,
+      "sha256Matches": true
+    },
+    {
+      "path": "assets/semantic-worker-CfTC1XUf.js",
+      "status": 200,
+      "bytes": 1667,
+      "sha256Matches": true
+    }
+  ],
+  "pagesRunId": "39172292205",
+  "missingInstagramSessionRefusedBeforeQueue": true,
+  "boundedYouTubeTest": {
+    "boundedLiveSourceTest": true,
+    "collector": "yt-dlp",
+    "source": "upstream yt-dlp test video",
+    "ok": false,
+    "report": {
+      "collector": "yt-dlp",
+      "routing": {
+        "platform": "youtube",
+        "upstream": [
+          "yt-dlp"
+        ],
+        "collectors": [
+          "yt-dlp"
+        ],
+        "routeVerified": true
+      },
+      "state": "blocked",
+      "errorCode": "SOURCE_UNAVAILABLE",
+      "requests": 2,
+      "requestLimit": 12,
+      "budgetScope": "yt-dlp transport dispatch",
+      "remaining": null,
+      "records": 0,
+      "collectedAt": "2026-10-18T22:29:59.082506+00:00",
+      "coverage": "bounded selected source; no global comment index",
+      "liveReadVerified": false
+    },
+    "errorCode": null,
+    "records": 0,
+    "remotePayloadRemoved": true
+  },
+  "temporaryJobPayloadsConfirmedCleared": true,
+  "unrelatedPublishedFilesPreserved": 1802
 }

@@ -26,6 +26,9 @@ test('job bodies are encrypted, only their ticket can read results, and worker i
   await handle(post('worker',{operation:'complete',id,result:{ok:true,count:2}},{authorization:'Bearer verified-worker'}));
   assert.ok(!job.result_cipher.includes('count'));const response=await (await handle(post('result',{id,token}))).json();assert.equal(response.result.count,2);
   await handle(post('remove',{id,token}));assert.equal(job,null);
+  db.complete=async()=>{throw Object.assign(Error('Cancelled'),{status:409});};
+  const cancelled=await handle(post('worker',{operation:'complete',id,result:{ok:true}},{authorization:'Bearer verified-worker'}));
+  assert.equal(cancelled.status,200);assert.equal((await cancelled.json()).discarded,true);
 });
 test('offline workers, missing Instagram sessions, foreign origins and oversized bodies never enqueue',async()=>{
   let calls=0,online=false;const db={worker:async()=>online?{beat_at:new Date().toISOString()}:null,enqueue:async()=>calls++};

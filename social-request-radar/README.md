@@ -44,7 +44,7 @@ Node 24 وpnpm 11.25.0 وPython 3.12. أضيفت MiniSearch 7.2.0 وTanStack Vir
 ```bash
 pnpm install --frozen-lockfile
 node --test tests/*.test.mjs
-node node_modules/typescript/bin/tsc --noEmit --incremental false
+node node_modules/typescript/bin/tsc --project github-pages/tsconfig.json --noEmit
 node scripts/build-github-pages.mjs
 node scripts/verify-github-pages.mjs
 ```
