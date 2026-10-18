@@ -31,7 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
-      SABEQ_REA_REPORT_DIR: ${{ runner.temp }}/sabeq-rea-report
+      SABEQ_REA_REPORT_DIR: legal-memo-platform/tools/rea/reports
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -59,7 +59,7 @@ jobs:
         with:
           name: sabeq-rea-summary
           path: |
-            ${{ runner.temp }}/sabeq-rea-report/report.json
-            ${{ runner.temp }}/sabeq-rea-report/report.md
+            legal-memo-platform/tools/rea/reports/report.json
+            legal-memo-platform/tools/rea/reports/report.md
           if-no-files-found: warn
           retention-days: 7

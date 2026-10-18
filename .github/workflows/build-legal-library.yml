@@ -18,7 +18,35 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  scope:
+    runs-on: ubuntu-latest
+    outputs:
+      library: ${{ steps.scope.outputs.library }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Ignore development-tool-only updates
+        id: scope
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+        run: |
+          if [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" ]]; then
+            echo "library=true" >> "$GITHUB_OUTPUT"
+          elif [[ "$BEFORE_SHA" =~ ^[0-9a-f]{40}$ ]] && git cat-file -e "$BEFORE_SHA^{commit}"; then
+            changed="$(git diff --name-only "$BEFORE_SHA" "$GITHUB_SHA" -- legal-memo-platform)"
+            if printf '%s\n' "$changed" | grep -Ev '^(legal-memo-platform/tools/rea/|legal-memo-platform/README\.md$)' | grep -q .; then
+              echo "library=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "library=false" >> "$GITHUB_OUTPUT"
+            fi
+          else
+            echo "library=true" >> "$GITHUB_OUTPUT"
+          fi
+
   extract-and-index:
+    needs: scope
+    if: needs.scope.outputs.library == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 330
     defaults:

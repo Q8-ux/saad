@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdtempSync, mkdirSync, writeFileSync, symlinkSync, rmSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, readFileSync, writeFileSync, symlinkSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
@@ -55,4 +55,39 @@ test('partial evidence from a failed REA run stays failed and raw data is omitte
   assert.equal(JSON.stringify(result).includes('PRIVATE'), false);
   assert.equal(summarize({ evidence_id: 'evidence', normalized_result }, 1).status, 'failed');
   assert.throws(() => summarize({}, 0), /unrecognized/);
+});
+
+test('the legal-library workflow skips tooling updates and preserves real imports', () => {
+  const workflow = readFileSync(new URL('../../../.github/workflows/build-legal-library.yml', import.meta.url), 'utf8');
+  const block = workflow.match(/        run: \|\n((?: {10}[^\n]*(?:\n|$))+)/)?.[1];
+  assert.ok(block, 'The scope step must have a runnable shell block');
+  const script = block.split('\n').map(line => line.slice(10)).join('\n');
+  const root = mkdtempSync(path.join(tmpdir(), 'sabeq-library-scope-'));
+  try {
+    execFileSync('git', ['init', '--quiet', root]);
+    const commit = (name, text) => {
+      mkdirSync(path.dirname(path.join(root, name)), { recursive: true });
+      writeFileSync(path.join(root, name), text);
+      execFileSync('git', ['add', '.'], { cwd: root });
+      execFileSync('git', ['-c', 'user.name=Test', '-c', 'user.email=test@example.invalid', 'commit', '-qm', 'fixture'], { cwd: root });
+      return execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim();
+    };
+    const before = commit('legal-memo-platform/gateway.js', 'original');
+    const tools = commit('legal-memo-platform/tools/rea/change.js', 'tooling');
+    const output = path.join(tmpdir(), path.basename(root) + '.output');
+    const check = (previous, current, expected, event = 'push') => {
+      writeFileSync(output, '');
+      execFileSync('bash', ['-e', '-o', 'pipefail', '-c', script], { cwd: root, env: { ...process.env, BEFORE_SHA: previous, GITHUB_SHA: current, GITHUB_EVENT_NAME: event, GITHUB_OUTPUT: output } });
+      assert.equal(readFileSync(output, 'utf8').trim(), `library=${expected}`);
+    };
+    try {
+      check(before, tools, false);
+      check(before, tools, true, 'workflow_dispatch');
+      const code = commit('legal-memo-platform/gateway.js', 'changed');
+      check(tools, code, true);
+      const config = commit('.github/workflows/build-legal-library.yml', 'configuration-only');
+      check(code, config, false);
+      check('0'.repeat(40), config, true);
+    } finally { rmSync(output, { force: true }); }
+  } finally { rmSync(root, { recursive: true, force: true }); }
 });
