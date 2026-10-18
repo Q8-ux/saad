@@ -1,23 +1,43 @@
-name: Trigger Barcode Pages
+name: Publish Series Library
 on:
   push:
     branches: [main]
-    paths:
-      - 'barcode/**'
-      - '.github/workflows/deploy-barcode-pages.yml'
+    paths: ['barcode/**', '.github/workflows/deploy-barcode-pages.yml']
   workflow_dispatch:
 permissions:
-  contents: write
+  contents: read
+  actions: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages-v2
+  cancel-in-progress: false
 jobs:
-  trigger:
+  publish:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
-      - name: Verify Barcode
-        run: test -s barcode/index.html
-      - name: Touch main Pages workflow
+        with: {ref: main}
+      - uses: actions/setup-node@v4
+        with: {node-version: 24}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Verify series, screenplay text and preserved sites
         run: |
-          git config user.name github-actions[bot]
-          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git commit --allow-empty -m "Trigger combined Pages deploy for Barcode"
-          git push
+          node --check barcode/assets/app.mjs
+          node --check barcode/assets/catalog.mjs
+          node --test barcode/tests/*.test.mjs
+          python -m unittest discover -s barcode/tests -p 'test_*.py'
+      - uses: actions/configure-pages@v5
+      - name: Preserve published sites and update the series library only
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python barcode/deployment/preserve.py
+      - uses: actions/upload-pages-artifact@v3
+        with: {path: _site, retention-days: 30}
+      - name: Deploy
+        id: deploy
+        uses: actions/deploy-pages@v4
