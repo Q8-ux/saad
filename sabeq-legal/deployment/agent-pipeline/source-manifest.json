@@ -1,0 +1,17 @@
+{
+  "native_base_commit": "60149a83791a05b69d36633fc8cd299c359b7668",
+  "native_source_commit": "3a8f1988aeaa03cf098fbff25a2e448b44a960ba",
+  "files": [
+    "app/api/admin/agent-knowledge/route.ts",
+    "app/api/legal/memo/route.ts",
+    "lib/sabeq-agent-bridge.ts",
+    "specs/019-agent-pipeline/plan.md",
+    "specs/019-agent-pipeline/spec.md",
+    "specs/019-agent-pipeline/tasks.md",
+    "specs/019-agent-pipeline/validation.md",
+    "tests/agent-pipeline.test.mjs",
+    "tests/approved-templates.test.mjs",
+    "tests/template-harness.mjs"
+  ],
+  "activation": "pending_render_workspace_and_knowledge_ingest"
+}
