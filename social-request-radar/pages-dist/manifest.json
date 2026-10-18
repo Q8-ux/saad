@@ -1,0 +1,17 @@
+{
+  "sources": {
+    "lib/radar-core.mjs": "6a3702aaf0a75f24fc709fb9ae37a066582722f357ca4e6e626721f78e8e24fc",
+    "app/radar.css": "219fe96391baabbe008aa87f0e45ce13a9f7335fce051c388de2ddfe962d18c5",
+    "github-pages/index.html": "2786d08b4467e23233b5f00f2ae4a7fa44460b611cbb0bc3d18ea1dc586c8328",
+    "github-pages/vite.config.ts": "0661dfef6c3da2c2a45dbaa3d111fd403d6edd1e367e6667f43fd8c240b41ee5",
+    "github-pages/source/main.tsx": "2174c01e47429d7d47d12393a297e5be1413794f80f4b2f81b5281a71980b83d",
+    "github-pages/source/workspace.mjs": "c2122816b1e31e7aef12d5b6ba1ab071a3cdb247c9141f91cd11bfd45ca84697",
+    "github-pages/source/radar-dashboard.tsx": "e94b2a1a2892add8bfc3c97aaa2dae9be098a6d5fe5cb9580e290db471c9a6b0"
+  },
+  "assets": {
+    "index.html": "6a19c6946276f4f5dcef579e79b0becd99fe8f853ad3cd3fdc827201088fefd4",
+    "favicon.svg": "1ecbb96e3d87afd70c5f095d47b380357fbac22eb8ceca5b4c7ad4b16cba5e79",
+    "assets/index.css": "5c060f3f0e845ce0d55c1927d24fe5b01045c82b23e20b961278f8cdbad67f8f",
+    "assets/radar.js": "2743bb30762991cb811c566999d79d5b4205a39973a3c902b3756f503aae1e22"
+  }
+}

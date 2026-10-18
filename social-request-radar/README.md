@@ -19,6 +19,12 @@ Instagram keyword discovery is limited to Google-indexed reels returned by the p
 
 `score` is a transparent keyword/request/location match heuristic, not the probability that a person will buy or follow. Content grouping is a preliminary keyword grouping, not an installed BERTopic model. Follower/profile-visit ratios are proxies, since follows can happen away from a profile page. Missing denominators show unavailable.
 
+## GitHub Pages edition
+
+The `github-pages/` entry point reuses the research core and dashboard in a browser-only edition. Imports, searches, saved items and account growth measurements are stored in IndexedDB on the current browser. It starts empty; no account is authenticated and no live provider is connected. This edition is a public application interface, while its local records remain on the current device. Direct platform searches require a separately connected secure backend and are explicitly unavailable here.
+
+Build with `node scripts/build-github-pages.mjs`, then verify with `node scripts/verify-github-pages.mjs` and `node --test tests/radar.test.mjs tests/pages-workspace.test.mjs`. The publication workflow overlays the verified `pages-dist/` folder onto the latest successfully deployed Pages snapshot and checks that every unrelated file is byte-identical.
+
 ## Development
 
 Use Node 22.13+. Install with the included Sites dependency helper or the repository's pnpm lockfile. Run `node --test tests/radar.test.mjs` and `node node_modules/typescript/bin/tsc --noEmit`. Run `npm run db:generate` after schema changes. Build through the included Sites build integration. The app requires D1 binding `DB` and the hosting authentication boundary; the public GitHub source is not itself a private live backend.
