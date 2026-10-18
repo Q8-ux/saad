@@ -1,7 +1,7 @@
 {
-  "release": "2026-10-17-pleading-form-layout",
-  "clientSource": "566b7a7b4e3b1fccc7d202c1eeeff45522be1d09",
-  "backendSource": "566b7a7b4e3b1fccc7d202c1eeeff45522be1d09",
+  "release": "2026-10-18-interface-taste",
+  "clientSource": "8e16ec8e38120fd30e6f1bede9116fa39c90ea30",
+  "backendSource": "8e16ec8e38120fd30e6f1bede9116fa39c90ea30",
   "assistant": "official-research-sources-1",
   "voice": "gulf-male-voice-4",
   "tools": "legal-tools-1",
@@ -21,15 +21,15 @@
   "finalMemo": "clean-no-review-notes-1",
   "memoResultTools": "bottom-vector-actions-1",
   "memoPreview": "document-derived-clean-text-1",
-  "githubPagesAsset": "index-DEGpVLcU.js",
-  "publishedAt": "2026-10-17T19:37:57.298017+00:00",
+  "githubPagesAsset": "index-6fGoKNun.js",
+  "publishedAt": "2026-10-18T09:52:45.484730+00:00",
   "memoLanguage": "ar-KW",
   "memoDirection": "rtl",
   "memoAlignment": "right",
   "interfaceLocalization": "ar-en-ur-tools-guidance-1",
   "memoProseLanguage": "arabic-with-protected-names-and-identifiers-1",
   "builtAt": "2026-10-08T03:06:00Z",
-  "backendVersion": 111,
+  "backendVersion": 112,
   "pleadingLayout": "first-page-only-sidebar-and-frame-full-width-right-aligned-continuations",
   "citationCorrection": "one-bounded-server-retry-before-archive",
   "legalSourceDirectory": "6-catalogues-3-fetched-0-new-citable-pdfs",
@@ -60,5 +60,7 @@
   "cassationValidation": "92-targeted-tests-pass;159-full-suite-pass;6-pre-existing-failures-confirmed",
   "cassationPublishedAt": "2026-10-17T19:07:22.671927+00:00",
   "pleadingFormPublishedAt": "2026-10-17T19:37:57.298017+00:00",
-  "pleadingFormValidation": "claim-2-and-appeal-4-pages-rendered-in-AlMohanad;no-device-or-physical-printer-test"
+  "pleadingFormValidation": "claim-2-and-appeal-4-pages-rendered-in-AlMohanad;no-device-or-physical-printer-test",
+  "interfaceTaste": "large-arabic-task-first-rtl-mobile-navigation-1",
+  "interfaceTasteValidation": "31-focused-tests-pass;both-builds;private-corpus-absent;contrast-measured;browser-device-QA-not-run"
 }

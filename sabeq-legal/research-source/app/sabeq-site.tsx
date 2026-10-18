@@ -284,7 +284,7 @@ export default function SabeqSite() {
   function scrollTo(id: string) {
     window.dispatchEvent(new CustomEvent("sabeq-analytics-section", { detail: id }));
     setMobileMenu(false);
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    document.getElementById(id)?.scrollIntoView({ behavior: "auto", block: "start" });
   }
 
   function showModal(name: ModalName) {
@@ -370,17 +370,17 @@ export default function SabeqSite() {
               <button className="theme-toggle" type="button" onClick={() => setTheme((current) => current === "light" ? "dark" : "light")} aria-label={themeLabel} title={themeLabel} aria-pressed={theme === "dark"}>
                 {theme === "light" ? <Moon size={20} /> : <Sun size={20} />}
               </button>
-              <button className="menu-toggle" onClick={() => setMobileMenu(true)} aria-label="Open menu"><Menu /></button>
+              <button className="menu-toggle" onClick={() => setMobileMenu(true)} aria-label={language === "ar" ? "فتح القائمة" : language === "en" ? "Open menu" : "مینو کھولیں"} aria-expanded={mobileMenu} aria-controls="mobile-navigation"><Menu /></button>
             </div>
           </div>
-          <nav className="header-nav" aria-label="Primary navigation">
+          <nav className="header-nav" aria-label={language === "ar" ? "القائمة الرئيسية" : language === "en" ? "Primary navigation" : "مرکزی مینو"}>
             {t.nav.map((item, index) => <button key={item} onClick={() => scrollTo(sectionIds[index])}>{item}</button>)}
           </nav>
         </div>
       </header>
 
       {mobileMenu && (
-        <div className="nav-dropdown" role="dialog" aria-label={language === "ar" ? "القائمة" : language === "en" ? "Menu" : "مینو"}>
+        <div className="nav-dropdown" id="mobile-navigation" role="dialog" aria-label={language === "ar" ? "القائمة" : language === "en" ? "Menu" : "مینو"}>
           <div className="nav-dropdown-head"><strong>{t.brand}</strong><button className="icon-button" onClick={() => setMobileMenu(false)} aria-label={language === "ar" ? "إغلاق القائمة" : language === "en" ? "Close menu" : "مینو بند کریں"}><X /></button></div>
           <nav>{t.nav.map((item, index) => <button key={item} onClick={() => scrollTo(sectionIds[index])}>{item}</button>)}</nav>
           {authUser && <div className="drawer-account"><i><UserRound size={20} /></i><span><strong>{authUser.name}</strong><small dir="ltr">{authUser.email}</small></span><button type="button" onClick={signOut} aria-label={language === "ar" ? "تسجيل الخروج" : language === "en" ? "Sign out" : "سائن آؤٹ"}><LogOut size={18} /></button></div>}
@@ -434,7 +434,7 @@ export default function SabeqSite() {
           <div className="container">
             <SectionHeading kicker={t.servicesKicker} title={t.servicesTitle} light />
             <div className="services-grid">
-              {t.services.map(([title, text], index) => { const Icon = serviceIcons[index]; return <article className="service-card" key={title}><i><Icon size={27} /></i><span>0{index + 1}</span><h3>{title}</h3><p>{text}</p><button onClick={() => showModal("booking")}><DirectionArrow size={19} /></button></article>; })}
+              {t.services.map(([title, text], index) => { const Icon = serviceIcons[index]; return <article className="service-card" key={title}><i><Icon size={27} /></i><span aria-hidden="true">0{index + 1}</span><h3>{title}</h3><p>{text}</p><button onClick={() => showModal("booking")} aria-label={`${t.book}: ${title}`}><DirectionArrow size={19} /></button></article>; })}
             </div>
           </div>
         </section>
