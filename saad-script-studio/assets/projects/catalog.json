@@ -1,0 +1,12 @@
+[
+  {
+    "key": "barcode",
+    "title": "باركود",
+    "file": "barcode.script.json"
+  },
+  {
+    "key": "outside-story",
+    "title": "خارج الستوري",
+    "file": "outside-story.script.json"
+  }
+]

@@ -4,6 +4,7 @@ import {exampleProject} from './example.mjs?v=4';
 import {METHOD,STAGES,DRAMA_FIELDS,storyChecks,storyFingerprint,isApproved,planIssues,planFromBeats,promptForFoundation,validateFoundation,mergeFoundation,dramaForScene,sceneReview,storyText,printStoryBody} from './story.mjs?v=4';
 import {makeStoryUI,dramaInputs} from './story-ui.mjs?v=4';
 import {makeCinemaUI} from './cinematic-ui.mjs?v=4';
+import {orderProjects,mergeCatalog} from './project-catalog.mjs?v=5';
 const $=selector=>document.querySelector(selector);
 const $$=selector=>[...document.querySelectorAll(selector)];
 const STORAGE='saad.script-studio.v1';
@@ -19,10 +20,28 @@ function load(){
   catch{if(raw){try{localStorage.setItem(`${STORAGE}.recovery`,raw);}catch{}setTimeout(()=>toast('تعذّر فتح البيانات السابقة. احتُفظ ببيانات الاستعادة إن سمحت مساحة المتصفح. استورد آخر ملف مشروع محفوظ.',true),400);}}
   if(!projects.length){const p=newProject();projects=[p];activeId=p.id;}
 }
+
+async function loadCatalog(){
+  const key=STORAGE+'.catalog.v1';
+  try{
+    const seen=JSON.parse(localStorage.getItem(key)||'[]');
+    if(Array.isArray(seen)&&['barcode','outside-story'].every(k=>seen.includes(k)))return;
+    const read=async file=>{const response=await fetch(new URL('./projects/'+file,import.meta.url));if(!response.ok)throw Error('catalog');return response.json();};
+    const catalog=await read('catalog.json');
+    const seeds=await Promise.all(catalog.map(async entry=>validateProject(await read(entry.file))));
+    const merged=mergeCatalog(projects,seeds,Array.isArray(seen)?seen:[]);
+    const untouched=projects.length===1&&projects[0].title==='سيناريو جديد'&&projects[0].blocks.every(b=>!b.text.trim())&&!projects[0].idea;
+    projects=merged.projects;
+    if(untouched&&merged.added.length){activeId=projects.find(p=>p.id===merged.added[0]).id;}
+    if(merged.added.length&&!saveNow())return;
+    localStorage.setItem(key,JSON.stringify(merged.seen));
+  }catch{ /* The writer's existing projects remain usable offline. */ }
+}
+
 function saveNow(){
   clearTimeout(saveTimer);
-  try{localStorage.setItem(STORAGE,JSON.stringify({projects,activeId}));$('#saveStatus').textContent='تم الحفظ على جهازك';$('#saveStatus').style.color='';}
-  catch{$('#saveStatus').textContent='تعذّر الحفظ · صدّر المشروع';$('#saveStatus').style.color='#a94037';toast('مساحة التخزين غير كافية أو الحفظ محظور. صدّر ملف المشروع الآن لحماية عملك.',true);}
+  try{localStorage.setItem(STORAGE,JSON.stringify({projects,activeId}));$('#saveStatus').textContent='تم الحفظ على جهازك';$('#saveStatus').style.color='';return true;}
+  catch{$('#saveStatus').textContent='تعذّر الحفظ · صدّر المشروع';$('#saveStatus').style.color='#a94037';toast('مساحة التخزين غير كافية أو الحفظ محظور. صدّر ملف المشروع الآن لحماية عملك.',true);return false;}
 }
 function scheduleSave(){current().updatedAt=new Date().toISOString();$('#saveStatus').textContent='جارٍ الحفظ…';clearTimeout(saveTimer);saveTimer=setTimeout(saveNow,450);}
 function structuralChange(fn){undoStack.push(structuredClone(current().blocks));undoStack=undoStack.slice(-30);redoStack=[];fn();scheduleSave();renderEditor();renderMeta();}
@@ -37,7 +56,7 @@ function renderMeta(){
   if(currentView==='cinema')cinemaUI?.refresh();
 }
 function renderProjects(){
-  $('#projectList').innerHTML=projects.map(p=>`<div class="project-item ${p.id===activeId?'active':''}"><button class="project-open" data-project="${esc(p.id)}">${esc(p.title)}</button><button class="icon-button delete-project" data-delete-project="${esc(p.id)}" aria-label="حذف المشروع ${esc(p.title)}">×</button></div>`).join('');
+  $('#projectList').innerHTML=orderProjects(projects).map(p=>`<div class="project-item ${p.id===activeId?'active':''}"><button class="project-open" data-project="${esc(p.id)}">${esc(p.title)}</button><button class="icon-button delete-project" data-delete-project="${esc(p.id)}" aria-label="حذف المشروع ${esc(p.title)}">×</button></div>`).join('');
 }
 function renderSceneList(){
   const list=scenes(current());$('#sceneList').innerHTML=list.length?list.map(s=>`<button class="scene-item" data-jump="${esc(s.id)}"><span>${esc(s.number)}</span><span>${esc(s.title)}</span></button>`).join(''):empty('أضف عنوان مشهد لتبدأ.');
@@ -224,6 +243,13 @@ function initEvents(){
     const exp=e.target.closest('[data-export]');if(exp){
       const p=current();const kind=exp.dataset.export;
       if(!['project','storypdf','storytxt'].includes(kind)&&!p.blocks.some(b=>b.text.trim())){toast('أضف نصاً إلى السيناريو قبل التصدير.',true);return;}
+      if(kind==='downloadpdf'||kind==='docx'){
+        saveNow();const buttons=$$('[data-export]');buttons.forEach(b=>b.disabled=true);
+        $('#exportProgress').textContent='جارٍ تجهيز السيناريو بخط أميري…';
+        try{const {downloadScreenplay}=await import('./screenplay-export.mjs?v=5');const result=await downloadScreenplay(p,kind==='docx'?'docx':'pdf');$('#exportProgress').textContent='تم تنزيل السيناريو: '+result.pages+' صفحة.';}
+        catch(error){$('#exportProgress').textContent='تعذّر تجهيز الملف: '+error.message;}
+        finally{buttons.forEach(b=>b.disabled=false);}return;
+      }
       $('#exportDialog').close();saveNow();
       if(kind==='fdx')download(toFdx(p),fileName()+'.fdx','application/xml;charset=utf-8');
       if(kind==='fountain')download(toFountain(p),fileName()+'.fountain');
@@ -257,7 +283,7 @@ function initEvents(){
     try{const result=parseText($('#rawInput').value);if(!result.blocks.length)throw new Error('أدخل النص الذي تريد تحويله.');const p=newProject();p.blocks=result.blocks;if(addProject(validateProject(p))){$('#convertDialog').close();toast('تم تحويل النص. راجع نوع كل فقرة من شريط التنسيق.');}}catch(e){toast(e.message,true);}
   });
   $('#sampleButton').addEventListener('click',sample);
-  $('#exportButton').addEventListener('click',()=>{$('#printStyleInput').value=current().printStyle;$('#exportDialog').showModal();});
+  $('#exportButton').addEventListener('click',()=>{$('#printStyleInput').value=current().printStyle;$('#exportProgress').textContent='';$('#exportDialog').showModal();});
   $('#printStyleInput').addEventListener('change',e=>{current().printStyle=e.target.value==='classic'?'classic':'ink';saveNow();});
   $('#importButton').addEventListener('click',()=>$('#fileInput').click());
   $('#fileInput').addEventListener('change',async e=>{
@@ -289,4 +315,5 @@ function initEvents(){
   window.addEventListener('beforeunload',saveNow);
   window.addEventListener('resize',()=>{if(currentView==='editor')$$('#blocksEditor textarea').forEach(autoSize);});
 }
-load();initEvents();storyUI=makeStoryUI({current,save:scheduleSave,toast,isBusy:()=>busy,checkpoint:name=>snapshot(current(),name),manualPlan,develop:developStory,copyPrompt:()=>copyText(promptForFoundation(current())),showEditor:()=>showView('editor')});cinemaUI=makeCinemaUI({current,save:scheduleSave,toast,isBusy:()=>busy,checkpoint:name=>snapshot(current(),name),copy:copyText,download:value=>download(value,fileName()+'-cinematic.txt'),print:printCinema,openScene:focusBlock});focusedId=current().blocks[0]?.id;renderMeta();showView('story');updateConnection();
+load();await loadCatalog();initEvents();storyUI=makeStoryUI({current,save:scheduleSave,toast,isBusy:()=>busy,checkpoint:name=>snapshot(current(),name),manualPlan,develop:developStory,copyPrompt:()=>copyText(promptForFoundation(current())),showEditor:()=>showView('editor')});cinemaUI=makeCinemaUI({current,save:scheduleSave,toast,isBusy:()=>busy,checkpoint:name=>snapshot(current(),name),copy:copyText,download:value=>download(value,fileName()+'-cinematic.txt'),print:printCinema,openScene:focusBlock});focusedId=current().blocks[0]?.id;renderMeta();showView('story');updateConnection();
+
