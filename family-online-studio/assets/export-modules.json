@@ -2,15 +2,31 @@
   "initial": [
     {
       "file": "assets/app.mjs",
-      "bytes": 347049
+      "bytes": 287588
     },
     {
-      "file": "assets/chunks/chunk-R77ZSM2Q.mjs",
-      "bytes": 65295
+      "file": "assets/chunks/chunk-G3VF33UY.mjs",
+      "bytes": 13168
+    },
+    {
+      "file": "assets/chunks/chunk-VUVL4QRL.mjs",
+      "bytes": 5787
+    },
+    {
+      "file": "assets/chunks/chunk-YJOTW2OM.mjs",
+      "bytes": 59485
     },
     {
       "file": "assets/chunks/chunk-2V77MTNA.mjs",
       "bytes": 605
+    },
+    {
+      "file": "assets/chunks/chunk-KQ2T2IH7.mjs",
+      "bytes": 1927
+    },
+    {
+      "file": "assets/chunks/chunk-273564TL.mjs",
+      "bytes": 47234
     }
   ],
   "deferred": [
@@ -27,12 +43,36 @@
       "bytes": 159757
     },
     {
-      "file": "assets/chunks/pdf-export-2QJR7G76.mjs",
-      "bytes": 425859
+      "file": "assets/chunks/pdf-export-MPI5KRR5.mjs",
+      "bytes": 7464
+    },
+    {
+      "file": "assets/chunks/book-pdf-5SVXGK76.mjs",
+      "bytes": 3162
+    },
+    {
+      "file": "assets/chunks/chunk-PS5P2ZZE.mjs",
+      "bytes": 418093
     },
     {
       "file": "assets/chunks/chunk-3YV2JGDK.mjs",
       "bytes": 272
+    },
+    {
+      "file": "assets/chunks/book-exports-WTRTIWO2.mjs",
+      "bytes": 9677
+    },
+    {
+      "file": "assets/chunks/chunk-IRJ4PDZI.mjs",
+      "bytes": 4529
+    },
+    {
+      "file": "assets/chunks/book-studio-SOSJNYZY.mjs",
+      "bytes": 22659
+    },
+    {
+      "file": "assets/chunks/chunk-HX6W2WS6.mjs",
+      "bytes": 1505
     }
   ]
 }

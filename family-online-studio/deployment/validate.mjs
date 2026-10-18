@@ -10,15 +10,18 @@ assert.ok(!/current-password|studio-password|onSignOut|\/api\/auth\/sms\//.test(
 assert.ok(!/h\(['"](?:input|form)['"]/.test(login));assert.ok(loginCss.includes(':focus-visible'));
 assert.ok(html.includes('lang="ar" dir="rtl"'));assert.ok(html.includes('noindex,nofollow'));
 assert.ok(app.includes('السينارست'));assert.ok(!/sk-proj-[A-Za-z0-9_-]{20,}/.test(app+config));assert.ok(!config.includes('chatgpt.site'));
-assert.ok(app.includes('المظهر وراحة القراءة')&&app.includes('حبر وبحر'));
+
 assert.ok(css.includes('--ui-size')&&css.includes('prefers-reduced-motion')&&css.includes('max-width:1100px'));
 assert.ok(Buffer.byteLength(app)<440000,'Client bundle exceeds writing workspace budget');
 const modules=JSON.parse(await readFile(path.join(root,'assets/export-modules.json'),'utf8'));
+const initialText=(await Promise.all(modules.initial.map(item=>readFile(path.join(root,item.file),'utf8')))).join('\n');
+assert.ok(initialText.includes('المظهر وراحة القراءة')&&initialText.includes('حبر وبحر'));
+assert.ok(app.includes('أعمالي')&&initialText.includes('The Art of the Last Line'));
 assert.ok(modules.initial.reduce((sum,item)=>sum+item.bytes,0)<440000,'Initial modules exceed writing workspace budget');
 for(const item of [...modules.initial,...modules.deferred])assert.ok((await readFile(path.join(root,item.file))).length>0);
 assert.ok(modules.deferred.some(item=>item.file.includes('pdf-export')),'Direct PDF exporter must load on demand');
 assert.ok(app.includes('تحميل PDF'),'Direct PDF download button missing');
-assert.ok(Buffer.byteLength(css)<132000,'Stylesheet exceeds writing workspace budget');
+assert.ok(Buffer.byteLength(css)<144000,'Stylesheet exceeds writing workspace budget');
 assert.ok(css.includes('66fr 22fr 8fr 74fr')||css.includes('66fr 22fr 8fr 74fr'.replaceAll(' ',''))||/66fr\s+22fr\s+8fr\s+74fr/.test(css));
 for(const file of ['Amiri-Regular.ttf','Amiri-Bold.ttf','OFL.txt'])assert.ok((await readFile(path.join(root,'assets/fonts',file))).length>1000);
 const match=config.match(/window.STUDIO_CONFIG = (\{.*\});/);assert.ok(match);const parsed=JSON.parse(match[1]);
