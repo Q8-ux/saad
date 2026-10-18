@@ -2,11 +2,11 @@
   "initial": [
     {
       "file": "assets/app.mjs",
-      "bytes": 343700
+      "bytes": 347049
     },
     {
-      "file": "assets/chunks/chunk-XLRE6LSY.mjs",
-      "bytes": 65248
+      "file": "assets/chunks/chunk-R77ZSM2Q.mjs",
+      "bytes": 65295
     },
     {
       "file": "assets/chunks/chunk-2V77MTNA.mjs",
@@ -27,7 +27,7 @@
       "bytes": 159757
     },
     {
-      "file": "assets/chunks/pdf-export-B3OVOCYF.mjs",
+      "file": "assets/chunks/pdf-export-2QJR7G76.mjs",
       "bytes": 425859
     },
     {
