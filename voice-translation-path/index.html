@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>مسار الترجمة الذكية | Voice Translation Path</title>
+<style>
+:root{font-family:Tahoma,Arial,sans-serif;background:#081725;color:#eef5f9;font-size:18px}
+*{box-sizing:border-box}body{margin:0;line-height:1.75}
+main{max-width:1080px;margin:auto;padding:28px 18px 70px}
+h1{font-size:clamp(1.9rem,5vw,3rem);line-height:1.4;margin:12px 0}
+h2{font-size:1.35rem;margin:0 0 12px}
+p{color:#c7d6e1}
+small{font-size:.9rem;color:#bbcbd7}
+a{color:#85e6e2}
+.hero{padding:16px 0 28px;border-bottom:1px solid #315061}
+.panel{background:#10283b;border:1px solid #31556b;border-radius:18px;padding:22px;margin-top:24px;box-shadow:0 12px 32px #0003}
+.field{margin:15px 0}label{display:block;font-weight:700;margin-bottom:7px}
+input,select,button{font:inherit;border-radius:12px;min-height:52px}
+input,select{background:#091b2a;color:white;border:1px solid #547286;padding:12px;width:100%}
+input[type=file]{padding:10px}
+input:focus-visible,select:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid #61dbce;outline-offset:3px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+button{background:#4bd3ca;border:none;color:#07242b;font-weight:800;padding:12px 23px;cursor:pointer}
+button:disabled{opacity:.5;cursor:wait}
+.secondary{background:#223e50;color:#fff;border:1px solid #678ca1}
+.buttons{display:flex;flex-wrap:wrap;gap:12px}
+.status{font-weight:700;min-height:30px}
+.status.error{color:#ffc5c5}.status.good{color:#84efd1}
+pre{white-space:pre-wrap;overflow-wrap:anywhere;direction:rtl;text-align:right;background:#071824;border-radius:12px;border:1px solid #29495c;padding:16px;max-height:340px;overflow:auto;font:1rem/1.9 Tahoma,Arial,sans-serif}
+table{border-collapse:collapse;width:100%}th,td{border-bottom:1px solid #34556a;padding:12px;text-align:right;vertical-align:top}
+td:first-child{white-space:nowrap;color:#9ac8db;font-size:.85rem}
+.scroll{overflow-x:auto}
+[hidden]{display:none!important}
+footer{padding-top:30px;color:#b9ccd6}
+@media(max-width:680px){.grid{grid-template-columns:1fr}.panel{padding:16px}main{padding:14px 12px 55px}}
+</style>
+</head>
+<body>
+<main>
+<header class="hero">
+<small>وحدة مستقلة قابلة للربط بالمشاريع</small>
+<h1>🎬 مسار الترجمة الذكية</h1>
+<p>ارفع مقطع فيديو أو أدخل رابط يوتيوب. سيُستخرج الكلام بلغته الأصلية، ويُترجم، ثم يُتاح لك تنزيل ملفات SRT وVTT والنص الكامل.</p>
+<div id="server" class="status" role="status">جارٍ التحقق من خدمة المعالجة...</div>
+</header>
+<section class="panel">
+<h2>إعداد المقطع</h2>
+<form id="translateForm">
+<div class="field"><label for="file">ملف الفيديو أو الصوت (حتى 150 ميغابايت)</label>
+<input id="file" name="file" type="file" accept="video/*,audio/*,.mkv,.flac,.m4a">
+<small>يمكنك استخدام الملف أو رابط يوتيوب، وليس الاثنين معاً.</small></div>
+<div class="field"><label for="youtube">رابط يوتيوب (بدلاً من الملف)</label>
+<input id="youtube" name="youtube_url" type="url" inputmode="url" dir="ltr" placeholder="https://www.youtube.com/watch?v=..."></div>
+<div class="grid">
+<div class="field"><label for="source">لغة الصوت الأصلية</label>
+<select id="source" name="source_language">
+<option value="auto">تعرّف تلقائي</option>
+<option value="ar">العربية</option><option value="en">الإنجليزية</option>
+<option value="zh">الصينية</option><option value="ja">اليابانية</option>
+<option value="ko">الكورية</option><option value="hi">الهندية</option>
+<option value="ur">الأوردية</option><option value="fr">الفرنسية</option>
+<option value="es">الإسبانية</option><option value="tr">التركية</option>
+</select></div>
+<div class="field"><label for="target">لغة الترجمة</label>
+<select id="target" name="target_language">
+<option value="ar" selected>العربية</option>
+<option value="en">الإنجليزية</option><option value="ur">الأوردية</option>
+<option value="fr">الفرنسية</option><option value="es">الإسبانية</option>
+<option value="zh-CN">الصينية</option><option value="hi">الهندية</option>
+<option value="ja">اليابانية</option><option value="ko">الكورية</option>
+<option value="tr">التركية</option><option value="fa">الفارسية</option>
+<option value="de">الألمانية</option><option value="none">تفريغ دون ترجمة</option>
+</select></div>
+</div>
+<div class="field"><label for="key">مفتاح وصول الخادم (عند الحاجة)</label>
+<input id="key" type="password" autocomplete="off" placeholder="يُرسل للطلب الحالي ولا يُخزّن في المتصفح"></div>
+<button id="go" type="submit">ابدأ التفريغ والترجمة</button>
+<p id="progress" class="status" role="status" aria-live="polite"></p>
+</form>
+</section>
+<section id="result" class="panel" hidden>
+<h2>النتيجة</h2><p id="meta"></p>
+<div class="buttons">
+<button class="secondary" id="saveSrt" type="button">تنزيل SRT</button>
+<button class="secondary" id="saveVtt" type="button">تنزيل VTT</button>
+<button class="secondary" id="saveTxt" type="button">تنزيل النص العربي</button>
+<button class="secondary" id="saveJson" type="button">تنزيل JSON</button>
+</div>
+<h2>النص المترجم</h2><pre id="translated"></pre>
+<h2>الحوار الأصلي</h2><pre id="original"></pre>
+<h2>الجمل والتوقيتات</h2>
+<div class="scroll"><table><thead><tr><th>الوقت</th><th>الحوار الأصلي</th><th>الترجمة</th></tr></thead><tbody id="rows"></tbody></table></div>
+</section>
+<footer>
+<p>الملفات تُعالج على الخادم وتُحذف الملفات المؤقتة بعد المعالجة. <strong>نصوص التفريغ تُرسل إلى خدمة ترجمة خارجية</strong> عند طلب الترجمة. لا تستخدمه للملفات السرية أو الحساسة دون إعداد ترجمة محلية.</p>
+<p>هذا مسار للترجمة النصية، وليس تحليلاً بصرياً للأحداث أو دبلجة صوتية كاملة.</p>
+<a href="https://github.com/Q8-ux/saad/tree/main/voice-translation-path" target="_blank" rel="noopener noreferrer">المصدر على GitHub</a>
+</footer>
+</main>
+<script>
+'use strict';
+let last=null;
+const id=x=>document.getElementById(x);
+const status=(msg,isError=false)=>{id('progress').textContent=msg;id('progress').className='status '+(isError?'error':'good')};
+async function health(){
+try{const r=await fetch('/api/health',{cache:'no-store'});if(!r.ok)throw Error();
+id('server').textContent='● الخادم متصل وجاهز لاستقبال المقاطع';id('server').className='status good'}
+catch{ id('server').textContent='● الخادم غير متصل. تشغيل الملفات يحتاج خادم Python وليس GitHub Pages وحده.';id('server').className='status error'}
+}
+function download(name,text,type='text/plain;charset=utf-8'){
+const blob=new Blob(['\ufeff',text],{type});const url=URL.createObjectURL(blob);
+const a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500)
+}
+function textCell(row,val){const cell=document.createElement('td');cell.textContent=val;row.appendChild(cell)}
+function display(data){
+last=data;id('result').hidden=false;id('translated').textContent=data.translated_text;
+id('original').textContent=data.original_text;
+id('meta').textContent='لغة الصوت: '+data.source_language+' · المدة: '+Math.round(data.duration_seconds)+' ثانية · المقاطع: '+data.segments.length;
+const body=id('rows');body.replaceChildren();
+for(const segment of data.segments){const row=document.createElement('tr');textCell(row,segment.start.toFixed(1)+'–'+segment.end.toFixed(1));textCell(row,segment.original);textCell(row,segment.translated);body.appendChild(row)}
+id('result').scrollIntoView({behavior:'smooth',block:'start'});
+}
+id('translateForm').addEventListener('submit',async event=>{
+event.preventDefault();if(id('go').disabled)return;
+const file=id('file').files[0],youtube=id('youtube').value.trim();
+if(Number(Boolean(file))+Number(Boolean(youtube))!==1){status('اختر ملفاً واحداً أو رابط يوتيوب فقط.',true);return}
+const form=new FormData();if(file)form.append('file',file);else form.append('youtube_url',youtube);
+form.append('source_language',id('source').value);form.append('target_language',id('target').value);
+id('go').disabled=true;id('result').hidden=true;status('جارٍ معالجة الصوت. قد يستغرق تشغيل النموذج المحلي بعض الوقت...');
+try{
+const headers={};if(id('key').value)headers['X-API-Key']=id('key').value;
+const response=await fetch('/api/translate',{method:'POST',body:form,headers});
+const data=await response.json();
+if(!response.ok)throw Error(typeof data.detail==='string'?data.detail:'تعذّر إتمام المعالجة');
+display(data);status('اكتمل التفريغ والترجمة بنجاح.')
+}catch(error){status(error.message||'حدث خطأ غير متوقع',true)}
+finally{id('go').disabled=false}
+});
+id('saveSrt').onclick=()=>last&&download('translation.srt',last.srt);
+id('saveVtt').onclick=()=>last&&download('translation.vtt',last.vtt);
+id('saveTxt').onclick=()=>last&&download('translation.txt',last.translated_text);
+id('saveJson').onclick=()=>last&&download('translation.json',JSON.stringify(last,null,2),'application/json;charset=utf-8');
+health();
+</script>
+</body></html>
