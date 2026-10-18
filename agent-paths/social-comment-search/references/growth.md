@@ -1,0 +1,11 @@
+# Evidence-based follower growth
+
+Use observed audience questions to choose useful content, form one hypothesis at a time, then measure the account's own results. Follower growth is voluntary; do not propose forced following, account rotation, unsolicited mass replies/DMs, or invented ranking exploits.
+
+1. Group the collected questions with representative quotations, source URLs, dates and group sizes. Label keyword grouping as preliminary. [BERTopic](https://github.com/MaartenGr/BERTopic) is an optional semantic-clustering route; it is not installed just because this skill exists. Validate Arabic dialect clusters before using them as evidence.
+2. Turn a documented question into a proposed answer, hook, format and useful call to follow. Mark creative recommendations as hypotheses, not platform-proven rules. Do not identify sampled commenters as the account's followers without evidence.
+3. Distinguish native experiments from observations. [YouTube's title/thumbnail tests](https://support.google.com/youtube/answer/16391400?hl=en) can be native concurrent experiments; two posts published at different times are an observational comparison. [Instagram Trial Reels](https://about.fb.com/news/2024/12/trial-reels-try-content-non-followers-first-see-what-perfoms-best/) is an exploration surface, not documented randomized A/B testing.
+4. Record account, platform, measurement dates, raw numerator/denominator and data source. Compare comparable periods on the same account. Net follows = new follows minus unfollows when both counts are available. New follows/profile visits is a proxy: follows can happen without a profile visit. Use null for a zero denominator; do not claim attribution.
+5. Report shares, saves and retention separately when the actual data provides them. Do not create universal benchmarks or guaranteed follower forecasts. [Meta's ranking explanation](https://about.fb.com/news/2023/06/how-ai-ranks-content-on-facebook-and-instagram/) describes multiple predictions rather than a fixed public growth formula.
+
+Useful primary native research surfaces are TikTok Comment Insights and Creator Search Insights. Regional eligibility and API exposure must be verified before promising automation. Screenshots/exports can provide bounded evidence when no approved connector exists.
