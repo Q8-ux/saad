@@ -50,8 +50,10 @@ test('policy and notices have local, readable routes for every site language',()
 test('original post images retain their sources and show judgment dates only',()=>{
  const data=module('app/group-news.ts'),artworks=module('app/group-post-artworks.ts');
  const posts=module('app/group-posts.ts',{'./group-news':data,'./group-post-artworks':artworks});
- assert.equal(data.groupNews.length,15);assert.equal(new Set(data.groupNews.map(n=>n.source)).size,15);
- assert.equal(posts.groupPosts.length,13);
+ assert.equal(data.groupNews.length,3);assert.equal(new Set(data.groupNews.map(n=>n.source)).size,3);
+ assert.deepEqual(Array.from(data.groupNews,n=>n.id).sort(),['DdWSqBrg19a','Ddgy2L5geSN','DdoBZ65AguI'].sort());
+ assert.ok(data.groupNews.every(n=>n.kind==='case-result'&&n.eventDate));
+ assert.equal(posts.groupPosts.length,3);
  for(const post of posts.groupPosts){
   assert.ok(post.source.includes('/p/'));assert.equal(post.artwork.src,`/images/posts/${post.id}.jpg`);
   assert.equal(post.artwork.width,480);assert.equal(post.artwork.height,640);
@@ -62,7 +64,7 @@ test('original post images retain their sources and show judgment dates only',()
   const html=renderToStaticMarkup(React.createElement(strip,{language}));
   const dates=[...html.matchAll(/<time dateTime="([^"]+)"/g)].map(m=>m[1]);
   assert.deepEqual(dates.sort(),['2026-09-14','2026-09-20','2026-09-21']);
-  assert.equal((html.match(/<article/g)||[]).length,13);assert.equal((html.match(/<img /g)||[]).length,13);
+  assert.equal((html.match(/<article/g)||[]).length,3);assert.equal((html.match(/<img /g)||[]).length,3);
   assert.doesNotMatch(html,/<(?:img|iframe)[^>]+(?:src|srcset)="https?:/);assert.doesNotMatch(html,/2026-09-28|2026-09-23|2026-09-19|2026-09-16/);
   assert.match(html,/<dialog[^>]+aria-labelledby="group-post-dialog-title"/);
   for(const post of posts.groupPosts)assert.ok(html.includes(post.artwork.src));

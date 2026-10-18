@@ -528,6 +528,7 @@ html[data-theme="dark"] .button-primary {
 .group-posts-controls button:disabled { opacity: .45; cursor: default; }
 .group-posts button:focus-visible, .group-posts a:focus-visible, .group-posts-viewport:focus-visible { outline: 3px solid #8ee5df; outline-offset: 4px; }
 .group-posts-viewport { display: flex; gap: 22px; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scrollbar-color: #77bdbd #143746; scrollbar-width: thin; padding: 5px 4px 20px; }
+.group-posts-viewport.no-overflow { justify-content: center; }
 .group-post { flex: 0 0 clamp(245px,28vw,310px); min-width: 0; scroll-snap-align: start; }
 .group-post-artwork { width: 100%; display: block; padding: 0; overflow: hidden; border: 1px solid #9ab1b7; border-radius: 10px; background: #e6eced; cursor: zoom-in; }
 .group-post-image { display: block; aspect-ratio: 3 / 4; }

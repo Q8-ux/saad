@@ -23,6 +23,7 @@ export default function GroupPostsStrip({ language, posts = groupPosts }: { lang
   const [hovered, setHovered] = useState(false);
   const [focused, setFocused] = useState(false);
   const [visible, setVisible] = useState(false);
+  const [canScroll, setCanScroll] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(true);
   const [zoomed, setZoomed] = useState(false);
 
@@ -36,6 +37,15 @@ export default function GroupPostsStrip({ language, posts = groupPosts }: { lang
   useEffect(() => {
     const element = viewport.current;
     if (!element) return;
+    const measure = () => setCanScroll(element.scrollWidth > element.clientWidth + 2);
+    const observer = new ResizeObserver(measure);
+    observer.observe(element); measure();
+    return () => observer.disconnect();
+  }, [posts.length]);
+
+  useEffect(() => {
+    const element = viewport.current;
+    if (!element) return;
     let inView = false;
     const update = () => setVisible(inView && document.visibilityState === "visible");
     const observer = new IntersectionObserver(entries => { inView = entries[0].isIntersecting; update(); }, { threshold: 0.5 });
@@ -44,10 +54,10 @@ export default function GroupPostsStrip({ language, posts = groupPosts }: { lang
   }, [posts.length]);
 
   useEffect(() => {
-    if (posts.length < 2 || paused || hovered || focused || selected || !visible || reducedMotion) return;
+    if (!canScroll || posts.length < 2 || paused || hovered || focused || selected || !visible || reducedMotion) return;
     const timer = window.setInterval(() => setIndex(current => (current + 1) % posts.length), 7000);
     return () => window.clearInterval(timer);
-  }, [posts.length, paused, hovered, focused, selected, visible, reducedMotion]);
+  }, [posts.length, canScroll, paused, hovered, focused, selected, visible, reducedMotion]);
 
   useEffect(() => {
     const element = viewport.current;
@@ -72,12 +82,12 @@ export default function GroupPostsStrip({ language, posts = groupPosts }: { lang
   if (!posts.length) return null;
 
   return <section className="group-posts" id="group-posts" aria-labelledby="group-posts-title" aria-roledescription={t.carousel} dir={rtl ? "rtl" : "ltr"} onPointerEnter={() => setHovered(true)} onPointerLeave={() => setHovered(false)} onFocusCapture={() => setFocused(true)} onBlurCapture={event => { if (!event.currentTarget.contains(event.relatedTarget)) setFocused(false); }}>
-    <div className="group-posts-heading"><div><h2 id="group-posts-title">{t.title}</h2><p>{t.hint}</p></div><div className="group-posts-controls">
+    <div className="group-posts-heading"><div><h2 id="group-posts-title">{t.title}</h2><p>{t.hint}</p></div>{canScroll && <div className="group-posts-controls">
       <button type="button" onClick={() => move(-1)} aria-label={t.previous} disabled={posts.length < 2}><Previous size={22} /></button>
       {!reducedMotion && posts.length > 1 && <button type="button" onClick={() => setPaused(value => !value)} aria-label={paused ? t.play : t.pause} aria-pressed={paused}>{paused ? <Play size={20} /> : <Pause size={20} />}</button>}
       <button type="button" onClick={() => move(1)} aria-label={t.next} disabled={posts.length < 2}><Next size={22} /></button>
-    </div></div>
-    <div className="group-posts-viewport" ref={viewport} tabIndex={0} aria-label={t.title} onPointerDown={() => setPaused(true)} onWheel={() => setPaused(true)} onKeyDown={event => { if (event.key === "ArrowRight" || event.key === "ArrowLeft") { event.preventDefault(); move((event.key === "ArrowRight") === rtl ? -1 : 1); } }}>
+    </div>}</div>
+    <div className={`group-posts-viewport${canScroll ? "" : " no-overflow"}`} ref={viewport} tabIndex={canScroll ? 0 : undefined} aria-label={t.title} onPointerDown={() => setPaused(true)} onWheel={() => setPaused(true)} onKeyDown={event => { if (canScroll && (event.key === "ArrowRight" || event.key === "ArrowLeft")) { event.preventDefault(); move((event.key === "ArrowRight") === rtl ? -1 : 1); } }}>
       {posts.map(post => <article className="group-post" key={post.id}>
         <button type="button" className="group-post-artwork" onClick={() => setSelected(post)} aria-label={`${t.open}: ${post.title[language]}`} aria-haspopup="dialog"><span className="group-post-image"><img src={assetUrl(post.artwork.src)} alt={post.title[language]} width={post.artwork.width} height={post.artwork.height} loading="lazy" decoding="async" /></span><span className="group-post-open"><ZoomIn size={20} aria-hidden="true" />{t.open}</span></button>
         <h3>{post.title[language]}</h3>{post.eventDate && <p className="group-post-date">{t.date}: <time dateTime={post.eventDate}>{date(post.eventDate)}</time></p>}
