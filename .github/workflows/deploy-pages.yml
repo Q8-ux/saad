@@ -39,7 +39,6 @@ on:
       - 'remote-ai-hub/**'
       - 'ai-video-studio/**'
       - 'autoclip-studio/**'
-      - 'barcode/**'
       - 'frame-studio/**'
       - 'muhami-next/**'
       - 'workforce-platform/apps/web/**'
