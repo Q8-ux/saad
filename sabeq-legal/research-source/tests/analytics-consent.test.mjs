@@ -131,24 +131,23 @@ test('policy page controls use the same explicit contract and stop an open main-
  assert.equal(b.localStorage.getItem(visitor),null);close();
 });
 
-for(const language of ['ar','en','ur']) test(`${language} carousel next/previous follow manual swipe and wrap at the clamped end`,()=>{
- const rtl=language!=='en',direction=rtl?-1:1,window=new EventTarget(),document=new EventTarget(),timers=new Map();
- document.visibilityState='visible';window.matchMedia=()=>({matches:false,addEventListener(){},removeEventListener(){}});
+for(const language of ['ar','en','ur']) test(`${language} manual news strip follows swipes and keyboard navigation without autoplay controls`,()=>{
+ const rtl=language!=='en',direction=rtl?-1:1,window=new EventTarget(),timers=new Map();
+ window.matchMedia=()=>({matches:false,addEventListener(){},removeEventListener(){}});
  window.setInterval=fn=>{timers.set(1,fn);return 1;};window.clearInterval=id=>timers.delete(id);
  const scrolls=[],element={scrollLeft:0,scrollWidth:966,clientWidth:390,getBoundingClientRect:()=>({left:0,right:390}),scrollTo({left}){this.scrollLeft=rtl?Math.max(-576,Math.min(0,left)):Math.min(576,Math.max(0,left));scrolls.push(this.scrollLeft);}};
  element.children=[0,1,2].map(i=>({getBoundingClientRect(){const leading=(rtl?390:0)+direction*i*322-element.scrollLeft;return rtl?{right:leading,left:leading-300}:{left:leading,right:leading+300};}}));
  const posts=[0,1,2].map(i=>({id:String(i),title:{ar:'خبر',en:'News',ur:'خبر'},source:'https://example.test/post',artwork:{src:'/synthetic.jpg',width:480,height:640}}));
- const ui=mount('app/group-posts-strip.tsx',{'./group-posts':{groupPosts:posts},'../lib/runtime-urls':{assetUrl:path=>path}},{window,document,ResizeObserver:class{constructor(fn){this.fn=fn;}observe(){this.fn();}disconnect(){}},IntersectionObserver:class{constructor(fn){this.fn=fn;}observe(){this.fn([{isIntersecting:true}]);}disconnect(){}}},node=>{if(node.props?.ref&&node.props.className?.startsWith('group-posts-viewport'))node.props.ref.current=element;});
- const render=()=>ui.render({language,posts}),clickNext=()=>{const controls=ui.nodes().find(node=>node.props?.className==='group-posts-controls');React.Children.toArray(controls.props.children).at(-1).props.onClick();render();};
- render();assert.equal(timers.size,1);
- ui.nodes().find(node=>node.props?.className?.startsWith('group-posts-viewport')).props.onPointerDown();render();assert.equal(timers.size,0);
- element.scrollLeft=direction*322;clickNext();assert.equal(element.scrollLeft,direction*576);assert.equal(timers.size,0);
- clickNext();assert.equal(element.scrollLeft,0);
- element.scrollLeft=direction*322;const controls=ui.nodes().find(node=>node.props?.className==='group-posts-controls');React.Children.toArray(controls.props.children)[0].props.onClick();render();assert.equal(element.scrollLeft,0);
- clickNext();assert.equal(element.scrollLeft,direction*322);
- React.Children.toArray(ui.nodes().find(node=>node.props?.className==='group-posts-controls').props.children)[1].props.onClick();render();assert.equal(timers.size,1);
- timers.get(1)();assert.equal(element.scrollLeft,direction*576);
- let prevented=false;ui.nodes().find(node=>node.props?.className?.startsWith('group-posts-viewport')).props.onKeyDown({key:'ArrowRight',preventDefault(){prevented=true;}});render();
- assert.equal(prevented,true);assert.equal(element.scrollLeft,rtl?direction*322:0);
+ const ui=mount('app/group-posts-strip.tsx',{'./group-posts':{groupPosts:posts},'../lib/runtime-urls':{assetUrl:path=>path}},{window,ResizeObserver:class{constructor(fn){this.fn=fn;}observe(){this.fn();}disconnect(){}}},node=>{if(node.props?.ref&&node.props.className?.startsWith('group-posts-viewport'))node.props.ref.current=element;});
+ const render=()=>ui.render({language,posts}),press=key=>{let prevented=false;ui.nodes().find(node=>node.props?.className?.startsWith('group-posts-viewport')).props.onKeyDown({key,preventDefault(){prevented=true;}});render();assert.equal(prevented,true);};
+ const next=rtl?'ArrowLeft':'ArrowRight',previous=rtl?'ArrowRight':'ArrowLeft';
+ render();assert.equal(timers.size,0);assert.equal(ui.nodes().some(node=>node.props?.className==='group-posts-controls'),false);
+ assert.equal(ui.nodes().find(node=>node.props?.className?.startsWith('group-posts-viewport')).props.tabIndex,0);
+ element.scrollLeft=direction*322;press(next);assert.equal(element.scrollLeft,direction*576);
+ press(next);assert.equal(element.scrollLeft,0);
+ element.scrollLeft=direction*322;press(previous);assert.equal(element.scrollLeft,0);
+ press(next);assert.equal(element.scrollLeft,direction*322);
+ press(next);assert.equal(element.scrollLeft,direction*576);
+ press('ArrowRight');assert.equal(element.scrollLeft,rtl?direction*322:0);
  ui.close();assert.equal(timers.size,0);assert.ok(scrolls.length>=4);
 });
