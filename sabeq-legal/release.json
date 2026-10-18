@@ -1,7 +1,7 @@
 {
-  "release": "2026-10-18-interface-taste",
-  "clientSource": "8e16ec8e38120fd30e6f1bede9116fa39c90ea30",
-  "backendSource": "8e16ec8e38120fd30e6f1bede9116fa39c90ea30",
+  "release": "2026-10-18-privacy-original-posts",
+  "clientSource": "016f7c9fde73162255403d9c7413d75e314dc1b8",
+  "backendSource": "016f7c9fde73162255403d9c7413d75e314dc1b8",
   "assistant": "official-research-sources-1",
   "voice": "gulf-male-voice-4",
   "tools": "legal-tools-1",
@@ -21,15 +21,15 @@
   "finalMemo": "clean-no-review-notes-1",
   "memoResultTools": "bottom-vector-actions-1",
   "memoPreview": "document-derived-clean-text-1",
-  "githubPagesAsset": "index-6fGoKNun.js",
-  "publishedAt": "2026-10-18T09:52:45.484730+00:00",
+  "githubPagesAsset": "index-CIFQn6d6.js",
+  "publishedAt": "2026-10-18T11:39:48.180923+00:00",
   "memoLanguage": "ar-KW",
   "memoDirection": "rtl",
   "memoAlignment": "right",
   "interfaceLocalization": "ar-en-ur-tools-guidance-1",
   "memoProseLanguage": "arabic-with-protected-names-and-identifiers-1",
   "builtAt": "2026-10-08T03:06:00Z",
-  "backendVersion": 112,
+  "backendVersion": 116,
   "pleadingLayout": "first-page-only-sidebar-and-frame-full-width-right-aligned-continuations",
   "citationCorrection": "one-bounded-server-retry-before-archive",
   "legalSourceDirectory": "6-catalogues-3-fetched-0-new-citable-pdfs",
@@ -62,5 +62,16 @@
   "pleadingFormPublishedAt": "2026-10-17T19:37:57.298017+00:00",
   "pleadingFormValidation": "claim-2-and-appeal-4-pages-rendered-in-AlMohanad;no-device-or-physical-printer-test",
   "interfaceTaste": "large-arabic-task-first-rtl-mobile-navigation-1",
-  "interfaceTasteValidation": "31-focused-tests-pass;both-builds;private-corpus-absent;contrast-measured;browser-device-QA-not-run"
+  "interfaceTasteValidation": "31-focused-tests-pass;both-builds;private-corpus-absent;contrast-measured;browser-device-QA-not-run",
+  "privacyPolicy": "ar-en-ur-readable-local-policy-analytics-opt-out-1",
+  "privacyValidation": "29-related-tests;both-builds;private-corpus-absent;local-assets-verified",
+  "groupPosts": "13-original-local-artworks-below-videos-in-site-zoom-1",
+  "groupPostCoverage": "13-public-photo-posts;full-account-archive-unavailable-without-sign-in",
+  "groupPostJudgmentDates": [
+    "2026-09-14",
+    "2026-09-20",
+    "2026-09-21"
+  ],
+  "groupNewsHeading": "أخبار مجموعة سابق القانونية",
+  "groupPostBrowserValidation": "native-production:correct-heading;below-video-sibling;arrows-pause;in-site-dialog;960px-zoom;escape-focus-return;privacy-route-readable"
 }
