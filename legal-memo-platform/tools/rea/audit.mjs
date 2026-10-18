@@ -97,10 +97,29 @@ function trace(cli, evidence, feature, directory) {
   };
 }
 
+export function summarizeSemantics(result, exitCode) {
+  const normalized = result.normalized_result;
+  const failed = exitCode !== 0 || Boolean(result.error) || !normalized?.status || !normalized?.summary || !normalized?.coverage;
+  return {
+    status: failed ? 'failed' : normalized.status,
+    error_code: failed ? String(result.code || 'invalid-semantic-envelope') : null,
+    evidence_id: result.evidence_id || null,
+    coverage: normalized?.coverage?.status || 'unavailable',
+    statistics: Object.fromEntries(['total_seed_matches', 'traversed_nodes', 'traversed_relations', 'relevant_unknowns'].map(key => [key, normalized?.summary?.[key] ?? null])),
+  };
+}
+
+function traceSemantics(cli, evidence, feature, directory) {
+  const request = path.join(directory, 'semantic-input.json');
+  writeFileSync(request, JSON.stringify({ application: evidence, query: { seed: { kind: 'literal', value: feature }, direction: 'forward-influence' } }), { mode: 0o600 });
+  const { result, exitCode } = execute(cli, ['trace-javascript-semantics', request], directory);
+  return summarizeSemantics(result, exitCode);
+}
+
 export function markdown(report) {
   const rows = report.targets.map(target => `| ${target.target} | ${target.status} | ${target.graph_coverage} | ${target.statistics.parsed_javascript_files ?? '—'} | ${target.unknown_nodes ?? '—'} |`).join('\n');
-  const traces = report.targets.flatMap(target => (target.traces || []).map(item => `| ${target.target} | ${item.feature} | ${item.status} | ${item.statistics.matched_seeds ?? '—'} |`)).join('\n');
-  return `# تحليل سابق بواسطة REA\n\nالإصدار: ${REA_VERSION}\n\nالتزام المصدر: ${report.source_commit}\n\nحالة تنفيذ التحليل: ${report.status}\n\n| الجزء | التنفيذ | تغطية الرسم | الملفات المحللة | عقد غير معلومة |\n|---|---|---|---:|---:|\n${rows}\n\n| الجزء | نقطة بدء التتبع | التغطية | مواضع المطابقة |\n|---|---|---|---:|\n${traces}\n\nتحليل ثابت للكود المتتبع في Git فقط. التتبع يثبت علاقات مرصودة أو مستنتجة في الكود؛ لا يثبت أن الوظيفة عملت على الخادم. حالة no-match لا تثبت غياب الميزة.\n\nمصدر الواجهة المنشور في GitHub لقطة غير مكتملة، والحزمة المنشورة مصغرة ومن دون source maps. تبقى الواردات الخارجية والعلاقات الديناميكية ضمن حدود التحليل.\n\nهذا الفحص لا يستدعي النموذج، ولا يولد مذكرة، ولا يراجع صحة القوانين أو الأحكام، ولا يرفع ملفات قضايا. raw Evidence يحذف بعد استخراج الأعداد والمعرفات والبصمات.\n\n## ما الذي قد نكون أغفلناه؟\n\nمطابقة الكود مع تشغيل الخدمة الفعلي والأجزاء غير الموجودة في لقطة المصدر تحتاج فحص تشغيل منفصل. بيانات العملاء والمستندات الخاصة مستبعدة بالكامل.\n`;
+  const traces = report.targets.flatMap(target => (target.traces || []).map(item => `| ${target.target} | ${item.feature} | ${item.status} | ${item.statistics.matched_seeds ?? '—'} | ${item.semantic?.status ?? '—'} | ${item.semantic?.statistics.total_seed_matches ?? '—'} |`)).join('\n');
+  return `# تحليل سابق بواسطة REA\n\nالإصدار: ${REA_VERSION}\n\nالتزام المصدر: ${report.source_commit}\n\nحالة تنفيذ التحليل: ${report.status}\n\n| الجزء | التنفيذ | تغطية الرسم | الملفات المحللة | عقد غير معلومة |\n|---|---|---|---:|---:|\n${rows}\n\n| الجزء | نقطة بدء التتبع | التغطية البنيوية | مواضع المطابقة | تتبع البيانات | مواضع البيانات |\n|---|---|---|---:|---|---:|\n${traces}\n\nتحليل ثابت للكود المتتبع في Git فقط. التتبع يثبت علاقات مرصودة أو مستنتجة في الكود؛ لا يثبت أن الوظيفة عملت على الخادم. حالة no-match لا تثبت غياب الميزة. عند غياب المطابقة البنيوية، يفحص تتبع البيانات الانتقال من نص نقطة الطلب عبر العلاقات التي استخرجها REA. found لا يثبت نجاح الطلب الفعلي، وpartial أو ambiguous تبقى غير محسومة.\n\nمصدر الواجهة المنشور في GitHub لقطة غير مكتملة، والحزمة المنشورة مصغرة ومن دون source maps. تبقى الواردات الخارجية والعلاقات الديناميكية ضمن حدود التحليل.\n\nهذا الفحص لا يستدعي النموذج، ولا يولد مذكرة، ولا يراجع صحة القوانين أو الأحكام، ولا يرفع ملفات قضايا. raw Evidence يحذف بعد استخراج الأعداد والمعرفات والبصمات.\n\n## ما الذي قد نكون أغفلناه؟\n\nمطابقة الكود مع تشغيل الخدمة الفعلي والأجزاء غير الموجودة في لقطة المصدر تحتاج فحص تشغيل منفصل. بيانات العملاء والمستندات الخاصة مستبعدة بالكامل.\n`;
 }
 
 export async function audit(root, outputDirectory) {
@@ -131,9 +150,13 @@ export async function audit(root, outputDirectory) {
       const { result, exitCode } = execute(cli, ['analyze-javascript-application', artifact, '--analysis-timeout-ms', '120000'], directory);
       const target = { target: name, inputs, ...summarize(result, exitCode), traces: [] };
       if (target.status === 'analyzed') {
-        for (const feature of FEATURES) target.traces.push(trace(cli, result, feature, directory));
+        for (const feature of FEATURES) {
+          const featureTrace = trace(cli, result, feature, directory);
+          if (featureTrace.status === 'no-match') featureTrace.semantic = traceSemantics(cli, result, feature, directory);
+          target.traces.push(featureTrace);
+        }
       }
-      if (target.status === 'failed' || target.traces.some(item => item.status === 'failed')) report.status = 'failed';
+      if (target.status === 'failed' || target.traces.some(item => item.status === 'failed' || item.semantic?.status === 'failed')) report.status = 'failed';
       report.targets.push(target);
       console.log(`${name}: ${target.status}; graph coverage: ${target.graph_coverage}`);
     }

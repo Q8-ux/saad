@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import test from 'node:test';
-import { checkedFile, collectInputs, publishedScripts, summarize } from './audit.mjs';
+import { checkedFile, collectInputs, publishedScripts, summarize, summarizeSemantics } from './audit.mjs';
 
 test('only tracked Sabeq source and the currently linked bundle enter the analysis', () => {
   const root = mkdtempSync(path.join(tmpdir(), 'sabeq-scope-test-'));
@@ -90,4 +90,14 @@ test('the legal-library workflow skips tooling updates and preserves real import
       check('0'.repeat(40), config, true);
     } finally { rmSync(output, { force: true }); }
   } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test('semantic tracing preserves uncertainty and omits literal contents from reports', () => {
+  const result = summarizeSemantics({ evidence_id: 'evidence', normalized_result: { status: 'partial', coverage: { status: 'partial' }, summary: { total_seed_matches: 1, relevant_unknowns: 2 }, nodes: [{ properties: { value: 'PRIVATE' } }] } }, 0);
+  assert.equal(result.status, 'partial');
+  assert.equal(result.coverage, 'partial');
+  assert.equal(result.statistics.relevant_unknowns, 2);
+  assert.equal(JSON.stringify(result).includes('PRIVATE'), false);
+  assert.equal(summarizeSemantics({}, 0).status, 'failed');
+  assert.equal(summarizeSemantics({ error: 'PRIVATE', code: 'bad_input' }, 1).status, 'failed');
 });
