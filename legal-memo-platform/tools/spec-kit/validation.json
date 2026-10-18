@@ -14,7 +14,11 @@
   "prerequisites": "passed for specs/001-spec-kit-adoption",
   "configuration": "JSON and CI YAML parsed; Docker exclusions checked",
   "scope": "Sabeq development tooling only",
-  "ci": "pending GitHub run",
+  "ci": {
+    "result": "success",
+    "run_url": "https://github.com/Q8-ux/saad/actions/runs/39120464720",
+    "tested_commit": "b42e1666e7e15c9c2c29523140df14fe6990a7d9"
+  },
   "not_tested": [
     "Live assistant or memo generation",
     "Client documents and legal-source validity",

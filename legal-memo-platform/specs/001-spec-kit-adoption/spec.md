@@ -1,6 +1,6 @@
 # Feature Specification: تركيب مسار المواصفات والتنفيذ لسابق
 
-**Created**: 2026-10-18 | **Status**: Implementation under validation
+**Created**: 2026-10-18 | **Status**: Installed; local integration and GitHub CI verified
 
 ## User Scenarios & Testing
 
