@@ -1,0 +1,1 @@
+{"id":"sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2","revision":"e8f8c211226b894fcb81acc59f3b34ba3efd5f42","onnxFile":"model_quint8_avx2","maxTokens":128,"dimensions":384,"license":"Apache-2.0","browserDownloadApproxMB":118}

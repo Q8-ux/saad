@@ -5,5 +5,6 @@ const result=spawnSync(process.execPath,['node_modules/vite/bin/vite.js','build'
 copyFileSync('public/favicon.svg','pages-dist/favicon.svg');
 const digest=p=>createHash('sha256').update(readFileSync(p)).digest('hex');
 const sources=['lib/radar-core.mjs','app/radar.css','github-pages/index.html','github-pages/vite.config.ts','github-pages/source/main.tsx','github-pages/source/workspace.mjs','github-pages/source/search-state.mjs','github-pages/source/connector.mjs','github-pages/source/backend-config.mjs','github-pages/source/development-paths.mjs','github-pages/source/local.css','github-pages/source/radar-dashboard.tsx'];
+sources.push('github-pages/source/local-search.mjs','github-pages/source/virtual-results.tsx','github-pages/source/tools-panel.tsx','github-pages/source/tools-client.mjs','github-pages/source/semantic-worker.mjs','worker/model.json');
 const assets=['index.html','favicon.svg',...readdirSync('pages-dist/assets').map(x=>'assets/'+x)];
 writeFileSync('pages-dist/manifest.json',JSON.stringify({sources:Object.fromEntries(sources.map(p=>[p,digest(p)])),assets:Object.fromEntries(assets.map(p=>[p,digest('pages-dist/'+p)]))},null,2)+'\n');

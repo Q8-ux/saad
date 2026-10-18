@@ -29,10 +29,16 @@ jobs:
         with: {node-version: 24}
       - uses: actions/setup-python@v5
         with: {python-version: '3.12'}
+      - uses: pnpm/action-setup@v4
+        with: {version: 11.25.0, run_install: false}
+      - name: Install pinned browser libraries
+        working-directory: social-request-radar
+        run: pnpm install --frozen-lockfile
       - name: Verify research, growth and browser-local workspace
         working-directory: social-request-radar
         run: |
-          node --test tests/radar.test.mjs tests/pages-workspace.test.mjs tests/server.test.mjs tests/edge.test.mjs
+          node --test tests/*.test.mjs
+          node node_modules/typescript/bin/tsc --noEmit --incremental false
           node scripts/verify-github-pages.mjs
       - uses: actions/configure-pages@v5
       - name: Preserve published projects and add request radar

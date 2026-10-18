@@ -11,7 +11,27 @@ export function createLocalApi(store,{remote=null}={}){let backendReady=false,ba
   const all=await store.all();const list=kind=>all.filter(d=>d.kind===kind).sort((a,b)=>b.updatedAt.localeCompare(a.updatedAt)).map(d=>d.payload);
   const put=async(key,kind,payload)=>{await store.put({key,kind,payload,updatedAt:new Date().toISOString()});return payload;};
   const connection=list('connector')[0];
-  if(action==='workspace')return {connected:!!remote&&backendReady&&!!connection?.credential,backendConfigured:!!remote,backendReady,backendError,backendUrl:remote?.endpoint||'',sourceVerifiedAt:connection?.verifiedAt||null,deviceLocal:true,searches:list('search').slice(0,20),saved:list('saved'),metrics:list('metric'),datasets:list('dataset').map(d=>({id:d.id,name:d.name,count:d.records.length,platformCounts:platformCounts(d.records),createdAt:d.createdAt}))};
+  if(action==='workspace')return {connected:!!remote&&backendReady&&!!connection?.credential,backendConfigured:!!remote,backendReady,backendError,backendUrl:remote?.endpoint||'',sourceVerifiedAt:connection?.verifiedAt||null,deviceLocal:true,searches:list('search').slice(0,20),saved:list('saved'),metrics:list('metric'),toolsJobs:list('toolJob'),toolsReports:list('toolReport').slice(0,12),datasets:list('dataset').map(d=>({id:d.id,name:d.name,count:d.records.length,platformCounts:platformCounts(d.records),createdAt:d.createdAt}))};
+  if(action==='tool-job'){
+    if(!/^[a-f0-9-]{36}$/.test(body?.id||'')||!/^[A-Za-z0-9_-]{48,100}$/.test(body.token||''))throw Error('مهمة غير صالحة.');
+    return put('toolJob:'+body.id,'toolJob',{id:body.id,token:body.token,action:body.action,createdAt:new Date().toISOString(),sourceRecords:(body.sourceRecords||[]).slice(0,80).map(r=>({id:r.id,text:r.text,sourceUrl:r.sourceUrl}))});
+  }
+  if(action==='tool-result'){
+    const {id,result}=body||{};if(typeof id!=='string'||!result)throw Error('نتيجة أدوات غير صالحة.');
+    const job=list('toolJob').find(j=>j.id===id);if(!job)throw Error('المهمة غير محفوظة على هذا الجهاز.');
+    let imported=0;
+    if(result.action==='collect'&&result.records?.length){
+      if(result.records.length>80)throw Error('تجاوزت النتيجة حد الجولة.');
+      const records=importRecords(result.records,result.records[0].platform,result.records[0].sourceUrl);imported=records.length;
+      await put('dataset:tools-'+id,'dataset',{id:'tools-'+id,name:'جمع الأدوات · '+(result.report?.collector||'مصدر'),records,createdAt:new Date().toISOString()});
+    }
+    const {records,...summary}=result;
+    await put('toolReport:'+id,'toolReport',{id,...summary,sourceRecords:job.sourceRecords,imported,createdAt:new Date().toISOString()});return {imported};
+  }
+  if(action==='browser-analysis'){
+    if(!body?.result||!Array.isArray(body.sourceRecords)||body.sourceRecords.length>80)throw Error('تحليل غير صالح.');
+    const report={id:crypto.randomUUID(),...body.result,sourceRecords:body.sourceRecords,createdAt:new Date().toISOString()};return put('toolReport:'+report.id,'toolReport',report);
+  }
   if(action==='connect'){
     if(!remote)throw Error('خادم البحث غير مُعدّ لهذه النسخة.');
     const response=await remote.configure(body?.apiKey);
@@ -55,7 +75,7 @@ export function createLocalApi(store,{remote=null}={}){let backendReady=false,ba
     await put('metric:'+metric.id,'metric',metric);return metric;
   }
   if(action==='delete'){
-    if(!['search','dataset','metric'].includes(body?.kind)||typeof body.id!=='string')throw Error('اختر العنصر المطلوب.');await store.remove(body.kind+':'+body.id);return {ok:true};
+    if(!['search','dataset','metric','toolJob','toolReport'].includes(body?.kind)||typeof body.id!=='string')throw Error('اختر العنصر المطلوب.');await store.remove(body.kind+':'+body.id);return {ok:true};
   }
   throw Error('عملية غير مدعومة.');
 };}

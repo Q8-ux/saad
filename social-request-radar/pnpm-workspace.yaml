@@ -6,6 +6,8 @@ strictDepBuilds: true
 allowBuilds:
   esbuild: true
   fsevents: true
+  onnxruntime-node: false
+  protobufjs: true
   sharp: true
   unrs-resolver: true
   workerd: true

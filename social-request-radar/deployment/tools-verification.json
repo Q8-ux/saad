@@ -1,0 +1,77 @@
+{
+  "syntheticOnly": true,
+  "python": {
+    "tools": {
+      "yt-dlp": {
+        "installed": true,
+        "tested": true,
+        "version": "2026.8.19"
+      },
+      "Instaloader": {
+        "installed": true,
+        "tested": true,
+        "version": "4.15.4"
+      },
+      "instagrapi": {
+        "installed": true,
+        "tested": true,
+        "version": "3.0.26"
+      },
+      "Agent-Reach": {
+        "installed": true,
+        "tested": true,
+        "version": "1.5.0"
+      },
+      "Sentence Transformers": {
+        "installed": true,
+        "tested": true,
+        "version": "6.1.0"
+      },
+      "BERTopic": {
+        "installed": true,
+        "tested": true,
+        "version": "0.17.4"
+      },
+      "CAMeL Tools": {
+        "installed": true,
+        "tested": true,
+        "version": "1.6.0"
+      }
+    },
+    "model": {
+      "id": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+      "revision": "e8f8c211226b894fcb81acc59f3b34ba3efd5f42",
+      "onnxFile": "model_quint8_avx2",
+      "maxTokens": 128,
+      "dimensions": 384,
+      "license": "Apache-2.0",
+      "browserDownloadApproxMB": 118
+    },
+    "syntheticTest": true,
+    "analysisCount": 12,
+    "livePlatformAccessVerified": false
+  },
+  "transformers": {
+    "tool": "Transformers.js",
+    "version": "4.3.1",
+    "tested": true,
+    "execution": "ONNX CPU",
+    "browserWasmVerified": false,
+    "model": {
+      "id": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+      "revision": "e8f8c211226b894fcb81acc59f3b34ba3efd5f42",
+      "onnxFile": "model_quint8_avx2",
+      "maxTokens": 128,
+      "dimensions": 384,
+      "license": "Apache-2.0",
+      "browserDownloadApproxMB": 118
+    },
+    "count": 3,
+    "dimensions": 384,
+    "synthetic": true
+  },
+  "nodeTestCount": 53,
+  "pythonTestCount": 5,
+  "browserVisualQA": false,
+  "livePlatformAccessVerified": false
+}

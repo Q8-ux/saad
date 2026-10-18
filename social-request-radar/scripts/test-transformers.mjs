@@ -1,0 +1,12 @@
+import {pipeline,mean_pooling,env} from '@huggingface/transformers';
+import {readFileSync,writeFileSync,mkdirSync} from 'node:fs';
+const model=JSON.parse(readFileSync('worker/model.json','utf8'));
+env.cacheDir='worker/.cache/transformers';mkdirSync(env.cacheDir,{recursive:true});
+const extractor=await pipeline('feature-extraction',model.id,{revision:model.revision,model_file_name:model.onnxFile,dtype:'fp32',device:'cpu'});
+const inputs=extractor.tokenizer(['أبي محامي لعقد إيجار','أحتاج استشارة قانونية عن عقد شقة','أبحث عن دورة لغة إنجليزية'],{padding:true,truncation:true,max_length:model.maxTokens});
+const output=await extractor.model(inputs);const vectors=mean_pooling(output.last_hidden_state,inputs.attention_mask).normalize(2,-1).tolist();
+if(vectors.length!==3||vectors[0].length!==384||!vectors.flat().every(Number.isFinite))throw Error('Invalid model output');
+for(const vector of vectors)if(Math.abs(Math.sqrt(vector.reduce((sum,v)=>sum+v*v,0))-1)>0.001)throw Error('Invalid normalization');
+const result={tool:'Transformers.js',version:'4.3.1',tested:true,execution:'ONNX CPU',browserWasmVerified:false,model,count:3,dimensions:384,synthetic:true};
+writeFileSync('/tmp/radar-transformers-smoke.json',JSON.stringify(result,null,2));console.log(JSON.stringify(result));
+await extractor.dispose();

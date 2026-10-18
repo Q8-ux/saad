@@ -5,18 +5,25 @@
     "github-pages/index.html": "2786d08b4467e23233b5f00f2ae4a7fa44460b611cbb0bc3d18ea1dc586c8328",
     "github-pages/vite.config.ts": "ef97fb0e839cf3c8f9174583668cf814cd346915097f3a4a145815953f93a19f",
     "github-pages/source/main.tsx": "4c86ba227db63118600477d9d3f1b672c831b858ecef4abfd748fe854ab83235",
-    "github-pages/source/workspace.mjs": "c5284ee1bd8887302b0cf2af8b642c008b8adf6a48241aef581d13eb40f3cff7",
+    "github-pages/source/workspace.mjs": "4993d72b4d6bc8bca59b6e7691d0715f1cfafd7e207edbe88cae69e60e1f11a6",
     "github-pages/source/search-state.mjs": "d9969d4694070258ef6f8ddb8993877e72be2edc576fca46f2cf068ed96edd0d",
     "github-pages/source/connector.mjs": "e3a759249e2205119e889981f313b77c5cfb67e1f99bb2004b61d5b61b96bb79",
     "github-pages/source/backend-config.mjs": "66c76e25e1e8a27147be80978156e3e17a6df3c7adfe259c91dafdbf6c05d7fc",
-    "github-pages/source/development-paths.mjs": "5377af7f9ea5403bf5b65ab7442ebec5ebf1c22f2041a1cb196c1f6be6b2e0d9",
-    "github-pages/source/local.css": "e3cc163bf7db8bc4c82c8fd6d4bf0e93b5a40e921f210c9da4ab82d28a409051",
-    "github-pages/source/radar-dashboard.tsx": "c76c8c80e4d4e904c815c01578a1965d64d79890ff7f0026da101ee145c48f28"
+    "github-pages/source/development-paths.mjs": "0944432986d4773ed6962b517569899e1add7405844ee3737a2b596b516f3314",
+    "github-pages/source/local.css": "8195c220c82e2c5d5cd5e431b237cd1ae8662a1177a1de4148fe3862c1806620",
+    "github-pages/source/radar-dashboard.tsx": "97a6c25e0746a58ac4f5dd7310ad96cf548107fe4d5aa250e7458b7dd07cef7a",
+    "github-pages/source/local-search.mjs": "1c3d97229e04a023c78eaaf22edc5305dff57efb157ed447bc27ff8892de0d22",
+    "github-pages/source/virtual-results.tsx": "43cb0f428a4825b4f9b9a10c9e2e91ee1d68157b07ab98bc3c439d84510d2643",
+    "github-pages/source/tools-panel.tsx": "45ca05dde8eede2e585a6c18fcd1bb948cbf3cf67062290dc0875c39ec8c65ef",
+    "github-pages/source/tools-client.mjs": "540a0bd54f4e6f90c49653bd7fcfd5fd8c8d003b96119173237757dfdf128c5f",
+    "github-pages/source/semantic-worker.mjs": "778aa3c76794bdb510100a1abccc49298ec8ef914766e024d796fb41afd88937",
+    "worker/model.json": "809572756f63e63a80649d11e52221b78b047ba3a209ded617764c3f7057d36d"
   },
   "assets": {
-    "index.html": "c196b6e2977c0055277005030e5f2de91435dfd8c93a946643d2e1ab5370a2e2",
+    "index.html": "c9b7bcf22f4bad1d2add1f87c1b45e3278caf533192257c6e0492436ea9489b9",
     "favicon.svg": "1ecbb96e3d87afd70c5f095d47b380357fbac22eb8ceca5b4c7ad4b16cba5e79",
-    "assets/index-BL0CfWkI.css": "794ce06fa841886d97605c010c419227ba3136510b8b2fadd533fa90593493b4",
-    "assets/radar-B5TQ_fs4.js": "a0e47fa33fe32403514270e7123cb8b954ee28d859069e8de67d02ea57ed76e2"
+    "assets/index-CZi1BD37.css": "8304cd6f2f4eb285b9c343ce0af0e99a627c0c90762bef92f2a1333a072b3877",
+    "assets/radar-C-0Pjj0x.js": "cfed50d0767fa465c15305a733dfba5907959458c7f96dc769b464f7f915432a",
+    "assets/semantic-worker-CfTC1XUf.js": "49e3b2bddae8f5a81860bcfe8ae67a3772dab6979788c744a10937e3eba65137"
   }
 }

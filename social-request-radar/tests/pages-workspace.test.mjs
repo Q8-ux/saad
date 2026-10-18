@@ -83,3 +83,14 @@ test('a configured endpoint is not treated as a running backend and readiness ca
   assert.equal(workspace.backendReady,true);assert.equal(workspace.backendError,'');assert.equal(workspace.connected,false);
   await api('connect',{apiKey:'fixture-only-key'});assert.equal((await api('workspace')).connected,true);
 });
+
+test('tool jobs never persist session fields and completed collections import idempotently',async()=>{
+  const docs=new Map();const api=createLocalApi({all:async()=>[...docs.values()],put:async d=>docs.set(d.key,d),remove:async k=>docs.delete(k)});
+  const id='01234567-89ab-4cde-8123-456789abcdef';
+  await api('tool-job',{id,token:'A'.repeat(64),action:'collect',sessionid:'do-not-store',cookies:{sessionid:'do-not-store'},sourceRecords:[]});
+  assert.ok(!JSON.stringify([...docs.values()]).includes('do-not-store'));
+  const result={ok:true,action:'collect',records:[{id:'comment-1',platform:'youtube',text:'سؤال صناعي للاختبار',author:'test',sourceUrl:'https://www.youtube.com/watch?v=abcdefghijk',collectedAt:'2026-10-18T22:00:00Z'}],report:{collector:'yt-dlp'}};
+  await api('tool-result',{id,result});await api('tool-result',{id,result});
+  const state=await api('workspace');assert.equal(state.datasets.length,1);assert.equal(state.datasets[0].count,1);assert.equal(state.toolsReports.length,1);
+  assert.equal(state.toolsReports[0].imported,1);assert.equal(state.toolsReports[0].records,undefined);
+});

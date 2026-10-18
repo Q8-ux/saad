@@ -1,0 +1,39 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {generateKeyPairSync,sign} from 'node:crypto';
+import {githubVerifier} from '../tools-edge/oidc.mjs';
+import {createToolsHandler} from '../tools-edge/handler.mjs';
+const origin='https://q8-ux.github.io',id='01234567-89ab-4cde-8123-456789abcdef',token='A'.repeat(64);
+const post=(path,body,headers={})=>new Request('https://api.test/radar-tools/'+path,{method:'POST',headers:{origin,'content-type':'application/json',...headers},body:JSON.stringify(body)});
+test('GitHub identity verifies a signed main workflow, rejects wrong scopes, expiry and altered signatures',async()=>{
+  const {privateKey,publicKey}=generateKeyPairSync('rsa',{modulusLength:2048}),jwk={...publicKey.export({format:'jwk'}),kid:'test-key'};
+  const now=1792363000000;
+  const base={iss:'https://token.actions.githubusercontent.com',aud:'social-request-radar-tools',repository_id:'1296995243',repository_owner_id:'289591300',repository:'Q8-ux/saad',workflow_ref:'Q8-ux/saad/.github/workflows/radar-tools-worker.yml@refs/heads/main',ref:'refs/heads/main',event_name:'push',run_id:'1234',exp:now/1000+600,iat:now/1000,nbf:now/1000};
+  const jwt=claims=>{const prefix=Buffer.from(JSON.stringify({alg:'RS256',kid:'test-key'})).toString('base64url')+'.'+Buffer.from(JSON.stringify({...base,...claims})).toString('base64url');return prefix+'.'+sign('RSA-SHA256',Buffer.from(prefix),privateKey).toString('base64url');};
+  const verify=githubVerifier({now:()=>now,fetcher:async()=>Response.json({keys:[jwk]})});
+  assert.equal((await verify(jwt({}))).runId,'1234');
+  for(const claims of [{repository_id:'999'},{aud:'another-app'},{ref:'refs/heads/other'},{event_name:'pull_request'},{exp:now/1000-1},{workflow_ref:'Q8-ux/saad/.github/workflows/other.yml@refs/heads/main'}])await assert.rejects(()=>verify(jwt(claims)));
+  const good=jwt({});await assert.rejects(()=>verify(good.slice(0,good.lastIndexOf('.')+1)+'A'.repeat(342)));
+});
+test('job bodies are encrypted, only their ticket can read results, and worker identity is mandatory',async()=>{
+  let job,queued;const db={worker:async()=>({beat_at:new Date().toISOString(),report:{},run_id:'123'}),enqueue:async(id,token_hash,payload_cipher)=>{job={id,token_hash,payload_cipher,state:'queued',expires_at:new Date(Date.now()+600000).toISOString()};queued=payload_cipher;},job:async()=>job,claim:async()=>job,complete:async(id,run,result)=>{job.result_cipher=result;job.state='completed';},remove:async()=>{job=null;},heartbeat:async()=>{}};
+  const handle=createToolsHandler({sealKey:Buffer.alloc(32,7).toString('base64url'),db,verifyWorker:async value=>{if(value!=='verified-worker')throw Object.assign(Error('Denied'),{status:401});return {runId:'123'};}});
+  const payload={action:'analyze',records:[{id:'a',text:'سؤال اختبار أول '.repeat(60)},{id:'b',text:'سؤال اختبار ثانٍ '.repeat(50)}]};
+  assert.equal((await handle(post('enqueue',{id,token,payload}))).status,202);assert.ok(!queued.includes(payload.records[0].text));
+  assert.equal((await handle(post('result',{id,token:'B'.repeat(64)}))).status,404);
+  assert.equal((await handle(post('worker',{operation:'claim'}))).status,401);
+  const claimed=await (await handle(post('worker',{operation:'claim'},{authorization:'Bearer verified-worker'}))).json();assert.deepEqual(claimed.job.payload,payload);
+  await handle(post('worker',{operation:'complete',id,result:{ok:true,count:2}},{authorization:'Bearer verified-worker'}));
+  assert.ok(!job.result_cipher.includes('count'));const response=await (await handle(post('result',{id,token}))).json();assert.equal(response.result.count,2);
+  await handle(post('remove',{id,token}));assert.equal(job,null);
+});
+test('offline workers, missing Instagram sessions, foreign origins and oversized bodies never enqueue',async()=>{
+  let calls=0,online=false;const db={worker:async()=>online?{beat_at:new Date().toISOString()}:null,enqueue:async()=>calls++};
+  const handle=createToolsHandler({sealKey:Buffer.alloc(32,7).toString('base64url'),db});
+  const payload={action:'collect',collector:'instaloader',url:'https://www.instagram.com/p/TEST/'};
+  assert.equal((await handle(post('enqueue',{id,token,payload}))).status,503);online=true;
+  assert.equal((await handle(post('enqueue',{id,token,payload}))).status,424);
+  assert.equal((await handle(post('enqueue',{id,token,payload},{origin:'https://evil.test'}))).status,403);
+  assert.equal((await handle(post('enqueue',{id,token,payload:{...payload,url:'https://instagram.com.evil.test/p/TEST/'}}))).status,400);
+  assert.equal((await handle(post('enqueue',{id,token,oversize:'A'.repeat(240000)}))).status,413);assert.equal(calls,0);
+});

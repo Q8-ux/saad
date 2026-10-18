@@ -1,0 +1,8 @@
+sentence-transformers==6.1.0
+bertopic==0.17.4
+camel-tools==1.6.0
+instaloader==4.15.4
+instagrapi==3.0.26
+yt-dlp[default]==2026.8.19
+agent-reach @ https://github.com/Panniantong/Agent-Reach/archive/94f06c1969dfc1834001269d79d3ad0972d9dee6.zip
+httpx[socks]==0.28.1
