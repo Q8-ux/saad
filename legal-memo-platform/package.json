@@ -6,6 +6,8 @@
     "start": "node gateway.js",
     "dev": "node --watch gateway.js",
     "test": "node --test",
+    "rea:audit": "npm run audit --prefix tools/rea",
+    "rea:test": "npm test --prefix tools/rea",
     "ingest:moj": "node scripts/ingest-moj-laws.js",
     "ingest:local-laws": "node scripts/ingest-local-laws.js",
     "merge:legal-library": "node scripts/merge-legal-library-data.js"

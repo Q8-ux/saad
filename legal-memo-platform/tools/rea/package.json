@@ -1,0 +1,16 @@
+{
+  "name": "sabeq-rea-audit",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "audit": "node audit.mjs",
+    "test": "node --test audit.test.mjs"
+  },
+  "engines": {
+    "node": "^22.19.0 || ^24.11.0 || >=26.0.0"
+  },
+  "devDependencies": {
+    "rea-agents": "6.5.0"
+  }
+}

@@ -11,3 +11,8 @@ For specific Sabeq requests, also load:
 
 Default review, audit and debt scope is the Sabeq frontend and backend, not the entire shared repository. A report request alone does not authorize edits. Follow current user instructions over older project notes.
 
+## REA investigations
+
+For REA or reverse-engineering work on Sabeq, read `legal-memo-platform/tools/rea/README.md` and use its pinned runner. Run `npm ci --omit=optional --ignore-scripts --prefix legal-memo-platform/tools/rea`, then `npm run rea:audit --prefix legal-memo-platform`.
+The runner inspects only tracked Sabeq application code and the bundle referenced by the current index. Do not point REA at the shared repository, private uploads, databases, sessions or environment files. Keep raw Evidence private; publish only the runner's metadata summary. Treat incomplete source, no-match traces and unresolved imports as unknown. REA code analysis does not validate legal authority, prove a deployed API works, or replace human approval of a memo.
+

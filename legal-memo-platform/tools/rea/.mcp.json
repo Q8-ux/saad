@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "sabeq-rea": {
+      "command": "npx",
+      "args": ["--yes", "--package=rea-agents@6.5.0", "rea", "--mcp"],
+      "env": {
+        "npm_config_omit": "optional",
+        "npm_config_ignore_scripts": "true"
+      }
+    }
+  }
+}

@@ -1,0 +1,65 @@
+name: Sabeq REA code analysis
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'sabeq-legal/index.html'
+      - 'sabeq-legal/assets/*.js'
+      - 'sabeq-legal/research-source/app/**'
+      - 'sabeq-legal/research-source/lib/**'
+      - 'legal-memo-platform/*.js'
+      - 'legal-memo-platform/package.json'
+      - 'legal-memo-platform/tools/rea/**'
+      - '.github/workflows/sabeq-rea.yml'
+  pull_request:
+    paths:
+      - 'sabeq-legal/**'
+      - 'legal-memo-platform/**'
+      - '.github/workflows/sabeq-rea.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sabeq-rea-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      SABEQ_REA_REPORT_DIR: ${{ runner.temp }}/sabeq-rea-report
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.19.0'
+          cache: npm
+          cache-dependency-path: legal-memo-platform/tools/rea/package-lock.json
+      - name: Check Linux process inspection
+        run: ps -axo pid=,ppid=,pgid=,uid=,stat=,command= >/dev/null
+      - name: Install pinned REA without native optional tools
+        working-directory: legal-memo-platform/tools/rea
+        run: npm ci --omit=optional --ignore-scripts --no-audit --no-fund
+      - name: Verify scope and report privacy
+        run: npm test --prefix legal-memo-platform/tools/rea
+      - name: Analyze code and trace Sabeq features
+        run: npm run audit --prefix legal-memo-platform/tools/rea
+      - name: Publish analysis summary
+        if: always()
+        run: |
+          if [ -f "$SABEQ_REA_REPORT_DIR/report.md" ]; then
+            cat "$SABEQ_REA_REPORT_DIR/report.md" >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sabeq-rea-summary
+          path: |
+            ${{ runner.temp }}/sabeq-rea-report/report.json
+            ${{ runner.temp }}/sabeq-rea-report/report.md
+          if-no-files-found: warn
+          retention-days: 7
