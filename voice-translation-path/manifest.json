@@ -1,0 +1,47 @@
+{
+  "id": "voice-translation-path",
+  "name_ar": "مسار الترجمة الذكية",
+  "status": "implemented_in_repository_not_deployed",
+  "repository": "https://github.com/Q8-ux/saad",
+  "upstream_reference": "https://github.com/abus-aikorea/voice-pro",
+  "upstream_embedded": false,
+  "entrypoint": "voice-translation-path/api.py",
+  "ui": "voice-translation-path/index.html",
+  "api": "POST /api/translate",
+  "output": [
+    "original_text",
+    "translated_text",
+    "segments",
+    "srt",
+    "vtt"
+  ],
+  "extensions": [
+    "mp3",
+    "mp4",
+    "m4a",
+    "wav",
+    "mov",
+    "webm",
+    "ogg",
+    "flac",
+    "mkv"
+  ],
+  "security": [
+    "optional API key; required for public Docker startup",
+    "external text translation disclosed",
+    "temporary media deletion",
+    "host allowlist for YouTube URLs"
+  ],
+  "eligible_projects": [
+    "ai-video-studio",
+    "youtube-studio-ai",
+    "saad-script-studio",
+    "barcode",
+    "noura-alattal"
+  ],
+  "requires_review": [
+    "sabeq-legal",
+    "legal-memo-platform"
+  ],
+  "deployment": "external Python worker, not GitHub Pages"
+}

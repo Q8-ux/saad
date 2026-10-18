@@ -1,0 +1,30 @@
+name: Voice Translation Path CI
+on:
+  pull_request:
+    paths:
+      - "voice-translation-path/**"
+      - ".github/workflows/test-voice-translation-path.yml"
+  push:
+    branches: [main]
+    paths:
+      - "voice-translation-path/**"
+      - ".github/workflows/test-voice-translation-path.yml"
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: voice-translation-path
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install test dependencies
+        run: python -m pip install "fastapi>=0.116,<1" "httpx>=0.28,<1" "python-multipart>=0.0.20,<1" "pytest>=8,<10"
+      - name: Syntax check
+        run: python -m py_compile api.py
+      - name: Offline API contract tests
+        run: python -m pytest -q
