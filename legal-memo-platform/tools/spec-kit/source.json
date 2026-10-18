@@ -1,0 +1,17 @@
+{
+  "name": "مسار هندسة المواصفات والتنفيذ",
+  "upstream": "https://github.com/github/spec-kit",
+  "version": "1.2.1",
+  "ref": "9dca9bf42a031765ee5e5f2371137f2f26967e11",
+  "installed_date": "2026-10-18",
+  "integration": "codex",
+  "delivery": "skills",
+  "script": "py",
+  "scope": [
+    "legal-memo-platform",
+    "sabeq-legal"
+  ],
+  "install_command": "specify init --here --force --non-interactive --integration codex --integration-options=--skills --script py --ignore-agent-tools",
+  "optional_extensions_installed": [],
+  "runtime_changes": false
+}
