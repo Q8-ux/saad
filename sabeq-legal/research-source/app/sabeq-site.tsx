@@ -7,7 +7,7 @@ import { cleanIntakeContext } from "@/lib/intake-context";
 import type { AnalysisStage } from "@/lib/intake-analysis";
 import IntakeAnalysisView, { IntakeStages, type ConnectedIntakeState } from "./intake-analysis-view";
 import VoiceWaveform from "./voice-waveform";
-import PrivacyNotice, { PrivacyLink } from "./privacy-notice";
+import { PrivacyLink } from "./privacy-notice";
 import GroupPostsStrip from "./group-posts-strip";
 import MemoVoiceInput from "./memo-voice-input";
 import PleadingPreview from "./pleading-preview";
@@ -515,7 +515,7 @@ export default function SabeqSite() {
             </div>
             <form className="contact-form" onSubmit={(event) => submitForm(event, "/api/contact")}>
               <div className="form-title"><i><Send size={21} /></i><h3>{t.contactTitle}</h3></div>
-              <PrivacyNotice language={language} context="contact" />
+
               <div className="form-grid"><Field label={t.form.name}><input name="name" required autoComplete="name" /></Field><Field label={t.form.email}><input name="email" type="email" required autoComplete="email" dir="ltr" /></Field><Field label={t.form.phone}><input name="phone" required inputMode="tel" autoComplete="tel" dir="ltr" /></Field><Field label={t.form.subject}><input name="subject" required /></Field><Field label={t.form.message} wide><textarea name="message" rows={5} required /></Field></div>
               <label className="honeypot" aria-hidden="true">Website<input name="website" tabIndex={-1} autoComplete="off" /></label>
               <input type="hidden" name="language" value={language} /><button className="button button-primary button-block" disabled={formStatus === "loading"}><Send size={18} />{formStatus === "loading" ? t.loading : t.form.send}</button><FormNotice status={formStatus} t={t} />
@@ -703,7 +703,7 @@ function AuthGate({ language, service, onAuthenticated }: { language: Language; 
     <div className="modal-icon"><KeyRound /></div>
     <h2>{stage === "details" ? ui.title : ui.verifyTitle}</h2>
     <p>{stage === "details" ? ui.intro : ui.verifyText}</p>
-    <PrivacyNotice language={language} context="account" />
+
     {stage === "details" ? <form onSubmit={requestCode}>
       <div className="form-grid">
         <Field label={ui.name}><input name="name" required minLength={2} autoComplete="name" /></Field>
@@ -722,7 +722,7 @@ function AuthGate({ language, service, onAuthenticated }: { language: Language; 
 }
 
 function Booking({ t, language, status, submit }: { t: SiteCopy; language: Language; status: string; submit: (event: FormEvent<HTMLFormElement>, endpoint: string) => Promise<void> }) {
-  return <div className="modal-content"><div className="modal-icon"><CalendarDays /></div><h2>{t.bookingTitle}</h2><p>{t.bookingText}</p><PrivacyNotice language={language} context="contact" /><form onSubmit={(event) => submit(event, "/api/consultations")}><div className="form-grid"><Field label={t.form.name}><input name="name" required /></Field><Field label={t.form.phone}><input name="phone" required dir="ltr" /></Field><Field label={t.form.email}><input name="email" type="email" required dir="ltr" /></Field><Field label={t.caseType}><CustomSelect name="caseType" ariaLabel={t.caseType} options={t.caseTypes.map((item) => ({ value: item, label: item }))} /></Field><Field label={t.preferred}><CustomSelect name="preferredContact" ariaLabel={t.preferred} options={[{ value: "WhatsApp", label: "WhatsApp" }, { value: t.phone, label: t.phone }, { value: t.email, label: t.email }]} /></Field><Field label={t.form.message} wide><textarea name="message" rows={4} /></Field></div><label className="honeypot" aria-hidden="true">Website<input name="website" tabIndex={-1} autoComplete="off" /></label><input type="hidden" name="language" value={language} /><button className="button button-primary button-block" disabled={status === "loading"}>{status === "loading" ? t.loading : t.submitBooking}</button><FormNotice status={status} t={t} /></form></div>;
+  return <div className="modal-content"><div className="modal-icon"><CalendarDays /></div><h2>{t.bookingTitle}</h2><p>{t.bookingText}</p><form onSubmit={(event) => submit(event, "/api/consultations")}><div className="form-grid"><Field label={t.form.name}><input name="name" required /></Field><Field label={t.form.phone}><input name="phone" required dir="ltr" /></Field><Field label={t.form.email}><input name="email" type="email" required dir="ltr" /></Field><Field label={t.caseType}><CustomSelect name="caseType" ariaLabel={t.caseType} options={t.caseTypes.map((item) => ({ value: item, label: item }))} /></Field><Field label={t.preferred}><CustomSelect name="preferredContact" ariaLabel={t.preferred} options={[{ value: "WhatsApp", label: "WhatsApp" }, { value: t.phone, label: t.phone }, { value: t.email, label: t.email }]} /></Field><Field label={t.form.message} wide><textarea name="message" rows={4} /></Field></div><label className="honeypot" aria-hidden="true">Website<input name="website" tabIndex={-1} autoComplete="off" /></label><input type="hidden" name="language" value={language} /><button className="button button-primary button-block" disabled={status === "loading"}>{status === "loading" ? t.loading : t.submitBooking}</button><FormNotice status={status} t={t} /></form></div>;
 }
 
 type IntakeState = ConnectedIntakeState;
@@ -882,7 +882,7 @@ function Assistant({ t, language, token, initialSession, onSession, openBooking,
   return <div className="modal-content legal-intake"><div className="assistant-opening-identity"><span className="assistant-portrait assistant-header-portrait"><img src={assetUrl("/images/sabeq-assistant-avatar.jpg")} alt="" width={84} height={84} decoding="async" /></span><h2>{t.assistant}</h2></div>
     <div className="intake-progress"><span><b>{intake?.progress || 0}%</b>{` ${tr(language, "اكتمال فهم القضية")}`}</span><i><em style={{ width: `${intake?.progress || 0}%` }} /></i></div>
     <div className="conversation-toolbar" aria-label={tr(language, "أدوات المحادثة")}><button type="button" onClick={newConversation} title={voiceUi.newChat}><Trash2 size={18} /><span>{voiceUi.newChat}</span></button><button type="button" onClick={exportConversation} disabled={!messages.length} title={tr(language, "تصدير المحادثة")}><Download size={18} /><span>{tr(language, "تصدير")}</span></button><button type="button" onClick={shareConversation} disabled={!messages.length} title={tr(language, "إرسال أو مشاركة المحادثة")}><Share2 size={18} /><span>{tr(language, "إرسال")}</span></button></div>
-    <PrivacyNotice language={language} context="ai" />
+
     <LegalToolsPanel key={toolSession} language={language} disabled={loading || voiceActive} request={(path, init) => memoFetch(path, token, init)} caseText={intake ? [...intake.facts, ...intake.requests].join("\n") : ""} onUseText={text => { setQuestion(text); setToolNotice(tr(language, "راجع النص المنقول ثم أرسله. لم يُضف إلى وقائع القضية تلقائياً.")); }} />
     <div className="intake-chat"><div className="chat-welcome"><Sparkles size={17} />{intro}</div>{messages.map((item, index) => <div key={`${item.role}-${index}`} className={`intake-message ${item.role}`}><b><span>{item.role === "user" ? tr(language, "أنت") : t.assistant}</span><span className="message-tools">{item.role === "user" && <button type="button" className="message-tool" onClick={() => editMessage(index)} aria-label={tr(language, "تعديل الرسالة")} title={tr(language, "تعديل")}><Pencil size={17} /></button>}<button type="button" className="message-tool danger" onClick={() => deleteMessage(index)} aria-label={tr(language, "حذف الرسالة")} title={tr(language, "حذف")}><Trash2 size={17} /></button></span></b><p>{item.content}</p></div>)}{(loading || voiceActive) && streamedAnswer && <div className="intake-message assistant" aria-live="polite"><b>{t.assistant}</b><p>{streamedAnswer}</p></div>}{loading && !streamedAnswer && <div className="intake-thinking"><Sparkles size={16} />{tr(language, "أحلل المعلومات وأحدد السؤال التالي…")}</div>}</div>
     {intake && <div className="intake-dashboard">
@@ -1009,7 +1009,7 @@ function MemoWizard({ t, language, token, initialData = null }: { t: SiteCopy; l
       fileTypeError: "صيغة الملف غير مدعومة. استخدم PDF أو DOCX أو TXT أو RTF أو JPG أو PNG أو WEBP.",
       fileCountError: "يمكن رفع 25 مستندًا كحد أقصى.",
       fileSizeError: "إجمالي حجم المستندات يجب ألا يتجاوز 50 ميغابايت.",
-      privacyUpload: "تُستخدم المستندات للتحليل المطلوب، ونطلب حذف ملفات المعالجة المؤقتة بعد انتهائه.",
+
       allParties: "جميع الأطراف والصفات",
       allPartiesHint: "يمكنك تعديل القائمة أو إضافة أي طرف لم يظهر في المستندات.",
       analysisWarnings: "ملاحظات تحتاج إلى مراجعتك",
@@ -1045,7 +1045,7 @@ function MemoWizard({ t, language, token, initialData = null }: { t: SiteCopy; l
       fileTypeError: "Unsupported format. Use PDF, DOCX, TXT, RTF, JPG, PNG, or WEBP.",
       fileCountError: "You can upload up to 25 documents.",
       fileSizeError: "The total document size must not exceed 50 MB.",
-      privacyUpload: "Documents are used for the requested analysis; we request deletion of temporary processing files afterwards.",
+
       allParties: "All parties and roles",
       allPartiesHint: "Edit the list or add any party that was not found in the documents.",
       analysisWarnings: "Items that need your review",
@@ -1081,7 +1081,7 @@ function MemoWizard({ t, language, token, initialData = null }: { t: SiteCopy; l
       fileTypeError: "یہ فارمیٹ قابلِ قبول نہیں۔ PDF، DOCX، TXT، RTF، JPG، PNG یا WEBP استعمال کریں۔",
       fileCountError: "زیادہ سے زیادہ 25 دستاویزات اپ لوڈ کی جا سکتی ہیں۔",
       fileSizeError: "دستاویزات کا مجموعی حجم 50 MB سے زیادہ نہیں ہونا چاہیے۔",
-      privacyUpload: "دستاویزات مطلوبہ تجزیے کے لیے استعمال ہوتی ہیں؛ بعد میں عارضی فائلیں حذف کرنے کی درخواست بھیجی جاتی ہے۔",
+
       allParties: "تمام فریقین اور حیثیتیں",
       allPartiesHint: "فہرست میں ترمیم کریں یا کوئی غائب فریق شامل کریں۔",
       analysisWarnings: "وہ نکات جن کا آپ کو جائزہ لینا ہے",
@@ -1477,7 +1477,7 @@ function MemoWizard({ t, language, token, initialData = null }: { t: SiteCopy; l
   if (memo) return <div className="memo-result" lang={language} dir={language === "en" ? "ltr" : "rtl"}><p role="note" className="form-notice">{memoApprovalNotice[language]}</p>{memoQuality && <div className="form-notice" role="status"><strong>{language === "ar" ? (memoQuality.status === "incomplete" ? "المذكرة غير مكتملة: توجد وقائع أو أسانيد تحتاج استكمالًا" : "اجتازت المسودة مراجعة الاتساق الآلية وتحتاج مراجعة قانونية") : language === "en" ? (memoQuality.status === "incomplete" ? "Incomplete draft: facts or legal sources need review" : "Draft passed automated consistency review; legal review is required") : (memoQuality.status === "incomplete" ? "مسودہ نامکمل ہے؛ حقائق یا قانونی ماخذ کی جانچ درکار ہے" : "مسودے کی خودکار مطابقت جانچ مکمل؛ قانونی جائزہ ضروری ہے")}</strong>{language === "ar" && <ul>{memoQuality.notices.map((notice,index)=><li key={index}>{notice}</li>)}</ul>}</div>}<div className="modal-icon"><FileCheck2 /></div><h2>{memoDocument ? interfaceLabel(memoDocument.title, language) : tr(language, "المذكرة القانونية")}</h2>{memoAnalysis && <div className="memo-analysis-summary"><strong><Sparkles size={18} /> {tr(language, "مصادر استشهدت بها المسودة")}</strong><span>{tr(language, "مراجع تشريعية مستشهد بها")}: {memoAnalysis.lawCount}</span><span>{tr(language, "استشهادات بمبادئ وأحكام تمييز")}: {memoAnalysis.cassationCount}</span><small>{tr(language, "لا يُدرج النظام مادة أو حكماً غير موجود في المكتبة الموثقة، وتبقى المراجعة النهائية للمجموعة.")}</small><ul>{memoAnalysis.sources.map(source => <li key={source.marker}><strong>{source.marker} — {source.title}</strong><span>{source.officialSource} · {source.reference}</span>{source.sourceUrl ? <a href={source.sourceUrl} target="_blank" rel="noopener noreferrer">{tr(language, "فتح المصدر الأصلي")}</a> : <small>{tr(language, "نص من المكتبة المرفوعة؛ لا يتوفر رابط عام للأصل.")}</small>}{source.libraryUpdatedAt && <small>{tr(language, "تحديث الفهرسة")}: {source.libraryUpdatedAt.slice(0, 10)} — {tr(language, "لا يثبت سريان النص.")}</small>}</li>)}</ul></div>}<>{memoDocument ? <PleadingPreview document={memoDocument} text={memo} language={language}/> : <pre lang="ar" dir="rtl">{memo}</pre>}</><div className="memo-result-tools" aria-label={tr(language, "أدوات المذكرة")}><button type="button" onClick={editGeneratedMemo}><Pencil size={18} />{tr(language, "تعديل")}</button><button type="button" onClick={archiveGeneratedMemo} disabled={archiving}><Archive size={18} />{archiving ? tr(language, "جارٍ الأرشفة") : tr(language, "أرشفة")}</button><button type="button" className="danger" onClick={deleteGeneratedMemo}><Trash2 size={18} />{tr(language, "حذف")}</button><button type="button" onClick={exportGeneratedMemo}><Download size={18} />{tr(language, "تصدير كملف")}</button><button type="button" onClick={() => void printGeneratedMemo()}><Printer size={18} />{tr(language, "طباعة")}</button></div>{resultNotice && <p role="status" className={`form-notice ${resultNotice.kind}`}>{resultNotice.message}</p>}</div>;
   return (
     <div className="memo-modal">
-      <div className="memo-modal-title"><div className="modal-icon"><FileText /></div><span><h2>{t.memoModal}</h2><p><Languages size={15} />{t.arabicOnly}</p><small className="memo-guest-notice">{language === "ar" ? "وضع تجريبي: متاح مؤقتاً دون تسجيل دخول. بيانات الضيف لا تُؤرشف في سجل مستخدم؛ للمسجّل قد تُحفظ سجلات الخدمة وفق سياسة الخصوصية." : language === "en" ? "Pilot mode: available without sign-in. Guest content is not archived in a user record; signed-in service records may be saved under the privacy policy." : "آزمائشی موڈ بغیر سائن اِن دستیاب ہے۔ مہمان کا مواد صارف کے ریکارڈ میں آرکائیو نہیں ہوتا؛ رجسٹرڈ صارف کے سروس ریکارڈ محفوظ ہو سکتے ہیں۔"}</small></span></div>
+      <div className="memo-modal-title"><div className="modal-icon"><FileText /></div><span><h2>{t.memoModal}</h2><p><Languages size={15} />{t.arabicOnly}</p></span></div>
       {memoData.conversationTranscript && <details className="memo-conversation-review" open>
         <summary>{language === "ar" ? "المحادثة وملخص القضية المنقولان من المساعد" : language === "en" ? "Conversation and case summary from the assistant" : "معاون سے منتقل گفتگو اور مقدمے کا خلاصہ"}</summary>
         <p>{language === "ar" ? "راجع الأسماء والأرقام والوقائع والطلبات أدناه. يتولى المساعد التصحيح اللغوي والبحث القانوني؛ كلام المساعد ليس مصدراً قانونياً." : language === "en" ? "Confirm names, numbers and case facts. The assistant corrects the language and researches legal sources; assistant messages are not legal authorities." : "گفتگو اور خلاصے کی تصحیح کریں۔ منظور شدہ حقائق اور مطالبات بنیاد ہیں؛ معاون کی بات قانونی ماخذ نہیں۔"}</p>
@@ -1486,7 +1486,7 @@ function MemoWizard({ t, language, token, initialData = null }: { t: SiteCopy; l
         {memoData.conversationTranscript.length > 30000 && <p role="alert">{tr(language, "التفريغ طويل. صدّر النسخة الكاملة ثم اختصر النص إلى 30,000 حرف قبل التوليد؛ لن يُحذف جزء منه تلقائياً.")}</p>}
       </details>}
       <div className="steps">{t.steps.map((item, index) => <div key={item} className={index === step ? "active" : index < step ? "done" : ""}><i>{index < step ? <Check size={14} /> : index + 1}</i><span>{item}</span></div>)}</div>
-      <PrivacyNotice language={language} context="ai" />
+
       <MemoVoiceInput language={language} disabled={status === "loading" || analysisStatus === "loading" || Boolean(recordingField || transcribingField || draftAction)} onBusy={setVoiceEntryBusy} request={(path, init) => memoFetch(path, token, init)} apply={patch => {
         const currentFields = memoFormRef.current ? Object.fromEntries(Array.from(new FormData(memoFormRef.current).entries(), ([key,value]) => [key,String(value)])) : {};
         setMemoData(current => ({ ...current, ...currentFields, facts, requests, ...patch }));
@@ -1541,7 +1541,7 @@ function MemoWizard({ t, language, token, initialData = null }: { t: SiteCopy; l
                 <button type="button" className="button button-primary" onClick={analyzeDocuments} disabled={!documents.length || analysisStatus === "loading"}>
                   {analysisStatus === "loading" ? <><Sparkles size={17} />{ui.analyzing}</> : <><Search size={17} />{ui.analyze}</>}
                 </button>
-                <p><ShieldCheck size={16} />{ui.privacyUpload}</p><PrivacyNotice language={language} context="files" />
+
               </div>
 
               {analysisNotice && <p className={`analysis-notice ${analysisStatus}`}><ShieldCheck size={17} />{analysisNotice}</p>}
@@ -1625,7 +1625,7 @@ function MemoWizard({ t, language, token, initialData = null }: { t: SiteCopy; l
           {step === 2 && <div className="research-box"><Search size={30} /><h3>{language === "ar" ? "مسار التحليل القانوني للمذكرة" : t.steps[2]}</h3><p>{language === "ar" ? "يحلّل المحرك الوقائع والطلبات، يصنّف المسائل القانونية، يطابقها مع القوانين والمواد الكويتية، ثم يبحث عن مبادئ وأحكام التمييز المتصلة بذات المسألة والسبب قبل بناء الدفوع بصياغة المحاكم الكويتية." : language === "en" ? "The engine classifies the issues, matches verified Kuwaiti laws and provisions, then retrieves materially related Court of Cassation principles before drafting each argument." : "انجن قانونی مسائل کی درجہ بندی کرتا ہے، مصدقہ کویتی قوانین اور متعلقہ امتیازی عدالتی اصولوں سے مطابقت کرتا ہے، پھر ہر دلیل تیار کرتا ہے۔"}</p><div className="analysis-pipeline"><span>1. {tr(language, "تحليل الوقائع")}</span><span>2. {tr(language, "تحديد المواد")}</span><span>3. {tr(language, "مطابقة أحكام التمييز")}</span><span>4. {tr(language, "بناء الدفوع والطلبات")}</span></div><Field label={language === "ar" ? "ملاحظات قانونية إضافية (اختيارية)" : language === "en" ? "Additional legal notes (optional)" : "اضافی قانونی نوٹس (اختیاری)"}><textarea name="legalIssues" rows={6} defaultValue={memoData.legalIssues} placeholder={tr(language, "اتركها فارغة إن لم تكن لديك ملاحظة؛ سيستنتج النظام المسائل القانونية تلقائياً.")} /></Field><div><ShieldCheck size={18} />{language === "ar" ? "لن تُدرج مادة أو حكم تمييز إلا من مصدر موثق، وسيصرّح النظام عند عدم العثور على تطابق." : language === "en" ? "No law or judgment is included unless it is found in the verified legal database." : "کوئی قانون یا فیصلہ شامل نہیں ہوگا جب تک وہ مصدقہ قانونی ڈیٹابیس میں نہ ہو۔"}</div></div>}
           {step === 3 && <div className="review-box"><FileCheck2 size={34} /><h3>{t.review}</h3><p>{t.arabicOnly}</p><p className="template-badge">{tr(language, "الصيغة")}: {tr(language, selectPleadingKind(memoData) === "appeal" ? "صحيفة استئناف" : selectPleadingKind(memoData) === "claim" ? "صحيفة دعوى" : "مذكرة بدفاع")}</p><p role="note" className="form-notice">{memoApprovalNotice[language]}</p>
             {memoData.conversationTranscript && <dl className="memo-handoff-details">{[[t.caseType, "caseType"], [t.court, "court"], [tr(language, "الدائرة"), "courtCircuit"], [tr(language, "مرحلة القضية"), "caseStage"], [t.clientName, "clientName"], [t.role, "partyRole"], [t.otherParty, "otherParty"], [ui.allParties, "allParties"], [t.facts, "facts"], [t.requests, "requests"]].map(([label, key]) => <div key={key}><dt>{label}</dt><dd>{["caseType", "court", "partyRole", "caseStage"].includes(key) ? interfaceLabel(memoData[key] || "", language) : memoData[key]}</dd></div>)}</dl>}
-            <div><ShieldCheck size={18} />{t.privacy}</div><div><BookOpen size={18} />{t.libraryText}</div>
+            <div><BookOpen size={18} />{t.libraryText}</div>
             <label className="memo-generation-approval"><input type="checkbox" checked={memoApproved} onChange={event => setMemoApproved(event.target.checked)} disabled={status === "loading"} />{generationUi.approval}</label></div>}
         </div>
         <div className="memo-actions">{step > 0 ? <button type="button" className="button button-outline" disabled={status === "loading"} onClick={() => { setMemoApproved(false); setStep(step - 1); }}>{t.previous}</button> : <span />}<button className="button button-primary" disabled={voiceEntryBusy || status === "loading" || analysisStatus === "loading" || Boolean(step === 1 && documents.length && analysisStatus !== "success") || Boolean(recordingField || transcribingField || draftAction)}>{status === "loading" ? t.loading : step === 3 ? t.generate : step === 1 && documents.length === 0 ? ui.continueManual : t.next}<ArrowLeft size={17} /></button></div>

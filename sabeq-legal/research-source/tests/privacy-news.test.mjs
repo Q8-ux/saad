@@ -23,13 +23,13 @@ test('policy preferences remove measurement identifiers and handle unavailable s
  listeners.enable();assert.equal(status.textContent,'enabled');assert.equal(localStorage.getItem('sabeq-analytics-consent'),'granted');
  vm.runInNewContext(read('public/privacy.js'),{document,navigator:{},localStorage:{getItem(){throw Error('blocked');}},sessionStorage,window});assert.equal(status.textContent,'unavailable');
 });
-test('policy and notices have local, readable routes for every site language',()=>{
+test('footer policy links have local, readable routes for every site language',()=>{
  const notice=module('app/privacy-notice.tsx');
  for(const language of ['ar','en','ur']){
   const path=`privacy${language==='ar'?'':'-'+language}.html`,html=read('public/'+path);
   assert.match(html,new RegExp(`<html lang="${language}" dir="${language==='en'?'ltr':'rtl'}"`));
   assert.equal((html.match(/<section /g)||[]).length,10);assert.match(html,/mailto:info@sabeq.legal/);assert.doesNotMatch(html,/<(?:script|link)[^>]+(?:src|href)="https?:/);
-  const rendered=renderToStaticMarkup(React.createElement(notice.default,{language,context:'ai'}));assert.ok(rendered.includes(`./${path}`));assert.match(rendered,/target="_blank"/);
+  const rendered=renderToStaticMarkup(React.createElement(notice.PrivacyLink,{language}));assert.ok(rendered.includes(`./${path}`));assert.match(rendered,/target="_blank"/);
   if(language==='en')assert.doesNotMatch(rendered,/[\u0600-\u06ff]/);
  }
 });
