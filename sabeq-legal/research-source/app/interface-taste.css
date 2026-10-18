@@ -529,7 +529,6 @@ html[data-theme="dark"] .button-primary {
 .group-post-artwork { width: 100%; display: block; padding: 0; overflow: hidden; border: 1px solid #9ab1b7; border-radius: 10px; background: #e6eced; cursor: zoom-in; }
 .group-post-image { display: block; aspect-ratio: 3 / 4; }
 .group-post-artwork img { width: 100%; height: 100%; object-fit: contain; display: block; }
-.group-post-open { display: flex; align-items: center; justify-content: center; gap: 7px; min-height: 44px; background: #0a2c3a; color: #fff; border-top: 1px solid #9bd1d0; padding: 6px 12px; font-size: 19px; line-height: 1.4; }
 .group-post-dialog { color: #f5fbfc; background: #0b2b3a; border: 1px solid #91bdc5; border-radius: 14px; padding: 0; width: min(1100px,94vw); max-height: 94dvh; max-width: 94vw; overflow: auto; font-family: inherit; }
 .group-post-dialog::backdrop { background: #04161de8; }
 .group-post-dialog-content { padding: 20px; }
@@ -542,7 +541,7 @@ html[data-theme="dark"] .button-primary {
 .group-post-zoom img { width: auto; max-width: 100%; max-height: 72dvh; height: auto; object-fit: contain; display: block; margin-inline: auto; }
 .group-post-dialog-content > a { display: inline-flex; align-items: center; min-height: 48px; color: #b1ece7; font-size: 21px; text-decoration: underline; text-underline-offset: 4px; margin-top: 12px; }
 @media(max-width:700px) { .group-posts { margin-top: 30px; } .group-post { flex-basis: min(80vw,300px); } .group-post-dialog-content { padding: 14px; } .group-post-dialog h2 { font-size: 24px; } }
-@media print { .group-posts-viewport { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); overflow: visible; } .group-post-open { display: none; } .group-post { break-inside: avoid; } }
+@media print { .group-posts-viewport { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); overflow: visible; } .group-post { break-inside: avoid; } }
 
 .privacy-link { display: inline-flex; align-items: center; min-height: 44px; color: #006367; font-weight: 700; text-decoration: underline; text-underline-offset: 4px; }
 .footer .privacy-link { color: #fff; }

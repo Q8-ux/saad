@@ -7,9 +7,9 @@ import type { Language } from "./site-content";
 import { groupPosts, type GroupPost } from "./group-posts";
 
 const copy = {
-  ar: { title: "أخبار مجموعة سابق القانونية", open: "عرض الخبر", close: "إغلاق الخبر", zoom: "تكبير النص", fit: "عرض الصورة كاملة", source: "المصدر الأصلي في إنستقرام", date: "تاريخ الحكم", carousel: "شريط أخبار" },
-  en: { title: "Sabeq Legal Group news", open: "View news item", close: "Close news item", zoom: "Enlarge text", fit: "Fit full image", source: "Original Instagram post", date: "Judgment date", carousel: "News carousel" },
-  ur: { title: "سابق لیگل گروپ کی خبریں", open: "خبر دیکھیں", close: "خبر بند کریں", zoom: "متن بڑا کریں", fit: "پوری تصویر دکھائیں", source: "اصل انسٹاگرام پوسٹ", date: "فیصلے کی تاریخ", carousel: "خبروں کی پٹی" },
+  ar: { title: "أخبار مجموعة سابق القانونية", open: "تكبير الصورة", close: "إغلاق الخبر", zoom: "تكبير النص", fit: "عرض الصورة كاملة", source: "المصدر الأصلي في إنستقرام", date: "تاريخ الحكم", carousel: "شريط أخبار" },
+  en: { title: "Sabeq Legal Group news", open: "Enlarge image", close: "Close news item", zoom: "Enlarge text", fit: "Fit full image", source: "Original Instagram post", date: "Judgment date", carousel: "News carousel" },
+  ur: { title: "سابق لیگل گروپ کی خبریں", open: "تصویر بڑی کریں", close: "خبر بند کریں", zoom: "متن بڑا کریں", fit: "پوری تصویر دکھائیں", source: "اصل انسٹاگرام پوسٹ", date: "فیصلے کی تاریخ", carousel: "خبروں کی پٹی" },
 };
 
 export default function GroupPostsStrip({ language, posts = groupPosts }: { language: Language; posts?: GroupPost[] }) {
@@ -63,7 +63,7 @@ export default function GroupPostsStrip({ language, posts = groupPosts }: { lang
     <div className="group-posts-heading"><h2 id="group-posts-title">{t.title}</h2></div>
     <div className={`group-posts-viewport${canScroll ? "" : " no-overflow"}`} ref={viewport} tabIndex={canScroll ? 0 : undefined} aria-label={t.title} onKeyDown={event => { if (canScroll && (event.key === "ArrowRight" || event.key === "ArrowLeft")) { event.preventDefault(); move((event.key === "ArrowRight") === rtl ? -1 : 1); } }}>
       {posts.map(post => <article className="group-post" key={post.id}>
-        <button type="button" className="group-post-artwork" onClick={() => setSelected(post)} aria-label={`${t.open}: ${post.title[language]}`} aria-haspopup="dialog"><span className="group-post-image"><img src={assetUrl(post.artwork.src)} alt={post.title[language]} width={post.artwork.width} height={post.artwork.height} loading="lazy" decoding="async" /></span><span className="group-post-open"><ZoomIn size={20} aria-hidden="true" />{t.open}</span></button>
+        <button type="button" className="group-post-artwork" onClick={() => setSelected(post)} aria-label={`${t.open}: ${post.title[language]}`} aria-haspopup="dialog"><span className="group-post-image"><img src={assetUrl(post.artwork.src)} alt={post.title[language]} width={post.artwork.width} height={post.artwork.height} loading="lazy" decoding="async" /></span></button>
       </article>)}
     </div>
     <dialog ref={dialog} className="group-post-dialog" aria-labelledby="group-post-dialog-title" onClose={() => setSelected(null)} onClick={event => { if (event.target === event.currentTarget) dialog.current?.close(); }}>
