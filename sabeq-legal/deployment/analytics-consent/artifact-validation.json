@@ -1,0 +1,33 @@
+{
+  "sourceCommit": "d1d6f9661e30f8840557460d646ce2415ef14973",
+  "serviceBaselineCommit": "5a6a51ccd0b58fb82b09c9e0d35973818349b1c6",
+  "clientAsset": "/saad/sabeq-legal/assets/index-DegYa7Pu.js",
+  "clientSha256": "13892c815a851af291ff432afe341777d279cf8ae9e559df6e9b688e45b48a67",
+  "policySha256": {
+    "privacy.html": "a4db7e4fa903c6bbf2c12f682f3f9e2ba18dd2ced13fcbbd82908b7335880b42",
+    "privacy-en.html": "c2eb17aa757124944a46656cb30af90c3db8ee7b05c97f8b846d1e0537b00e97",
+    "privacy-ur.html": "f6bbea7e13d3322d492a1b3e86572c0aec378d72b5bd20d5c05381d531bce949",
+    "privacy.js": "2bdbbf7ede5843c1c0ce8a866a0f8ec964c28983e51a245abb75d2930e1662d7"
+  },
+  "serviceAndGitHubPoliciesMatch": true,
+  "changedApplicationSourceMatchesService": [
+    "app/analytics-consent.tsx",
+    "app/group-posts-strip.tsx",
+    "app/interface-taste.css",
+    "app/sabeq-site.tsx",
+    "lib/visitor-analytics.ts",
+    "public/privacy.html",
+    "public/privacy-en.html",
+    "public/privacy-ur.html",
+    "public/privacy.js",
+    "tests/analytics-consent.test.mjs",
+    "tests/privacy-news.test.mjs"
+  ],
+  "unchangedLegacyBackendDifferences": [
+    "lib/sabeq-agent-bridge.ts",
+    "lib/openai.ts",
+    "app/api/legal/assistant/route.ts"
+  ],
+  "originalNewsImagesUnchanged": true,
+  "deployment": "not-performed"
+}

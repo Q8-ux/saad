@@ -1,6 +1,6 @@
 {
-  "release": "2026-10-18-privacy-original-posts",
-  "clientSource": "5a6a51ccd0b58fb82b09c9e0d35973818349b1c6",
+  "release": "2026-10-18-explicit-analytics-consent",
+  "clientSource": "d1d6f9661e30f8840557460d646ce2415ef14973",
   "backendSource": "5a6a51ccd0b58fb82b09c9e0d35973818349b1c6",
   "assistant": "official-research-sources-1",
   "voice": "gulf-male-voice-4",
@@ -21,14 +21,13 @@
   "finalMemo": "clean-no-review-notes-1",
   "memoResultTools": "bottom-vector-actions-1",
   "memoPreview": "document-derived-clean-text-1",
-  "githubPagesAsset": "index-CzOdhA_g.js",
-  "publishedAt": "2026-10-18T11:45:18.028056+00:00",
+  "githubPagesAsset": "index-DegYa7Pu.js",
   "memoLanguage": "ar-KW",
   "memoDirection": "rtl",
   "memoAlignment": "right",
   "interfaceLocalization": "ar-en-ur-tools-guidance-1",
   "memoProseLanguage": "arabic-with-protected-names-and-identifiers-1",
-  "builtAt": "2026-10-08T03:06:00Z",
+  "builtAt": "2026-10-18T13:03:10.068792+00:00",
   "backendVersion": 117,
   "pleadingLayout": "first-page-only-sidebar-and-frame-full-width-right-aligned-continuations",
   "citationCorrection": "one-bounded-server-retry-before-archive",
@@ -63,9 +62,9 @@
   "pleadingFormValidation": "claim-2-and-appeal-4-pages-rendered-in-AlMohanad;no-device-or-physical-printer-test",
   "interfaceTaste": "large-arabic-task-first-rtl-mobile-navigation-1",
   "interfaceTasteValidation": "31-focused-tests-pass;both-builds;private-corpus-absent;contrast-measured;browser-device-QA-not-run",
-  "privacyPolicy": "ar-en-ur-readable-local-policy-analytics-opt-out-1",
+  "privacyPolicy": "ar-en-ur-explicit-opt-in-live-withdrawal-2",
   "privacyValidation": "29-related-tests;both-builds;private-corpus-absent;local-assets-verified",
-  "groupPosts": "3-actual-case-news-original-artworks-below-videos-in-site-zoom-1",
+  "groupPosts": "3-original-case-news-visible-card-navigation-ar-en-ur-2",
   "groupPostCoverage": "3-case-outcome-news-from-13-reviewed-photo-posts;10-guidance-posts-excluded;full-archive-unavailable-without-sign-in",
   "groupPostJudgmentDates": [
     "2026-09-14",
@@ -73,5 +72,12 @@
     "2026-09-21"
   ],
   "groupNewsHeading": "أخبار مجموعة سابق القانونية",
-  "groupPostBrowserValidation": "native-production:3-news-only;correct-heading;below-video-sibling;3-images-loaded;dialog-and-judgment-date;960px-zoom;escape-focus-return;privacy-route-readable;controls-only-if-overflow"
+  "groupPostBrowserValidation": "native-production:3-news-only;correct-heading;below-video-sibling;3-images-loaded;dialog-and-judgment-date;960px-zoom;escape-focus-return;privacy-route-readable;controls-only-if-overflow",
+  "releaseStatus": "pull-request-candidate-not-deployed",
+  "analyticsConsent": "explicit-opt-in-default-off-live-revocation-1",
+  "analyticsConsentSource": "d1d6f9661e30f8840557460d646ce2415ef14973",
+  "analyticsConsentValidation": "85-regression-tests;26-mirrored-source-tests;3-scoped-release-tests;both-builds;private-corpus-absent;18-baseline-type-errors-unchanged",
+  "analyticsConsentDeployment": "PR-only;service-and-official-domain-not-deployed",
+  "serviceConsentSource": "d1d6f9661e30f8840557460d646ce2415ef14973",
+  "previousPublishedAt": "2026-10-18T11:45:18.028056+00:00"
 }
