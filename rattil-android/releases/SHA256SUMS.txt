@@ -1,1 +1,1 @@
-e555c65004c79df7a1aa42b0ddabd65cb558731f1dcf795eed2e92b7020fa7a4  rattil-android/releases/Rattil-Quran.apk
+196af2700c970cd72a1b703e57017d5f041c998df265447e00d6e3bcd648e657  rattil-android/releases/Rattil-Quran.apk
