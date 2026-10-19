@@ -68,10 +68,11 @@
 }
 
 
-/* Rattil UI typography: Amiri.
-   Quran verse surfaces keep their dedicated Quran typography from app.css. */
+/* Rattil typography: Amiri across the full site, including Quran reading surfaces. */
 html,
 body,
+#root,
+#root *,
 button,
 input,
 select,
@@ -80,9 +81,14 @@ nav,
 header,
 footer,
 .rattil-credit,
-.rattil-credit-label,
-.rattil-whatsapp-credit,
-.rattil-whatsapp-credit b {
+.rattil-credit *,
+.quran-text,
+.hero-verse,
+.ayah-card,
+.ayah-card *,
+.session-verse,
+.matched-verse-text-button,
+.matched-verse-text-button * {
   font-family: "Amiri", serif !important;
 }
 
