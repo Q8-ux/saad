@@ -331,3 +331,16 @@ html body .quantity-stepper strong {
     font-size: 14px;
   }
 }
+
+
+/* Hide unintended small site/app badge shown beside Tamweenat label on product cards */
+.product-card [class*="site"],
+.product-card [class*="badge"] img[alt*="site" i],
+.product-card [class*="badge"] svg[aria-label*="site" i],
+.product-card .site-badge,
+.product-card .sites-badge,
+.product-card .app-site-badge,
+.product-card .provider-badge > svg:not(:only-child),
+.product-card .provider-badge > img:not(:only-child) {
+  display:none !important;
+}
