@@ -88,6 +88,7 @@ const adminOnly=(req,res,next)=>req.user?.role==='admin'?next():res.status(403).
 function findRestaurantForUser(username,password){for(const r of store.restaurants){const u=r.users.find(x=>x.username===username&&x.password===password&&x.active);if(u&&r.active)return{r,u};}return null;}
 function restaurantView(r){const s=state(r);return{...r,users:undefined,...s,orders:store.orders.filter(o=>o.restaurantId===r.id),invoices:store.invoices.filter(i=>i.restaurantId===r.id),messages:store.messages.filter(m=>m.restaurantId===r.id)};}
 
+app.get('/',(req,res)=>res.redirect(302,'https://q8-ux.github.io/saad/tamweenat/'));
 app.get('/health',(req,res)=>res.json({ok:true,service:'tamweenat-api',ai:Boolean(process.env.OPENAI_API_KEY),time:now()}));
 app.get('/api/catalog',(req,res)=>res.json(catalog));
 app.post('/api/auth/admin',(req,res)=>{const{username,password}=req.body||{};if(username!==ADMIN_USERNAME||password!==ADMIN_PASSWORD)return res.status(401).json({error:'invalid_credentials'});audit(username,'login','admin');res.json({token:sign({role:'admin',username}),user:{role:'admin',username}});});
