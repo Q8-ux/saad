@@ -11,7 +11,7 @@
     "github-pages/source/backend-config.mjs": "66c76e25e1e8a27147be80978156e3e17a6df3c7adfe259c91dafdbf6c05d7fc",
     "github-pages/source/development-paths.mjs": "0944432986d4773ed6962b517569899e1add7405844ee3737a2b596b516f3314",
     "github-pages/source/local.css": "046f159eefabf9beb6fc75976f8e06f8617faa21b7e43caf6c0dae6a4b05b793",
-    "github-pages/source/radar-dashboard.tsx": "72a7bd789a25d4b0cb7d5e2b9f0b0df53da76ea1e9fe53a3ce2f9c80670865bc",
+    "github-pages/source/radar-dashboard.tsx": "f4d15a4fe293253a0656fd31c68b147fc51f052b782d210ca6c3375fcd9681f6",
     "github-pages/source/local-search.mjs": "1c3d97229e04a023c78eaaf22edc5305dff57efb157ed447bc27ff8892de0d22",
     "github-pages/source/virtual-results.tsx": "43cb0f428a4825b4f9b9a10c9e2e91ee1d68157b07ab98bc3c439d84510d2643",
     "github-pages/source/tools-panel.tsx": "45ca05dde8eede2e585a6c18fcd1bb948cbf3cf67062290dc0875c39ec8c65ef",
@@ -21,10 +21,10 @@
     "worker/model.json": "809572756f63e63a80649d11e52221b78b047ba3a209ded617764c3f7057d36d"
   },
   "assets": {
-    "index.html": "276f2c337218366652076e90f25ae9b25141e4e5a406cf2caf34d81fb1fadd28",
+    "index.html": "69be8215dc53f8464e13607f8d6dc8ce7fd5227a7385205bdd35327963eb8a94",
     "favicon.svg": "1ecbb96e3d87afd70c5f095d47b380357fbac22eb8ceca5b4c7ad4b16cba5e79",
     "assets/index-DobNBh3n.css": "e9ca4e707ba42247a021f4ec64e7f68a7c94c12ec0babf1be81b1b22ecd95b3c",
-    "assets/radar-CBsrv2RZ.js": "05f9730d39e930c199716af0f169826869ec428471958a0f43d245d4d48470c6",
+    "assets/radar-vxfbCHAH.js": "b7fe6ee460374b0b140d2b024d2d907d07b2c735deca106bdc01b79711d3b3cb",
     "assets/semantic-worker-CfTC1XUf.js": "49e3b2bddae8f5a81860bcfe8ae67a3772dab6979788c744a10937e3eba65137"
   }
 }
