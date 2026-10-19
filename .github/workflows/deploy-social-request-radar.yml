@@ -38,6 +38,7 @@ jobs:
         working-directory: social-request-radar
         run: |
           node --test tests/*.test.mjs
+          python -m unittest discover -s content-worker -p 'test_*.py'
           node node_modules/typescript/bin/tsc --project github-pages/tsconfig.json --noEmit
           node scripts/verify-github-pages.mjs
       - uses: actions/configure-pages@v5

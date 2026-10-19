@@ -1,6 +1,7 @@
 export const developmentGuide='https://github.com/Q8-ux/saad/blob/main/social-request-radar/docs/development-paths.md';
 const project='https://github.com/Q8-ux/saad/tree/main/social-request-radar';
 export const appliedPaths=[
+  {name:'مسار إنشاء المحتوى',status:'إدارة الحملات مفعلة · المحركات بحسب الربط',detail:'عشر أدوات موزعة على البحث والسكربت والصورة والصوت والفيديو والنشر. استوديو ومكتبة وتقويم محلي؛ الإنتاج الآلي يحتاج خدمة كتابة أو عامل إنتاج متحققاً.',url:project+'/docs/content-factory.md'},
   {name:'ربط مصدر البيانات',status:'مفعّل · إعداد المصدر مطلوب',detail:'خادم الجمع مربوط بهذه النسخة. راجع حالته في مصادر البيانات؛ صلاحية مفتاحك وتوفر التعليقات يُختبران عند أول بحث.',url:project+'/edge'},
   {name:'هوية التعليقات ووقت المصدر',status:'مفعّل',detail:'المعرّف ثابت عند إعادة الاستيراد، مع فصل وقت الجمع عن وقت الاستيراد وإبقاء المجهول غير مسجل.',url:project+'/lib'},
   {name:'فهم الأسئلة العربية',status:'مفعّل بقواعد قابلة للمراجعة',detail:'التقاط أسئلة مثل «كم» و«شلون» وطلبات التوصية، مع إظهار الكلمات التي دعمت التصنيف.',url:project+'/lib'},

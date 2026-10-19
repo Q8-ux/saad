@@ -1,7 +1,8 @@
 import {normalizeRecord,prepareSpec,audienceSignals,category,growthMetrics,platformNames} from '../../lib/radar-core.mjs';
+import {normalizeCampaign} from '../../lib/content-core.mjs';
 
 export const transferLimit=10*1024*1024;
-const kinds=new Set(['connector','dataset','search','saved','metric']);
+const kinds=new Set(['connector','dataset','search','saved','metric','campaign']);
 const text=(value,max=300)=>typeof value==='string'?value.slice(0,max):'';
 const timestamp=value=>typeof value==='string'&&!Number.isNaN(Date.parse(value))?new Date(value).toISOString():null;
 const count=value=>Number.isSafeInteger(value)&&value>=0?value:0;
@@ -36,6 +37,7 @@ export function readTransfer(input,endpoint){
       if(typeof raw.id!=='string'||!raw.id||raw.id.length>300||doc.key!==doc.kind+':'+raw.id)throw invalid();
       if(doc.kind==='dataset')payload={id:raw.id,name:text(raw.name,100),records:rows(raw.records),createdAt:timestamp(raw.createdAt)};
       if(doc.kind==='saved')payload=record(raw);
+      if(doc.kind==='campaign')payload={...normalizeCampaign({...raw,state:'draft'}),provenance:'imported-draft'};
       if(doc.kind==='search'){
         if(!['completed','uncollected'].includes(raw.state))throw invalid();
         const spec=prepareSpec(raw.spec);spec.maxRequests=Math.min(12,spec.maxRequests);spec.maxCredits=Math.min(20,spec.maxCredits);

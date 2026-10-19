@@ -1,6 +1,7 @@
 import {prepareSpec,analyze,importRecords,normalizeRecord,growthMetrics,platformNames} from '../../lib/radar-core.mjs';
 import {platformCounts} from './search-state.mjs';
 import {makeTransfer,readTransfer} from './device-transfer.mjs';
+import {contentAction,contentSummary} from './content-workspace.mjs';
 export function indexedStore(){
   let connection;
   async function db(){if(!connection)connection=new Promise((resolve,reject)=>{if(!globalThis.indexedDB)return reject(Error('تخزين المتصفح غير متاح. افتح الموقع في متصفح يدعم IndexedDB.'));const r=indexedDB.open('saad-request-radar-device-v1',1);r.onupgradeneeded=()=>r.result.createObjectStore('documents',{keyPath:'key'});r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(Error('تعذر فتح بيانات هذا المتصفح.'));});return connection;}
@@ -12,6 +13,7 @@ export function createLocalApi(store,{remote=null}={}){let backendReady=false,ba
   const all=await store.all();const list=kind=>all.filter(d=>d.kind===kind).sort((a,b)=>b.updatedAt.localeCompare(a.updatedAt)).map(d=>d.payload);
   const put=async(key,kind,payload)=>{await store.put({key,kind,payload,updatedAt:new Date().toISOString()});return payload;};
   const connection=list('connector')[0];
+  if(action.startsWith('content-'))return contentAction(action,body,{list,put,store});
   if(action==='export-transfer')return makeTransfer(all,remote?.endpoint||'',body?.preferredSearchId||list('view')[0]?.searchId);
   if(action==='import-transfer'){
     const transfer=readTransfer(body,remote?.endpoint||'');
@@ -27,7 +29,7 @@ export function createLocalApi(store,{remote=null}={}){let backendReady=false,ba
     if(incoming){backendReady=true;backendError='';}
     return {connected:!!incoming,documents:transfer.documents.length,records:transfer.documents.filter(doc=>doc.kind==='dataset').reduce((n,doc)=>n+doc.payload.records.length,0),searchId:selected||null};
   }
-  if(action==='workspace')return {connected:!!remote&&backendReady&&!!connection?.credential,backendConfigured:!!remote,backendReady,backendError,backendUrl:remote?.endpoint||'',sourceVerifiedAt:connection?.verifiedAt||null,deviceLocal:true,selectedSearchId:list('view')[0]?.searchId||null,searches:list('search').slice(0,20),saved:list('saved'),metrics:list('metric'),toolsJobs:list('toolJob'),toolsReports:list('toolReport').slice(0,12),datasets:list('dataset').map(d=>({id:d.id,name:d.name,count:d.records.length,platformCounts:platformCounts(d.records),createdAt:d.createdAt}))};
+  if(action==='workspace')return {...contentSummary(list),connected:!!remote&&backendReady&&!!connection?.credential,backendConfigured:!!remote,backendReady,backendError,backendUrl:remote?.endpoint||'',sourceVerifiedAt:connection?.verifiedAt||null,deviceLocal:true,selectedSearchId:list('view')[0]?.searchId||null,searches:list('search').slice(0,20),saved:list('saved'),metrics:list('metric'),toolsJobs:list('toolJob'),toolsReports:list('toolReport').slice(0,12),datasets:list('dataset').map(d=>({id:d.id,name:d.name,count:d.records.length,platformCounts:platformCounts(d.records),createdAt:d.createdAt}))};
   if(action==='select-search'){
     const search=list('search').find(s=>s.id===body?.id);
     if(!search||!['completed','uncollected'].includes(search.state))throw Error('الجولة غير موجودة على هذا الجهاز.');

@@ -1,0 +1,65 @@
+{
+  "reviewedAt": "2026-10-19",
+  "repositories": [
+    {
+      "id": "social-research",
+      "repository": "ScrapeCreators/social-media-research-skills",
+      "commit": "64ba7b4dea71e130d2712ffb6c1c1024b3b7c4b2",
+      "license": "MIT"
+    },
+    {
+      "id": "deep-research",
+      "repository": "LearningCircuit/local-deep-research",
+      "commit": "39dc78acc90e159a15c054a5d876a897fb9cf261",
+      "license": "MIT"
+    },
+    {
+      "id": "opencreator",
+      "repository": "krillinai/OpenCreator",
+      "commit": "a595282fba72d6594f56b6d4dd928fb3cae72110",
+      "license": "Apache-2.0"
+    },
+    {
+      "id": "flux",
+      "repository": "black-forest-labs/flux2",
+      "commit": "50fe5162777813d869182b139e83b10743caef15",
+      "license": "Apache-2.0 code; klein 4B weights Apache-2.0"
+    },
+    {
+      "id": "kokoro",
+      "repository": "hexgrad/kokoro",
+      "commit": "dfb907a02bba8152ca444717ca5d78747ccb4bec",
+      "license": "Apache-2.0"
+    },
+    {
+      "id": "ace-step",
+      "repository": "ace-step/ACE-Step-1.5",
+      "commit": "ca1e85fe9430179831e6bc6be790c332190a3866",
+      "license": "MIT"
+    },
+    {
+      "id": "video-factory",
+      "repository": "YILS-LIN/short-video-factory",
+      "commit": "bc32e3515b38df548ff0608f7325b7806e8cfa20",
+      "license": "AGPL-3.0"
+    },
+    {
+      "id": "shorts",
+      "repository": "Anil-matcha/AI-Youtube-Shorts-Generator",
+      "commit": "3d11f2e6ecbbb9757d788e1bd05695c01f3e6c6c",
+      "license": "MIT"
+    },
+    {
+      "id": "podcastfy",
+      "repository": "souzatharsis/podcastfy",
+      "commit": "053b54a0917e35edb2808049499292361ccaae7b",
+      "license": "Apache-2.0"
+    },
+    {
+      "id": "social-agent",
+      "repository": "langchain-ai/social-media-agent",
+      "commit": "efe42b62e413c99125a57d7c6dab228d4c13756b",
+      "license": "MIT"
+    }
+  ]
+}
