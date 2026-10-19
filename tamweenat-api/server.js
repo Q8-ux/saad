@@ -207,7 +207,6 @@ app.post('/api/receipts/:token/confirm',auth,(req,res)=>{
   invoice.receiverSignature=signature||invoice.receivedByName;
   invoice.receiverNote=note;
   invoice.status=note?'received_with_note':'received';
-  invoice.receiptTokenHash=null;
   const order=receiptOrder(invoice);
   if(order&&order.status!=='cancelled'){
     order.status='delivered';
