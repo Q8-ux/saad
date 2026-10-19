@@ -13,6 +13,7 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.Uri;
 import android.net.http.SslError;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.View;
@@ -135,7 +136,9 @@ public class MainActivity extends Activity {
         cookies.setAcceptCookie(true);
         cookies.setAcceptThirdPartyCookies(webView, false);
 
-        settings.setSafeBrowsingEnabled(true);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            settings.setSafeBrowsingEnabled(true);
+        }
 
         webView.setWebViewClient(new RattilWebViewClient());
         webView.setWebChromeClient(new RattilChromeClient());
@@ -269,6 +272,12 @@ public class MainActivity extends Activity {
         @Override
         public void onPermissionRequest(PermissionRequest request) {
             runOnUiThread(() -> {
+                Uri origin = request.getOrigin();
+                if (origin == null || !ALLOWED_HOST.equalsIgnoreCase(origin.getHost())) {
+                    request.deny();
+                    return;
+                }
+
                 boolean wantsAudio = false;
                 for (String resource : request.getResources()) {
                     if (PermissionRequest.RESOURCE_AUDIO_CAPTURE.equals(resource)) {
