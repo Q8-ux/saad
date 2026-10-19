@@ -1,8 +1,8 @@
 {
   "sources": {
     "lib/radar-core.mjs": "1334f5a6d76f7831db010607e980bf8552ff35968dd0689d74c02bda527ffcb8",
-    "app/radar.css": "219fe96391baabbe008aa87f0e45ce13a9f7335fce051c388de2ddfe962d18c5",
-    "github-pages/index.html": "2786d08b4467e23233b5f00f2ae4a7fa44460b611cbb0bc3d18ea1dc586c8328",
+    "app/radar.css": "3e5c698784cc4b4954d373df90f15596ce532e09c488e9da0cd6967430d52ce1",
+    "github-pages/index.html": "7c9b34f1ad2f8817af36b8542c93e76e473d97e290edfcd2589b2ddb14929f6c",
     "github-pages/vite.config.ts": "ef97fb0e839cf3c8f9174583668cf814cd346915097f3a4a145815953f93a19f",
     "github-pages/source/main.tsx": "4c86ba227db63118600477d9d3f1b672c831b858ecef4abfd748fe854ab83235",
     "github-pages/source/workspace.mjs": "4993d72b4d6bc8bca59b6e7691d0715f1cfafd7e207edbe88cae69e60e1f11a6",
@@ -20,10 +20,10 @@
     "worker/model.json": "809572756f63e63a80649d11e52221b78b047ba3a209ded617764c3f7057d36d"
   },
   "assets": {
-    "index.html": "c9b7bcf22f4bad1d2add1f87c1b45e3278caf533192257c6e0492436ea9489b9",
+    "index.html": "8ac0c552d9bd7605536c371ecfeaa37143f271479ddbfc35f4c61e57cce41a28",
     "favicon.svg": "1ecbb96e3d87afd70c5f095d47b380357fbac22eb8ceca5b4c7ad4b16cba5e79",
-    "assets/index-CZi1BD37.css": "8304cd6f2f4eb285b9c343ce0af0e99a627c0c90762bef92f2a1333a072b3877",
-    "assets/radar-C-0Pjj0x.js": "cfed50d0767fa465c15305a733dfba5907959458c7f96dc769b464f7f915432a",
+    "assets/index-BK1pxQXA.css": "b9f81c553d60300ca1c2182b077c69be2d18a4faa99a865898eac651e4c8a4c0",
+    "assets/radar-DOiT9rhr.js": "cfed50d0767fa465c15305a733dfba5907959458c7f96dc769b464f7f915432a",
     "assets/semantic-worker-CfTC1XUf.js": "49e3b2bddae8f5a81860bcfe8ae67a3772dab6979788c744a10937e3eba65137"
   }
 }

@@ -1,0 +1,34 @@
+{
+  "date": "2026-10-19",
+  "connectionConfigured": true,
+  "credentialStorage": "AES-256-GCM sealed capability in the selected browser; plaintext key cleared after configure",
+  "crossDeviceSync": false,
+  "sourceAccess": "real non-empty provider reads, not fixtures",
+  "discoveryRound": {
+    "query": "محامي الكويت",
+    "country": "KW",
+    "includeUnknown": true,
+    "matched": 7,
+    "unknownCountryMatches": 4,
+    "scanned": 79,
+    "providerCalls": 11,
+    "platformCounts": {
+      "instagram": 1,
+      "x": 10,
+      "tiktok": 24,
+      "youtube": 40,
+      "reddit": 4
+    },
+    "xRecordKind": "public indexed posts; replies not collected"
+  },
+  "facebookProbe": {
+    "purpose": "connectivity check only; not legal leads",
+    "source": "https://www.facebook.com/reel/753347914167361",
+    "sourceReference": "official provider comment endpoint example",
+    "scanned": 10,
+    "matched": 0,
+    "providerCalls": 1
+  },
+  "sourceCredentialsIncluded": false,
+  "collectedPersonalRecordsIncluded": false
+}
