@@ -34,7 +34,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 public class MainActivity extends Activity {
-    private static final String HOME_URL = "https://q8-ux.github.io/saad/rattil/";
+    private static final String HOME_URL = "https://q8-ux.github.io/saad/rattil/?app=android&v=amiri-force-20261020";
     private static final String ALLOWED_HOST = "q8-ux.github.io";
     private static final String ALLOWED_PATH_PREFIX = "/saad/rattil/";
     private static final int AUDIO_PERMISSION_REQUEST = 4103;
@@ -130,7 +130,7 @@ public class MainActivity extends Activity {
         settings.setCacheMode(WebSettings.LOAD_DEFAULT);
         settings.setSupportMultipleWindows(true);
         settings.setJavaScriptCanOpenWindowsAutomatically(true);
-        settings.setUserAgentString(settings.getUserAgentString() + " RattilQuranAndroid/1.0");
+        settings.setUserAgentString(settings.getUserAgentString() + " RattilQuranAndroid/1.1");
 
         CookieManager cookies = CookieManager.getInstance();
         cookies.setAcceptCookie(true);
