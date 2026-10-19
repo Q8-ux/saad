@@ -1,3 +1,19 @@
+@font-face {
+  font-family: "RattilAmiri";
+  src: url("https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/amiri/Amiri-Regular.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "RattilAmiri";
+  src: url("https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/amiri/Amiri-Bold.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 700 900;
+  font-display: swap;
+}
+
 /*
  * Rattil Quran display safeguards
  * Quranic text must remain visually unobstructed by notes, insights, or explanatory UI.
@@ -89,7 +105,7 @@ footer,
 .session-verse,
 .matched-verse-text-button,
 .matched-verse-text-button * {
-  font-family: "Amiri", serif !important;
+  font-family: "RattilAmiri", "Amiri", serif !important;
 }
 
 /* Site credit: deliberately outside Quran content surfaces. */
@@ -104,7 +120,7 @@ footer,
   border-top: 1px solid rgba(13, 79, 68, 0.12);
   background: rgba(250, 249, 244, 0.96);
   color: #4d635e;
-  font-family: "Amiri", serif;
+  font-family: "RattilAmiri", "Amiri", serif;
   font-size: 16px;
   line-height: 1.4;
 }
@@ -152,7 +168,7 @@ footer,
 }
 
 .rattil-whatsapp-credit b {
-  font-family: "Amiri", serif;
+  font-family: "RattilAmiri", "Amiri", serif;
   font-size: 14px;
   letter-spacing: .1px;
 }
