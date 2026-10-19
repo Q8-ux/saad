@@ -12,12 +12,12 @@ for item in runs:
         continue
     artifacts = json.loads(run("gh", "api", f"repos/{repo}/actions/runs/{item['id']}/artifacts"))["artifacts"]
     if any(a["name"] == "github-pages" and not a["expired"] for a in artifacts):
-        run("gh", "run", "download", str(item["id"]), "--repo", repo, "--name", "github-pages", "--dir", "_prior")
+        run("gh", "run", "download", str(item["id"]), "--repo", repo, "--name", "github-pages", "--dir", "_prior_rattil")
         break
 else:
     raise RuntimeError("No prior successful Pages artifact: refusing destructive deployment")
 
-with tarfile.open("_prior/artifact.tar") as tf:
+with tarfile.open("_prior_rattil/artifact.tar") as tf:
     for member in tf.getmembers():
         path = PurePosixPath(member.name)
         if path.is_absolute() or ".." in path.parts or not (member.isfile() or member.isdir()):
