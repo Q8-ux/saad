@@ -5,25 +5,26 @@
     "github-pages/index.html": "7c9b34f1ad2f8817af36b8542c93e76e473d97e290edfcd2589b2ddb14929f6c",
     "github-pages/vite.config.ts": "ef97fb0e839cf3c8f9174583668cf814cd346915097f3a4a145815953f93a19f",
     "github-pages/source/main.tsx": "4c86ba227db63118600477d9d3f1b672c831b858ecef4abfd748fe854ab83235",
-    "github-pages/source/workspace.mjs": "4993d72b4d6bc8bca59b6e7691d0715f1cfafd7e207edbe88cae69e60e1f11a6",
-    "github-pages/source/search-state.mjs": "d9969d4694070258ef6f8ddb8993877e72be2edc576fca46f2cf068ed96edd0d",
+    "github-pages/source/workspace.mjs": "09ac71ca7bd35e0748a70a9c7e8e0ec987f4b7cbcc70e1efc07cf6c2b72a828b",
+    "github-pages/source/search-state.mjs": "971f1d83071c3a841131e306c2c5d0aee8cab5b6014ea2a15b3ceb6e96a5594a",
     "github-pages/source/connector.mjs": "e3a759249e2205119e889981f313b77c5cfb67e1f99bb2004b61d5b61b96bb79",
     "github-pages/source/backend-config.mjs": "66c76e25e1e8a27147be80978156e3e17a6df3c7adfe259c91dafdbf6c05d7fc",
     "github-pages/source/development-paths.mjs": "0944432986d4773ed6962b517569899e1add7405844ee3737a2b596b516f3314",
-    "github-pages/source/local.css": "8195c220c82e2c5d5cd5e431b237cd1ae8662a1177a1de4148fe3862c1806620",
-    "github-pages/source/radar-dashboard.tsx": "51e2432303b4402a198350d55ffde0a12be283408a5ee702e207a175f26205e9",
+    "github-pages/source/local.css": "046f159eefabf9beb6fc75976f8e06f8617faa21b7e43caf6c0dae6a4b05b793",
+    "github-pages/source/radar-dashboard.tsx": "df16c60d58a514f87debdc5a233c4e399ed5bc3d9e09c78f8a7399ba6c9aedc3",
     "github-pages/source/local-search.mjs": "1c3d97229e04a023c78eaaf22edc5305dff57efb157ed447bc27ff8892de0d22",
     "github-pages/source/virtual-results.tsx": "43cb0f428a4825b4f9b9a10c9e2e91ee1d68157b07ab98bc3c439d84510d2643",
     "github-pages/source/tools-panel.tsx": "45ca05dde8eede2e585a6c18fcd1bb948cbf3cf67062290dc0875c39ec8c65ef",
     "github-pages/source/tools-client.mjs": "540a0bd54f4e6f90c49653bd7fcfd5fd8c8d003b96119173237757dfdf128c5f",
     "github-pages/source/semantic-worker.mjs": "778aa3c76794bdb510100a1abccc49298ec8ef914766e024d796fb41afd88937",
+    "github-pages/source/device-transfer.mjs": "08f09040a5627917838e14893c64a5edd4b5a35f5a21e0ce1954b32a811f10fe",
     "worker/model.json": "809572756f63e63a80649d11e52221b78b047ba3a209ded617764c3f7057d36d"
   },
   "assets": {
-    "index.html": "ad0fa847d9cbe28fa4c9f0599827a75d44e1a95a42f92a24c8c89a7b04218abd",
+    "index.html": "f803640fc51debf10c424fac1683916e0bd1bc14f07a77359eee723744048fea",
     "favicon.svg": "1ecbb96e3d87afd70c5f095d47b380357fbac22eb8ceca5b4c7ad4b16cba5e79",
-    "assets/index-BK1pxQXA.css": "b9f81c553d60300ca1c2182b077c69be2d18a4faa99a865898eac651e4c8a4c0",
-    "assets/radar-DC6pTWJr.js": "a84d7dd60e716123a1703fe96888499bac98ae605d17f7f95e473f06a07b14ba",
+    "assets/index-DobNBh3n.css": "e9ca4e707ba42247a021f4ec64e7f68a7c94c12ec0babf1be81b1b22ecd95b3c",
+    "assets/radar-UrnMY2Tu.js": "1e0e661be8ba46157c1bb02424dd6a20e083e3bc25429857f51cc7f144c4fd79",
     "assets/semantic-worker-CfTC1XUf.js": "49e3b2bddae8f5a81860bcfe8ae67a3772dab6979788c744a10937e3eba65137"
   }
 }

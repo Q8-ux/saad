@@ -18,6 +18,16 @@
 .connector-actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
 .connector-actions a{display:inline-flex;align-items:center;gap:6px;font-size:16px}
 .connector-verified{margin-top:18px;color:var(--teal);font-size:15px}
+.device-transfer{background:#fff;border:1px solid #b5d8d7;border-inline-start:5px solid var(--teal);border-radius:12px;padding:26px;margin:0 0 24px}
+.device-transfer h2{font-size:26px;margin-block:6px 10px}
+.device-transfer p{font-size:18px;line-height:1.9;color:var(--muted)}
+.transfer-actions{display:flex;gap:14px;flex-wrap:wrap;margin-block:22px}
+.transfer-import{position:relative;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:48px}
+.transfer-import input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.transfer-import:focus-within{outline:3px solid var(--teal);outline-offset:4px}
+.transfer-import.is-busy{opacity:.6;pointer-events:none}
+.device-transfer .transfer-note{font-size:15px}
+@media(max-width:700px){.device-transfer{padding:22px 17px}.transfer-actions{flex-direction:column;align-items:stretch}.transfer-actions .secondary-button,.transfer-import{white-space:normal;text-align:center}.device-transfer h2{font-size:24px}}
 @media(max-width:700px){.connector-form{padding:20px 17px}.connector-actions{align-items:stretch;flex-direction:column}.connector-actions .primary-button{white-space:normal}}
 @media(max-width:700px){.search-readiness{flex-wrap:wrap;padding:17px;gap:10px}.search-readiness>div{flex:1;min-width:200px}.search-readiness .secondary-button{width:100%;justify-content:center;margin:4px 0 0}.search-readiness strong{font-size:20px}.source-availability{padding:20px 17px}.source-availability>div{grid-template-columns:repeat(2,minmax(0,1fr))}.platform-state{font-size:11px}}
 

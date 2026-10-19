@@ -1,16 +1,32 @@
 import {prepareSpec,analyze,importRecords,normalizeRecord,growthMetrics,platformNames} from '../../lib/radar-core.mjs';
 import {platformCounts} from './search-state.mjs';
+import {makeTransfer,readTransfer} from './device-transfer.mjs';
 export function indexedStore(){
   let connection;
   async function db(){if(!connection)connection=new Promise((resolve,reject)=>{if(!globalThis.indexedDB)return reject(Error('تخزين المتصفح غير متاح. افتح الموقع في متصفح يدعم IndexedDB.'));const r=indexedDB.open('saad-request-radar-device-v1',1);r.onupgradeneeded=()=>r.result.createObjectStore('documents',{keyPath:'key'});r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(Error('تعذر فتح بيانات هذا المتصفح.'));});return connection;}
   async function run(mode,action){const database=await db();return new Promise((resolve,reject)=>{const tx=database.transaction('documents',mode);let value;const r=action(tx.objectStore('documents'));r.onsuccess=()=>{value=r.result;};tx.oncomplete=()=>resolve(value);tx.onerror=()=>reject(Error('تعذر حفظ البيانات على هذا الجهاز. صدّر ملفك وراجع مساحة التخزين.'));tx.onabort=()=>reject(Error('لم يكتمل حفظ البيانات.'));});}
-  return {all:()=>run('readonly',s=>s.getAll()),put:doc=>run('readwrite',s=>s.put(doc)),remove:key=>run('readwrite',s=>s.delete(key))};
+  return {all:()=>run('readonly',s=>s.getAll()),put:doc=>run('readwrite',s=>s.put(doc)),putMany:docs=>run('readwrite',s=>{let request;for(const doc of docs)request=s.put(doc);return request;}),remove:key=>run('readwrite',s=>s.delete(key))};
 }
 /** @param {any} store @param {{remote?:any}} [options] */
 export function createLocalApi(store,{remote=null}={}){let backendReady=false,backendError=remote?.initialBlocker||'';return async function api(action,body){
   const all=await store.all();const list=kind=>all.filter(d=>d.kind===kind).sort((a,b)=>b.updatedAt.localeCompare(a.updatedAt)).map(d=>d.payload);
   const put=async(key,kind,payload)=>{await store.put({key,kind,payload,updatedAt:new Date().toISOString()});return payload;};
   const connection=list('connector')[0];
+  if(action==='export-transfer')return makeTransfer(all,remote?.endpoint||'',body?.preferredSearchId);
+  if(action==='import-transfer'){
+    const transfer=readTransfer(body,remote?.endpoint||'');
+    const incoming=transfer.documents.find(doc=>doc.kind==='connector')?.payload;
+    if(incoming){
+      if(!remote)throw Error('خادم البحث غير مُعدّ لهذه النسخة.');
+      const status=await remote.status(incoming.credential);
+      if(status.ok!==true||status.keyConfigured!==true)throw Error('لم يؤكد الخادم صلاحية ملف الربط. أعد تصديره من الجهاز المرتبط.');
+    }
+    if(!store.putMany)throw Error('حدّث الصفحة لإكمال نقل البيانات.');
+    await store.putMany(transfer.documents);
+    if(incoming){backendReady=true;backendError='';}
+    const searches=transfer.documents.filter(doc=>doc.kind==='search');
+    return {connected:!!incoming,documents:transfer.documents.length,records:transfer.documents.filter(doc=>doc.kind==='dataset').reduce((n,doc)=>n+doc.payload.records.length,0),searchId:transfer.preferredSearchId||searches[0]?.payload.id||null};
+  }
   if(action==='workspace')return {connected:!!remote&&backendReady&&!!connection?.credential,backendConfigured:!!remote,backendReady,backendError,backendUrl:remote?.endpoint||'',sourceVerifiedAt:connection?.verifiedAt||null,deviceLocal:true,searches:list('search').slice(0,20),saved:list('saved'),metrics:list('metric'),toolsJobs:list('toolJob'),toolsReports:list('toolReport').slice(0,12),datasets:list('dataset').map(d=>({id:d.id,name:d.name,count:d.records.length,platformCounts:platformCounts(d.records),createdAt:d.createdAt}))};
   if(action==='tool-job'){
     if(!/^[a-f0-9-]{36}$/.test(body?.id||'')||!/^[A-Za-z0-9_-]{48,100}$/.test(body.token||''))throw Error('مهمة غير صالحة.');
