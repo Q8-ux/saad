@@ -66,5 +66,41 @@ document.addEventListener('DOMContentLoaded',()=>{
   };
   const timer=setInterval(()=>{if(go()||++tries>40)clearInterval(timer)},250);
 })();
+</script><script>
+(function(){
+  const q=new URLSearchParams(location.search);
+  if(q.get('guest')!=='1') return;
+  let attempts=0, submitted=false;
+  const tryGuest=()=>{
+    if(submitted) return true;
+    const pass=document.querySelector('input[type="password"]');
+    const inputs=[...document.querySelectorAll('input')];
+    const user=inputs.find(i=>i!==pass&&(i.type==='text'||i.type==='email'||i.name?.toLowerCase().includes('user')||i.autocomplete==='username'));
+    if(!user||!pass) return false;
+    user.value='restaurant1';
+    pass.value='123456';
+    user.dispatchEvent(new Event('input',{bubbles:true}));
+    user.dispatchEvent(new Event('change',{bubbles:true}));
+    pass.dispatchEvent(new Event('input',{bubbles:true}));
+    pass.dispatchEvent(new Event('change',{bubbles:true}));
+    const form=pass.closest('form');
+    const btn=form?.querySelector('button[type="submit"],button')||[...document.querySelectorAll('button')].find(b=>/دخول|login|sign in/i.test((b.textContent||'').trim()));
+    if(form){
+      submitted=true;
+      if(form.requestSubmit) form.requestSubmit(btn||undefined); else form.submit();
+      return true;
+    }
+    if(btn){submitted=true;btn.click();return true}
+    return false;
+  };
+  const veil=document.createElement('div');
+  veil.id='guest-entry-veil';
+  veil.innerHTML='<div style="font:700 20px Tahoma,Arial;color:#0b6047">جاري الدخول إلى حساب المطعم…</div>';
+  veil.style.cssText='position:fixed;inset:0;z-index:2147483647;background:#f8f6eb;display:grid;place-items:center';
+  document.addEventListener('DOMContentLoaded',()=>document.body.appendChild(veil),{once:true});
+  const timer=setInterval(()=>{
+    if(tryGuest()||++attempts>60){clearInterval(timer);setTimeout(()=>veil.remove(),1200)}
+  },200);
+})();
 </script></body>
 </html>
