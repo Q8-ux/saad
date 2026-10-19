@@ -17,7 +17,37 @@
     <link rel="stylesheet" href="assets/al-mohanad-override.css?v=20260831-font" />
     <link rel="stylesheet" href="assets/voice-assistant.css?v=20260908-assistant2" />
     <link rel="stylesheet" href="assets/catalog-import.css?v=20260901-internal-navigation" />
-  </head>
+  <style>
+/* WhatsApp cleanup requested: hide mid-page WhatsApp CTA, keep footer icon without phone number */
+a[href*="wa.me"],a[href*="whatsapp.com"]{display:none!important}
+.support-card[href*="wa.me"],.whatsapp-card,.whatsapp-cta,.order-whatsapp{display:none!important}
+.footer-whatsapp .phone,.footer-whatsapp .number,.whatsapp-footer .phone,.whatsapp-footer .number{display:none!important}
+</style>
+<script>
+document.addEventListener('DOMContentLoaded',()=>{
+  const clean=()=>{
+    document.querySelectorAll('a[href*="wa.me"],a[href*="whatsapp.com"]').forEach(a=>{
+      const t=(a.textContent||'').trim();
+      const inFooter=!!a.closest('footer,.footer,[class*="footer"]');
+      if(inFooter){
+        a.removeAttribute('href'); a.removeAttribute('target'); a.style.display='inline-flex';
+        [...a.childNodes].forEach(n=>{if(n.nodeType===3&&/\d{6,}/.test(n.textContent||'')) n.textContent='';});
+        a.querySelectorAll('small,span,p').forEach(el=>{if(/\d{6,}/.test(el.textContent||'')) el.remove();});
+      }else a.remove();
+    });
+    document.querySelectorAll('body *').forEach(el=>{
+      const t=(el.textContent||'').trim();
+      if(/^(?:\+?965)?\s*50168888$/.test(t)) el.remove();
+      if((/واتساب|WhatsApp|واٹس ایپ/i.test(t))&&!el.closest('footer,.footer,[class*="footer"]')&&t.length<80){
+        const card=el.closest('a,button,.card,[class*="card"],[class*="support"]');
+        if(card) card.remove();
+      }
+    });
+  };
+  clean(); new MutationObserver(clean).observe(document.body,{childList:true,subtree:true});
+});
+</script>
+</head>
   <body>
     <div id="root"></div>
   </body>
