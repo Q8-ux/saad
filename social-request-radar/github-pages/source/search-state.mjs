@@ -1,5 +1,10 @@
 import {platformNames} from '../../lib/radar-core.mjs';
 
+export function restoredSearch(workspace={}) {
+  const searches=(workspace.searches||[]).filter(s=>s&&typeof s.id==='string'&&s.spec&&['completed','uncollected'].includes(s.state));
+  return searches.find(s=>s.id===workspace.selectedSearchId)||searches.find(s=>searchOutcome(s).kind==='matched')||searches[0]||null;
+}
+
 export function platformCounts(records=[]) {
   const counts=Object.fromEntries(Object.keys(platformNames).map(p=>[p,0]));
   for(const record of records)if(Object.hasOwn(counts,record.platform))counts[record.platform]++;

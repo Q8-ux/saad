@@ -6,6 +6,7 @@ import {createConnector} from '../github-pages/source/connector.mjs';
 import {createEdgeHandler} from '../edge/handler.mjs';
 import {normalizeRecord} from '../lib/radar-core.mjs';
 import {transferLimit} from '../github-pages/source/device-transfer.mjs';
+import {restoredSearch} from '../github-pages/source/search-state.mjs';
 
 const providerKey='fixture-provider-key-not-a-real-account';
 const base='https://fixture.supabase.co/functions/v1/comment-radar';
@@ -35,7 +36,7 @@ test('two independent devices transfer sealed access and results, retain existin
   assert.equal(restored.records,1);assert.equal(restored.searchId,fixture.search.id);assert.equal(target.batches,1);assert.equal(fixture.calls,1);
   let state=await phone('workspace');assert.equal(state.connected,true);assert.equal(state.datasets.length,2);assert.equal(state.searches[0].results[0].text,row.text);assert.equal(state.searches[0].results[0].geo.status,'mentioned');assert.equal(state.saved.length,1);
   await phone('import-transfer',packet);assert.equal((await phone('workspace')).datasets.length,2);
-  const reloaded=createLocalApi(target,{remote:fixture.remote});await reloaded('connection-status');assert.equal((await reloaded('workspace')).connected,true);
+  const reloaded=createLocalApi(target,{remote:fixture.remote});const coldWorkspace=await reloaded('workspace');assert.equal(coldWorkspace.selectedSearchId,fixture.search.id);assert.equal(restoredSearch(coldWorkspace).results.length,1);await reloaded('connection-status');assert.equal((await reloaded('workspace')).connected,true);
   const newSearch=await reloaded('search',{...spec,requestId:'fixture-phone-search-0002'});assert.equal(newSearch.results.length,1);assert.equal(fixture.calls,2);
 });
 

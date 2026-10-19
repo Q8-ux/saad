@@ -12,7 +12,7 @@ export function createLocalApi(store,{remote=null}={}){let backendReady=false,ba
   const all=await store.all();const list=kind=>all.filter(d=>d.kind===kind).sort((a,b)=>b.updatedAt.localeCompare(a.updatedAt)).map(d=>d.payload);
   const put=async(key,kind,payload)=>{await store.put({key,kind,payload,updatedAt:new Date().toISOString()});return payload;};
   const connection=list('connector')[0];
-  if(action==='export-transfer')return makeTransfer(all,remote?.endpoint||'',body?.preferredSearchId);
+  if(action==='export-transfer')return makeTransfer(all,remote?.endpoint||'',body?.preferredSearchId||list('view')[0]?.searchId);
   if(action==='import-transfer'){
     const transfer=readTransfer(body,remote?.endpoint||'');
     const incoming=transfer.documents.find(doc=>doc.kind==='connector')?.payload;
@@ -22,12 +22,17 @@ export function createLocalApi(store,{remote=null}={}){let backendReady=false,ba
       if(status.ok!==true||status.keyConfigured!==true)throw Error('لم يؤكد الخادم صلاحية ملف الربط. أعد تصديره من الجهاز المرتبط.');
     }
     if(!store.putMany)throw Error('حدّث الصفحة لإكمال نقل البيانات.');
-    await store.putMany(transfer.documents);
+    const selected=transfer.preferredSearchId||transfer.documents.find(doc=>doc.kind==='search'&&doc.payload.results.length)?.payload.id||transfer.documents.find(doc=>doc.kind==='search')?.payload.id;
+    await store.putMany([...transfer.documents,...(selected?[{key:'view:search',kind:'view',payload:{searchId:selected},updatedAt:new Date().toISOString()}]:[])]);
     if(incoming){backendReady=true;backendError='';}
-    const searches=transfer.documents.filter(doc=>doc.kind==='search');
-    return {connected:!!incoming,documents:transfer.documents.length,records:transfer.documents.filter(doc=>doc.kind==='dataset').reduce((n,doc)=>n+doc.payload.records.length,0),searchId:transfer.preferredSearchId||searches[0]?.payload.id||null};
+    return {connected:!!incoming,documents:transfer.documents.length,records:transfer.documents.filter(doc=>doc.kind==='dataset').reduce((n,doc)=>n+doc.payload.records.length,0),searchId:selected||null};
   }
-  if(action==='workspace')return {connected:!!remote&&backendReady&&!!connection?.credential,backendConfigured:!!remote,backendReady,backendError,backendUrl:remote?.endpoint||'',sourceVerifiedAt:connection?.verifiedAt||null,deviceLocal:true,searches:list('search').slice(0,20),saved:list('saved'),metrics:list('metric'),toolsJobs:list('toolJob'),toolsReports:list('toolReport').slice(0,12),datasets:list('dataset').map(d=>({id:d.id,name:d.name,count:d.records.length,platformCounts:platformCounts(d.records),createdAt:d.createdAt}))};
+  if(action==='workspace')return {connected:!!remote&&backendReady&&!!connection?.credential,backendConfigured:!!remote,backendReady,backendError,backendUrl:remote?.endpoint||'',sourceVerifiedAt:connection?.verifiedAt||null,deviceLocal:true,selectedSearchId:list('view')[0]?.searchId||null,searches:list('search').slice(0,20),saved:list('saved'),metrics:list('metric'),toolsJobs:list('toolJob'),toolsReports:list('toolReport').slice(0,12),datasets:list('dataset').map(d=>({id:d.id,name:d.name,count:d.records.length,platformCounts:platformCounts(d.records),createdAt:d.createdAt}))};
+  if(action==='select-search'){
+    const search=list('search').find(s=>s.id===body?.id);
+    if(!search||!['completed','uncollected'].includes(search.state))throw Error('الجولة غير موجودة على هذا الجهاز.');
+    await put('view:search','view',{searchId:search.id});return {selectedSearchId:search.id};
+  }
   if(action==='tool-job'){
     if(!/^[a-f0-9-]{36}$/.test(body?.id||'')||!/^[A-Za-z0-9_-]{48,100}$/.test(body.token||''))throw Error('مهمة غير صالحة.');
     return put('toolJob:'+body.id,'toolJob',{id:body.id,token:body.token,action:body.action,createdAt:new Date().toISOString(),sourceRecords:(body.sourceRecords||[]).slice(0,80).map(r=>({id:r.id,text:r.text,sourceUrl:r.sourceUrl}))});
@@ -72,13 +77,13 @@ export function createLocalApi(store,{remote=null}={}){let backendReady=false,ba
       const reply=await remote.search(body,connection.credential);const {collectedRecords=[],...result}=reply;
       if(!result.id||!Array.isArray(result.results)||!result.report)throw Error('لم يُعد الخادم تقرير بحث صالحًا.');
       if(collectedRecords.length){const id=crypto.randomUUID();await put('dataset:'+id,'dataset',{id,name:'جمع مباشر · '+body.query,records:collectedRecords,createdAt:result.createdAt});await put('connector:scrapecreators','connector',{...connection,verifiedAt:new Date().toISOString()});}
-      await put('search:'+result.id,'search',result);return result;
+      await put('search:'+result.id,'search',result);await put('view:search','view',{searchId:result.id});return result;
     }
     const spec=prepareSpec(body);const records=list('dataset').flatMap(d=>d.records).filter(r=>spec.platforms.includes(r.platform));
     if(!records.length)throw Error('لم يبدأ البحث: لا توجد تعليقات مستوردة للمنصات المحددة. أضف ملف تعليقات من «مصادر البيانات».');
     const counts=platformCounts(records);
     const result={id:crypto.randomUUID(),state:'completed',spec,mode:'library',createdAt:new Date().toISOString(),...analyze(records,spec),report:{provider:'ملفات هذا المتصفح',calls:0,creditsUsed:0,sources:spec.platforms.map(platform=>({platform,status:counts[platform]?'completed':'not_collected',records:counts[platform],pages:0,remainingCursors:[],error:counts[platform]?null:{message:'لا توجد بيانات مستوردة لهذه المنصة؛ لم تُفحص.'}})),collectedAt:new Date().toISOString(),coverage:'فحص للملفات المستوردة فقط؛ لم تُجرَ طلبات إلى المنصات'}};
-    await put('search:'+result.id,'search',result);return result;
+    await put('search:'+result.id,'search',result);await put('view:search','view',{searchId:result.id});return result;
   }
   if(action==='save'){
     const row=body?.record;if(!row||typeof row.id!=='string')throw Error('اختر نتيجة صحيحة.');normalizeRecord(row,row.platform,row.sourceUrl,row.kind);
@@ -91,7 +96,7 @@ export function createLocalApi(store,{remote=null}={}){let backendReady=false,ba
     await put('metric:'+metric.id,'metric',metric);return metric;
   }
   if(action==='delete'){
-    if(!['search','dataset','metric','toolJob','toolReport'].includes(body?.kind)||typeof body.id!=='string')throw Error('اختر العنصر المطلوب.');await store.remove(body.kind+':'+body.id);return {ok:true};
+    if(!['search','dataset','metric','toolJob','toolReport'].includes(body?.kind)||typeof body.id!=='string')throw Error('اختر العنصر المطلوب.');await store.remove(body.kind+':'+body.id);if(body.kind==='search'&&list('view')[0]?.searchId===body.id)await store.remove('view:search');return {ok:true};
   }
   throw Error('عملية غير مدعومة.');
 };}
