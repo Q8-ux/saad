@@ -1,7 +1,7 @@
 {
   "projectRef": "wvzkpazvtnclcghjrjvv",
   "function": "radar-content",
-  "version": 1,
+  "version": 2,
   "status": "ACTIVE",
   "healthVerified": true,
   "invalidCredentialRejected": true,
@@ -12,6 +12,8 @@
     "content-edge/deno.json": "b74fcc39a49e598cf03feff6bcda4b72f88343a9fc4852e0db37d0d017230459",
     "content-edge/handler.mjs": "ac868c166b08f06c7529e0f5562a6fa0e62912decd49ee41bc6cb9efda88cff6",
     "server/credentials.mjs": "48d287d4deb00f81882669e976b3dfd36ae07c1d8bafc1cfc3de57c7fa75e80f",
-    "lib/content-core.mjs": "bbdc2d24555e5ab2ed0e251117845c6d1b7efc692d2718712db763bbf38f84a5"
-  }
+    "lib/content-core.mjs": "fce09cfc49d31a06c83d8b2891f9f1d8559a38b06ecf07c915c497570934354b",
+    "lib/comment-sources.mjs": "861669df51af4dffcbd981e11e2cec558239a20f60b15c4effa11d1bf6c2c083"
+  },
+  "bundleSha256": "144b3306b17bca04696ef4deca73f1a78db7699e41fa38fb86ef375f68ad751e"
 }

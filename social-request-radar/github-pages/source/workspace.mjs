@@ -2,6 +2,17 @@ import {prepareSpec,analyze,importRecords,normalizeRecord,growthMetrics,platform
 import {platformCounts} from './search-state.mjs';
 import {makeTransfer,readTransfer} from './device-transfer.mjs';
 import {contentAction,contentSummary} from './content-workspace.mjs';
+import {withCommentSource,sourceSnapshot} from '../../lib/comment-sources.mjs';
+const upgradeRow=row=>{try{return withCommentSource(row);}catch{return row;}};
+function upgradeDocument(doc){
+  const p=doc.payload;let payload=p;
+  if(doc.kind==='saved')payload=upgradeRow(p);
+  if(doc.kind==='search')payload={...p,results:(p.results||[]).map(upgradeRow)};
+  if(doc.kind==='dataset')payload={...p,records:(p.records||[]).map(upgradeRow)};
+  if(doc.kind==='toolJob'||doc.kind==='toolReport')payload={...p,sourceRecords:(p.sourceRecords||[]).map(upgradeRow)};
+  if(doc.kind==='campaign')payload={...p,sources:(p.sources||[]).map(upgradeRow)};
+  return {...doc,payload};
+}
 export function indexedStore(){
   let connection;
   async function db(){if(!connection)connection=new Promise((resolve,reject)=>{if(!globalThis.indexedDB)return reject(Error('تخزين المتصفح غير متاح. افتح الموقع في متصفح يدعم IndexedDB.'));const r=indexedDB.open('saad-request-radar-device-v1',1);r.onupgradeneeded=()=>r.result.createObjectStore('documents',{keyPath:'key'});r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(Error('تعذر فتح بيانات هذا المتصفح.'));});return connection;}
@@ -10,7 +21,7 @@ export function indexedStore(){
 }
 /** @param {any} store @param {{remote?:any}} [options] */
 export function createLocalApi(store,{remote=null}={}){let backendReady=false,backendError=remote?.initialBlocker||'';return async function api(action,body){
-  const all=await store.all();const list=kind=>all.filter(d=>d.kind===kind).sort((a,b)=>b.updatedAt.localeCompare(a.updatedAt)).map(d=>d.payload);
+  const all=(await store.all()).map(upgradeDocument);const list=kind=>all.filter(d=>d.kind===kind).sort((a,b)=>b.updatedAt.localeCompare(a.updatedAt)).map(d=>d.payload);
   const put=async(key,kind,payload)=>{await store.put({key,kind,payload,updatedAt:new Date().toISOString()});return payload;};
   const connection=list('connector')[0];
   if(action.startsWith('content-'))return contentAction(action,body,{list,put,store});
@@ -37,7 +48,7 @@ export function createLocalApi(store,{remote=null}={}){let backendReady=false,ba
   }
   if(action==='tool-job'){
     if(!/^[a-f0-9-]{36}$/.test(body?.id||'')||!/^[A-Za-z0-9_-]{48,100}$/.test(body.token||''))throw Error('مهمة غير صالحة.');
-    return put('toolJob:'+body.id,'toolJob',{id:body.id,token:body.token,action:body.action,createdAt:new Date().toISOString(),sourceRecords:(body.sourceRecords||[]).slice(0,80).map(r=>({id:r.id,text:r.text,sourceUrl:r.sourceUrl}))});
+    return put('toolJob:'+body.id,'toolJob',{id:body.id,token:body.token,action:body.action,createdAt:new Date().toISOString(),sourceRecords:(body.sourceRecords||[]).slice(0,80).map(sourceSnapshot)});
   }
   if(action==='tool-result'){
     const {id,result}=body||{};if(typeof id!=='string'||!result)throw Error('نتيجة أدوات غير صالحة.');
@@ -53,7 +64,7 @@ export function createLocalApi(store,{remote=null}={}){let backendReady=false,ba
   }
   if(action==='browser-analysis'){
     if(!body?.result||!Array.isArray(body.sourceRecords)||body.sourceRecords.length>80)throw Error('تحليل غير صالح.');
-    const report={id:crypto.randomUUID(),...body.result,sourceRecords:body.sourceRecords,createdAt:new Date().toISOString()};return put('toolReport:'+report.id,'toolReport',report);
+    const report={id:crypto.randomUUID(),...body.result,sourceRecords:body.sourceRecords.map(sourceSnapshot),createdAt:new Date().toISOString()};return put('toolReport:'+report.id,'toolReport',report);
   }
   if(action==='connect'){
     if(!remote)throw Error('خادم البحث غير مُعدّ لهذه النسخة.');
@@ -76,8 +87,9 @@ export function createLocalApi(store,{remote=null}={}){let backendReady=false,ba
   if(action==='search'){
     if(body?.mode==='live'){
       if(!remote||!connection?.credential)throw Error('البحث المباشر يحتاج ربط مصدر البيانات بالخادم الآمن. أضف مفتاح المزود من «مصادر البيانات».');
-      const reply=await remote.search(body,connection.credential);const {collectedRecords=[],...result}=reply;
+      const reply=await remote.search(body,connection.credential);const {collectedRecords:rawRecords=[],...result}=reply;const collectedRecords=rawRecords.map(upgradeRow);
       if(!result.id||!Array.isArray(result.results)||!result.report)throw Error('لم يُعد الخادم تقرير بحث صالحًا.');
+      result.results=result.results.map(upgradeRow);
       if(collectedRecords.length){const id=crypto.randomUUID();await put('dataset:'+id,'dataset',{id,name:'جمع مباشر · '+body.query,records:collectedRecords,createdAt:result.createdAt});await put('connector:scrapecreators','connector',{...connection,verifiedAt:new Date().toISOString()});}
       await put('search:'+result.id,'search',result);await put('view:search','view',{searchId:result.id});return result;
     }
@@ -88,7 +100,7 @@ export function createLocalApi(store,{remote=null}={}){let backendReady=false,ba
     await put('search:'+result.id,'search',result);await put('view:search','view',{searchId:result.id});return result;
   }
   if(action==='save'){
-    const row=body?.record;if(!row||typeof row.id!=='string')throw Error('اختر نتيجة صحيحة.');normalizeRecord(row,row.platform,row.sourceUrl,row.kind);
+    const raw=body?.record;if(!raw||typeof raw.id!=='string')throw Error('اختر نتيجة صحيحة.');const row={...raw,...normalizeRecord(raw,raw.platform,raw.postUrl||raw.sourceUrl,raw.kind)};
     if(body.remove)await store.remove('saved:'+row.id);else await put('saved:'+row.id,'saved',row);return {ok:true};
   }
   if(action==='metrics'){

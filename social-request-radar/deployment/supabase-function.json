@@ -3,7 +3,7 @@
   "projectName": "social-request-radar",
   "functionName": "comment-radar",
   "functionId": "012c5650-e537-4cf7-b4ac-641b6e012667",
-  "version": 3,
+  "version": 4,
   "url": "https://wvzkpazvtnclcghjrjvv.supabase.co/functions/v1/comment-radar",
   "status": "ACTIVE",
   "healthVerified": true,
@@ -14,8 +14,9 @@
     "edge/handler.mjs": "983f53eaa6201833eb232814a6ae02a6b8bf6d60735ee5262ede2afc4e558264",
     "edge/deno.json": "b3315cd8aefa9bb3d26e4b6de28fc450e4e9860484eecf613eef7111632d9878",
     "server/credentials.mjs": "48d287d4deb00f81882669e976b3dfd36ae07c1d8bafc1cfc3de57c7fa75e80f",
-    "lib/radar-core.mjs": "1334f5a6d76f7831db010607e980bf8552ff35968dd0689d74c02bda527ffcb8",
-    "lib/providers.mjs": "3c54e3645ed6c413c97ee364a044101b08d2efd72d744d3eb3dc21700cb62154"
+    "lib/radar-core.mjs": "47e78ed390060083170b2d261dff3780f176e151037869bd20084d4c3449120f",
+    "lib/providers.mjs": "3c54e3645ed6c413c97ee364a044101b08d2efd72d744d3eb3dc21700cb62154",
+    "lib/comment-sources.mjs": "861669df51af4dffcbd981e11e2cec558239a20f60b15c4effa11d1bf6c2c083"
   },
-  "bundleSha256": "fef143b09b34cdd93cd4e2aac811d192df6778363a480a424a4edf927ebe52df"
+  "bundleSha256": "9eefc9f6275c9766a0acf8514676580b7b0e419d457d35d79d78122abbd49e70"
 }

@@ -1,3 +1,4 @@
+import {commentSource,validatePlatformSourceUrl} from './comment-sources.mjs';
 export const platformNames = {instagram:'Instagram', x:'X', tiktok:'TikTok', youtube:'YouTube', reddit:'Reddit', facebook:'Facebook'};
 export const countryCodes = 'AD AE AF AG AI AL AM AO AQ AR AS AT AU AW AX AZ BA BB BD BE BF BG BH BI BJ BL BM BN BO BQ BR BS BT BV BW BY BZ CA CC CD CF CG CH CI CK CL CM CN CO CR CU CV CW CX CY CZ DE DJ DK DM DO DZ EC EE EG EH ER ES ET FI FJ FK FM FO FR GA GB GD GE GF GG GH GI GL GM GN GP GQ GR GS GT GU GW GY HK HM HN HR HT HU ID IE IL IM IN IO IQ IR IS IT JE JM JO JP KE KG KH KI KM KN KP KR KW KY KZ LA LB LC LI LK LR LS LT LU LV LY MA MC MD ME MF MG MH MK ML MM MN MO MP MQ MR MS MT MU MV MW MX MY MZ NA NC NE NF NG NI NL NO NP NR NU NZ OM PA PE PF PG PH PK PL PM PN PR PS PT PW PY QA RE RO RS RU RW SA SB SC SD SE SG SH SI SJ SK SL SM SN SO SR SS ST SV SX SY SZ TC TD TF TG TH TJ TK TL TM TN TO TR TT TV TW TZ UA UG UM US UY UZ VA VC VE VG VI VN VU WF WS YE YT ZA ZM ZW'.split(' ');
 export const countryName = code => code === 'ALL' ? 'كل الدول' : new Intl.DisplayNames(['ar'], {type:'region'}).of(code);
@@ -73,19 +74,19 @@ export function normalizeRecord(raw, platform, url, kind='comment', parentId=nul
   const author=raw.author||raw.user||raw.owner||{};
   const text=raw.text||raw.content||raw.body||raw.legacy?.full_text||[raw.title,raw.selftext].filter(Boolean).join('\n');
   if(typeof text!=='string'||!text.trim()) return null;
-  let source=raw.sourceUrl||raw.url||raw.post_url||raw.permalink||url||'';
-  if(source.startsWith('/r/')) source='https://www.reddit.com'+source;
-  const safeUrl=validateSourceUrl(source,platform);
+  const links=commentSource(raw,{platform,postUrl:url,kind,parentId});
+  const safeUrl=links.sourceUrl;
   let username=typeof author==='string'?author:(author.username||author.unique_id||author.name||'');
   if(!username&&platform==='x'&&safeUrl) username=new URL(safeUrl).pathname.split('/')[1]||'';
   const parsed=parseTimestamp(raw.createdAt??raw.created_at??raw.created_at_utc??raw.publishedTime??raw.create_time??raw.created_utc??raw.timestamp??raw.legacy?.created_at);
   const canonical=typeof raw.id==='string'&&raw.id.startsWith(platform+':')?raw.id:'';
   const firstId=values=>values.find(value=>value!==undefined&&value!==null&&value!=='');
-  const originalId=firstId([raw.nativeId,raw.commentId,canonical?(canonical.startsWith(platform+':derived:')?undefined:canonical.slice(platform.length+1)):raw.id,raw.pk,raw.cid,raw.rest_id]);
+  const candidateId=firstId([raw.nativeId,raw.commentId,raw.comment_id,canonical?(canonical.startsWith(platform+':derived:')?undefined:canonical.slice(platform.length+1)):raw.id,raw.pk,raw.cid,raw.rest_id]);
+  const originalId=typeof candidateId==='number'&&!Number.isSafeInteger(candidateId)?undefined:candidateId;
   const derived=originalId===undefined;
   return {id:derived?(canonical||platform+':derived:'+hash(safeUrl+'|'+username+'|'+parsed+'|'+text)):platform+':'+String(originalId),
-    nativeId:derived?'':String(originalId),platform,kind,author:String(username).slice(0,150),text:text.slice(0,20000),sourceUrl:safeUrl,
-    parentId:raw.parentId||raw.parent_id||raw.replied_to_comment_id||(raw.parent==='root'?null:raw.parent)||parentId||null,createdAt:parsed,
+    nativeId:derived?'':String(originalId),platform,kind,author:String(username).slice(0,150),text:text.slice(0,20000),...links,
+    parentId:raw.parentId||raw.parent_id||raw.parent_comment_id||raw.replied_to_comment_id||(raw.parent==='root'?null:raw.parent)||parentId||null,createdAt:parsed,
     authorLocation:String(raw.authorLocation||author.location||'').slice(0,180),
     likes:raw.likes??raw.like_count??raw.comment_like_count??raw.digg_count??raw.engagement?.likes??raw.legacy?.favorite_count??null,
     collectedAt:parseTimestamp(raw.collectedAt),importedAt:parseTimestamp(raw.importedAt),collectionMethod:String(raw.collectionMethod||'').slice(0,80)};
@@ -95,12 +96,9 @@ function parseTimestamp(raw) {
   const value=typeof raw==='number'||/^\d{10}(?:\d{3})?$/.test(String(raw))?Number(raw)*(Number(raw)<1e12?1000:1):raw;
   const date=new Date(value);return Number.isNaN(date.getTime())?null:date.toISOString();
 }
-export function validateSourceUrl(url,platform) {
-  const hosts={instagram:['instagram.com'],x:['x.com','twitter.com'],youtube:['youtube.com','youtu.be'],tiktok:['tiktok.com'],reddit:['reddit.com','redd.it'],facebook:['facebook.com','fb.watch']};
-  try{const u=new URL(String(url));if(u.protocol!=='https:'||u.username||u.password||!hosts[platform]?.some(h=>u.hostname===h||u.hostname.endsWith('.'+h))) throw Error();u.hash='';return u.href;}catch{throw new Error('رابط مصدر غير صالح للمنصة المحددة.');}
-}
+export const validateSourceUrl=validatePlatformSourceUrl;
 export function hash(text) {let a=2166136261,b=5381;for(let i=0;i<text.length;i++){a=Math.imul(a^text.charCodeAt(i),16777619);b=Math.imul(b,33)^text.charCodeAt(i);}return(a>>>0).toString(16)+(b>>>0).toString(16);}
-export function importRecords(rows,platform,url){if(!Array.isArray(rows))throw new Error('يجب أن يحتوي الملف على قائمة تعليقات.');const out=[],now=new Date().toISOString();function visit(items,p,u,parent=null){for(const raw of items){if(out.length>=2000)throw new Error('الحد الأقصى ٢٠٠٠ تعليق ورد في الملف.');const row=normalizeRecord(raw,raw.platform||p,raw.postUrl||raw.post_url||u,raw.kind||(parent?'reply':'comment'),parent);if(!row)continue;out.push({...row,importedAt:row.importedAt||now});const children=raw.answers||raw.replies;if(Array.isArray(children))visit(children,row.platform,row.sourceUrl,row.nativeId||row.id);}}visit(rows,platform,url);return out;}
+export function importRecords(rows,platform,url){if(!Array.isArray(rows))throw new Error('يجب أن يحتوي الملف على قائمة تعليقات.');const out=[],now=new Date().toISOString();function visit(items,p,u,parent=null){for(const raw of items){if(out.length>=2000)throw new Error('الحد الأقصى ٢٠٠٠ تعليق ورد في الملف.');const row=normalizeRecord(raw,raw.platform||p,raw.postUrl||raw.post_url||u,raw.kind||(parent?'reply':'comment'),parent);if(!row)continue;out.push({...row,importedAt:row.importedAt||now});const children=raw.answers||raw.replies;if(Array.isArray(children))visit(children,row.platform,row.postUrl,row.nativeId||row.id);}}visit(rows,platform,url);return out;}
 export function analyze(records,spec) {
   const seen=new Set(),results=[];const excluded={duplicate:0,topic:0,notRequest:0,country:0,date:0,dateUnknown:0};
   for(const r of records){if(!r)continue;if(seen.has(r.id)){excluded.duplicate++;continue;}seen.add(r.id);
@@ -120,7 +118,7 @@ export function growthInsights(records) {
   for(const r of records){if(!r?.text)continue;const identity=r.id||r.platform+':'+(r.nativeId||hash(r.sourceUrl+'|'+r.text));if(seen.has(identity))continue;seen.add(identity);const intent=audienceSignals(r.text);if(!intent.request)continue;const key=category(r.text);if(!buckets.has(key))buckets.set(key,[]);buckets.get(key).push({...r,intent});}
   const angles={'أسعار وتكلفة':'وضّح العوامل التي تغيّر التكلفة، وما المعلومات المطلوبة قبل تقديم سعر.','إجراءات قانونية':'وضّح الخطوات والمستندات المطلوبة بعد مراجعة مختص، مع ذكر نطاق الدولة.','عقود وإيجارات':'اعرض قائمة تحقق تساعد الجمهور على مراجعة البنود أو تحديد احتياجه.','قضايا عمالية':'ناقش الإجراء والمستندات المرتبطة بالسؤال بعد مراجعة مختص.','موقع الخدمة':'وضّح طريقة الوصول إلى الخدمة والنطاق الذي تغطيه.','تجربة وتوصية':'قدّم معايير واضحة للمقارنة والاختيار مع مثال عملي.','تعلّم وتوضيح':'اشرح خطوة واحدة من السؤال، ثم اعرض تطبيقًا قصيرًا.','توفر الخدمة':'وضّح شروط التوفر وطريقة التأكد منها قبل الطلب.'};
   return [...buckets].map(([topic,items])=>{
-    const unique=new Set();const evidence=items.filter(item=>{const quote=norm(item.intent.question||item.text);if(unique.has(quote))return false;unique.add(quote);return true;}).slice(0,3).map(item=>({id:item.id,quote:item.intent.question||item.text,sourceUrl:item.sourceUrl,author:item.author,platform:item.platform}));
+    const unique=new Set();const evidence=items.filter(item=>{const quote=norm(item.intent.question||item.text);if(unique.has(quote))return false;unique.add(quote);return true;}).slice(0,3).map(item=>({id:item.id,quote:item.intent.question||item.text,...commentSource(item),nativeId:item.nativeId,parentId:item.parentId,kind:item.kind,author:item.author,platform:item.platform}));
     return {topic,count:items.length,authors:new Set(items.filter(item=>item.author).map(item=>item.platform+':'+item.author)).size,evidence,example:evidence[0].quote,source:evidence[0].sourceUrl,
       hook:'سؤال الجمهور: «'+evidence[0].quote.slice(0,120)+(evidence[0].quote.length>120?'…':'')+'»',
       angle:angles[topic]||'أجب عن السؤال المحدد بمعلومة قابلة للتحقق، ثم وضّح الخطوة التالية.',format:topic==='عقود وإيجارات'?'منشور شرائح مع قائمة تحقق قصيرة':'فيديو قصير يجيب عن سؤال واحد، مع مثال واضح',
@@ -132,4 +130,4 @@ export function growthMetrics(raw) {
   const value={};for(const key of ['impressions','visits','follows','unfollows']){const n=Number(raw[key]);if(!Number.isFinite(n)||n<0||!Number.isInteger(n))throw Error('أدخل أرقاماً صحيحة غير سالبة.');value[key]=n;}
   return {...value,profileRate:value.impressions?value.visits/value.impressions*100:null,followRate:value.visits?value.follows/value.visits*100:null,net:value.follows-value.unfollows};
 }
-export function safeCsv(rows){const fields=['id','nativeId','platform','kind','parentId','author','text','sourceUrl','createdAt','collectedAt','importedAt','authorLocation','likes','collectionMethod','geo','score'];const escape=v=>{let s=String(v??'');if(/^[\s]*[=+@-]/.test(s))s="'"+s;return '"'+s.replace(/"/g,'""')+'"';};return '\uFEFF'+[fields.join(','),...rows.map(r=>fields.map(k=>escape(k==='geo'?r.geo?.evidence:r[k])).join(','))].join('\r\n');}
+export function safeCsv(rows){const fields=['id','nativeId','platform','kind','parentId','author','text','sourceUrl','commentUrl','postUrl','sourceKind','sourceStatus','createdAt','collectedAt','importedAt','authorLocation','likes','collectionMethod','geo','score'];const escape=v=>{let s=String(v??'');if(/^[\s]*[=+@-]/.test(s))s="'"+s;return '"'+s.replace(/"/g,'""')+'"';};return '\uFEFF'+[fields.join(','),...rows.map(r=>fields.map(k=>escape(k==='geo'?r.geo?.evidence:r[k])).join(','))].join('\r\n');}

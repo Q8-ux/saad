@@ -1,3 +1,4 @@
+import {sourceSnapshot} from './comment-sources.mjs';
 /** Shared production contracts. A plan, a draft and rendered media are different artifacts. */
 export const contentTools = [
   {id:'social-research',name:'Social Media Research Skills',stage:'بحث الجمهور',repo:'ScrapeCreators/social-media-research-skills',license:'MIT',mode:'radar',detail:'استخدم نتائج الرصد والأسئلة الأصلية لبناء موجز الجمهور. الجمع المباشر يستخدم ربط ScrapeCreators الحالي.'},
@@ -15,7 +16,7 @@ export const contentStages=['الموجز','البحث','الكتابة','الم
 export const campaignStates={draft:'مسودة',review:'للمراجعة',approved:'معتمدة',scheduled:'مخططة في التقويم',published:'نُشرت يدوياً'};
 const text=(value,max=1000)=>typeof value==='string'?value.trim().slice(0,max):'';
 export function publicUrl(value){try{const u=new URL(value);return u.protocol==='https:'&&!u.username&&!u.password?u.href:'';}catch{return '';}}
-export function evidenceFromRows(rows=[]){const seen=new Set();return rows.filter(r=>r&&text(r.text)&&publicUrl(r.sourceUrl)).filter(r=>{const id=text(r.id,300)||r.sourceUrl+':'+r.text;if(seen.has(id))return false;seen.add(id);return true;}).slice(0,12).map(r=>({id:text(r.id,300),text:text(r.text,1200),sourceUrl:publicUrl(r.sourceUrl),platform:text(r.platform,40)}));}
+export function evidenceFromRows(rows=[]){const seen=new Set();return rows.filter(r=>r&&text(r.text)&&publicUrl(r.sourceUrl)).filter(r=>{const id=text(r.id,300)||r.sourceUrl+':'+r.text;if(seen.has(id))return false;seen.add(id);return true;}).slice(0,12).flatMap(r=>{try{return [{...sourceSnapshot(r),id:text(r.id,300),text:text(r.text,1200)}];}catch{return [{id:text(r.id,300),text:text(r.text,1200),sourceUrl:publicUrl(r.sourceUrl),platform:text(r.platform,40)}];}});}
 export function normalizeCampaign(raw,previous){
   if(!raw||!text(raw.topic,240))throw Error('أدخل موضوع الحملة أولاً.');
   const now=new Date().toISOString();
