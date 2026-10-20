@@ -30,9 +30,29 @@ function harness(){
 }
 const input={caseType:'قضية اصطناعية',court:'محكمة اختبار',clientName:'عميل اصطناعي',otherParty:'خصم اصطناعي',partyRole:'مدعٍ',facts:'هذه وقائع اصطناعية للاختبار دون أي بيانات عميل حقيقية.',requests:'طلب اصطناعي للاختبار',interfaceLanguage:'ar',outputLanguage:'ar'};
 const newAttempt=()=>({attemptId:webcrypto.randomUUID(),paymentToken:Buffer.from(webcrypto.getRandomValues(new Uint8Array(32))).toString('base64url'),input});
-async function ready(h){const api=h.load('lib/sadad-payments.ts');await api.sadadManagement({action:'save',environment:'sandbox',clientKey:'synthetic-client-key',clientSecret:'synthetic-client-secret',priceKwd:'2.501',required:false,accountConfirmed:true,callbacksConfirmed:true},'test');await api.sadadManagement({action:'test'},'test');await api.sadadManagement({action:'save',environment:'sandbox',priceKwd:'2.501',required:true,accountConfirmed:true,callbacksConfirmed:true},'test');return api;}
+async function ready(h){const api=h.load('lib/sadad-payments.ts');await api.sadadManagement({action:'save',environment:'sandbox',clientKey:'synthetic-client-key',clientSecret:'synthetic-client-secret',priceKwd:'2.501',required:false,accountConfirmed:true,callbacksConfirmed:true},'test');await api.sadadManagement({action:'test'},'test');await api.sadadManagement({action:'save',environment:'sandbox',priceKwd:'2.501',required:true,publicCheckoutEnabled:true,accountConfirmed:true,callbacksConfirmed:true},'test');return api;}
 async function paid(h,api,attempt){await api.createMemoPayment(attempt);const remote=[...h.invoices.values()].at(-1);remote.status='Paid';remote.transactionID='synthetic-transaction-'+remote.id;return remote;}
 const memoInput=a=>({...a.input,paymentId:a.attemptId,paymentToken:a.paymentToken});
+
+test('SADAD stays admin-only by default and configuring credentials never enables public checkout',async()=>{const h=harness();try{
+ const api=h.load('lib/sadad-payments.ts');assert.equal((await api.memoPaymentPolicy()).publicCheckoutEnabled,false);
+ await api.sadadManagement({action:'save',environment:'sandbox',clientKey:'synthetic-key',clientSecret:'synthetic-secret',priceKwd:'2.501',required:false,accountConfirmed:true,callbacksConfirmed:true},'test');
+ await api.sadadManagement({action:'test'},'test');
+ const admin=await api.sadadManagement(null,'test'),policy=await api.memoPaymentPolicy();
+ assert.equal(admin.ready,true);assert.equal(admin.publicCheckoutEnabled,false);assert.equal(policy.publicCheckoutEnabled,false);assert.equal(policy.required,false);assert.equal(policy.ready,false);
+ await assert.rejects(api.sadadManagement({action:'save',environment:'sandbox',priceKwd:'2.501',required:true,accountConfirmed:true,callbacksConfirmed:true},'test'),/إدارة فقط/);
+ assert.equal(h.invoices.size,0);assert.equal((await api.memoPaymentPolicy()).required,false);
+}finally{h.close();}});
+test('hiding checkout blocks new invoices without losing a previously paid memo or its recovery',async()=>{const h=harness();try{
+ const api=await ready(h),a=newAttempt();await paid(h,api,a);
+ await api.sadadManagement({action:'save',environment:'sandbox',priceKwd:'2.501',required:false,publicCheckoutEnabled:false,accountConfirmed:true,callbacksConfirmed:true},'test');
+ h.sqlite.prepare("UPDATE service_settings SET payment_required=1 WHERE service_key='memo'").run();
+ await assert.rejects(api.createMemoPayment(newAttempt()),/مخفية/);assert.equal(h.invoices.size,1);
+ await assert.rejects(api.reserveMemoPayment(input));
+ const {lease}=await api.reserveMemoPayment(memoInput(a));assert.ok(lease);
+ await api.completeMemoPayment(lease,{memo:'ناتج اصطناعي محفوظ بعد إخفاء الدفع'});
+ assert.equal((await api.recoverMemoPayment(a.attemptId,a.paymentToken)).memo,'ناتج اصطناعي محفوظ بعد إخفاء الدفع');
+}finally{h.close();}});
 
 test('KWD has exact integer fils and rejects rounding, exponent, negative or invalid amounts',()=>{const h=harness();try{const api=h.load('lib/sadad-payments.ts');assert.equal(api.kwdToFils('2.501'),2501);assert.equal(api.kwdToFils('0.001'),1);for(const v of ['2.0001','-1','NaN','1e3','','2,50'])assert.throws(()=>api.kwdToFils(v));}finally{h.close();}});
 test('credentials are encrypted and withheld; no invoice is created by configuration or connection tests',async()=>{const h=harness();try{const api=await ready(h),safe=await api.sadadManagement(null,'test');assert.equal(safe.ready,true);assert.ok(!JSON.stringify(safe).includes('synthetic-client'));assert.ok(!h.sqlite.prepare("SELECT sealed FROM management_vault WHERE integration='sadad'").get().sealed.includes('synthetic-client'));assert.equal(h.invoices.size,0);assert.ok(h.calls.every(c=>!c.url.includes('synthetic-')));const settings=await api.memoPaymentPolicy();assert.equal(settings.priceFils,2501);assert.ok(!JSON.stringify(settings).includes('Key'));}finally{h.close();}});

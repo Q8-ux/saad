@@ -78,6 +78,23 @@ test('the shipped GitHub client completes a real code exchange and clears callba
  assert.match(storage.get('sabeq-management-session'),/^[A-Za-z0-9_-]{43}$/);assert.match(node('app').innerHTML,/class="sidebar"/);assert.match(node('workspace').innerHTML,/مصادر المتابعة/);
  assert.deepEqual(calls,['/api/management/exchange','/api/management/session','/api/management/snapshot']);
 }finally{h.close();}});
+test('the Payments deep link survives the real PKCE exchange and only loads protected payment administration',async()=>{const h=harness();try{
+ const auth=h.load('lib/management-auth.ts'),routes=h.load('app/api/management/[...path]/route.ts'),verifier=auth.randomToken(),state=auth.randomToken();
+ const req=request('login?'+new URLSearchParams({challenge:await auth.proofChallenge(verifier),state}));req.headers.set('oai-authenticated-user-id','synthetic-platform-id');req.headers.set('oai-authenticated-user-email','manager@example.test');
+ const callback=(await routes.GET(req)).headers.get('location');
+ const storage=new Map([['sabeq-admin-section','payments'],['sabeq-admin-proof',verifier],['sabeq-admin-state',state]]),nodes=new Map(),calls=[];let cleanPath='';
+ const node=id=>{if(!nodes.has(id))nodes.set(id,{innerHTML:'',textContent:'',addEventListener(){},replaceChildren(){this.innerHTML='';}});return nodes.get(id);};
+ const context=vm.createContext({URL,URLSearchParams,Headers,Request,Response,TextEncoder,TextDecoder,Uint8Array,AbortSignal,crypto:webcrypto,btoa,atob,console,
+  document:{getElementById:node,addEventListener(){}},location:{href:callback,pathname:'/saad/sabeq-admin-preview/'},history:{replaceState(_s,_t,path){cleanPath=path;}},
+  sessionStorage:{getItem:key=>storage.get(key)||null,setItem:(key,value)=>storage.set(key,value),removeItem:key=>storage.delete(key)},setInterval(){},setTimeout,clearTimeout,
+  fetch:async(url,init)=>{const headers=new Headers(init.headers);headers.set('Origin','https://q8-ux.github.io');const request=new Request(url,{...init,headers});calls.push(new URL(url).pathname);return request.method==='POST'?routes.POST(request):routes.GET(request);}
+ });
+ const client=readFileSync(root+'/public/management/admin.js','utf8').replace('void boot();','globalThis.bootPromise=boot();');
+ vm.runInContext(client,context);await context.bootPromise;
+ assert.equal(cleanPath,'/saad/sabeq-admin-preview/#payments');assert.equal(storage.has('sabeq-admin-proof'),false);assert.equal(storage.has('sabeq-admin-state'),false);
+ assert.match(storage.get('sabeq-management-session'),/^[A-Za-z0-9_-]{43}$/);assert.match(node('app').innerHTML,/class="sidebar"/);assert.match(node('workspace').innerHTML,/إدارة فقط/);assert.match(node('workspace').innerHTML,/name="publicCheckoutEnabled"/);assert.match(node('workspace').innerHTML,/name="required" type="checkbox" disabled/);assert.ok(!node('workspace').innerHTML.includes('synthetic-management-secret'));
+ assert.deepEqual(calls,['/api/management/exchange','/api/management/session','/api/management/payments']);
+}finally{h.close();}});
 test('guest and signed-in memo requests persist their distinct outcomes and stay behind the admin boundary',async()=>{const h=harness();try{const ledger=h.load('lib/memo-requests.ts');const id=await ledger.startMemoRequest({clientName:'عميل اصطناعي',caseType:'اختبار',facts:'وقائع اصطناعية فقط'},null,'https://www.sabeq.legal');assert.equal(h.sqlite.prepare('SELECT status FROM management_memo_requests WHERE id=?').get(id).status,'running');await ledger.finishMemoRequest(id,'needs_review','مسودة اصطناعية للمراجعة','draft_generated');const auth=await login(h),routes=h.load('app/api/management/[...path]/route.ts');assert.equal((await routes.GET(request('memos?id='+id))).status,401);const result=await(await routes.GET(request('memos?id='+id,auth.token))).json();assert.equal(result.memo.output_text,'مسودة اصطناعية للمراجعة');assert.equal(result.memo.user_id,null);const id2=await ledger.startMemoRequest({clientName:'مستخدم اصطناعي',caseType:'اختبار'},{id:'synthetic-user',email:'user@example.test'},'https://q8-ux.github.io');await ledger.finishMemoRequest(id2,'failed','','request_422');assert.equal(h.sqlite.prepare('SELECT user_id,status,error_code FROM management_memo_requests WHERE id=?').get(id2).user_id,'synthetic-user');}finally{h.close();}});
 test('commands and notification read states survive independent requests; raw customer text is never required in events',async()=>{const h=harness();try{const session=await login(h),routes=h.load('app/api/management/[...path]/route.ts');let response=await routes.POST(request('commands',session.token,{title:'متابعة طلب اصطناعي',details:'تفاصيل اختبار',priority:'urgent'}));assert.equal(response.status,200);let rows=(await(await routes.GET(request('commands',session.token))).json()).commands;assert.equal(rows.length,1);response=await routes.POST(request('commands',session.token,{id:rows[0].id,status:'completed'}));assert.equal(response.status,200);rows=(await(await routes.GET(request('commands',session.token))).json()).commands;assert.equal(rows[0].status,'completed');await routes.POST(request('read',session.token,{ids:['memo:synthetic:needs_review']}));await routes.POST(request('read',session.token,{ids:['memo:synthetic:needs_review']}));assert.equal(h.sqlite.prepare('SELECT COUNT(*) n FROM management_read_states').get().n,1);assert.equal((await routes.POST(request('commands',session.token,{id:rows[0].id,status:'shell_exec'}))).status,400);}finally{h.close();}});
 const sessionId='11111111-1111-4111-8111-111111111111';
@@ -137,3 +154,14 @@ test('mailbox status changes require confirmation and a verified member; adminis
 test('a mailbox provider error preserves the configuration screen and cannot become a successful empty list',async()=>{const h=harness();try{
  await saveZoho(h,{accessToken:'synthetic-access-token',expiresAt:Date.now()+3600000});h.setTransport(async()=>Response.json({error:'synthetic-provider-error'},{status:503}));const api=h.load('lib/management-mailboxes.ts');const result=await api.mailboxAction(null,'manager@example.test');assert.equal(result.loaded,false);assert.equal(result.hasCredentials,true);assert.ok(result.error);assert.ok(!JSON.stringify(result).includes('synthetic-provider-error'));await assert.rejects(api.mailboxAction({action:'test'},'manager@example.test'));
 }finally{h.close();}});
+
+test('a direct Payments bookmark cannot fetch dashboard records before sign-in',async()=>{
+ for(const hash of ['payments','unknown-section']){
+  const nodes=new Map(),storage=new Map();let requests=0;
+  const node=id=>{if(!nodes.has(id))nodes.set(id,{innerHTML:'',textContent:'',addEventListener(){},replaceChildren(){}});return nodes.get(id);};
+  const context=vm.createContext({URL,URLSearchParams,crypto:webcrypto,document:{getElementById:node,addEventListener(){}},location:{href:'https://q8-ux.github.io/saad/sabeq-admin-preview/#'+hash,pathname:'/saad/sabeq-admin-preview/'},history:{replaceState(){}},sessionStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v),removeItem:k=>storage.delete(k)},setInterval(){},setTimeout,clearTimeout,fetch:async()=>{requests++;throw Error('unexpected request before login');}});
+  vm.runInContext(readFileSync(root+'/public/management/admin.js','utf8').replace('void boot();','globalThis.bootPromise=boot();'),context);await context.bootPromise;
+  assert.equal(requests,0);assert.match(node('app').innerHTML,/الدخول بالحساب الإداري/);assert.ok(!node('app').innerHTML.includes('name="clientSecret"'));
+  assert.equal(storage.get('sabeq-admin-section'),hash==='payments'?'payments':undefined);
+ }
+});

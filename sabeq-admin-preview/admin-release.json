@@ -1,5 +1,7 @@
 {
-  "revision": "independent-admin-6-sadad",
-  "backendSource": "abb39da04e4448788ee196269ec6a884fc42802b",
-  "sourceRepository": "https://github.com/Q8-ux/saad"
+  "revision": "independent-admin-7-sadad-private",
+  "backendSource": "df30c4b0ea079eeaf2e13516196bc0b331f0fd8a",
+  "sourceRepository": "https://github.com/Q8-ux/saad",
+  "paymentVisibility": "admin-only-by-default",
+  "paymentsLink": "#payments"
 }
