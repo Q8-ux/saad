@@ -4,6 +4,7 @@ import {exampleProject} from './example.mjs?v=4';
 import {METHOD,STAGES,DRAMA_FIELDS,storyChecks,storyFingerprint,isApproved,planIssues,planFromBeats,promptForFoundation,validateFoundation,mergeFoundation,dramaForScene,sceneReview,storyText,printStoryBody} from './story.mjs?v=4';
 import {makeStoryUI,dramaInputs} from './story-ui.mjs?v=4';
 import {makeCinemaUI} from './cinematic-ui.mjs?v=4';
+import {makeSummaryUI} from './series-summary.mjs?v=6';
 import {orderProjects,mergeCatalog} from './project-catalog.mjs?v=5';
 const $=selector=>document.querySelector(selector);
 const $$=selector=>[...document.querySelectorAll(selector)];
@@ -11,7 +12,7 @@ const STORAGE='saad.script-studio.v1';
 const ai=makeGemini();
 let projects=[],activeId='',focusedId='',currentView='editor',saveTimer,toastTimer,busy=false,controller=null,models=[];
 let undoStack=[],redoStack=[];
-let storyUI,cinemaUI;
+let storyUI,cinemaUI,summaryUI;
 function toast(message,error=false){const el=$('#toast');el.textContent=message;el.classList.remove('hidden');el.classList.toggle('error',error);clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.add('hidden'),error?11000:5500);}
 function current(){return projects.find(p=>p.id===activeId);}
 function load(){
@@ -54,6 +55,7 @@ function renderMeta(){
   if(currentView==='board')renderBoard();if(currentView==='review')renderReview();
   if(currentView==='story')storyUI?.refresh();
   if(currentView==='cinema')cinemaUI?.refresh();
+  if(currentView==='summary')summaryUI?.refresh();
 }
 function renderProjects(){
   $('#projectList').innerHTML=orderProjects(projects).map(p=>`<div class="project-item ${p.id===activeId?'active':''}"><button class="project-open" data-project="${esc(p.id)}">${esc(p.title)}</button><button class="icon-button delete-project" data-delete-project="${esc(p.id)}" aria-label="حذف المشروع ${esc(p.title)}">×</button></div>`).join('');
@@ -112,7 +114,7 @@ function renderReview(){
 function showView(view){
   currentView=view;$$('.view').forEach(el=>el.classList.add('hidden'));$(`#${view}View`).classList.remove('hidden');$$('.nav-button').forEach(btn=>btn.classList.toggle('active',btn.dataset.view===view));$('#sidebar').classList.remove('open');
   if(view==='editor')renderEditor();if(view==='board')renderBoard();if(view==='story')fillStoryForm();if(view==='review')renderReview();
-  if(view==='cinema')cinemaUI?.render();
+  if(view==='cinema')cinemaUI?.render();if(view==='summary')summaryUI?.render();
 }
 function switchProject(pid){if(busy){toast('أوقف الكاتب المساعد قبل تغيير المشروع.');return;}saveNow();activeId=pid;focusedId=current().blocks[0]?.id;undoStack=[];redoStack=[];renderMeta();storyUI?.select('dna');showView(current().blocks.some(b=>b.text.trim())?'editor':'story');saveNow();}
 function addProject(p){if(projects.length>=40){toast('لديك ٤٠ مشروعاً على هذا الجهاز. صدّر أحدها واحذفه قبل إضافة مشروع.',true);return false;}p.id=id();projects.push(p);activeId=p.id;focusedId=p.blocks[0]?.id;undoStack=[];redoStack=[];renderMeta();storyUI?.select('dna');showView(p.blocks.some(b=>b.text.trim())?'editor':'story');saveNow();return true;}
@@ -315,5 +317,5 @@ function initEvents(){
   window.addEventListener('beforeunload',saveNow);
   window.addEventListener('resize',()=>{if(currentView==='editor')$$('#blocksEditor textarea').forEach(autoSize);});
 }
-load();await loadCatalog();initEvents();storyUI=makeStoryUI({current,save:scheduleSave,toast,isBusy:()=>busy,checkpoint:name=>snapshot(current(),name),manualPlan,develop:developStory,copyPrompt:()=>copyText(promptForFoundation(current())),showEditor:()=>showView('editor')});cinemaUI=makeCinemaUI({current,save:scheduleSave,toast,isBusy:()=>busy,checkpoint:name=>snapshot(current(),name),copy:copyText,download:value=>download(value,fileName()+'-cinematic.txt'),print:printCinema,openScene:focusBlock});focusedId=current().blocks[0]?.id;renderMeta();showView('story');updateConnection();
+load();await loadCatalog();initEvents();storyUI=makeStoryUI({current,save:scheduleSave,toast,isBusy:()=>busy,checkpoint:name=>snapshot(current(),name),manualPlan,develop:developStory,copyPrompt:()=>copyText(promptForFoundation(current())),showEditor:()=>showView('editor')});cinemaUI=makeCinemaUI({current,save:scheduleSave,toast,isBusy:()=>busy,checkpoint:name=>snapshot(current(),name),copy:copyText,download:value=>download(value,fileName()+'-cinematic.txt'),print:printCinema,openScene:focusBlock});summaryUI=makeSummaryUI({current,save:scheduleSave,toast});focusedId=current().blocks[0]?.id;renderMeta();showView('story');updateConnection();
 
