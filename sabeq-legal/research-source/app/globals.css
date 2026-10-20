@@ -3976,3 +3976,5 @@ html[data-theme="dark"] .memo-result-tools .danger { border-color: #7b3d48; colo
   .floating .assistant-avatar-button { width: 56px; height: 56px; }
   .floating-whatsapp { width: 45px; height: 45px; }
 }
+
+.memo-payment{border:1px solid var(--teal,#086677);border-radius:12px;background:var(--panel-soft,#edf6f8);padding:20px;margin-block:18px;text-align:start;min-width:0}.memo-payment>div{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;align-items:center}.memo-payment h4{margin:0;font-size:22px}.memo-payment strong{font-size:26px;font-variant-numeric:tabular-nums}.memo-payment p{font-size:20px;line-height:1.8}.memo-payment small{display:block;font-size:16px;overflow-wrap:anywhere;margin-block-start:12px}.memo-payment a:focus-visible{outline:3px solid var(--teal,#086677);outline-offset:4px}

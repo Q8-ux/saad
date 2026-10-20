@@ -193,6 +193,15 @@ export const serviceSettings = sqliteTable(
   },
 );
 
+export const sadadPayments = sqliteTable("sadad_payments", {
+  id: text("id").primaryKey(), tokenHash: text("token_hash").notNull(), inputHash: text("input_hash").notNull(),
+  environment: text("environment").notNull(), amountFils: integer("amount_fils").notNull(), currency: text("currency").notNull().default("KWD"),
+  reference: text("reference").notNull(), invoiceId: text("invoice_id"), invoiceKey: text("invoice_key"), transactionId: text("transaction_id"),
+  status: text("status").notNull().default("creating"), generationId: text("generation_id"), leaseUntil: integer("lease_until"),
+  resultJson: text("result_json"), resultExpiresAt: integer("result_expires_at"),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`), updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+}, table => [uniqueIndex("sadad_invoice_uidx").on(table.environment, table.invoiceId), uniqueIndex("sadad_transaction_uidx").on(table.environment, table.transactionId)]);
+
 export const emailVerificationChallenges = sqliteTable(
   "email_verification_challenges",
   {

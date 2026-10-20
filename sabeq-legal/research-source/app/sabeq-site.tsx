@@ -2,6 +2,7 @@
 
 import { ASSISTANT_MESSAGE_LIMIT, assistantInputCopy, validateAssistantInput } from "@/lib/assistant-input";
 import { runMemoGeneration, MemoGenerationStopped, memoGenerationCopy } from "@/lib/memo-generation";
+import { newPaymentAttempt, loadPaymentAttempt, rememberPaymentAttempt, clearPaymentAttempt, paymentCopy, type SadadCheckout } from "@/lib/sadad-client";
 import { readSSE } from "@/lib/intake-stream";
 import { cleanIntakeContext } from "@/lib/intake-context";
 import type { AnalysisStage } from "@/lib/intake-analysis";
@@ -945,6 +946,18 @@ const emptyAnalysisFields: AnalysisFields = {
 };
 
 function MemoWizard({ t, language, token, initialData = null }: { t: SiteCopy; language: Language; token: string; initialData?: MemoPrefill | null }) {
+  const [paymentPolicy, setPaymentPolicy] = useState<{ required: boolean; priceFils: number; ready: boolean; environment: string } | null>(null);
+  const [checkout, setCheckout] = useState<SadadCheckout | null>(null);
+  const [checkingPayment, setCheckingPayment] = useState(false);
+  const paymentAttempt = useRef<ReturnType<typeof newPaymentAttempt> | null>(null);
+  const payUi = paymentCopy[language];
+  useEffect(() => {
+    const controller = new AbortController();
+    memoFetch("/api/payments/sadad", token, { signal: controller.signal }).then(async response => {
+      if (response.ok) setPaymentPolicy(await response.json());
+    }).catch(() => undefined);
+    return () => controller.abort();
+  }, [token]);
   const [step, setStep] = useState(() => isCompleteMemoHandoff(initialData) ? 3 : 0);
   const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
   const [memoError, setMemoError] = useState("");
@@ -985,6 +998,26 @@ function MemoWizard({ t, language, token, initialData = null }: { t: SiteCopy; l
   const [analysisParties, setAnalysisParties] = useState<AnalysisParty[]>([]);
   const [analysisWarnings, setAnalysisWarnings] = useState<string[]>([]);
   const documentInputRef = useRef<HTMLInputElement | null>(null);
+  useEffect(() => {
+    const saved = loadPaymentAttempt();
+    if (!saved) return;
+    paymentAttempt.current = saved;
+    const controller = new AbortController();
+    (async () => {
+      const response = await memoFetch(`/api/payments/sadad?id=${saved.attemptId}`, saved.paymentToken, { signal: controller.signal });
+      if (!response.ok || controller.signal.aborted) return;
+      const payment = await response.json() as SadadCheckout;
+      setCheckout(payment);
+      if (payment.status === "consumed") {
+        const recovered = await memoFetch(`/api/payments/sadad?id=${saved.attemptId}&result=1`, saved.paymentToken, { signal: controller.signal });
+        if (recovered.ok && !controller.signal.aborted) {
+          const result = await recovered.json();
+          setMemo(result.memo || ""); setMemoDocument(result.document || null); setMemoAnalysis(result.analysis || null); setMemoQuality(result.caseQuality || null);
+        }
+      }
+    })().catch(() => undefined);
+    return () => controller.abort();
+  }, [initialData]);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const audioStreamRef = useRef<MediaStream | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -1220,6 +1253,7 @@ function MemoWizard({ t, language, token, initialData = null }: { t: SiteCopy; l
   }
 
   function editGeneratedMemo() {
+    clearPaymentAttempt(); paymentAttempt.current = null; setCheckout(null);
     setMemo("");
     setMemoDocument(null);
     setMemoAnalysis(null);
@@ -1231,6 +1265,7 @@ function MemoWizard({ t, language, token, initialData = null }: { t: SiteCopy; l
   function deleteGeneratedMemo() {
     const ok = window.confirm(language === "ar" ? "حذف المذكرة الحالية من الشاشة؟" : language === "en" ? "Delete the current draft from the screen?" : "موجودہ مسودہ اسکرین سے حذف کریں؟");
     if (!ok) return;
+    clearPaymentAttempt(); paymentAttempt.current = null; setCheckout(null);
     setMemo("");
     setMemoDocument(null);
     setMemoAnalysis(null);
@@ -1449,11 +1484,42 @@ function MemoWizard({ t, language, token, initialData = null }: { t: SiteCopy; l
     setStatus("loading");
     setMemoError("");
     try {
+      const input: Record<string, unknown> = { ...nextData, interfaceLanguage: language, outputLanguage: "ar" };
+      setCheckingPayment(true);
+      const policyResponse = await memoFetch("/api/payments/sadad", token, { signal: controller.signal });
+      const currentPolicy = await readServiceJson<{ required: boolean; priceFils: number; ready: boolean; environment: string; error?: string }>(policyResponse);
+      if (!policyResponse.ok || typeof currentPolicy.required !== "boolean") throw new Error(currentPolicy.error || payUi.policyError);
+      setPaymentPolicy(currentPolicy);
+      if (currentPolicy.required || paymentAttempt.current) {
+        if (!paymentAttempt.current) {
+          const attempt = newPaymentAttempt();
+          try { rememberPaymentAttempt(attempt); } catch { throw new Error(language === "ar" ? "يلزم تفعيل تخزين جلسة المتصفح للاحتفاظ بطلب الدفع. لم تُنشأ فاتورة." : "Enable browser session storage to retain your payment request. No invoice was created."); }
+          paymentAttempt.current = attempt;
+        }
+        const attempt = paymentAttempt.current;
+        const createdResponse = await memoFetch("/api/payments/sadad", token, { method: "POST", signal: controller.signal, headers: { "Content-Type": "application/json" }, body: JSON.stringify({ attemptId: attempt.attemptId, paymentToken: attempt.paymentToken, input }) });
+        const created = await readServiceJson<SadadCheckout & { error?: string; required?: boolean }>(createdResponse);
+        if (!createdResponse.ok) {
+          if ([400, 413, 422].includes(createdResponse.status) && !checkout) { clearPaymentAttempt(); paymentAttempt.current = null; }
+          throw new Error(created.error || payUi.policyError);
+        }
+        if (created.id) {
+          setCheckout(created);
+          const statusResponse = await memoFetch(`/api/payments/sadad?id=${encodeURIComponent(created.id)}`, attempt.paymentToken, { signal: controller.signal });
+          const payment = await readServiceJson<SadadCheckout & { error?: string }>(statusResponse);
+          if (!statusResponse.ok) throw new Error(payment.error || payUi.policyError);
+          setCheckout(payment);
+          if (!["paid", "consumed"].includes(payment.status)) { setStatus("idle"); return; }
+          input.paymentId = attempt.attemptId;
+          input.paymentToken = attempt.paymentToken;
+        }
+      }
+      setCheckingPayment(false);
       const data = await runMemoGeneration(async (signal) => {
       const response = await memoFetch("/api/legal/memo", token, {
         method: "POST", signal,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...nextData, interfaceLanguage: language, outputLanguage: "ar" }),
+        body: JSON.stringify(input),
       });
       const data = await readServiceJson<{ memo?: string; document?: PleadingDocument; caseQuality?: {status:string;notices:string[]}; error?: string; analysis?: { sourceCount: number; lawCount: number; cassationCount: number; sources: Array<{ marker: string; title: string; reference: string; kind: "cassation" | "legislation"; officialSource: string; sourceUrl?: string; libraryUpdatedAt?: string | null }> } }>(response);
       if (!response.ok || !data.memo) throw new Error(data.error || t.error);
@@ -1470,6 +1536,7 @@ function MemoWizard({ t, language, token, initialData = null }: { t: SiteCopy; l
       setStatus("error");
       setMemoError(error instanceof MemoGenerationStopped ? (error.reason === "timeout" ? generationUi.timeout : generationUi.cancelled) : interfaceError(error, language, t.error));
     } finally {
+      setCheckingPayment(false);
       if (generationRequest.current === controller) generationRequest.current = null;
     }
   }
@@ -1626,10 +1693,17 @@ function MemoWizard({ t, language, token, initialData = null }: { t: SiteCopy; l
           {step === 3 && <div className="review-box"><FileCheck2 size={34} /><h3>{t.review}</h3><p>{t.arabicOnly}</p><p className="template-badge">{tr(language, "الصيغة")}: {tr(language, selectPleadingKind(memoData) === "appeal" ? "صحيفة استئناف" : selectPleadingKind(memoData) === "claim" ? "صحيفة دعوى" : "مذكرة بدفاع")}</p><p role="note" className="form-notice">{memoApprovalNotice[language]}</p>
             {memoData.conversationTranscript && <dl className="memo-handoff-details">{[[t.caseType, "caseType"], [t.court, "court"], [tr(language, "الدائرة"), "courtCircuit"], [tr(language, "مرحلة القضية"), "caseStage"], [t.clientName, "clientName"], [t.role, "partyRole"], [t.otherParty, "otherParty"], [ui.allParties, "allParties"], [t.facts, "facts"], [t.requests, "requests"]].map(([label, key]) => <div key={key}><dt>{label}</dt><dd>{["caseType", "court", "partyRole", "caseStage"].includes(key) ? interfaceLabel(memoData[key] || "", language) : memoData[key]}</dd></div>)}</dl>}
             <div><BookOpen size={18} />{t.libraryText}</div>
+            {paymentPolicy?.required && <section className="memo-payment" aria-label={payUi.title}>
+              <div><h4>{payUi.title}</h4><strong><bdi>{new Intl.NumberFormat(language === "ar" ? "ar-KW" : "en-KW", { style: "currency", currency: "KWD" }).format((checkout?.priceFils ?? paymentPolicy.priceFils) / 1000)}</bdi></strong></div>
+              {(checkout?.environment || paymentPolicy.environment) === "sandbox" && <p>{payUi.test}</p>}
+              <p>{checkout ? payUi.waiting : payUi.safety}</p>
+              {checkout?.checkoutUrl && <a className="button button-primary" href={checkout.checkoutUrl} target="_blank" rel="noopener noreferrer">{payUi.open}</a>}
+              {checkout && <small dir="ltr">{checkout.id}</small>}
+            </section>}
             <label className="memo-generation-approval"><input type="checkbox" checked={memoApproved} onChange={event => setMemoApproved(event.target.checked)} disabled={status === "loading"} />{generationUi.approval}</label></div>}
         </div>
-        <div className="memo-actions">{step > 0 ? <button type="button" className="button button-outline" disabled={status === "loading"} onClick={() => { setMemoApproved(false); setStep(step - 1); }}>{t.previous}</button> : <span />}<button className="button button-primary" disabled={voiceEntryBusy || status === "loading" || analysisStatus === "loading" || Boolean(step === 1 && documents.length && analysisStatus !== "success") || Boolean(recordingField || transcribingField || draftAction)}>{status === "loading" ? t.loading : step === 3 ? t.generate : step === 1 && documents.length === 0 ? ui.continueManual : t.next}<ArrowLeft size={17} /></button></div>
-        {status === "loading" && <div className="memo-generation-pending"><p role="status" aria-live="polite">{generationUi.pending}</p><span>{generationSeconds} {generationUi.seconds}</span><small>{generationUi.limit}</small><button type="button" className="button button-outline" onClick={() => generationRequest.current?.abort()}>{generationUi.cancel}</button></div>}
+        <div className="memo-actions">{step > 0 ? <button type="button" className="button button-outline" disabled={status === "loading"} onClick={() => { setMemoApproved(false); setStep(step - 1); }}>{t.previous}</button> : <span />}<button className="button button-primary" disabled={voiceEntryBusy || status === "loading" || analysisStatus === "loading" || Boolean(step === 1 && documents.length && analysisStatus !== "success") || Boolean(recordingField || transcribingField || draftAction)}>{status === "loading" ? (checkingPayment ? payUi.checking : t.loading) : step === 3 ? paymentPolicy?.required || checkout ? checkout ? payUi.verify : payUi.pay : t.generate : step === 1 && documents.length === 0 ? ui.continueManual : t.next}<ArrowLeft size={17} /></button></div>
+        {status === "loading" && <div className="memo-generation-pending"><p role="status" aria-live="polite">{checkingPayment ? payUi.checking : generationUi.pending}</p><span>{generationSeconds} {generationUi.seconds}</span><small>{checkingPayment ? payUi.safety : generationUi.limit}</small><button type="button" className="button button-outline" onClick={() => generationRequest.current?.abort()}>{generationUi.cancel}</button></div>}
         {status === "error" && <p className="form-notice error">{memoError || t.error}</p>}
       </form>
     </div>
