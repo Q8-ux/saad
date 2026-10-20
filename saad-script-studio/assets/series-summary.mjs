@@ -130,6 +130,7 @@ export function makeSummaryUI({current,save,toast}){
     const epForms=episodes.length?episodes.map(e=>'<label class="summary-field summary-episode-field"><span>الحلقة '+ar(e.number)+' · '+esc(e.title)+'</span><textarea data-episode="'+e.number+'" rows="2" maxlength="300">'+esc(data.episodeNotes[String(e.number)]||'')+'</textarea></label>').join(''):'<p>أضف عناوين الحلقات في نص السيناريو لتظهر هنا.</p>';
     host.innerHTML='<div id="summarySourceNotice" class="summary-warning" role="alert" hidden></div>'+
       '<div class="summary-layout"><div class="summary-editor"><div class="summary-panel-head"><h2>بيانات الملخص</h2><p>عدّل المحتوى المقترح؛ هذه البيانات لا تغيّر نص الحلقات ولا أي مشهد.</p></div>'+
+      '<label class="summary-field"><span>اسم المؤلف</span><small>يُحدّث الاسم في بيانات المشروع نفسه</small><input id="summaryAuthorInput" maxlength="150" value="'+esc(p.author||'سعد روضان')+'"></label>'+ 
       '<div class="summary-fields">'+fields+'</div><h3 class="summary-episode-heading">فهرس الحلقات ووصف كل حلقة</h3>'+epForms+'</div>'+
       '<aside class="summary-preview"><div id="summaryPreview"></div></aside></div>'+
       '<div class="summary-tools"><button class="button dark" type="button" data-summary-action="pdf">تصدير ملخص المسلسل · PDF</button><button class="button subtle" type="button" data-summary-action="copy">نسخ الملخص كنص</button><span>٦ صفحات مصممة بالعربية · فهرس مستقل · لا يُرفق السيناريو الكامل</span></div>';
@@ -138,6 +139,7 @@ export function makeSummaryUI({current,save,toast}){
   host.addEventListener('input',e=>{
     const p=current();if(!p||active!==p.id)return;
     const key=e.target.dataset.field,ep=e.target.dataset.episode;
+    if(e.target.id==='summaryAuthorInput'){p.author=e.target.value.slice(0,150);save();preview();return;}
     if(!key&&!ep)return;
     if(!p.presentation||typeof p.presentation!=='object')p.presentation={};
     if(key&&ORDER.some(x=>x[0]===key))p.presentation[key]=e.target.value;
