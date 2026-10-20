@@ -128,6 +128,12 @@ def verify():
         for name in ("index.html", "admin.js", "admin.css", "sabeq-logo.png", "al-mohanad.ttf", "al-mohanad-bold.ttf"):
             if not (admin / name).is_file() or not (admin / name).stat().st_size:
                 raise RuntimeError("Admin referenced asset missing")
+        stylesheet = (admin / "admin.css").read_text()
+        for asset in re.findall(r"url\(['\"]?([^)'\"]+)", stylesheet):
+            if not asset.startswith("./") or ".." in PurePosixPath(asset).parts or not (admin / asset).is_file():
+                raise RuntimeError("Admin referenced font or CSS asset missing")
+        if "ibm-plex-arabic" in stylesheet and not (admin / "fonts/OFL.txt").is_file():
+            raise RuntimeError("Admin font licence missing")
         admin_scripts = re.findall(r'<script[^>]+src="([^"]+)"', (admin / "index.html").read_text())
         if len(admin_scripts) != 1 or not re.fullmatch(r"\./admin\.js(?:\?v=[a-z0-9-]{1,80})?", admin_scripts[0]):
             raise RuntimeError("Unexpected admin script path")

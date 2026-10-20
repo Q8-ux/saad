@@ -82,6 +82,15 @@ class PublicationTests(unittest.TestCase):
                     with self.assertRaisesRegex(RuntimeError,"Unexpected admin script"):
                         release.verify()
                 (admin / "index.html").write_text('<script src="./admin.js?v=independent-admin-2-login"></script>')
+                (admin / "admin.css").write_text("@font-face{src:url('./fonts/ibm-plex-arabic-regular.woff2')}")
+                with self.assertRaisesRegex(RuntimeError,"font or CSS asset missing"):
+                    release.verify()
+                (admin / "fonts").mkdir()
+                (admin / "fonts/ibm-plex-arabic-regular.woff2").write_bytes(b"synthetic font")
+                with self.assertRaisesRegex(RuntimeError,"font licence missing"):
+                    release.verify()
+                (admin / "fonts/OFL.txt").write_text("Synthetic licence fixture")
+                release.verify()
                 (admin / "admin.js").unlink()
                 with self.assertRaisesRegex(RuntimeError,"Admin referenced asset missing"):
                     release.verify()
