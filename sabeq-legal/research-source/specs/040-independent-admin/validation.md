@@ -9,3 +9,11 @@
 - Browser screenshots and interaction QA were unavailable because the managed control-browser capability is not exposed. No substitute browser path was used.
 - Live office-number linking, mail-provider credentials, client email delivery, and customer messages were not exercised.
 - Publication and live verification remain pending at packaging time.
+
+## Login correction — 20 October 2026
+- The original native backend v124 and independent GitHub client were published successfully. Live HTML and JavaScript matched the source, CORS preflight returned 204 and anonymous management data access returned 401.
+- Production logs show repeated mobile login requests carrying platform identity headers, returning 302 without a subsequent exchange call. Header values are redacted; the logs do not establish which email was used or which redirect destination was returned.
+- Route login now reads identity from the incoming Request. The verified Site owner's email is configured in a separate secret setting; the existing allowlist is preserved. Repeated missing-identity redirects are bounded, and the client offers explicit account switching.
+- 12 management tests passed using actual SQLite migrations, including a complete login/exchange/session/logout, a conflicting render identity, owner revocation and a simulated execution of the shipped client through the real management routes. No production identity or credentials are used in the tests.
+- Four scoped publication tests passed, including bounded versioned script URLs and rejection of substituted script paths. Production Worker build and JavaScript syntax checks passed.
+- Authenticated login from the user's phone is not yet verified. A valid production platform session is not available to the test runner; a 200 public login page alone is not treated as proof of authenticated access. Publication of this correction is pending at packaging time.

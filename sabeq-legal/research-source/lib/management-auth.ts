@@ -5,10 +5,11 @@ import { RequestError } from "@/lib/request-security";
 
 export const MANAGEMENT_HOME = "https://q8-ux.github.io/saad/sabeq-admin-preview/";
 export const MANAGEMENT_ORIGIN = new URL(MANAGEMENT_HOME).origin;
-type Runtime = { AUTH_SECRET?: string; MANAGEMENT_ALLOWED_EMAILS?: string };
+type Runtime = { AUTH_SECRET?: string; MANAGEMENT_ALLOWED_EMAILS?: string; MANAGEMENT_OWNER_EMAIL?: string };
 export const managementRuntime = () => env as unknown as Runtime;
 export function managerAllowed(email: string) {
-  return String(managementRuntime().MANAGEMENT_ALLOWED_EMAILS || "").split(/[\s,;]+/).filter(Boolean).map(s => s.toLowerCase()).includes(email.toLowerCase());
+  const runtime = managementRuntime();
+  return `${runtime.MANAGEMENT_ALLOWED_EMAILS || ""},${runtime.MANAGEMENT_OWNER_EMAIL || ""}`.split(/[\s,;]+/).filter(Boolean).map(s => s.toLowerCase()).includes(email.trim().toLowerCase());
 }
 export function managementJson(data: unknown, status = 200) {
   return Response.json(data, { status, headers: { "Access-Control-Allow-Origin": MANAGEMENT_ORIGIN, "Vary": "Origin", "Cache-Control": "private, no-store, max-age=0", "Referrer-Policy": "no-referrer", "X-Content-Type-Options": "nosniff" } });
@@ -34,8 +35,15 @@ export async function signIntegration(value: string, secret?: string) {
 export async function managerLogin(request: Request) {
   const url = new URL(request.url), challenge = url.searchParams.get("challenge") || "", state = url.searchParams.get("state") || "";
   if (!/^[A-Za-z0-9_-]{43}$/.test(challenge) || !/^[A-Za-z0-9_-]{32,80}$/.test(state)) throw new RequestError("ابدأ الدخول من رابط لوحة التحكم.");
-  const user = await getChatGPTUser();
-  if (!user) return Response.redirect(new URL(chatGPTSignInPath(url.pathname + url.search), url.origin), 302);
+  const user = await getChatGPTUser(request);
+  if (!user) {
+    if (url.searchParams.get("auth_return") === "1") {
+      const target = new URL(MANAGEMENT_HOME); target.searchParams.set("login_error", "identity_unavailable");
+      return new Response(null, { status: 302, headers: { Location: target.href, "Cache-Control": "no-store", "Referrer-Policy": "no-referrer" } });
+    }
+    url.searchParams.set("auth_return", "1");
+    return new Response(null, { status: 302, headers: { Location: new URL(chatGPTSignInPath(url.pathname + url.search), url.origin).href, "Cache-Control": "no-store", "Referrer-Policy": "no-referrer" } });
+  }
   if (!managerAllowed(user.email)) {
     const target = new URL(MANAGEMENT_HOME); target.searchParams.set("login_error", "not_authorized");
     return new Response(null, { status: 302, headers: { Location: target.href, "Cache-Control": "no-store", "Referrer-Policy": "no-referrer" } });

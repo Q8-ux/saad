@@ -13,6 +13,8 @@
 
 ## Phase 3: Validation and publication
 - [x] T008 Test security and business boundaries, typecheck and build; document unavailable external integrations.
-- [ ] T009 Publish backend and GitHub client, verify authenticated data denial and public client availability.
+- [x] T009 Publish backend and GitHub client, verify authenticated data denial and public client availability. Native v124 and GitHub Pages published; official Render bridge remains blocked by exhausted build minutes.
+- [x] T010 Correct request-scoped platform identity, configure the verified owner without replacing existing administrators, bound sign-in redirects and add account switching (FR-011/012/013).
+- [ ] T011 Test the complete login route boundary, publish the fix and record the limits of live authenticated verification (SC-006).
 
 Dependencies: T001 -> T002/T003/T004/T005 -> T006 -> T008 -> T009. T007 is independent until the source-status check. No automatic customer messaging is part of this feature.

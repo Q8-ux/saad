@@ -128,7 +128,8 @@ def verify():
         for name in ("index.html", "admin.js", "admin.css", "sabeq-logo.png", "al-mohanad.ttf", "al-mohanad-bold.ttf"):
             if not (admin / name).is_file() or not (admin / name).stat().st_size:
                 raise RuntimeError("Admin referenced asset missing")
-        if re.findall(r'<script[^>]+src="([^"]+)"', (admin / "index.html").read_text()) != ["./admin.js"]:
+        admin_scripts = re.findall(r'<script[^>]+src="([^"]+)"', (admin / "index.html").read_text())
+        if len(admin_scripts) != 1 or not re.fullmatch(r"\./admin\.js(?:\?v=[a-z0-9-]{1,80})?", admin_scripts[0]):
             raise RuntimeError("Unexpected admin script path")
     print(f"Validated Sabeq release; {len(expected)} unrelated files are byte-identical")
 

@@ -15,3 +15,6 @@ Reuse the public Sites Vinext/D1 backend, existing brand assets and React depend
 Backend: `lib/management*.ts`, `lib/memo-requests.ts`, `app/api/management/[...path]/route.ts`, integration routes, D1 migration, memo route. Client: `public/management/` copied to GitHub `sabeq-admin-preview/`. Official backend bridge: `legal-memo-platform/operations-monitor.js` and gateway registration.
 
 Use synthetic D1/SQLite boundary tests for authorization, PKCE consumption, data isolation, encrypted credentials, webhook signatures/idempotency, guest memo capture and command updates. Build and typecheck existing backend; validate scoped Pages packaging. Preserve legal regression suites. Production checks must not create real client activity or send mail/WhatsApp messages.
+
+## Login correction
+Pass the actual Request into the existing platform identity helper for route authentication. Preserve the helper's default server-component behavior. Add the verified owner's email as an independent server secret, preserving the old allowlist. Bound platform redirects to one attempt and provide an explicit account-switch action. Version the client assets to avoid serving the old login code from browser caches. Test a complete synthetic route login/exchange/session/logout with no render context and a conflicting render identity.

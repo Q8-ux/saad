@@ -32,3 +32,9 @@
 - لا توجد إعدادات مزود بريد في بيئة الخدمة حالياً. يمكن عرض رسائل الموقع مع إعداد ربط البريد، ولا يدعى اتصال صندوق بريد.
 - الدومين الرسمي يستدعي أيضاً خلفية Render؛ يلزم جسر بيانات مصادق عليه أو تعرض حالته غير متاحة. لا يتم تغيير DNS.
 - لا تغيير في المصادر القانونية أو قوالب المذكرات أو الموافقة على التحليلات.
+
+## Login correction — 2026-10-20
+- FR-011: Route authentication reads the platform identity from the current incoming Request, without depending on the server-rendering header context. A stale or absent render context cannot cause a sign-in loop or substitute a different account.
+- FR-012: The verified Site owner may administer the dashboard, while the existing administrative allowlist remains valid. Configure the owner's email only in a separate secret runtime setting, never in the client or source.
+- FR-013: Missing identity after one platform sign-in returns a clear recoverable error instead of redirecting indefinitely. A rejected account can explicitly sign out and choose another account.
+- SC-006: A request carrying a permitted platform identity exchanges a single-use code and accesses the session endpoint with no render identity; unknown accounts and unauthenticated data access remain rejected.

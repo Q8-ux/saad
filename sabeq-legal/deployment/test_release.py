@@ -75,6 +75,13 @@ class PublicationTests(unittest.TestCase):
                 (admin / "index.html").write_text('<script src="./admin.js"></script>')
                 Path("_protected-pages.json").write_text(json.dumps(release.protected_manifest(root)))
                 release.verify()
+                (admin / "index.html").write_text('<script src="./admin.js?v=independent-admin-2-login"></script>')
+                release.verify()
+                for unsafe in ("https://other.example/admin.js", "./admin.js?redirect=other", "./other.js?v=2"):
+                    (admin / "index.html").write_text(f'<script src="{unsafe}"></script>')
+                    with self.assertRaisesRegex(RuntimeError,"Unexpected admin script"):
+                        release.verify()
+                (admin / "index.html").write_text('<script src="./admin.js?v=independent-admin-2-login"></script>')
                 (admin / "admin.js").unlink()
                 with self.assertRaisesRegex(RuntimeError,"Admin referenced asset missing"):
                     release.verify()
