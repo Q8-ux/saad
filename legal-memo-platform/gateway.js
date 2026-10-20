@@ -16,6 +16,7 @@ const { searchLegalDocuments, findRelevantLegalContext } = require('./legal-libr
 const { corsPolicy } = require('./cors-policy');
 const { openAiError, openAiErrorDetails } = require('./openai-errors');
 const { createOperationsMonitor } = require('./operations-monitor');
+const { memoPaymentGate } = require('./memo-payment-gate');
 
 const publicPort = Number(process.env.PORT || 3000);
 const appPort = Number(process.env.INTERNAL_APP_PORT || 3001);
@@ -257,7 +258,7 @@ app.post('/api/legal/draft-tools', jsonBody, async (req, res) => {
   }
 });
 
-app.post('/api/legal/memo', jsonBody, async (req, res) => {
+app.post('/api/legal/memo', jsonBody, memoPaymentGate(), async (req, res) => {
   const client = requireAi(res);
   if (!client) return;
   const body = req.body || {};
