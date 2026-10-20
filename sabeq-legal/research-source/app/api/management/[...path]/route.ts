@@ -1,5 +1,6 @@
 import { listManagedUsers, updateManagedUser } from "@/lib/user-management";
 import { mailboxAction } from "@/lib/management-mailboxes";
+import { sadadManagement } from "@/lib/sadad-payments";
 import { getD1 } from "@/db";
 import { assertManagementOrigin, exchangeManagerCode, managementJson, managerLogin, requireManager } from "@/lib/management-auth";
 import { bridgeKeys, managerInbox, managerMemos, managerSnapshot, managerUpdates } from "@/lib/management-data";
@@ -20,6 +21,7 @@ export async function GET(request: Request) {
     if (action === "jwks") { const keys = await bridgeKeys(); return managementJson({ keys: [keys.publicKey] }); }
     const manager = await requireManager(request), url = new URL(request.url);
     if (action === "users") return managementJson(await listManagedUsers(url, 50));
+    if (action === "payments") return managementJson(await sadadManagement(null, manager.email));
     if (action === "mailboxes") return managementJson(await mailboxAction(null, manager.email, Number(url.searchParams.get("offset") || 0)));
     if (action === "session") return managementJson({ manager: { email: manager.email, name: manager.name } });
     if (action === "snapshot") return managementJson(await managerSnapshot(manager.email));
@@ -41,6 +43,7 @@ export async function POST(request: Request) {
     await enforceRateLimit(request, "management-write", 150);
     if (action === "logout") { await getD1().prepare("DELETE FROM management_sessions WHERE token_hash = ?").bind(manager.hash).run(); return managementJson({ ok: true }); }
     if (action === "users") { const result = await updateManagedUser(data); await operationEvent("admin", "user-updated", "تم تحديث حساب مستخدم وخدماته"); return managementJson(result); }
+    if (action === "payments") return managementJson(await sadadManagement(data, manager.email));
     if (action === "mailboxes") return managementJson(await mailboxAction(data, manager.email));
     if (action === "whatsapp") return managementJson(await whatsappAction(data, manager.email));
     if (action === "mail") return managementJson(await mailAction(data, manager.email));

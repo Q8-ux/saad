@@ -1,0 +1,14 @@
+interface:
+  display_name: مسار دفع سداد
+  short_description: ربط سداد الكويتية والتحقق من الدفع قبل إتاحة الخدمة
+  default_prompt: استخدم $sadad-payments-path لربط سداد بمشروعي والتحقق من الدفع عبر
+    الخادم.
+  icon_small: assets/icon.svg
+  icon_large: assets/icon.svg
+policy:
+  products:
+  - chatgpt
+  - codex
+  - api
+  - atlas
+  allow_implicit_invocation: true

@@ -12,7 +12,7 @@ const githubBase = "/saad/sabeq-legal/";
 function githubBrandAssets(): Plugin {
   const assets = [
     ...Object.values(groupPostArtworks).map(artwork => ({ source: artwork.src, input: `public${artwork.src}`, output: artwork.src.slice(1) })),
-    ...["privacy.html", "privacy-en.html", "privacy-ur.html", "privacy.css", "privacy.js"].map(name => ({ source: `/${name}`, input: `public/${name}`, output: name })),
+    ...["privacy.html", "privacy-en.html", "privacy-ur.html", "privacy.css", "privacy.js", "payment-return.html"].map(name => ({ source: `/${name}`, input: `public/${name}`, output: name })),
     { source: "/source.html", input: "public/source.html", output: "source.html" },
     { source: "/source-viewer.js", input: "public/source-viewer.js", output: "source-viewer.js" },
     { source: "/images/sabeq-assistant-avatar.jpg", input: "public/images/sabeq-assistant-avatar.jpg", output: "images/sabeq-assistant-avatar.jpg" },
@@ -32,7 +32,7 @@ function githubBrandAssets(): Plugin {
         this.emitFile({
           type: "asset",
           fileName: asset.output,
-          source: asset.output === "privacy.css" ? readFileSync(path.join(projectRoot, asset.input), "utf8").replaceAll("./fonts/AL-Mohanad.ttf", "./assets/al-mohanad.ttf").replaceAll("./fonts/AL-Mohanad-Bold.ttf", "./assets/al-mohanad-bold.ttf") : readFileSync(path.join(projectRoot, asset.input)),
+          source: ["privacy.css", "payment-return.html"].includes(asset.output) ? readFileSync(path.join(projectRoot, asset.input), "utf8").replaceAll("./fonts/AL-Mohanad.ttf", "./assets/al-mohanad.ttf").replaceAll("./fonts/AL-Mohanad-Bold.ttf", "./assets/al-mohanad-bold.ttf") : readFileSync(path.join(projectRoot, asset.input)),
         });
       }
     },

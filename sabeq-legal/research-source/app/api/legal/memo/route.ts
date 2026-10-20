@@ -1,3 +1,5 @@
+import { validateMemoInput } from "@/lib/memo-input";
+import { reserveMemoPayment, completeMemoPayment, releaseMemoPayment, type PaymentLease } from "@/lib/sadad-payments";
 import {assessMatterFacts} from "@/lib/matter-facts";
 import {scopeEvidenceToFacts,prepareBoundDraft} from "@/lib/bound-draft";
 import { applyCheckedJudgmentMatches, caseReasoningInstructions, caseResearchQueries, approvedCaseFacts, buildCheckedCasePlan, CasePlanValidationError, casePlanFailureMessage, caseAuditSchema, parseCaseAudit, caseQualitySummary } from "@/lib/case-reasoning";
@@ -47,6 +49,7 @@ function stripInternalMemoLanguage(text: string) {
 
 export async function POST(request: Request) {
   let managementRequestId = "";
+  let paymentLease: PaymentLease | undefined;
   try {
     assertSameOrigin(request);
     const signal = AbortSignal.any([request.signal, AbortSignal.timeout(240_000)]);
@@ -60,27 +63,12 @@ export async function POST(request: Request) {
     // Memo sign-in is temporarily disabled for the pilot. The previous guest
     // limit was too low for a normal test flow (retrying after document review
     // exhausted it), so retain abuse protection while allowing real testing.
-    await enforceRateLimit(request, "legal-memo", user ? 12 : 12, "hour");
     if (user) await enforceUserServiceLimit(user, "memo");
-    const caseType = cleanString(raw.caseType, "نوع القضية", { min: 2, max: 160 });
-    const clientName = cleanString(raw.clientName, "اسم الموكل", { min: 2, max: 200 });
-    const court = cleanString(raw.court, "المحكمة", { min: 2, max: 200 });
-    const courtCircuit = cleanString(raw.courtCircuit, "الدائرة", { max: 200, required: false });
-    const caseNumber = cleanString(raw.caseNumber, "رقم القضية", { max: 120, required: false });
-    const otherParty = cleanString(raw.otherParty, "الخصم", { min: 2, max: 400 });
-    const partyRole = cleanString(raw.partyRole, "الصفة", { min: 2, max: 120 });
-    const allParties = cleanMultiline(raw.allParties, "الأطراف والصفات", { max: 4_000, required: false });
-    const facts = correctLegalProse(cleanMultiline(raw.facts, "الوقائع", { min: 20, max: 16_000 }), [clientName, otherParty, allParties]);
-    const requests = correctLegalProse(cleanMultiline(raw.requests, "الطلبات", { min: 5, max: 7_000 }), [clientName, otherParty, allParties]);
-    const legalIssues = cleanMultiline(raw.legalIssues, "المسائل القانونية", { max: 5_000, required: false });
-    const conversationTranscript = cleanMultiline(raw.conversationTranscript, "تفريغ المحادثة", { max: 30_000, required: false });
-    const conversationSummary = cleanMultiline(raw.conversationSummary, "ملخص المحادثة", { max: 6_000, required: false });
-    const assistantResearch = cleanMultiline(raw.assistantResearch, "تحليل المساعد", { max: 12_000, required: false });
-    const extraFields: Record<string,string> = {};
-    for (const [key,label] of Object.entries(pleadingFields)) extraFields[key] = cleanMultiline(raw[key],label,{max:5000,required:false});
-    const documentKind = cleanString(raw.documentKind,"صيغة المستند",{max:30,required:false});
-    if (documentKind && !["auto","claim","appeal","memorandum"].includes(documentKind)) throw new RequestError("صيغة المستند غير صحيحة.");
-    const caseStage = cleanString(raw.caseStage,"مرحلة القضية",{max:300,required:false});
+    const { caseType, clientName, court, courtCircuit, caseNumber, otherParty, partyRole, allParties, facts, requests, legalIssues, conversationTranscript, conversationSummary, assistantResearch, extraFields, documentKind, caseStage } = validateMemoInput(raw);
+    const entitlement = await reserveMemoPayment(raw);
+    if (entitlement.result) return privateJson(entitlement.result);
+    paymentLease = entitlement.lease;
+    await enforceRateLimit(request, paymentLease ? `legal-memo-paid:${paymentLease.id}` : "legal-memo", 12, "hour");
     managementRequestId = await startMemoRequest({ ...extraFields, clientName, court, courtCircuit, caseNumber, caseType, partyRole, otherParty, allParties, facts, requests, legalIssues, documentKind, caseStage }, user, request.headers.get("origin") || new URL(request.url).origin);
     const matter=assessMatterFacts(facts+" "+requests+" "+allParties);
     if(!matter.ready) {
@@ -167,7 +155,9 @@ export async function POST(request: Request) {
       signal.throwIfAborted();
       await finishMemoRequest(managementRequestId, "needs_review", finalMemo, "draft_generated");
       if(user) await recordServiceActivity({userId:user.id,serviceType:"memo",title:`${document.title} — ${clientName}`,inputText:JSON.stringify({...memoInput,legalIssues}),outputText:finalMemo,metadata:{managementRequestId,sourceCount:sources.length,caseNumber,template:template.info,documentKind:document.kind,pageSections:document.pages.length}});
-      return privateJson({requestId:managementRequestId,caseQuality,sourceCoverage:legalSourceCoverage(evidence),memo:finalMemo,document,template:template.info,sourceVerification:officialVerificationSummary(),engineRevision:"case-grounded-memo-1",analysis:{sourceCount:sources.length,lawCount:sources.filter(s=>s.kind==="legislation").length,cassationCount:sources.filter(s=>s.kind==="cassation").length,sources,missingSources:!evidence.length,researchNotice:caseQuality.status==="incomplete"?caseQuality.notices.join(" "):"",...(agentAudit?{agentAudit}:{})}});
+      const responseData = {requestId:managementRequestId,caseQuality,sourceCoverage:legalSourceCoverage(evidence),memo:finalMemo,document,template:template.info,sourceVerification:officialVerificationSummary(),engineRevision:"case-grounded-memo-1",analysis:{sourceCount:sources.length,lawCount:sources.filter(s=>s.kind==="legislation").length,cassationCount:sources.filter(s=>s.kind==="cassation").length,sources,missingSources:!evidence.length,researchNotice:caseQuality.status==="incomplete"?caseQuality.notices.join(" "):"",...(agentAudit?{agentAudit}:{})}};
+      await completeMemoPayment(paymentLease, responseData);
+      return privateJson(responseData);
     }
     if (agentPipelineEnabled()) {
       const result = await generateAgentPleading({signal,caseData:{...memoInput,legalIssues},fields:extraFields,documentKind:kind,template:template.info,evidence,casePlan:checkedPlan});
@@ -211,7 +201,10 @@ export async function POST(request: Request) {
     if (managementRequestId) await finishMemoRequest(managementRequestId, request.signal.aborted ? "cancelled" : "failed", "", error instanceof RequestError ? `request_${error.status}` : "generation_failed").catch(() => undefined);
     const openAIError = openAIErrorResponse(error, "تعذر توليد المذكرة حالياً. يرجى المحاولة لاحقاً.");
     if (openAIError) return privateJson({ error: openAIError.message }, openAIError.status);
+    if (error instanceof RequestError && "stage" in error && "missingFacts" in error) return privateJson({ error: error.message, stage: error.stage, missingFacts: error.missingFacts }, error.status);
     if (error instanceof RequestError) return errorResponse(error);
     return privateJson({ error: "تعذر توليد المذكرة حالياً. يرجى المحاولة لاحقاً." }, 503);
+  } finally {
+    await releaseMemoPayment(paymentLease).catch(() => undefined);
   }
 }
