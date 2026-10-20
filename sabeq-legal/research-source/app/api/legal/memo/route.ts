@@ -10,6 +10,7 @@ import { formatEvidence, isCassationEvidence, readHandoffEvidence, searchCassati
 import { deriveLegalResearchPlan, generateText as modelGenerateText, openAIErrorResponse } from "@/lib/openai";
 import { requireMemoUserOrGuest } from "@/lib/public-auth";
 import { enforceUserServiceLimit, recordServiceActivity } from "@/lib/service-records";
+import { startMemoRequest, finishMemoRequest } from "@/lib/memo-requests";
 import { requireServiceEnabled } from "@/lib/service-settings";
 import { agentPipelineEnabled, generateAgentPleading } from "@/lib/sabeq-agent-bridge";
 import { reviewLegalCitations, citationFailureMessage } from "@/lib/legal-citation-review";
@@ -45,6 +46,7 @@ function stripInternalMemoLanguage(text: string) {
 }
 
 export async function POST(request: Request) {
+  let managementRequestId = "";
   try {
     assertSameOrigin(request);
     const signal = AbortSignal.any([request.signal, AbortSignal.timeout(240_000)]);
@@ -79,8 +81,12 @@ export async function POST(request: Request) {
     const documentKind = cleanString(raw.documentKind,"صيغة المستند",{max:30,required:false});
     if (documentKind && !["auto","claim","appeal","memorandum"].includes(documentKind)) throw new RequestError("صيغة المستند غير صحيحة.");
     const caseStage = cleanString(raw.caseStage,"مرحلة القضية",{max:300,required:false});
+    managementRequestId = await startMemoRequest({ ...extraFields, clientName, court, courtCircuit, caseNumber, caseType, partyRole, otherParty, allParties, facts, requests, legalIssues, documentKind, caseStage }, user, request.headers.get("origin") || new URL(request.url).origin);
     const matter=assessMatterFacts(facts+" "+requests+" "+allParties);
-    if(!matter.ready)return privateJson({error:"قبل إعداد المذكرة، يلزم توضيح وقائع لتحديد التشريع المناسب: "+matter.missing.map(g=>g.ar).slice(0,3).join(" "),stage:"fact_clarification",missingFacts:matter.missing.map(g=>({key:g.key,question:g.ar})),sourceScope:"bound_file_only"},422);
+    if(!matter.ready) {
+      await finishMemoRequest(managementRequestId, "needs_information", "", "fact_clarification");
+      return privateJson({requestId:managementRequestId,error:"قبل إعداد المذكرة، يلزم توضيح وقائع لتحديد التشريع المناسب: "+matter.missing.map(g=>g.ar).slice(0,3).join(" "),stage:"fact_clarification",missingFacts:matter.missing.map(g=>({key:g.key,question:g.ar})),sourceScope:"bound_file_only"},422);
+    }
     const memoInput: PleadingInput = await arabicMemoInput({ ...extraFields, court, courtCircuit, caseNumber, clientName, partyRole, otherParty, allParties, caseType, facts, requests, conversationTranscript, conversationSummary, assistantResearch, documentKind, caseStage }, generateText);
     for (const key of Object.keys(extraFields)) extraFields[key] = memoInput[key];
     const kind = selectPleadingKind(memoInput);
@@ -130,7 +136,10 @@ export async function POST(request: Request) {
 
         citationReview=reviewLegalCitations(`${content.grounds}\n${content.requests}`,evidence,{requireJudgmentAnalogy:true});
       }
-      if(!citationReview.ok) return privateJson({error:citationFailureMessage,stage:"source_review",sourceScope:"bound_file_and_reviewed_judgments",issues:[...new Set(citationReview.issues.map(i=>i.code))]},422);
+      if(!citationReview.ok) {
+        await finishMemoRequest(managementRequestId, "needs_review", "", "source_review");
+        return privateJson({requestId:managementRequestId,error:citationFailureMessage,stage:"source_review",sourceScope:"bound_file_and_reviewed_judgments",issues:[...new Set(citationReview.issues.map(i=>i.code))]},422);
+      }
       content.facts = correctLegalProse(stripInternalMemoLanguage(removeDelegatedResearch(content.facts)),[clientName,otherParty,allParties]);
       content.requests = correctLegalProse(stripInternalMemoLanguage(removeDelegatedResearch(content.requests)),[clientName,otherParty,allParties]);
       content.factualNotes = factualRequirements(content.factualNotes);
@@ -156,8 +165,9 @@ export async function POST(request: Request) {
       const finalMemo = pleadingText(document);
       const sources = evidence.map((item,index)=>({marker:`م${index+1}`,title:item.title,reference:item.reference||"غير محدد",kind:isCassationEvidence(item)?"cassation":"legislation",officialSource:item.officialSource,sourceUrl:item.sourceUrl,libraryUpdatedAt:item.libraryUpdatedAt||null,verification:item.verification,corpus:item.corpus,sourceAccess:item.sourceUrl?"original_link":"indexed_upload"})).filter(source=>new RegExp(`[【\\[]${source.marker}[】\\]]`).test(finalMemo));
       signal.throwIfAborted();
-      if(user) await recordServiceActivity({userId:user.id,serviceType:"memo",title:`${document.title} — ${clientName}`,inputText:JSON.stringify({...memoInput,legalIssues}),outputText:finalMemo,metadata:{sourceCount:sources.length,caseNumber,template:template.info,documentKind:document.kind,pageSections:document.pages.length}});
-      return privateJson({caseQuality,sourceCoverage:legalSourceCoverage(evidence),memo:finalMemo,document,template:template.info,sourceVerification:officialVerificationSummary(),engineRevision:"case-grounded-memo-1",analysis:{sourceCount:sources.length,lawCount:sources.filter(s=>s.kind==="legislation").length,cassationCount:sources.filter(s=>s.kind==="cassation").length,sources,missingSources:!evidence.length,researchNotice:caseQuality.status==="incomplete"?caseQuality.notices.join(" "):"",...(agentAudit?{agentAudit}:{})}});
+      await finishMemoRequest(managementRequestId, "needs_review", finalMemo, "draft_generated");
+      if(user) await recordServiceActivity({userId:user.id,serviceType:"memo",title:`${document.title} — ${clientName}`,inputText:JSON.stringify({...memoInput,legalIssues}),outputText:finalMemo,metadata:{managementRequestId,sourceCount:sources.length,caseNumber,template:template.info,documentKind:document.kind,pageSections:document.pages.length}});
+      return privateJson({requestId:managementRequestId,caseQuality,sourceCoverage:legalSourceCoverage(evidence),memo:finalMemo,document,template:template.info,sourceVerification:officialVerificationSummary(),engineRevision:"case-grounded-memo-1",analysis:{sourceCount:sources.length,lawCount:sources.filter(s=>s.kind==="legislation").length,cassationCount:sources.filter(s=>s.kind==="cassation").length,sources,missingSources:!evidence.length,researchNotice:caseQuality.status==="incomplete"?caseQuality.notices.join(" "):"",...(agentAudit?{agentAudit}:{})}});
     }
     if (agentPipelineEnabled()) {
       const result = await generateAgentPleading({signal,caseData:{...memoInput,legalIssues},fields:extraFields,documentKind:kind,template:template.info,evidence,casePlan:checkedPlan});
@@ -198,6 +208,7 @@ export async function POST(request: Request) {
     catch { throw new RequestError("لم يكتمل ملء القالب المعتمد. احتفظ ببياناتك وأعد المحاولة؛ لم تُعرض صحيفة ناقصة كأنها مكتملة.",503); }
     return await finish(content);
   } catch (error) {
+    if (managementRequestId) await finishMemoRequest(managementRequestId, request.signal.aborted ? "cancelled" : "failed", "", error instanceof RequestError ? `request_${error.status}` : "generation_failed").catch(() => undefined);
     const openAIError = openAIErrorResponse(error, "تعذر توليد المذكرة حالياً. يرجى المحاولة لاحقاً.");
     if (openAIError) return privateJson({ error: openAIError.message }, openAIError.status);
     if (error instanceof RequestError) return errorResponse(error);

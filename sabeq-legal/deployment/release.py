@@ -10,6 +10,7 @@ import sys
 import tarfile
 
 WORKFLOW = ".github/workflows/deploy-pages.yml"
+SABEQ_DIRECTORIES = ("sabeq-legal", "sabeq-admin-preview")
 
 def command(*args):
     return subprocess.check_output(args, text=True).strip()
@@ -26,7 +27,7 @@ def digest(path):
 
 def protected_manifest(root):
     return {str(p.relative_to(root)): digest(p) for p in root.rglob("*")
-            if p.is_file() and p.relative_to(root).parts[0] != "sabeq-legal"}
+            if p.is_file() and p.relative_to(root).parts[0] not in SABEQ_DIRECTORIES}
 
 def extract_published(archive, destination):
     with tarfile.open(archive) as package:
@@ -45,7 +46,7 @@ def scope():
     if os.environ.get("GITHUB_EVENT_NAME") == "push" and re.fullmatch(r"[0-9a-f]{40}", before) and set(before) != {"0"}:
         subprocess.run(["git", "fetch", "--no-tags", "--depth=1", "origin", before], check=True)
         paths = command("git", "diff", "--name-only", before, current).splitlines()
-        only = any(p.startswith("sabeq-legal/") for p in paths) and all(p.startswith("sabeq-legal/") or p == WORKFLOW for p in paths)
+        only = any(p.startswith(tuple(d + "/" for d in SABEQ_DIRECTORIES)) for p in paths) and all(p.startswith(tuple(d + "/" for d in SABEQ_DIRECTORIES)) or p == WORKFLOW for p in paths)
     with open(os.environ["GITHUB_OUTPUT"], "a") as f:
         f.write("sabeq_only=" + str(only).lower() + "\n")
 
@@ -91,6 +92,10 @@ def prepare():
         raise RuntimeError("Sabeq release incomplete")
     shutil.rmtree(target / "sabeq-legal", ignore_errors=True)
     shutil.copytree(source, target / "sabeq-legal", ignore=shutil.ignore_patterns("deployment"))
+    admin = Path("sabeq-admin-preview")
+    if admin.is_dir():
+        shutil.rmtree(target / "sabeq-admin-preview", ignore_errors=True)
+        shutil.copytree(admin, target / "sabeq-admin-preview")
     release = json.loads((source / "release.json").read_text())
     proof = {"commit": os.environ["GITHUB_SHA"], "source": release["clientSource"], "baseRun": previous["id"],
              "protectedFiles": len(protected), "protectedManifestSha256": hashlib.sha256(json.dumps(protected, sort_keys=True).encode()).hexdigest()}
@@ -115,6 +120,16 @@ def verify():
     release = json.loads((root / "sabeq-legal/release.json").read_text())
     if not all(re.fullmatch(r"[a-f0-9]{40}", release.get(k, "")) for k in ("clientSource", "backendSource")):
         raise RuntimeError("Source provenance missing")
+    admin = root / "sabeq-admin-preview"
+    if (admin / "admin-release.json").is_file():
+        metadata = json.loads((admin / "admin-release.json").read_text())
+        if not re.fullmatch(r"[a-f0-9]{40}", metadata.get("backendSource", "")):
+            raise RuntimeError("Admin backend provenance missing")
+        for name in ("index.html", "admin.js", "admin.css", "sabeq-logo.png", "al-mohanad.ttf", "al-mohanad-bold.ttf"):
+            if not (admin / name).is_file() or not (admin / name).stat().st_size:
+                raise RuntimeError("Admin referenced asset missing")
+        if re.findall(r'<script[^>]+src="([^"]+)"', (admin / "index.html").read_text()) != ["./admin.js"]:
+            raise RuntimeError("Unexpected admin script path")
     print(f"Validated Sabeq release; {len(expected)} unrelated files are byte-identical")
 
 if __name__ == "__main__":

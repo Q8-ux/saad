@@ -49,11 +49,37 @@ class PublicationTests(unittest.TestCase):
 
     def test_scope_never_skips_changes_to_another_project(self):
         for paths, expected in [("sabeq-legal/index.html\n.github/workflows/deploy-pages.yml", "true"),
+                                ("sabeq-admin-preview/admin.js\nsabeq-legal/deployment/release.py", "true"),
+                                ("sabeq-admin-preview/admin.js\nlegal-memo-platform/gateway.js", "false"),
                                 ("sabeq-legal/index.html\ntamweenat/app.js", "false"),
                                 (".github/workflows/deploy-pages.yml", "false")]:
             with tempfile.NamedTemporaryFile() as out, patch.dict(os.environ, {"BEFORE_SHA":"a"*40,"GITHUB_SHA":"b"*40,"GITHUB_EVENT_NAME":"push","GITHUB_OUTPUT":out.name}), patch.object(release,"command",side_effect=["b"*40,paths]), patch.object(release.subprocess,"run"):
                 release.scope()
                 self.assertEqual(Path(out.name).read_text(),"sabeq_only="+expected+"\n")
+
+    def test_admin_assets_are_scoped_and_validated(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            previous = os.getcwd()
+            os.chdir(tmp)
+            try:
+                root = Path("_site")
+                (root / "sabeq-legal/assets").mkdir(parents=True)
+                (root / "sabeq-legal/index.html").write_text('<script src="/saad/sabeq-legal/assets/client.js"></script>')
+                (root / "sabeq-legal/assets/client.js").write_text("safe")
+                (root / "sabeq-legal/release.json").write_text(json.dumps({"clientSource":"a"*40,"backendSource":"b"*40}))
+                admin = root / "sabeq-admin-preview"
+                admin.mkdir()
+                (admin / "admin-release.json").write_text(json.dumps({"backendSource":"c"*40}))
+                for name in ("admin.js","admin.css","sabeq-logo.png","al-mohanad.ttf","al-mohanad-bold.ttf"):
+                    (admin / name).write_bytes(b"synthetic")
+                (admin / "index.html").write_text('<script src="./admin.js"></script>')
+                Path("_protected-pages.json").write_text(json.dumps(release.protected_manifest(root)))
+                release.verify()
+                (admin / "admin.js").unlink()
+                with self.assertRaisesRegex(RuntimeError,"Admin referenced asset missing"):
+                    release.verify()
+            finally:
+                os.chdir(previous)
 
 if __name__ == "__main__":
     unittest.main()
