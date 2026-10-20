@@ -5,7 +5,7 @@ import { integrationConfig, operationEvent, saveIntegration } from "@/lib/manage
 import { cleanString, RequestError } from "@/lib/request-security";
 import { validateMemoInput } from "@/lib/memo-input";
 
-type Config = { environment: "sandbox" | "live"; clientKey: string; clientSecret: string; testedAt?: string; accountConfirmed?: boolean; callbacksConfirmed?: boolean };
+type Config = { environment: "sandbox" | "live"; clientKey: string; clientSecret: string; testedAt?: string; accountConfirmed?: boolean; callbacksConfirmed?: boolean; publicCheckoutEnabled?: boolean };
 type Payment = { id: string; token_hash: string; input_hash: string; environment: Config["environment"]; amount_fils: number; currency: string; reference: string; invoice_id: string | null; invoice_key: string | null; transaction_id: string | null; status: string; generation_id: string | null; lease_until: number | null; result_json: string | null; result_expires_at: number | null };
 export type PaymentLease = { id: string; generationId: string };
 const API = { live: "https://api.sadadpay.net/api", sandbox: "https://apisandbox.sadadpay.net/api" };
@@ -48,7 +48,7 @@ async function purgeExpiredPaymentResults() {
 }
 export async function memoPaymentPolicy() {
   const settings = await policy(), config = await configuration();
-  return { ...settings, provider: "sadad", ready: isReady(config) && settings.priceFils > 0 && settings.currency === "KWD", environment: config.environment };
+  return { ...settings, publicCheckoutEnabled: config.publicCheckoutEnabled === true, provider: "sadad", ready: config.publicCheckoutEnabled === true && isReady(config) && settings.priceFils > 0 && settings.currency === "KWD", environment: config.environment };
 }
 async function provider(config: Config, path: string, authorization: string, body?: unknown): Promise<Record<string, any>> {
   try {
@@ -129,6 +129,7 @@ export async function createMemoPayment(data: Record<string, unknown>) {
   let existing = await getD1().prepare("SELECT * FROM sadad_payments WHERE id = ? AND token_hash = ?").bind(id, tokenHash).first<Payment>();
   if (!existing) {
     if (!settings.required) return { required: false };
+    if (config.publicCheckoutEnabled !== true) throw new RequestError("خطوة الدفع مخفية عن الموقع؛ راجع إدارة المكتب قبل إنشاء فاتورة.", 409);
     if (!isReady(config) || settings.priceFils <= 0 || settings.currency !== "KWD") throw new RequestError("إعداد التحصيل يحتاج استكمالاً من إدارة المكتب.", 503);
     const created = await getD1().prepare("INSERT INTO sadad_payments (id, token_hash, input_hash, environment, amount_fils, currency, reference, status) VALUES (?, ?, ?, ?, ?, 'KWD', ?, 'creating') ON CONFLICT(id) DO NOTHING RETURNING id")
       .bind(id, tokenHash, inputHash, config.environment, settings.priceFils, `sabeq-${id}`).first();
@@ -217,8 +218,9 @@ export async function sadadManagement(data: Record<string, unknown> | null, acto
       if (pending?.n && config.environment === "live") throw new RequestError("توجد طلبات دفع حقيقية لم تنتهِ؛ أكمل تسويتها قبل تبديل البيئة.", 409);
       if (!key || !secret) throw new RequestError("أدخل مفاتيح البيئة الجديدة؛ لا يعاد استخدام مفاتيح بيئة أخرى.");
     }
-    const next: Config = { environment, clientKey: key || config.clientKey, clientSecret: secret || config.clientSecret, ...(changed ? {} : { testedAt: config.testedAt }), accountConfirmed: data.accountConfirmed === true, callbacksConfirmed: data.callbacksConfirmed === true };
+    const next: Config = { environment, clientKey: key || config.clientKey, clientSecret: secret || config.clientSecret, ...(changed ? {} : { testedAt: config.testedAt }), accountConfirmed: data.accountConfirmed === true, callbacksConfirmed: data.callbacksConfirmed === true, publicCheckoutEnabled: data.publicCheckoutEnabled === undefined ? config.publicCheckoutEnabled === true : data.publicCheckoutEnabled === true };
     const priceFils = kwdToFils(data.priceKwd), required = data.required === true;
+    if (required && !next.publicCheckoutEnabled) throw new RequestError("سداد في وضع إدارة فقط. ألغ اشتراط الدفع لإبقاء الخطوة مخفية، أو فعّل ظهور خطوة الدفع أولاً.", 409);
     if (required && (!isReady(next) || priceFils <= 0)) throw new RequestError("احفظ المفاتيح واختبر الاتصال، ثم أكد إعدادات التاجر والروابط وحدد سعراً موجباً قبل اشتراط الدفع.", 409);
     await saveIntegration("sadad", next, actor);
     if (config.environment === "sandbox" && environment === "live") await getD1().prepare("UPDATE sadad_payments SET status = 'sandbox_closed', generation_id = NULL, lease_until = NULL WHERE environment = 'sandbox' AND status != 'consumed'").run();
@@ -239,5 +241,5 @@ export async function sadadManagement(data: Record<string, unknown> | null, acto
   } else if (data) throw new RequestError("عملية سداد غير مدعومة.");
   const settings = await policy();
   const payments = await getD1().prepare("SELECT id, reference, environment, amount_fils, currency, invoice_id, transaction_id, status, created_at, updated_at FROM sadad_payments ORDER BY created_at DESC LIMIT 100").all();
-  return { ...settings, environment: config.environment, ready: isReady(config), hasCredentials: !!(config.clientKey && config.clientSecret), testedAt: config.testedAt || null, accountConfirmed: !!config.accountConfirmed, callbacksConfirmed: !!config.callbacksConfirmed, successUrl: `${RETURN}?result=success`, failedUrl: `${RETURN}?result=failed`, webhookUrl: WEBHOOK, payments: payments.results };
+  return { ...settings, publicCheckoutEnabled: config.publicCheckoutEnabled === true, environment: config.environment, ready: isReady(config), hasCredentials: !!(config.clientKey && config.clientSecret), testedAt: config.testedAt || null, accountConfirmed: !!config.accountConfirmed, callbacksConfirmed: !!config.callbacksConfirmed, successUrl: `${RETURN}?result=success`, failedUrl: `${RETURN}?result=failed`, webhookUrl: WEBHOOK, payments: payments.results };
 }
