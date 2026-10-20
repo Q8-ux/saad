@@ -1,0 +1,65 @@
+
+/* Series brief: separate from screenplay editing and its print layout. */
+#summaryView{direction:rtl}
+.summary-layout{display:grid;grid-template-columns:minmax(0,1.18fr) minmax(320px,.85fr);align-items:start;gap:20px}
+.summary-editor,.summary-preview{border:1px solid #cbdad8;background:#fff;border-radius:17px;padding:25px;box-shadow:0 9px 32px rgba(10,35,36,.05)}
+.summary-panel-head h2{margin:0;color:#143f44;font-size:24px}
+.summary-panel-head p{color:#52656a;line-height:1.8}
+.summary-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}
+.summary-field{display:flex;flex-direction:column;align-items:stretch;gap:5px;font-weight:700;color:#1e353b;font-size:15px}
+.summary-field small{color:#64757d;font-size:12px;font-weight:500;line-height:1.6}
+.summary-field input,.summary-field textarea{display:block;width:100%;background:#f8faf9;border:1px solid #c6d5d5;border-radius:10px;padding:12px;color:#18353b;font:inherit;line-height:1.9;resize:vertical}
+.summary-field input:focus,.summary-field textarea:focus{outline:2px solid #32b4ad;outline-offset:2px}
+.summary-fields .summary-field:nth-child(1),.summary-fields .summary-field:nth-child(4){grid-column:1/-1}
+.summary-episode-heading{margin:26px 0 12px;color:#1e4348}
+.summary-episode-field{margin-bottom:14px}
+.summary-preview{background:#f9fbfa;position:sticky;top:15px;max-height:75vh;overflow:auto}
+.summary-preview h3{font-size:15px;margin:20px 0 8px;color:#134d50}
+.summary-preview p{font-size:14px;color:#304e53;line-height:1.9}
+.summary-mini-heading{display:flex;flex-direction:column;padding-bottom:14px;border-bottom:1px solid #bfd2d0}
+.summary-mini-heading span{font-size:12px;color:#477572}
+.summary-mini-heading b{font-size:25px;color:#143e43}
+.pitch-points{margin:0;padding:0 18px 0 0}
+.pitch-points li{margin-bottom:11px;line-height:1.9}
+.pitch-episodes{display:grid;gap:10px}
+.pitch-episode{padding:10px;border:1px solid #d8e4e2;background:#fff;border-radius:10px;display:flex;flex-direction:column;gap:4px}
+.pitch-episode strong{color:#15474b;font-size:14px}
+.pitch-episode span{color:#4c6065;font-size:13px;line-height:1.7}
+.summary-tools{display:flex;align-items:center;flex-wrap:wrap;gap:12px;padding:25px 0}
+.summary-tools span{font-size:13px;color:#69777c}
+.summary-warning{padding:15px 20px;margin:0 0 18px;background:#fff6e4;border-right:5px solid #d28b17;border-radius:12px;color:#663d00;line-height:1.8}
+.summary-warning[hidden]{display:none}
+@media(max-width:1080px){.summary-layout{grid-template-columns:minmax(0,1fr)}.summary-preview{position:static;max-height:none}}
+@media(max-width:620px){.summary-fields{grid-template-columns:1fr}.summary-fields .summary-field:nth-child(n){grid-column:auto}.summary-editor,.summary-preview{padding:14px}}
+@media screen{#printArea[data-summary-report="true"]{display:none!important}}
+@media print{
+  @page{size:A4;margin:14mm 18mm 14mm 18mm}
+  #printArea[data-summary-report="true"]{display:block!important;color:#152d35;font-family:Cairo,'Amiri',Tahoma,sans-serif!important;font-size:12pt!important;line-height:1.7;background:#fff;direction:rtl}
+  #printArea[data-summary-report="true"] .pitch-report{margin:0;direction:rtl;font-family:inherit;line-height:1.7}
+  #printArea[data-summary-report="true"] .pitch-print-page{break-after:page;page-break-after:always;position:relative;min-height:266mm;padding:0 2mm 18mm;box-sizing:border-box}
+  #printArea[data-summary-report="true"] .pitch-print-page:last-child{break-after:auto;page-break-after:auto}
+  #printArea[data-summary-report="true"] .pitch-page-top{border-bottom:2px solid #2f6c70;display:flex;justify-content:space-between;font-size:9pt;letter-spacing:.3pt;color:#4b6a6c;padding-bottom:4mm;margin-bottom:15mm}
+  #printArea[data-summary-report="true"] .pitch-page-foot{position:absolute;bottom:0;right:0;left:0;display:flex;justify-content:space-between;align-items:center;border-top:1px solid #c9dada;padding-top:3mm;color:#607579;font-size:9pt}
+  #printArea[data-summary-report="true"] h1{color:#163e44;font-size:27pt;margin:0 0 8mm;line-height:1.5}
+  #printArea[data-summary-report="true"] h2{color:#315d62;font-size:16pt;margin:9mm 0 3mm;border-bottom:1px solid #c5d7d5;padding-bottom:2mm;break-after:avoid}
+  #printArea[data-summary-report="true"] p{margin:0 0 5mm;font-size:12pt;line-height:1.85;white-space:pre-wrap;overflow-wrap:anywhere}
+  #printArea[data-summary-report="true"] .pitch-cover{margin-top:44mm;text-align:center;min-height:180mm}
+  #printArea[data-summary-report="true"] .pitch-cover-small{font-size:14pt;color:#537376}
+  #printArea[data-summary-report="true"] .pitch-cover h1{font-size:56pt;margin:11mm 0 0}
+  #printArea[data-summary-report="true"] .pitch-cover-en{font-size:14pt;letter-spacing:3px;color:#456c71}
+  #printArea[data-summary-report="true"] .pitch-cover .pitch-rule{width:75mm;border-bottom:2px solid #a9905e;margin:22mm auto 16mm}
+  #printArea[data-summary-report="true"] .pitch-cover h2{border:0;font-size:24pt;color:#173d42}
+  #printArea[data-summary-report="true"] .pitch-toc{list-style:none;margin:0 0 10mm;padding:0;counter-reset:none}
+  #printArea[data-summary-report="true"] .pitch-toc li{display:flex;justify-content:space-between;border-bottom:1px dotted #8eaaab;padding:3.5mm 2mm;font-size:12pt}
+  #printArea[data-summary-report="true"] .pitch-toc b{color:#30696c}
+  #printArea[data-summary-report="true"] .pitch-facts{display:grid;grid-template-columns:25mm 1fr;gap:3mm 7mm;margin:0}
+  #printArea[data-summary-report="true"] .pitch-facts dt{color:#60777a;font-weight:700}
+  #printArea[data-summary-report="true"] .pitch-facts dd{margin:0}
+  #printArea[data-summary-report="true"] .pitch-points{padding-right:8mm;margin:4mm 0;font-size:12pt}
+  #printArea[data-summary-report="true"] .pitch-points li{padding-right:1.5mm;line-height:1.9;margin-bottom:5mm;break-inside:avoid}
+  #printArea[data-summary-report="true"] .pitch-kicker{color:#557477;font-size:11pt;margin-bottom:6mm}
+  #printArea[data-summary-report="true"] .pitch-episodes{display:grid;gap:2.5mm}
+  #printArea[data-summary-report="true"] .pitch-episode{display:grid;gap:.5mm;border:0;border-bottom:1px solid #d2dfdc;padding:2.2mm 3mm;background:none;border-radius:0;break-inside:avoid}
+  #printArea[data-summary-report="true"] .pitch-episode strong{font-size:12pt;color:#214e53}
+  #printArea[data-summary-report="true"] .pitch-episode span{font-size:10pt;color:#3c565c;line-height:1.55}
+}
