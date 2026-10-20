@@ -36,7 +36,7 @@ export function validateProject(value) {
   p.cinematic=normalizeCinematic(value.cinematic);
   if(value.presentation&&typeof value.presentation==='object'&&!Array.isArray(value.presentation)){
     const src=value.presentation;
-    for(const key of ['logline','vision','purpose','points','value','audience','style','duration']){
+    for(const key of ['logline','vision','perspective','purpose','points','value','audience','style','duration']){
       if(typeof src[key]==='string')p.presentation[key]=src[key].slice(0,key==='points'?1150:450);
     }
     if(src.episodeNotes&&typeof src.episodeNotes==='object'&&!Array.isArray(src.episodeNotes)){
