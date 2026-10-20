@@ -10,6 +10,7 @@
   <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="assets/style.css?v=4">
   <link rel="stylesheet" href="assets/print.css?v=4" media="print">
+  <link rel="stylesheet" href="assets/series-summary.css?v=6">
 </head>
 <body>
   <header class="topbar">
@@ -22,6 +23,7 @@
       <nav class="main-nav" aria-label="أقسام الاستوديو">
         <button class="nav-button" data-view="editor"><span aria-hidden="true">▤</span> كتابة السيناريو</button>
         <button class="nav-button" data-view="board"><span aria-hidden="true">▦</span> لوحة المشاهد</button>
+        <button class="nav-button" data-view="summary"><span aria-hidden="true">◈</span> ملخص المسلسل</button>
         <button class="nav-button active" data-view="story"><span aria-hidden="true">✦</span> بناء القصة</button>
         <button class="nav-button" data-view="cinema"><span aria-hidden="true">◫</span> التصور السينمائي</button>
         <button class="nav-button" data-view="review"><span aria-hidden="true">✓</span> مراجعة ونسخ</button>
@@ -65,6 +67,7 @@
           <aside class="panel writing-status"><span class="eyebrow">اكتمال بيانات البناء</span><h2 id="basisStatus">أكمل أساس القصة</h2><div class="basis-meter"><strong id="basisPercent">0 / 0</strong><span>بنود موثّقة</span></div><progress id="basisProgress" value="0" max="100" aria-label="اكتمال بيانات بناء القصة"></progress><div id="basisChecks"></div><div id="basisMissing"></div><button id="approveStory" class="button dark">اعتمد أساس القصة</button><hr><span class="eyebrow writer-eyebrow">كاتب مساعد اختياري</span><h3 id="writerTitle">الكتابة تبدأ منك</h3><p id="writerMessage"></p><button id="developStory" class="button accent">✦ طوّر الفراغات من الفكرة</button><button id="copyFoundationPrompt" class="text-button">نسخ برومبت بناء القصة</button><button id="storySettings" class="button subtle">ربط الكاتب المساعد</button><div id="generationProgress" class="hidden"><progress id="progressBar" value="0" max="1"></progress><p id="progressText" role="status"></p><button id="cancelGeneration" class="button danger">إيقاف الكتابة</button></div><div id="usageStats" class="usage-stats"></div><p class="field-help">التخطيط اليدوي والمحرر والتصدير يعملون دون مفتاح. التوليد يرسل الفكرة والنص إلى Google عند طلبه فقط.</p></aside>
         </div>
       </section>
+      <section id="summaryView" class="view hidden"><div class="view-intro"><span class="eyebrow">تعريف ومقترح تقديم للجهات الإنتاجية</span><h1>ملخص المسلسل</h1><p>فهرس خاص بالملخص، تعريف بالعمل، رؤية المؤلف، القصة في نقاط، وحركة الحلقات. لا يغيّر محتوى السيناريو المكتمل.</p></div><div id="summaryPanel"></div></section>
       <section id="cinemaView" class="view hidden"><div class="view-intro"><span class="eyebrow">من الفعل إلى الصورة</span><h1>التصور السينمائي</h1><p>اربط اللقطة بوظيفة المشهد، واضبط وجهة النظر والاستمرارية قبل إعداد البرومبت.</p></div><div id="cinemaPanel"></div></section>
       <section id="reviewView" class="view hidden"><div class="view-intro"><span class="eyebrow">قبل التسليم</span><h1>راجع النص واحتفظ بنسخه</h1><p>راجع اكتمال بناء القصة، وروابط المشاهد، ثم التنسيق والحوار. اكتمال الحقول لا يثبت جودة الحبكة.</p></div><div class="panel story-review-panel"><h2>جوهر القصة والسببية</h2><div id="storyReviewList"></div><p class="field-help">اختبر: هل كانت النتيجة متوقعة من المحاولة؟ هل خرج القرار من الدافع والمعرفة؟ وهل يرفع الصراع المخاطر ويخدم السطر التمهيدي؟</p></div><div class="review-grid"><div class="panel"><h2>ملاحظات التنسيق</h2><div id="reviewList"></div></div><div class="panel"><div class="section-label"><h2>نسخ المسودة</h2><button id="saveSnapshot" class="button subtle">حفظ نسخة</button></div><p class="field-help">تحتفظ الأداة بآخر ١٢ نسخة على هذا الجهاز. صدّر ملف المشروع للاحتفاظ بنسخة خارج المتصفح.</p><div id="snapshotList"></div></div></div><div class="panel characters-panel"><h2>الشخصيات والحوار</h2><div id="characterList"></div></div></section>
     </section>
@@ -78,7 +81,7 @@
   <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
   <div id="printArea" aria-hidden="true"></div>
   <noscript><p class="noscript">يرجى تفعيل JavaScript لتشغيل محرر السيناريو.</p></noscript>
-  <script type="module" src="assets/app.mjs?v=5"></script>
+  <script type="module" src="assets/app.mjs?v=6"></script>
 </body>
 </html>
 
