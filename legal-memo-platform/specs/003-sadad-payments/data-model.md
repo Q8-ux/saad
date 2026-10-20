@@ -1,0 +1,2 @@
+# Data Model
+sadad_payments: id UUID، token_hash، input_hash (SHA256 مرتبة دون payment fields)، environment، amount_fils موجب، currency=KWD، invoice_id/key، reference ثابت، transaction_id فريد داخل البيئة، status، generation_id، lease_until، result_json خاص وresult_expires_at، created_at/updated_at. لا وقائع أو بيانات بطاقة في محاولة الدفع؛ الناتج الخاص مؤقت 7 أيام. service_settings.memo للسعر والاشتراط؛ management_vault.sadad للمفاتيح المشفرة. SADAD_CLIENT_KEY/SECRET/ENVIRONMENT إعداد أولي في الخادم.
