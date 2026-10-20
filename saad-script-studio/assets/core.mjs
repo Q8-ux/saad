@@ -7,7 +7,7 @@ export const id = () => globalThis.crypto?.randomUUID?.() || `s-${Date.now().toS
 export const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export const block = (type='Action', text='', extra={}) => ({id:id(),type,text,...extra});
 export function newProject(title='سيناريو جديد') {
-  return {version:2,id:id(),title,author:'',language:'ar',format:'short',genre:'دراما',dialect:'فصحى',printStyle:'ink',sceneCount:6,idea:'',pillars:{hero:'',goal:'',obstacle:'',stakes:'',ending:''},story:newStory(),cinematic:newCinematic(),blocks:[block('Scene Heading')],plan:null,snapshots:[],updatedAt:new Date().toISOString()};
+  return {version:2,id:id(),title,author:'',language:'ar',format:'short',genre:'دراما',dialect:'فصحى',printStyle:'ink',sceneCount:6,idea:'',pillars:{hero:'',goal:'',obstacle:'',stakes:'',ending:''},story:newStory(),cinematic:newCinematic(),presentation:{},blocks:[block('Scene Heading')],plan:null,snapshots:[],updatedAt:new Date().toISOString()};
 }
 export function validateProject(value) {
   if (!value || typeof value !== 'object' || !Array.isArray(value.blocks)) throw new Error('ملف المشروع لا يحتوي على سيناريو صالح.');
@@ -34,6 +34,18 @@ export function validateProject(value) {
   for(const key of Object.keys(p.pillars)) p.pillars[key]=String(value.pillars?.[key]??'').slice(0,3000);
   p.story=normalizeStory(value.story);
   p.cinematic=normalizeCinematic(value.cinematic);
+  if(value.presentation&&typeof value.presentation==='object'&&!Array.isArray(value.presentation)){
+    const src=value.presentation;
+    for(const key of ['logline','vision','purpose','points','value','audience','style','duration']){
+      if(typeof src[key]==='string')p.presentation[key]=src[key].slice(0,key==='points'?1150:450);
+    }
+    if(src.episodeNotes&&typeof src.episodeNotes==='object'&&!Array.isArray(src.episodeNotes)){
+      p.presentation.episodeNotes={};
+      for(const [k,v] of Object.entries(src.episodeNotes)){
+        if(/^\d{1,2}$/.test(k)&&typeof v==='string')p.presentation.episodeNotes[k]=v.slice(0,300);
+      }
+    }
+  }
   p.blocks = blocks.length ? blocks : [block('Scene Heading')];
   if (value.plan) p.plan = validatePlan(value.plan);
   p.snapshots = Array.isArray(value.snapshots) ? value.snapshots.slice(-12).map(s=>{
