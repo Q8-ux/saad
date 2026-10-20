@@ -15,6 +15,7 @@ require('dotenv').config({ path: path.join(__dirname, '..', '.env.local') });
 const { searchLegalDocuments, findRelevantLegalContext } = require('./legal-library');
 const { corsPolicy } = require('./cors-policy');
 const { openAiError, openAiErrorDetails } = require('./openai-errors');
+const { createOperationsMonitor } = require('./operations-monitor');
 
 const publicPort = Number(process.env.PORT || 3000);
 const appPort = Number(process.env.INTERNAL_APP_PORT || 3001);
@@ -38,6 +39,10 @@ const upload = multer({
 });
 
 app.use(corsPolicy);
+const operations = createOperationsMonitor({ dataDir, databasePath });
+app.get('/api/admin/operations', operations.route);
+app.get('/api/operations-health', (_req, res) => res.json({ revision: 'operations-monitor-1' }));
+app.use(['/api/legal/memo', '/api/contact', '/api/consultations'], jsonBody, operations.track);
 
 function aiClient() {
   if (!process.env.OPENAI_API_KEY) return null;
@@ -395,7 +400,8 @@ function proxy(req, res) {
     if (!res.headersSent) res.status(502).json({ error: 'application_unavailable' });
     else res.end();
   });
-  req.pipe(upstream);
+  if (req.body && String(req.headers['content-type'] || '').includes('application/json')) upstream.end(JSON.stringify(req.body));
+  else req.pipe(upstream);
 }
 
 const child = spawn(process.execPath, [path.join(__dirname, 'server.js')], {
