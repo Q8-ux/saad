@@ -13,6 +13,7 @@ const BARCODE_EPISODES=[
 const ORDER=[
   ['logline','التعريف بالمسلسل','جملة تعريفية واحدة دون كشف النهاية',450],
   ['vision','رؤية المؤلف','الزاوية الفنية والإنسانية التي يقترحها العمل',380],
+  ['perspective','نظرة المؤلف','كيف ينظر الكاتب إلى القضية والشخصيات؟',380],
   ['purpose','رسالة العمل','ما الذي نريد أن يبقى لدى المشاهد؟',380],
   ['points','القصة في نقاط','كل سطر نقطة واحدة؛ تجنّب التفاصيل والحوار والنهاية الدقيقة',1150],
   ['value','القيمة المجتمعية','فائدة المشاهد دون تحويل الدراما إلى محاضرة',450],
@@ -51,8 +52,9 @@ export function proposedSummary(project,episodes=episodesFromProject(project)){
   const first=chars.find(c=>txt(c.name));
   const hero=txt(project.pillars?.hero)||txt(first?.name);
   const defaults={
-    logline:barcode?'مبرمج كويتي يسعى إلى استرداد مستحقاته ومساعدة أسرته، فينجرّ إلى تعاون رقمي خطِر مع صديق قديم، ثم يواجه تبعات خياراته بين القانون والضمير.':txt(project.story?.logline),
+    logline:txt(project.story?.logline)||(barcode?'مبرمج كويتي يسعى إلى استرداد مستحقاته ومساعدة أسرته، فينجرّ إلى تعاون رقمي خطِر مع صديق قديم، ثم يواجه تبعات خياراته بين القانون والضمير.':''),
     vision:barcode?'حكاية إنسانية كويتية تحوّل تحديات العالم الرقمي إلى صراع أخلاقي وعائلي، وتجعل أثر القرارات على الناس أهم من استعراض التقنية.':'',
+    perspective:barcode?'لا تُقاس المعرفة بقدرة صاحبها على الوصول إلى الأنظمة، بل بقدرته على اختيار ما يفعله وما يمتنع عنه، خصوصًا حين تتأثر أسرته والآخرون.':'',
     purpose:barcode?'المعرفة التقنية أمانة، واسترداد الحق لا يبرر الاعتداء على حقوق الآخرين. الوقاية تبدأ بالوعي والحوار والمسؤولية.':'',
     points:barcode?[
       'تبدأ الأزمة من أجور متأخرة وحاجة عائلية تضغط على سعود.',
@@ -102,7 +104,7 @@ function htmlReport(project,episodes,data){
   const info='<dl class="pitch-facts"><dt>العمل</dt><dd>'+title+'</dd><dt>المؤلف</dt><dd>'+author+'</dd><dt>الصيغة</dt><dd>مسلسل تلفزيوني · '+ar(episodes.length)+' حلقات</dd><dt>النوع</dt><dd>'+esc(project.genre||'دراما')+'</dd><dt>اللغة</dt><dd>'+esc(project.dialect||'العربية')+'</dd><dt>المدة</dt><dd>'+esc(data.duration)+'</dd></dl>';
   return '<div class="pitch-report">'+cover+
     page(2,'<h1>فهرس الملخص</h1>'+toc+'<h2>بطاقة العمل</h2>'+info)+
-    page(3,'<h1>الرؤية الفنية والإنسانية</h1><h2>التعريف بالمسلسل</h2>'+paragraph(data.logline)+'<h2>رؤية المؤلف</h2>'+paragraph(data.vision)+'<h2>رسالة العمل</h2>'+paragraph(data.purpose))+
+    page(3,'<h1>الرؤية الفنية والإنسانية</h1><h2>التعريف بالمسلسل</h2>'+paragraph(data.logline)+'<h2>رؤية المؤلف</h2>'+paragraph(data.vision)+'<h2>نظرة المؤلف</h2>'+paragraph(data.perspective)+'<h2>رسالة العمل</h2>'+paragraph(data.purpose))+
     page(4,'<h1>القصة في نقاط</h1><p class="pitch-kicker">عرض موجز للمسار الدرامي دون كشف تفاصيل المشاهد أو الحوارات.</p>'+bullets(data.points))+
     page(5,'<h1>خريطة الحلقات</h1><p class="pitch-kicker">تعريف مختصر بحركة الموسم من الحلقة الأولى إلى الأخيرة.</p>'+episodeCards(episodes,data))+
     page(6,'<h1>القيمة الإبداعية والمجتمعية</h1><h2>القيمة المجتمعية</h2>'+paragraph(data.value)+'<h2>الجمهور المستهدف</h2>'+paragraph(data.audience)+'<h2>الهوية الدرامية</h2>'+paragraph(data.style)+'<h2>حقوق المؤلف</h2>'+paragraph('تُقدّم هذه النسخة للقراءة والتقييم فقط. ولا تمنح أي حق بالإنتاج أو النشر أو الاقتباس أو التوزيع دون اتفاق كتابي مع صاحب الحق.'))+
