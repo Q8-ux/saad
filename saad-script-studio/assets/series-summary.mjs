@@ -96,7 +96,7 @@ function htmlReport(project,episodes,data){
   const titles=['الغلاف','فهرس الملخص وبطاقة العمل','الرؤية ورسالة المؤلف','القصة في نقاط','خريطة الحلقات','القيمة المجتمعية والحقوق'];
   const pclass='class="pitch-print-page"';
   const title=esc(project.title),author=esc(project.author||'سعد روضان');
-  const page=(n,inner)=>'<section '+pclass+'><div class="pitch-page-top"><span>BARCODE · SERIES BRIEF</span><b>'+ar(n)+' / ٦</b></div>'+inner+'<div class="pitch-page-foot"><span>© 2026 '+author+' · جميع الحقوق محفوظة</span><span>'+ar(n)+'</span></div></section>';
+  const page=(n,inner)=>'<section '+pclass+'><div class="pitch-page-top"><span>SAAD SCRIPT STUDIO · SERIES BRIEF</span><b>'+ar(n)+' / ٦</b></div>'+inner+'<div class="pitch-page-foot"><span>© 2026 '+author+' · جميع الحقوق محفوظة</span><span>'+ar(n)+'</span></div></section>';
   const toc='<ol class="pitch-toc">'+titles.map((t,i)=>'<li><span>'+esc(t)+'</span><b>'+ar(i+1)+'</b></li>').join('')+'</ol>';
   const cover=page(1,'<div class="pitch-cover"><span class="pitch-cover-small">ملف تعريف وملخص المسلسل</span><h1>'+title+'</h1><div class="pitch-cover-en">SERIES PRESENTATION</div><div class="pitch-rule"></div><p>تأليف وسيناريو وحوار</p><h2>'+author+'</h2><p>نسخة تقديم موجزة · أكتوبر ٢٠٢٦</p></div>');
   const info='<dl class="pitch-facts"><dt>العمل</dt><dd>'+title+'</dd><dt>المؤلف</dt><dd>'+author+'</dd><dt>الصيغة</dt><dd>مسلسل تلفزيوني · '+ar(episodes.length)+' حلقات</dd><dt>النوع</dt><dd>'+esc(project.genre||'دراما')+'</dd><dt>اللغة</dt><dd>'+esc(project.dialect||'العربية')+'</dd><dt>المدة</dt><dd>'+esc(data.duration)+'</dd></dl>';
