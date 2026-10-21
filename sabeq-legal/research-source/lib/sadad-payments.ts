@@ -143,6 +143,7 @@ export async function createMemoPayment(data: Record<string, unknown>) {
       if (!amended) throw new RequestError("لا يمكن تغيير بيانات طلب قيد التوليد أو طلب مكتمل. احتفظ بإيصالك وراجع المكتب.", 409);
     }
     if (existing.invoice_id) return publicPayment(await refreshPayment(existing, config));
+    if (config.publicCheckoutEnabled !== true) throw new RequestError("خطوة الدفع مخفية عن الموقع؛ راجع إدارة المكتب قبل إنشاء فاتورة.", 409);
     const retry = await getD1().prepare("UPDATE sadad_payments SET status = 'creating', updated_at = CURRENT_TIMESTAMP WHERE id = ? AND status = 'retryable' RETURNING id").bind(id).first();
     if (!retry) throw new RequestError("إنشاء الفاتورة قيد التحقق. لا تنشئ دفعة أخرى؛ راجع المكتب بمعرف الطلب.", 409);
   }
@@ -212,8 +213,14 @@ export async function sadadManagement(data: Record<string, unknown> | null, acto
     if (!["live", "sandbox"].includes(String(data.environment))) throw new RequestError("بيئة سداد غير صحيحة.");
     const environment = data.environment as Config["environment"];
     const key = cleanString(data.clientKey, "Client Key", { max: 500, required: false }), secret = cleanString(data.clientSecret, "Client Secret", { max: 500, required: false });
-    const changed = environment !== config.environment || !!key || !!secret;
-    if (environment !== config.environment) {
+    const environmentChanged = environment !== config.environment;
+    const credentialsChanged = (!!key && key !== config.clientKey) || (!!secret && secret !== config.clientSecret);
+    const changed = environmentChanged || credentialsChanged;
+    if (credentialsChanged && !environmentChanged) {
+      const active = await getD1().prepare("SELECT COUNT(*) n FROM sadad_payments WHERE environment = ? AND status IN ('creating','pending','uncertain','paid','generating')").bind(config.environment).first<{ n: number }>();
+      if (active?.n) throw new RequestError("توجد طلبات دفع نشطة؛ أكمل تسويتها قبل استبدال مفاتيح سداد.", 409);
+    }
+    if (environmentChanged) {
       const pending = await getD1().prepare("SELECT COUNT(*) n FROM sadad_payments WHERE status IN ('creating','pending','uncertain','paid','generating')").first<{ n: number }>();
       if (pending?.n && config.environment === "live") throw new RequestError("توجد طلبات دفع حقيقية لم تنتهِ؛ أكمل تسويتها قبل تبديل البيئة.", 409);
       if (!key || !secret) throw new RequestError("أدخل مفاتيح البيئة الجديدة؛ لا يعاد استخدام مفاتيح بيئة أخرى.");
