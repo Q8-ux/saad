@@ -19,7 +19,10 @@ function createOperationsMonitor({ dataDir, databasePath, fetcher = fetch, publi
       updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
     CREATE TABLE IF NOT EXISTS operations_meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
-    INSERT OR IGNORE INTO operations_meta (key,value) VALUES ('tracking_since', CURRENT_TIMESTAMP);`);
+    INSERT OR IGNORE INTO operations_meta (key,value) VALUES ('tracking_since', CURRENT_TIMESTAMP);
+    UPDATE operations_records
+      SET client_name='زائر', email='', case_type='', case_number='', input_json='{}', output_text=''
+      WHERE kind='memo' AND (client_name!='زائر' OR email!='' OR case_type!='' OR case_number!='' OR input_json!='{}' OR output_text!='');`);
   let keyCache = null;
   const nonces = new Map();
   function track(req, res, next) {
