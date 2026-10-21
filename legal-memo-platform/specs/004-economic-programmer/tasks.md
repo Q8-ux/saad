@@ -12,6 +12,9 @@
 - [x] T006 [US3] Add explicit copy and follow-up command in public/management/admin.js (US3).
 ## Phase 5: Validation
 - [x] T007 Add boundary tests in tests/management.test.mjs, run regression/typecheck/build/UI checks (SC-001–004).
-- [ ] T008 Publish backend and GitHub client, record limits in specs/044-economic-programmer/validation.md (SC-004).
+- [x] T008 Publish backend and GitHub client, record limits in specs/044-economic-programmer/validation.md (SC-004).
 
 Dependencies: T001 → T002 → T003/T004 → T005 → T006 → T007 → T008. Upstream read-only contract research is independent of local source inspection. Deliver configuration then a complete synthetic review before optional FCC inference.
+
+## Phase 6: Convergence
+- [x] T009 Permit the exact ordered programmer.js/admin.js client in sabeq-legal/deployment/release.py and validate the real shipped admin client in sabeq-legal/deployment/test_release.py per FR-008 and plan: publication (partial).
