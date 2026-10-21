@@ -1514,6 +1514,17 @@ function MemoWizard({ t, language, token, initialData = null }: { t: SiteCopy; l
           input.paymentId = attempt.attemptId;
           input.paymentToken = attempt.paymentToken;
         }
+      } else if (paymentAttempt.current) {
+        const attempt = paymentAttempt.current;
+        const statusResponse = await memoFetch(`/api/payments/sadad?id=${encodeURIComponent(attempt.attemptId)}`, attempt.paymentToken, { signal: controller.signal });
+        if (statusResponse.ok) {
+          const payment = await readServiceJson<SadadCheckout>(statusResponse);
+          if (["paid", "consumed"].includes(payment.status)) {
+            setCheckout(payment);
+            input.paymentId = attempt.attemptId;
+            input.paymentToken = attempt.paymentToken;
+          }
+        }
       }
       setCheckingPayment(false);
       const data = await runMemoGeneration(async (signal) => {
