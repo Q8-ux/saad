@@ -1,5 +1,5 @@
 {
-  "version": "2.4",
+  "version": "2.5",
   "visibility": "backend_only",
   "admin_ui_exposure": false,
   "customer_ui_exposure": false,
@@ -12,28 +12,54 @@
   ],
   "tracks": [
     {
-      "name": "spec-kit",
-      "purpose": "change specification and acceptance criteria"
+      "name": "engineering-qa",
+      "purpose": "prevent blank pages broken login slow load and mobile regressions",
+      "priority": 1
+    },
+    {
+      "name": "catalog-single-source",
+      "purpose": "one authoritative backend for products categories stock and prices",
+      "priority": 2
     },
     {
       "name": "google-analysis",
-      "purpose": "orchestration and review"
+      "purpose": "planning routing reviewing recommendations",
+      "priority": 3
     },
     {
       "name": "agent-workflows",
-      "purpose": "inventory credit and procurement recommendations"
-    },
-    {
-      "name": "engineering-qa",
-      "purpose": "performance accessibility and regression checks"
-    },
-    {
-      "name": "codewiki",
-      "purpose": "code ownership and data source mapping"
+      "purpose": "procurement inventory credit and restaurant forecasts",
+      "priority": 4
     },
     {
       "name": "masar-analysis",
-      "purpose": "sourced market research"
+      "purpose": "source-grounded supplier and competitor research",
+      "priority": 5
+    },
+    {
+      "name": "design-tools",
+      "purpose": "responsive RTL accessibility and performance",
+      "priority": 6
+    },
+    {
+      "name": "spec-kit",
+      "purpose": "requirements acceptance tests and safe releases",
+      "priority": 7
+    },
+    {
+      "name": "codewiki",
+      "purpose": "system dependencies and source mapping",
+      "priority": 8
+    },
+    {
+      "name": "credit-risk",
+      "purpose": "credit utilization alerts overdue debt and direct-payment fallback",
+      "priority": 9
+    },
+    {
+      "name": "supplier-replenishment",
+      "purpose": "supplier comparisons demand prediction and reorder recommendations",
+      "priority": 10
     }
   ],
   "rules": {
@@ -41,6 +67,9 @@
     "no_auto_write": true,
     "no_public_keys": true,
     "no_voice": true,
-    "rtl_mobile_qa": true
-  }
+    "rtl_mobile_qa": true,
+    "no_public_track_labels": true,
+    "manual_approval_required": true
+  },
+  "status": "configured_not_all_executing"
 }
