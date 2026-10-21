@@ -50,6 +50,13 @@
       "when": 1792496884122,
       "tag": "0006_sadad_payments",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1792610000000,
+      "tag": "0007_sadad_credential_versions",
+      "breakpoints": true
     }
   ]
 }
