@@ -1,6 +1,7 @@
 import { listManagedUsers, updateManagedUser } from "@/lib/user-management";
 import { mailboxAction } from "@/lib/management-mailboxes";
 import { sadadManagement } from "@/lib/sadad-payments";
+import { programmerAction } from "@/lib/management-programmer";
 import { getD1 } from "@/db";
 import { assertManagementOrigin, exchangeManagerCode, managementJson, managerLogin, requireManager } from "@/lib/management-auth";
 import { bridgeKeys, managerInbox, managerMemos, managerSnapshot, managerUpdates } from "@/lib/management-data";
@@ -21,6 +22,7 @@ export async function GET(request: Request) {
     if (action === "jwks") { const keys = await bridgeKeys(); return managementJson({ keys: [keys.publicKey] }); }
     const manager = await requireManager(request), url = new URL(request.url);
     if (action === "users") return managementJson(await listManagedUsers(url, 50));
+    if (action === "programmer") return managementJson(await programmerAction(null, manager.email));
     if (action === "payments") return managementJson(await sadadManagement(null, manager.email));
     if (action === "mailboxes") return managementJson(await mailboxAction(null, manager.email, Number(url.searchParams.get("offset") || 0)));
     if (action === "session") return managementJson({ manager: { email: manager.email, name: manager.name } });
@@ -41,6 +43,10 @@ export async function POST(request: Request) {
     if (action === "exchange") { await enforceRateLimit(request, "management-exchange", 30); return managementJson(await exchangeManagerCode(data)); }
     const manager = await requireManager(request);
     await enforceRateLimit(request, "management-write", 150);
+    if (action === "programmer") {
+      if (data.action === "run") await enforceRateLimit(request, "management-programmer", 20);
+      return managementJson(await programmerAction(data, manager.email, request.signal));
+    }
     if (action === "logout") { await getD1().prepare("DELETE FROM management_sessions WHERE token_hash = ?").bind(manager.hash).run(); return managementJson({ ok: true }); }
     if (action === "users") { const result = await updateManagedUser(data); await operationEvent("admin", "user-updated", "تم تحديث حساب مستخدم وخدماته"); return managementJson(result); }
     if (action === "payments") return managementJson(await sadadManagement(data, manager.email));
