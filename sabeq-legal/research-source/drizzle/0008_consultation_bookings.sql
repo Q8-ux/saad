@@ -2,6 +2,7 @@
 -- Apply this migration to the canonical D1 database before enabling bookings.
 CREATE TABLE IF NOT EXISTS consultation_bookings (
   id TEXT PRIMARY KEY NOT NULL,
+  idempotency_key TEXT NOT NULL UNIQUE,
   slot_date TEXT NOT NULL,
   slot_time TEXT NOT NULL,
   name TEXT NOT NULL,
