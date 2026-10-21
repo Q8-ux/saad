@@ -102,6 +102,8 @@ jobs:
         if: steps.scope.outputs.sabeq_only != 'true' && steps.tamweenat.outputs.only != 'true' && steps.rattil.outputs.only != 'true'
         working-directory: autoclip-studio
         run: npm test && npm run check
+      - name: Validate Tamweenat release smoke checks
+        run: node tamweenat/tests/release-smoke.cjs
       - name: Validate Tamweenat assistant
         if: steps.scope.outputs.sabeq_only != 'true' && steps.tamweenat.outputs.only != 'true' && steps.rattil.outputs.only != 'true'
         run: |
