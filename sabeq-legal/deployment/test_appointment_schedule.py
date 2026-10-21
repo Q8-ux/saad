@@ -19,7 +19,7 @@ class AppointmentReleaseTests(unittest.TestCase):
         self.assertEqual(db.execute(statement,("synthetic-2","key-2")).rowcount,1)
         self.assertEqual(db.execute(statement,("synthetic-3","key-3")).rowcount,0)
         db.execute("UPDATE consultation_bookings SET status='cancelled' WHERE id='synthetic-1'")
-        self.assertEqual(db.execute(statement,("synthetic-3",)).rowcount,1)
+        self.assertEqual(db.execute(statement,("synthetic-3","key-3")).rowcount,1)
         self.assertEqual(db.execute("SELECT COUNT(*) FROM consultation_bookings WHERE status!='cancelled'").fetchone()[0],2)
 
     def test_only_relevant_navigation_is_visible(self):
