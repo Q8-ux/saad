@@ -1524,6 +1524,12 @@ function MemoWizard({ t, language, token, initialData = null }: { t: SiteCopy; l
             input.paymentId = attempt.attemptId;
             input.paymentToken = attempt.paymentToken;
           }
+        } else if ([403, 404].includes(statusResponse.status)) {
+          clearPaymentAttempt();
+          paymentAttempt.current = null;
+        } else {
+          const payment = await readServiceJson<{ error?: string }>(statusResponse);
+          throw new Error(payment.error || payUi.policyError);
         }
       }
       setCheckingPayment(false);
