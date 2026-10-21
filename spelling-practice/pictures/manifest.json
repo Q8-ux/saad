@@ -1,0 +1,177 @@
+{
+  "source": {
+    "width": 1024,
+    "height": 1536,
+    "sha256": "db1683a490bd979b6784c74d452216583064c764edb9bc945dfeb390a6c7deb0"
+  },
+  "pictures": [
+    {
+      "id": "air",
+      "file": "air-v1.webp",
+      "width": 197,
+      "height": 174,
+      "bounds": [
+        30,
+        271,
+        227,
+        445
+      ]
+    },
+    {
+      "id": "leaf",
+      "file": "leaf-v1.webp",
+      "width": 154,
+      "height": 164,
+      "bounds": [
+        266,
+        285,
+        420,
+        449
+      ]
+    },
+    {
+      "id": "buds",
+      "file": "buds-v1.webp",
+      "width": 149,
+      "height": 166,
+      "bounds": [
+        449,
+        283,
+        598,
+        449
+      ]
+    },
+    {
+      "id": "soil",
+      "file": "soil-v1.webp",
+      "width": 164,
+      "height": 160,
+      "bounds": [
+        632,
+        289,
+        796,
+        449
+      ]
+    },
+    {
+      "id": "grow",
+      "file": "grow-v1.webp",
+      "width": 165,
+      "height": 164,
+      "bounds": [
+        832,
+        285,
+        997,
+        449
+      ]
+    },
+    {
+      "id": "water",
+      "file": "water-v1.webp",
+      "width": 322,
+      "height": 157,
+      "bounds": [
+        32,
+        562,
+        354,
+        719
+      ]
+    },
+    {
+      "id": "plants",
+      "file": "plants-v1.webp",
+      "width": 282,
+      "height": 157,
+      "bounds": [
+        405,
+        561,
+        687,
+        718
+      ]
+    },
+    {
+      "id": "flower",
+      "file": "flower-v1.webp",
+      "width": 256,
+      "height": 159,
+      "bounds": [
+        734,
+        562,
+        990,
+        721
+      ]
+    },
+    {
+      "id": "climber",
+      "file": "climber-v1.webp",
+      "width": 284,
+      "height": 178,
+      "bounds": [
+        38,
+        838,
+        322,
+        1016
+      ]
+    },
+    {
+      "id": "creeper",
+      "file": "creeper-v1.webp",
+      "width": 287,
+      "height": 172,
+      "bounds": [
+        351,
+        844,
+        638,
+        1016
+      ]
+    },
+    {
+      "id": "sunlight",
+      "file": "sunlight-v1.webp",
+      "width": 294,
+      "height": 182,
+      "bounds": [
+        694,
+        834,
+        988,
+        1016
+      ]
+    },
+    {
+      "id": "animals",
+      "file": "animals-v1.webp",
+      "width": 318,
+      "height": 186,
+      "bounds": [
+        34,
+        1139,
+        352,
+        1325
+      ]
+    },
+    {
+      "id": "healthy",
+      "file": "healthy-v1.webp",
+      "width": 259,
+      "height": 189,
+      "bounds": [
+        404,
+        1139,
+        663,
+        1328
+      ]
+    },
+    {
+      "id": "energy",
+      "file": "energy-v1.webp",
+      "width": 269,
+      "height": 185,
+      "bounds": [
+        714,
+        1143,
+        983,
+        1328
+      ]
+    }
+  ]
+}

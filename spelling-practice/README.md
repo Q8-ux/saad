@@ -1,8 +1,10 @@
 # دفتر الإملاء
 
-Finger and stylus handwriting practice with **59 pages across five subjects**. English, Science and Social contain all 42 entries from the supplied three-column photograph, covering 41 unique words. Arabic adds eight fully marked dictation examples from the school announcement; Numbers adds the English names for 1–10. `water` appears in both Science and Social and shares one saved word page.
+Finger and stylus handwriting practice with **59 pages across five subjects**. All 42 entries from the original three-column photograph are retained, covering 41 unique words. Arabic adds eight fully marked dictation examples from the school announcement; Numbers adds the English names for 1–10. The English section also includes the 14 words from the illustrated science sheet, in that sheet's order. Words shared across subjects retain one saved page.
 
 English: hot, sit, ant, garden, go, bag, cry, down, left, play, kind, read, sleep, wash.
+
+English picture words: air, leaf, buds, soil, grow, water, plants, flower, climber, creeper, sunlight, animals, healthy, energy. Each has one separate illustration extracted from the supplied sheet, a large live-text English label, pronunciation and the original three handwriting rows. The same pictures appear when these words are opened from Science or Social. `Start picture words` jumps to the first illustrated word; the dedicated print button makes 14 sheets with exactly one picture and word on each. Recall mode hides the drawing along with the answer.
 
 Science: creeper, climber, buds, energy, grow, plants, air, animals, sunlight, soil, water, flower, leaf, healthy.
 
@@ -33,11 +35,13 @@ node --check spelling-practice/arabic-guides.js
 node --test spelling-practice/tests/*.test.cjs
 mkdir -p spelling-practice/dist
 cp spelling-practice/index.html spelling-practice/style.css spelling-practice/core.js spelling-practice/app.js spelling-practice/arabic-guides.js spelling-practice/avatar-v1.png spelling-practice/dist/
-cp -R spelling-practice/audio spelling-practice/dist/
+cp -R spelling-practice/audio spelling-practice/pictures spelling-practice/dist/
 python spelling-practice/tests/test_publication.py
 ```
 
 Runtime has no third-party dependencies or network-loaded fonts. UI, pointer and native-audio behavior are covered with a simulated DOM, canvas and audio element; real-device touch/stylus, speakers and browser print pagination should also be checked on the student's device.
+
+`pictures/manifest.json` records the 14 independent drawings, their crop bounds and the supplied sheet's checksum. To reproduce the assets without redrawing or rescaling them, run `python spelling-practice/deployment/extract-word-pictures.py --source /path/to/1000406183.jpg --output spelling-practice/pictures` with Pillow installed. Image printing waits for decoding to finish, and publication refuses a package missing any drawing.
 
 The circular avatar was generated from the user's supplied portrait and is used in the page header, browser icon and home-screen shortcut. Only the generated icon is included in this repository; the original photograph is not part of the project. The production PNG preserves transparency and is optimized to 256 × 256 pixels.
 

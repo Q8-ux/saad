@@ -12,7 +12,7 @@ function setup(saved=null,failStorage=false,hash=''){
     constructor(id){this.id=id;this.events={};this.attributes={};this.dataset={};this.children=[];this.checked=false;this.hidden=false;this._html='';const classes=new Set();this.classList={add:v=>classes.add(v),remove:v=>classes.delete(v),toggle:(v,on)=>on?classes.add(v):classes.delete(v),contains:v=>classes.has(v)};}
     addEventListener(t,cb){(this.events[t]??=[]).push(cb)}
     fire(type,props={}){const e={type,button:0,pointerId:1,pointerType:'touch',clientX:50,clientY:100,pressure:.5,preventDefault(){},...props};for(const cb of this.events[type]??[])cb(e)}
-    setAttribute(k,v){this.attributes[k]=v}getAttribute(k){return this.attributes[k]??null}appendChild(c){this.children.push(c)}
+    scrollIntoView(){this.scrolled=true}removeAttribute(k){delete this.attributes[k]}querySelectorAll(){return []}setAttribute(k,v){this.attributes[k]=v}getAttribute(k){return this.attributes[k]??null}appendChild(c){this.children.push(c)}
     set innerHTML(v){this._html=v;this.children=[]}get innerHTML(){return this._html}
     getBoundingClientRect(){return this.rect??{left:10,top:20,width:340,height:397.8}}
     setPointerCapture(id){this.capture=id}hasPointerCapture(id){return this.capture===id}releasePointerCapture(){this.capture=null}
@@ -33,7 +33,7 @@ function setup(saved=null,failStorage=false,hash=''){
 function draw(app,props={}){app.nodes.ink.fire('pointerdown',props);app.nodes.ink.fire('pointermove',{clientX:100,clientY:160,...props});app.nodes.ink.fire('pointerup',{clientX:110,clientY:170,...props});}
 
 test('finger drawing saves the final position, reloads, and survives resizing',()=>{
-  const a=setup();assert.equal(a.nodes.wordTabs.children.length,14);assert.equal(a.nodes.subjectTabs.children.length,5);draw(a);
+  const a=setup();assert.equal(a.nodes.wordTabs.children.length,28);assert.equal(a.nodes.subjectTabs.children.length,5);draw(a);
   const stroke=a.state().pages['hot:trace'][0];assert.equal(stroke.points.length,3);assert.equal(stroke.points.at(-1).x,294.1);
   a.nodes.ink.rect={left:0,top:0,width:700,height:819};a.events.resize();assert.equal(a.nodes.ink.width,1400);assert.deepEqual(a.state().pages['hot:trace'][0],stroke);
   const b=setup(a.saved());assert.equal(b.nodes.wordTitle.textContent,'hot');assert.ok(b.drawOps.length);assert.equal(b.nodes.undo.disabled,false);
@@ -63,9 +63,10 @@ test('blocked/corrupt storage and malformed links do not prevent training',()=>{
 });
 test('subject navigation stops at boundaries and printing covers all words or one subject',()=>{
   const a=setup();assert.equal(a.nodes.previous.disabled,true);a.nodes.complete.fire('click');assert.equal(a.state().completed.hot,true);assert.equal(a.nodes.complete.attributes['aria-pressed'],'true');
-  a.nodes.wordTabs.children[13].fire('click');assert.equal(a.nodes.wordTitle.textContent,'wash');assert.equal(a.nodes.next.disabled,true);assert.equal(a.nodes.pronunciation.getAttribute('src'),'audio/wash.mp3?v=2');
+  a.nodes.wordTabs.children[13].fire('click');assert.equal(a.nodes.wordTitle.textContent,'wash');assert.equal(a.nodes.next.disabled,false);assert.equal(a.nodes.pronunciation.getAttribute('src'),'audio/wash.mp3?v=2');
+  a.nodes.wordTabs.children[27].fire('click');assert.equal(a.nodes.wordTitle.textContent,'energy');assert.equal(a.nodes.next.disabled,true);
   a.nodes.printAll.fire('click');assert.equal(a.window.printed,true);assert.equal((a.nodes.printArea.innerHTML.match(/class="print-sheet(?: arabic-sheet)?"/g)||[]).length,59);
-  a.nodes.printSubject.fire('click');assert.equal((a.nodes.printArea.innerHTML.match(/class="print-sheet(?: arabic-sheet)?"/g)||[]).length,14);
+  a.nodes.printSubject.fire('click');assert.equal((a.nodes.printArea.innerHTML.match(/class="print-sheet(?: arabic-sheet)?"/g)||[]).length,28);
 });
 test('bundled MP3 plays on the tap without speech synthesis; repeat restarts it',()=>{
   const a=setup();const player=a.nodes.pronunciation;assert.equal('speechSynthesis'in a.window,false);assert.equal(player.getAttribute('src'),'audio/hot.mp3?v=2');
@@ -93,7 +94,7 @@ test('water is shared across science and social without losing handwriting',()=>
   assert.equal(a.state().pages['water:trace'].length,1);
 });
 test('direct links open the corresponding subject and retain the circular avatar',()=>{
-  const a=setup(null,false,'#sunlight');assert.equal(a.nodes.wordTitle.textContent,'sunlight');assert.ok(a.nodes.subjectLabel.textContent.includes('العلوم'));assert.equal(a.nodes.pronunciation.getAttribute('src'),'audio/sunlight.mp3?v=2');
+  const a=setup(null,false,'#sunlight');assert.equal(a.nodes.wordTitle.textContent,'sunlight');assert.ok(a.nodes.subjectLabel.textContent.includes('الإنجليزي'));assert.equal(a.nodes.pronunciation.getAttribute('src'),'audio/sunlight.mp3?v=2');
   assert.ok(html.includes('avatar-v1.png'));assert.ok(html.includes('داخل دائرة'));
 });
 test('Arabic practice changes language, direction and hint and uses its own audio',()=>{
@@ -104,4 +105,20 @@ test('Arabic practice changes language, direction and hint and uses its own audi
 test('number pages show and print the digit and English name, and keep their boundaries',()=>{
   const a=setup(null,false,'#numone');assert.equal(a.nodes.wordTitle.textContent,'1 = One');assert.equal(a.nodes.wordTitle.dir,'ltr');assert.equal(a.nodes.wordTabs.children.length,10);assert.equal(a.nodes.previous.disabled,true);assert.equal(a.nodes.subjectNote.hidden,true);
   a.nodes.wordTabs.children[9].fire('click');assert.equal(a.nodes.wordTitle.textContent,'10 = Ten');assert.equal(a.nodes.next.disabled,true);assert.equal(a.nodes.pronunciation.getAttribute('src'),'audio/numten.mp3?v=2');a.nodes.printSubject.fire('click');assert.equal((a.nodes.printArea.innerHTML.match(/class="print-sheet(?: arabic-sheet)?"/g)||[]).length,10);
+});
+
+
+test('illustrated English words open separately, switch pictures and hide them in recall',()=>{
+  const a=setup();assert.equal(a.nodes.wordPicture.hidden,true);a.nodes.openPictures.fire('click');
+  assert.equal(a.nodes.wordTitle.textContent,'air');assert.equal(a.nodes.wordImage.getAttribute('src'),'pictures/air-v1.webp');assert.equal(a.nodes.wordPicture.hidden,false);assert.ok(a.nodes.subjectLabel.textContent.includes('الإنجليزي'));
+  draw(a);a.nodes.next.fire('click');assert.equal(a.nodes.wordTitle.textContent,'leaf');assert.equal(a.nodes.wordImage.getAttribute('src'),'pictures/leaf-v1.webp');assert.equal(a.nodes.clear.disabled,true);
+  a.nodes.previous.fire('click');assert.equal(a.nodes.clear.disabled,false);a.nodes.recallMode.fire('click');assert.equal(a.nodes.wordPicture.hidden,true);assert.equal(a.nodes.wordImage.getAttribute('src'),null);
+  a.nodes.traceMode.fire('click');assert.equal(a.nodes.wordImage.getAttribute('src'),'pictures/air-v1.webp');
+  a.nodes.printPictures.fire('click');assert.equal((a.nodes.printArea.innerHTML.match(/<article /g)||[]).length,14);assert.equal((a.nodes.printArea.innerHTML.match(/<img /g)||[]).length,14);
+  a.nodes.subjectTabs.children[3].fire('click');assert.equal(a.nodes.wordPicture.hidden,true);assert.equal(a.nodes.pictureEntry.hidden,true);assert.equal(a.nodes.printPictures.hidden,true);
+});
+test('first picture print waits for all image decodes and reports a missing image',async()=>{
+  const a=setup();let finish;a.nodes.printArea.querySelectorAll=()=>[{decode:()=>new Promise(resolve=>{finish=resolve})}];
+  a.nodes.printPictures.fire('click');assert.equal(a.window.printed,undefined);finish();await new Promise(resolve=>setImmediate(resolve));assert.equal(a.window.printed,true);
+  const b=setup();b.nodes.printArea.querySelectorAll=()=>[{decode:()=>Promise.reject(Error('missing'))}];b.nodes.printPictures.fire('click');await new Promise(resolve=>setImmediate(resolve));assert.equal(b.window.printed,undefined);assert.ok(b.nodes.toast.textContent.includes('تعذّر تحميل إحدى الرسومات'));
 });

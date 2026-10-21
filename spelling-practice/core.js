@@ -1,6 +1,7 @@
 /* Original center-line handwriting guides: one route of dots, not outlined type. */
 (function(root,factory){const guides=typeof module==='object'&&module.exports?require('./arabic-guides.js'):root.SpellingArabicGuides;const api=factory(guides);if(typeof module==='object'&&module.exports)module.exports=api;else root.SpellingCore=api;})(typeof globalThis!=='undefined'?globalThis:this,function(ARABIC_GUIDES){
   'use strict';
+  const PICTURE_IDS=Object.freeze(['air','leaf','buds','soil','grow','water','plants','flower','climber','creeper','sunlight','animals','healthy','energy']);
   const WORDS=Object.freeze([
     {id:'hot',word:'hot',meaning:'حارّ'},
     {id:'sit',word:'sit',meaning:'يجلس'},
@@ -29,7 +30,7 @@
     {id:'water',word:'water',meaning:'ماء'},
     {id:'flower',word:'flower',meaning:'زهرة'},
     {id:'leaf',word:'leaf',meaning:'ورقة نبات'},
-    {id:'healthy',word:'healthy',meaning:'صحيّ'},
+    {id:'healthy',word:'healthy',meaning:'بصحة جيدة'},
     {id:'apple',word:'apple',meaning:'تفاحة'},
     {id:'orange',word:'orange',meaning:'برتقالة'},
     {id:'carrot',word:'carrot',meaning:'جزرة'},
@@ -61,15 +62,16 @@
     {id:'numeight',word:'Eight',trace:'8 = Eight',number:8,meaning:'ثمانية'},
     {id:'numnine',word:'Nine',trace:'9 = Nine',number:9,meaning:'تسعة'},
     {id:'numten',word:'Ten',trace:'10 = Ten',number:10,meaning:'عشرة'}
-  ]);
+  ].map(w=>PICTURE_IDS.includes(w.id)?{...w,picture:'pictures/'+w.id+'-v1.webp'}:w));
   const SUBJECTS=Object.freeze([
-    {id:'english',label:'الإنجليزي',ids:['hot','sit','ant','garden','go','bag','cry','down','left','play','kind','read','sleep','wash']},
+    {id:'english',label:'الإنجليزي',ids:['hot','sit','ant','garden','go','bag','cry','down','left','play','kind','read','sleep','wash',...PICTURE_IDS]},
     {id:'science',label:'العلوم',ids:['creeper','climber','buds','energy','grow','plants','air','animals','sunlight','soil','water','flower','leaf','healthy']},
     {id:'social',label:'الاجتماعيات',ids:['apple','orange','carrot','potato','pilot','nurse','chef','kuwait','parents','children','soap','water','comb','learn']},
     {id:'arabic',label:'العربي',ids:['ardaras','arsaad','arkhatar','aratas','arshaar','arsataa','arkhadaa','arzaraa']},
     {id:'numbers',label:'الأعداد',ids:['numone','numtwo','numthree','numfour','numfive','numsix','numseven','numeight','numnine','numten']}
   ]);
   function subjectWords(id){return (SUBJECTS.find(s=>s.id===id)||SUBJECTS[0]).ids.map(id=>WORDS.find(w=>w.id===id));}
+  function pictureWords(){return PICTURE_IDS.map(id=>WORDS.find(w=>w.id===id));}
   function subjectForWord(id,preferred='english'){return SUBJECTS.find(s=>s.id===preferred&&s.ids.includes(id))?.id||SUBJECTS.find(s=>s.ids.includes(id))?.id||'english';}
   const GLYPHS=Object.freeze({
     ' ':{w:30,p:[]},
@@ -170,6 +172,10 @@
     if(s.points.length===1){const p=s.points[0];ctx.beginPath();ctx.arc(p.x,p.y,s.width*(.65+p.p*.7)/2,0,Math.PI*2);ctx.fill();}
     for(let i=Math.max(1,from);i<s.points.length;i++){const a=s.points[i-1],b=s.points[i];ctx.lineWidth=s.width*(.65+(a.p+b.p)*.35);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}ctx.restore();
   }
-  function printMarkup(words){return words.map((w,i)=>`<article class="print-sheet${w.lang==='ar'?' arabic-sheet':''}"><header class="print-meta"><span>MY SPELLING BOOK · GRADE 1</span><span>${i+1} / ${words.length}</span></header><h1${w.lang==='ar'?' dir="rtl" lang="ar"':''}>${w.trace||w.word}</h1><p class="print-instruction"${w.lang==='ar'?' dir="rtl"':''}>${w.lang==='ar'?'أقرأ الكلمة، أتتبّع النقاط، ثم أكتب بنفسي.':'Read. Trace the dots. Write on your own.'}</p>${sheetSvg(w.trace||w.word,'trace',true)}<footer><span>Name: ___________________</span><span>Date: ______________</span></footer></article>`).join('');}
-  return {WORDS,SUBJECTS,subjectWords,subjectForWord,GLYPHS,COLORS,WIDTH,HEIGHT,STORAGE_KEY,wordLayout,wordPaths,sheetSvg,emptyState,normalizeState,pointerPoint,pageKey,drawStroke,printMarkup};
+  function printMarkup(words){return words.map((w,i)=>{
+    const model=`<h1${w.lang==='ar'?' dir="rtl" lang="ar"':''}>${w.trace||w.word}</h1><p class="print-instruction"${w.lang==='ar'?' dir="rtl"':''}>${w.lang==='ar'?'أقرأ الكلمة، أتتبّع النقاط، ثم أكتب بنفسي.':'Read. Trace the dots. Write on your own.'}</p>`;
+    const illustrated=w.picture?`<div class="print-model"><img src="${w.picture}" alt="Illustration of ${w.word}" width="320" height="200"><div>${model}</div></div>`:model;
+    return `<article class="print-sheet${w.lang==='ar'?' arabic-sheet':''}"${w.picture?' data-illustrated="true"':''}><header class="print-meta"><span>MY SPELLING BOOK · GRADE 1</span><span>${i+1} / ${words.length}</span></header>${illustrated}${sheetSvg(w.trace||w.word,'trace',true)}<footer><span>Name: ___________________</span><span>Date: ______________</span></footer></article>`;
+  }).join('');}
+  return {WORDS,SUBJECTS,PICTURE_IDS,pictureWords,subjectWords,subjectForWord,GLYPHS,COLORS,WIDTH,HEIGHT,STORAGE_KEY,wordLayout,wordPaths,sheetSvg,emptyState,normalizeState,pointerPoint,pageKey,drawStroke,printMarkup};
 });

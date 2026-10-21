@@ -97,7 +97,15 @@ def overlay(destination,base_run):
     word_ids=json.loads((target/'audio/manifest.json').read_text())
     if not isinstance(word_ids,list) or not word_ids or not all(isinstance(word,str) and word.isascii() and word.isalpha() for word in word_ids) or len(set(word_ids))!=len(word_ids):
         raise RuntimeError('Invalid pronunciation manifest')
-    for name in ['index.html','style.css','core.js','app.js','arabic-guides.js','avatar-v1.png']+[f'audio/{word}.mp3' for word in word_ids]:
+    picture_manifest=json.loads((target/'pictures/manifest.json').read_text())
+    pictures=picture_manifest.get('pictures',[])
+    if len(pictures)!=14 or len({p.get('id') for p in pictures})!=14:
+        raise RuntimeError('The illustrated word set must contain all 14 separate drawings')
+    for picture in pictures:
+        word=picture.get('id','')
+        if word not in word_ids or picture.get('file')!=word+'-v1.webp':
+            raise RuntimeError('Invalid word-picture mapping')
+    for name in ['index.html','style.css','core.js','app.js','arabic-guides.js','avatar-v1.png','pictures/manifest.json']+[f'audio/{word}.mp3' for word in word_ids]+['pictures/'+p['file'] for p in pictures]:
         if not (target/name).is_file():
             raise RuntimeError('Spelling workbook package incomplete')
     (target/'deployment.json').write_text(json.dumps({

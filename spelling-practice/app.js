@@ -2,7 +2,7 @@
   'use strict';
   const C=window.SpellingCore,$=id=>document.getElementById(id),canvas=$('ink'),ctx=canvas.getContext('2d'),player=$('pronunciation');
   const digits=n=>String(n).replace(/\d/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]);
-  let state=C.emptyState(),tool='pen',active=null,lastClear=null,toastTimer,storageFailed=false,playAttempt=0,audioTimer;
+  let state=C.emptyState(),tool='pen',active=null,lastClear=null,toastTimer,storageFailed=false,playAttempt=0,audioTimer,printAttempt=0;
   try{state=C.normalizeState(JSON.parse(localStorage.getItem(C.STORAGE_KEY)));}catch{storageFailed=true;}
   let requested='';try{requested=decodeURIComponent(location.hash.slice(1));}catch{/* Ignore malformed link fragments. */}
   const requestedIndex=C.WORDS.findIndex(w=>w.id===requested);if(requestedIndex>=0){state.index=requestedIndex;state.subject=C.subjectForWord(requested,state.subject);}
@@ -37,6 +37,12 @@
     $('wordTitle').classList.toggle('long-word',!recall&&!arabic&&(w.word.length>=5||Boolean(w.number)));
     $('meaning').textContent=recall?'أتذكّر الحروف وأكتبها وحدي.':w.meaning;$('wordCaption').textContent=recall?'أجرّب بنفسي':'أقرأ الكلمة';
     if(!recall&&w.number)$('wordCaption').textContent='أقرأ العدد وأكتب اسمه';
+    const pictured=!recall&&Boolean(w.picture);
+    $('wordPicture').hidden=!pictured;
+    if(pictured){$('wordImage').setAttribute('src',w.picture);$('wordImage').alt='Illustration of '+w.word;$('wordCaption').textContent='أنظر إلى الصورة وأقرأ الكلمة';}
+    else{$('wordImage').removeAttribute('src');$('wordImage').alt='';}
+    $('pictureEntry').hidden=state.subject!=='english';
+    $('printPictures').hidden=!['english','science'].includes(state.subject);
     const items=visibleWords(),position=visiblePosition();
     $('pageCount').textContent='صفحة '+digits(position+1)+' من '+digits(items.length);$('navCount').textContent=digits(position+1)+' / '+digits(items.length);
     $('subjectLabel').textContent=C.SUBJECTS.find(s=>s.id===state.subject).label+' · تدريب الإملاء';
@@ -50,7 +56,7 @@
     for(const [i,item] of items.entries()){
       const b=document.createElement('button');b.type='button';b.className='word-tab'+(state.completed[item.id]?' completed':'');b.textContent=recall?'كلمة '+digits(i+1):item.word;b.lang=recall||item.lang==='ar'?'ar':'en';b.dir=recall||item.lang==='ar'?'rtl':'ltr';
       b.setAttribute('aria-label',recall?'الكلمة '+digits(i+1):item.word);if(item.id===w.id)b.setAttribute('aria-current','page');
-      b.addEventListener('click',()=>navigate(C.WORDS.findIndex(w=>w.id===item.id)));$('wordTabs').appendChild(b);
+      b.addEventListener('click',()=>{navigate(C.WORDS.findIndex(w=>w.id===item.id));if(item.picture)$('wordPage').scrollIntoView({block:'start'});});$('wordTabs').appendChild(b);
     }
     $('previous').disabled=position===0;$('next').disabled=position===items.length-1;
     const done=Boolean(state.completed[w.id]);$('complete').setAttribute('aria-pressed',String(done));$('completeLabel').textContent=done?'أكملت هذه الكلمة':'أنهيت التدريب';
@@ -90,6 +96,7 @@
   });
   canvas.addEventListener('pointercancel',finish);canvas.addEventListener('lostpointercapture',finish);canvas.addEventListener('contextmenu',e=>e.preventDefault());
   $('previous').addEventListener('click',()=>stepWord(-1));$('next').addEventListener('click',()=>stepWord(1));
+  $('openPictures').addEventListener('click',()=>{setSubject('english');navigate(C.WORDS.findIndex(w=>w.id===C.PICTURE_IDS[0]));$('wordPage').scrollIntoView({block:'start'});});
   $('pen').addEventListener('click',()=>{finish();tool='pen';updateTools();});$('eraser').addEventListener('click',()=>{finish();tool='eraser';updateTools();});
   document.querySelectorAll('[data-color]').forEach(b=>b.addEventListener('click',()=>{finish();state.color=b.dataset.color;tool='pen';save();updateTools();}));
   $('undo').addEventListener('click',()=>{finish();if(lastClear?.key===C.pageKey(state)){state.pages[C.pageKey(state)]=lastClear.strokes;lastClear=null;}else strokes().pop();redraw();save();updateTools();});
@@ -110,13 +117,25 @@
   player.addEventListener('ended',()=>{clearTimeout(audioTimer);listening(false);});
   player.addEventListener('pause',()=>listening(false));
   player.addEventListener('error',()=>{clearTimeout(audioTimer);listening(false);player.hidden=false;message('تعذّر تحميل صوت الكلمة. أعد المحاولة بعد اتصال الإنترنت.');});
-  function print(words){finish();$('printArea').innerHTML=C.printMarkup(words);window.print();}
+  function print(words){
+    finish();$('printArea').innerHTML=C.printMarkup(words);
+    // A first-time print must wait for all the separate image files to be ready.
+    const attempt=++printAttempt,pictures=[...$('printArea').querySelectorAll('img')];
+    if(!pictures.length){window.print();return;}
+    Promise.all(pictures.map(img=>{
+      if(typeof img.decode==='function')return img.decode();
+      if(img.complete&&img.naturalWidth>0)return Promise.resolve();
+      return new Promise((resolve,reject)=>{img.addEventListener('load',resolve,{once:true});img.addEventListener('error',reject,{once:true});});
+    })).then(()=>{if(attempt===printAttempt)window.print();},()=>{if(attempt===printAttempt)message('تعذّر تحميل إحدى الرسومات. أعد المحاولة قبل الطباعة.');});
+  }
   $('printOne').addEventListener('click',()=>print([C.WORDS[state.index]]));$('printAll').addEventListener('click',()=>print(C.WORDS));
   $('printSubject').addEventListener('click',()=>print(visibleWords()));
+  $('printPictures').addEventListener('click',()=>print(C.pictureWords()));
   window.addEventListener('beforeprint',()=>{if(!$('printArea').innerHTML)$('printArea').innerHTML=C.printMarkup([C.WORDS[state.index]]);});
-  window.addEventListener('afterprint',()=>$('printArea').innerHTML='');
+  window.addEventListener('afterprint',()=>{printAttempt++;$('printArea').innerHTML='';});
   document.addEventListener('visibilitychange',()=>{if(document.hidden){finish();save();stopAudio();}});window.addEventListener('pagehide',()=>{finish();save();stopAudio();});
   window.addEventListener('hashchange',()=>{const id=location.hash.slice(1),i=C.WORDS.findIndex(w=>w.id===id);if(i>=0&&i!==state.index)navigate(i);});
   window.addEventListener('resize',resize);if('ResizeObserver'in window)new ResizeObserver(resize).observe($('paper'));
   render();
+  if(requestedIndex>=0&&C.WORDS[state.index].picture)$('wordPage').scrollIntoView({block:'start'});
 })();

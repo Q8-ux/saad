@@ -10,9 +10,9 @@ test('all 42 photographed entries are covered by 41 distinct word pages',()=>{
     ['creeper','climber','buds','energy','grow','plants','air','animals','sunlight','soil','water','flower','leaf','healthy'],
     ['apple','orange','carrot','potato','pilot','nurse','chef','Kuwait','parents','children','soap','water','comb','learn']
   ];
-  C.SUBJECTS.slice(0,3).forEach((s,i)=>assert.deepEqual(C.subjectWords(s.id).map(w=>w.word),columns[i]));
+  C.SUBJECTS.slice(0,3).forEach((s,i)=>assert.deepEqual(C.subjectWords(s.id).slice(0,14).map(w=>w.word),columns[i]));
   assert.equal(C.WORDS.length,59);assert.equal(new Set(C.WORDS.map(w=>w.id)).size,59);
-  assert.equal(C.SUBJECTS.slice(0,3).reduce((n,s)=>n+s.ids.length,0),42);
+  assert.equal(C.SUBJECTS.slice(0,3).reduce((n,s)=>n+Math.min(s.ids.length,14),0),42);
   assert.deepEqual(C.WORDS.slice(0,7).map(w=>w.id),['hot','sit','ant','go','bag','cry','garden']);
   for(const w of C.WORDS)if(w.lang!=='ar')for(const letter of w.trace||w.word)assert.ok(C.GLYPHS[letter]);
 });
@@ -82,4 +82,24 @@ test('Arabic examples preserve all eight three-letter words and fathas',()=>{
 test('number practice matches the supplied 1–10 names and traces digits too',()=>{
   const words=C.subjectWords('numbers');assert.deepEqual(words.map(w=>w.word),['One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten']);
   words.forEach((w,i)=>{assert.equal(w.number,i+1);assert.equal(w.trace,`${i+1} = ${w.word}`);assert.ok(C.sheetSvg(w.trace).includes('stroke-dasharray'));});
+});
+
+
+test('each supplied picture has its own English page, local asset and printed sheet',()=>{
+  const expected=['air','leaf','buds','soil','grow','water','plants','flower','climber','creeper','sunlight','animals','healthy','energy'];
+  const words=C.pictureWords();assert.deepEqual(words.map(w=>w.id),expected);
+  assert.deepEqual(C.subjectWords('english').slice(14).map(w=>w.id),expected);
+  const manifest=JSON.parse(fs.readFileSync(path.join(__dirname,'../pictures/manifest.json'),'utf8'));
+  assert.deepEqual(manifest.pictures.map(p=>p.id),expected);
+  for(const [i,w] of words.entries()){
+    assert.equal(w.picture,'pictures/'+w.id+'-v1.webp');
+    const picture=manifest.pictures[i],bytes=fs.readFileSync(path.join(__dirname,'..',w.picture));
+    assert.equal(bytes.toString('ascii',0,4),'RIFF');assert.equal(bytes.toString('ascii',8,12),'WEBP');
+    assert.ok(picture.width>=140&&picture.height>=150);
+    const page=C.printMarkup([w]);assert.equal((page.match(/<article /g)||[]).length,1);
+    assert.equal((page.match(/<img /g)||[]).length,1);assert.ok(page.includes('src="'+w.picture+'"'));
+    assert.ok(page.includes('<h1>'+w.word+'</h1>'));assert.equal((page.match(/stroke-dasharray="0.01 6.3"/g)||[]).length,2);
+  }
+  const all=C.printMarkup(words);assert.equal((all.match(/<article /g)||[]).length,14);assert.equal((all.match(/<img /g)||[]).length,14);
+  assert.equal(C.subjectWords('english').length,28);assert.equal(C.WORDS.length,59);
 });

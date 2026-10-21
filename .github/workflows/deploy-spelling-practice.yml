@@ -41,7 +41,7 @@ jobs:
           node --test spelling-practice/tests/*.test.cjs
           mkdir -p spelling-practice/dist
           cp spelling-practice/index.html spelling-practice/style.css spelling-practice/core.js spelling-practice/app.js spelling-practice/arabic-guides.js spelling-practice/avatar-v1.png spelling-practice/dist/
-          cp -R spelling-practice/audio spelling-practice/dist/
+          cp -R spelling-practice/audio spelling-practice/pictures spelling-practice/dist/
           python spelling-practice/tests/test_publication.py
       - uses: actions/configure-pages@v5
       - name: Preserve published projects and add spelling workbook
