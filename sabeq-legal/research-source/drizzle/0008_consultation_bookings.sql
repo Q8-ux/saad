@@ -17,3 +17,12 @@ CREATE TABLE IF NOT EXISTS consultation_bookings (
 );
 CREATE INDEX IF NOT EXISTS consultation_bookings_slot_idx ON consultation_bookings (slot_date,slot_time,status);
 CREATE INDEX IF NOT EXISTS consultation_bookings_status_idx ON consultation_bookings (status,created_at);
+
+-- Separate editorial review state from the actual memo generation/payment status.
+CREATE TABLE IF NOT EXISTS management_memo_reviews (
+  memo_id TEXT PRIMARY KEY NOT NULL,
+  review_status TEXT NOT NULL DEFAULT 'pending' CHECK(review_status IN ('pending','approved','needs_changes')),
+  review_note TEXT NOT NULL DEFAULT '',
+  reviewed_by TEXT NOT NULL DEFAULT '',
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
