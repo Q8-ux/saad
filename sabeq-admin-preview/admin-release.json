@@ -1,5 +1,5 @@
 {
-  "revision": "independent-admin-8-programmer",
+  "revision": "independent-admin-9-mobile-qa",
   "backendSource": "f811ae3f2c5fc4b80d4030deb9affe62fa57f9a8",
   "sourceRepository": "https://github.com/Q8-ux/saad",
   "paymentVisibility": "admin-only-by-default",
@@ -11,5 +11,9 @@
   "projectProviderConfigured": true,
   "liveInferenceVerified": false,
   "localChecksPassed": 49,
-  "releasePreparedAt": "2026-10-21T20:12:10.290Z"
+  "releasePreparedAt": "2026-10-21T20:12:10.290Z",
+  "mobileQALink": "#mobileqa",
+  "mobileQABackend": "github-actions-manual-android-emulator",
+  "mobileQARealRunsOnly": true,
+  "mobileQATestScope": "public-read-only"
 }
