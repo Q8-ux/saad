@@ -3,19 +3,22 @@ import { openConfig, sealConfig } from "@/lib/management-auth";
 import { RequestError } from "@/lib/request-security";
 
 export type ScheduleDay = { day: number; enabled: boolean; times: string[]; capacity: number; dailyLimit: number };
-export type Schedule = { enabled: boolean; days: ScheduleDay[]; horizonDays: number; leadHours: number };
+export type Schedule = { enabled: boolean; days: ScheduleDay[]; horizonDays: number; leadHours: number; closedDates: string[] };
 const KEY = "office-consultation-schedule-v1";
 const DAYS = [0, 1, 2, 3, 4, 5, 6];
 const MINUTE = 60_000;
 const TIME = /^([01]\d|2[0-3]):(00|15|30|45)$/;
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
-export const defaultSchedule = (): Schedule => ({ enabled: false, days: DAYS.map(day => ({ day, enabled: false, times: [], capacity: 1, dailyLimit: 4 })), horizonDays: 30, leadHours: 24 });
+export const defaultSchedule = (): Schedule => ({ enabled: false, days: DAYS.map(day => ({ day, enabled: false, times: [], capacity: 1, dailyLimit: 4 })), horizonDays: 30, leadHours: 24, closedDates: [] });
 export function validateSchedule(raw: unknown): Schedule {
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) throw new RequestError("إعدادات المواعيد غير صحيحة.");
   const x = raw as Record<string, unknown>;
   if (!Array.isArray(x.days) || x.days.length !== 7) throw new RequestError("حدد أيام الأسبوع السبعة.");
   const horizonDays=Number(x.horizonDays),leadHours=Number(x.leadHours);
   if (!Number.isInteger(horizonDays)||horizonDays<7||horizonDays>60||!Number.isInteger(leadHours)||leadHours<0||leadHours>168) throw new RequestError("نطاق الحجز أو مهلة الحجز غير صحيحة.");
+  const dates=Array.isArray(x.closedDates)?x.closedDates:[];
+  if(dates.length>180||dates.some(d=>typeof d!=="string"||!DATE.test(d))) throw new RequestError("تواريخ الإغلاق الاستثنائية غير صحيحة.");
+  const closedDates=Array.from(new Set(dates as string[])).sort();
   const seen=new Set<number>();
   const days=x.days.map((v):ScheduleDay=>{
     if (!v || typeof v!=="object" || Array.isArray(v)) throw new RequestError("يوم غير صحيح.");
@@ -27,7 +30,7 @@ export function validateSchedule(raw: unknown): Schedule {
     if (d.enabled===true&&!times.length) throw new RequestError("كل يوم متاح يحتاج إلى فترة واحدة على الأقل.");
     return {day,enabled:d.enabled===true,times,capacity,dailyLimit};
   });
-  return {enabled:x.enabled===true,days:days.sort((a,b)=>a.day-b.day),horizonDays,leadHours};
+  return {enabled:x.enabled===true,days:days.sort((a,b)=>a.day-b.day),horizonDays,leadHours,closedDates};
 }
 export async function getSchedule():Promise<Schedule> {
   const row=await getD1().prepare("SELECT sealed FROM management_vault WHERE integration = ?").bind(KEY).first<{sealed:string}>();
@@ -52,6 +55,7 @@ function slotDate(date:string,time:string) {
 }
 export function validChoice(schedule:Schedule,date:string,time:string, now=Date.now()) {
   if (!schedule.enabled) throw new RequestError("حجز المواعيد متوقف حالياً.",409);
+  if(schedule.closedDates.includes(date))throw new RequestError("المكتب مغلق في هذا التاريخ.",409);
   const weekday=dayFor(date),day=schedule.days.find(v=>v.day===weekday);
   if (!day?.enabled||!day.times.includes(time)) throw new RequestError("هذا الموعد غير متاح.",409);
   const stamp=slotDate(date,time);
@@ -69,7 +73,7 @@ export async function availableAppointments(now=Date.now()) {
   const slots=[] as Array<{date:string;time:string;remaining:number}>;
   for(let index=0;index<=schedule.horizonDays;index++){
     const date=localDate(now+index*86400000),day=schedule.days.find(d=>d.day===dayFor(date));
-    if(!day?.enabled)continue;
+    if(!day?.enabled||schedule.closedDates.includes(date))continue;
     for(const time of day.times){
       if(slotDate(date,time)<now+schedule.leadHours*3600000)continue;
       const remaining=Math.min(day.capacity-(slotCounts.get(date+"|"+time)||0),day.dailyLimit-(perDay.get(date)||0));
@@ -90,7 +94,7 @@ export async function reserveConsultation(raw:BookingPayload) {
   const caseType=str(raw.caseType,100),preferredContact=str(raw.preferredContact,30),message=str(raw.message,2000,false),language=str(raw.language||"ar",3);
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)||!/^[0-9+()\s-]{7,35}$/.test(phone))throw new RequestError("يرجى إدخال بريد ورقم هاتف صحيحين.");
   const schedule=await getSchedule(),day=validChoice(schedule,date,time);
-  const now=Date.now(),id=crypto.randomUUID();
+  const id=crypto.randomUUID();
   // The capacity check and INSERT occur in one SQL statement to avoid a read/write race.
   const write=await getD1().prepare(`INSERT INTO consultation_bookings (id,slot_date,slot_time,name,phone,email,case_type,preferred_contact,message,language,status)
    SELECT ?,?,?,?,?,?,?,?,?,?,'pending'
