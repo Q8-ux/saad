@@ -35,6 +35,7 @@ jobs:
           node --check family-online-studio/assets/login.mjs
           node --check family-online-studio/backend/server.mjs
           node --test family-online-studio/tests/sms-auth.test.mjs
+          node --test family-online-studio/tests/motion.test.mjs
           node family-online-studio/deployment/validate.mjs --ready
       - uses: actions/configure-pages@v5
       - name: Preserve other published projects

@@ -2,7 +2,7 @@
   "initial": [
     {
       "file": "assets/app.mjs",
-      "bytes": 287588
+      "bytes": 287603
     },
     {
       "file": "assets/chunks/chunk-G3VF33UY.mjs",
@@ -27,6 +27,14 @@
     {
       "file": "assets/chunks/chunk-273564TL.mjs",
       "bytes": 47234
+    },
+    {
+      "file": "assets/motion/studio-motion.mjs",
+      "bytes": 12354
+    },
+    {
+      "file": "assets/motion/motion-core.mjs",
+      "bytes": 9627
     }
   ],
   "deferred": [
