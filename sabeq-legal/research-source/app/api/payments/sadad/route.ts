@@ -21,7 +21,13 @@ export async function POST(request: Request) {
     assertSameOrigin(request);
     const user = await requireMemoUserOrGuest(request);
     await enforceRateLimit(request, "sadad-create", 12);
-    if (user) await enforceUserServiceLimit(user, "memo");
-    return privateJson(await createMemoPayment(await readJsonObject(request, 210_000)));
+    const input = await readJsonObject(request, 210_000);
+    let continuesExistingInvoice = false;
+    try {
+      const existing = await memoPaymentStatus(input.attemptId, input.paymentToken);
+      continuesExistingInvoice = !!existing.checkoutUrl || ["paid", "generating", "consumed"].includes(existing.status);
+    } catch { /* Invalid or new attempts still pass through the normal validation below. */ }
+    if (user && !continuesExistingInvoice) await enforceUserServiceLimit(user, "memo");
+    return privateJson(await createMemoPayment(input));
   } catch (error) { return errorResponse(error); }
 }
