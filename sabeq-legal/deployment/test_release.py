@@ -13,6 +13,19 @@ release = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(release)
 
 class PublicationTests(unittest.TestCase):
+    def test_current_index_keeps_main_bundle_first_and_motion_within_asset_scope(self):
+        source = Path(__file__).resolve().parents[1]
+        import re
+        html = (source / "index.html").read_text()
+        scripts = re.findall(r'<script[^>]+src="([^"]+)"', html)
+        self.assertIn('/assets/index-', scripts[0])
+        self.assertIn('/saad/sabeq-legal/assets/service-motion-v1.js', scripts)
+        for script in scripts:
+            self.assertTrue(script.startswith('/saad/sabeq-legal/assets/'))
+            self.assertTrue((source / script.removeprefix('/saad/sabeq-legal/')).is_file())
+        self.assertEqual((source / 'assets/service-motion-v1.js').read_text().strip(), "import '../motion/sabeq-entry.mjs';")
+        self.assertTrue((source / 'motion/motion-core.mjs').is_file())
+
     def test_protected_files_and_asset_validation(self):
         with tempfile.TemporaryDirectory() as tmp:
             previous = os.getcwd()

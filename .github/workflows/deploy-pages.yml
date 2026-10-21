@@ -86,7 +86,9 @@ jobs:
           fi
       - name: Validate Sabeq publication safety
         if: steps.scope.outputs.sabeq_only == 'true'
-        run: python sabeq-legal/deployment/test_release.py
+        run: |
+          python sabeq-legal/deployment/test_release.py
+          node --test sabeq-legal/motion/motion.test.mjs
       - uses: actions/configure-pages@v5
       - name: Restore published sites and update Sabeq only
         if: steps.scope.outputs.sabeq_only == 'true'
