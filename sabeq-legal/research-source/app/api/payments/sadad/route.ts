@@ -1,4 +1,4 @@
-import { createMemoPayment, memoPaymentPolicy, memoPaymentStatus, recoverMemoPayment } from "@/lib/sadad-payments";
+import { createMemoPayment, memoPaymentHasInvoice, memoPaymentPolicy, memoPaymentStatus, recoverMemoPayment } from "@/lib/sadad-payments";
 import { assertSameOrigin, corsPreflight, enforceRateLimit, errorResponse, privateJson, readJsonObject } from "@/lib/request-security";
 import { requireMemoUserOrGuest } from "@/lib/public-auth";
 import { enforceUserServiceLimit } from "@/lib/service-records";
@@ -23,10 +23,8 @@ export async function POST(request: Request) {
     await enforceRateLimit(request, "sadad-create", 12);
     const input = await readJsonObject(request, 210_000);
     let continuesExistingInvoice = false;
-    try {
-      const existing = await memoPaymentStatus(input.attemptId, input.paymentToken);
-      continuesExistingInvoice = !!existing.checkoutUrl || ["paid", "generating", "consumed"].includes(existing.status);
-    } catch { /* Invalid or new attempts still pass through the normal validation below. */ }
+    try { continuesExistingInvoice = await memoPaymentHasInvoice(input.attemptId, input.paymentToken); }
+    catch { /* Invalid or new attempts still pass through the normal validation below. */ }
     if (user && !continuesExistingInvoice) await enforceUserServiceLimit(user, "memo");
     return privateJson(await createMemoPayment(input));
   } catch (error) { return errorResponse(error); }
