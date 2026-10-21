@@ -1,7 +1,10 @@
 {
-  "revision": "independent-admin-7-sadad-private",
-  "backendSource": "df30c4b0ea079eeaf2e13516196bc0b331f0fd8a",
+  "revision": "independent-admin-8-programmer",
+  "backendSource": "f811ae3f2c5fc4b80d4030deb9affe62fa57f9a8",
   "sourceRepository": "https://github.com/Q8-ux/saad",
   "paymentVisibility": "admin-only-by-default",
-  "paymentsLink": "#payments"
+  "paymentsLink": "#payments",
+  "programmerLink": "#programmer",
+  "programmerScope": "advice-and-explicit-follow-up",
+  "fccGateway": "requires-independent-configured-service"
 }
