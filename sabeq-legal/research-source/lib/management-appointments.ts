@@ -82,7 +82,7 @@ export async function availableAppointments(now=Date.now()) {
   }
   return {enabled:true,timezone:"Asia/Kuwait",slots};
 }
-type BookingPayload={name?:unknown;phone?:unknown;email?:unknown;caseType?:unknown;preferredContact?:unknown;message?:unknown;language?:unknown;slotDate?:unknown;slotTime?:unknown;website?:unknown};
+type BookingPayload={idempotencyKey?:unknown;name?:unknown;phone?:unknown;email?:unknown;caseType?:unknown;preferredContact?:unknown;message?:unknown;language?:unknown;slotDate?:unknown;slotTime?:unknown;website?:unknown};
 function str(value:unknown,max:number,mandatory=true) {
   const result=typeof value==="string"?value.trim():"";
   if(result.length>max||(mandatory&&!result))throw new RequestError("بيانات الحجز غير مكتملة أو تتجاوز الطول المسموح.");
@@ -90,18 +90,31 @@ function str(value:unknown,max:number,mandatory=true) {
 }
 export async function reserveConsultation(raw:BookingPayload) {
   if(raw.website)throw new RequestError("تعذر إتمام الحجز.");
-  const date=str(raw.slotDate,10),time=str(raw.slotTime,5),name=str(raw.name,120),phone=str(raw.phone,35),email=str(raw.email,180);
+  const key=str(raw.idempotencyKey,36),date=str(raw.slotDate,10),time=str(raw.slotTime,5),name=str(raw.name,120),phone=str(raw.phone,35),email=str(raw.email,180);
+  if(!/^[a-f0-9-]{36}$/.test(key))throw new RequestError("معرف طلب الحجز غير صحيح.");
   const caseType=str(raw.caseType,100),preferredContact=str(raw.preferredContact,30),message=str(raw.message,2000,false),language=str(raw.language||"ar",3);
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)||!/^[0-9+()\s-]{7,35}$/.test(phone))throw new RequestError("يرجى إدخال بريد ورقم هاتف صحيحين.");
+  const existing=await getD1().prepare("SELECT id,slot_date,slot_time,email,phone,status FROM consultation_bookings WHERE idempotency_key=?").bind(key).first<{id:string;slot_date:string;slot_time:string;email:string;phone:string;status:string}>();
+  if(existing){
+    if(existing.email!==email||existing.phone!==phone||existing.slot_date!==date||existing.slot_time!==time)throw new RequestError("مفتاح هذا الطلب مستخدم لحجز مختلف.",409);
+    if(existing.status==="cancelled")throw new RequestError("هذا الحجز السابق ملغي. افتح نموذج الحجز مجدداً لطلب موعد آخر.",409);
+    return {ok:true,bookingId:existing.id,date,time,timezone:"Asia/Kuwait",status:existing.status,message:"هذا الطلب مسجل بالفعل، ولم ينشأ حجز مكرر."};
+  }
   const schedule=await getSchedule(),day=validChoice(schedule,date,time);
   const id=crypto.randomUUID();
   // The capacity check and INSERT occur in one SQL statement to avoid a read/write race.
-  const write=await getD1().prepare(`INSERT INTO consultation_bookings (id,slot_date,slot_time,name,phone,email,case_type,preferred_contact,message,language,status)
-   SELECT ?,?,?,?,?,?,?,?,?,?,'pending'
+  const write=await getD1().prepare(`INSERT INTO consultation_bookings (id,idempotency_key,slot_date,slot_time,name,phone,email,case_type,preferred_contact,message,language,status)
+   SELECT ?,?,?,?,?,?,?,?,?,?,?,'pending'
    WHERE (SELECT COUNT(*) FROM consultation_bookings WHERE slot_date=? AND slot_time=? AND status != 'cancelled') < ?
-     AND (SELECT COUNT(*) FROM consultation_bookings WHERE slot_date=? AND status != 'cancelled') < ?`)
-    .bind(id,date,time,name,phone,email,caseType,preferredContact,message,language,date,time,day.capacity,date,day.dailyLimit).run();
-  if(!write.meta.changes)throw new RequestError("اكتمل عدد حجوزات هذا الموعد. اختر فترة أخرى.",409);
+     AND (SELECT COUNT(*) FROM consultation_bookings WHERE slot_date=? AND status != 'cancelled') < ?
+   ON CONFLICT(idempotency_key) DO NOTHING`)
+    .bind(id,key,date,time,name,phone,email,caseType,preferredContact,message,language,date,time,day.capacity,date,day.dailyLimit).run();
+  if(!write.meta.changes){
+    const replay=await getD1().prepare("SELECT id,slot_date,slot_time,email,phone,status FROM consultation_bookings WHERE idempotency_key=?").bind(key).first<{id:string;slot_date:string;slot_time:string;email:string;phone:string;status:string}>();
+    if(replay&&replay.email===email&&replay.phone===phone&&replay.slot_date===date&&replay.slot_time===time&&replay.status!=="cancelled")
+      return {ok:true,bookingId:replay.id,date,time,timezone:"Asia/Kuwait",status:replay.status,message:"هذا الطلب مسجل بالفعل، ولم ينشأ حجز مكرر."};
+    throw new RequestError("اكتمل عدد حجوزات هذا الموعد. اختر فترة أخرى.",409);
+  }
   // Never expose the visitor name, case description or phone number in the notification stream.
   try { await getD1().prepare("INSERT INTO management_events(id,source,kind,title,severity) VALUES (?,?,?,?,?)").bind(crypto.randomUUID(),"consultation","booking-request","طلب حجز استشارة جديد يحتاج تأكيداً","info").run(); } catch { /* the booking is already committed; event delivery is best-effort */ }
   return {ok:true,bookingId:id,date,time,timezone:"Asia/Kuwait",status:"pending",message:"تم استلام طلب الحجز، وسيؤكد المكتب الموعد بعد المراجعة."};
