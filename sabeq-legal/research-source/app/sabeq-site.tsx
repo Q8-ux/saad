@@ -294,7 +294,7 @@ export default function SabeqSite() {
     window.dispatchEvent(new CustomEvent("sabeq-analytics-section", { detail: name }));
     setFormStatus("idle");
     if (name === "memo") setAssistantMemoPrefill(null);
-    if (name === "memo" || name === "assistant") {
+    if (name === "memo" || name === "assistant" || name === "booking") {
       setModal(name);
       return;
     }
@@ -334,18 +334,22 @@ export default function SabeqSite() {
 
   async function submitForm(event: FormEvent<HTMLFormElement>, endpoint: string) {
     event.preventDefault();
-    if (!authToken) {
+    if (!authToken && endpoint !== "/api/consultations") {
       setModal("auth");
       return;
     }
     setFormStatus("loading");
     const form = event.currentTarget;
     try {
-      const response = await authenticatedFetch(endpoint, authToken, {
+      const response = await (endpoint === "/api/consultations" ? memoFetch(endpoint, authToken, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(Object.fromEntries(new FormData(form).entries())),
-      });
+      }) : authenticatedFetch(endpoint, authToken, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(Object.fromEntries(new FormData(form).entries())),
+      }));
       if (!response.ok) throw new Error("Request failed");
       form.reset();
       setFormStatus("success");
