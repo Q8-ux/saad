@@ -1,0 +1,51 @@
+name: Sabeq Mobile QA - Phone Harness
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'Approved public Sabeq URL to inspect'
+        required: true
+        type: choice
+        options:
+          - 'https://www.sabeq.legal'
+          - 'https://q8-ux.github.io/saad/sabeq-legal/'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sabeq-phone-harness-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  android-smoke:
+    name: Read-only Android phone inspection
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      SABEQ_TARGET_URL: ${{ inputs.target }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install pinned stable Phone Harness
+        run: python -m pip install --disable-pip-version-check 'phone-harness==0.3.2'
+      - name: Test on an Android emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          disable-animations: true
+          script: bash scripts/sabeq-phone-harness/smoke.sh
+      - name: Upload public-site test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sabeq-mobile-qa-${{ github.run_number }}
+          path: qa-evidence/
+          if-no-files-found: warn
+          retention-days: 7
