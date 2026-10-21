@@ -2,7 +2,7 @@
 (() => {
   'use strict';
   const ACTIONS_URL = 'https://github.com/Q8-ux/saad/actions/workflows/sabeq-phone-harness.yml';
-  const RUNS_API = 'https://api.github.com/repos/Q8-ux/saad/actions/workflows/sabeq-phone-harness.yml/runs?per_page=6';
+  const RUNS_API = 'https://api.github.com/repos/Q8-ux/saad/actions/workflows/sabeq-phone-harness.yml/runs?event=workflow_dispatch&per_page=6';
   const HELP_URL = 'https://github.com/ShawnPana/phone-harness';
   const escape = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
   const runStates = {queued:'بانتظار التشغيل', in_progress:'قيد الاختبار', completed:'انتهى', waiting:'بانتظار الموافقة', requested:'مطلوب', pending:'معلّق'};
