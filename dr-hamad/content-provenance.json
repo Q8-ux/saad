@@ -1,0 +1,32 @@
+{
+  "doctor_identity_source": "User-provided doctor clinic message; name and specialty kept verbatim",
+  "clinic": {
+    "hospital": "مستشفى الرازي",
+    "department": "العيادات التخصصية B",
+    "clinic": 6,
+    "day": "Tuesday morning",
+    "booking_url": "https://ask.moh.gov.kw"
+  },
+  "reference_site": "https://maaster.my.canva.site/drhamad",
+  "logo": "Existing user-approved circular silver H, unmodified; displayed from original supplied collage",
+  "font": "Existing user project Al Mohanad TTF regular/bold/extra bold",
+  "carousels": {
+    "count": 11,
+    "slides_per_carousel": 8,
+    "source": "Retained project data, no text changes. Existing archive captions are prior supplied project content, not independently reverified in this redesign."
+  },
+  "original_article": {
+    "title": "توقيت استبدال مفصل الركبة",
+    "url": "https://dr-hamad-knee-replacement-timing.centrino.chatgpt.site",
+    "verified": "Native Sites metadata confirms active public owner site and version 2. Original text has not been copied or redated."
+  },
+  "editorial_article": "article.html; editorial revision date distinct from research dates",
+  "joint_model": "Original SVG schematic, simplified one-plane view; not a validated biomechanical simulation, 3D asset or surgical instruction",
+  "sources": [
+    "NICE NG226",
+    "Cochrane CD004376.pub4 (2024)",
+    "IDEA JAMA 2013",
+    "AAOS OrthoInfo knee implants and total hip replacement"
+  ],
+  "claims": "No fabricated doctor portrait, clinical outcomes, testimonials, appointment availability, credentials, or AI diagnosis"
+}

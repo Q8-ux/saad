@@ -1,0 +1,41 @@
+{
+  "checks": {
+    "javascript_syntax": "passed: app.js experience.js site.js",
+    "carousel_vm": "passed: 11 × 8, all 88 slides, boundaries, medical/archive filters, search, empty state",
+    "html": "passed: local asset references, fragment targets, unique IDs, single H1 on each document",
+    "font_files": "verified name tables for Al-Mohanad Regular, Bold, Extra Bold; Arabic alef present in all three",
+    "browser_sizes_css_px": [
+      320,
+      390,
+      768,
+      1440
+    ],
+    "observed_horizontal_overflow": false,
+    "mobile_title": "fixed 4-line wrapping at 390 and 768; verified two lines after fix",
+    "browser_actions": [
+      "Mobile menu open and section selection closes it",
+      "Hip motion mode",
+      "Hip parts mode and head detail selection",
+      "Assembly step 5 and matching explanation/output",
+      "Play/pause pressed state",
+      "Carousel open and next 1/8 to 2/8",
+      "Search الرياضة gives one post",
+      "Clinic copy reports success",
+      "Clinic details match supplied message",
+      "FAQ expands",
+      "Article at 390px, 28px body, 5 references, QR image loads"
+    ]
+  },
+  "limits": [
+    "Browser QA uses same-origin fixed-width iframe documents under the supported preview; screenshots inspected at target widths. Not separate physical-device testing.",
+    "PDF print toolbar is available; no generated PDF export was requested or tested.",
+    "No real appointment was booked; official external booking destination retained exactly as supplied.",
+    "Previous original article linked to its existing public site; source retrieval was unsuccessful, and the original article was not replaced or re-dated.",
+    "No benchmark, medical approval, validated biomechanics, universal accessibility certification or real 3D claimed."
+  ],
+  "paths_applied": [
+    "frontend-taste-path",
+    "visual-library-path",
+    "sites"
+  ]
+}
