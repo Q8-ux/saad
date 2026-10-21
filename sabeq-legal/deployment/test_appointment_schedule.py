@@ -11,13 +11,13 @@ class AppointmentReleaseTests(unittest.TestCase):
         db=sqlite3.connect(":memory:")
         db.executescript(sql)
         statement="""INSERT INTO consultation_bookings
-          (id,slot_date,slot_time,name,phone,email,case_type,preferred_contact,message,language,status)
-          SELECT ?, '2026-12-15','10:00','TEST','12345678','test@example.invalid','test','email','','ar','pending'
+          (id,idempotency_key,slot_date,slot_time,name,phone,email,case_type,preferred_contact,message,language,status)
+          SELECT ?,?, '2026-12-15','10:00','TEST','12345678','test@example.invalid','test','email','','ar','pending'
           WHERE (SELECT COUNT(*) FROM consultation_bookings WHERE slot_date='2026-12-15' AND slot_time='10:00' AND status != 'cancelled') < 2
             AND (SELECT COUNT(*) FROM consultation_bookings WHERE slot_date='2026-12-15' AND status != 'cancelled') < 2"""
-        self.assertEqual(db.execute(statement,("synthetic-1",)).rowcount,1)
-        self.assertEqual(db.execute(statement,("synthetic-2",)).rowcount,1)
-        self.assertEqual(db.execute(statement,("synthetic-3",)).rowcount,0)
+        self.assertEqual(db.execute(statement,("synthetic-1","key-1")).rowcount,1)
+        self.assertEqual(db.execute(statement,("synthetic-2","key-2")).rowcount,1)
+        self.assertEqual(db.execute(statement,("synthetic-3","key-3")).rowcount,0)
         db.execute("UPDATE consultation_bookings SET status='cancelled' WHERE id='synthetic-1'")
         self.assertEqual(db.execute(statement,("synthetic-3",)).rowcount,1)
         self.assertEqual(db.execute("SELECT COUNT(*) FROM consultation_bookings WHERE status!='cancelled'").fetchone()[0],2)
