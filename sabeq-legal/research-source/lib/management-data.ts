@@ -61,7 +61,18 @@ export async function managerMemos(url: URL) {
     ) WHERE (? = '' OR client_name LIKE ? OR email LIKE ? OR case_number LIKE ?) AND (? = '' OR status = ?) ORDER BY created_at DESC, id LIMIT ? OFFSET ?`)
     .bind(query, `%${query}%`, `%${query}%`, `%${query}%`, status, status, limit, offset).all();
   const official = await officialOperations(new URLSearchParams({ kind: "memos", q: query, status, offset: String(offset), limit: String(limit) }));
-  return { memos: [...rows.results.map((row: Record<string, unknown>) => ({ ...row, source: "hosted" })), ...(official.memos || []).map((row: Record<string, unknown>) => ({ ...row, id: `official:${row.id}`, source: "official" }))].sort((a, b) => String(b.created_at).localeCompare(String(a.created_at))), hasMore: rows.results.length === limit || official.hasMore === true, officialAvailable: official.available, offset };
+  const memos = [...rows.results.map((row: Record<string, unknown>) => ({ ...row, source: "hosted" })), ...(official.memos || []).map((row: Record<string, unknown>) => ({ ...row, id: `official:${row.id}`, source: "official" }))].sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)));
+  const ids=memos.map(row=>String(row.id)).filter(id=>/^[a-zA-Z0-9:_-]{1,150}$/.test(id)).slice(0,150);
+  let reviews:{memo_id:string;review_status:string}[]=[];
+  if(ids.length) {
+    try {
+      const placeholders=ids.map(()=>"?").join(",");
+      const result=await getD1().prepare(`SELECT memo_id,review_status FROM management_memo_reviews WHERE memo_id IN (${placeholders})`).bind(...ids).all<{memo_id:string;review_status:string}>();
+      reviews=result.results;
+    }catch{ /* new review table may not be migrated yet; memo records remain readable */ }
+  }
+  const mapped=new Map(reviews.map(row=>[row.memo_id,row.review_status]));
+  return { memos:memos.map(row=>({...row,review_status:mapped.get(String(row.id))||null})),hasMore: rows.results.length === limit || official.hasMore === true, officialAvailable: official.available, offset };
 }
 export async function managerInbox(url: URL) {
   const { offset, limit, query } = pagination(url);
