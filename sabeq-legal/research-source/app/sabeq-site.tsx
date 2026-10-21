@@ -1520,9 +1520,15 @@ function MemoWizard({ t, language, token, initialData = null }: { t: SiteCopy; l
         if (statusResponse.ok) {
           const payment = await readServiceJson<SadadCheckout>(statusResponse);
           if (["paid", "consumed"].includes(payment.status)) {
-            setCheckout(payment);
-            input.paymentId = attempt.attemptId;
-            input.paymentToken = attempt.paymentToken;
+            const amendedResponse = await memoFetch("/api/payments/sadad", token, { method: "POST", signal: controller.signal, headers: { "Content-Type": "application/json" }, body: JSON.stringify({ attemptId: attempt.attemptId, paymentToken: attempt.paymentToken, input }) });
+            if (amendedResponse.ok) {
+              setCheckout(payment);
+              input.paymentId = attempt.attemptId;
+              input.paymentToken = attempt.paymentToken;
+            } else if (!(payment.status === "consumed" && amendedResponse.status === 409)) {
+              const amended = await readServiceJson<{ error?: string }>(amendedResponse);
+              throw new Error(amended.error || payUi.policyError);
+            }
           }
         } else if ([403, 404].includes(statusResponse.status)) {
           clearPaymentAttempt();
