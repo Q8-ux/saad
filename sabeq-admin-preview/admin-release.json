@@ -1,5 +1,5 @@
 {
-  "revision": "independent-admin-9-mobile-qa",
+  "revision": "independent-admin-10-appointments",
   "backendSource": "f811ae3f2c5fc4b80d4030deb9affe62fa57f9a8",
   "sourceRepository": "https://github.com/Q8-ux/saad",
   "paymentVisibility": "admin-only-by-default",
@@ -15,5 +15,21 @@
   "mobileQALink": "#mobileqa",
   "mobileQABackend": "github-actions-manual-android-emulator",
   "mobileQARealRunsOnly": true,
-  "mobileQATestScope": "public-read-only"
+  "mobileQATestScope": "public-read-only",
+  "dashboardSections": [
+    "overview",
+    "inbox",
+    "memos",
+    "users",
+    "appointments"
+  ],
+  "invoicesSectionVisible": false,
+  "casesSectionVisible": false,
+  "appointmentsLink": "#appointments",
+  "bookingMode": "office-schedule-controlled",
+  "bookingActivation": "requires-canonical-backend-deploy-and-d1-migration",
+  "memoReview": "human-review-separate-from-generation",
+  "apiMigrations": [
+    "0008_consultation_bookings"
+  ]
 }
