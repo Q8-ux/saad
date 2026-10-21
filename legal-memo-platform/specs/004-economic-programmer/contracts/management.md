@@ -1,0 +1,3 @@
+# Management contract
+
+All calls require existing management bearer session and allowed Origin. GET /api/management/programmer returns redacted configuration and existing-project availability. POST: save accepts mode and optional FCC URL/key/model; models returns sanitized IDs and catalogOnly:true; run accepts task trial/review/diagnose/tests, prompt (8–2000 chars except fixed trial) and optional code (0–4000). All bodies <=20KB. run returns text, source, model, durationMs, actual usage or null, applied:false. Failures: 400 invalid config/input, 401 no session, 403 origin/authorization, 409 not configured, 413 body bound, 429 rate limit, 499 cancelled, 502 gateway/provider failure. No command execution route.
