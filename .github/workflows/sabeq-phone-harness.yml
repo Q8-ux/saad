@@ -39,12 +39,16 @@ jobs:
         run: |
           node --check sabeq-admin-preview/admin.js
           node --check sabeq-admin-preview/mobileqa.js
+          node --check sabeq-admin-preview/appointments.js
           node --check sabeq-legal/research-source/public/management/admin.js
           node --check sabeq-legal/research-source/public/management/mobileqa.js
+          node --check sabeq-legal/research-source/public/management/appointments.js
           bash -n scripts/sabeq-phone-harness/smoke.sh
           python sabeq-legal/deployment/test_release.py
+          python sabeq-legal/deployment/test_appointment_schedule.py
           cmp sabeq-admin-preview/admin.js sabeq-legal/research-source/public/management/admin.js
           cmp sabeq-admin-preview/mobileqa.js sabeq-legal/research-source/public/management/mobileqa.js
+          cmp sabeq-admin-preview/appointments.js sabeq-legal/research-source/public/management/appointments.js
           cmp sabeq-admin-preview/index.html sabeq-legal/research-source/public/management/index.html
           cmp sabeq-admin-preview/admin.css sabeq-legal/research-source/public/management/admin.css
   android-smoke:
