@@ -1,0 +1,32 @@
+{
+  "editorial_updated": "2026-10-22",
+  "article_status": "new editorial version; previous full text not recovered",
+  "previous_report_library_id": "libfile_66a90b8e922c8191922371cd4034f92c",
+  "diagram_type": "original simplified SVG; not patient-specific; not validated biomechanics",
+  "clinical_signoff_claimed": false,
+  "sources": [
+    {
+      "id": "nice",
+      "url": "https://www.nice.org.uk/guidance/ng226/chapter/Recommendations",
+      "alternative": "https://www.ncbi.nlm.nih.gov/books/NBK588843/"
+    },
+    {
+      "id": "cochrane",
+      "url": "https://www.cochrane.org/evidence/CD004376_exercise-effective-therapy-treat-knee-osteoarthritis",
+      "doi": "10.1002/14651858.CD004376.pub4"
+    },
+    {
+      "id": "idea",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/24065013/",
+      "doi": "10.1001/jama.2013.277669"
+    },
+    {
+      "id": "implants",
+      "url": "https://www.orthoinfo.org/treatment/knee-replacement-implants/"
+    },
+    {
+      "id": "hip",
+      "url": "https://www.orthoinfo.org/treatment/total-hip-replacement/"
+    }
+  ]
+}
