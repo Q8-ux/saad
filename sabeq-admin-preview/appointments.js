@@ -36,6 +36,7 @@
               <label class="field"><span>عدد الأيام المعروضة مسبقاً (7–60)</span><input name="horizonDays" type="number" min="7" max="60" required value="${esc(s.horizonDays||30)}"></label>
               <label class="field"><span>المهلة الدنيا قبل الموعد بالساعات (0–168)</span><input name="leadHours" type="number" min="0" max="168" required value="${esc(s.leadHours??24)}"></label>
             </div>
+            <label class="field"><span>أيام إغلاق استثنائية (العطل والإجازات)</span><input name="closedDates" dir="ltr" placeholder="2026-12-31, 2027-01-01" value="${esc((s.closedDates||[]).join(', '))}"><small>اكتب التواريخ بصيغة YYYY-MM-DD مفصولة بفاصلة، ولن تظهر للزوار.</small></label>
             <div class="table-scroll" tabindex="0" role="region" aria-label="أيام المكتب">
               <table class="qa-schedule"><thead><tr><th>اليوم</th><th>متاح</th><th>الفترات (15 دقيقة)</th><th>الحجوزات لكل فترة</th><th>الحد اليومي</th></tr></thead>
                 <tbody>${names.map((name,i)=>{
@@ -66,7 +67,7 @@
             times:String(f.get('times-'+i)||'').split(',').map(t=>t.trim()).filter(Boolean),
             capacity:Number(f.get('capacity-'+i)),dailyLimit:Number(f.get('daily-'+i))
           }));
-          const payload={enabled:f.get('enabled')==='on',horizonDays:Number(f.get('horizonDays')),leadHours:Number(f.get('leadHours')),days};
+          const payload={enabled:f.get('enabled')==='on',horizonDays:Number(f.get('horizonDays')),leadHours:Number(f.get('leadHours')),closedDates:String(f.get('closedDates')||'').split(',').map(d=>d.trim()).filter(Boolean),days};
           await api('schedule',payload);
           toast('حُفظ جدول المكتب وحدود الاستشارات في الخادم.');
           await reload();
