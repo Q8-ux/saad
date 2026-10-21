@@ -4,7 +4,7 @@
   const names=['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
   const esc=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
   const statuses={pending:'بانتظار التأكيد',confirmed:'مؤكد',cancelled:'ملغي',completed:'مكتمل',new:'طلب سابق'};
-  let current=null;
+  let current=null;let cleanup=null;
   const row=(book)=>`<tr>
     <td><strong>${esc(book.name)}</strong><small><bdi>${esc(book.phone)}</bdi> · <bdi>${esc(book.email)}</bdi></small></td>
     <td><bdi>${esc(book.slot_date||'لم يحدد')}</bdi><small><bdi>${esc(book.slot_time||'طلب سابق بدون موعد')}</bdi></small></td>
@@ -12,7 +12,9 @@
     <td>${book.slot_date?`<select aria-label="حالة الحجز" data-booking-id="${esc(book.id)}"><option value="pending" ${book.status==='pending'?'selected':''}>بانتظار التأكيد</option><option value="confirmed" ${book.status==='confirmed'?'selected':''}>تأكيد</option><option value="completed" ${book.status==='completed'?'selected':''}>مكتمل</option><option value="cancelled" ${book.status==='cancelled'?'selected':''}>إلغاء</option></select>`:'<span class="muted">طلب قديم — لا يوجد تاريخ محدد</span>'}</td>
   </tr>`;
   function mount(element,api,toast){
+    if(cleanup)cleanup();
     let alive=true;
+    cleanup=()=>{alive=false;};
     element.innerHTML='<div class="section-intro"><h2>مواعيد واستشارات المكتب</h2></div><div class="skeleton">جارٍ تحميل جدول المكتب من الخادم…</div>';
     async function reload(){
       try {
@@ -84,5 +86,5 @@
     void reload();
     return ()=>{alive=false;};
   }
-  globalThis.SabeqAppointments={mount};
+  globalThis.SabeqAppointments={mount,leave:()=>cleanup?.()};
 })();
