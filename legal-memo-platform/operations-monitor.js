@@ -19,7 +19,10 @@ function createOperationsMonitor({ dataDir, databasePath, fetcher = fetch, publi
       updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
     CREATE TABLE IF NOT EXISTS operations_meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
-    INSERT OR IGNORE INTO operations_meta (key,value) VALUES ('tracking_since', CURRENT_TIMESTAMP);`);
+    INSERT OR IGNORE INTO operations_meta (key,value) VALUES ('tracking_since', CURRENT_TIMESTAMP);
+    UPDATE operations_records
+      SET client_name='زائر', email='', case_type='', case_number='', input_json='{}', output_text=''
+      WHERE kind='memo' AND (client_name!='زائر' OR email!='' OR case_type!='' OR case_number!='' OR input_json!='{}' OR output_text!='');`);
   let keyCache = null;
   const nonces = new Map();
   function track(req, res, next) {
@@ -27,20 +30,20 @@ function createOperationsMonitor({ dataDir, databasePath, fetcher = fetch, publi
     const kind = types[String(req.originalUrl || req.path).split('?')[0]];
     if (req.method !== 'POST' || !kind) return next();
     const body = req.body || {}, input = {};
-    const fields = kind === 'memo' ? ['clientName','court','courtCircuit','caseNumber','caseType','partyRole','otherParty','allParties','facts','requests','documentKind','caseStage'] : ['name','email','phone','subject','message','caseType'];
-    for (const key of fields) if (typeof body[key] === 'string') input[key] = body[key].slice(0, key === 'facts' ? 40000 : key === 'requests' ? 20000 : 6000);
+    const fields = kind === 'memo' ? [] : ['name','email','phone','subject','message','caseType'];
+    for (const key of fields) if (typeof body[key] === 'string') input[key] = body[key].slice(0, 6000);
     const id = crypto.randomUUID();
     try {
       db.prepare("INSERT INTO operations_records (id,kind,client_name,email,case_type,case_number,input_json,status,origin) VALUES (?,?,?,?,?,?,?,'running',?)")
-        .run(id,kind,String(body.clientName || body.name || 'طلب موقع').slice(0,200),String(body.email || '').slice(0,180),String(body.caseType || '').slice(0,160),String(body.caseNumber || '').slice(0,120),JSON.stringify(input),String(req.headers.origin || '').slice(0,200));
+        .run(id,kind,kind === 'memo' ? 'زائر' : String(body.name || 'طلب موقع').slice(0,200),kind === 'memo' ? '' : String(body.email || '').slice(0,180),kind === 'memo' ? '' : String(body.caseType || '').slice(0,160),'',JSON.stringify(input),String(req.headers.origin || '').slice(0,200));
     } catch { return res.status(503).json({ error: 'تعذر تسجيل الطلب في سجل المكتب. أعد المحاولة.' }); }
     let finished = false;
     const originalJson = res.json;
     const finish = (payload, cancelled) => {
       if (finished) return; finished = true;
-      const output = typeof payload?.memo === 'string' ? payload.memo.slice(0,140000) : '';
-      const status = cancelled ? 'cancelled' : res.statusCode >= 400 ? 'failed' : kind === 'memo' ? (output ? 'needs_review' : 'failed') : 'new';
-      try { db.prepare('UPDATE operations_records SET output_text=?,status=?,error_code=?,updated_at=CURRENT_TIMESTAMP WHERE id=?').run(output,status,status==='failed'?`http_${res.statusCode}`:'',id); }
+      const memoCompleted = kind === 'memo' && typeof payload?.memo === 'string' && payload.memo.trim().length > 0;
+      const status = cancelled ? 'cancelled' : res.statusCode >= 400 ? 'failed' : kind === 'memo' ? (memoCompleted ? 'needs_review' : 'failed') : 'new';
+      try { db.prepare('UPDATE operations_records SET output_text=?,status=?,error_code=?,updated_at=CURRENT_TIMESTAMP WHERE id=?').run('',status,status==='failed'?`http_${res.statusCode}`:'',id); }
       catch { /* The accepted request remains visible as running; no payload enters logs. */ }
     };
     res.json = function captureJson(payload) { finish(payload,false); return originalJson.call(this,payload); };

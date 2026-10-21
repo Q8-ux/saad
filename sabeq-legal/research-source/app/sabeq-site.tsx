@@ -1489,8 +1489,8 @@ function MemoWizard({ t, language, token, initialData = null }: { t: SiteCopy; l
       const currentPolicy = await readServiceJson<{ required: boolean; publicCheckoutEnabled: boolean; priceFils: number; ready: boolean; environment: string; error?: string }>(policyResponse);
       if (!policyResponse.ok || typeof currentPolicy.required !== "boolean") throw new Error(currentPolicy.error || payUi.policyError);
       setPaymentPolicy(currentPolicy);
-      if (currentPolicy.required || paymentAttempt.current) {
-        if (currentPolicy.publicCheckoutEnabled !== true && !paymentAttempt.current) throw new Error(payUi.policyError);
+      if (currentPolicy.required) {
+        if (currentPolicy.publicCheckoutEnabled !== true) throw new Error(payUi.policyError);
         setCheckingPayment(true);
         if (!paymentAttempt.current) {
           const attempt = newPaymentAttempt();
@@ -1513,6 +1513,29 @@ function MemoWizard({ t, language, token, initialData = null }: { t: SiteCopy; l
           if (!["paid", "consumed"].includes(payment.status)) { setStatus("idle"); return; }
           input.paymentId = attempt.attemptId;
           input.paymentToken = attempt.paymentToken;
+        }
+      } else if (paymentAttempt.current) {
+        const attempt = paymentAttempt.current;
+        const statusResponse = await memoFetch(`/api/payments/sadad?id=${encodeURIComponent(attempt.attemptId)}`, attempt.paymentToken, { signal: controller.signal });
+        if (statusResponse.ok) {
+          const payment = await readServiceJson<SadadCheckout>(statusResponse);
+          if (["paid", "consumed"].includes(payment.status)) {
+            const amendedResponse = await memoFetch("/api/payments/sadad", token, { method: "POST", signal: controller.signal, headers: { "Content-Type": "application/json" }, body: JSON.stringify({ attemptId: attempt.attemptId, paymentToken: attempt.paymentToken, input }) });
+            if (amendedResponse.ok) {
+              setCheckout(payment);
+              input.paymentId = attempt.attemptId;
+              input.paymentToken = attempt.paymentToken;
+            } else if (!(payment.status === "consumed" && amendedResponse.status === 409)) {
+              const amended = await readServiceJson<{ error?: string }>(amendedResponse);
+              throw new Error(amended.error || payUi.policyError);
+            }
+          }
+        } else if ([403, 404].includes(statusResponse.status)) {
+          clearPaymentAttempt();
+          paymentAttempt.current = null;
+        } else {
+          const payment = await readServiceJson<{ error?: string }>(statusResponse);
+          throw new Error(payment.error || payUi.policyError);
         }
       }
       setCheckingPayment(false);
@@ -1694,7 +1717,7 @@ function MemoWizard({ t, language, token, initialData = null }: { t: SiteCopy; l
           {step === 3 && <div className="review-box"><FileCheck2 size={34} /><h3>{t.review}</h3><p>{t.arabicOnly}</p><p className="template-badge">{tr(language, "الصيغة")}: {tr(language, selectPleadingKind(memoData) === "appeal" ? "صحيفة استئناف" : selectPleadingKind(memoData) === "claim" ? "صحيفة دعوى" : "مذكرة بدفاع")}</p><p role="note" className="form-notice">{memoApprovalNotice[language]}</p>
             {memoData.conversationTranscript && <dl className="memo-handoff-details">{[[t.caseType, "caseType"], [t.court, "court"], [tr(language, "الدائرة"), "courtCircuit"], [tr(language, "مرحلة القضية"), "caseStage"], [t.clientName, "clientName"], [t.role, "partyRole"], [t.otherParty, "otherParty"], [ui.allParties, "allParties"], [t.facts, "facts"], [t.requests, "requests"]].map(([label, key]) => <div key={key}><dt>{label}</dt><dd>{["caseType", "court", "partyRole", "caseStage"].includes(key) ? interfaceLabel(memoData[key] || "", language) : memoData[key]}</dd></div>)}</dl>}
             <div><BookOpen size={18} />{t.libraryText}</div>
-            {((paymentPolicy?.publicCheckoutEnabled && paymentPolicy.required) || checkout) && <section className="memo-payment" aria-label={payUi.title}>
+            {(paymentPolicy?.publicCheckoutEnabled && paymentPolicy.required) && <section className="memo-payment" aria-label={payUi.title}>
               <div><h4>{payUi.title}</h4><strong><bdi>{new Intl.NumberFormat(language === "ar" ? "ar-KW" : "en-KW", { style: "currency", currency: "KWD" }).format((checkout?.priceFils ?? paymentPolicy?.priceFils ?? 0) / 1000)}</bdi></strong></div>
               {(checkout?.environment || paymentPolicy?.environment) === "sandbox" && <p>{payUi.test}</p>}
               <p>{checkout ? payUi.waiting : payUi.safety}</p>
@@ -1703,7 +1726,7 @@ function MemoWizard({ t, language, token, initialData = null }: { t: SiteCopy; l
             </section>}
             <label className="memo-generation-approval"><input type="checkbox" checked={memoApproved} onChange={event => setMemoApproved(event.target.checked)} disabled={status === "loading"} />{generationUi.approval}</label></div>}
         </div>
-        <div className="memo-actions">{step > 0 ? <button type="button" className="button button-outline" disabled={status === "loading"} onClick={() => { setMemoApproved(false); setStep(step - 1); }}>{t.previous}</button> : <span />}<button className="button button-primary" disabled={voiceEntryBusy || status === "loading" || analysisStatus === "loading" || Boolean(step === 1 && documents.length && analysisStatus !== "success") || Boolean(recordingField || transcribingField || draftAction)}>{status === "loading" ? (checkingPayment ? payUi.checking : t.loading) : step === 3 ? (paymentPolicy?.publicCheckoutEnabled && paymentPolicy.required) || checkout ? checkout ? payUi.verify : payUi.pay : t.generate : step === 1 && documents.length === 0 ? ui.continueManual : t.next}<ArrowLeft size={17} /></button></div>
+        <div className="memo-actions">{step > 0 ? <button type="button" className="button button-outline" disabled={status === "loading"} onClick={() => { setMemoApproved(false); setStep(step - 1); }}>{t.previous}</button> : <span />}<button className="button button-primary" disabled={voiceEntryBusy || status === "loading" || analysisStatus === "loading" || Boolean(step === 1 && documents.length && analysisStatus !== "success") || Boolean(recordingField || transcribingField || draftAction)}>{status === "loading" ? (checkingPayment ? payUi.checking : t.loading) : step === 3 ? paymentPolicy?.publicCheckoutEnabled && paymentPolicy.required ? checkout ? payUi.verify : payUi.pay : t.generate : step === 1 && documents.length === 0 ? ui.continueManual : t.next}<ArrowLeft size={17} /></button></div>
         {status === "loading" && <div className="memo-generation-pending"><p role="status" aria-live="polite">{checkingPayment ? payUi.checking : generationUi.pending}</p><span>{generationSeconds} {generationUi.seconds}</span><small>{checkingPayment ? payUi.safety : generationUi.limit}</small><button type="button" className="button button-outline" onClick={() => generationRequest.current?.abort()}>{generationUi.cancel}</button></div>}
         {status === "error" && <p className="form-notice error">{memoError || t.error}</p>}
       </form>
