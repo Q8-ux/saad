@@ -723,7 +723,56 @@ function AuthGate({ language, service, onAuthenticated }: { language: Language; 
 }
 
 function Booking({ t, language, status, submit }: { t: SiteCopy; language: Language; status: string; submit: (event: FormEvent<HTMLFormElement>, endpoint: string) => Promise<void> }) {
-  return <div className="modal-content"><div className="modal-icon"><CalendarDays /></div><h2>{t.bookingTitle}</h2><p>{t.bookingText}</p><form onSubmit={(event) => submit(event, "/api/consultations")}><div className="form-grid"><Field label={t.form.name}><input name="name" required /></Field><Field label={t.form.phone}><input name="phone" required dir="ltr" /></Field><Field label={t.form.email}><input name="email" type="email" required dir="ltr" /></Field><Field label={t.caseType}><CustomSelect name="caseType" ariaLabel={t.caseType} options={t.caseTypes.map((item) => ({ value: item, label: item }))} /></Field><Field label={t.preferred}><CustomSelect name="preferredContact" ariaLabel={t.preferred} options={[{ value: "WhatsApp", label: "WhatsApp" }, { value: t.phone, label: t.phone }, { value: t.email, label: t.email }]} /></Field><Field label={t.form.message} wide><textarea name="message" rows={4} /></Field></div><label className="honeypot" aria-hidden="true">Website<input name="website" tabIndex={-1} autoComplete="off" /></label><input type="hidden" name="language" value={language} /><button className="button button-primary button-block" disabled={status === "loading"}>{status === "loading" ? t.loading : t.submitBooking}</button><FormNotice status={status} t={t} /></form></div>;
+  const [slots,setSlots]=useState<Array<{date:string;time:string;remaining:number}>>([]);
+  const [ready,setReady]=useState(false);
+  const [availabilityError,setAvailabilityError]=useState("");
+  const [slotDate,setSlotDate]=useState("");
+  const [slotTime,setSlotTime]=useState("");
+  useEffect(()=>{
+    const controller=new AbortController();
+    fetch(apiUrl("/api/consultations/availability"),{cache:"no-store",credentials:"omit",signal:controller.signal})
+      .then(async r=>{if(!r.ok)throw Error("availability_unavailable");return r.json();})
+      .then(data=>{
+        if(!data.enabled||!Array.isArray(data.slots)){setSlots([]);return;}
+        const valid=data.slots.filter((s: {date:string;time:string;remaining:number})=>/^\d{4}-\d{2}-\d{2}$/.test(s.date)&&/^\d{2}:\d{2}$/.test(s.time)&&s.remaining>0);
+        setSlots(valid);
+      }).catch(()=>{if(!controller.signal.aborted)setAvailabilityError(language==="ar"?"تعذر التحقق من مواعيد المكتب الآن.":"Appointment availability could not be verified.");})
+      .finally(()=>{if(!controller.signal.aborted)setReady(true);});
+    return ()=>controller.abort();
+  },[language]);
+  const dates=Array.from(new Set(slots.map(s=>s.date)));
+  const filtered=slots.filter(s=>s.date===slotDate);
+  const selectedTime=filtered.some(s=>s.time===slotTime)?slotTime:"";
+  const bookingDisabled=status==="loading"||!slotDate||!selectedTime||!slots.some(s=>s.date===slotDate&&s.time===selectedTime);
+  return <div className="modal-content"><div className="modal-icon"><CalendarDays /></div><h2>{t.bookingTitle}</h2><p>{t.bookingText}</p>
+    <form onSubmit={(event)=>submit(event,"/api/consultations")}>
+      <div className="form-grid">
+        <Field label={t.form.name}><input name="name" required maxLength={120} /></Field>
+        <Field label={t.form.phone}><input name="phone" required dir="ltr" maxLength={35}/></Field>
+        <Field label={t.form.email}><input name="email" type="email" required dir="ltr" maxLength={180}/></Field>
+        <Field label={t.caseType}><CustomSelect name="caseType" ariaLabel={t.caseType} options={t.caseTypes.map(item=>({value:item,label:item}))}/></Field>
+        <Field label={t.preferred}><CustomSelect name="preferredContact" ariaLabel={t.preferred} options={[{value:"WhatsApp",label:"WhatsApp"},{value:t.phone,label:t.phone},{value:t.email,label:t.email}]}/></Field>
+        <Field label={language==="ar"?"اليوم المتاح":"Available date"}>
+          <select name="slotDate" value={slotDate} onChange={event=>{setSlotDate(event.target.value);setSlotTime("");}} required disabled={!dates.length}>
+            <option value="">{language==="ar"?"اختر يوماً متاحاً":"Choose an available date"}</option>
+            {dates.map(date=><option value={date} key={date}>{date}</option>)}
+          </select>
+        </Field>
+        <Field label={language==="ar"?"وقت الاستشارة (بتوقيت الكويت)":"Consultation time (Kuwait)"}>
+          <select name="slotTime" value={selectedTime} onChange={event=>setSlotTime(event.target.value)} required disabled={!slotDate}>
+            <option value="">{language==="ar"?"اختر الفترة":"Choose a time"}</option>
+            {filtered.map(slot=><option key={slot.time} value={slot.time}>{slot.time} — {slot.remaining} {language==="ar"?"متاح":"available"}</option>)}
+          </select>
+        </Field>
+        <Field label={t.form.message} wide><textarea name="message" rows={4} maxLength={2000}/></Field>
+      </div>
+      <p role="status" aria-live="polite">{!ready?(language==="ar"?"جارٍ تحميل الأيام المتاحة…":"Loading availability…"):availabilityError||(!slots.length?(language==="ar"?"لا توجد مواعيد متاحة حالياً. يحدد المكتب الأيام والفترات من لوحة الإدارة.":"No appointments are currently available."):(language==="ar"?"يُرسل طلب الحجز إلى المكتب لتأكيده، ولا يُعد موعداً مؤكداً بعد.":"The office must confirm your requested slot."))}</p>
+      <label className="honeypot" aria-hidden="true">Website<input name="website" tabIndex={-1} autoComplete="off"/></label>
+      <input type="hidden" name="language" value={language}/>
+      <button className="button button-primary button-block" disabled={bookingDisabled}>{status==="loading"?t.loading:t.submitBooking}</button>
+      <FormNotice status={status} t={t}/>
+    </form>
+  </div>;
 }
 
 type IntakeState = ConnectedIntakeState;
