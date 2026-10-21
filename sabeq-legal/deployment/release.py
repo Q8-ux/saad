@@ -135,8 +135,13 @@ def verify():
         if "ibm-plex-arabic" in stylesheet and not (admin / "fonts/OFL.txt").is_file():
             raise RuntimeError("Admin font licence missing")
         admin_scripts = re.findall(r'<script[^>]+src="([^"]+)"', (admin / "index.html").read_text())
-        if len(admin_scripts) != 1 or not re.fullmatch(r"\./admin\.js(?:\?v=[a-z0-9-]{1,80})?", admin_scripts[0]):
+        approved = [re.fullmatch(r"\./(programmer|admin)\.js(?:\?v=[a-z0-9-]{1,80})?", src) for src in admin_scripts]
+        if not all(approved) or [match.group(1) for match in approved] not in (["admin"], ["programmer", "admin"]):
             raise RuntimeError("Unexpected admin script path")
+        for match in approved:
+            asset = admin / (match.group(1) + ".js")
+            if not asset.is_file() or not asset.stat().st_size:
+                raise RuntimeError("Admin referenced script missing")
     print(f"Validated Sabeq release; {len(expected)} unrelated files are byte-identical")
 
 if __name__ == "__main__":
