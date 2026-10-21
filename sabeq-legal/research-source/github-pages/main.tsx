@@ -1,3 +1,5 @@
+import "../../motion/sabeq-motion.css";
+import "../../motion/sabeq-entry.mjs";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import SabeqSite from "../app/sabeq-site";

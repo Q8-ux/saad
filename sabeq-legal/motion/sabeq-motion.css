@@ -1,0 +1,20 @@
+@font-face{font-family:"Sabeq Motion Urdu";src:url(./Amiri-Regular.ttf) format("truetype");font-display:swap}
+.sabeq-service-motion{padding:clamp(2rem,5vw,4rem) 0;background:#eef4f4;color:#102c38;font-family:"Al Mohanad",Tahoma,sans-serif}
+.sabeq-service-motion .pm-service-layout{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:clamp(1.5rem,4vw,4rem);align-items:center;max-width:1240px;margin-inline:auto;padding-inline:clamp(1rem,4vw,3rem)}
+.sabeq-service-motion h2{font-size:clamp(1.8rem,3vw,2.5rem);line-height:1.5;margin:0 0 .6rem;color:#102c38}
+.sabeq-service-motion p{font-size:1.25rem;line-height:1.8;margin:0 0 1.1rem;color:#304f5c}
+.sabeq-service-motion ol{padding-inline-start:1.4rem;margin:0;display:grid;gap:.75rem;font-size:1.2rem}
+.sabeq-service-motion li{padding-inline-start:.4rem;line-height:1.6}
+.sabeq-service-motion li strong,.sabeq-service-motion li span{display:block}
+.sabeq-service-motion li span{color:#304f5c}
+.sabeq-service-motion canvas{display:block;width:100%;height:auto;border-radius:10px;background:#081f2c}
+.sabeq-service-motion .pm-service-player{min-width:0}
+.sabeq-service-motion .pm-service-controls{display:flex;align-items:center;gap:1rem;padding-top:.8rem}
+.sabeq-service-motion button{font:inherit;font-size:1.15rem;min-height:48px;flex:none;border:0;border-radius:6px;padding:.5rem 1.25rem;background:#123e49;color:#fff;cursor:pointer}
+.sabeq-service-motion button:hover{background:#195463}
+.sabeq-service-motion input{width:100%;min-width:0;min-height:44px;accent-color:#195463;direction:ltr}
+.sabeq-service-motion :focus-visible{outline:3px solid #286f7c;outline-offset:4px}
+@media(max-width:760px){.sabeq-service-motion .pm-service-layout{grid-template-columns:minmax(0,1fr)}.sabeq-service-motion .pm-service-controls{gap:.6rem}}
+@media(prefers-reduced-motion:reduce){.sabeq-service-motion *{scroll-behavior:auto!important;transition:none!important}}
+
+.sabeq-service-motion[dir=rtl]:lang(ur){font-family:"Sabeq Motion Urdu","Al Mohanad",Tahoma,sans-serif}
