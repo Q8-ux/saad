@@ -141,8 +141,8 @@ def verify():
         if "ibm-plex-arabic" in stylesheet and not (admin / "fonts/OFL.txt").is_file():
             raise RuntimeError("Admin font licence missing")
         admin_scripts = re.findall(r'<script[^>]+src="([^"]+)"', (admin / "index.html").read_text())
-        approved = [re.fullmatch(r"\./(programmer|mobileqa|admin)\.js(?:\?v=[a-z0-9-]{1,80})?", src) for src in admin_scripts]
-        if not all(approved) or [match.group(1) for match in approved] not in (["admin"], ["programmer", "admin"], ["programmer", "mobileqa", "admin"]):
+        approved = [re.fullmatch(r"\./(programmer|mobileqa|appointments|admin)\.js(?:\?v=[a-z0-9-]{1,80})?", src) for src in admin_scripts]
+        if not all(approved) or [match.group(1) for match in approved] not in (["admin"], ["programmer", "admin"], ["programmer", "mobileqa", "admin"], ["programmer", "mobileqa", "appointments", "admin"]):
             raise RuntimeError("Unexpected admin script path")
         for match in approved:
             asset = admin / (match.group(1) + ".js")
