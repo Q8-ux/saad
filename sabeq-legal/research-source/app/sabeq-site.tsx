@@ -115,7 +115,7 @@ async function memoFetch(path: string, token: string, init: RequestInit = {}) {
       }
       return response;
     } catch (error) {
-      if (init.signal?.aborted || ["/api/legal/memo", "/api/legal/assistant", "/api/legal/transcribe", "/api/legal/speech", "/api/legal/voice-turn", "/api/legal/memo-dictation", "/api/legal/tools"].includes(path)) throw error;
+      if (init.signal?.aborted || ["/api/legal/memo", "/api/legal/assistant", "/api/legal/transcribe", "/api/legal/speech", "/api/legal/voice-turn", "/api/legal/memo-dictation", "/api/legal/tools", "/api/consultations"].includes(path)) throw error;
       lastError = error;
       if (attempt < 2) await new Promise((resolve) => window.setTimeout(resolve, 550 * (attempt + 1)));
     }
@@ -728,6 +728,7 @@ function AuthGate({ language, service, onAuthenticated }: { language: Language; 
 
 function Booking({ t, language, status, submit }: { t: SiteCopy; language: Language; status: string; submit: (event: FormEvent<HTMLFormElement>, endpoint: string) => Promise<void> }) {
   const [slots,setSlots]=useState<Array<{date:string;time:string;remaining:number}>>([]);
+  const idempotencyKey=useRef(crypto.randomUUID());
   const [ready,setReady]=useState(false);
   const [availabilityError,setAvailabilityError]=useState("");
   const [slotDate,setSlotDate]=useState("");
@@ -747,7 +748,7 @@ function Booking({ t, language, status, submit }: { t: SiteCopy; language: Langu
   const dates=Array.from(new Set(slots.map(s=>s.date)));
   const filtered=slots.filter(s=>s.date===slotDate);
   const selectedTime=filtered.some(s=>s.time===slotTime)?slotTime:"";
-  const bookingDisabled=status==="loading"||!slotDate||!selectedTime||!slots.some(s=>s.date===slotDate&&s.time===selectedTime);
+  const bookingDisabled=status==="loading"||status==="success"||!slotDate||!selectedTime||!slots.some(s=>s.date===slotDate&&s.time===selectedTime);
   return <div className="modal-content"><div className="modal-icon"><CalendarDays /></div><h2>{t.bookingTitle}</h2><p>{t.bookingText}</p>
     <form onSubmit={(event)=>submit(event,"/api/consultations")}>
       <div className="form-grid">
@@ -773,6 +774,7 @@ function Booking({ t, language, status, submit }: { t: SiteCopy; language: Langu
       <p role="status" aria-live="polite">{!ready?(language==="ar"?"جارٍ تحميل الأيام المتاحة…":"Loading availability…"):availabilityError||(!slots.length?(language==="ar"?"لا توجد مواعيد متاحة حالياً. يحدد المكتب الأيام والفترات من لوحة الإدارة.":"No appointments are currently available."):(language==="ar"?"يُرسل طلب الحجز إلى المكتب لتأكيده، ولا يُعد موعداً مؤكداً بعد.":"The office must confirm your requested slot."))}</p>
       <label className="honeypot" aria-hidden="true">Website<input name="website" tabIndex={-1} autoComplete="off"/></label>
       <input type="hidden" name="language" value={language}/>
+      <input type="hidden" name="idempotencyKey" value={idempotencyKey.current}/>
       <button className="button button-primary button-block" disabled={bookingDisabled}>{status==="loading"?t.loading:t.submitBooking}</button>
       <FormNotice status={status} t={t}/>
     </form>
