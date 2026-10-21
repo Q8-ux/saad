@@ -172,6 +172,7 @@ export async function createMemoPayment(data: Record<string, unknown>) {
   }
 }
 export async function memoPaymentStatus(id: unknown, token: unknown) { return publicPayment(await refreshPayment(await ownedPayment(id, token))); }
+export async function memoPaymentHasInvoice(id: unknown, token: unknown) { return !!(await ownedPayment(id, token)).invoice_id; }
 export async function receiveSadadWebhook(data: Record<string, unknown>) {
   const id = invoiceId(data.InvoiceId);
   const config = await configuration();
