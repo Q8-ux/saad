@@ -3,3 +3,8 @@
 @font-face{font-family:Cairo;src:url('assets/cairo-extrabold.woff') format('woff');font-weight:900;font-style:normal;font-display:swap}
 html body,html body *{font-family:Cairo,sans-serif!important}
 html body .clinic-strip-arrow{font-family:Cairo,sans-serif!important}
+body{background-color:#f8fbfc!important;background-image:url('assets/animated-mesh.svg')!important;background-position:center top!important;background-size:100vw auto!important;background-attachment:fixed!important}
+.hero-copy{min-width:0}
+.hero-copy h1{font-size:clamp(64px,6.5vw,92px);line-height:1.14;max-width:100%;overflow-wrap:normal;text-wrap:balance}
+@media(max-width:760px){.hero-copy h1{font-size:clamp(48px,14vw,68px);white-space:normal}.hero-copy h1>span{white-space:normal}}
+@media(max-width:360px){.hero-copy h1{font-size:clamp(44px,15vw,56px)}}
