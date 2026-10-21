@@ -102,6 +102,8 @@ export async function reserveConsultation(raw:BookingPayload) {
      AND (SELECT COUNT(*) FROM consultation_bookings WHERE slot_date=? AND status != 'cancelled') < ?`)
     .bind(id,date,time,name,phone,email,caseType,preferredContact,message,language,date,time,day.capacity,date,day.dailyLimit).run();
   if(!write.meta.changes)throw new RequestError("اكتمل عدد حجوزات هذا الموعد. اختر فترة أخرى.",409);
+  // Never expose the visitor name, case description or phone number in the notification stream.
+  try { await getD1().prepare("INSERT INTO management_events(id,source,kind,title,severity) VALUES (?,?,?,?,?)").bind(crypto.randomUUID(),"consultation","booking-request","طلب حجز استشارة جديد يحتاج تأكيداً","info").run(); } catch { /* the booking is already committed; event delivery is best-effort */ }
   return {ok:true,bookingId:id,date,time,timezone:"Asia/Kuwait",status:"pending",message:"تم استلام طلب الحجز، وسيؤكد المكتب الموعد بعد المراجعة."};
 }
 export async function officeAppointments() {
