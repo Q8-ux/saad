@@ -105,7 +105,7 @@ def overlay(destination,base_run):
         word=picture.get('id','')
         if word not in word_ids or picture.get('file')!=word+'-v1.webp':
             raise RuntimeError('Invalid word-picture mapping')
-    for name in ['index.html','style.css','core.js','app.js','arabic-guides.js','avatar-v1.png','pictures/manifest.json']+[f'audio/{word}.mp3' for word in word_ids]+['pictures/'+p['file'] for p in pictures]:
+    for name in ['index.html','style.css','core.js','app.js','motion.js','arabic-guides.js','avatar-v1.png','pictures/manifest.json']+[f'audio/{word}.mp3' for word in word_ids]+['pictures/'+p['file'] for p in pictures]:
         if not (target/name).is_file():
             raise RuntimeError('Spelling workbook package incomplete')
     (target/'deployment.json').write_text(json.dumps({

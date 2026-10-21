@@ -1,8 +1,62 @@
 (function(){
   'use strict';
-  const C=window.SpellingCore,$=id=>document.getElementById(id),canvas=$('ink'),ctx=canvas.getContext('2d'),player=$('pronunciation');
+  const C=window.SpellingCore,M=window.SpellingMotion,$=id=>document.getElementById(id),canvas=$('ink'),ctx=canvas.getContext('2d'),player=$('pronunciation');
   const digits=n=>String(n).replace(/\d/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]);
   let state=C.emptyState(),tool='pen',active=null,lastClear=null,toastTimer,storageFailed=false,playAttempt=0,audioTimer,printAttempt=0;
+  const demo=$('motionCanvas'),demoContext=demo.getContext('2d');
+  let motionPlan=null,motionPosition=0,motionSlow=false,motionPlaying=false,motionFrame=0,motionVersion=0,motionAttempt=0,motionExport=null,motionPicture=null;
+  const canRecord=Boolean(M.recordingFormat()&&demo.captureStream&&(window.AudioContext||window.webkitAudioContext));
+  function motionDuration(){return motionPlan.duration*(motionSlow?1.6:1);}
+  function motionBusy(busy){
+    for(const id of ['motionWatch','motionSeek','motionRestart','motionSlow'])$(id).disabled=busy;
+    $('motionVideo').disabled=busy||!canRecord;$('motionProgress').hidden=!busy;
+    $('motionVideo').textContent=canRecord?'تنزيل فيديو الكلمة':'تصدير الفيديو غير مدعوم';
+  }
+  function pauseMotion(){
+    motionAttempt++;motionPlaying=false;cancelAnimationFrame(motionFrame);motionFrame=0;
+    $('motionWatch').textContent=motionPosition>0&&motionPlan&&motionPosition<motionDuration()?'متابعة الكتابة':'شاهد الكتابة';
+  }
+  function stopMotion(){
+    motionVersion++;pauseMotion();motionExport?.abort();motionExport=null;motionBusy(false);
+    motionPosition=0;motionPicture=null;$('motionSeek').value=0;$('motionPanel').hidden=true;
+    $('motionWatch').setAttribute('aria-expanded','false');$('motionWatch').textContent='شاهد الكتابة';
+    $('motionStatus').textContent='';demoContext.clearRect(0,0,M.WIDTH,M.HEIGHT);
+  }
+  function prepareMotion(word,recall){
+    stopMotion();const enabled=!recall&&word.lang!=='ar';$('wordMotion').hidden=!enabled;
+    motionPlan=enabled?M.buildPlan(word):null;
+    demo.setAttribute('aria-label',enabled?'مثال كتابة '+(word.trace||word.word):'نموذج كتابة الكلمة');
+  }
+  function paintMotion(){
+    if(!motionPlan)return;M.drawFrame(demoContext,motionPlan,M.progressAt(motionPosition,motionDuration()),{picture:motionPicture});
+    $('motionSeek').value=Math.round(motionPosition/motionDuration()*1000);
+  }
+  async function readyMotionPicture(version){
+    if(!motionPlan.picture){motionPicture=null;return true;}
+    const image=$('wordImage');
+    if(!image.complete||!image.naturalWidth){
+      if(typeof image.decode==='function')await image.decode();
+      else await new Promise((resolve,reject)=>{image.addEventListener('load',resolve,{once:true});image.addEventListener('error',reject,{once:true});});
+    }
+    if(version!==motionVersion)return false;motionPicture=image;return true;
+  }
+  async function playMotion(){
+    if(!motionPlan||motionExport)return;if(motionPlaying){pauseMotion();return;}
+    const version=motionVersion,attempt=++motionAttempt;
+    $('motionPanel').hidden=false;$('motionWatch').setAttribute('aria-expanded','true');$('motionStatus').textContent='';
+    try{
+      if(!await readyMotionPicture(version)||version!==motionVersion||attempt!==motionAttempt)return;
+      if(motionPosition>=motionDuration())motionPosition=0;
+      const start=performance.now()-motionPosition*1000;motionPlaying=true;$('motionWatch').textContent='إيقاف مؤقت';
+      const tick=now=>{
+        if(version!==motionVersion||attempt!==motionAttempt)return;
+        motionPosition=Math.min(motionDuration(),(now-start)/1000);paintMotion();
+        if(motionPosition>=motionDuration()){pauseMotion();$('motionStatus').textContent='الآن دورك. جرّب الكتابة على النقاط.';}
+        else motionFrame=requestAnimationFrame(tick);
+      };
+      paintMotion();motionFrame=requestAnimationFrame(tick);
+    }catch{if(version===motionVersion)$('motionStatus').textContent='تعذر تحميل رسمة الكلمة. أعد المحاولة.';}
+  }
   try{state=C.normalizeState(JSON.parse(localStorage.getItem(C.STORAGE_KEY)));}catch{storageFailed=true;}
   let requested='';try{requested=decodeURIComponent(location.hash.slice(1));}catch{/* Ignore malformed link fragments. */}
   const requestedIndex=C.WORDS.findIndex(w=>w.id===requested);if(requestedIndex>=0){state.index=requestedIndex;state.subject=C.subjectForWord(requested,state.subject);}
@@ -30,6 +84,7 @@
   }
   function render(){
     const w=C.WORDS[state.index],recall=state.mode==='recall';
+    prepareMotion(w,recall);
     prepareAudio();
     const arabic=w.lang==='ar';
     $('wordTitle').textContent=recall?'أكتب من الذاكرة':(w.trace||w.word);$('wordTitle').classList.toggle('recall-title',recall);$('wordTitle').lang=recall||arabic?'ar':'en';$('wordTitle').dir=recall||arabic?'rtl':'ltr';
@@ -96,6 +151,39 @@
   });
   canvas.addEventListener('pointercancel',finish);canvas.addEventListener('lostpointercapture',finish);canvas.addEventListener('contextmenu',e=>e.preventDefault());
   $('previous').addEventListener('click',()=>stepWord(-1));$('next').addEventListener('click',()=>stepWord(1));
+  $('motionWatch').addEventListener('click',playMotion);
+  $('motionRestart').addEventListener('click',()=>{pauseMotion();motionPosition=0;playMotion();});
+  $('motionSlow').addEventListener('click',()=>{
+    const fraction=motionPosition/motionDuration();pauseMotion();motionSlow=!motionSlow;
+    $('motionSlow').setAttribute('aria-pressed',String(motionSlow));motionPosition=fraction*motionDuration();paintMotion();
+  });
+  $('motionSeek').addEventListener('input',()=>{pauseMotion();motionPosition=Number($('motionSeek').value)/1000*motionDuration();paintMotion();});
+  $('motionClose').addEventListener('click',()=>{stopMotion();$('motionWatch').focus();});
+  $('motionVideo').addEventListener('click',async()=>{
+    if(!motionPlan||!canRecord||motionExport)return;
+    const version=motionVersion;pauseMotion();stopAudio();motionBusy(true);
+    const controller=new AbortController();motionExport=controller;
+    let audioContext;
+    const abortAudio=()=>{if(audioContext&&audioContext.state!=='closed')audioContext.close().catch(()=>{});};
+    controller.signal.addEventListener('abort',abortAudio,{once:true});
+    $('motionStatus').textContent='جارٍ تجهيز المقطع مع نطق الكلمة. أبقِ الصفحة ظاهرة حتى يكتمل.';
+    try{
+      // Unlock audio synchronously in the tap before image decoding yields.
+      audioContext=new (window.AudioContext||window.webkitAudioContext)();
+      const [pictureReady]=await Promise.all([readyMotionPicture(version),audioContext.resume()]);
+      if(!pictureReady||version!==motionVersion)return;
+      const result=await M.recordLesson(demo,{...motionPlan,duration:motionDuration()},{audioUrl:'audio/'+motionPlan.id+'.mp3?v=2',picture:motionPicture,audioContext,signal:controller.signal,onProgress:value=>{$('motionProgress').value=value;}});
+      if(version!==motionVersion)return;
+      const url=URL.createObjectURL(result.blob),link=document.createElement('a');link.href=url;link.download=motionPlan.id+'-writing.'+result.extension;link.click();setTimeout(()=>URL.revokeObjectURL(url),60000);
+      $('motionStatus').textContent='جهز فيديو الكلمة مع صوتها للتنزيل.';
+    }catch(error){
+      if(version===motionVersion)$('motionStatus').textContent=error.name==='AbortError'?'ألغي التصدير.':error.message==='hidden'?'توقف التصدير لأن الصفحة أصبحت مخفية. أعد المحاولة مع إبقائها ظاهرة.':'تعذر تجهيز الفيديو بالصوت. يمكنك متابعة العرض والتدريب أو المحاولة بمتصفح أحدث.';
+    }finally{
+      controller.signal.removeEventListener('abort',abortAudio);
+      if(audioContext&&audioContext.state!=='closed')await audioContext.close();
+      if(version===motionVersion){motionExport=null;motionBusy(false);paintMotion();}
+    }
+  });
   $('openPictures').addEventListener('click',()=>{setSubject('english');navigate(C.WORDS.findIndex(w=>w.id===C.PICTURE_IDS[0]));$('wordPage').scrollIntoView({block:'start'});});
   $('pen').addEventListener('click',()=>{finish();tool='pen';updateTools();});$('eraser').addEventListener('click',()=>{finish();tool='eraser';updateTools();});
   document.querySelectorAll('[data-color]').forEach(b=>b.addEventListener('click',()=>{finish();state.color=b.dataset.color;tool='pen';save();updateTools();}));
@@ -133,7 +221,7 @@
   $('printPictures').addEventListener('click',()=>print(C.pictureWords()));
   window.addEventListener('beforeprint',()=>{if(!$('printArea').innerHTML)$('printArea').innerHTML=C.printMarkup([C.WORDS[state.index]]);});
   window.addEventListener('afterprint',()=>{printAttempt++;$('printArea').innerHTML='';});
-  document.addEventListener('visibilitychange',()=>{if(document.hidden){finish();save();stopAudio();}});window.addEventListener('pagehide',()=>{finish();save();stopAudio();});
+  document.addEventListener('visibilitychange',()=>{if(document.hidden){finish();save();stopAudio();stopMotion();}});window.addEventListener('pagehide',()=>{finish();save();stopAudio();stopMotion();});
   window.addEventListener('hashchange',()=>{const id=location.hash.slice(1),i=C.WORDS.findIndex(w=>w.id===id);if(i>=0&&i!==state.index)navigate(i);});
   window.addEventListener('resize',resize);if('ResizeObserver'in window)new ResizeObserver(resize).observe($('paper'));
   render();

@@ -20,6 +20,14 @@ Each word has its own page, with two original center-line dotted tracing rows an
 
 Each word has a bundled MP3 in its language, played directly on the student's tap with native HTML audio. Playback does not require browser speech synthesis or an installed text-to-speech voice. The native audio controls appear as a fallback if scripted playback is blocked. Print one word, the selected subject, or all 59 pages on A4 (one practice per sheet); the print view contains clean worksheets, not the student's ink. Drawings belong to the current browser and can be removed by clearing its local data.
 
+## Animated writing lessons
+
+The «شاهد الكتابة» button opens a separate model canvas for all 51 English and number pages. It follows the existing glyph paths in `core.js`, includes a moving pen tip, pause/resume, replay, a slow option and a scrubber. Nothing plays automatically. Arabic keeps its original joined, fully marked guides; generated Arabic centerlines are not treated as a verified handwriting stroke order. Recall mode hides and clears the model. Changing words, subjects or modes, and hiding the page, cancels animation and any recording without touching saved ink or completion flags.
+
+The 14 supplied drawings are reused in their matching lessons. `garden` has an original code-drawn garden illustration. One downloaded clip teaches only the current word. A capable browser can record its animation with the existing local MP3 pronounced at the beginning and again near the end, using MP4 or WebM with the correct extension. This captures the bundled audio only, never a microphone. The browser must support Canvas capture, MediaRecorder and Web Audio; decoding or capture failures are reported rather than producing a silently incomplete lesson. Keep the page visible while recording.
+
+Creative reference requested by the user: https://github.com/yihui-dev/awesome-opus5-5-videos . This is an original native Canvas integration, with no creator videos, AI model calls, additional runtime dependencies or external rendering service. Playback and export do not alter the student's worksheet.
+
 ## Publication
 
 GitHub Pages: https://q8-ux.github.io/saad/spelling-practice/
@@ -31,10 +39,11 @@ GitHub Pages: https://q8-ux.github.io/saad/spelling-practice/
 ```sh
 node --check spelling-practice/core.js
 node --check spelling-practice/app.js
+node --check spelling-practice/motion.js
 node --check spelling-practice/arabic-guides.js
 node --test spelling-practice/tests/*.test.cjs
 mkdir -p spelling-practice/dist
-cp spelling-practice/index.html spelling-practice/style.css spelling-practice/core.js spelling-practice/app.js spelling-practice/arabic-guides.js spelling-practice/avatar-v1.png spelling-practice/dist/
+cp spelling-practice/index.html spelling-practice/style.css spelling-practice/core.js spelling-practice/app.js spelling-practice/motion.js spelling-practice/arabic-guides.js spelling-practice/avatar-v1.png spelling-practice/dist/
 cp -R spelling-practice/audio spelling-practice/pictures spelling-practice/dist/
 python spelling-practice/tests/test_publication.py
 ```

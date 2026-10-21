@@ -8,10 +8,11 @@
   <title>دفتر الإملاء · أتتبّع وأكتب</title>
   <link rel="icon" type="image/png" sizes="256x256" href="avatar-v1.png">
   <link rel="apple-touch-icon" href="avatar-v1.png">
-  <link rel="stylesheet" href="style.css?v=8">
+  <link rel="stylesheet" href="style.css?v=9">
   <script src="arabic-guides.js?v=8" defer></script>
   <script src="core.js?v=8" defer></script>
-  <script src="app.js?v=8" defer></script>
+  <script src="motion.js?v=1" defer></script>
+  <script src="app.js?v=9" defer></script>
 </head>
 <body>
   <a href="#workbook" class="skip-link">الانتقال إلى التمرين</a>
@@ -32,6 +33,17 @@
         <figure class="word-picture" id="wordPicture" hidden><img id="wordImage" width="320" height="200" decoding="async" alt=""></figure>
         <div class="word-heading"><div><p class="word-caption" id="wordCaption">أقرأ الكلمة</p><h3 id="wordTitle" dir="ltr" lang="en"></h3><p id="meaning" class="meaning"></p></div><button class="listen-button" id="listen" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m11 4-5 4H2v8h4l5 4V4Zm5 4a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/></svg><span id="listenLabel">اسمع الكلمة</span></button></div>
         <audio id="pronunciation" class="fallback-player" preload="auto" controls playsinline hidden aria-label="نطق كلمة التدريب"></audio>
+        <div class="word-motion" id="wordMotion">
+          <button type="button" id="motionWatch" class="motion-watch" aria-controls="motionPanel" aria-expanded="false">شاهد الكتابة</button>
+          <section class="motion-panel" id="motionPanel" aria-label="مثال متحرك لكتابة الكلمة" hidden>
+            <p class="motion-instruction">اتبع حركة النقطة، ثم اكتب بيدك.</p>
+            <canvas id="motionCanvas" width="1000" height="760" role="img" aria-label="نموذج كتابة الكلمة"></canvas>
+            <label class="motion-position">موضع العرض<input type="range" id="motionSeek" min="0" max="1000" step="1" value="0"></label>
+            <div class="motion-actions"><button type="button" id="motionRestart">من البداية</button><button type="button" id="motionSlow" aria-pressed="false">عرض بطيء</button><button type="button" id="motionVideo">تنزيل فيديو الكلمة</button><button type="button" id="motionClose">أعود للتدريب</button></div>
+            <progress id="motionProgress" max="1" value="0" aria-label="تقدم تجهيز فيديو الكلمة" hidden></progress>
+            <p class="motion-status" id="motionStatus" role="status" aria-live="polite"></p>
+          </section>
+        </div>
         <div class="mode-switch" role="group" aria-label="طريقة التدريب"><button type="button" id="traceMode" aria-pressed="true">أتتبّع النقاط</button><button type="button" id="recallMode" aria-pressed="false">أكتب من الذاكرة</button></div>
         <p class="writing-hint" id="writingHint">اكتب فوق النقاط بإصبعك أو بقلم الشاشة، من اليسار إلى اليمين.</p>
         <p class="subject-note" id="subjectNote" hidden>هذه الكلمات من أمثلة الإعلان، بفتحة على كل حرف كما في الصورة.</p>

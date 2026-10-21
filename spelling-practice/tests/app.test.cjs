@@ -4,15 +4,16 @@ const vm=require('node:vm');
 const fs=require('node:fs');
 const path=require('node:path');
 const C=require('../core.js');
+const M=require('../motion.js');
 const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
 const code=fs.readFileSync(path.join(__dirname,'../app.js'),'utf8');
 
-function setup(saved=null,failStorage=false,hash=''){
+function setup(saved=null,failStorage=false,hash='',recordMock=null){
   class Element{
     constructor(id){this.id=id;this.events={};this.attributes={};this.dataset={};this.children=[];this.checked=false;this.hidden=false;this._html='';const classes=new Set();this.classList={add:v=>classes.add(v),remove:v=>classes.delete(v),toggle:(v,on)=>on?classes.add(v):classes.delete(v),contains:v=>classes.has(v)};}
     addEventListener(t,cb){(this.events[t]??=[]).push(cb)}
     fire(type,props={}){const e={type,button:0,pointerId:1,pointerType:'touch',clientX:50,clientY:100,pressure:.5,preventDefault(){},...props};for(const cb of this.events[type]??[])cb(e)}
-    scrollIntoView(){this.scrolled=true}removeAttribute(k){delete this.attributes[k]}querySelectorAll(){return []}setAttribute(k,v){this.attributes[k]=v}getAttribute(k){return this.attributes[k]??null}appendChild(c){this.children.push(c)}
+    scrollIntoView(){this.scrolled=true}focus(){this.focused=true}removeAttribute(k){delete this.attributes[k]}querySelectorAll(){return []}setAttribute(k,v){this.attributes[k]=v}getAttribute(k){return this.attributes[k]??null}appendChild(c){this.children.push(c)}
     set innerHTML(v){this._html=v;this.children=[]}get innerHTML(){return this._html}
     getBoundingClientRect(){return this.rect??{left:10,top:20,width:340,height:397.8}}
     setPointerCapture(id){this.capture=id}hasPointerCapture(id){return this.capture===id}releasePointerCapture(){this.capture=null}
@@ -21,14 +22,21 @@ function setup(saved=null,failStorage=false,hash=''){
   const colors=C.COLORS.map(color=>{const e=new Element();e.dataset.color=color;return e});
   const drawOps=[];let operation='source-over';const ctx={save(){},restore(){},setTransform(){},clearRect(){},beginPath(){},arc(){},moveTo(){},lineTo(){},fill(){drawOps.push(operation)},stroke(){drawOps.push(operation)},set globalCompositeOperation(v){operation=v}};
   nodes.ink.getContext=()=>ctx;
+  const motionOps=[];const motionContext={save(){},restore(){},setTransform(){},clearRect(){},fillRect(){},fillText(){},translate(){},setLineDash(){},beginPath(){},arc(){},moveTo(){},lineTo(){},stroke(){motionOps.push('stroke')},fill(){motionOps.push('fill')},drawImage(){motionOps.push('picture')}};
+  nodes.motionCanvas.getContext=()=>motionContext;
+  nodes.wordImage.complete=true;nodes.wordImage.naturalWidth=320;nodes.wordImage.naturalHeight=200;nodes.wordImage.decode=()=>Promise.resolve();
   const player=nodes.pronunciation;player.currentTime=0;player.paused=true;player.plays=0;player.loads=0;player.pause=()=>{player.paused=true;player.fire('pause')};player.load=()=>{player.loads++};player.play=()=>{player.plays++;player.paused=false;player.fire('playing');return Promise.resolve()};
   const store=new Map(saved?[[C.STORAGE_KEY,saved]]:[]);
-  const document={hidden:false,getElementById(id){assert.ok(nodes[id],`HTML node missing: ${id}`);return nodes[id]},querySelectorAll:()=>colors,createElement:()=>new Element(),addEventListener(){}};
-  const location={hash};const events={};const window={SpellingCore:C,devicePixelRatio:2,addEventListener(t,f){events[t]=f},print(){window.printed=true}};
+  const documentEvents={};
+  const document={hidden:false,getElementById(id){assert.ok(nodes[id],`HTML node missing: ${id}`);return nodes[id]},querySelectorAll:()=>colors,createElement:()=>new Element(),addEventListener(t,f){documentEvents[t]=f}};
+  const frames=new Map();let frameId=0,now=0;
+  const location={hash};const events={};const window={SpellingCore:C,SpellingMotion:M,devicePixelRatio:2,addEventListener(t,f){events[t]=f},print(){window.printed=true}};
+  const audioContexts=[];
+  if(recordMock){nodes.motionCanvas.captureStream=()=>{};window.AudioContext=class{constructor(){this.state='running';audioContexts.push(this)}resume(){return Promise.resolve()}close(){this.state='closed';return Promise.resolve()}};window.SpellingMotion={...M,recordingFormat:()=>({mimeType:'video/webm',extension:'webm'}),recordLesson:recordMock};}
   const localStorage={getItem:key=>{if(failStorage)throw Error('blocked');return store.get(key)??null},setItem:(key,value)=>{if(failStorage)throw Error('quota');store.set(key,value)}};
-  const context={window,document,location,history:{replaceState(a,b,h){location.hash=h}},localStorage,setTimeout:()=>1,clearTimeout(){},console};
+  const context={window,document,location,history:{replaceState(a,b,h){location.hash=h}},localStorage,setTimeout:()=>1,clearTimeout(){},console,AbortController,URL,performance:{now:()=>now},requestAnimationFrame:f=>{frames.set(++frameId,f);return frameId},cancelAnimationFrame:id=>frames.delete(id)};
   vm.runInNewContext(code,context,{filename:'app.js'});
-  return {nodes,window,location,events,colors,drawOps,state:()=>JSON.parse(store.get(C.STORAGE_KEY)||'null'),saved:()=>store.get(C.STORAGE_KEY),store};
+  return {nodes,window,location,events,document,documentEvents,colors,drawOps,motionOps,frames,audioContexts,advance(ms){now+=ms;const pending=[...frames.values()];frames.clear();pending.forEach(f=>f(now));},state:()=>JSON.parse(store.get(C.STORAGE_KEY)||'null'),saved:()=>store.get(C.STORAGE_KEY),store};
 }
 function draw(app,props={}){app.nodes.ink.fire('pointerdown',props);app.nodes.ink.fire('pointermove',{clientX:100,clientY:160,...props});app.nodes.ink.fire('pointerup',{clientX:110,clientY:170,...props});}
 
@@ -121,4 +129,45 @@ test('first picture print waits for all image decodes and reports a missing imag
   const a=setup();let finish;a.nodes.printArea.querySelectorAll=()=>[{decode:()=>new Promise(resolve=>{finish=resolve})}];
   a.nodes.printPictures.fire('click');assert.equal(a.window.printed,undefined);finish();await new Promise(resolve=>setImmediate(resolve));assert.equal(a.window.printed,true);
   const b=setup();b.nodes.printArea.querySelectorAll=()=>[{decode:()=>Promise.reject(Error('missing'))}];b.nodes.printPictures.fire('click');await new Promise(resolve=>setImmediate(resolve));assert.equal(b.window.printed,undefined);assert.ok(b.nodes.toast.textContent.includes('تعذّر تحميل إحدى الرسومات'));
+});
+
+test('writing animation starts only on request and never writes to saved ink or completion',async()=>{
+  const a=setup(null,false,'#garden');draw(a);const saved=a.saved();
+  assert.equal(a.frames.size,0);assert.equal(a.nodes.motionPanel.hidden,true);
+  a.nodes.motionWatch.fire('click');await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(a.nodes.motionPanel.hidden,false);assert.equal(a.frames.size,1);a.advance(3000);
+  assert.ok(a.motionOps.length);assert.ok(a.nodes.motionSeek.value>0);assert.equal(a.saved(),saved);
+  a.nodes.motionWatch.fire('click');assert.equal(a.frames.size,0);
+  a.nodes.motionSlow.fire('click');assert.equal(a.nodes.motionSlow.attributes['aria-pressed'],'true');
+  a.nodes.motionClose.fire('click');assert.equal(a.nodes.motionPanel.hidden,true);assert.equal(a.nodes.motionWatch.focused,true);assert.equal(a.saved(),saved);
+});
+
+test('recall, word changes, Arabic and page hiding stop the model and do not reveal the answer',async()=>{
+  const a=setup();a.nodes.motionWatch.fire('click');await new Promise(resolve=>setImmediate(resolve));a.advance(1000);
+  a.nodes.recallMode.fire('click');assert.equal(a.frames.size,0);assert.equal(a.nodes.wordMotion.hidden,true);assert.equal(a.nodes.motionPanel.hidden,true);assert.equal(a.nodes.motionCanvas.attributes['aria-label'],'نموذج كتابة الكلمة');
+  a.nodes.traceMode.fire('click');a.nodes.motionWatch.fire('click');await new Promise(resolve=>setImmediate(resolve));a.nodes.next.fire('click');assert.equal(a.frames.size,0);assert.equal(a.nodes.motionPanel.hidden,true);assert.equal(a.nodes.wordTitle.textContent,'sit');
+  a.nodes.motionWatch.fire('click');await new Promise(resolve=>setImmediate(resolve));a.document.hidden=true;a.documentEvents.visibilitychange();assert.equal(a.frames.size,0);assert.equal(a.nodes.motionPanel.hidden,true);
+  const b=setup(null,false,'#ardaras');assert.equal(b.nodes.wordMotion.hidden,true);assert.equal(b.nodes.wordTitle.textContent,'دَرَسَ');
+});
+
+test('a picture decoding failure from an old word cannot reopen or update another page',async()=>{
+  const a=setup(null,false,'#air');let reject;a.nodes.wordImage.complete=false;a.nodes.wordImage.decode=()=>new Promise((resolve,r)=>{reject=r});
+  a.nodes.motionWatch.fire('click');a.nodes.next.fire('click');reject(Error('old image'));await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(a.nodes.wordTitle.textContent,'leaf');assert.equal(a.nodes.motionPanel.hidden,true);assert.equal(a.nodes.motionStatus.textContent,'');assert.equal(a.frames.size,0);
+});
+
+test('navigating during export aborts the old recording and releases its audio context',async()=>{
+  let options;
+  const a=setup(null,false,'#garden',(canvas,plan,settings)=>{options=settings;return new Promise((resolve,reject)=>settings.signal.addEventListener('abort',()=>reject(new DOMException('Cancelled','AbortError'))));});
+  a.nodes.motionWatch.fire('click');await new Promise(resolve=>setImmediate(resolve));a.nodes.motionVideo.fire('click');await new Promise(resolve=>setImmediate(resolve));
+  assert.ok(options);assert.equal(options.audioUrl,'audio/garden.mp3?v=2');assert.equal(a.nodes.motionWatch.disabled,true);
+  a.nodes.next.fire('click');await new Promise(resolve=>setImmediate(resolve));assert.equal(options.signal.aborted,true);assert.equal(options.audioContext.state,'closed');assert.equal(a.nodes.motionStatus.textContent,'');assert.equal(a.nodes.motionPanel.hidden,true);assert.equal(a.nodes.motionWatch.disabled,false);
+});
+
+test('closing while a picture decode stalls releases audio before recording starts',async()=>{
+  const a=setup(null,false,'#air',()=>{throw Error('Recording must not start before image decode')});
+  a.nodes.wordImage.complete=false;a.nodes.wordImage.decode=()=>new Promise(()=>{});
+  a.nodes.motionWatch.fire('click');a.nodes.motionVideo.fire('click');
+  assert.equal(a.audioContexts.length,1);assert.equal(a.audioContexts[0].state,'running');
+  a.nodes.motionClose.fire('click');assert.equal(a.audioContexts[0].state,'closed');assert.equal(a.nodes.motionPanel.hidden,true);assert.equal(a.nodes.motionWatch.disabled,false);
 });
