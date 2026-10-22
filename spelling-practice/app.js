@@ -1,7 +1,9 @@
 (function(){
   'use strict';
-  const C=window.SpellingCore,M=window.SpellingMotion,$=id=>document.getElementById(id),canvas=$('ink'),ctx=canvas.getContext('2d'),player=$('pronunciation');
-  const digits=n=>String(n).replace(/\d/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]);
+  const C=window.SpellingCore,M=window.SpellingMotion,I=window.SpellingI18n,$=id=>document.getElementById(id),canvas=$('ink'),ctx=canvas.getContext('2d'),player=$('pronunciation');
+  let locale='ar';
+  try{locale=I.resolveLocale(location.search,localStorage.getItem(I.LANGUAGE_KEY));}catch{locale=I.resolveLocale(location.search,null);}
+  const T=(key,values)=>I.t(key,locale,values),digits=n=>I.digits(n,locale);
   let state=C.emptyState(),tool='pen',active=null,lastClear=null,toastTimer,storageFailed=false,playAttempt=0,audioTimer,printAttempt=0;
   const demo=$('motionCanvas'),demoContext=demo.getContext('2d');
   let motionPlan=null,motionPosition=0,motionSlow=false,motionPlaying=false,motionFrame=0,motionVersion=0,motionAttempt=0,motionExport=null,motionPicture=null;
@@ -10,25 +12,25 @@
   function motionBusy(busy){
     for(const id of ['motionWatch','motionSeek','motionRestart','motionSlow'])$(id).disabled=busy;
     $('motionVideo').disabled=busy||!canRecord;$('motionProgress').hidden=!busy;
-    $('motionVideo').textContent=canRecord?'تنزيل فيديو الكلمة':'تصدير الفيديو غير مدعوم';
+    $('motionVideo').textContent=T(canRecord?'video':'unsupportedVideo');
   }
   function pauseMotion(){
     motionAttempt++;motionPlaying=false;cancelAnimationFrame(motionFrame);motionFrame=0;
-    $('motionWatch').textContent=motionPosition>0&&motionPlan&&motionPosition<motionDuration()?'متابعة الكتابة':'شاهد الكتابة';
+    $('motionWatch').textContent=T(motionPosition>0&&motionPlan&&motionPosition<motionDuration()?'resume':'watch');
   }
   function stopMotion(){
     motionVersion++;pauseMotion();motionExport?.abort();motionExport=null;motionBusy(false);
     motionPosition=0;motionPicture=null;$('motionSeek').value=0;$('motionPanel').hidden=true;
-    $('motionWatch').setAttribute('aria-expanded','false');$('motionWatch').textContent='شاهد الكتابة';
+    $('motionWatch').setAttribute('aria-expanded','false');$('motionWatch').textContent=T('watch');
     $('motionStatus').textContent='';demoContext.clearRect(0,0,M.WIDTH,M.HEIGHT);
   }
   function prepareMotion(word,recall){
     stopMotion();const enabled=!recall&&word.lang!=='ar';$('wordMotion').hidden=!enabled;
     motionPlan=enabled?M.buildPlan(word):null;
-    demo.setAttribute('aria-label',enabled?'مثال كتابة '+(word.trace||word.word):'نموذج كتابة الكلمة');
+    demo.setAttribute('aria-label',enabled?T('modelWord',{word:word.trace||word.word}):T('modelCanvas'));
   }
   function paintMotion(){
-    if(!motionPlan)return;M.drawFrame(demoContext,motionPlan,M.progressAt(motionPosition,motionDuration()),{picture:motionPicture});
+    if(!motionPlan)return;M.drawFrame(demoContext,motionPlan,M.progressAt(motionPosition,motionDuration()),{picture:motionPicture,locale});
     $('motionSeek').value=Math.round(motionPosition/motionDuration()*1000);
   }
   async function readyMotionPicture(version){
@@ -47,15 +49,15 @@
     try{
       if(!await readyMotionPicture(version)||version!==motionVersion||attempt!==motionAttempt)return;
       if(motionPosition>=motionDuration())motionPosition=0;
-      const start=performance.now()-motionPosition*1000;motionPlaying=true;$('motionWatch').textContent='إيقاف مؤقت';
+      const start=performance.now()-motionPosition*1000;motionPlaying=true;$('motionWatch').textContent=T('pause');
       const tick=now=>{
         if(version!==motionVersion||attempt!==motionAttempt)return;
         motionPosition=Math.min(motionDuration(),(now-start)/1000);paintMotion();
-        if(motionPosition>=motionDuration()){pauseMotion();$('motionStatus').textContent='الآن دورك. جرّب الكتابة على النقاط.';}
+        if(motionPosition>=motionDuration()){pauseMotion();$('motionStatus').textContent=T('modelDone');}
         else motionFrame=requestAnimationFrame(tick);
       };
       paintMotion();motionFrame=requestAnimationFrame(tick);
-    }catch{if(version===motionVersion)$('motionStatus').textContent='تعذر تحميل رسمة الكلمة. أعد المحاولة.';}
+    }catch{if(version===motionVersion)$('motionStatus').textContent=T('pictureError');}
   }
   try{state=C.normalizeState(JSON.parse(localStorage.getItem(C.STORAGE_KEY)));}catch{storageFailed=true;}
   let requested='';try{requested=decodeURIComponent(location.hash.slice(1));}catch{/* Ignore malformed link fragments. */}
@@ -64,13 +66,27 @@
   function visiblePosition(){return visibleWords().findIndex(w=>w.id===C.WORDS[state.index].id);}
   function strokes(){const key=C.pageKey(state);return state.pages[key]||(state.pages[key]=[]);}
   function message(text){$('toast').textContent=text;$('toast').hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').hidden=true,4500);}
-  function listening(on){$('listen').classList.toggle('playing',on);$('listenLabel').textContent=on?'أسمع وأتعلّم':'اسمع الكلمة';$('listen').setAttribute('aria-pressed',String(on));}
+  function listening(on){$('listen').classList.toggle('playing',on);$('listenLabel').textContent=T(on?'listening':'listen');$('listen').setAttribute('aria-pressed',String(on));}
   function stopAudio(){playAttempt++;clearTimeout(audioTimer);player.pause();try{player.currentTime=0;}catch{}listening(false);}
   function prepareAudio(){const src='audio/'+C.WORDS[state.index].id+'.mp3?v=2';if(player.getAttribute('src')!==src){stopAudio();player.setAttribute('src',src);player.load();}}
-  function audioFallback(attempt){if(attempt!==playAttempt)return;clearTimeout(audioTimer);listening(false);player.hidden=false;message('اضغط زر التشغيل في مشغّل الصوت أسفل الكلمة.');}
+  function audioFallback(attempt){if(attempt!==playAttempt)return;clearTimeout(audioTimer);listening(false);player.hidden=false;message(T('audioFallback'));}
   function save(){
-    try{localStorage.setItem(C.STORAGE_KEY,JSON.stringify(state));storageFailed=false;$('saveState').textContent='حُفظ التدريب على هذا الجهاز';$('saveState').classList.remove('error');}
-    catch{storageFailed=true;$('saveState').textContent='تعذّر الحفظ؛ أبقِ الصفحة مفتوحة';$('saveState').classList.add('error');}
+    try{localStorage.setItem(C.STORAGE_KEY,JSON.stringify(state));storageFailed=false;$('saveState').textContent=T('saved');$('saveState').classList.remove('error');}
+    catch{storageFailed=true;$('saveState').textContent=T('saveError');$('saveState').classList.add('error');}
+  }
+  function applyLanguage(){
+    document.documentElement.lang=locale;document.documentElement.dir=locale==='ar'?'rtl':'ltr';document.title=T('docTitle');
+    document.querySelectorAll('[data-i18n]').forEach(node=>{node.textContent=T(node.getAttribute('data-i18n'));});
+    for(const attribute of ['aria-label','alt','content'])document.querySelectorAll('[data-i18n-'+attribute+']').forEach(node=>node.setAttribute(attribute,T(node.getAttribute('data-i18n-'+attribute))));
+    $('languageArabic').setAttribute('aria-pressed',String(locale==='ar'));$('languageEnglish').setAttribute('aria-pressed',String(locale==='en'));
+    $('printArea').innerHTML='';printAttempt++;listening(false);
+  }
+  function setLanguage(next){
+    if(!I.isLocale(next)||next===locale)return;
+    finish();stopAudio();stopMotion();locale=next;
+    try{localStorage.setItem(I.LANGUAGE_KEY,locale);}catch{/* Language switching also works without storage. */}
+    try{const url=new URL(location.href);url.searchParams.set('lang',locale);history.replaceState(null,'',url.pathname+url.search+url.hash);}catch{}
+    clearTimeout(toastTimer);$('toast').hidden=true;applyLanguage();render();
   }
   function updateTools(){
     $('pen').classList.toggle('active',tool==='pen');$('eraser').classList.toggle('active',tool==='eraser');$('pen').setAttribute('aria-pressed',String(tool==='pen'));$('eraser').setAttribute('aria-pressed',String(tool==='eraser'));canvas.classList.toggle('eraser',tool==='eraser');
@@ -87,37 +103,37 @@
     prepareMotion(w,recall);
     prepareAudio();
     const arabic=w.lang==='ar';
-    $('wordTitle').textContent=recall?'أكتب من الذاكرة':(w.trace||w.word);$('wordTitle').classList.toggle('recall-title',recall);$('wordTitle').lang=recall||arabic?'ar':'en';$('wordTitle').dir=recall||arabic?'rtl':'ltr';
+    $('wordTitle').textContent=recall?T('recallTitle'):(w.trace||w.word);$('wordTitle').classList.toggle('recall-title',recall);$('wordTitle').lang=recall?locale:arabic?'ar':'en';$('wordTitle').dir=recall?(locale==='ar'?'rtl':'ltr'):arabic?'rtl':'ltr';
     $('wordTitle').classList.toggle('arabic-word',!recall&&arabic);
     $('wordTitle').classList.toggle('long-word',!recall&&!arabic&&(w.word.length>=5||Boolean(w.number)));
-    $('meaning').textContent=recall?'أتذكّر الحروف وأكتبها وحدي.':w.meaning;$('wordCaption').textContent=recall?'أجرّب بنفسي':'أقرأ الكلمة';
-    if(!recall&&w.number)$('wordCaption').textContent='أقرأ العدد وأكتب اسمه';
+    $('meaning').textContent=recall?T('recallMeaning'):I.meaning(w,locale);$('meaning').lang=!recall&&arabic?'ar':locale;$('meaning').dir=!recall&&arabic?'rtl':locale==='ar'?'rtl':'ltr';$('wordCaption').textContent=T(recall?'tryOnOwn':'readWord');
+    if(!recall&&w.number)$('wordCaption').textContent=T('readNumber');
     const pictured=!recall&&Boolean(w.picture);
     $('wordPicture').hidden=!pictured;
-    if(pictured){$('wordImage').setAttribute('src',w.picture);$('wordImage').alt='Illustration of '+w.word;$('wordCaption').textContent='أنظر إلى الصورة وأقرأ الكلمة';}
+    if(pictured){$('wordImage').setAttribute('src',w.picture);$('wordImage').alt=T('pictureAlt',{word:w.word});$('wordCaption').textContent=T('readPicture');}
     else{$('wordImage').removeAttribute('src');$('wordImage').alt='';}
     $('pictureEntry').hidden=state.subject!=='english';
     $('printPictures').hidden=!['english','science'].includes(state.subject);
     const items=visibleWords(),position=visiblePosition();
-    $('pageCount').textContent='صفحة '+digits(position+1)+' من '+digits(items.length);$('navCount').textContent=digits(position+1)+' / '+digits(items.length);
-    $('subjectLabel').textContent=C.SUBJECTS.find(s=>s.id===state.subject).label+' · تدريب الإملاء';
+    $('pageCount').textContent=T('pageCount',{page:digits(position+1),total:digits(items.length)});$('navCount').textContent=digits(position+1)+' / '+digits(items.length);
+    $('subjectLabel').textContent=T(state.subject)+' · '+T('spellingTraining');
     $('subjectTabs').innerHTML='';
-    for(const subject of C.SUBJECTS){const b=document.createElement('button');b.type='button';b.textContent=subject.label+' '+digits(subject.ids.length);b.setAttribute('aria-pressed',String(state.subject===subject.id));b.addEventListener('click',()=>setSubject(subject.id));$('subjectTabs').appendChild(b);}
+    for(const subject of C.SUBJECTS){const b=document.createElement('button');b.type='button';b.textContent=T(subject.id)+' '+digits(subject.ids.length);b.setAttribute('aria-pressed',String(state.subject===subject.id));b.addEventListener('click',()=>setSubject(subject.id));$('subjectTabs').appendChild(b);}
     $('traceMode').setAttribute('aria-pressed',String(!recall));$('recallMode').setAttribute('aria-pressed',String(recall));
-    $('writingHint').textContent=recall?'اكتب الكلمة من الذاكرة. يمكنك سماعها بالضغط على «اسمع الكلمة».':(arabic?'اكتب فوق النقاط بإصبعك أو بقلم الشاشة، من اليمين إلى اليسار.':'اكتب فوق النقاط بإصبعك أو بقلم الشاشة، من اليسار إلى اليمين.');
+    $('writingHint').textContent=T(recall?'recallHint':arabic?'traceRTL':'traceLTR');
     $('subjectNote').hidden=!arabic;
-    $('guide').innerHTML=C.sheetSvg(w.trace||w.word,state.mode);
+    $('guide').innerHTML=C.sheetSvg(w.trace||w.word,state.mode,false,locale);
     $('wordTabs').innerHTML='';
     for(const [i,item] of items.entries()){
-      const b=document.createElement('button');b.type='button';b.className='word-tab'+(state.completed[item.id]?' completed':'');b.textContent=recall?'كلمة '+digits(i+1):item.word;b.lang=recall||item.lang==='ar'?'ar':'en';b.dir=recall||item.lang==='ar'?'rtl':'ltr';
-      b.setAttribute('aria-label',recall?'الكلمة '+digits(i+1):item.word);if(item.id===w.id)b.setAttribute('aria-current','page');
+      const b=document.createElement('button');b.type='button';b.className='word-tab'+(state.completed[item.id]?' completed':'');b.textContent=recall?T('wordNumber',{number:digits(i+1)}):item.word;b.lang=recall?locale:item.lang==='ar'?'ar':'en';b.dir=recall?(locale==='ar'?'rtl':'ltr'):item.lang==='ar'?'rtl':'ltr';
+      b.setAttribute('aria-label',recall?T('wordAriaNumber',{number:digits(i+1)}):item.word);if(item.id===w.id)b.setAttribute('aria-current','page');
       b.addEventListener('click',()=>{navigate(C.WORDS.findIndex(w=>w.id===item.id));if(item.picture)$('wordPage').scrollIntoView({block:'start'});});$('wordTabs').appendChild(b);
     }
     $('previous').disabled=position===0;$('next').disabled=position===items.length-1;
-    const done=Boolean(state.completed[w.id]);$('complete').setAttribute('aria-pressed',String(done));$('completeLabel').textContent=done?'أكملت هذه الكلمة':'أنهيت التدريب';
-    $('progressCount').textContent=digits(Object.values(state.completed).filter(Boolean).length)+' / '+digits(C.WORDS.length)+' مكتملة';
+    const done=Boolean(state.completed[w.id]);$('complete').setAttribute('aria-pressed',String(done));$('completeLabel').textContent=T(done?'completed':'complete');
+    $('progressCount').textContent=T('progress',{done:digits(Object.values(state.completed).filter(Boolean).length),total:digits(C.WORDS.length)});
     try{history.replaceState(null,'','#'+w.id);}catch{/* Embedded/file contexts may disallow history changes. */}
-    if(storageFailed){$('saveState').textContent='الحفظ غير متاح في هذا المتصفح';$('saveState').classList.add('error');}
+    if(storageFailed){$('saveState').textContent=T('saveUnavailable');$('saveState').classList.add('error');}
     updateTools();resize();
   }
   function finish(event){
@@ -134,7 +150,7 @@
   canvas.addEventListener('pointerdown',event=>{
     if(active||event.button>0||($('penOnly').checked&&event.pointerType!=='pen'))return;
     event.preventDefault();
-    if(strokes().reduce((n,s)=>n+s.points.length,0)>=30000){message('الصفحة ممتلئة. يمكنك مسحها لبدء محاولة جديدة.');return;}
+    if(strokes().reduce((n,s)=>n+s.points.length,0)>=30000){message(T('pageFull'));return;}
     const s={tool,color:state.color,width:tool==='eraser'?34:9,points:[C.pointerPoint(event,canvas.getBoundingClientRect())]};
     strokes().push(s);active={id:event.pointerId,stroke:s};lastClear=null;
     try{canvas.setPointerCapture(event.pointerId);}catch{}C.drawStroke(ctx,s);updateTools();
@@ -151,6 +167,7 @@
   });
   canvas.addEventListener('pointercancel',finish);canvas.addEventListener('lostpointercapture',finish);canvas.addEventListener('contextmenu',e=>e.preventDefault());
   $('previous').addEventListener('click',()=>stepWord(-1));$('next').addEventListener('click',()=>stepWord(1));
+  $('languageArabic').addEventListener('click',()=>setLanguage('ar'));$('languageEnglish').addEventListener('click',()=>setLanguage('en'));
   $('motionWatch').addEventListener('click',playMotion);
   $('motionRestart').addEventListener('click',()=>{pauseMotion();motionPosition=0;playMotion();});
   $('motionSlow').addEventListener('click',()=>{
@@ -166,18 +183,18 @@
     let audioContext;
     const abortAudio=()=>{if(audioContext&&audioContext.state!=='closed')audioContext.close().catch(()=>{});};
     controller.signal.addEventListener('abort',abortAudio,{once:true});
-    $('motionStatus').textContent='جارٍ تجهيز المقطع مع نطق الكلمة. أبقِ الصفحة ظاهرة حتى يكتمل.';
+    $('motionStatus').textContent=T('videoWorking');
     try{
       // Unlock audio synchronously in the tap before image decoding yields.
       audioContext=new (window.AudioContext||window.webkitAudioContext)();
       const [pictureReady]=await Promise.all([readyMotionPicture(version),audioContext.resume()]);
       if(!pictureReady||version!==motionVersion)return;
-      const result=await M.recordLesson(demo,{...motionPlan,duration:motionDuration()},{audioUrl:'audio/'+motionPlan.id+'.mp3?v=2',picture:motionPicture,audioContext,signal:controller.signal,onProgress:value=>{$('motionProgress').value=value;}});
+      const result=await M.recordLesson(demo,{...motionPlan,duration:motionDuration()},{audioUrl:'audio/'+motionPlan.id+'.mp3?v=2',picture:motionPicture,locale,audioContext,signal:controller.signal,onProgress:value=>{$('motionProgress').value=value;}});
       if(version!==motionVersion)return;
       const url=URL.createObjectURL(result.blob),link=document.createElement('a');link.href=url;link.download=motionPlan.id+'-writing.'+result.extension;link.click();setTimeout(()=>URL.revokeObjectURL(url),60000);
-      $('motionStatus').textContent='جهز فيديو الكلمة مع صوتها للتنزيل.';
+      $('motionStatus').textContent=T('videoReady');
     }catch(error){
-      if(version===motionVersion)$('motionStatus').textContent=error.name==='AbortError'?'ألغي التصدير.':error.message==='hidden'?'توقف التصدير لأن الصفحة أصبحت مخفية. أعد المحاولة مع إبقائها ظاهرة.':'تعذر تجهيز الفيديو بالصوت. يمكنك متابعة العرض والتدريب أو المحاولة بمتصفح أحدث.';
+      if(version===motionVersion)$('motionStatus').textContent=T(error.name==='AbortError'?'cancelled':error.message==='hidden'?'videoHidden':'videoError');
     }finally{
       controller.signal.removeEventListener('abort',abortAudio);
       if(audioContext&&audioContext.state!=='closed')await audioContext.close();
@@ -188,11 +205,11 @@
   $('pen').addEventListener('click',()=>{finish();tool='pen';updateTools();});$('eraser').addEventListener('click',()=>{finish();tool='eraser';updateTools();});
   document.querySelectorAll('[data-color]').forEach(b=>b.addEventListener('click',()=>{finish();state.color=b.dataset.color;tool='pen';save();updateTools();}));
   $('undo').addEventListener('click',()=>{finish();if(lastClear?.key===C.pageKey(state)){state.pages[C.pageKey(state)]=lastClear.strokes;lastClear=null;}else strokes().pop();redraw();save();updateTools();});
-  $('clear').addEventListener('click',()=>{finish();if(!strokes().length)return;lastClear={key:C.pageKey(state),strokes:strokes()};state.pages[C.pageKey(state)]=[];redraw();save();updateTools();message('مُسحت الصفحة. اضغط «تراجع» لاستعادتها.');});
+  $('clear').addEventListener('click',()=>{finish();if(!strokes().length)return;lastClear={key:C.pageKey(state),strokes:strokes()};state.pages[C.pageKey(state)]=[];redraw();save();updateTools();message(T('cleared'));});
   function setMode(mode){finish();state.mode=mode;lastClear=null;save();render();}
   $('traceMode').addEventListener('click',()=>setMode('trace'));$('recallMode').addEventListener('click',()=>setMode('recall'));
-  $('penOnly').addEventListener('change',()=>{finish();if($('penOnly').checked)message('الكتابة بقلم الشاشة فقط. أزل العلامة للكتابة بالإصبع.');});
-  $('complete').addEventListener('click',()=>{finish();const id=C.WORDS[state.index].id;state.completed[id]=!state.completed[id];save();render();if(state.completed[id])message(Object.values(state.completed).filter(Boolean).length===C.WORDS.length?'أحسنت! أكملت تدريب جميع الكلمات.':'أحسنت! يمكنك الانتقال إلى الكلمة التالية.');});
+  $('penOnly').addEventListener('change',()=>{finish();if($('penOnly').checked)message(T('penOnlyHint'));});
+  $('complete').addEventListener('click',()=>{finish();const id=C.WORDS[state.index].id;state.completed[id]=!state.completed[id];save();render();if(state.completed[id])message(T(Object.values(state.completed).filter(Boolean).length===C.WORDS.length?'allDone':'nextDone'));});
   $('listen').addEventListener('click',()=>{
     stopAudio();prepareAudio();const attempt=++playAttempt;
     try{
@@ -204,9 +221,9 @@
   player.addEventListener('playing',()=>{clearTimeout(audioTimer);listening(true);});
   player.addEventListener('ended',()=>{clearTimeout(audioTimer);listening(false);});
   player.addEventListener('pause',()=>listening(false));
-  player.addEventListener('error',()=>{clearTimeout(audioTimer);listening(false);player.hidden=false;message('تعذّر تحميل صوت الكلمة. أعد المحاولة بعد اتصال الإنترنت.');});
+  player.addEventListener('error',()=>{clearTimeout(audioTimer);listening(false);player.hidden=false;message(T('audioError'));});
   function print(words){
-    finish();$('printArea').innerHTML=C.printMarkup(words);
+    finish();$('printArea').innerHTML=C.printMarkup(words,locale);
     // A first-time print must wait for all the separate image files to be ready.
     const attempt=++printAttempt,pictures=[...$('printArea').querySelectorAll('img')];
     if(!pictures.length){window.print();return;}
@@ -214,16 +231,16 @@
       if(typeof img.decode==='function')return img.decode();
       if(img.complete&&img.naturalWidth>0)return Promise.resolve();
       return new Promise((resolve,reject)=>{img.addEventListener('load',resolve,{once:true});img.addEventListener('error',reject,{once:true});});
-    })).then(()=>{if(attempt===printAttempt)window.print();},()=>{if(attempt===printAttempt)message('تعذّر تحميل إحدى الرسومات. أعد المحاولة قبل الطباعة.');});
+    })).then(()=>{if(attempt===printAttempt)window.print();},()=>{if(attempt===printAttempt)message(T('printPictureError'));});
   }
   $('printOne').addEventListener('click',()=>print([C.WORDS[state.index]]));$('printAll').addEventListener('click',()=>print(C.WORDS));
   $('printSubject').addEventListener('click',()=>print(visibleWords()));
   $('printPictures').addEventListener('click',()=>print(C.pictureWords()));
-  window.addEventListener('beforeprint',()=>{if(!$('printArea').innerHTML)$('printArea').innerHTML=C.printMarkup([C.WORDS[state.index]]);});
+  window.addEventListener('beforeprint',()=>{if(!$('printArea').innerHTML)$('printArea').innerHTML=C.printMarkup([C.WORDS[state.index]],locale);});
   window.addEventListener('afterprint',()=>{printAttempt++;$('printArea').innerHTML='';});
   document.addEventListener('visibilitychange',()=>{if(document.hidden){finish();save();stopAudio();stopMotion();}});window.addEventListener('pagehide',()=>{finish();save();stopAudio();stopMotion();});
   window.addEventListener('hashchange',()=>{const id=location.hash.slice(1),i=C.WORDS.findIndex(w=>w.id===id);if(i>=0&&i!==state.index)navigate(i);});
   window.addEventListener('resize',resize);if('ResizeObserver'in window)new ResizeObserver(resize).observe($('paper'));
-  render();
+  applyLanguage();render();
   if(requestedIndex>=0&&C.WORDS[state.index].picture)$('wordPage').scrollIntoView({block:'start'});
 })();

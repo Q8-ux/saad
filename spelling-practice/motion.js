@@ -1,5 +1,5 @@
 /* Code-drawn lessons using the workbook's existing center-line letter models. */
-(function(root,factory){const core=typeof module==='object'&&module.exports?require('./core.js'):root.SpellingCore;const api=factory(core);if(typeof module==='object'&&module.exports)module.exports=api;else root.SpellingMotion=api;})(typeof globalThis!=='undefined'?globalThis:this,function(C){
+(function(root,factory){const common=typeof module==='object'&&module.exports,core=common?require('./core.js'):root.SpellingCore,i18n=common?require('./i18n.js'):root.SpellingI18n;const api=factory(core,i18n);if(common)module.exports=api;else root.SpellingMotion=api;})(typeof globalThis!=='undefined'?globalThis:this,function(C,I){
   'use strict';
   const WIDTH=1000,HEIGHT=760;
   const clamp=(value,min,max)=>Math.min(max,Math.max(min,value));
@@ -73,11 +73,11 @@
     ctx.stroke();return tip;
   }
 
-  function drawFrame(ctx,plan,progress,{picture}={}){
+  function drawFrame(ctx,plan,progress,{picture,locale='ar'}={}){
     ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,WIDTH,HEIGHT);
     ctx.fillStyle='#fbfdf9';ctx.fillRect(0,0,WIDTH,HEIGHT);
-    ctx.textAlign='center';ctx.textBaseline='middle';ctx.direction='rtl';
-    ctx.font='32px Tahoma, Arial, sans-serif';ctx.fillStyle='#234d48';ctx.fillText('أشاهد… ثم أكتب بنفسي',WIDTH/2,35);
+    ctx.textAlign='center';ctx.textBaseline='middle';ctx.direction=locale==='en'?'ltr':'rtl';
+    ctx.font='32px Tahoma, Arial, sans-serif';ctx.fillStyle='#234d48';ctx.fillText(I.t('videoTitle',locale),WIDTH/2,35);
     if(plan.id==='garden')drawGarden(ctx);
     else if(picture){
       const w=picture.naturalWidth||picture.width,h=picture.naturalHeight||picture.height,scale=Math.min(340/w,180/h);
@@ -96,7 +96,8 @@
       budget-=stroke.length;
     }
     if(tip&&progress<1){ctx.fillStyle='#b35136';ctx.beginPath();ctx.arc(tip.x,tip.y,9,0,Math.PI*2);ctx.fill();}
-    ctx.font='34px Tahoma, Arial, sans-serif';ctx.fillStyle='#234d48';ctx.fillText(plan.meaning,WIDTH/2,710);
+    const word=C.WORDS.find(w=>w.id===plan.id);
+    ctx.font=(locale==='en'?'27':'34')+'px Tahoma, Arial, sans-serif';ctx.fillStyle='#234d48';ctx.fillText(word?I.meaning(word,locale):plan.meaning,WIDTH/2,710,900);
     ctx.fillStyle='#176d69';ctx.fillRect(50,742,900*clamp(progress,0,1),5);ctx.restore();
   }
 
@@ -106,7 +107,7 @@
     return null;
   }
 
-  async function recordLesson(canvas,plan,{audioUrl,picture,signal,audioContext,onProgress=()=>{}}={}){
+  async function recordLesson(canvas,plan,{audioUrl,picture,locale='ar',signal,audioContext,onProgress=()=>{}}={}){
     const format=recordingFormat(),Audio=globalThis.AudioContext||globalThis.webkitAudioContext;
     if(!format||!Audio||!canvas.captureStream)throw new Error('unsupported');
     if(!/^audio\/[a-z]+\.mp3(?:\?v=\d+)?$/.test(audioUrl||''))throw new Error('audio');
@@ -136,10 +137,10 @@
           recorder.onerror=()=>stop(new Error('recording'));
           recorder.onstop=()=>{cleanup();const blob=new Blob(chunks,{type:recorder.mimeType});if(failure||!blob.size)reject(failure||new Error('empty'));else resolve({blob,extension:recorder.mimeType.includes('mp4')?'mp4':'webm',duration});};
           signal?.addEventListener('abort',abort,{once:true});document.addEventListener('visibilitychange',visibility);
-          drawFrame(canvas.getContext('2d'),plan,0,{picture});recorder.start(250);
+          drawFrame(canvas.getContext('2d'),plan,0,{picture,locale});recorder.start(250);
           const start=performance.now(),audioStart=audio.currentTime+.12;
           for(const delay of [0,Math.max(0,duration-buffer.duration-.25)]){const source=audio.createBufferSource();source.buffer=buffer;source.connect(destination);sources.push(source);source.start(audioStart+delay);}
-          const tick=now=>{const elapsed=(now-start)/1000;drawFrame(canvas.getContext('2d'),plan,progressAt(elapsed,duration),{picture});onProgress(Math.min(1,elapsed/duration));if(elapsed>=duration)stop();else frame=requestAnimationFrame(tick);};
+          const tick=now=>{const elapsed=(now-start)/1000;drawFrame(canvas.getContext('2d'),plan,progressAt(elapsed,duration),{picture,locale});onProgress(Math.min(1,elapsed/duration));if(elapsed>=duration)stop();else frame=requestAnimationFrame(tick);};
           frame=requestAnimationFrame(tick);timer=setTimeout(()=>stop(new Error('timeout')),(duration+8)*1000);
         }catch(error){cleanup();reject(error);}
       });

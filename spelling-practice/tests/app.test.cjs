@@ -5,10 +5,11 @@ const fs=require('node:fs');
 const path=require('node:path');
 const C=require('../core.js');
 const M=require('../motion.js');
+const I=require('../i18n.js');
 const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
 const code=fs.readFileSync(path.join(__dirname,'../app.js'),'utf8');
 
-function setup(saved=null,failStorage=false,hash='',recordMock=null){
+function setup(saved=null,failStorage=false,hash='',recordMock=null,{search='',savedLocale=null}={}){
   class Element{
     constructor(id){this.id=id;this.events={};this.attributes={};this.dataset={};this.children=[];this.checked=false;this.hidden=false;this._html='';const classes=new Set();this.classList={add:v=>classes.add(v),remove:v=>classes.delete(v),toggle:(v,on)=>on?classes.add(v):classes.delete(v),contains:v=>classes.has(v)};}
     addEventListener(t,cb){(this.events[t]??=[]).push(cb)}
@@ -20,6 +21,11 @@ function setup(saved=null,failStorage=false,hash='',recordMock=null){
   }
   const nodes=Object.fromEntries([...html.matchAll(/id="([^"]+)"/g)].map(m=>[m[1],new Element(m[1])]));
   const colors=C.COLORS.map(color=>{const e=new Element();e.dataset.color=color;return e});
+  const elements=[...html.matchAll(/<([a-z][a-z0-9]*)\b([^>]*)>/gi)].map(([,tag,body])=>{
+    const attributes=Object.fromEntries([...body.matchAll(/([\w-]+)="([^"]*)"/g)].map(m=>[m[1],m[2]]));
+    const node=nodes[attributes.id]||colors.find(c=>c.dataset.color===attributes['data-color'])||new Element();
+    node.tagName=tag;Object.entries(attributes).forEach(([key,value])=>node.setAttribute(key,value));return node;
+  });
   const drawOps=[];let operation='source-over';const ctx={save(){},restore(){},setTransform(){},clearRect(){},beginPath(){},arc(){},moveTo(){},lineTo(){},fill(){drawOps.push(operation)},stroke(){drawOps.push(operation)},set globalCompositeOperation(v){operation=v}};
   nodes.ink.getContext=()=>ctx;
   const motionOps=[];const motionContext={save(){},restore(){},setTransform(){},clearRect(){},fillRect(){},fillText(){},translate(){},setLineDash(){},beginPath(){},arc(){},moveTo(){},lineTo(){},stroke(){motionOps.push('stroke')},fill(){motionOps.push('fill')},drawImage(){motionOps.push('picture')}};
@@ -27,14 +33,15 @@ function setup(saved=null,failStorage=false,hash='',recordMock=null){
   nodes.wordImage.complete=true;nodes.wordImage.naturalWidth=320;nodes.wordImage.naturalHeight=200;nodes.wordImage.decode=()=>Promise.resolve();
   const player=nodes.pronunciation;player.currentTime=0;player.paused=true;player.plays=0;player.loads=0;player.pause=()=>{player.paused=true;player.fire('pause')};player.load=()=>{player.loads++};player.play=()=>{player.plays++;player.paused=false;player.fire('playing');return Promise.resolve()};
   const store=new Map(saved?[[C.STORAGE_KEY,saved]]:[]);
+  if(savedLocale!==null)store.set(I.LANGUAGE_KEY,savedLocale);
   const documentEvents={};
-  const document={hidden:false,getElementById(id){assert.ok(nodes[id],`HTML node missing: ${id}`);return nodes[id]},querySelectorAll:()=>colors,createElement:()=>new Element(),addEventListener(t,f){documentEvents[t]=f}};
+  const document={hidden:false,documentElement:elements.find(n=>n.tagName==='html'),getElementById(id){assert.ok(nodes[id],`HTML node missing: ${id}`);return nodes[id]},querySelectorAll:selector=>{const attribute=selector.match(/^\[([^\]]+)\]$/)?.[1];assert.ok(attribute,'Unsupported test selector: '+selector);return elements.filter(node=>node.getAttribute(attribute)!==null)},createElement:()=>new Element(),addEventListener(t,f){documentEvents[t]=f}};
   const frames=new Map();let frameId=0,now=0;
-  const location={hash};const events={};const window={SpellingCore:C,SpellingMotion:M,devicePixelRatio:2,addEventListener(t,f){events[t]=f},print(){window.printed=true}};
+  const location={hash,search,href:'https://q8-ux.github.io/saad/spelling-practice/'+search+hash};const events={};const window={SpellingCore:C,SpellingMotion:M,SpellingI18n:I,devicePixelRatio:2,addEventListener(t,f){events[t]=f},print(){window.printed=true}};
   const audioContexts=[];
   if(recordMock){nodes.motionCanvas.captureStream=()=>{};window.AudioContext=class{constructor(){this.state='running';audioContexts.push(this)}resume(){return Promise.resolve()}close(){this.state='closed';return Promise.resolve()}};window.SpellingMotion={...M,recordingFormat:()=>({mimeType:'video/webm',extension:'webm'}),recordLesson:recordMock};}
   const localStorage={getItem:key=>{if(failStorage)throw Error('blocked');return store.get(key)??null},setItem:(key,value)=>{if(failStorage)throw Error('quota');store.set(key,value)}};
-  const context={window,document,location,history:{replaceState(a,b,h){location.hash=h}},localStorage,setTimeout:()=>1,clearTimeout(){},console,AbortController,URL,performance:{now:()=>now},requestAnimationFrame:f=>{frames.set(++frameId,f);return frameId},cancelAnimationFrame:id=>frames.delete(id)};
+  const context={window,document,location,history:{replaceState(a,b,value){const url=new URL(value,location.href);location.hash=url.hash;location.search=url.search;location.href=url.href}},localStorage,setTimeout:()=>1,clearTimeout(){},console,AbortController,URL,performance:{now:()=>now},requestAnimationFrame:f=>{frames.set(++frameId,f);return frameId},cancelAnimationFrame:id=>frames.delete(id)};
   vm.runInNewContext(code,context,{filename:'app.js'});
   return {nodes,window,location,events,document,documentEvents,colors,drawOps,motionOps,frames,audioContexts,advance(ms){now+=ms;const pending=[...frames.values()];frames.clear();pending.forEach(f=>f(now));},state:()=>JSON.parse(store.get(C.STORAGE_KEY)||'null'),saved:()=>store.get(C.STORAGE_KEY),store};
 }
@@ -170,4 +177,59 @@ test('closing while a picture decode stalls releases audio before recording star
   a.nodes.motionWatch.fire('click');a.nodes.motionVideo.fire('click');
   assert.equal(a.audioContexts.length,1);assert.equal(a.audioContexts[0].state,'running');
   a.nodes.motionClose.fire('click');assert.equal(a.audioContexts[0].state,'closed');assert.equal(a.nodes.motionPanel.hidden,true);assert.equal(a.nodes.motionWatch.disabled,false);
+});
+
+test('interface switching translates controls and accessibility without changing saved practice',()=>{
+  const a=setup(null,false,'#garden');draw(a);a.nodes.complete.fire('click');a.nodes.eraser.fire('click');
+  const saved=a.saved(),audio=a.nodes.pronunciation.getAttribute('src');
+  a.nodes.languageEnglish.fire('click');
+  assert.equal(a.document.documentElement.lang,'en');assert.equal(a.document.documentElement.dir,'ltr');assert.equal(a.document.title,I.t('docTitle','en'));
+  assert.equal(a.nodes.next.textContent,'Next word');assert.equal(a.nodes.subjectTabs.children[0].textContent,'English 28');assert.equal(a.nodes.subjectLabel.textContent,'English · Spelling practice');
+  assert.equal(a.nodes.progressCount.textContent,'1 / 59 complete');assert.equal(a.nodes.completeLabel.textContent,'Word completed');assert.equal(a.nodes.wordTitle.textContent,'garden');assert.equal(a.nodes.wordTitle.dir,'ltr');
+  assert.equal(a.nodes.meaning.textContent,'A place where plants and flowers grow.');assert.equal(a.nodes.ink.attributes['aria-label'],'Finger or stylus writing area');assert.equal(a.colors[0].attributes['aria-label'],'Blue');
+  assert.equal(a.saved(),saved);assert.equal(a.nodes.pronunciation.getAttribute('src'),audio);assert.equal(a.nodes.eraser.attributes['aria-pressed'],'true');assert.equal(a.store.get(I.LANGUAGE_KEY),'en');
+  assert.equal(a.location.hash,'#garden');assert.equal(new URL(a.location.href).searchParams.get('lang'),'en');
+  for(const node of a.document.querySelectorAll('[data-i18n]'))assert.equal(node.textContent,I.t(node.getAttribute('data-i18n'),'en'));
+  for(const attr of ['aria-label','alt','content'])for(const node of a.document.querySelectorAll('[data-i18n-'+attr+']'))assert.equal(node.getAttribute(attr),I.t(node.getAttribute('data-i18n-'+attr),'en'));
+  const reload=setup(saved,false,'',null,{savedLocale:a.store.get(I.LANGUAGE_KEY)});assert.equal(reload.document.documentElement.lang,'en');assert.equal(reload.nodes.wordTitle.textContent,'garden');assert.equal(reload.nodes.clear.disabled,false);
+  a.nodes.languageArabic.fire('click');assert.equal(a.document.documentElement.dir,'rtl');assert.equal(a.nodes.next.textContent,'الكلمة التالية');assert.equal(a.nodes.meaning.textContent,'حديقة');assert.equal(a.saved(),saved);
+});
+
+test('language URLs take precedence and switching still works when storage is unavailable',()=>{
+  const english=setup(null,false,'#garden',null,{search:'?lang=en',savedLocale:'ar'});assert.equal(english.document.documentElement.lang,'en');assert.equal(english.nodes.wordTitle.textContent,'garden');
+  const invalid=setup(null,false,'',null,{search:'?lang=fr',savedLocale:'en'});assert.equal(invalid.document.documentElement.lang,'en');
+  const blocked=setup(null,true,'#garden',null,{search:'?lang=en'});draw(blocked);assert.ok(blocked.nodes.saveState.textContent.includes('Could not save'));
+  blocked.nodes.languageArabic.fire('click');assert.equal(blocked.document.documentElement.lang,'ar');assert.equal(blocked.nodes.wordTitle.textContent,'garden');assert.equal(blocked.nodes.clear.disabled,false);
+});
+
+test('English interface preserves Arabic glyphs, vowel marks, audio and recall privacy',()=>{
+  const a=setup(null,false,'#ardaras',null,{search:'?lang=en'});
+  assert.equal(a.document.documentElement.dir,'ltr');assert.equal(a.nodes.wordTitle.textContent,'دَرَسَ');assert.equal(a.nodes.wordTitle.dir,'rtl');assert.equal(a.nodes.wordTitle.lang,'ar');assert.equal(a.nodes.meaning.textContent,'دَ · رَ · سَ');assert.equal(a.nodes.meaning.dir,'rtl');
+  assert.ok(a.nodes.writingHint.textContent.includes('right to left'));assert.equal((a.nodes.guide.innerHTML.match(/data-diacritic="fatha"/g)||[]).length,6);assert.ok(a.nodes.guide.innerHTML.includes('Trace the dots'));assert.equal(a.nodes.pronunciation.getAttribute('src'),'audio/ardaras.mp3?v=2');
+  draw(a);a.nodes.recallMode.fire('click');assert.equal(a.nodes.wordTitle.textContent,'Write from memory');assert.equal(a.nodes.wordTitle.dir,'ltr');assert.equal(a.nodes.wordTabs.children[0].textContent,'Word 1');assert.ok(!a.nodes.guide.innerHTML.includes('data-guide="arabic"'));assert.equal(a.nodes.wordMotion.hidden,true);
+  a.nodes.languageArabic.fire('click');assert.equal(a.nodes.wordTitle.textContent,'أكتب من الذاكرة');assert.ok(!a.nodes.guide.innerHTML.includes('data-guide="arabic"'));
+  a.nodes.traceMode.fire('click');assert.equal(a.nodes.wordTitle.textContent,'دَرَسَ');assert.equal(a.nodes.clear.disabled,false);
+  a.nodes.subjectTabs.children[4].fire('click');assert.equal(a.nodes.wordTitle.textContent,'1 = One');assert.equal(a.nodes.wordTitle.dir,'ltr');
+});
+
+test('printing and word playback use the chosen interface language',()=>{
+  const a=setup(null,false,'#garden',null,{search:'?lang=en'});a.nodes.printOne.fire('click');
+  assert.ok(a.nodes.printArea.innerHTML.includes('MY SPELLING BOOK · GRADE 1'));assert.ok(a.nodes.printArea.innerHTML.includes('Name:'));assert.ok(a.nodes.printArea.innerHTML.includes('dir="ltr"'));assert.ok(!/[\u0600-\u06ff]/.test(a.nodes.printArea.innerHTML));
+  a.nodes.listen.fire('click');assert.equal(a.nodes.listenLabel.textContent,'Listen and learn');
+  a.nodes.languageArabic.fire('click');assert.equal(a.nodes.pronunciation.paused,true);assert.equal(a.nodes.printArea.innerHTML,'');a.nodes.printOne.fire('click');
+  assert.ok(a.nodes.printArea.innerHTML.includes('دفتر الإملاء · الصف الأول'));assert.ok(a.nodes.printArea.innerHTML.includes('الاسم:'));assert.ok(a.nodes.printArea.innerHTML.includes('dir="rtl"'));assert.ok(a.nodes.printArea.innerHTML.includes('<h1>garden</h1>'));
+});
+
+test('changing language finishes an active stroke and keeps clear undo available',()=>{
+  const a=setup(null,false,'#garden');a.nodes.ink.fire('pointerdown');a.nodes.ink.fire('pointermove',{clientX:100});a.nodes.languageEnglish.fire('click');
+  assert.equal(a.nodes.ink.capture,null);assert.equal(a.state().pages['garden:trace'].length,1);assert.equal(a.nodes.clear.disabled,false);
+  a.nodes.clear.fire('click');a.nodes.languageArabic.fire('click');a.nodes.undo.fire('click');assert.equal(a.state().pages['garden:trace'].length,1);
+});
+
+test('switching language aborts video export, releases audio and prevents stale status text',async()=>{
+  let options;
+  const a=setup(null,false,'#garden',(canvas,plan,settings)=>{options=settings;return new Promise((resolve,reject)=>settings.signal.addEventListener('abort',()=>reject(new DOMException('Cancelled','AbortError'))));},{search:'?lang=en'});
+  a.nodes.motionWatch.fire('click');await new Promise(resolve=>setImmediate(resolve));a.nodes.motionVideo.fire('click');await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(options.locale,'en');assert.ok(a.nodes.motionStatus.textContent.includes('Preparing the video'));a.nodes.languageArabic.fire('click');await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(options.signal.aborted,true);assert.equal(options.audioContext.state,'closed');assert.equal(a.nodes.motionStatus.textContent,'');assert.equal(a.nodes.motionPanel.hidden,true);assert.equal(a.frames.size,0);assert.equal(a.nodes.wordTitle.textContent,'garden');assert.equal(a.nodes.motionWatch.textContent,'شاهد الكتابة');
 });

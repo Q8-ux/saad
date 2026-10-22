@@ -62,4 +62,18 @@ class PublicationTests(unittest.TestCase):
             finally:
                 publisher.SOURCE=previous
 
+    def test_missing_translations_refuses_publication(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            source=Path(tmp)/'source'
+            shutil.copytree(publisher.SOURCE,source)
+            (source/'i18n.js').unlink()
+            previous=publisher.SOURCE
+            try:
+                publisher.SOURCE=source
+                dest=Path(tmp)/'_site'
+                publisher.restore(envelope([('index.html','root')]),dest)
+                with self.assertRaisesRegex(RuntimeError,'package incomplete'):publisher.overlay(dest,123)
+            finally:
+                publisher.SOURCE=previous
+
 if __name__=='__main__':unittest.main()

@@ -2,6 +2,14 @@
 
 Finger and stylus handwriting practice with **59 pages across five subjects**. All 42 entries from the original three-column photograph are retained, covering 41 unique words. Arabic adds eight fully marked dictation examples from the school announcement; Numbers adds the English names for 1–10. The English section also includes the 14 words from the illustrated science sheet, in that sheet's order. Words shared across subjects retain one saved page.
 
+## Arabic and English interface
+
+The header's **العربية / English** buttons translate instructions, controls, subjects, counters, accessible labels, status messages, printed worksheets and animation/video captions. Arabic is the default; `?lang=en` or `?lang=ar` selects a shareable interface language, and a button selection is remembered under the separate `spelling-ui-language-v1` browser key. Language switching works even when storage is blocked. It never resets the existing handwriting or completion state, selected word, subject, mode or pen colour. Switching language cancels a running animation/export and finishes an active pen stroke before redrawing the same saved worksheet.
+
+The interface changes RTL/LTR independently of lesson direction: English words and number names remain LTR, and all eight Arabic examples keep their original RTL joined guides and vowel marks. English interface definitions explain the English words in simple English; Arabic letter breakdowns remain Arabic lesson content. Bundled pronunciation stays in the language of the practice word. The translation module has no network or AI dependency.
+
+English link: https://q8-ux.github.io/saad/spelling-practice/?lang=en
+
 English: hot, sit, ant, garden, go, bag, cry, down, left, play, kind, read, sleep, wash.
 
 English picture words: air, leaf, buds, soil, grow, water, plants, flower, climber, creeper, sunlight, animals, healthy, energy. Each has one separate illustration extracted from the supplied sheet, a large live-text English label, pronunciation and the original three handwriting rows. The same pictures appear when these words are opened from Science or Social. `Start picture words` jumps to the first illustrated word; the dedicated print button makes 14 sheets with exactly one picture and word on each. Recall mode hides the drawing along with the answer.
@@ -38,12 +46,13 @@ GitHub Pages: https://q8-ux.github.io/saad/spelling-practice/
 
 ```sh
 node --check spelling-practice/core.js
+node --check spelling-practice/i18n.js
 node --check spelling-practice/app.js
 node --check spelling-practice/motion.js
 node --check spelling-practice/arabic-guides.js
 node --test spelling-practice/tests/*.test.cjs
 mkdir -p spelling-practice/dist
-cp spelling-practice/index.html spelling-practice/style.css spelling-practice/core.js spelling-practice/app.js spelling-practice/motion.js spelling-practice/arabic-guides.js spelling-practice/avatar-v1.png spelling-practice/dist/
+cp spelling-practice/index.html spelling-practice/style.css spelling-practice/core.js spelling-practice/i18n.js spelling-practice/app.js spelling-practice/motion.js spelling-practice/arabic-guides.js spelling-practice/avatar-v1.png spelling-practice/dist/
 cp -R spelling-practice/audio spelling-practice/pictures spelling-practice/dist/
 python spelling-practice/tests/test_publication.py
 ```

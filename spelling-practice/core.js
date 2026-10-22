@@ -1,5 +1,5 @@
 /* Original center-line handwriting guides: one route of dots, not outlined type. */
-(function(root,factory){const guides=typeof module==='object'&&module.exports?require('./arabic-guides.js'):root.SpellingArabicGuides;const api=factory(guides);if(typeof module==='object'&&module.exports)module.exports=api;else root.SpellingCore=api;})(typeof globalThis!=='undefined'?globalThis:this,function(ARABIC_GUIDES){
+(function(root,factory){const common=typeof module==='object'&&module.exports,guides=common?require('./arabic-guides.js'):root.SpellingArabicGuides,i18n=common?require('./i18n.js'):root.SpellingI18n;const api=factory(guides,i18n);if(common)module.exports=api;else root.SpellingCore=api;})(typeof globalThis!=='undefined'?globalThis:this,function(ARABIC_GUIDES,I){
   'use strict';
   const PICTURE_IDS=Object.freeze(['air','leaf','buds','soil','grow','water','plants','flower','climber','creeper','sunlight','animals','healthy','energy']);
   const WORDS=Object.freeze([
@@ -133,16 +133,16 @@
     const paths=layout.letters.map(g=>{const a=`<g transform="translate(${x} 0)">${g.p.map(d=>`<path d="${d}"/>`).join('')}${g.dot?`<circle cx="${g.dot[0]}" cy="${g.dot[1]}" r="2.1" fill="currentColor" stroke="none"/>`:''}</g>`;x+=g.w+9;return a;}).join('');
     return `<g transform="translate(${layout.x} ${y}) scale(${layout.scale})" fill="none" stroke="currentColor" stroke-width="${dotted?2.3:2.8}" stroke-linecap="round" stroke-linejoin="round"${dotted?' stroke-dasharray="0.01 6.3"':''}>${paths}</g>`;
   }
-  function sheetSvg(word,mode='trace',print=false){
-    const scale=wordLayout(word).scale,arabic=Boolean(ARABIC_GUIDES[word]);let content='';
-    const labels=arabic?(mode==='recall'?['أكتب من الذاكرة','أحاول مرة أخرى','أعيد الكتابة']:['أتتبّع النقاط','أعيد المحاولة','أكتب وحدي']):(mode==='recall'?['Write from memory','Try again','One more time']:['Trace the dots','Trace again','Write on your own']);
+  function sheetSvg(word,mode='trace',print=false,locale){
+    const scale=wordLayout(word).scale,arabic=Boolean(ARABIC_GUIDES[word]),ui=I.normalize(locale||(arabic?'ar':'en')),rtl=ui==='ar';let content='';
+    const labels=(mode==='recall'?['guideMemory','guideRetry','guideRepeat']:['guideTraceFirst','guideTraceAgain','guideOwn']).map(key=>I.t(key,ui));
     for(let i=0;i<3;i++){
       const top=i*390+37;
       content+=`<g fill="none" stroke="#d1ddd8" stroke-width="1.6"><path d="M38 ${top+12*scale}H962"/><path d="M38 ${top+46*scale}H962" stroke-dasharray="8 9"/><path d="M38 ${top+100*scale}H962" stroke="#94b9b3" stroke-width="2.4"/><path d="M38 ${top+136*scale}H962"/></g>`;
-      content+=`<text x="${arabic?960:39}" y="${top-12}"${arabic?' direction="rtl" text-anchor="start"':''} fill="#64857e" font-family="Arial,Tahoma,sans-serif" font-size="21">${i+1} · ${labels[i]}</text>`;
+      content+=`<text x="${rtl?960:39}" y="${top-12}" direction="${rtl?'rtl':'ltr'}" lang="${ui}" text-anchor="start" fill="#64857e" font-family="Arial,Tahoma,sans-serif" font-size="21">${I.digits(i+1,ui)} · ${labels[i]}</text>`;
       if(mode==='trace'&&i<2)content+=`<g color="${print?'#506966':'#8da6a0'}">${wordPaths(word,top)}</g>`;
     }
-    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${WIDTH} ${HEIGHT}" role="img" aria-label="Handwriting practice">${content}</svg>`;
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${WIDTH} ${HEIGHT}" role="img" aria-label="${I.t('guideLabel',ui)}">${content}</svg>`;
   }
   function emptyState(){return {version:1,index:0,subject:'english',color:COLORS[0],mode:'trace',pages:{},completed:{}};}
   function normalizeState(raw){
@@ -172,10 +172,13 @@
     if(s.points.length===1){const p=s.points[0];ctx.beginPath();ctx.arc(p.x,p.y,s.width*(.65+p.p*.7)/2,0,Math.PI*2);ctx.fill();}
     for(let i=Math.max(1,from);i<s.points.length;i++){const a=s.points[i-1],b=s.points[i];ctx.lineWidth=s.width*(.65+(a.p+b.p)*.35);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}ctx.restore();
   }
-  function printMarkup(words){return words.map((w,i)=>{
-    const model=`<h1${w.lang==='ar'?' dir="rtl" lang="ar"':''}>${w.trace||w.word}</h1><p class="print-instruction"${w.lang==='ar'?' dir="rtl"':''}>${w.lang==='ar'?'أقرأ الكلمة، أتتبّع النقاط، ثم أكتب بنفسي.':'Read. Trace the dots. Write on your own.'}</p>`;
-    const illustrated=w.picture?`<div class="print-model"><img src="${w.picture}" alt="Illustration of ${w.word}" width="320" height="200"><div>${model}</div></div>`:model;
-    return `<article class="print-sheet${w.lang==='ar'?' arabic-sheet':''}"${w.picture?' data-illustrated="true"':''}><header class="print-meta"><span>MY SPELLING BOOK · GRADE 1</span><span>${i+1} / ${words.length}</span></header>${illustrated}${sheetSvg(w.trace||w.word,'trace',true)}<footer><span>Name: ___________________</span><span>Date: ______________</span></footer></article>`;
-  }).join('');}
+  function printMarkup(words,locale='en'){
+    const ui=I.normalize(locale),dir=ui==='ar'?'rtl':'ltr';
+    return words.map((w,i)=>{
+      const model=`<h1${w.lang==='ar'?' dir="rtl" lang="ar"':''}>${w.trace||w.word}</h1><p class="print-instruction">${I.t('printInstruction',ui)}</p>`;
+      const illustrated=w.picture?`<div class="print-model"><img src="${w.picture}" alt="${I.t('pictureAlt',ui,{word:w.word})}" width="320" height="200"><div>${model}</div></div>`:model;
+      return `<article class="print-sheet${w.lang==='ar'?' arabic-sheet':''}" lang="${ui}" dir="${dir}"${w.picture?' data-illustrated="true"':''}><header class="print-meta"><span>${I.t('printTitle',ui)}</span><span>${I.digits(i+1,ui)} / ${I.digits(words.length,ui)}</span></header>${illustrated}${sheetSvg(w.trace||w.word,'trace',true,ui)}<footer><span>${I.t('name',ui)}: ___________________</span><span>${I.t('date',ui)}: ______________</span></footer></article>`;
+    }).join('');
+  }
   return {WORDS,SUBJECTS,PICTURE_IDS,pictureWords,subjectWords,subjectForWord,GLYPHS,COLORS,WIDTH,HEIGHT,STORAGE_KEY,wordLayout,wordPaths,sheetSvg,emptyState,normalizeState,pointerPoint,pageKey,drawStroke,printMarkup};
 });

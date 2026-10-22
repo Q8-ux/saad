@@ -4,68 +4,69 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#123f43">
-  <meta name="description" content="دفتر إملاء تفاعلي: ٥٩ تدريبًا للإنجليزي والعلوم والاجتماعيات والعربي والأعداد، بالحروف المنقّطة والنطق، للكتابة بالإصبع أو بقلم الشاشة.">
+  <meta name="description" data-i18n-content="description" content="دفتر إملاء تفاعلي بالعربية والإنجليزية: ٥٩ تدريبًا بالحروف المنقّطة والنطق، للكتابة بالإصبع أو بقلم الشاشة.">
   <title>دفتر الإملاء · أتتبّع وأكتب</title>
   <link rel="icon" type="image/png" sizes="256x256" href="avatar-v1.png">
   <link rel="apple-touch-icon" href="avatar-v1.png">
-  <link rel="stylesheet" href="style.css?v=9">
+  <link rel="stylesheet" href="style.css?v=10">
+  <script src="i18n.js?v=1" defer></script>
   <script src="arabic-guides.js?v=8" defer></script>
-  <script src="core.js?v=8" defer></script>
-  <script src="motion.js?v=1" defer></script>
-  <script src="app.js?v=9" defer></script>
+  <script src="core.js?v=9" defer></script>
+  <script src="motion.js?v=2" defer></script>
+  <script src="app.js?v=10" defer></script>
 </head>
 <body>
-  <a href="#workbook" class="skip-link">الانتقال إلى التمرين</a>
+  <a href="#workbook" class="skip-link" data-i18n="skip">الانتقال إلى التمرين</a>
   <div class="app-shell" id="app">
     <header class="topbar">
-      <div class="brand"><span class="brand-avatar"><img src="avatar-v1.png" width="64" height="64" alt="أفاتار الطالبة داخل دائرة" fetchpriority="high" decoding="async"></span><div><h1>دفتر الإملاء</h1><p>أتتبّع النقاط… وأكتب بنفسي</p></div></div>
-      <span class="grade">الصف الأول <span lang="en" dir="ltr">GRADE 1</span></span>
+      <div class="brand"><span class="brand-avatar"><img src="avatar-v1.png" width="64" height="64" alt="أفاتار الطالبة داخل دائرة" data-i18n-alt="avatar" fetchpriority="high" decoding="async"></span><div><h1 data-i18n="brand">دفتر الإملاء</h1><p data-i18n="tagline">أتتبّع النقاط… وأكتب بنفسي</p></div></div>
+      <div class="topbar-actions"><span class="grade" data-i18n="grade">الصف الأول</span><nav class="language-switch" aria-label="لغة الواجهة" data-i18n-aria-label="language"><button type="button" id="languageArabic" lang="ar" dir="rtl" aria-pressed="true">العربية</button><button type="button" id="languageEnglish" lang="en" dir="ltr" aria-pressed="false">English</button></nav></div>
     </header>
 
     <main id="workbook">
-      <div class="lesson-heading"><div><span class="eyebrow">رحلتي مع الكلمات</span><h2>كلمة واحدة، خطوة بخطوة.</h2></div><span class="progress-pill" id="progressCount">٠ / ٥٩ مكتملة</span></div>
-      <nav class="subject-tabs" id="subjectTabs" aria-label="اختيار المادة"></nav>
-      <div class="picture-entry" id="pictureEntry"><span>١٤ كلمة مع رسوماتها</span><button type="button" id="openPictures">ابدأ كلمات الصورة</button></div>
-      <nav class="word-tabs" id="wordTabs" aria-label="اختيار كلمة التدريب"></nav>
+      <div class="lesson-heading"><div><span class="eyebrow" data-i18n="journey">رحلتي مع الكلمات</span><h2 data-i18n="headline">كلمة واحدة، خطوة بخطوة.</h2></div><span class="progress-pill" id="progressCount">٠ / ٥٩ مكتملة</span></div>
+      <nav class="subject-tabs" id="subjectTabs" aria-label="اختيار المادة" data-i18n-aria-label="subjects"></nav>
+      <div class="picture-entry" id="pictureEntry"><span data-i18n="pictureCount">١٤ كلمة مع رسوماتها</span><button type="button" id="openPictures" data-i18n="openPictures">ابدأ كلمات الصورة</button></div>
+      <nav class="word-tabs" id="wordTabs" aria-label="اختيار كلمة التدريب" data-i18n-aria-label="words"></nav>
 
-      <section class="workbook" id="wordPage" aria-label="صفحة الكلمة">
+      <section class="workbook" id="wordPage" aria-label="صفحة الكلمة" data-i18n-aria-label="wordPage">
         <div class="page-topline"><span class="page-label" id="subjectLabel">تدريب الإملاء</span><span id="pageCount" class="page-count"></span></div>
         <figure class="word-picture" id="wordPicture" hidden><img id="wordImage" width="320" height="200" decoding="async" alt=""></figure>
         <div class="word-heading"><div><p class="word-caption" id="wordCaption">أقرأ الكلمة</p><h3 id="wordTitle" dir="ltr" lang="en"></h3><p id="meaning" class="meaning"></p></div><button class="listen-button" id="listen" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m11 4-5 4H2v8h4l5 4V4Zm5 4a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/></svg><span id="listenLabel">اسمع الكلمة</span></button></div>
-        <audio id="pronunciation" class="fallback-player" preload="auto" controls playsinline hidden aria-label="نطق كلمة التدريب"></audio>
+        <audio id="pronunciation" class="fallback-player" preload="auto" controls playsinline hidden aria-label="نطق كلمة التدريب" data-i18n-aria-label="audioLabel"></audio>
         <div class="word-motion" id="wordMotion">
           <button type="button" id="motionWatch" class="motion-watch" aria-controls="motionPanel" aria-expanded="false">شاهد الكتابة</button>
-          <section class="motion-panel" id="motionPanel" aria-label="مثال متحرك لكتابة الكلمة" hidden>
-            <p class="motion-instruction">اتبع حركة النقطة، ثم اكتب بيدك.</p>
+          <section class="motion-panel" id="motionPanel" aria-label="مثال متحرك لكتابة الكلمة" data-i18n-aria-label="modelLabel" hidden>
+            <p class="motion-instruction" data-i18n="instruction">اتبع حركة النقطة، ثم اكتب بيدك.</p>
             <canvas id="motionCanvas" width="1000" height="760" role="img" aria-label="نموذج كتابة الكلمة"></canvas>
-            <label class="motion-position">موضع العرض<input type="range" id="motionSeek" min="0" max="1000" step="1" value="0"></label>
-            <div class="motion-actions"><button type="button" id="motionRestart">من البداية</button><button type="button" id="motionSlow" aria-pressed="false">عرض بطيء</button><button type="button" id="motionVideo">تنزيل فيديو الكلمة</button><button type="button" id="motionClose">أعود للتدريب</button></div>
-            <progress id="motionProgress" max="1" value="0" aria-label="تقدم تجهيز فيديو الكلمة" hidden></progress>
+            <label class="motion-position"><span data-i18n="position">موضع العرض</span><input type="range" id="motionSeek" min="0" max="1000" step="1" value="0"></label>
+            <div class="motion-actions"><button type="button" id="motionRestart" data-i18n="restart">من البداية</button><button type="button" id="motionSlow" aria-pressed="false" data-i18n="slow">عرض بطيء</button><button type="button" id="motionVideo">تنزيل فيديو الكلمة</button><button type="button" id="motionClose" data-i18n="returnPractice">أعود للتدريب</button></div>
+            <progress id="motionProgress" max="1" value="0" aria-label="تقدم تجهيز فيديو الكلمة" data-i18n-aria-label="videoProgress" hidden></progress>
             <p class="motion-status" id="motionStatus" role="status" aria-live="polite"></p>
           </section>
         </div>
-        <div class="mode-switch" role="group" aria-label="طريقة التدريب"><button type="button" id="traceMode" aria-pressed="true">أتتبّع النقاط</button><button type="button" id="recallMode" aria-pressed="false">أكتب من الذاكرة</button></div>
+        <div class="mode-switch" role="group" aria-label="طريقة التدريب" data-i18n-aria-label="trainingMode"><button type="button" id="traceMode" aria-pressed="true" data-i18n="traceMode">أتتبّع النقاط</button><button type="button" id="recallMode" aria-pressed="false" data-i18n="recallMode">أكتب من الذاكرة</button></div>
         <p class="writing-hint" id="writingHint">اكتب فوق النقاط بإصبعك أو بقلم الشاشة، من اليسار إلى اليمين.</p>
-        <p class="subject-note" id="subjectNote" hidden>هذه الكلمات من أمثلة الإعلان، بفتحة على كل حرف كما في الصورة.</p>
+        <p class="subject-note" id="subjectNote" data-i18n="subjectNote" hidden>هذه الكلمات من أمثلة الإعلان، بفتحة على كل حرف كما في الصورة.</p>
 
-        <div class="toolbar" aria-label="أدوات الكتابة">
-          <div class="tool-group"><button type="button" id="pen" class="tool active" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 20 2-7L16 3l5 5-10 10-7 2Zm10-15 5 5M6 13l5 5"/></svg>قلم</button><button type="button" id="eraser" class="tool" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 14 9-10a2 2 0 0 1 3 0l6 5a2 2 0 0 1 0 3l-7 8H8l-5-4a2 2 0 0 1 0-2Zm3-3 10 9M13 20h9"/></svg>ممحاة</button></div>
-          <div class="colors" role="group" aria-label="لون القلم"><button type="button" class="color-dot active" data-color="#1769aa" style="--ink:#1769aa" aria-label="أزرق" aria-pressed="true"></button><button type="button" class="color-dot" data-color="#17846e" style="--ink:#17846e" aria-label="أخضر" aria-pressed="false"></button><button type="button" class="color-dot" data-color="#aa4b79" style="--ink:#aa4b79" aria-label="بنفسجي" aria-pressed="false"></button></div>
-          <div class="tool-group secondary-tools"><button type="button" id="undo" class="text-tool">تراجع</button><button type="button" id="clear" class="text-tool">مسح الصفحة</button></div>
+        <div class="toolbar" aria-label="أدوات الكتابة" data-i18n-aria-label="tools">
+          <div class="tool-group"><button type="button" id="pen" class="tool active" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 20 2-7L16 3l5 5-10 10-7 2Zm10-15 5 5M6 13l5 5"/></svg><span data-i18n="pen">قلم</span></button><button type="button" id="eraser" class="tool" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 14 9-10a2 2 0 0 1 3 0l6 5a2 2 0 0 1 0 3l-7 8H8l-5-4a2 2 0 0 1 0-2Zm3-3 10 9M13 20h9"/></svg><span data-i18n="eraser">ممحاة</span></button></div>
+          <div class="colors" role="group" aria-label="لون القلم" data-i18n-aria-label="penColor"><button type="button" class="color-dot active" data-color="#1769aa" style="--ink:#1769aa" aria-label="أزرق" data-i18n-aria-label="blue" aria-pressed="true"></button><button type="button" class="color-dot" data-color="#17846e" style="--ink:#17846e" aria-label="أخضر" data-i18n-aria-label="green" aria-pressed="false"></button><button type="button" class="color-dot" data-color="#aa4b79" style="--ink:#aa4b79" aria-label="بنفسجي" data-i18n-aria-label="purple" aria-pressed="false"></button></div>
+          <div class="tool-group secondary-tools"><button type="button" id="undo" class="text-tool" data-i18n="undo">تراجع</button><button type="button" id="clear" class="text-tool" data-i18n="clear">مسح الصفحة</button></div>
         </div>
-        <div class="paper" id="paper"><div class="guide" id="guide" aria-hidden="true"></div><canvas id="ink" aria-label="مساحة الكتابة بالإصبع أو قلم الشاشة" aria-describedby="writingHint"></canvas></div>
-        <div class="page-bottom"><label class="pen-only"><input type="checkbox" id="penOnly"> قلم الشاشة فقط <span>(لتجاهل لمس اليد)</span></label><span class="save-state" id="saveState" role="status">يُحفظ التدريب على هذا الجهاز</span></div>
+        <div class="paper" id="paper"><div class="guide" id="guide" aria-hidden="true"></div><canvas id="ink" aria-label="مساحة الكتابة بالإصبع أو قلم الشاشة" data-i18n-aria-label="inkLabel" aria-describedby="writingHint"></canvas></div>
+        <div class="page-bottom"><label class="pen-only"><input type="checkbox" id="penOnly"><span class="pen-only-label" data-i18n="penOnly">قلم الشاشة فقط</span><span data-i18n="ignoreTouch">(لتجاهل لمس اليد)</span></label><span class="save-state" id="saveState" role="status" data-i18n="saveLocal">يُحفظ التدريب على هذا الجهاز</span></div>
       </section>
 
-      <div class="lesson-footer"><button type="button" id="complete" class="complete-button" aria-pressed="false"><span aria-hidden="true">✓</span><span id="completeLabel">أنهيت التدريب</span></button><p>تتبّع الكلمة، ثم جرّب كتابتها من الذاكرة.</p></div>
-      <div class="print-options"><button type="button" id="printOne">طباعة هذه الكلمة</button><button type="button" id="printPictures">طباعة كلمات الصورة</button><button type="button" id="printSubject">طباعة كلمات المادة</button><button type="button" id="printAll">طباعة كل الكلمات</button></div>
-      <p class="parent-note">اضغط «اسمع الكلمة» لسماع نطقها. إتمام التدريب يُحدَّد يدويًا.</p>
-      <p class="storage-note">الكتابة محفوظة في هذا المتصفح فقط؛ حذف بيانات المتصفح يحذفها.</p>
+      <div class="lesson-footer"><button type="button" id="complete" class="complete-button" aria-pressed="false"><span aria-hidden="true">✓</span><span id="completeLabel">أنهيت التدريب</span></button><p data-i18n="practiceTip">تتبّع الكلمة، ثم جرّب كتابتها من الذاكرة.</p></div>
+      <div class="print-options"><button type="button" id="printOne" data-i18n="printOne">طباعة هذه الكلمة</button><button type="button" id="printPictures" data-i18n="printPictures">طباعة كلمات الصورة</button><button type="button" id="printSubject" data-i18n="printSubject">طباعة كلمات المادة</button><button type="button" id="printAll" data-i18n="printAll">طباعة كل الكلمات</button></div>
+      <p class="parent-note" data-i18n="parentNote">اضغط «اسمع الكلمة» لسماع نطقها. إتمام التدريب يُحدَّد يدويًا.</p>
+      <p class="storage-note" data-i18n="storageNote">الكتابة محفوظة في هذا المتصفح فقط؛ حذف بيانات المتصفح يحذفها.</p>
     </main>
-    <nav class="page-navigation" aria-label="التنقل بين الصفحات"><button type="button" id="previous">السابقة</button><span id="navCount" aria-live="polite"></span><button type="button" id="next" class="next-button">الكلمة التالية</button></nav>
+    <nav class="page-navigation" aria-label="التنقل بين الصفحات" data-i18n-aria-label="pages"><button type="button" id="previous" data-i18n="previous">السابقة</button><span id="navCount" aria-live="polite"></span><button type="button" id="next" class="next-button" data-i18n="next">الكلمة التالية</button></nav>
   </div>
   <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
-  <div id="printArea" dir="ltr"></div>
-  <noscript><p class="no-script">فعّل JavaScript في المتصفح لفتح دفتر الإملاء والكتابة عليه.</p></noscript>
+  <div id="printArea"></div>
+  <noscript><p class="no-script" lang="ar" dir="rtl">فعّل JavaScript في المتصفح لفتح دفتر الإملاء والكتابة عليه.</p><p class="no-script" lang="en" dir="ltr">Enable JavaScript in your browser to open and write in the spelling workbook.</p></noscript>
 </body>
 </html>
