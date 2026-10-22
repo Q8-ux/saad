@@ -1,4 +1,4 @@
-# دفتر الإملاء
+# 1-F Home Work
 
 Finger and stylus handwriting practice with **59 pages across five subjects**. All 42 entries from the original three-column photograph are retained, covering 41 unique words. Arabic adds eight fully marked dictation examples from the school announcement; Numbers adds the English names for 1–10. The English section also includes the 14 words from the illustrated science sheet, in that sheet's order. Words shared across subjects retain one saved page.
 

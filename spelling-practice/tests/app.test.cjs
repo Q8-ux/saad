@@ -214,10 +214,10 @@ test('English interface preserves Arabic glyphs, vowel marks, audio and recall p
 
 test('printing and word playback use the chosen interface language',()=>{
   const a=setup(null,false,'#garden',null,{search:'?lang=en'});a.nodes.printOne.fire('click');
-  assert.ok(a.nodes.printArea.innerHTML.includes('MY SPELLING BOOK · GRADE 1'));assert.ok(a.nodes.printArea.innerHTML.includes('Name:'));assert.ok(a.nodes.printArea.innerHTML.includes('dir="ltr"'));assert.ok(!/[\u0600-\u06ff]/.test(a.nodes.printArea.innerHTML));
+  assert.ok(a.nodes.printArea.innerHTML.includes('1-F Home Work'));assert.ok(a.nodes.printArea.innerHTML.includes('Name:'));assert.ok(a.nodes.printArea.innerHTML.includes('dir="ltr"'));assert.ok(!/[\u0600-\u06ff]/.test(a.nodes.printArea.innerHTML));
   a.nodes.listen.fire('click');assert.equal(a.nodes.listenLabel.textContent,'Listen and learn');
   a.nodes.languageArabic.fire('click');assert.equal(a.nodes.pronunciation.paused,true);assert.equal(a.nodes.printArea.innerHTML,'');a.nodes.printOne.fire('click');
-  assert.ok(a.nodes.printArea.innerHTML.includes('دفتر الإملاء · الصف الأول'));assert.ok(a.nodes.printArea.innerHTML.includes('الاسم:'));assert.ok(a.nodes.printArea.innerHTML.includes('dir="rtl"'));assert.ok(a.nodes.printArea.innerHTML.includes('<h1>garden</h1>'));
+  assert.ok(a.nodes.printArea.innerHTML.includes('1-F Home Work'));assert.ok(a.nodes.printArea.innerHTML.includes('الاسم:'));assert.ok(a.nodes.printArea.innerHTML.includes('dir="rtl"'));assert.ok(a.nodes.printArea.innerHTML.includes('<h1>garden</h1>'));
 });
 
 test('changing language finishes an active stroke and keeps clear undo available',()=>{

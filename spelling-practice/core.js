@@ -177,7 +177,7 @@
     return words.map((w,i)=>{
       const model=`<h1${w.lang==='ar'?' dir="rtl" lang="ar"':''}>${w.trace||w.word}</h1><p class="print-instruction">${I.t('printInstruction',ui)}</p>`;
       const illustrated=w.picture?`<div class="print-model"><img src="${w.picture}" alt="${I.t('pictureAlt',ui,{word:w.word})}" width="320" height="200"><div>${model}</div></div>`:model;
-      return `<article class="print-sheet${w.lang==='ar'?' arabic-sheet':''}" lang="${ui}" dir="${dir}"${w.picture?' data-illustrated="true"':''}><header class="print-meta"><span>${I.t('printTitle',ui)}</span><span>${I.digits(i+1,ui)} / ${I.digits(words.length,ui)}</span></header>${illustrated}${sheetSvg(w.trace||w.word,'trace',true,ui)}<footer><span>${I.t('name',ui)}: ___________________</span><span>${I.t('date',ui)}: ______________</span></footer></article>`;
+      return `<article class="print-sheet${w.lang==='ar'?' arabic-sheet':''}" lang="${ui}" dir="${dir}"${w.picture?' data-illustrated="true"':''}><header class="print-meta"><span dir="ltr" lang="en">${I.t('printTitle',ui)}</span><span>${I.digits(i+1,ui)} / ${I.digits(words.length,ui)}</span></header>${illustrated}${sheetSvg(w.trace||w.word,'trace',true,ui)}<footer><span>${I.t('name',ui)}: ___________________</span><span>${I.t('date',ui)}: ______________</span></footer></article>`;
     }).join('');
   }
   return {WORDS,SUBJECTS,PICTURE_IDS,pictureWords,subjectWords,subjectForWord,GLYPHS,COLORS,WIDTH,HEIGHT,STORAGE_KEY,wordLayout,wordPaths,sheetSvg,emptyState,normalizeState,pointerPoint,pageKey,drawStroke,printMarkup};
