@@ -3,11 +3,11 @@
   'use strict';
   const LANGUAGE_KEY='spelling-ui-language-v1';
   const TEXT=Object.freeze({
-    docTitle:['1-F Home Work','1-F Home Work'],
+    docTitle:['1-F / Home Work','1-F / Home Work'],
     description:['دفتر إملاء تفاعلي بالعربية والإنجليزية: ٥٩ تدريبًا بالحروف المنقّطة والنطق، للكتابة بالإصبع أو بقلم الشاشة.','An Arabic and English spelling workbook: 59 exercises with dotted handwriting guides, pronunciation, and finger or stylus practice.'],
     skip:['الانتقال إلى التمرين','Skip to practice'],
     avatar:['أفاتار الطالبة داخل دائرة','Student avatar in a circle'],
-    brand:['1-F Home Work','1-F Home Work'],
+    brand:['1-F / Home Work','1-F / Home Work'],
     tagline:['أتتبّع النقاط… وأكتب بنفسي','Trace the dots… then write on my own'],
     grade:['الصف الأول','Grade 1'],
     language:['لغة الواجهة','Interface language'],
@@ -91,7 +91,7 @@
     pages:['التنقل بين الصفحات','Page navigation'],
     previous:['السابقة','Previous'],
     next:['الكلمة التالية','Next word'],
-    noScript:['فعّل JavaScript في المتصفح لفتح الواجبات والكتابة عليها.','Enable JavaScript in your browser to open and write in 1-F Home Work.'],
+    noScript:['فعّل JavaScript في المتصفح لفتح الواجبات والكتابة عليها.','Enable JavaScript in your browser to open and write in 1-F / Home Work.'],
     pageCount:['صفحة {page} من {total}','Page {page} of {total}'],
     wordNumber:['كلمة {number}','Word {number}'],
     wordAriaNumber:['الكلمة {number}','Word {number}'],
@@ -110,7 +110,7 @@
     guideRetry:['أحاول مرة أخرى','Try again'],
     guideRepeat:['أعيد الكتابة','One more time'],
     guideLabel:['تدريب الكتابة','Handwriting practice'],
-    printTitle:['1-F Home Work','1-F Home Work'],
+    printTitle:['1-F / Home Work','1-F / Home Work'],
     printInstruction:['أقرأ الكلمة، أتتبّع النقاط، ثم أكتب بنفسي.','Read. Trace the dots. Write on your own.'],
     name:['الاسم','Name'],
     date:['التاريخ','Date'],
