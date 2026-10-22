@@ -15,6 +15,7 @@ from .coach import router as coach_router
 from .engine import LEVELS, choose_move
 from .explainer import router as explainer_router
 from .multiplayer import router as multiplayer_router
+from .review import router as review_router
 
 BASE_DIR = Path(__file__).resolve().parent
 STATIC_DIR = BASE_DIR / "static"
@@ -26,6 +27,7 @@ app.include_router(multiplayer_router)
 app.include_router(analysis_router)
 app.include_router(explainer_router)
 app.include_router(coach_router)
+app.include_router(review_router)
 
 
 class LegalMovesRequest(BaseModel):

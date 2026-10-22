@@ -15,6 +15,12 @@ const coachSummary = document.getElementById('coachSummary');
 const coachPlans = document.getElementById('coachPlans');
 const coachMaterial = document.getElementById('coachMaterial');
 const showCoachMove = document.getElementById('showCoachMove');
+const moveReview = document.getElementById('moveReview');
+const moveReviewGrade = document.getElementById('moveReviewGrade');
+const moveReviewSummary = document.getElementById('moveReviewSummary');
+const moveReviewFact = document.getElementById('moveReviewFact');
+const moveReviewPlayed = document.getElementById('moveReviewPlayed');
+const moveReviewBest = document.getElementById('moveReviewBest');
 const resumeButton = document.getElementById('resumeGame');
 const SAVED_GAME_KEY = 'ai_chess_saved_game_v1';
 const shareButton=document.getElementById('shareGame'),shareModal=document.getElementById('shareModal'),sharePreview=document.getElementById('sharePreview');
@@ -41,6 +47,7 @@ let pendingMoveController = null;
 let pendingLegalController = null;
 let pendingCoachController = null;
 let coachSuggestion = null;
+let reviewRequestSeq = 0;
 
 function toast(text){
   toastEl.textContent = text;
@@ -103,6 +110,28 @@ function clearCoach(abortRequest=true){
  pendingCoachController=null;coachSuggestion=null;coachPanel.hidden=true;
  coachSummary.textContent='';coachPlans.replaceChildren();coachMaterial.textContent='';
 }
+function clearMoveReview(){
+  reviewRequestSeq+=1;
+  moveReview.hidden=true;
+  moveReview.dataset.grade='';
+  moveReviewGrade.textContent='';moveReviewSummary.textContent='';moveReviewFact.textContent='';
+  moveReviewPlayed.textContent='';moveReviewBest.textContent='';
+}
+async function requestMoveReview(reviewFen,uci,generation){
+  const requestSeq=++reviewRequestSeq;
+  try{
+    const response=await fetch('/api/review',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fen:reviewFen,uci,language:window.getLanguage?.()||'ar'})});
+    const data=await response.json();
+    if(generation!==gameGeneration||requestSeq!==reviewRequestSeq||!response.ok)return;
+    moveReview.dataset.grade=data.grade;
+    moveReviewGrade.textContent=data.label;
+    moveReviewSummary.textContent=data.summary;
+    moveReviewFact.textContent=data.fact;
+    moveReviewPlayed.textContent=data.played.san;
+    moveReviewBest.textContent=data.engine_choice.san;
+    moveReview.hidden=false;
+  }catch(_){clearMoveReview()}
+}
 function updateCoachAvailability(){
  const available=!window.multiplayerGame&&currentTurn()==='white';
  coachButton.hidden=Boolean(window.multiplayerGame);
@@ -135,6 +164,8 @@ function renderBoard(){
       if(hintMove?.to === sq) square.classList.add('hint-to');
 
       const piece = pieces[sq];
+      square.setAttribute('aria-label',piece?`${piece===piece.toUpperCase()?t('whitePiece'):t('blackPiece')} ${sq}`:`${t('emptySquare')} ${sq}`);
+      square.setAttribute('aria-pressed',selected===sq?'true':'false');
       if(piece){
         const span = document.createElement('span');
         span.className = `piece ${piece === piece.toUpperCase() ? 'white':'black'}`;
@@ -194,7 +225,7 @@ async function onSquareClick(square, piece){
 
 async function playMove(from, to){
   if(window.multiplayerGame){ await window.multiplayerMove(from,to); return; }
-  hintExplanation.hidden=true;clearCoach();
+  hintExplanation.hidden=true;clearCoach();clearMoveReview();
   const generation = gameGeneration;
   const controller = new AbortController();
   pendingMoveController = controller;
@@ -228,6 +259,7 @@ async function playMove(from, to){
     selected = null; legalMoves = [];
     renderMoves(); renderBoard(); updateHintAvailability(); updateCoachAvailability();
     saveCurrentGame();
+    void requestMoveReview(previousFen,from+to,gameGeneration);
 
     if(data.status === 'game_over'){
       clearSavedGame();
@@ -345,6 +377,7 @@ function resetGame(playSound=true,clearPrevious=true){
   pendingLegalController = null;
   fen=START_FEN; selected=null; legalMoves=[]; movePairs=[]; moveHistory=[]; lastMove=null; hintMove=null; hintsUsed=0; locked=false;
   hintExplanation.hidden=true;hintExplanation.textContent='';clearCoach(false);
+  clearMoveReview();
   statusEl.textContent=t('yourWhiteTurn');
   renderMoves(); renderBoard(); updateHintAvailability(); updateCoachAvailability();
   if(clearPrevious)clearSavedGame();else refreshResumeButton();
@@ -356,6 +389,10 @@ hintButton.addEventListener('click',requestHint);
 coachButton.addEventListener('click',requestCoach);
 showCoachMove.addEventListener('click',revealCoachMove);
 document.getElementById('newGame').addEventListener('click',()=>resetGame(true));
+document.getElementById('dockNew').addEventListener('click',()=>document.getElementById('newGame').click());
+document.getElementById('dockAnalyze').addEventListener('click',()=>{coachButton.click();document.querySelector('.controls-panel').scrollIntoView({behavior:'smooth',block:'start'})});
+document.getElementById('dockMoves').addEventListener('click',()=>{movesDisclosure.open=true;document.querySelector('.moves-panel').scrollIntoView({behavior:'smooth',block:'start'})});
+document.getElementById('dockSettings').addEventListener('click',()=>document.querySelector('.controls-panel').scrollIntoView({behavior:'smooth',block:'start'}));
 levelEl.addEventListener('change', ()=>{
   aiLevelLabel.textContent = levelEl.options[levelEl.selectedIndex].text;
   hintsUsed=0; hintMove=null; selected=null; legalMoves=[]; renderBoard(); updateHintAvailability();
@@ -365,4 +402,4 @@ levelEl.addEventListener('change', ()=>{
 
 resetGame(false,false);
 
-window.addEventListener('languagechange',()=>{ aiLevelLabel.textContent=levelEl.options[levelEl.selectedIndex].text; hintButton.textContent=t('getHint'); coachButton.textContent=t('analyzePosition'); resumeButton.textContent=t('resumeGame'); clearCoach(); updateHintAvailability(); updateCoachAvailability(); refreshResumeButton(); renderMoves(); if(!window.multiplayerGame && !locked) statusEl.textContent=t('yourWhiteTurn'); });
+window.addEventListener('languagechange',()=>{ aiLevelLabel.textContent=levelEl.options[levelEl.selectedIndex].text; hintButton.textContent=t('getHint'); coachButton.textContent=t('analyzePosition'); resumeButton.textContent=t('resumeGame'); clearCoach();clearMoveReview(); updateHintAvailability(); updateCoachAvailability(); refreshResumeButton(); renderMoves();renderBoard(); if(!window.multiplayerGame && !locked) statusEl.textContent=t('yourWhiteTurn'); });

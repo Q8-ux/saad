@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>AI Chess Arena</title>
-  <link rel="stylesheet" href="/static/styles.css?v=20261006-coach1" />
+  <link rel="stylesheet" href="/static/styles.css?v=20261022-review1" />
 </head>
 <body>
   <div class="app-shell">
@@ -102,6 +102,19 @@
           <div id="board" class="board" data-i18n-aria="boardLabel" aria-label="رقعة الشطرنج"></div>
         </div>
 
+        <section id="moveReview" class="move-review glass" aria-labelledby="moveReviewTitle" aria-live="polite" hidden>
+          <div class="move-review-head">
+            <strong id="moveReviewTitle" data-i18n="moveReview">مراجعة النقلة</strong>
+            <span id="moveReviewGrade" class="move-review-grade"></span>
+          </div>
+          <p id="moveReviewSummary"></p>
+          <p id="moveReviewFact" class="move-review-fact"></p>
+          <div class="move-review-meta">
+            <span><b data-i18n="playedMove">نقلتك</b> <bdi id="moveReviewPlayed"></bdi></span>
+            <span><b data-i18n="engineChoice">اختيار المحرك</b> <bdi id="moveReviewBest"></bdi></span>
+          </div>
+        </section>
+
         <div class="player-strip glass">
           <div class="avatar player-avatar" data-i18n="you">أنت</div>
           <div><strong data-i18n="player">اللاعب</strong><span data-i18n="white">الأبيض</span></div>
@@ -124,6 +137,13 @@
         </details>
       </aside>
     </main>
+
+    <nav class="play-dock glass" aria-label="أوامر اللعب السريعة" data-i18n-aria="quickActions">
+      <button id="dockNew" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg><b data-i18n="dockNew">جديدة</b></button>
+      <button id="dockAnalyze" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19h16M8 15h8M9 15l1-6h4l1 6M10 9V6h4v3" /></svg><b data-i18n="dockAnalyze">تحليل</b></button>
+      <button id="dockMoves" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 6h13M7 12h13M7 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01" /></svg><b data-i18n="dockMoves">النقلات</b></button>
+      <button id="dockSettings" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10M14 4v6M6 14v6" /></svg><b data-i18n="dockSettings">الإعدادات</b></button>
+    </nav>
   </div>
 
   <div id="shareModal" class="share-modal" hidden>
@@ -153,9 +173,9 @@
   </a>
   <div id="toast" class="toast"></div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="/static/i18n.js?v=20261006-coach1"></script>
+  <script src="/static/i18n.js?v=20261022-review1"></script>
   <script src="/static/audio.js?v=20260820-platform"></script>
-  <script src="/static/app.js?v=20261006-coach1"></script>
+  <script src="/static/app.js?v=20261022-review1"></script>
   <script src="/static/multiplayer.js?v=20260820-platform"></script>
   <script>document.getElementById("languageSelect").addEventListener("change",e=>setLanguage(e.target.value));</script>
 </body>
