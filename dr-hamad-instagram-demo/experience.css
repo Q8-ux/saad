@@ -8,3 +8,8 @@ html{scroll-behavior:smooth;scroll-padding-top:110px}body{background:#f1f8fa;col
 @media(max-width:360px){.site-header .brand{font-size:20px}.site-header .brand-logo{width:47px}.site-header .instagram-link{display:none}.site-header .brand{grid-column:1/-1}}
 
 .article-hero h1{font-family:Mohanad,sans-serif;font-weight:900}
+
+.header-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-shrink:0}
+.language-switch{display:inline-flex;align-items:center;justify-content:center;width:38px;height:30px;min-width:0;padding:0 6px;border:1px solid #a9bac3;border-radius:7px;color:#155e75;font:700 13px/1 Arial,sans-serif;text-decoration:none;white-space:nowrap}
+.header-actions .instagram-link{padding:10px 13px}
+@media(max-width:760px){.header-actions{gap:6px}.language-switch{width:34px;height:28px}.header-actions .instagram-link{font-size:12px;padding:8px 9px}}
