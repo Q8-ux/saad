@@ -46,8 +46,35 @@ jobs:
           if [ ! -f "$sdk/platforms/android-36/android.jar" ] || [ ! -f "$sdk/build-tools/35.0.0/lib/apksigner.jar" ]; then
             "$sdk/cmdline-tools/latest/bin/sdkmanager" 'platforms;android-36' 'build-tools;35.0.0'
           fi
-      - name: Build test APK and unsigned release
-        run: gradle --no-daemon :app:assembleDebug :app:assembleRelease
+      - name: Create Play upload key
+        shell: bash
+        run: |
+          password="$(openssl rand -hex 24)"
+          alias_name="ant-alshaer-upload"
+          key_store="$RUNNER_TEMP/ant-alshaer-upload-key.p12"
+          echo "::add-mask::$password"
+          keytool -genkeypair -noprompt -storetype PKCS12 \
+            -keystore "$key_store" -storepass "$password" \
+            -alias "$alias_name" -keypass "$password" \
+            -keyalg RSA -keysize 4096 -validity 10000 \
+            -dname "CN=Saad Rawdan, OU=Ant Alshaer, O=Saad Rawdan, L=Kuwait City, ST=Kuwait, C=KW"
+          {
+            echo "ANT_ALSHAER_KEYSTORE_PATH=$key_store"
+            echo "ANT_ALSHAER_STORE_PASSWORD=$password"
+            echo "ANT_ALSHAER_KEY_ALIAS=$alias_name"
+            echo "ANT_ALSHAER_KEY_PASSWORD=$password"
+          } >> "$GITHUB_ENV"
+          {
+            echo "App: أنت الشاعر"
+            echo "Package: com.q8ux.antalshaer"
+            echo "Alias: $alias_name"
+            echo "Keystore password: $password"
+            echo "Key password: $password"
+            echo "Keep this file and the upload key private. They are required for future Google Play uploads."
+          } > "$RUNNER_TEMP/ant-alshaer-upload-key.txt"
+          chmod 600 "$key_store" "$RUNNER_TEMP/ant-alshaer-upload-key.txt"
+      - name: Build test APK and signed Play bundle
+        run: gradle --no-daemon :app:assembleDebug :app:bundleRelease
       - name: Generate standard Gradle wrapper
         run: gradle --no-daemon wrapper --gradle-version 8.13 --distribution-type bin
       - name: Prepare unsigned build and signing tools
@@ -56,7 +83,9 @@ jobs:
           package="$RUNNER_TEMP/ant-alshaer-build"
           mkdir -p "$package/gradle/wrapper"
           cp app/build/outputs/apk/debug/app-debug.apk "$package/ant-alshaer-1.0.0-test.apk"
-          cp app/build/outputs/apk/release/app-release-unsigned.apk "$package/"
+          cp app/build/outputs/bundle/release/app-release.aab "$package/ant-alshaer-1.0.0-play.aab"
+          cp "$ANT_ALSHAER_KEYSTORE_PATH" "$package/ant-alshaer-upload-key.p12"
+          cp "$RUNNER_TEMP/ant-alshaer-upload-key.txt" "$package/"
           cp "$sdk/build-tools/35.0.0/lib/apksigner.jar" "$package/"
           if [ -f "$sdk/build-tools/35.0.0/NOTICE.txt" ]; then cp "$sdk/build-tools/35.0.0/NOTICE.txt" "$package/Android-Build-Tools-NOTICE.txt"; fi
           cp gradlew gradlew.bat "$package/"
@@ -64,7 +93,10 @@ jobs:
           "$sdk/build-tools/35.0.0/aapt" dump badging app/build/outputs/apk/release/app-release-unsigned.apk > "$package/apk-badging.txt"
           printf '%s\n' "$GITHUB_SHA" > "$package/source-commit.txt"
           sha256sum "$package/ant-alshaer-1.0.0-test.apk" > "$package/test-apk-sha256.txt"
-          sha256sum "$package/app-release-unsigned.apk" > "$package/unsigned-sha256.txt"
+          sha256sum "$package/ant-alshaer-1.0.0-play.aab" > "$package/play-aab-sha256.txt"
+          keytool -list -v -storetype PKCS12 -keystore "$ANT_ALSHAER_KEYSTORE_PATH" \
+            -storepass "$ANT_ALSHAER_STORE_PASSWORD" -alias "$ANT_ALSHAER_KEY_ALIAS" \
+            > "$package/upload-key-certificate.txt"
       - uses: actions/upload-artifact@v4
         with:
           name: ant-alshaer-android-unsigned
