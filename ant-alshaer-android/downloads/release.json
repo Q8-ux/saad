@@ -1,0 +1,16 @@
+{
+  "app_name": "أنت الشاعر",
+  "package_name": "com.q8ux.antalshaer",
+  "version_name": "1.0.0",
+  "version_code": 1,
+  "artifact": "ant-alshaer-1.0.0-test.apk",
+  "artifact_type": "debug-signed test APK",
+  "source_commit": "d5e7e6c81f7f798035dbba15fb3404a02f106fb2",
+  "workflow_run": "https://github.com/Q8-ux/saad/actions/runs/39930165184",
+  "minimum_android": "8.0",
+  "target_sdk": 36,
+  "sha256": "75b75c70d74a440d70c0c1acb76099a96bdbf09c0fd7eecc6593c0ba135336ea",
+  "signature_scheme": "APK Signature Scheme v2",
+  "signer": "Android Debug",
+  "production_ready_for_google_play": false
+}
