@@ -40,3 +40,18 @@ dialog{max-height:94dvh;overflow:hidden}
 @media(max-width:760px){
  #slide-mount{display:block;height:auto}
 }
+
+@media(min-width:761px){
+ dialog{height:94dvh}
+ .post{display:grid;height:94dvh;max-height:94dvh;grid-template-rows:94dvh}
+ .visual{position:relative;height:94dvh;min-height:94dvh;overflow:hidden}
+ #slide-mount{position:absolute;inset:0;display:grid;place-items:center;width:100%;height:100%;max-width:none;max-height:none;margin:0}
+ #slide-mount .slide{display:block;width:min(100%,calc((94dvh - 24px)*.8));height:auto;max-height:calc(94dvh - 24px);aspect-ratio:4/5;flex:none}
+}
+@media(max-width:760px){
+ dialog{height:auto}
+ .post{height:auto;max-height:none;grid-template-rows:auto}
+ .visual{height:auto;min-height:0}
+ #slide-mount{position:relative;inset:auto;width:100%;height:auto;display:block}
+ #slide-mount .slide{width:100%;height:auto;max-height:none;aspect-ratio:4/5}
+}
