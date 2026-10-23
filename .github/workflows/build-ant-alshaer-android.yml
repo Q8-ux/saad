@@ -1,0 +1,73 @@
+name: Build Ant Alshaer Android
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'ant-alshaer-android/app/**'
+      - 'ant-alshaer-android/tools/**'
+      - 'ant-alshaer-android/*.gradle.kts'
+      - 'ant-alshaer-android/gradle.properties'
+      - '.github/workflows/build-ant-alshaer-android.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ant-alshaer-android
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: ant-alshaer-android
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.13'
+      - name: Check native protocol and policy
+        run: |
+          node tools/bridge.test.mjs
+          python3 tools/check-source.py
+          mkdir -p build/policy
+          javac -encoding UTF-8 -d build/policy app/src/main/java/com/q8ux/antalshaer/BrowserPolicy.java tools/PolicySelfTest.java
+          java -cp build/policy PolicySelfTest
+      - name: Ensure Android SDK components
+        run: |
+          sdk="${ANDROID_SDK_ROOT:-$ANDROID_HOME}"
+          if [ ! -f "$sdk/platforms/android-36/android.jar" ] || [ ! -f "$sdk/build-tools/35.0.0/lib/apksigner.jar" ]; then
+            "$sdk/cmdline-tools/latest/bin/sdkmanager" 'platforms;android-36' 'build-tools;35.0.0'
+          fi
+      - name: Build test APK and unsigned release
+        run: gradle --no-daemon :app:assembleDebug :app:assembleRelease
+      - name: Generate standard Gradle wrapper
+        run: gradle --no-daemon wrapper --gradle-version 8.13 --distribution-type bin
+      - name: Prepare unsigned build and signing tools
+        run: |
+          sdk="${ANDROID_SDK_ROOT:-$ANDROID_HOME}"
+          package="$RUNNER_TEMP/ant-alshaer-build"
+          mkdir -p "$package/gradle/wrapper"
+          cp app/build/outputs/apk/debug/app-debug.apk "$package/ant-alshaer-1.0.0-test.apk"
+          cp app/build/outputs/apk/release/app-release-unsigned.apk "$package/"
+          cp "$sdk/build-tools/35.0.0/lib/apksigner.jar" "$package/"
+          if [ -f "$sdk/build-tools/35.0.0/NOTICE.txt" ]; then cp "$sdk/build-tools/35.0.0/NOTICE.txt" "$package/Android-Build-Tools-NOTICE.txt"; fi
+          cp gradlew gradlew.bat "$package/"
+          cp gradle/wrapper/gradle-wrapper.jar gradle/wrapper/gradle-wrapper.properties "$package/gradle/wrapper/"
+          "$sdk/build-tools/35.0.0/aapt" dump badging app/build/outputs/apk/release/app-release-unsigned.apk > "$package/apk-badging.txt"
+          printf '%s\n' "$GITHUB_SHA" > "$package/source-commit.txt"
+          sha256sum "$package/ant-alshaer-1.0.0-test.apk" > "$package/test-apk-sha256.txt"
+          sha256sum "$package/app-release-unsigned.apk" > "$package/unsigned-sha256.txt"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ant-alshaer-android-unsigned
+          path: ${{ runner.temp }}/ant-alshaer-build
+          retention-days: 7
+          if-no-files-found: error
