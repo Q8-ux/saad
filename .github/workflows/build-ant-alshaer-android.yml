@@ -90,7 +90,7 @@ jobs:
           if [ -f "$sdk/build-tools/35.0.0/NOTICE.txt" ]; then cp "$sdk/build-tools/35.0.0/NOTICE.txt" "$package/Android-Build-Tools-NOTICE.txt"; fi
           cp gradlew gradlew.bat "$package/"
           cp gradle/wrapper/gradle-wrapper.jar gradle/wrapper/gradle-wrapper.properties "$package/gradle/wrapper/"
-          "$sdk/build-tools/35.0.0/aapt" dump badging app/build/outputs/apk/release/app-release-unsigned.apk > "$package/apk-badging.txt"
+          "$sdk/build-tools/35.0.0/aapt" dump badging app/build/outputs/apk/debug/app-debug.apk > "$package/apk-badging.txt"
           printf '%s\n' "$GITHUB_SHA" > "$package/source-commit.txt"
           sha256sum "$package/ant-alshaer-1.0.0-test.apk" > "$package/test-apk-sha256.txt"
           sha256sum "$package/ant-alshaer-1.0.0-play.aab" > "$package/play-aab-sha256.txt"
