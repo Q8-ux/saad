@@ -55,3 +55,18 @@ dialog{max-height:94dvh;overflow:hidden}
  #slide-mount{position:relative;inset:auto;width:100%;height:auto;display:block}
  #slide-mount .slide{width:100%;height:auto;max-height:none;aspect-ratio:4/5}
 }
+
+/* Reliable, intrinsic 4:5 carousel sizing inside the post viewer. */
+@media(min-width:761px){
+ dialog{width:min(1100px,calc(100vw - 50px));height:min(94dvh,900px);max-height:94dvh;overflow:hidden}
+ dialog .post{display:grid;grid-template-columns:minmax(0,1fr) 330px;grid-template-rows:minmax(0,1fr);height:100%;max-height:none;min-height:0}
+ dialog .visual{position:relative;display:flex;align-items:center;justify-content:center;height:100%;min-height:0;overflow:hidden}
+ dialog #slide-mount{position:relative;inset:auto;display:block;flex:none;width:min(100%,calc((94dvh - 32px)*.8));height:auto;max-height:calc(94dvh - 32px);aspect-ratio:4/5;margin:0 auto}
+ dialog #slide-mount .slide{position:relative;inset:auto;display:block;flex:none;width:100%;height:100%;max-height:100%;aspect-ratio:4/5;transform:none;visibility:visible;opacity:1}
+}
+@media(max-width:760px){
+ dialog .post{display:block;height:auto;max-height:none}
+ dialog .visual{display:block;height:auto;min-height:0;overflow:hidden}
+ dialog #slide-mount{position:relative;inset:auto;display:block;width:100%;height:auto;max-height:none;aspect-ratio:4/5}
+ dialog #slide-mount .slide{position:relative;display:block;width:100%;height:100%;max-height:none;aspect-ratio:4/5;transform:none}
+}
