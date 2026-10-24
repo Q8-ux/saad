@@ -16,8 +16,9 @@
 - [x] T007 [US2] فحص حزمة المصدر الخاص وعدم تعديل app أو public، وتوثيق حدود Hermes في tools/internal-verification/README.md (FR-005).
 
 ## Phase 5: Validation and release
-- [ ] T008 تنفيذ الفحوص الفعلية وبناء ونشر المصدر الخاص وحفظ نسخة GitHub ثم فحص CI في specs/006-internal-verification/validation.md (SC-001..SC-004).
+- [x] T008 تنفيذ الفحوص الفعلية وبناء ونشر المصدر الخاص وحفظ نسخة GitHub ثم فحص CI في specs/006-internal-verification/validation.md (SC-001..SC-004).
 - [x] T009 تجهيز اعتماد Python في المصدر الخاص عبر scripts/setup-verification.sh وscripts/install-ci.sh حتى لا يفشل بناء checkout جديد بسبب غياب الأداة (FR-001، FR-003).
+- [x] T010 منع أدوات التحقق من تشغيل استيراد المكتبة القديم، عبر tools/internal-verification/library_scope.py واختبار حدوده و.github/workflows/build-legal-library.yml (FR-005، FR-006).
 
 ## Dependencies
 T001 ثم T002 ثم T003 قبل ربط T004 وT005. T006 مع التنفيذ، T007 بعد البناء، T008 بعد اجتياز الفحوص. لا مهام تعديل مشتركة متوازية؛ مراجعة البحث المستقلة لا تكتب الملفات. النسخة الأولى تشمل القصتين لأن صمت الواجهة والخصوصية شرطان إلزاميان.

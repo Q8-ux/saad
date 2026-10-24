@@ -18,3 +18,9 @@ Pinned original OMH4.0.2 core API, no Hermes setup/model aliases/LLM calls. Fixe
 Native source a445fca5c52a2beb4b2f8446baaf67386df49bdf, version137, deployment appgdep_6add33861c1881919458d7e2b98d0ec3 succeeded at2026-10-24T22:39:27.954254Z. The client asset/source remains the previous one because UI code was unchanged.
 
 GitHub Actions and Pages deployment are checked after this commit; local pass results are not a CI or public deployment claim. This activates offline release verification only. Autonomous Hermes agents and multi-model routing are not activated.
+
+## GitHub evidence
+
+Commit d0ec715af75360e70a9571fe6a4fefa1262fea76: internal verification run40139569956 passed, Spec Kit run40139569970 passed, Pages run40139569969 deployed successfully. Publication safety ran with the pinned engine before deployment.
+
+A legacy Ministry-library workflow was also triggered by the package script change. The follow-up scope fix excludes only this verifier, its specification, ignore file and the verify:internal package script. Changes to runtime/ingestion scripts/dependencies keep the old ingestion behavior. Six added scope tests passed (15 verifier/scope tests total). The workflow's existing concurrency cancels its superseded run when this fix is pushed; cancellation and the replacement scope result are checked afterwards. No private bound corpus or client records are modified by this fix.
