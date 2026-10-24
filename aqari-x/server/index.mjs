@@ -3,6 +3,8 @@ import { attachDatabasePool } from "@neon/functions";
 import { schema, defaultSettings } from "./schema.mjs";
 import { seedProperties } from "./seed.mjs";
 import { officeAssistant } from './assistant.mjs';
+import { createOpenAIVault } from './openai-vault.mjs';
+import {generateAssistant,synthesizeSpeech,transcribeAudio,newAssistantSession,issueTicket,verifyTicket,assistantLocale,localized,CHAT_MODEL,VOICE_MODEL,TRANSCRIBE_MODEL} from './openai-assistant.mjs';
 import {
   uid,
   hash,
@@ -36,6 +38,7 @@ const pool = new Pool({
 attachDatabasePool(pool);
 let initialized;
 const query = (sql, args = []) => pool.query(sql, args);
+const openaiVault=createOpenAIVault(query);
 async function transaction(fn) {
   const c = await pool.connect();
   try {
@@ -52,6 +55,7 @@ async function transaction(fn) {
 }
 async function initialize() {
   await query(schema);
+  await openaiVault.initialize();
   await query(
     "INSERT INTO office_settings(key,data) VALUES($1,$2) ON CONFLICT DO NOTHING",
     ["office", defaultSettings],
@@ -258,6 +262,25 @@ async function availableSlots() {
   );
   return slots(s, r.rows);
 }
+const kuwaitDay=()=>new Date(Date.now()+3*3600000).toISOString().slice(0,10);
+const assistantClient=req=>hash(req.headers.get('x-forwarded-for')?.split(',')[0]?.trim()||req.headers.get('x-real-ip')||'public').slice(0,24);
+function assistantSession(token){
+  const session=verifyTicket(token,'session',process.env.VAULT_KEY);
+  if(!session)fail('انتهت جلسة المساعد؛ أعد المحاولة.',403);return session;
+}
+async function assistantBudget(kind,session,settings){
+  const limit=Number(settings.aiDailyLimit??20);
+  if(limit<=0)fail('الخدمة السحابية متوقفة من إعدادات المكتب.',429);
+  await rate('assistant:'+kind+':session:'+session.id,6,60);
+  await rate('assistant:'+kind+':day:'+kuwaitDay(),limit,86400);
+}
+function assistantReply(result,session){
+  const message=result.message.length>2200?result.message.slice(0,2199)+'…':result.message;
+  const speechSummary=message.length>650;
+  const speechText=speechSummary?message.slice(0,650).replace(/\s+\S*$/,'')+'…':message;
+  const speechTicket=session?issueTicket({kind:'speech',sessionId:session.id,locale:assistantLocale(result.locale),text:speechText},process.env.VAULT_KEY,10*60*1000):null;
+  return {...result,message,...(speechTicket?{speechTicket,speechSummary}:{})};
+}
 async function router(req) {
   const url = new URL(req.url),
     path = url.pathname.replace(/\/$/, "") || "/",
@@ -265,7 +288,7 @@ async function router(req) {
   if (path === "/health")
     return json({
       ok: true,
-      version: "1.0.0",
+      version: "1.2.0",
       storage: "connected",
       time: new Date().toISOString(),
     });
@@ -716,10 +739,48 @@ async function router(req) {
       return json({ id }, 201);
     }
   }
+  if(path==='/assistant/session'&&method==='POST'){
+    await rate('assistant:sessions:'+assistantClient(req),30,3600);
+    const settings=await getSettings(),ready=!!(await openaiVault.key())&&settings.aiDailyLimit!==0;
+    return json({token:newAssistantSession(process.env.VAULT_KEY),expiresAt:Date.now()+14*60*1000,chatReady:ready,voiceReady:ready});
+  }
+  if(path==='/assistant/speech'&&method==='POST'){
+    const b=await body(req,18000),session=assistantSession(b.token),ticket=verifyTicket(b.ticket,'speech',process.env.VAULT_KEY);
+    if(!ticket||ticket.sessionId!==session.id||typeof ticket.text!=='string')fail('انتهت صلاحية قراءة الرد؛ أرسل السؤال مجدداً.',403);
+    const key=await openaiVault.key();if(!key)fail('الصوت السحابي غير متصل حالياً.',503);
+    await assistantBudget('speech',session,await getSettings());
+    const audio=await synthesizeSpeech(ticket.text,ticket.locale,key);
+    await audit(null,'assistant.speech',session.id,{model:VOICE_MODEL,characters:ticket.text.length});
+    return new Response(audio,{headers:{'content-type':'audio/wav','cache-control':'no-store','content-length':String(audio.length)}});
+  }
+  if(path==='/assistant/transcribe'&&method==='POST'){
+    const b=await body(req,1800000),session=assistantSession(b.token);
+    if(typeof b.content!=='string'||!/^[A-Za-z0-9+/]*={0,2}$/.test(b.content))fail('ملف الصوت غير صالح.');
+    const key=await openaiVault.key();if(!key)fail('الصوت السحابي غير متصل حالياً.',503);
+    await assistantBudget('transcribe',session,await getSettings());
+    const audio=Buffer.from(b.content,'base64');
+    const text=await transcribeAudio(audio,b.mime,assistantLocale(b.locale),key);
+    await audit(null,'assistant.transcribed',session.id,{model:TRANSCRIBE_MODEL,bytes:audio.length});
+    return json({text,locale:assistantLocale(b.locale)});
+  }
   if (path === "/assistant" && method === "POST") {
     const b = await body(req, 20000);
-    const result = officeAssistant(b, (await allProperties()).map(publicProperty), await getSettings());
-    return json(result);
+    const properties=(await allProperties()).map(publicProperty),settings=await getSettings();
+    const session=verifyTicket(b.token,'session',process.env.VAULT_KEY);
+    const key=session?await openaiVault.key():null;
+    if(key){
+      try{
+        await assistantBudget('chat',session,settings);
+        const result=await generateAssistant(b,properties,settings,key);
+        const {usage,...reply}=result;
+        await audit(null,'assistant.chat',session.id,usage);
+        return json(assistantReply(reply,session));
+      }catch(error){
+        console.error('assistant_provider_unavailable',error.providerCode||error.status||error.name);
+        return json(assistantReply({...officeAssistant(b,properties,settings),fallback:error.status===429?'usage_limit':'provider_unavailable'},session));
+      }
+    }
+    return json(assistantReply(officeAssistant(b,properties,settings),session));
   }
   if (path === "/events" && method === "POST") {
     const u = await user(req);
@@ -1038,7 +1099,7 @@ async function router(req) {
       await query("SELECT name,encrypted,updated_at FROM office_integrations")
     ).rows;
     return json({
-      integrations: list.map((r) => {
+      integrations: [...list.map((r) => {
         const v = unseal(r.encrypted, process.env.VAULT_KEY);
         return {
           name: r.name,
@@ -1050,7 +1111,7 @@ async function router(req) {
           endpoint: v.endpoint || "",
           updatedAt: r.updated_at,
         };
-      }),
+      }),{name:'openai',enabled:(await getSettings()).aiDailyLimit!==0,configured:!!(await openaiVault.key()),model:CHAT_MODEL}],
     });
   }
   const integrationUpdate = path.match(

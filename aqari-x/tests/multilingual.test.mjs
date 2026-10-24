@@ -12,6 +12,10 @@ test('Arabic, English and Urdu requests match the same real listing and numeric 
     assert.equal(parseIntent(q).filters.maxPrice,500);
   }
 });
+test('spoken hundreds and thousands retain their scale in all three search languages',()=>{
+  for(const q of ['apartment in Jabriya budget five hundred','جابریہ میں فلیٹ بجٹ پانچ سو','شقة بالجابرية بحدود خمسمائة'])assert.equal(parseIntent(q).filters.maxPrice,500,q);
+  assert.equal(parseIntent('house budget two hundred fifty thousand').filters.maxPrice,250000);
+});
 test('all supported areas and seed title/description/location facts have both translations',()=>{
   for(const source of [...AREAS.map(x=>x.area),...seedProperties.flatMap(p=>[p.title,p.description,p.location])]){
     assert.ok(translations[source]?.en,source);assert.ok(translations[source]?.ur,source);

@@ -78,7 +78,7 @@ export function setSession(s) {
     ? sessionStorage.setItem("aqari-session", JSON.stringify(s))
     : sessionStorage.removeItem("aqari-session");
 }
-export async function api(path, { method = "GET", data, signal } = {}) {
+export async function api(path, { method = "GET", data, signal, binary = false } = {}) {
   if (!API_URL) throw new Error("الخادم غير مهيأ بعد");
   const s = getSession();
   const r = await fetch(API_URL.replace(/\/$/, "") + path, {
@@ -90,6 +90,7 @@ export async function api(path, { method = "GET", data, signal } = {}) {
     body: data ? JSON.stringify(data) : undefined,
     signal: signal || AbortSignal.timeout(45000),
   });
+  if(r.ok&&binary)return r.blob();
   const out = await r
     .json()
     .catch(() => ({ error: "استجابة الخادم غير صالحة" }));

@@ -2,7 +2,7 @@ import { parseIntent, searchProperties, norm, money, CATEGORIES, TYPES, AREAS } 
 import { translate } from '../public/i18n.mjs';
 
 const text=(locale,ar,en,ur)=>({ar,en,ur}[locale]);
-const cleanFilters=value=>{
+export const cleanFilters=value=>{
   const out={};if(!value||typeof value!=='object'||Array.isArray(value))return out;
   if(CATEGORIES.includes(value.category))out.category=value.category;
   if(TYPES.includes(value.type))out.type=value.type;

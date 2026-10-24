@@ -805,12 +805,14 @@ async function renderModules() {
   if (state.page !== "modules") return;
   const ai = integrations.find((x) => x.name === "ai"),
     wa = integrations.find((x) => x.name === "whatsapp");
+  const cloud=integrations.find(x=>x.name==='openai');
+  const visibleModules=[...modules,["مسار المساعد الذكي والصوت السحابي","محادثة بالعربية والإنجليزية والأردو من بيانات المكتب، وتسجيل السؤال وقراءة الرد بصوت مولّد بالذكاء الاصطناعي.",cloud?.configured&&cloud?.enabled?'active':'waiting',cloud?.configured&&cloud?.enabled?'متصل بخدمة المكتب':'غير متصل أو متوقف من الإعدادات',""]];
   content().innerHTML =
     intro(
       "المسارات التي تخدم المكتب.",
       "الحالة تعكس الوظيفة الفعلية. وجود موصل أو ملف إعداد لا يعني أن حساب المزود متصل أو أن الفيديو والدفع يعملان.",
     ) +
-    `<div class="notice">${modules.filter((x) => x[2] === "active").length} مسارات بوظائف منفذة · ${modules.filter((x) => x[2] === "waiting").length} مسارات بتهيئة أو متطلبات خارجية.</div><div class="admin-toolbar"><button class="btn primary" data-action="configure-ai">تهيئة NVIDIA ${ai?.enabled ? "· مفعل" : ""}</button><button class="btn secondary" data-action="configure-wa">تهيئة واتساب API ${wa?.configured ? "· محفوظ" : ""}</button><button class="btn ghost" data-action="models">التحقق من النماذج</button></div><div class="module-grid">${modules.map(([name, text, status, label, url]) => `<article class="module-card"><span class="module-state ${status === "waiting" ? "waiting" : ""}">${icon(status === "active" ? "check" : "clock")} ${esc(label)}</span><h3>${name}</h3><p>${text}</p>${url ? `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(url)}</a>` : ""}</article>`).join("")}</div>`;
+    `<div class="notice">${visibleModules.filter((x) => x[2] === "active").length} مسارات بوظائف منفذة · ${visibleModules.filter((x) => x[2] === "waiting").length} مسارات بتهيئة أو متطلبات خارجية.</div><div class="admin-toolbar"><button class="btn primary" data-action="configure-ai">تهيئة NVIDIA ${ai?.enabled ? "· مفعل" : ""}</button><button class="btn secondary" data-action="configure-wa">تهيئة واتساب API ${wa?.configured ? "· محفوظ" : ""}</button><button class="btn ghost" data-action="models">التحقق من النماذج</button></div><div class="module-grid">${visibleModules.map(([name, text, status, label, url]) => `<article class="module-card"><span class="module-state ${status === "waiting" ? "waiting" : ""}">${icon(status === "active" ? "check" : "clock")} ${esc(label)}</span><h3>${name}</h3><p>${text}</p>${url ? `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(url)}</a>` : ""}</article>`).join("")}</div>`;
 }
 async function configureAI() {
   const data = (await api("/admin/integrations")).integrations.find(
@@ -877,7 +879,7 @@ async function renderSettings() {
       ],
       s.slotMinutes,
       null,
-    )}</div><p class="fineprint">موعد واحد في كل فترة؛ الأيام الـ14 المقبلة. المواعيد السابقة تبقى في السجل حتى تغير حالتها.</p></section><section class="section-box"><h2>الحد المالي للتوليد</h2>${field("aiDailyLimit", "أقصى عدد طلبات توليد للمكتب في اليوم", "number", s.aiDailyLimit, 'required min="0" max="100"')}<p class="fineprint">صفر يوقف التوليد. هذا سقف للطلبات، وليس قياساً لرصيد الحساب أو سعر التوكن. تظهر إحصاءات الاستخدام الفعلية في سجل العمليات.</p></section><div class="form-actions"><button class="btn primary" type="submit">حفظ إعدادات المكتب</button><button class="btn secondary" type="button" data-action="export-all">تنزيل نسخة من بيانات العمل</button></div></form>`;
+    )}</div><p class="fineprint">موعد واحد في كل فترة؛ الأيام الـ14 المقبلة. المواعيد السابقة تبقى في السجل حتى تغير حالتها.</p></section><section class="section-box"><h2>حد الاستخدام السحابي</h2>${field("aiDailyLimit", "الحد اليومي لكل خدمة سحابية للمكتب", "number", s.aiDailyLimit, 'required min="0" max="100"')}<p class="fineprint">صفر يوقف الخدمات السحابية. يطبق الحد على المحادثة وقراءة الصوت وتحويل التسجيل إلى نص، كل خدمة على حدة. الاستخدام الفعلي مسجل في سجل العمليات.</p></section><div class="form-actions"><button class="btn primary" type="submit">حفظ إعدادات المكتب</button><button class="btn secondary" type="button" data-action="export-all">تنزيل نسخة من بيانات العمل</button></div></form>`;
   $("#settings-form").onsubmit = (e) => {
     e.preventDefault();
     withSubmit(e.target, async () => {
@@ -915,6 +917,9 @@ function actionLabel(a) {
       "settings.updated": "تحديث إعدادات المكتب",
       "user.permissions_changed": "تعديل الصلاحيات",
       "ai.draft_created": "توليد مسودة إعلان",
+      "assistant.chat": "محادثة المساعد الذكي",
+      "assistant.speech": "قراءة رد صوتي",
+      "assistant.transcribed": "تحويل سؤال صوتي إلى نص",
       "marketing.draft_created": "حزمة محتوى",
       "office.exported": "تصدير نسخة بيانات",
       "account.recovery_requested": "طلب استعادة حساب",

@@ -39,6 +39,7 @@ CREATE TABLE IF NOT EXISTS office_files (
 );
 CREATE INDEX IF NOT EXISTS office_files_property ON office_files(property_id);
 CREATE TABLE IF NOT EXISTS office_integrations (name text PRIMARY KEY, encrypted text NOT NULL, updated_at timestamptz NOT NULL DEFAULT now());
+CREATE TABLE IF NOT EXISTS office_ai_keys (name text PRIMARY KEY, public_key text NOT NULL, private_key text NOT NULL, wrapped_key text, updated_at timestamptz NOT NULL DEFAULT now());
 CREATE TABLE IF NOT EXISTS office_audit (
  id bigserial PRIMARY KEY, actor_id text, action text NOT NULL, target_id text, data jsonb NOT NULL DEFAULT '{}', created_at timestamptz NOT NULL DEFAULT now()
 );

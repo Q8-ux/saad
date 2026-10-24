@@ -192,6 +192,28 @@ export function commissionFils(finalPriceFils, mode, value) {
   return Math.round((finalPriceFils * rate) / 100);
 }
 let searchAliases;
+export function normalizeSpokenNumbers(query='') {
+  const units={one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,eleven:11,twelve:12,thirteen:13,fourteen:14,fifteen:15,sixteen:16,seventeen:17,eighteen:18,nineteen:19,twenty:20,thirty:30,forty:40,fifty:50,sixty:60,seventy:70,eighty:80,ninety:90,
+    'ایک':1,'دو':2,'تین':3,'چار':4,'پانچ':5,'چھ':6,'سات':7,'آٹھ':8,'نو':9,'دس':10,'بیس':20,'تیس':30,'چالیس':40,'پچاس':50,'ساٹھ':60,'ستر':70,'اسی':80,'نوے':90,
+    'واحد':1,'اثنين':2,'ثلاث':3,'ثلاثة':3,'اربع':4,'اربعة':4,'خمس':5,'خمسة':5,'ستة':6,'سبعة':7,'ثمانية':8,'تسعة':9,'عشرة':10,'عشرين':20,'ثلاثين':30,'اربعين':40,'خمسين':50,'ستين':60,'سبعين':70,'ثمانين':80,'تسعين':90,
+    'مائتان':200,'مئتان':200,'ثلاثمائة':300,'ثلاثمئة':300,'اربعمائة':400,'اربعمئة':400,'خمسمائة':500,'خمسمئة':500,'ستمائة':600,'ستمئة':600,'سبعمائة':700,'سبعمئة':700,'ثمانمائة':800,'ثمانمئة':800,'تسعمائة':900,'تسعمئة':900};
+  const values=new Map(Object.entries(units).map(([word,value])=>[norm(word),value]));
+  const scales=new Map(Object.entries({hundred:100,thousand:1000,million:1000000,'سو':100,'ہزار':1000,'لاکھ':100000,'کروڑ':10000000,'مئة':100,'مائة':100,'الف':1000,'مليون':1000000}).map(([word,value])=>[norm(word),value]));
+  const escape=word=>word.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  const starters=[...values.keys()].sort((a,b)=>b.length-a.length).map(escape).join('|');
+  const continuation=[...values.keys(),...scales.keys(),'and','و','اور'].sort((a,b)=>b.length-a.length).map(escape).join('|');
+  const phrase=new RegExp(`(?<![\\p{L}\\p{N}])(?:${starters})(?:\\s+(?:${continuation}))*(?![\\p{L}\\p{N}])`,'gu');
+  let text=norm(query).replace(phrase,source=>{
+    let total=0,group=0;
+    for(const word of source.split(/\s+/)){
+      if(values.has(word))group+=values.get(word);
+      else if(scales.has(word)){const scale=scales.get(word);if(scale===100)group=(group||1)*scale;else{total+=(group||1)*scale;group=0;}}
+    }
+    return String(total+group);
+  });
+  text=text.replace(/(\d+(?:\.\d+)?)\s*(?:hundred|سو|مئه|مائه)(?![\p{L}\p{N}])/gu,(_,number)=>String(Number(number)*100));
+  return text;
+}
 export function multilingualQuery(query='') {
   if(!searchAliases){
     const aliases=new Map();
@@ -213,7 +235,7 @@ export function multilingualQuery(query='') {
     add('',['i am looking for','looking for','i need','i want','show me','please','find me','find','a','an','the','in','at','for','with','and','kwd','kd','monthly','per month','مجھے','چاہیے','درکار','براہ کرم','میں','کے لیے','کیلئے','والا','والی','کا','کی','کے','اور','دکھائیں','تلاش','دینار','ماہانہ']);
     searchAliases=[...aliases].filter(([word])=>word).sort((a,b)=>b[0].length-a[0].length).map(([word,target])=>[new RegExp(`(?<![\\p{L}\\p{N}])${word.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}(?![\\p{L}\\p{N}])`,'gu'),target]);
   }
-  let text=norm(query).replace(/(\d+(?:\.\d+)?)\s*k\b/g,'$1 الف');
+  let text=normalizeSpokenNumbers(query).replace(/(\d+(?:\.\d+)?)\s*k\b/g,'$1 الف');
   for(const [pattern,target] of searchAliases)text=text.replace(pattern,` ${target} `);
   return norm(text);
 }
