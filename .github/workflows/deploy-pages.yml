@@ -84,11 +84,18 @@ jobs:
               echo "only=true" >> "$GITHUB_OUTPUT"
             fi
           fi
+      - uses: actions/setup-node@v4
+        if: steps.scope.outputs.sabeq_changed == 'true'
+        with: { node-version: '22' }
+      - uses: actions/setup-python@v5
+        if: steps.scope.outputs.sabeq_changed == 'true'
+        with: { python-version: '3.12' }
+      - name: Install Sabeq verification engine
+        if: steps.scope.outputs.sabeq_changed == 'true'
+        run: python -m pip install -r legal-memo-platform/tools/internal-verification/requirements.txt
       - name: Validate Sabeq publication safety
-        if: steps.scope.outputs.sabeq_only == 'true'
-        run: |
-          python sabeq-legal/deployment/test_release.py
-          node --test sabeq-legal/motion/motion.test.mjs
+        if: steps.scope.outputs.sabeq_changed == 'true'
+        run: python legal-memo-platform/tools/internal-verification/verify.py --profile publication
       - uses: actions/configure-pages@v5
       - name: Restore published sites and update Sabeq only
         if: steps.scope.outputs.sabeq_only == 'true'

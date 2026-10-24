@@ -11,6 +11,8 @@ import tarfile
 
 WORKFLOW = ".github/workflows/deploy-pages.yml"
 SABEQ_DIRECTORIES = ("sabeq-legal", "sabeq-admin-preview")
+SABEQ_TOOL_PREFIXES = ("legal-memo-platform/tools/internal-verification/", "legal-memo-platform/specs/006-internal-verification/")
+SABEQ_TOOL_FILES = {"legal-memo-platform/package.json", "legal-memo-platform/.gitignore", ".github/workflows/sabeq-internal-verification.yml"}
 
 def command(*args):
     return subprocess.check_output(args, text=True).strip()
@@ -43,12 +45,15 @@ def scope():
     if command("git", "rev-parse", "HEAD") != current:
         raise RuntimeError("Checkout does not match the triggering commit")
     only = False
+    sabeq_changed = True  # Manual/full releases include Sabeq; unknown diffs fail closed.
     if os.environ.get("GITHUB_EVENT_NAME") == "push" and re.fullmatch(r"[0-9a-f]{40}", before) and set(before) != {"0"}:
         subprocess.run(["git", "fetch", "--no-tags", "--depth=1", "origin", before], check=True)
         paths = command("git", "diff", "--name-only", before, current).splitlines()
-        only = any(p.startswith(tuple(d + "/" for d in SABEQ_DIRECTORIES)) for p in paths) and all(p.startswith(tuple(d + "/" for d in SABEQ_DIRECTORIES)) or p == WORKFLOW for p in paths)
+        sabeq_changed = any(p.startswith(tuple(d + "/" for d in SABEQ_DIRECTORIES) + ("legal-memo-platform/",)) or p == WORKFLOW or p in SABEQ_TOOL_FILES for p in paths)
+        only = any(p.startswith(tuple(d + "/" for d in SABEQ_DIRECTORIES)) for p in paths) and all(p.startswith(tuple(d + "/" for d in SABEQ_DIRECTORIES) + SABEQ_TOOL_PREFIXES) or p == WORKFLOW or p in SABEQ_TOOL_FILES for p in paths)
     with open(os.environ["GITHUB_OUTPUT"], "a") as f:
         f.write("sabeq_only=" + str(only).lower() + "\n")
+        f.write("sabeq_changed=" + str(sabeq_changed).lower() + "\n")
 
 def prepare():
     repo = os.environ["GITHUB_REPOSITORY"]

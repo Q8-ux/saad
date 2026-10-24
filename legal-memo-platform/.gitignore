@@ -9,3 +9,4 @@ npm-debug.log*
 # Local Python cache from Spec Kit development tools
 __pycache__/
 *.py[cod]
+.verification/

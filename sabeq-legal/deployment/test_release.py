@@ -126,11 +126,23 @@ class PublicationTests(unittest.TestCase):
         for paths, expected in [("sabeq-legal/index.html\n.github/workflows/deploy-pages.yml", "true"),
                                 ("sabeq-admin-preview/admin.js\nsabeq-legal/deployment/release.py", "true"),
                                 ("sabeq-admin-preview/admin.js\nlegal-memo-platform/gateway.js", "false"),
+                                ("sabeq-legal/deployment/release.py\nlegal-memo-platform/tools/internal-verification/verify.py\nlegal-memo-platform/package.json\nlegal-memo-platform/.gitignore\nlegal-memo-platform/specs/006-internal-verification/spec.md\n.github/workflows/sabeq-internal-verification.yml", "true"),
+                                ("sabeq-legal/index.html\nlegal-memo-platform/tools/unrelated/tool.py", "false"),
+                                ("sabeq-legal/index.html\n.github/workflows/deploy-barcode-pages.yml", "false"),
+                                ("tamweenat/app.js", "false"),
                                 ("sabeq-legal/index.html\ntamweenat/app.js", "false"),
                                 (".github/workflows/deploy-pages.yml", "false")]:
             with tempfile.NamedTemporaryFile() as out, patch.dict(os.environ, {"BEFORE_SHA":"a"*40,"GITHUB_SHA":"b"*40,"GITHUB_EVENT_NAME":"push","GITHUB_OUTPUT":out.name}), patch.object(release,"command",side_effect=["b"*40,paths]), patch.object(release.subprocess,"run"):
                 release.scope()
-                self.assertEqual(Path(out.name).read_text(),"sabeq_only="+expected+"\n")
+                result = dict(line.split("=") for line in Path(out.name).read_text().splitlines())
+                self.assertEqual(result["sabeq_only"], expected)
+                self.assertEqual(result["sabeq_changed"], "false" if paths == "tamweenat/app.js" else "true")
+
+    def test_manual_full_release_requires_sabeq_checks(self):
+        with tempfile.NamedTemporaryFile() as out, patch.dict(os.environ, {"BEFORE_SHA":"", "GITHUB_SHA":"b"*40, "GITHUB_EVENT_NAME":"workflow_dispatch", "GITHUB_OUTPUT":out.name}), patch.object(release,"command",return_value="b"*40):
+            release.scope()
+            result = dict(line.split("=") for line in Path(out.name).read_text().splitlines())
+            self.assertEqual(result, {"sabeq_only":"false", "sabeq_changed":"true"})
 
     def test_admin_assets_are_scoped_and_validated(self):
         with tempfile.TemporaryDirectory() as tmp:

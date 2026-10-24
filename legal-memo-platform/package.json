@@ -6,6 +6,7 @@
     "start": "node gateway.js",
     "dev": "node --watch gateway.js",
     "test": "node --test",
+    "verify:internal": "python tools/internal-verification/verify.py --profile backend",
     "rea:audit": "npm run audit --prefix tools/rea",
     "rea:test": "npm test --prefix tools/rea",
     "ingest:moj": "node scripts/ingest-moj-laws.js",

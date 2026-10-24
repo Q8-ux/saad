@@ -1,0 +1,1 @@
+oh-my-hermes @ git+https://github.com/rlaope/oh-my-hermes.git@cfb9625147ba20b35f59acbbe804afcb720013d1
