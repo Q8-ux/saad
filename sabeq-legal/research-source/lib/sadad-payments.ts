@@ -64,7 +64,7 @@ async function provider(config: Config, path: string, authorization: string, bod
   try {
     // SADAD returns HTTP 411 for bodiless POSTs (no Content-Length); token endpoints get an explicit empty JSON body.
     const payload = body !== undefined ? body : path.startsWith("/User/") ? {} : undefined;
-    const response = await fetch(`${API[config.environment]}${path}`, { method: payload !== undefined ? "POST" : "GET", headers: { Authorization: authorization, Accept: "application/json", ...(payload === undefined ? {} : { "Content-Type": "application/json" }) }, ...(payload === undefined ? {} : { body: JSON.stringify(payload) }), redirect: "error", signal: AbortSignal.timeout(20_000) });
+    const response = await fetch(`${API[config.environment]}${path}`, { method: payload !== undefined ? "POST" : "GET", headers: { Authorization: authorization, Accept: "application/json", ...(payload === undefined ? {} : { "Content-Type": "application/json" }) }, ...(payload === undefined ? {} : { body: JSON.stringify(payload) }), redirect: "manual", signal: AbortSignal.timeout(20_000) });
     const text = await response.text();
     if (text.length > 500_000 || !response.ok) throw Error("provider_failed");
     const data = JSON.parse(text);
