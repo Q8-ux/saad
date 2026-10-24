@@ -31,6 +31,8 @@ import {
   download,
 } from "./ui.mjs";
 import { showAuth, requireAuth } from "./auth.mjs";
+import { getLocale, translate } from './i18n.mjs';
+import { initOfficeAssistant, openOfficeAssistant } from './office-bot.mjs';
 const state = {
   view: "home",
   properties: [],
@@ -39,7 +41,7 @@ const state = {
     phone: "96551758056",
     contactName: "أبو مريم",
   },
-  filters: Object.fromEntries(new URLSearchParams(location.search)),
+  filters: {...Object.fromEntries(new URLSearchParams(location.search)),lang:getLocale()},
   saved: readIds("aqari-saved"),
   compare: readIds("aqari-compare").slice(0, 3),
   layout: "grid",
@@ -180,6 +182,7 @@ function advancedHTML() {
   )}</div><p class="hint">عند تحديد السعر أو المساحة، تستبعد العروض التي تفتقد هذه البيانات. سعر البدل هو الفرق، وإيجار الوحدة يوضح بجانب السعر.</p><div class="form-actions"><button class="btn primary" type="submit">تطبيق البحث</button></div></form>`;
 }
 function applyFilters(updateURL = true) {
+  state.filters.lang=getLocale();
   const { properties, intent } = searchProperties(
     state.properties,
     state.filters,
@@ -315,33 +318,10 @@ function renderAssistant() {
       "صف ما تبحث عنه.",
       "مساعد بحث يستخرج الشروط من عبارتك ويطابقها مع قاعدة المكتب. لا يقدم تقييماً سوقياً أو استشارة قانونية.",
     ) +
-    `<div class="quick-prompts">${["شقة في الجابرية 3 غرف بحدود 500", "بيت للبدل في المطلاع", "شقة للإيجار في العمرية"].map((x) => `<button data-action="prompt" data-value="${esc(x)}">${esc(x)}</button>`).join("")}</div><div id="chat-log" class="chat-log"><div class="chat-message"><p>اذكر المنطقة، النوع، الميزانية والغرف. النتائج من عروض المكتب المسجلة فقط.</p></div></div><form class="chat-form" id="chat-form"><input class="chat-input" name="message" required maxlength="500" placeholder="أبحث عن شقة…" aria-label="طلب البحث"><button class="btn primary" type="submit">ابحث</button></form>`;
-  $("#chat-form").onsubmit = (e) => {
-    e.preventDefault();
-    askAssistant(formValues(e.target).message);
-  };
+    `<div class="assistant-intro section-box"><span class="assistant-emblem">${icon('spark')}</span><h2>ابحث واستفسر بالكتابة أو الصوت</h2><p>اذكر المنطقة، النوع، الميزانية والغرف. النتائج من عروض المكتب المسجلة فقط.</p><button class="btn primary" data-action="open-assistant">${icon('mic')} اسأل المساعد</button><p class="fineprint">الصوت متاح حسب أصوات جهازك ومتصفحك.</p></div><div class="quick-prompts">${["شقة في الجابرية 3 غرف بحدود 500", "بيت للبدل في المطلاع", "شقة للإيجار في العمرية"].map((x) => `<button data-action="prompt" data-value="${esc(x)}">${esc(x)}</button>`).join("")}</div>`;
 }
 async function askAssistant(message) {
-  if (!message.trim()) return;
-  const log = $("#chat-log");
-  log.insertAdjacentHTML(
-    "beforeend",
-    `<div class="chat-message user"><p>${esc(message)}</p></div>`,
-  );
-  $("#chat-form [name=message]").value = "";
-  const btn = $("#chat-form button");
-  btn.disabled = true;
-  try {
-    const out = await api("/assistant", { method: "POST", data: { message } });
-    log.insertAdjacentHTML(
-      "beforeend",
-      `<div class="chat-message"><p>${esc(out.message)}</p><div class="chips">${out.intent.chips.map((c) => `<span class="chip">${esc(c)}</span>`).join("")}</div>${out.properties.length ? `<div class="property-grid">${out.properties.map(card).join("")}</div>` : '<button class="btn secondary small" data-action="request">سجل طلبك</button>'}</div>`,
-    );
-  } catch (e) {
-    toast(e.message, true);
-  } finally {
-    btn.disabled = false;
-  }
+  openOfficeAssistant(translate(message));
 }
 function renderSources() {
   const sources = [
@@ -724,6 +704,7 @@ document.addEventListener("click", async (e) => {
       renderHome();
     } else if (action === "print") window.print();
     else if (action === "prompt") askAssistant(value);
+    else if (action === "open-assistant") openOfficeAssistant();
     else if (action === "retry") switchView(state.view);
     else if (action === "archive") {
       openDialog(
@@ -784,7 +765,7 @@ document.addEventListener("click", async (e) => {
     } else if (action === "privacy")
       openDialog(
         "الخصوصية",
-        `<div class="text-flow">يجمع المكتب الاسم والبريد والهاتف عند إنشاء الحساب، وبيانات الطلب والمواعيد والإعلانات التي ترسلها. تحفظ هذه البيانات في الخادم لإدارة المكتب، ولا تظهر بيانات حسابك للزوار. قد يظهر رقم المكتب في صفحات العقارات.\n\nتحفظ المفضلة والمقارنة على هذا الجهاز. تحفظ جلسة الدخول في التبويب وتنتهي خلال ثماني ساعات. لا نضع مفاتيح الخدمة في الواجهة.\n\nنحصي تفاعلات البحث والعقارات للحسابات المسجلة دون تتبع موقعك الجغرافي أو جمع بصمة جهازك. استخدام واتساب أو الخرائط يخضع لسياسة الجهة الخارجية.\n\nللوصول إلى بياناتك أو طلب تصحيحها أو حذفها، تواصل مع المكتب. على إدارة المكتب اعتماد سياسة الاحتفاظ والاسم التجاري قبل الإطلاق التجاري.</div>`,
+        `<div class="text-flow">يجمع المكتب الاسم والبريد والهاتف عند إنشاء الحساب، وبيانات الطلب والمواعيد والإعلانات التي ترسلها. تحفظ هذه البيانات في الخادم لإدارة المكتب، ولا تظهر بيانات حسابك للزوار. يظهر زر واتساب للتواصل مع المكتب دون عرض رقمه في صفحات الزوار.\n\nتحفظ المفضلة والمقارنة على هذا الجهاز. تحفظ جلسة الدخول في التبويب وتنتهي خلال ثماني ساعات. لا نضع مفاتيح الخدمة في الواجهة.\n\nنحصي تفاعلات البحث والعقارات للحسابات المسجلة دون تتبع موقعك الجغرافي أو جمع بصمة جهازك. استخدام واتساب أو الخرائط يخضع لسياسة الجهة الخارجية.\n\nللوصول إلى بياناتك أو طلب تصحيحها أو حذفها، تواصل مع المكتب. على إدارة المكتب اعتماد سياسة الاحتفاظ والاسم التجاري قبل الإطلاق التجاري.</div><p class="fineprint">يبدأ الميكروفون عند ضغطك عليه فقط. قد تعالج خدمة المتصفح الصوت للتعرف على الكلام؛ لا يحفظ المكتب تسجيل الصوت.</p>`,
       );
     else if (action === "terms")
       openDialog(
@@ -808,6 +789,15 @@ document.addEventListener("aqari:session", () => {
   updateAccount();
   if (["requests", "mine"].includes(state.view)) switchView(state.view);
 });
+document.addEventListener('aqari:locale',event=>{
+  state.filters.lang=event.detail.locale;
+});
+document.addEventListener('aqari:property-details',event=>showDetails(event.detail.id).catch(error=>toast(error.message,true)));
+document.addEventListener('aqari:request',event=>showRequest(event.detail.id));
+document.addEventListener('aqari:appointment',event=>showAppointment(event.detail.id));
+document.addEventListener('aqari:navigate',event=>switchView(event.detail.view));
+document.addEventListener('aqari:assistant-filter',event=>{state.filters={...event.detail.filters,lang:getLocale()};switchView('home');});
+document.addEventListener('aqari:office-whatsapp',()=>whatsapp());
 $("#menu-toggle").innerHTML = icon("menu");
 $("#menu-toggle").onclick = () => {
   const open = !$("#sidebar").classList.contains("open");
@@ -854,6 +844,7 @@ async function loadProperties() {
 }
 async function init() {
   initDialog();
+  initOfficeAssistant();
   hydrateIcons();
   persistIds();
   updateAccount();

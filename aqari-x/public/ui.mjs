@@ -1,6 +1,11 @@
 import { API_URL } from "./config.mjs";
 import { escapeHTML } from "./core.mjs";
+import { getLocale } from "./i18n.mjs";
+import './theme.mjs';
 const paths = {
+  mic: "M9 5a3 3 0 0 1 6 0v7a3 3 0 0 1-6 0zM5 10v2a7 7 0 0 0 14 0v-2M12 19v3M8 22h8",
+  volume: "M4 9h4l5-4v14l-5-4H4zM17 8a6 6 0 0 1 0 8M20 5a10 10 0 0 1 0 14",
+  stop: "M6 6h12v12H6z",
   home: "M3 10 12 3l9 7M5 9v12h14V9M9 21v-7h6v7",
   building: "M4 21V5h10v16M14 11h6v10M8 9h2M8 13h2M8 17h2M18 15v2M2 21h20",
   search: "M20 20l-5-5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0",
@@ -171,7 +176,7 @@ export function download(name, data, type = "application/json") {
   setTimeout(() => URL.revokeObjectURL(url), 3000);
 }
 export const dateLabel = (slot) =>
-  new Intl.DateTimeFormat("ar-KW", {
+  new Intl.DateTimeFormat({ar:"ar-KW",en:"en-KW",ur:"ur-PK"}[getLocale()], {
     timeZone: "Asia/Kuwait",
     weekday: "short",
     month: "short",

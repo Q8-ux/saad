@@ -2,6 +2,7 @@ import pg from "pg";
 import { attachDatabasePool } from "@neon/functions";
 import { schema, defaultSettings } from "./schema.mjs";
 import { seedProperties } from "./seed.mjs";
+import { officeAssistant } from './assistant.mjs';
 import {
   uid,
   hash,
@@ -716,21 +717,9 @@ async function router(req) {
     }
   }
   if (path === "/assistant" && method === "POST") {
-    const b = await body(req, 4000);
-    const props = (await allProperties()).filter((p) =>
-      ["active", "reference"].includes(p.status),
-    );
-    const result = searchProperties(props, {
-      q: String(b.message || "").slice(0, 500),
-    });
-    return json({
-      method: "local",
-      message: result.properties.length
-        ? `وجدت ${result.properties.length} عروض في قاعدة المكتب. التوفر والأسعار يحتاجان تأكيد المكتب.`
-        : "لم أجد عرضاً يطابق طلبك بالكامل. خفف أحد الشروط أو سجل طلبك ليتابعه المكتب.",
-      properties: result.properties.slice(0, 6).map(publicProperty),
-      intent: result.intent,
-    });
+    const b = await body(req, 20000);
+    const result = officeAssistant(b, (await allProperties()).map(publicProperty), await getSettings());
+    return json(result);
   }
   if (path === "/events" && method === "POST") {
     const u = await user(req);

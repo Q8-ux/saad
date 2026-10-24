@@ -1,3 +1,4 @@
+import { translations } from './locales-dictionary.mjs';
 export const CATEGORIES = ["للبيع", "للإيجار", "للبدل"];
 export const TYPES = [
   "شقة",
@@ -190,8 +191,34 @@ export function commissionFils(finalPriceFils, mode, value) {
     throw inputError("قيمة الصفقة مطلوبة");
   return Math.round((finalPriceFils * rate) / 100);
 }
+let searchAliases;
+export function multilingualQuery(query='') {
+  if(!searchAliases){
+    const aliases=new Map();
+    const add=(target,words)=>words.filter(Boolean).forEach(word=>aliases.set(norm(word),target));
+    for(const source of [...CATEGORIES,...TYPES,...AREAS.map(x=>x.area),...Object.keys(GOVERNORATES),...FEATURE_OPTIONS])
+      add(source,Object.values(translations[source]||{}));
+    add('شقة',['apartment','apartments','flat','flats','فلیٹ','اپارٹمنٹ']);
+    add('بيت',['house','houses','home','گھر','مکان']);add('فيلا',['villa','villas','ولا']);add('أرض',['land','plot','plots','پلاٹ','زمین']);
+    add('عمارة',['building','buildings','عمارت']);add('مكتب',['office','offices','دفتر']);add('محل',['shop','shops','دکان']);
+    add('للايجار',['rent','rental','for rent','to rent','کرایہ','کرائے پر','کرایے پر']);
+    add('للبيع',['for sale','buy','sale','خریدنا','خریدنے','فروخت','برائے فروخت']);
+    add('للبدل',['swap','exchange','تبادلہ','بدلے']);
+    add('بحدود',['under','up to','maximum','max','budget','within','سے کم','تک','بجٹ','زیادہ سے زیادہ']);
+    add('غرف',['bedrooms','bedroom','beds','bed','rooms','room','کمرے','کمروں','کمرہ']);
+    add('3',['three','تین']);add('2',['two','دو']);add('4',['four','چار']);add('5',['five','پانچ']);
+    add('الف',['thousand','ہزار']);add('مليون',['million','ملین']);
+    add('الجابرية',['jabriya','jabriya area','jabriyah','al jabriya']);add('العمرية',['omariya','omariyah','umariya']);add('الفنطاس',['fintas']);add('المطلاع',['mutlaa','al mutlaa','mutla','مطلاع']);
+    add('السالمية',['salmiya','salmiyah']);
+    add('',['i am looking for','looking for','i need','i want','show me','please','find me','find','a','an','the','in','at','for','with','and','kwd','kd','monthly','per month','مجھے','چاہیے','درکار','براہ کرم','میں','کے لیے','کیلئے','والا','والی','کا','کی','کے','اور','دکھائیں','تلاش','دینار','ماہانہ']);
+    searchAliases=[...aliases].filter(([word])=>word).sort((a,b)=>b[0].length-a[0].length).map(([word,target])=>[new RegExp(`(?<![\\p{L}\\p{N}])${word.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}(?![\\p{L}\\p{N}])`,'gu'),target]);
+  }
+  let text=norm(query).replace(/(\d+(?:\.\d+)?)\s*k\b/g,'$1 الف');
+  for(const [pattern,target] of searchAliases)text=text.replace(pattern,` ${target} `);
+  return norm(text);
+}
 export function parseIntent(query = "") {
-  let q = norm(query);
+  let q = multilingualQuery(query).replace(/(\d+(?:\.\d+)?(?:\s+(?:الف|مليون))?)\s+بحدود/g,'بحدود $1');
   const found = {};
   const chips = [];
   const remove = (text) => {
