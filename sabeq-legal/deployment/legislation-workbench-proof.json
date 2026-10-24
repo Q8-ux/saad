@@ -1,0 +1,30 @@
+{
+  "backend_version": 136,
+  "archive_pages": 1549,
+  "sections": 74,
+  "reviewed_images": 43,
+  "unresolved_fields": 30,
+  "primary_pages_unchanged": 1710,
+  "primary_edition_unchanged": "2026-10-05",
+  "archive_active_for_generation": false,
+  "public_checked_field_search": true,
+  "negative_search": true,
+  "archive_page_keeps_unresolved_fields": true,
+  "article_number_arabic_readback": true,
+  "image_and_report_sha256_verified": true,
+  "manager_without_session_status": 401,
+  "live_model_generation_tested": false,
+  "authenticated_manager_browser_tested": false,
+  "sourceCommit": "8e06120e523d292df909fa92f32867da8e152599",
+  "focusedTestsPassed": 112,
+  "publicationTestsPassed": 7,
+  "desktopAndMobilePreviewChecked": true,
+  "privateCorpusAbsentFromBrowserBundles": true,
+  "temporaryPreviewAssetsExcludedFromDeployment": true,
+  "typecheck": {
+    "baseline_diagnostics": 20,
+    "current_diagnostics": 20,
+    "added": []
+  },
+  "baselineFastToolsFailure": "Missing dependency ./matter-facts; reproduced on pre-change HEAD"
+}

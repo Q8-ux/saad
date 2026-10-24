@@ -1,15 +1,21 @@
 {
-  "revision": "independent-admin-8-programmer",
-  "backendSource": "f811ae3f2c5fc4b80d4030deb9affe62fa57f9a8",
+  "revision": "independent-admin-9-legislation",
+  "backendSource": "8e06120e523d292df909fa92f32867da8e152599",
   "sourceRepository": "https://github.com/Q8-ux/saad",
   "paymentVisibility": "admin-only-by-default",
   "paymentsLink": "#payments",
   "programmerLink": "#programmer",
   "programmerScope": "advice-and-explicit-follow-up",
   "fccGateway": "requires-independent-configured-service",
-  "backendVersion": 131,
+  "backendVersion": 136,
   "projectProviderConfigured": true,
   "liveInferenceVerified": false,
-  "localChecksPassed": 49,
-  "releasePreparedAt": "2026-10-21T20:12:10.290Z"
+  "localChecksPassed": 112,
+  "releasePreparedAt": "2026-10-24T21:22:53.439651+00:00",
+  "legislationLink": "#legislation",
+  "archiveAssistantUse": "checked-image-fields-only",
+  "archiveMemoUse": "blocked",
+  "publicationChecksPassed": 7,
+  "authenticatedBrowserTested": false,
+  "liveReadOnlyChecksPassed": true
 }
