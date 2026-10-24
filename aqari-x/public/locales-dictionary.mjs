@@ -1582,6 +1582,22 @@ const marketUI = {
   "رصد السوق ومصادر البحث": {
     "en": "Market research and sources",
     "ur": "مارکیٹ کی تلاش اور ذرائع"
+  },
+  "صورة مولّدة · للتوضيح": {
+    "en": "AI-generated · Illustrative",
+    "ur": "مصنوعی ذہانت سے تیار · وضاحتی"
+  },
+  "صورة عقارية مولّدة للتوضيح ولا تمثل العقار الفعلي": {
+    "en": "AI-generated property illustration; not a photograph of the actual property",
+    "ur": "جائیداد کی وضاحتی تصویر، مصنوعی ذہانت سے تیار کردہ؛ اصل جائیداد کی تصویر نہیں"
+  },
+  "صورة مولّدة بالذكاء الاصطناعي للتجربة؛ لا تمثل العقار المعروض أو تشطيبه أو موقعه الفعلي.": {
+    "en": "AI-generated image for this trial. It does not depict the listed property, its actual finishes or its location.",
+    "ur": "اس تجربے کے لیے مصنوعی ذہانت سے تیار کردہ تصویر۔ یہ درج شدہ جائیداد، اس کی اصل تکمیل یا مقام کی تصویر نہیں ہے۔"
+  },
+  "بحث أُجري في 24 أكتوبر 2026. هذه دفعة محددة من نتائج البحث، وليست تغذية مباشرة أو حصراً لجميع العروض. صور البطاقات مولّدة للتجربة ولا تمثل العقارات الفعلية. وسائط الإعلانات الأصلية في رابط المصدر.": {
+    "en": "Research conducted on 24 October 2026. This is a limited research batch, not a live feed or complete inventory. Card images are AI-generated illustrations, not photographs of the listed properties. Original listing media remains at the source.",
+    "ur": "تلاش 24 اکتوبر 2026 کو کی گئی۔ یہ محدود نتائج ہیں، براہ راست فیڈ یا تمام اشتہارات نہیں۔ کارڈ کی تصاویر مصنوعی ذہانت سے تیار کردہ وضاحتی تصاویر ہیں، اصل جائیدادوں کی تصاویر نہیں۔ اصل اشتہارات کا میڈیا ماخذ کے لنک پر ہے۔"
   }
 };
 export const translations = {
