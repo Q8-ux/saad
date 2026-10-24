@@ -23,10 +23,20 @@ export const pleadingLayout = {
   firstMarginsCss: "10mm 8.5mm 10mm 6mm",
 } as const;
 const governmentCaptions = new Set(["دولة الكويت", "وزارة العدل", "إدارة كتاب محكمة الاستئناف", "قسم ضباط الدعاوى"]);
+// Source markers stay in checked drafting content, never in the court copy.
+export function stripPleadingResearchAnnotations(text:string):string {
+  return text
+    .replace(/[【\[]\s*م[\d٠-٩۰-۹]+\s*[】\]]/gu, "")
+    .replace(/؛\s*صفح(?:ة|ات)\s+PDF\s+[\d٠-٩۰-۹]+(?:\s*[–-]\s*[\d٠-٩۰-۹]+)?(?=\))/giu, "")
+    .split("\n")
+    .filter(line=>!/^\s*(?:المرجع|المصدر|المراجع(?: القانونية)?)\s*[:：]\s*(?:منشورات\s+)?(?:وزارة\s+العدل|بوابة\s+وزارة|موقع\s+وزارة|https?:\/\/)/u.test(line))
+    .join("\n");
+}
 export function presentationPleadingPages(pages: PleadingPage[]): PleadingPage[] {
+  const clean=(blocks:PleadingBlock[])=>blocks.map(b=>({...b,text:stripPleadingResearchAnnotations(b.text)})).filter(b=>b.text.trim());
   return wideContinuationPages(pages.map(({emblem: _emblem, ministry: _ministry, court: _court, sidebar, ...page}, i) => {
     const cleanSidebar = i === 0 ? sidebar?.filter(b => !governmentCaptions.has(b.text.replace(/\s+/g, " ").trim())) : undefined;
-    return {...page, ...(cleanSidebar?.length ? {sidebar: cleanSidebar} : {})};
+    return {...page,blocks:clean(page.blocks),...(page.after?{after:clean(page.after)}:{}), ...(cleanSidebar?.length ? {sidebar: clean(cleanSidebar)} : {})};
   }));
 }
 // Word applies margins per section, not per physical first page. Bound the
@@ -145,5 +155,5 @@ export function renderPleadingHtml(doc: PleadingDocument) {
 
 // Legacy text results still need a format that can retain Arabic direction.
 export function renderArabicMemoHtml(text: string) {
-  return `<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>مذكرة قانونية</title><style>@font-face{font-family:Mohanad;src:url('https://q8-ux.github.io/saad/sabeq-legal/assets/al-mohanad.ttf')}html,body{direction:rtl;text-align:right}body{font-family:Mohanad,Arial,sans-serif;font-size:18px;line-height:1.9;padding:24px;white-space:pre-wrap;overflow-wrap:anywhere}@page{size:A4;margin:18mm}.continuation-page{padding:0}@media print{body{padding:0;font-size:14pt}}</style></head><body lang="ar" dir="rtl">${escapeDocument(text)}</body></html>`;
+  return `<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>مذكرة قانونية</title><style>@font-face{font-family:Mohanad;src:url('https://q8-ux.github.io/saad/sabeq-legal/assets/al-mohanad.ttf')}html,body{direction:rtl;text-align:right}body{font-family:Mohanad,Arial,sans-serif;font-size:18px;line-height:1.9;padding:24px;white-space:pre-wrap;overflow-wrap:anywhere}@page{size:A4;margin:18mm}.continuation-page{padding:0}@media print{body{padding:0;font-size:14pt}}</style></head><body lang="ar" dir="rtl">${escapeDocument(stripPleadingResearchAnnotations(text))}</body></html>`;
 }

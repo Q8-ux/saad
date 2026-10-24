@@ -1,7 +1,7 @@
 import { validateMemoInput } from "@/lib/memo-input";
 import { reserveMemoPayment, completeMemoPayment, releaseMemoPayment, type PaymentLease } from "@/lib/sadad-payments";
 import {assessMatterFacts} from "@/lib/matter-facts";
-import {scopeEvidenceToFacts,prepareBoundDraft} from "@/lib/bound-draft";
+import {scopeEvidenceToFacts,prepareBoundDraft,pleadingAuthorityInstructions} from "@/lib/bound-draft";
 import { applyCheckedJudgmentMatches, caseReasoningInstructions, caseResearchQueries, approvedCaseFacts, buildCheckedCasePlan, CasePlanValidationError, casePlanFailureMessage, caseAuditSchema, parseCaseAudit, caseQualitySummary } from "@/lib/case-reasoning";
 import { legalSourceCoverage, formatSourceCoverage } from "@/lib/legal-source-coverage";
 import { loadApprovedTemplate } from "@/lib/approved-templates";
@@ -55,7 +55,7 @@ export async function POST(request: Request) {
     const signal = AbortSignal.any([request.signal, AbortSignal.timeout(240_000)]);
     const generateText = (options: Parameters<typeof modelGenerateText>[0]) => {
       signal.throwIfAborted();
-      return modelGenerateText({ ...options, signal });
+      return modelGenerateText({ ...options, instructions:`${options.instructions}\n${pleadingAuthorityInstructions}`, signal });
     };
     const user = await requireMemoUserOrGuest(request);
     await requireServiceEnabled("memo");
@@ -109,7 +109,7 @@ export async function POST(request: Request) {
     let agentAudit: unknown;
     async function finish(content: PleadingContent, qualityRetried = false): Promise<Response> {
       content=prepareBoundDraft(content,memoInput,evidence);
-      let citationReview=reviewLegalCitations(`${content.grounds}\n${content.requests}`,evidence,{requireJudgmentAnalogy:true});
+      let citationReview=reviewLegalCitations(`${content.grounds}\n${content.requests}`,evidence,{requireJudgmentAnalogy:true,courtDocument:true});
       if (!citationReview.ok && evidence.length) {
         // Retry legal prose once, preserving the visitor's facts, identities,
         // and requested relief. A failed correction never reaches the archive.
@@ -122,7 +122,7 @@ export async function POST(request: Request) {
         if(typeof parsed.grounds!=="string") throw new RequestError(citationFailureMessage,422);
         content=prepareBoundDraft({...content,grounds:parsed.grounds},memoInput,evidence);
 
-        citationReview=reviewLegalCitations(`${content.grounds}\n${content.requests}`,evidence,{requireJudgmentAnalogy:true});
+        citationReview=reviewLegalCitations(`${content.grounds}\n${content.requests}`,evidence,{requireJudgmentAnalogy:true,courtDocument:true});
       }
       if(!citationReview.ok) {
         await finishMemoRequest(managementRequestId, "needs_review", "", "source_review");
@@ -149,9 +149,10 @@ export async function POST(request: Request) {
         }
       }
       const caseQuality=caseQualitySummary(checkedPlan,caseAudit,content,evidence.length);
+      const citedContent=`${content.grounds}\n${content.requests}`;
       const document = buildPleadingDocument(template.info,template.definition,kind,memoInput,content);
       const finalMemo = pleadingText(document);
-      const sources = evidence.map((item,index)=>({marker:`م${index+1}`,title:item.title,reference:item.reference||"غير محدد",kind:isCassationEvidence(item)?"cassation":"legislation",officialSource:item.officialSource,sourceUrl:item.sourceUrl,libraryUpdatedAt:item.libraryUpdatedAt||null,verification:item.verification,corpus:item.corpus,sourceAccess:item.sourceUrl?"original_link":"indexed_upload"})).filter(source=>new RegExp(`[【\\[]${source.marker}[】\\]]`).test(finalMemo));
+      const sources = evidence.map((item,index)=>({marker:`م${index+1}`,title:item.title,reference:item.reference||"غير محدد",kind:isCassationEvidence(item)?"cassation":"legislation",officialSource:item.officialSource,sourceUrl:item.sourceUrl,libraryUpdatedAt:item.libraryUpdatedAt||null,verification:item.verification,corpus:item.corpus,sourceAccess:item.sourceUrl?"original_link":"indexed_upload"})).filter(source=>new RegExp(`[【\\[]\\s*${source.marker}\\s*[】\\]]`).test(citedContent));
       signal.throwIfAborted();
       await finishMemoRequest(managementRequestId, "needs_review", finalMemo, "draft_generated");
       if(user) await recordServiceActivity({userId:user.id,serviceType:"memo",title:`${document.title} — ${clientName}`,inputText:JSON.stringify({...memoInput,legalIssues}),outputText:finalMemo,metadata:{managementRequestId,sourceCount:sources.length,caseNumber,template:template.info,documentKind:document.kind,pageSections:document.pages.length}});

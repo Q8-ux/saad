@@ -10,12 +10,13 @@ const law=/(?:القانون|قانون|المرسوم\s+بقانون)\s*(?:(?:[
 const article=/(?:المادة|الماده|مادة|ماده|المادتين|المادتان|المواد|article|section|دفعہ)\s*(?:رقم\s*)?[（(]?([\d٠-٩۰-۹]+(?:\s*[,،و]\s*[\d٠-٩۰-۹]+)*)(?:\s*(مكرر(?:ة)?))?/giu;
 const ordinal=/(?:المادة|مادة)\s+(الأولى|الاولى|أولى|اولى|الثانية|ثانية)(?![\p{L}])/gu;
 const judgment=/(?:الطعن|طعن|حكم|judgment|appeal)\s*(?:رقم|no\.?|number)?\s*[（(]?([\d٠-٩۰-۹]+)(?:\s*(?:[/،]|لسنة|لسنه)\s*([\d٠-٩۰-۹]+))?/giu;
-export type CitationIssue={code:"unknown_source"|"missing_source"|"unverified_article"|"wrong_law"|"unverified_judgment"|"judgment_not_analogous"|"wrong_judgment_date"|"repealed_article";marker?:string};
+export type CitationIssue={code:"unknown_source"|"missing_source"|"unverified_article"|"wrong_law"|"unverified_judgment"|"judgment_not_analogous"|"wrong_judgment_date"|"repealed_article"|"research_reference_in_pleading";marker?:string};
 /** Each claim is paired with its own adjacent source markers. No cross-law
  * matching of numbers, trust in case text, or reliance on OCR quality. */
-export function reviewLegalCitations(text:string,evidence:LegalEvidence[],options:{requireJudgmentAnalogy?:boolean}={}) {
+export function reviewLegalCitations(text:string,evidence:LegalEvidence[],options:{requireJudgmentAnalogy?:boolean;courtDocument?:boolean}={}) {
  const issues:CitationIssue[]=[];const sources=new Map(evidence.map((s,i)=>[`م${i+1}`,s]));
  for(const paragraph of text.split(/\n+/).filter(Boolean)) {
+  if(options.courtDocument&&(/^\s*(?:[-#*]+\s*)?(?:المرجع|المصدر|الحاشية|الهامش|المراجع(?: القانونية)?|المصادر(?: القانونية)?)\s*[:：]/u.test(paragraph)||/^\s*(?:قائمة\s+)?(?:المراجع|المصادر)(?:\s+القانونية)?\s*$/u.test(paragraph)||/(?:المصدر|المرجع)\s*[:：]\s*(?:منشورات\s+)?(?:وزارة\s+العدل|موقع\s+وزارة|بوابة\s+وزارة|https?:\/\/)|(?:راجع|انظر)\s+(?:موقع|بوابة|منشورات)\s+وزارة\s+العدل|صفح(?:ة|ات)\s+PDF\s*[\d٠-٩۰-۹]/iu.test(paragraph)))issues.push({code:'research_reference_in_pleading'});
   const pieces=paragraph.split(/((?:[【\[]\s*م\d+\s*[】\]]\s*)+)/g);
   for(let i=0;i<pieces.length;i+=2) {
    const claim=pieces[i],ids=[...(pieces[i+1]||"").matchAll(/م\d+/g)].map(m=>m[0]);

@@ -1,8 +1,10 @@
+import {legalResearchInstructions} from "./legal-language";
+import {pleadingAuthorityInstructions} from "./bound-draft";
 import { caseReasoningInstructions, type CasePlan } from "./case-reasoning";
 import { legalSourceCoverage } from "./legal-source-coverage";
 import { env } from "cloudflare:workers";
 import { parsePleadingContent, type PleadingContent, type PleadingInput, type TemplateInfo } from "./pleading-document";
-import { isCassationEvidence, type LegalEvidence } from "./legal-search";
+import { corpusContext, isCassationEvidence, type LegalEvidence } from "./legal-search";
 import { RequestError } from "./request-security";
 
 type AgentEnvironment = { SABEQ_AGENT_ENABLED?: string; SABEQ_AGENT_URL?: string; SABEQ_AGENT_BRIDGE_TOKEN?: string };
@@ -26,8 +28,8 @@ export async function generateAgentPleading(input: { caseData: PleadingInput; fi
   const token = runtime.SABEQ_AGENT_BRIDGE_TOKEN || "";
   if (token.length < 32) throw new RequestError("لم يكتمل إعداد مسار الصياغة. يرجى مراجعة إدارة المجموعة.",503);
   const requestId = crypto.randomUUID();
-  const sources = input.evidence.map((item,index)=>({sourceId:evidenceSourceId(item,index),marker:`م${index+1}`,kind:isCassationEvidence(item)?"cassation":"legislation",title:item.title,text:item.text,reference:item.reference||"",sourceUrl:item.sourceUrl||""}));
-  const payload = {caseReasoning:{revision:"case-grounded-memo-1",instructions:caseReasoningInstructions,plan:input.casePlan||null},sourceCoverage:legalSourceCoverage(input.evidence),requestId,language:"ar",documentKind:input.documentKind,template:{id:input.template.id,version:input.template.version,kind:input.template.kind,title:input.template.title,sourceSha256:input.template.sourceSha256},caseData:input.caseData,fields:input.fields,sources};
+  const sources = input.evidence.map((item,index)=>({sourceId:evidenceSourceId(item,index),marker:`م${index+1}`,kind:isCassationEvidence(item)?"cassation":"legislation",title:item.title,text:item.text,reference:(item.reference||"")+corpusContext(item),sourceUrl:item.sourceUrl||""}));
+  const payload = {caseReasoning:{revision:"case-grounded-memo-1",instructions:caseReasoningInstructions+"\n"+legalResearchInstructions+"\n"+pleadingAuthorityInstructions,plan:input.casePlan||null},sourceCoverage:legalSourceCoverage(input.evidence),requestId,language:"ar",documentKind:input.documentKind,template:{id:input.template.id,version:input.template.version,kind:input.template.kind,title:input.template.title,sourceSha256:input.template.sourceSha256},caseData:input.caseData,fields:input.fields,sources};
   let response: Response;
   try {
     response = await transport(url, {method:"POST",headers:{"Content-Type":"application/json",Authorization:`Bearer ${token}`},body:JSON.stringify(payload),signal:input.signal ? AbortSignal.any([input.signal,AbortSignal.timeout(185_000)]) : AbortSignal.timeout(185_000),redirect:"error"});
