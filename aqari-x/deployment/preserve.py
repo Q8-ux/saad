@@ -2,6 +2,7 @@
 import hashlib
 import json
 import os
+import re
 from pathlib import Path, PurePosixPath
 import shutil
 import subprocess
@@ -51,17 +52,22 @@ def prepare():
     preserved = protected_manifest(root)
     source = Path("aqari-x/public")
     required = ["index.html", "app.mjs", "core.mjs", "style.css", "config.mjs",
-                "admin/index.html", "admin/admin.mjs", "assets/fonts/Cairo-Variable.woff2"]
+                "admin/index.html", "admin/admin.mjs", "assets/fonts/Cairo-Variable.woff2",
+                "i18n.mjs", "locales-dictionary.mjs", "office-bot.mjs", "theme.mjs"]
     for name in required:
         if not (source / name).is_file():
             raise RuntimeError(f"Missing Aqari X public file: {name}")
-    if not (source / "config.mjs").read_text().count("https://"):
+    config_text = (source / "config.mjs").read_text()
+    version = re.search(r'export const VERSION\s*=\s*"([\w.-]+)"', config_text)
+    if version is None:
+        raise RuntimeError("A public release version is required")
+    if not config_text.count("https://"):
         raise RuntimeError("A real backend URL is required")
     shutil.rmtree(root / "aqari-x", ignore_errors=True)
     shutil.copytree(source, root / "aqari-x", ignore=shutil.ignore_patterns("__qa-*"))
     if protected_manifest(root) != preserved:
         raise RuntimeError("An unrelated project's published content changed")
-    proof = {"version":"1.0.3", "commit":os.environ["GITHUB_SHA"], "baseRun":previous["id"],
+    proof = {"version":version.group(1), "commit":os.environ["GITHUB_SHA"], "baseRun":previous["id"],
              "preservedFiles":len(preserved), "data":"server-persisted", "admin":"server-authorized"}
     (root / "aqari-x/deployment.json").write_text(json.dumps(proof, indent=2) + "\n")
     print(f"Prepared Aqari X; {len(preserved)} unrelated published files are unchanged.")
