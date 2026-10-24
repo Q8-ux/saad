@@ -13,7 +13,7 @@ function harness(){
  const runtime={AUTH_SECRET:'synthetic-secret-for-tests-'.repeat(3),ALLOW_GUEST_MEMO:'true'},cache=new Map(),calls=[],invoices=new Map();let next=100,failInsert=false,authFailures=0,clockOffset=0;
  class Clock extends Date { static now(){return Date.now()+clockOffset;} }
  let transport=async(url,init={})=>{
-  calls.push({url:String(url),init});assert.equal(init.redirect,'error');
+  calls.push({url:String(url),init});assert.equal(init.redirect,'manual');
   const path=new URL(url).pathname;
   if(path.endsWith('GenerateRefreshToken')){if(authFailures){authFailures--;throw Error('synthetic auth failure');}assert.equal(init.method,'POST');assert.match(init.headers.Authorization,/^Basic /);assert.equal(init.body,'{}');assert.equal(init.headers['Content-Type'],'application/json');return Response.json({isValid:true,response:{refreshToken:'synthetic-refresh'}});}
   if(path.endsWith('GenerateAccessToken')){assert.equal(init.method,'POST');assert.equal(init.body,'{}');assert.equal(init.headers['Content-Type'],'application/json');assert.equal(init.headers.Authorization,'Bearer synthetic-refresh');return Response.json({isValid:true,response:{accessToken:'synthetic-access',expiredAfterSeconds:86400}});}
