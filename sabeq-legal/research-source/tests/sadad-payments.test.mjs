@@ -15,11 +15,11 @@ function harness(){
  let transport=async(url,init={})=>{
   calls.push({url:String(url),init});assert.equal(init.redirect,'error');
   const path=new URL(url).pathname;
-  if(path.endsWith('GenerateRefreshToken')){if(authFailures){authFailures--;throw Error('synthetic auth failure');}assert.equal(init.method,'POST');assert.match(init.headers.Authorization,/^Basic /);assert.equal(init.body,undefined);return Response.json({isValid:true,response:{refreshToken:'synthetic-refresh'}});}
-  if(path.endsWith('GenerateAccessToken')){assert.equal(init.headers.Authorization,'Bearer synthetic-refresh');return Response.json({isValid:true,response:{accessToken:'synthetic-access',expiredAfterSeconds:86400}});}
+  if(path.endsWith('GenerateRefreshToken')){if(authFailures){authFailures--;throw Error('synthetic auth failure');}assert.equal(init.method,'POST');assert.match(init.headers.Authorization,/^Basic /);assert.equal(init.body,'{}');assert.equal(init.headers['Content-Type'],'application/json');return Response.json({isValid:true,response:{refreshToken:'synthetic-refresh'}});}
+  if(path.endsWith('GenerateAccessToken')){assert.equal(init.method,'POST');assert.equal(init.body,'{}');assert.equal(init.headers['Content-Type'],'application/json');assert.equal(init.headers.Authorization,'Bearer synthetic-refresh');return Response.json({isValid:true,response:{accessToken:'synthetic-access',expiredAfterSeconds:86400}});}
   assert.equal(init.headers.Authorization,'Bearer synthetic-access');
   if(path.endsWith('/Invoice/insert')){const invoice=JSON.parse(init.body).invoices[0],id=String(next++);invoices.set(id,{id:Number(id),key:'synthetic-invoice-key-'+id,ref_Number:invoice.ref_Number,amount:invoice.amount,currency_Code:'KWD',status:'Unpaid',refunded_Amount:0,transactionID:'',transactions:[]});if(failInsert)throw Error('synthetic timeout after insert');return Response.json({isValid:true,response:{invoiceId:id}});}
-  if(path.endsWith('/Invoice/getbyid'))return Response.json({isValid:true,response:invoices.get(new URL(url).searchParams.get('id'))});
+  if(path.endsWith('/Invoice/getbyid')){assert.equal(init.method,'GET');assert.equal(init.body,undefined);return Response.json({isValid:true,response:invoices.get(new URL(url).searchParams.get('id'))});}
   throw Error('Unexpected external request');
  };
  const load=file=>{file=resolve(root,file);if(cache.has(file))return cache.get(file);const exports={};cache.set(file,exports);const source=ts.transpileModule(readFileSync(file,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,esModuleInterop:true}}).outputText;
