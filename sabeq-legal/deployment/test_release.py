@@ -98,7 +98,9 @@ class PublicationTests(unittest.TestCase):
                                 ("sabeq-admin-preview/admin.js\nsabeq-legal/deployment/release.py", "true"),
                                 ("sabeq-admin-preview/admin.js\nlegal-memo-platform/gateway.js", "false"),
                                 ("sabeq-legal/index.html\ntamweenat/app.js", "false"),
-                                (".github/workflows/deploy-pages.yml", "false")]:
+                                (".github/workflows/deploy-pages.yml", "false"),
+                                ("sabeq-admin-preview/mobileqa.js\n.github/workflows/sabeq-phone-harness.yml\nscripts/sabeq-phone-harness/smoke.sh", "true"),
+                                ("sabeq-admin-preview/mobileqa.js\n.github/workflows/other.yml", "false")]:
             with tempfile.NamedTemporaryFile() as out, patch.dict(os.environ, {"BEFORE_SHA":"a"*40,"GITHUB_SHA":"b"*40,"GITHUB_EVENT_NAME":"push","GITHUB_OUTPUT":out.name}), patch.object(release,"command",side_effect=["b"*40,paths]), patch.object(release.subprocess,"run"):
                 release.scope()
                 self.assertEqual(Path(out.name).read_text(),"sabeq_only="+expected+"\n")

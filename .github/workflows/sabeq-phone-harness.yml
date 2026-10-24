@@ -1,0 +1,90 @@
+name: Sabeq Mobile QA - Phone Harness
+
+on:
+  pull_request:
+    paths:
+      - 'sabeq-admin-preview/**'
+      - 'sabeq-legal/deployment/**'
+      - 'sabeq-legal/research-source/public/management/**'
+      - 'scripts/sabeq-phone-harness/**'
+      - '.github/workflows/sabeq-phone-harness.yml'
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'Approved public Sabeq URL to inspect'
+        required: true
+        type: choice
+        options:
+          - 'https://www.sabeq.legal'
+          - 'https://q8-ux.github.io/saad/sabeq-legal/'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sabeq-phone-harness-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  static-qa:
+    name: Verify dashboard integration and publication safety
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: JavaScript, shell, and Sabeq deployment tests
+        run: |
+          node --check sabeq-admin-preview/admin.js
+          node --check sabeq-admin-preview/mobileqa.js
+          node --check sabeq-admin-preview/appointments.js
+          node --check sabeq-legal/research-source/public/management/admin.js
+          node --check sabeq-legal/research-source/public/management/mobileqa.js
+          node --check sabeq-legal/research-source/public/management/appointments.js
+          bash -n scripts/sabeq-phone-harness/smoke.sh
+          python sabeq-legal/deployment/test_release.py
+          python sabeq-legal/deployment/test_appointment_schedule.py
+          cmp sabeq-admin-preview/admin.js sabeq-legal/research-source/public/management/admin.js
+          cmp sabeq-admin-preview/mobileqa.js sabeq-legal/research-source/public/management/mobileqa.js
+          cmp sabeq-admin-preview/appointments.js sabeq-legal/research-source/public/management/appointments.js
+          cmp sabeq-admin-preview/index.html sabeq-legal/research-source/public/management/index.html
+          cmp sabeq-admin-preview/admin.css sabeq-legal/research-source/public/management/admin.css
+  android-smoke:
+    if: github.event_name == 'workflow_dispatch'
+    needs: static-qa
+    name: Read-only Android phone inspection
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      SABEQ_TARGET_URL: ${{ inputs.target }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install pinned stable Phone Harness
+        run: python -m pip install --disable-pip-version-check 'phone-harness==0.3.2'
+      - name: Enable KVM acceleration
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Test on an Android emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          disable-animations: true
+          script: bash scripts/sabeq-phone-harness/smoke.sh
+      - name: Upload public-site test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sabeq-mobile-qa-${{ github.run_number }}
+          path: qa-evidence/
+          if-no-files-found: warn
+          retention-days: 7

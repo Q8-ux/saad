@@ -2,6 +2,7 @@ import { listManagedUsers, updateManagedUser } from "@/lib/user-management";
 import { mailboxAction } from "@/lib/management-mailboxes";
 import { sadadManagement } from "@/lib/sadad-payments";
 import { programmerAction } from "@/lib/management-programmer";
+import { officeAppointments, saveSchedule, changeBookingStatus } from "@/lib/management-appointments";
 import { getD1 } from "@/db";
 import { assertManagementOrigin, exchangeManagerCode, managementJson, managerLogin, requireManager } from "@/lib/management-auth";
 import { bridgeKeys, managerInbox, managerMemos, managerSnapshot, managerUpdates } from "@/lib/management-data";
@@ -22,12 +23,14 @@ export async function GET(request: Request) {
     if (action === "jwks") { const keys = await bridgeKeys(); return managementJson({ keys: [keys.publicKey] }); }
     const manager = await requireManager(request), url = new URL(request.url);
     if (action === "users") return managementJson(await listManagedUsers(url, 50));
+    if (action === "appointments") return managementJson(await officeAppointments());
     if (action === "programmer") return managementJson(await programmerAction(null, manager.email));
     if (action === "payments") return managementJson(await sadadManagement(null, manager.email));
     if (action === "mailboxes") return managementJson(await mailboxAction(null, manager.email, Number(url.searchParams.get("offset") || 0)));
     if (action === "session") return managementJson({ manager: { email: manager.email, name: manager.name } });
     if (action === "snapshot") return managementJson(await managerSnapshot(manager.email));
     if (action === "memos") return managementJson(await managerMemos(url));
+    if (action === "memo-review") { const id=cleanString(url.searchParams.get("id"),"معرف المذكرة",{max:150}); const review=await getD1().prepare("SELECT review_status,review_note,reviewed_by,updated_at FROM management_memo_reviews WHERE memo_id=?").bind(id).first(); return managementJson({review: review || {review_status:"pending",review_note:"",reviewed_by:"",updated_at:null}}); }
     if (action === "inbox") return managementJson(await managerInbox(url));
     if (action === "updates") return managementJson(await managerUpdates());
     if (action === "whatsapp") return managementJson(await whatsappAction(null, manager.email));
@@ -48,6 +51,9 @@ export async function POST(request: Request) {
       return managementJson(await programmerAction(data, manager.email, request.signal));
     }
     if (action === "logout") { await getD1().prepare("DELETE FROM management_sessions WHERE token_hash = ?").bind(manager.hash).run(); return managementJson({ ok: true }); }
+    if (action === "schedule") { const schedule=await saveSchedule(data,manager.email); await operationEvent("admin","consultation-schedule","تم تحديث أيام وسعة مواعيد الاستشارات"); return managementJson({schedule}); }
+    if (action === "appointments") { const result=await changeBookingStatus(data.id,data.status); await operationEvent("admin","consultation-status","تم تغيير حالة حجز استشارة"); return managementJson(result); }
+    if (action === "memo-review") { const id=cleanString(data.id,"معرف المذكرة",{max:150}); const status=cleanString(data.status,"قرار المراجعة",{max:25}); const note=cleanMultiline(data.note,"ملاحظات المراجع",{max:1800,required:false}); if(!/^[a-zA-Z0-9:_-]{1,150}$/.test(id)||!["pending","approved","needs_changes"].includes(status))throw new RequestError("بيانات مراجعة المذكرة غير صحيحة."); await getD1().prepare("INSERT INTO management_memo_reviews(memo_id,review_status,review_note,reviewed_by) VALUES(?,?,?,?) ON CONFLICT(memo_id) DO UPDATE SET review_status=excluded.review_status,review_note=excluded.review_note,reviewed_by=excluded.reviewed_by,updated_at=CURRENT_TIMESTAMP").bind(id,status,note,manager.email).run(); await operationEvent("admin","memo-review","تم حفظ قرار مراجعة مذكرة"); return managementJson({ok:true}); }
     if (action === "users") { const result = await updateManagedUser(data); await operationEvent("admin", "user-updated", "تم تحديث حساب مستخدم وخدماته"); return managementJson(result); }
     if (action === "payments") return managementJson(await sadadManagement(data, manager.email));
     if (action === "mailboxes") return managementJson(await mailboxAction(data, manager.email));

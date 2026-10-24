@@ -46,7 +46,13 @@ def scope():
     if os.environ.get("GITHUB_EVENT_NAME") == "push" and re.fullmatch(r"[0-9a-f]{40}", before) and set(before) != {"0"}:
         subprocess.run(["git", "fetch", "--no-tags", "--depth=1", "origin", before], check=True)
         paths = command("git", "diff", "--name-only", before, current).splitlines()
-        only = any(p.startswith(tuple(d + "/" for d in SABEQ_DIRECTORIES)) for p in paths) and all(p.startswith(tuple(d + "/" for d in SABEQ_DIRECTORIES)) or p == WORKFLOW for p in paths)
+        only = any(p.startswith(tuple(d + "/" for d in SABEQ_DIRECTORIES)) for p in paths) and all(
+            p.startswith(tuple(d + "/" for d in SABEQ_DIRECTORIES))
+            or p == WORKFLOW
+            or p == ".github/workflows/sabeq-phone-harness.yml"
+            or p.startswith("scripts/sabeq-phone-harness/")
+            for p in paths
+        )
     with open(os.environ["GITHUB_OUTPUT"], "a") as f:
         f.write("sabeq_only=" + str(only).lower() + "\n")
 
@@ -135,8 +141,8 @@ def verify():
         if "ibm-plex-arabic" in stylesheet and not (admin / "fonts/OFL.txt").is_file():
             raise RuntimeError("Admin font licence missing")
         admin_scripts = re.findall(r'<script[^>]+src="([^"]+)"', (admin / "index.html").read_text())
-        approved = [re.fullmatch(r"\./(programmer|admin)\.js(?:\?v=[a-z0-9-]{1,80})?", src) for src in admin_scripts]
-        if not all(approved) or [match.group(1) for match in approved] not in (["admin"], ["programmer", "admin"]):
+        approved = [re.fullmatch(r"\./(programmer|mobileqa|appointments|admin)\.js(?:\?v=[a-z0-9-]{1,80})?", src) for src in admin_scripts]
+        if not all(approved) or [match.group(1) for match in approved] not in (["admin"], ["programmer", "admin"], ["programmer", "mobileqa", "admin"], ["programmer", "mobileqa", "appointments", "admin"]):
             raise RuntimeError("Unexpected admin script path")
         for match in approved:
             asset = admin / (match.group(1) + ".js")
