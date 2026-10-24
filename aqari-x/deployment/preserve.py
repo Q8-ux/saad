@@ -51,7 +51,7 @@ def prepare():
     preserved = protected_manifest(root)
     source = Path("aqari-x/public")
     required = ["index.html", "app.mjs", "core.mjs", "style.css", "config.mjs",
-                "admin/index.html", "admin/admin.mjs", "assets/fonts/al-mohanad.woff"]
+                "admin/index.html", "admin/admin.mjs", "assets/fonts/Cairo-Variable.woff2"]
     for name in required:
         if not (source / name).is_file():
             raise RuntimeError(f"Missing Aqari X public file: {name}")
@@ -61,7 +61,7 @@ def prepare():
     shutil.copytree(source, root / "aqari-x", ignore=shutil.ignore_patterns("__qa-*"))
     if protected_manifest(root) != preserved:
         raise RuntimeError("An unrelated project's published content changed")
-    proof = {"version":"1.0.0", "commit":os.environ["GITHUB_SHA"], "baseRun":previous["id"],
+    proof = {"version":"1.0.1", "commit":os.environ["GITHUB_SHA"], "baseRun":previous["id"],
              "preservedFiles":len(preserved), "data":"server-persisted", "admin":"server-authorized"}
     (root / "aqari-x/deployment.json").write_text(json.dumps(proof, indent=2) + "\n")
     print(f"Prepared Aqari X; {len(preserved)} unrelated published files are unchanged.")

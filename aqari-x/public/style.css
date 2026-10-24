@@ -1,13 +1,8 @@
 @font-face {
-  font-family: Mohanad;
-  src: url("./assets/fonts/al-mohanad.woff") format("woff");
-  font-weight: 400 600;
-  font-display: swap;
-}
-@font-face {
-  font-family: Mohanad;
-  src: url("./assets/fonts/al-mohanad-bold.woff") format("woff");
-  font-weight: 700 900;
+  font-family: Cairo;
+  src: url("./assets/fonts/Cairo-Variable.woff2") format("woff2");
+  font-weight: 200 1000;
+  font-style: normal;
   font-display: swap;
 }
 :root {
@@ -38,7 +33,7 @@ body {
   background: var(--bg);
   color: var(--ink);
   font:
-    1rem/1.6 Mohanad,
+    1rem/1.6 Cairo,
     Arial,
     sans-serif;
   overflow-x: hidden;

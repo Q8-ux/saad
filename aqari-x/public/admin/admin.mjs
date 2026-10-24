@@ -682,7 +682,7 @@ async function renderFiles() {
 const modules = [
   [
     "مسار ذوق الواجهات",
-    "واجهة عربية بخط المهند، قائمة يمين، خط واضح، لوحة منفصلة وتجربة جوال.",
+    "واجهة عربية بخط Cairo، قائمة يمين، خط واضح، لوحة منفصلة وتجربة جوال.",
     "active",
     "مطبق",
     "https://github.com/Q8-ux/saad/tree/main/aqari-x",
