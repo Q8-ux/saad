@@ -15,7 +15,7 @@ function harness(){
  let transport=async(url,init={})=>{
   calls.push({url:String(url),init});assert.equal(init.redirect,'error');
   const path=new URL(url).pathname;
-  if(path.endsWith('GenerateRefreshToken')){if(authFailures){authFailures--;throw Error('synthetic auth failure');}assert.equal(init.method,'POST');assert.match(init.headers.Authorization,/^Basic /);assert.equal(init.body,undefined);return Response.json({isValid:true,response:{refreshToken:'synthetic-refresh'}});}
+  if(path.endsWith('GenerateRefreshToken')){if(authFailures){authFailures--;throw Error('synthetic auth failure');}assert.equal(init.method,'POST');assert.match(init.headers.Authorization,/^Basic /);assert.equal(init.body,'{}');assert.equal(init.headers['Content-Type'],'application/json');return Response.json({isValid:true,response:{refreshToken:'synthetic-refresh'}});}
   if(path.endsWith('GenerateAccessToken')){assert.equal(init.headers.Authorization,'Bearer synthetic-refresh');return Response.json({isValid:true,response:{accessToken:'synthetic-access',expiredAfterSeconds:86400}});}
   assert.equal(init.headers.Authorization,'Bearer synthetic-access');
   if(path.endsWith('/Invoice/insert')){const invoice=JSON.parse(init.body).invoices[0],id=String(next++);invoices.set(id,{id:Number(id),key:'synthetic-invoice-key-'+id,ref_Number:invoice.ref_Number,amount:invoice.amount,currency_Code:'KWD',status:'Unpaid',refunded_Amount:0,transactionID:'',transactions:[]});if(failInsert)throw Error('synthetic timeout after insert');return Response.json({isValid:true,response:{invoiceId:id}});}

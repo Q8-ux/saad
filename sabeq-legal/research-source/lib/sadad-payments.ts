@@ -62,7 +62,9 @@ export async function memoPaymentPolicy() {
 }
 async function provider(config: Config, path: string, authorization: string, body?: unknown): Promise<Record<string, any>> {
   try {
-    const response = await fetch(`${API[config.environment]}${path}`, { method: body !== undefined || path.startsWith("/User/") ? "POST" : "GET", headers: { Authorization: authorization, Accept: "application/json", ...(body === undefined ? {} : { "Content-Type": "application/json" }) }, ...(body === undefined ? {} : { body: JSON.stringify(body) }), redirect: "error", signal: AbortSignal.timeout(20_000) });
+    // SADAD returns HTTP 411 for bodiless POSTs (no Content-Length); token endpoints get an explicit empty JSON body.
+    const payload = body !== undefined ? body : path.startsWith("/User/") ? {} : undefined;
+    const response = await fetch(`${API[config.environment]}${path}`, { method: payload !== undefined ? "POST" : "GET", headers: { Authorization: authorization, Accept: "application/json", ...(payload === undefined ? {} : { "Content-Type": "application/json" }) }, ...(payload === undefined ? {} : { body: JSON.stringify(payload) }), redirect: "error", signal: AbortSignal.timeout(20_000) });
     const text = await response.text();
     if (text.length > 500_000 || !response.ok) throw Error("provider_failed");
     const data = JSON.parse(text);
