@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <meta
+      name="description"
+      content="عقاري X — عروض عقارية في الكويت للبيع والإيجار والبدل. بحث واضح ومقارنة العقارات وطلبات ومعاينات يتابعها المكتب."
+    />
+    <meta name="theme-color" content="#0c1114" />
+    <meta name="color-scheme" content="dark" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; connect-src 'self' https:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-src https://www.openstreetmap.org"
+    />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <title>عقاري X | المكتب العقاري</title>
+    <link rel="icon" href="./assets/mark.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./style.css" />
+    <link
+      rel="preload"
+      href="./assets/fonts/al-mohanad.woff"
+      as="font"
+      type="font/woff"
+      crossorigin
+    />
+  </head>
+  <body>
+    <a class="skip" href="#main">انتقل للمحتوى</a>
+    <div class="mobile-header">
+      <button
+        id="menu-toggle"
+        class="icon-btn"
+        aria-label="فتح القائمة"
+        aria-expanded="false"
+      ></button
+      ><a href="./" class="brand compact"
+        ><img src="./assets/mark.svg" width="30" height="30" alt="" /><span
+          >عقاري <bdi>X</bdi></span
+        ></a
+      ><button
+        class="icon-btn"
+        data-action="login"
+        aria-label="حسابي"
+        data-icon="user"
+      ></button>
+    </div>
+    <div id="scrim" class="scrim" hidden></div>
+    <div class="app-shell">
+      <aside class="sidebar" id="sidebar">
+        <a class="brand" href="./"
+          ><img
+            src="./assets/mark.svg"
+            width="42"
+            height="42"
+            alt="شعار عقاري X"
+          />
+          <div>
+            <strong>عقاري <bdi>X</bdi></strong
+            ><small>المكتب العقاري</small>
+          </div></a
+        >
+        <div class="nav-caption">مساحتك العقارية</div>
+        <nav aria-label="القائمة الرئيسية" id="main-nav">
+          <button class="nav-item active" data-view="home" data-icon="home">
+            اكتشف العقارات
+          </button>
+          <button class="nav-item" data-view="saved" data-icon="heart">
+            المفضلة <span id="saved-count" class="nav-count">0</span>
+          </button>
+          <button class="nav-item" data-view="compare" data-icon="compare">
+            مقارنة العقارات <span id="compare-count" class="nav-count">0</span>
+          </button>
+          <button class="nav-item" data-view="requests" data-icon="inbox">
+            طلباتي ومواعيدي
+          </button>
+          <button class="nav-item" data-view="mine" data-icon="building">
+            إعلاناتي
+          </button>
+          <div class="nav-rule"></div>
+          <button class="nav-item" data-view="assistant" data-icon="search">
+            مساعد البحث
+          </button>
+          <button
+            class="nav-item"
+            data-view="calculator"
+            data-icon="calculator"
+          >
+            حاسبة العمولة
+          </button>
+          <button class="nav-item" data-view="sources" data-icon="globe">
+            دليل البحث الموسع
+          </button>
+        </nav>
+        <button class="btn primary wide" data-action="add" data-icon="plus">
+          أضف عقارك
+        </button>
+        <div class="sidebar-bottom">
+          <button
+            id="account-button"
+            class="account-button"
+            data-action="login"
+          >
+            <span class="avatar" data-icon="user"></span
+            ><span
+              ><strong>مرحباً بك</strong
+              ><small>تسجيل الدخول أو إنشاء حساب</small></span
+            >
+          </button>
+          <div class="sidebar-footer">
+            <a href="./admin/" data-icon="settings">إدارة المكتب</a
+            ><button data-action="privacy">الخصوصية</button>
+          </div>
+        </div>
+      </aside>
+      <main id="main" tabindex="-1">
+        <header class="topbar">
+          <span class="eyebrow"
+            ><span class="live-dot"></span> الكويت <span class="slash">/</span>
+            <span id="page-title">اكتشف العقارات</span></span
+          >
+          <div class="top-actions">
+            <span id="connection-state" class="connection">جارٍ الاتصال</span
+            ><button
+              class="btn small secondary"
+              data-action="request"
+              data-icon="plus"
+            >
+              سجّل طلبك العقاري
+            </button>
+          </div>
+        </header>
+        <div id="page-content"></div>
+        <footer class="page-footer">
+          <span>عقاري X · <span id="year"></span></span
+          ><span>السعر والتوفر يُؤكدان مع المكتب.</span
+          ><button data-action="terms">شروط الاستخدام</button>
+        </footer>
+      </main>
+      <aside class="utility-panel" id="utility-panel">
+        <div class="office-card">
+          <div class="office-symbol" data-icon="building"></div>
+          <span class="eyebrow">تواصل مباشر</span>
+          <h2 id="office-contact-name">أبو مريم</h2>
+          <p>لديك عقار أو تبحث عن فرصة؟ نرتب التفاصيل معك.</p>
+          <button
+            class="btn secondary wide"
+            data-action="office-whatsapp"
+            data-icon="whatsapp"
+          >
+            تواصل مع المكتب
+          </button>
+        </div>
+        <section class="utility-section">
+          <div class="section-heading">
+            <h2>تصفح حسب المنطقة</h2>
+            <span class="muted">الكويت</span>
+          </div>
+          <div id="area-shortcuts"></div>
+        </section>
+        <section class="utility-section note">
+          <span class="eyebrow">قرار أوضح</span>
+          <h3>قارن قبل أن تختار.</h3>
+          <p>
+            أضف حتى ثلاثة عقارات للمقارنة؛ لترى السعر والمساحة والمواصفات في
+            مكان واحد.
+          </p>
+          <button class="text-btn" data-view="compare">
+            افتح المقارنة <span aria-hidden="true">←</span>
+          </button>
+        </section>
+      </aside>
+    </div>
+    <dialog id="modal" class="modal">
+      <div class="modal-top">
+        <h2 id="modal-title"></h2>
+        <button
+          class="icon-btn"
+          id="modal-close"
+          aria-label="إغلاق"
+          data-icon="close"
+        ></button>
+      </div>
+      <div id="modal-content"></div>
+    </dialog>
+    <div id="toasts" class="toasts" role="status" aria-live="polite"></div>
+    <div class="mobile-nav">
+      <button data-view="home" data-icon="home">العروض</button
+      ><button data-view="saved" data-icon="heart">المفضلة</button
+      ><button data-action="add" class="mobile-add" data-icon="plus">
+        أضف عقار</button
+      ><button data-view="requests" data-icon="inbox">طلباتي</button
+      ><button data-view="compare" data-icon="compare">المقارنة</button>
+    </div>
+    <script type="module" src="./app.mjs"></script>
+  </body>
+</html>

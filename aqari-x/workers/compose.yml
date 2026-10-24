@@ -1,0 +1,12 @@
+services:
+  extractor:
+    build: ./markitdown
+    ports: ["127.0.0.1:8080:8080"]
+    environment:
+      EXTRACTOR_KEY: ${EXTRACTOR_KEY:?Set a private 32-character key}
+    read_only: true
+    tmpfs: ["/tmp:size=128m,mode=1777"]
+    mem_limit: 512m
+    cpus: 1
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: ["ALL"]

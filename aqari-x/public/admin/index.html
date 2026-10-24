@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <meta name="robots" content="noindex,nofollow" />
+    <meta name="referrer" content="no-referrer" />
+    <meta name="theme-color" content="#0c1114" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; connect-src 'self' https:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'"
+    />
+    <title>إدارة المكتب | عقاري X</title>
+    <link rel="icon" href="../assets/mark.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="../style.css" />
+  </head>
+  <body>
+    <a class="skip" href="#main">انتقل للمحتوى</a>
+    <div class="mobile-header">
+      <button
+        id="menu-toggle"
+        class="icon-btn"
+        aria-label="فتح قائمة الإدارة"
+        aria-expanded="false"
+      ></button
+      ><a class="brand compact" href="../"
+        ><img src="../assets/mark.svg" width="30" height="30" alt="" /><span
+          >عقاري <bdi>X</bdi></span
+        ></a
+      ><button
+        class="icon-btn"
+        data-action="account"
+        aria-label="حساب الإدارة"
+        data-icon="user"
+      ></button>
+    </div>
+    <div class="scrim" id="scrim" hidden></div>
+    <div class="app-shell admin-shell">
+      <aside class="sidebar" id="sidebar">
+        <a class="brand" href="../"
+          ><img
+            src="../assets/mark.svg"
+            width="42"
+            height="42"
+            alt="شعار عقاري X"
+          />
+          <div>
+            <strong>عقاري <bdi>X</bdi></strong
+            ><small>إدارة المكتب</small>
+          </div></a
+        ><span class="nav-caption">مساحة الإدارة</span>
+        <nav aria-label="إدارة المكتب" id="admin-nav">
+          <button class="nav-item active" data-page="overview" data-icon="home">
+            نظرة عامة</button
+          ><button class="nav-item" data-page="properties" data-icon="building">
+            العقارات والمراجعة</button
+          ><button class="nav-item" data-page="requests" data-icon="inbox">
+            طلبات العملاء</button
+          ><button
+            class="nav-item"
+            data-page="appointments"
+            data-icon="calendar"
+          >
+            المعاينات والمواعيد</button
+          ><button class="nav-item" data-page="commissions" data-icon="money">
+            الصفقات والعمولات</button
+          ><button class="nav-item" data-page="users" data-icon="users">
+            المستخدمون والصلاحيات</button
+          ><button class="nav-item" data-page="marketing" data-icon="share">
+            استوديو المحتوى</button
+          ><button class="nav-item" data-page="files" data-icon="file">
+            الملفات والاستخلاص</button
+          ><button class="nav-item" data-page="modules" data-icon="grid">
+            المسارات والتكاملات</button
+          ><button class="nav-item" data-page="audit" data-icon="clock">
+            سجل العمليات</button
+          ><button class="nav-item" data-page="settings" data-icon="settings">
+            إعدادات المكتب
+          </button>
+        </nav>
+        <div class="sidebar-bottom">
+          <a class="btn secondary wide" href="../">افتح موقع العملاء</a
+          ><button class="account-button" data-action="account">
+            <span class="avatar" data-icon="user"></span
+            ><span
+              ><strong id="admin-name">حساب الإدارة</strong
+              ><small>صلاحيات يتحقق منها الخادم</small></span
+            >
+          </button>
+        </div>
+      </aside>
+      <main id="main" tabindex="-1">
+        <header class="topbar">
+          <span class="eyebrow"
+            ><span class="live-dot"></span> عقاري X <span class="slash">/</span
+            ><span id="page-title">نظرة عامة</span></span
+          >
+          <div class="top-actions">
+            <span class="connection" id="connection-state"
+              >يتطلب تسجيل الدخول</span
+            ><button
+              class="btn secondary small"
+              data-action="refresh"
+              data-icon="clock"
+            >
+              تحديث
+            </button>
+          </div>
+        </header>
+        <div id="admin-content"></div>
+        <footer class="page-footer">
+          <span>بيانات المكتب خاصة · سجل تدقيق لكل عملية</span
+          ><span>لا مفاتيح سرية في ملفات الموقع.</span>
+        </footer>
+      </main>
+    </div>
+    <dialog id="modal" class="modal">
+      <div class="modal-top">
+        <h2 id="modal-title"></h2>
+        <button
+          class="icon-btn"
+          id="modal-close"
+          data-icon="close"
+          aria-label="إغلاق"
+        ></button>
+      </div>
+      <div id="modal-content"></div>
+    </dialog>
+    <div id="toasts" class="toasts" role="status" aria-live="polite"></div>
+    <script type="module" src="./admin.mjs"></script>
+  </body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "name": "aqari-x-office",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "check": "node --check public/app.mjs && node --check public/admin/admin.mjs && node --check server/index.mjs",
+    "dev": "node server/local.mjs",
+    "bundle": "node scripts/bundle.mjs"
+  },
+  "dependencies": { "pg": "8.16.3", "@neon/functions": "0.11.0" },
+  "devDependencies": { "esbuild": "0.25.12" }
+}

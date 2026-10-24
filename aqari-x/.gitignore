@@ -1,0 +1,10 @@
+node_modules/
+.env*
+.neon
+.openai/
+.bundle/
+*.zip
+*-private*
+public/__qa-*
+__pycache__/
+*.pyc

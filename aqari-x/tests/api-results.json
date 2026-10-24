@@ -1,0 +1,109 @@
+{
+  "scope": "isolated QA branch only; production initial data unchanged",
+  "checkedAt": "2026-10-24T10:42:54.862Z",
+  "passed": 25,
+  "failed": 0,
+  "tests": [
+    {
+      "name": "durable API health and nine supplied listings",
+      "passed": true
+    },
+    {
+      "name": "unauthenticated and invented sessions cannot access administration",
+      "passed": true
+    },
+    {
+      "name": "one-time admin setup verifies a secret and cannot run twice",
+      "passed": true
+    },
+    {
+      "name": "new accounts cannot self-grant the admin role",
+      "passed": true
+    },
+    {
+      "name": "owner accounts require a real password and isolated server session",
+      "passed": true
+    },
+    {
+      "name": "submission is pending even if browser requests publication",
+      "passed": true
+    },
+    {
+      "name": "pending property is not public and another owner cannot modify it",
+      "passed": true
+    },
+    {
+      "name": "extra KWD decimal precision and duplicate submissions fail",
+      "passed": true
+    },
+    {
+      "name": "fake image bytes are rejected; private images require permission",
+      "passed": true
+    },
+    {
+      "name": "only admin can approve a property and approved image becomes public",
+      "passed": true
+    },
+    {
+      "name": "requests persist centrally and match only known prices within budget",
+      "passed": true
+    },
+    {
+      "name": "booking is blocked until office enables a real schedule",
+      "passed": true
+    },
+    {
+      "name": "simultaneous booking admits exactly one request per slot",
+      "passed": true
+    },
+    {
+      "name": "cancellation releases a slot and non-admin cannot change bookings",
+      "passed": true
+    },
+    {
+      "name": "commission uses final agreed KWD value and only admin closes a deal",
+      "passed": true
+    },
+    {
+      "name": "completed deals cannot be edited or deleted by their owner",
+      "passed": true
+    },
+    {
+      "name": "collection requires receipt and is idempotent",
+      "passed": true
+    },
+    {
+      "name": "internal documents cannot be read without admin permission",
+      "passed": true
+    },
+    {
+      "name": "provider secrets are encrypted and never returned to the browser",
+      "passed": true
+    },
+    {
+      "name": "zero AI budget rejects work before any upstream model call",
+      "passed": true
+    },
+    {
+      "name": "export excludes passwords, sessions and provider secrets",
+      "passed": true
+    },
+    {
+      "name": "session revocation is enforced on the server",
+      "passed": true
+    },
+    {
+      "name": "concurrent duplicate submissions admit only one listing",
+      "passed": true
+    },
+    {
+      "name": "changing a published listing image returns it to office review",
+      "passed": true
+    },
+    {
+      "name": "input validation returns a client error instead of a server fault",
+      "passed": true
+    }
+  ],
+  "hardeningCheckedAt": "2026-10-24T10:45:59.480Z"
+}

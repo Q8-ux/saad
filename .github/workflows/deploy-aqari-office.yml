@@ -1,0 +1,48 @@
+name: Publish Aqari X Office
+on:
+  push:
+    branches: [main]
+    paths: ['aqari-x/**', '.github/workflows/deploy-aqari-office.yml']
+  workflow_dispatch:
+  workflow_run:
+    workflows: ['Deploy All GitHub Pages Sites']
+    types: [completed]
+permissions:
+  contents: read
+  actions: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages-v2
+  cancel-in-progress: false
+jobs:
+  publish:
+    if: github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: main}
+      - uses: actions/setup-node@v4
+        with: {node-version: 24}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Validate Aqari X
+        working-directory: aqari-x
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm test
+          npm run check
+          python -m py_compile deployment/preserve.py workers/markitdown/server.py
+      - uses: actions/configure-pages@v5
+      - name: Preserve existing sites and add Aqari X
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python aqari-x/deployment/preserve.py
+      - uses: actions/upload-pages-artifact@v3
+        with: {path: _site, retention-days: 30}
+      - name: Deploy
+        id: deploy
+        uses: actions/deploy-pages@v4
