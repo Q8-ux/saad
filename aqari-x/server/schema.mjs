@@ -16,6 +16,7 @@ CREATE INDEX IF NOT EXISTS office_properties_status ON office_properties(status,
 CREATE INDEX IF NOT EXISTS office_properties_owner ON office_properties(owner_id);
 CREATE INDEX IF NOT EXISTS office_properties_fingerprint ON office_properties(fingerprint);
 CREATE UNIQUE INDEX IF NOT EXISTS office_properties_unique_listing ON office_properties(fingerprint) WHERE status NOT IN ('archived','rejected');
+CREATE UNIQUE INDEX IF NOT EXISTS office_properties_unique_source ON office_properties ((data->>'source'),(data->>'sourceId')) WHERE coalesce(data->>'sourceId','')<>'' AND status NOT IN ('archived','rejected');
 CREATE TABLE IF NOT EXISTS office_settings (key text PRIMARY KEY, data jsonb NOT NULL);
 CREATE TABLE IF NOT EXISTS office_setup (id integer PRIMARY KEY CHECK(id=1), claimed_at timestamptz NOT NULL DEFAULT now());
 CREATE TABLE IF NOT EXISTS office_requests (

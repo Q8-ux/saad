@@ -337,6 +337,9 @@ export function searchProperties(properties, filters = {}) {
   const filtered = properties.filter((p) => {
     if (f.category && p.category !== f.category) return false;
     if (f.type && p.type !== f.type) return false;
+    if (f.source && p.source !== f.source) return false;
+    if (f.origin === 'market' && p.sourceKind !== 'market-research') return false;
+    if (f.origin === 'office' && p.sourceKind === 'market-research') return false;
     if (f.governorate && p.governorate !== f.governorate) return false;
     if (f.area && !norm(p.location).includes(norm(f.area))) return false;
     if (

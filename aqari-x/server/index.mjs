@@ -2,6 +2,8 @@ import pg from "pg";
 import { attachDatabasePool } from "@neon/functions";
 import { schema, defaultSettings } from "./schema.mjs";
 import { seedProperties } from "./seed.mjs";
+import {marketFindings, marketResearch} from './market-findings.mjs';
+import {safeSourceURL, normalizeImportRow, isVideo, byteRange,redactContacts} from './catalog-import.mjs';
 import { officeAssistant } from './assistant.mjs';
 import { createOpenAIVault } from './openai-vault.mjs';
 import {generateAssistant,synthesizeSpeech,transcribeAudio,newAssistantSession,issueTicket,verifyTicket,assistantLocale,localized,CHAT_MODEL,VOICE_MODEL,TRANSCRIBE_MODEL} from './openai-assistant.mjs';
@@ -60,7 +62,7 @@ async function initialize() {
     "INSERT INTO office_settings(key,data) VALUES($1,$2) ON CONFLICT DO NOTHING",
     ["office", defaultSettings],
   );
-  for (const p of seedProperties)
+  for (const p of [...seedProperties, ...marketFindings])
     await query(
       "INSERT INTO office_properties(id,owner_id,status,fingerprint,data,created_at) VALUES($1,null,$2,$3,$4,$5) ON CONFLICT DO NOTHING",
       [p.id, p.status, duplicateKey(p), p, p.createdAt],
@@ -168,8 +170,11 @@ function publicProperty(p) {
     contact,
     internalNotes,
     sourceUrl,
+    permissionRef,
     ...safe
   } = p;
+  if (p.sourceKind === 'market-research' || p.sourceKind === 'authorized-import') safe.sourceUrl=safeSourceURL(sourceUrl);
+  for(const key of ['title','description','source']) if(safe[key]) safe[key]=redactContacts(safe[key]);
   return safe;
 }
 async function allProperties() {
@@ -288,7 +293,7 @@ async function router(req) {
   if (path === "/health")
     return json({
       ok: true,
-      version: "1.2.0",
+      version: "1.3.0",
       storage: "connected",
       time: new Date().toISOString(),
     });
@@ -407,6 +412,7 @@ async function router(req) {
         "إذا كان الحساب موجوداً، سُجل طلبك لدى الإدارة. تواصل مع المكتب للتحقق من الهوية؛ لم تُرسل رسالة تلقائية.",
     });
   }
+  if (path === '/market-research' && method === 'GET') return json(marketResearch);
   if (path === "/properties" && method === "GET") {
     const mine = url.searchParams.get("mine") === "1";
     let rows;
@@ -491,6 +497,8 @@ async function router(req) {
       if (u.role === "admin") {
         p.contact = row.data.contact;
         p.ownerType = row.data.ownerType;
+        p.source = row.data.source;
+        p.sourceUrl = row.data.sourceUrl;
       }
       const status = u.role === "admin" ? row.status : "pending";
       try {
@@ -519,12 +527,14 @@ async function router(req) {
   if (path === "/files" && method === "POST") {
     const u = await user(req);
     await rate("files:" + u.id, 40, 86400);
-    const b = await body(req, 2400000);
+    const b = await body(req, 11400000);
     const content = Buffer.from(String(b.content || ""), "base64");
-    if (content.length === 0 || content.length > 1500000)
-      fail("الملف حتى 1.5 ميغابايت بعد ضغط الصور", 413);
     const name = requiredText(b.name, "اسم الملف", 180),
       mime = String(b.mime || "");
+    const video = isVideo(content,mime);
+    if (content.length === 0 || content.length > (video ? 8000000 : 1500000))
+      fail(video ? 'الفيديو حتى 8 ميغابايت' : "الملف حتى 1.5 ميغابايت بعد ضغط الصور", 413);
+    const mediaKey=video?'videos':'images',mediaLimit=video?2:6;
     let isPublic = false;
     if (b.propertyId) {
       const p = (
@@ -534,9 +544,10 @@ async function router(req) {
       ).rows[0];
       if (!p) fail("العقار غير موجود", 404);
       if (p.owner_id !== u.id && u.role !== "admin") fail("غير مصرح", 403);
-      if ((p.data.images || []).length >= 6) fail("حتى ست صور لكل إعلان");
-      if (!isRaster(content, mime))
+      if ((p.data[mediaKey] || []).length >= mediaLimit) fail(video?'حتى فيديوهين لكل إعلان':"حتى ست صور لكل إعلان");
+      if (!video && !isRaster(content, mime))
         fail("صور JPEG أو PNG أو WebP فقط؛ لم يُقبل محتوى الصورة");
+      if (p.data.sourceKind && !p.data.marketingAuthorized) fail('سجل تفويض استخدام الإعلان والوسائط أولاً',409);
       isPublic = true;
     } else if (u.role !== "admin") fail("الأرشيف الداخلي للإدارة فقط", 403);
     if (
@@ -563,7 +574,8 @@ async function router(req) {
             [b.propertyId],
           )
         ).rows[0];
-        if ((p.data.images || []).length >= 6) fail("حتى ست صور لكل إعلان");
+        if ((p.data[mediaKey] || []).length >= mediaLimit) fail(video?'حتى فيديوهين لكل إعلان':"حتى ست صور لكل إعلان");
+        if (p.data.sourceKind && !p.data.marketingAuthorized) fail('سجل تفويض استخدام الإعلان والوسائط أولاً',409);
         if (["completed", "archived"].includes(p.status))
           fail("العقار مغلق", 409);
       }
@@ -573,15 +585,15 @@ async function router(req) {
       );
       if (b.propertyId) {
         await c.query(
-          "UPDATE office_properties SET data=jsonb_set(data,'{images}',coalesce(data->'images','[]'::jsonb)||$1::jsonb),status=CASE WHEN $3::boolean THEN status ELSE 'pending' END,updated_at=now() WHERE id=$2",
-          [JSON.stringify([id]), b.propertyId, u.role === "admin"],
+          "UPDATE office_properties SET data=jsonb_set(data,ARRAY[$4::text],coalesce(data->$4::text,'[]'::jsonb)||$1::jsonb),status=CASE WHEN $3::boolean THEN status ELSE 'pending' END,updated_at=now() WHERE id=$2",
+          [JSON.stringify([id]), b.propertyId, u.role === "admin",mediaKey],
         );
       }
     });
     await audit(u, "file.uploaded", id, { name, bytes: content.length });
     return json({ id }, 201);
   }
-  const fileMatch = path.match(/^\/(images|files)\/([a-f0-9]{32})$/);
+  const fileMatch = path.match(/^\/(images|media|files)\/([a-f0-9]{32})$/);
   if (fileMatch && method === "GET") {
     const f = (
       await query(
@@ -592,7 +604,7 @@ async function router(req) {
     if (!f) fail("الملف غير موجود", 404);
     if (
       !(
-        fileMatch[1] === "images" &&
+        (fileMatch[1] === 'media' || (fileMatch[1] === 'images' && f.mime.startsWith('image/'))) &&
         f.public &&
         ["active", "reference"].includes(f.status)
       )
@@ -605,8 +617,7 @@ async function router(req) {
       )
         fail("غير مصرح", 403);
     }
-    return new Response(f.content, {
-      headers: {
+    const headers = {
         "content-type": f.mime,
         "content-disposition": `${f.public ? "inline" : "attachment"}; filename*=UTF-8''${encodeURIComponent(f.name)}`,
         "x-content-type-options": "nosniff",
@@ -614,8 +625,14 @@ async function router(req) {
           f.public && ["active", "reference"].includes(f.status)
             ? "public, max-age=3600"
             : "no-store",
-      },
-    });
+      };
+    if (f.mime.startsWith('video/')) {
+      headers['accept-ranges']='bytes';
+      let range;
+      try {range=byteRange(req.headers.get('range'),f.content.length);} catch {return new Response(null,{status:416,headers:{'content-range':`bytes */${f.content.length}`}});}
+      if (range) {const clip=f.content.subarray(range.start,range.end+1);return new Response(clip,{status:206,headers:{...headers,'content-range':`bytes ${range.start}-${range.end}/${f.content.length}`,'content-length':String(clip.length)}});}
+    }
+    return new Response(f.content,{headers:{...headers,'content-length':String(f.content.length)}});
   }
   if (path === "/requests" && method === "GET") {
     const u = await user(req);
@@ -816,19 +833,49 @@ async function router(req) {
   }
   if (path === "/admin/properties" && method === "GET")
     return json({ properties: await allProperties() });
+  const mediaPermission=path.match(/^\/admin\/properties\/([a-z0-9-]+)\/permission$/);
+  if (mediaPermission && method==='POST') {
+    const b=await body(req,2000);
+    if (b.confirm!==true) fail('أكد إذن استخدام الإعلان والوسائط');
+    const permissionRef=requiredText(b.permissionRef,'مرجع التفويض',500);
+    const r=await query("UPDATE office_properties SET data=data||$1::jsonb,updated_at=now() WHERE id=$2 AND status NOT IN ('completed','archived') RETURNING id",[JSON.stringify({permissionRef,marketingAuthorized:true,mediaRights:'permission-recorded'}),mediaPermission[1]]);
+    if(!r.rowCount)fail('لا يمكن تعديل هذا العقار',409);
+    await audit(admin,'property.permission_recorded',mediaPermission[1]);
+    return json({ok:true});
+  }
+  if (path === '/admin/import-batch' && method === 'POST') {
+    const b=await body(req,1200000);
+    if (b.permissionConfirmed!==true) fail('أكد إذن استخدام الإعلان والوسائط');
+    const permissionRef=requiredText(b.permissionRef,'مرجع التفويض',500);
+    if (!Array.isArray(b.rows)||!b.rows.length||b.rows.length>100) fail('الدفعة من إعلان واحد إلى 100 إعلان');
+    await rate('import:'+admin.id,20,86400);
+    const results=[];
+    for (const [index,row] of b.rows.entries()) {
+      let normalized;
+      try {normalized=normalizeImportRow(row,b.source,permissionRef);} catch(e) {results.push({row:index+1,status:'invalid',message:e.message});continue;}
+      const {property:p,fingerprint}=normalized,id=uid();
+      const saved=await query("INSERT INTO office_properties(id,owner_id,status,fingerprint,data) VALUES($1,$2,'pending',$3,$4) ON CONFLICT DO NOTHING RETURNING id",[id,admin.id,fingerprint,p]);
+      results.push({row:index+1,id:saved.rowCount?id:null,status:saved.rowCount?'pending':'duplicate'});
+    }
+    await audit(admin,'property.batch_imported',null,{rows:b.rows.length,added:results.filter(x=>x.id).length});
+    return json({results,added:results.filter(x=>x.id).length});
+  }
   const moderation = path.match(/^\/admin\/properties\/([a-z0-9-]+)\/status$/);
   if (moderation && method === "POST") {
-    const b = await body(req, 1000);
+    const b = await body(req, 2000);
     if (
       !["active", "paused", "rejected", "reference", "pending"].includes(
         b.status,
       )
     )
       fail("حالة غير صحيحة");
-    const r = await query(
-      "UPDATE office_properties SET status=$1,updated_at=now() WHERE id=$2 AND status NOT IN ('completed','archived') RETURNING id",
-      [b.status, moderation[1]],
-    );
+    const r = await transaction(async c=>{
+      const row=(await c.query('SELECT data,status FROM office_properties WHERE id=$1 FOR UPDATE',[moderation[1]])).rows[0];
+      if(!row||['completed','archived'].includes(row.status))fail('لا يمكن تغيير حالة العقار',409);
+      if(b.status==='active'&&row.data.sourceKind&&(b.confirmAvailability!==true||b.confirmAuthority!==true))fail('أكد التوفر والتفويض قبل اعتماد عرض خارجي');
+      const proof=b.status==='active'&&row.data.sourceKind?{marketingAuthorized:true,availabilityVerified:true,verifiedAt:new Date().toISOString(),permissionRef:requiredText(b.permissionRef||row.data.permissionRef,'مرجع التفويض',500)}:{};
+      return c.query('UPDATE office_properties SET status=$1,data=data||$3::jsonb,updated_at=now() WHERE id=$2 RETURNING id',[b.status,moderation[1],JSON.stringify(proof)]);
+    });
     if (!r.rowCount) fail("لا يمكن تغيير حالة العقار", 409);
     await audit(admin, "property.status", moderation[1], { status: b.status });
     return json({ ok: true });
@@ -838,6 +885,7 @@ async function router(req) {
       text = requiredText(b.text, "نص الإعلان", 10000),
       out = extractListing(text);
     if (!b.confirm) return json(out);
+    if (b.permissionConfirmed!==true) fail('أكد إذن استخدام الإعلان والوسائط');
     const p = cleanProperty(
         {
           ...b,
@@ -862,7 +910,12 @@ async function router(req) {
       fail("إعلان مطابق موجود؛ لم يُكرر", 409);
     const id = uid();
     p.source = String(b.source || "استيراد يدوي").slice(0, 160);
-    p.sourceUrl = String(b.sourceUrl || "").slice(0, 500);
+    p.sourceUrl = safeSourceURL(b.sourceUrl);
+    p.sourceKind='authorized-import';
+    p.permissionRef=requiredText(b.permissionRef,'مرجع التفويض',500);
+    p.marketingAuthorized=true;
+    p.mediaRights='permission-recorded';
+    p.availabilityVerified=false;
     await query(
       "INSERT INTO office_properties(id,owner_id,status,fingerprint,data) VALUES($1,$2,$3,$4,$5)",
       [id, admin.id, "pending", fp, p],

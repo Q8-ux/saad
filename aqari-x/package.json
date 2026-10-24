@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "test": "node --test tests/*.test.mjs",
-    "check": "node --check public/app.mjs && node --check public/admin/admin.mjs && node --check public/i18n.mjs && node --check public/locales-dictionary.mjs && node --check public/office-bot.mjs && node --check public/theme.mjs && node --check server/index.mjs && node --check server/assistant.mjs && node --check server/openai-assistant.mjs && node --check server/openai-vault.mjs",
+    "check": "node --check public/app.mjs && node --check public/admin/admin.mjs && node --check public/i18n.mjs && node --check public/locales-dictionary.mjs && node --check public/office-bot.mjs && node --check public/theme.mjs && node --check server/index.mjs && node --check server/assistant.mjs && node --check server/openai-assistant.mjs && node --check server/openai-vault.mjs && node --check public/import-file.mjs && node --check public/media.mjs && node --check public/admin/catalog.mjs && node --check server/catalog-import.mjs && node --check server/market-findings.mjs",
     "dev": "node server/local.mjs",
     "bundle": "node scripts/bundle.mjs"
   },

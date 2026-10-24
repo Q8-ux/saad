@@ -1098,6 +1098,492 @@ const serverMessages = entries(`
 قطعة	Block	بلاک
 `);
 
+const marketUI = {
+  "رصد تجريبي": {
+    "en": "Experimental research",
+    "ur": "تجرباتی تلاش"
+  },
+  "رصد تجريبي من": {
+    "en": "Experimental finding from",
+    "ur": "تجرباتی نتیجہ از"
+  },
+  "المصدر:": {
+    "en": "Source:",
+    "ur": "ماخذ:"
+  },
+  "تاريخ الرصد:": {
+    "en": "Research date:",
+    "ur": "تلاش کی تاریخ:"
+  },
+  "التوفر والتفويض يحتاجان تأكيد المكتب": {
+    "en": "The office must confirm availability and marketing authority",
+    "ur": "دستیابی اور تشہیر کی اجازت کی تصدیق دفتر کرے گا"
+  },
+  "راجع المكتب للتفاصيل": {
+    "en": "Ask the office for details",
+    "ur": "تفصیل کے لیے دفتر سے رابطہ کریں"
+  },
+  "نسخة تجريبية: تشمل بيانات المكتب ونتائج رصد خارجية محددة. لا تمثل جميع إعلانات السوق، ولم يؤكد المكتب توفر العروض الخارجية أو تفويض تسويقها.": {
+    "en": "Experimental version with office data and a limited set of external research findings. It does not cover every market listing. External availability and marketing authority are unconfirmed.",
+    "ur": "تجرباتی نسخے میں دفتر کی معلومات اور بیرونی تلاش کے محدود نتائج شامل ہیں۔ یہ مارکیٹ کے تمام اشتہارات نہیں ہیں۔ بیرونی اشتہارات کی دستیابی اور تشہیر کی اجازت غیر مصدقہ ہے۔"
+  },
+  "مصدر الإعلان": {
+    "en": "Listing source",
+    "ur": "اشتہار کا ماخذ"
+  },
+  "نطاق البحث": {
+    "en": "Search scope",
+    "ur": "تلاش کا دائرہ"
+  },
+  "الرصد الخارجي": {
+    "en": "External research",
+    "ur": "بیرونی تلاش"
+  },
+  "بيانات المكتب": {
+    "en": "Office records",
+    "ur": "دفتر کا ریکارڈ"
+  },
+  "رصد السوق التجريبي": {
+    "en": "Experimental market research",
+    "ur": "تجرباتی مارکیٹ تلاش"
+  },
+  "نتيجة رصد": {
+    "en": "Research findings",
+    "ur": "تلاش کے نتائج"
+  },
+  "نتائج داخل المنصة": {
+    "en": "Findings on this platform",
+    "ur": "اس پلیٹ فارم پر نتائج"
+  },
+  "عرض النتائج": {
+    "en": "View results",
+    "ur": "نتائج دیکھیں"
+  },
+  "افتح الإعلان الأصلي ووسائطه": {
+    "en": "Open the original listing and media",
+    "ur": "اصل اشتہار اور میڈیا کھولیں"
+  },
+  "عرض تجريبي أو أولي؛ يحتاج السعر والتوفر والتفويض تأكيداً من المكتب.": {
+    "en": "Experimental or preliminary listing. The office must confirm price, availability and marketing authority.",
+    "ur": "تجرباتی یا ابتدائی اشتہار۔ قیمت، دستیابی اور تشہیر کی اجازت کی تصدیق دفتر کرے گا۔"
+  },
+  "بحث أُجري في 24 أكتوبر 2026. هذه دفعة محددة من نتائج البحث، وليست تغذية مباشرة أو حصراً لجميع العروض. الصور والفيديوهات الأصلية متاحة في رابط المصدر؛ لم تنسخ دون تفويض.": {
+    "en": "Research conducted on 24 October 2026. This is a limited research batch, not a live feed or complete inventory. Original photos and videos remain at the source; they were not copied without permission.",
+    "ur": "تلاش 24 اکتوبر 2026 کو کی گئی۔ یہ محدود نتائج ہیں، براہ راست فیڈ یا تمام اشتہارات نہیں۔ اصل تصاویر اور ویڈیوز ماخذ پر ہیں؛ اجازت کے بغیر نقل نہیں کی گئیں۔"
+  },
+  "التواصل داخل المنصة مع المكتب فقط. ظهور النتيجة لا يعني أن المكتب مفوض بتسويق العقار. الإعلانات التي تبين توقفها استبعدت.": {
+    "en": "Platform inquiries go to the office only. A research result does not establish marketing authority. Listings found to be withdrawn were excluded.",
+    "ur": "پلیٹ فارم پر رابطہ صرف دفتر سے ہے۔ نتیجہ ظاہر ہونے کا مطلب تشہیر کی اجازت نہیں۔ بند ہونے کی تصدیق والے اشتہارات شامل نہیں کیے گئے۔"
+  },
+  "ملخص مواصفات من رصد السوق لأغراض التجربة. يحتاج السعر والتوفر والتفويض تأكيداً من المكتب.": {
+    "en": "A factual market research summary for this experiment. The office must confirm price, availability and marketing authority.",
+    "ur": "اس تجربے کے لیے مارکیٹ تلاش کی معلومات کا خلاصہ۔ قیمت، دستیابی اور تشہیر کی اجازت کی تصدیق دفتر کرے گا۔"
+  },
+  "عدد الحمامات متعارض بين وصف المصدر وملخصه؛ لم يعتمد.": {
+    "en": "The source description and summary disagree on bathrooms; the count was left unspecified.",
+    "ur": "ماخذ کی تفصیل اور خلاصے میں غسل خانوں کی تعداد مختلف ہے؛ تعداد درج نہیں کی گئی۔"
+  },
+  "فيديو العقار": {
+    "en": "Property video",
+    "ur": "جائیداد کی ویڈیو"
+  },
+  "فيديو العقار (اختياري)": {
+    "en": "Property video (optional)",
+    "ur": "جائیداد کی ویڈیو (اختیاری)"
+  },
+  "حتى فيديوهين، 8 ميغابايت لكل فيديو. استخدم وسائط تملك حق نشرها.": {
+    "en": "Up to two videos, 8 MB each. Use media you have permission to publish.",
+    "ur": "دو ویڈیوز تک، ہر ایک 8 میگابائٹ۔ صرف اجازت یافتہ میڈیا استعمال کریں۔"
+  },
+  "أقر بصحة البيانات وتفويضي بعرض العقار وحق نشر الصور والفيديو.": {
+    "en": "I confirm the details, my authority to list the property and my right to publish the photos and videos.",
+    "ur": "میں معلومات، جائیداد پیش کرنے کی اجازت، اور تصاویر و ویڈیو شائع کرنے کے حق کی تصدیق کرتا ہوں۔"
+  },
+  "حتى فيديوهين لكل إعلان": {
+    "en": "Up to two videos per listing",
+    "ur": "ہر اشتہار میں دو ویڈیوز تک"
+  },
+  "الفيديو حتى 8 ميغابايت": {
+    "en": "Video size is limited to 8 MB",
+    "ur": "ویڈیو کی حد 8 میگابائٹ ہے"
+  },
+  "صور وفيديو": {
+    "en": "Photos and video",
+    "ur": "تصاویر اور ویڈیو"
+  },
+  "استيراد ملف JSON / CSV": {
+    "en": "Import JSON / CSV",
+    "ur": "JSON / CSV درآمد کریں"
+  },
+  "استيراد جماعي من ملف": {
+    "en": "Bulk import from a file",
+    "ur": "فائل سے اجتماعی درآمد"
+  },
+  "ملف الإعلانات": {
+    "en": "Listings file",
+    "ur": "اشتہارات کی فائل"
+  },
+  "تنزيل نموذج الاستيراد": {
+    "en": "Download import template",
+    "ur": "درآمد کا نمونہ ڈاؤن لوڈ کریں"
+  },
+  "معاينة الدفعة": {
+    "en": "Preview batch",
+    "ur": "بیچ کا پیش منظر"
+  },
+  "راجع دفعة الإعلانات": {
+    "en": "Review listing batch",
+    "ur": "اشتہارات کے بیچ کا جائزہ لیں"
+  },
+  "مرجع التفويض": {
+    "en": "Permission reference",
+    "ur": "اجازت کا حوالہ"
+  },
+  "رقم اتفاق، رسالة موافقة أو مرجع إذن المالك": {
+    "en": "Agreement number, approval message or owner permission reference",
+    "ur": "معاہدے کا نمبر، منظوری کا پیغام یا مالک کی اجازت کا حوالہ"
+  },
+  "لدي إذن استخدام الإعلانات ووسائطها وتسويقها عبر المكتب.": {
+    "en": "I have permission to use these listings and media and market them through the office.",
+    "ur": "مجھے ان اشتہارات اور میڈیا کے استعمال اور دفتر کے ذریعے تشہیر کی اجازت ہے۔"
+  },
+  "حتى 100 إعلان في الدفعة. أرفق الصور والفيديو بعد الاستيراد من ملف العقار.": {
+    "en": "Up to 100 listings per batch. Attach photos and videos from the property record after import.",
+    "ur": "ہر بیچ میں 100 اشتہارات تک۔ درآمد کے بعد جائیداد کے ریکارڈ سے تصاویر اور ویڈیوز لگائیں۔"
+  },
+  "حفظ الدفعة للمراجعة": {
+    "en": "Save batch for review",
+    "ur": "جائزے کے لیے بیچ محفوظ کریں"
+  },
+  "نتيجة الاستيراد": {
+    "en": "Import results",
+    "ur": "درآمد کے نتائج"
+  },
+  "الصف": {
+    "en": "Row",
+    "ur": "قطار"
+  },
+  "يحتاج تصحيحاً": {
+    "en": "Needs correction",
+    "ur": "درستگی درکار ہے"
+  },
+  "مكرر؛ لم يُضف": {
+    "en": "Duplicate; not added",
+    "ur": "دہرایا گیا؛ شامل نہیں ہوا"
+  },
+  "حُفظ للمراجعة": {
+    "en": "Saved for review",
+    "ur": "جائزے کے لیے محفوظ ہوا"
+  },
+  "الصفوف المكررة لم تُضف، والأخطاء موضحة أدناه.": {
+    "en": "Duplicate rows were not added. Errors are listed below.",
+    "ur": "دہرائی گئی قطاریں شامل نہیں ہوئیں۔ غلطیاں نیچے درج ہیں۔"
+  },
+  "إرفاق صور وفيديو للعقار": {
+    "en": "Attach property photos and videos",
+    "ur": "جائیداد کی تصاویر اور ویڈیوز لگائیں"
+  },
+  "إرفاق صور وفيديو": {
+    "en": "Attach photos and video",
+    "ur": "تصاویر اور ویڈیو لگائیں"
+  },
+  "صور العقار": {
+    "en": "Property photos",
+    "ur": "جائیداد کی تصاویر"
+  },
+  "حتى ست صور للإعلان؛ تضغط الصور قبل الإرسال.": {
+    "en": "Up to six photos per listing; photos are compressed before upload.",
+    "ur": "ہر اشتہار میں چھ تصاویر تک؛ بھیجنے سے پہلے تصاویر چھوٹی کی جاتی ہیں۔"
+  },
+  "حتى فيديوهين، 8 ميغابايت لكل فيديو.": {
+    "en": "Up to two videos, 8 MB each.",
+    "ur": "دو ویڈیوز تک، ہر ایک 8 میگابائٹ۔"
+  },
+  "لدي حق نشر الصور والفيديو وتفويض عرض العقار.": {
+    "en": "I have the right to publish the media and authority to list the property.",
+    "ur": "مجھے میڈیا شائع کرنے اور جائیداد پیش کرنے کی اجازت ہے۔"
+  },
+  "رفع الوسائط": {
+    "en": "Upload media",
+    "ur": "میڈیا اپ لوڈ کریں"
+  },
+  "اختر صورة أو فيديو": {
+    "en": "Choose a photo or video",
+    "ur": "تصویر یا ویڈیو منتخب کریں"
+  },
+  "تحققت من تفويض المكتب بعرض الإعلان ووسائطه.": {
+    "en": "I verified the office's authority to publish the listing and media.",
+    "ur": "میں نے دفتر کی اشتہار اور میڈیا شائع کرنے کی اجازت کی تصدیق کی۔"
+  },
+  "أكدت السعر والتوفر الحاليين مع المعلن.": {
+    "en": "I confirmed the current price and availability with the advertiser.",
+    "ur": "میں نے مشتہر سے موجودہ قیمت اور دستیابی کی تصدیق کی۔"
+  },
+  "التأكيدان ومرجع التفويض مطلوبان عند اعتماد عرض خارجي.": {
+    "en": "Both confirmations and the permission reference are required to approve an external listing.",
+    "ur": "بیرونی اشتہار کی منظوری کے لیے دونوں تصدیقات اور اجازت کا حوالہ ضروری ہیں۔"
+  },
+  "تسجيل تفويض الإعلان والوسائط": {
+    "en": "Record listing and media permission",
+    "ur": "اشتہار اور میڈیا کی اجازت درج کریں"
+  },
+  "استيراد دفعة إعلانات": {
+    "en": "Import listing batch",
+    "ur": "اشتہارات کا بیچ درآمد کریں"
+  },
+  "وسائط مرفقة": {
+    "en": "Attached media",
+    "ur": "منسلک میڈیا"
+  },
+  "مرجع التفويض مطلوب": {
+    "en": "A permission reference is required",
+    "ur": "اجازت کا حوالہ ضروری ہے"
+  },
+  "تأكيد التوفر والتفويض": {
+    "en": "Confirm availability and authority",
+    "ur": "دستیابی اور اجازت کی تصدیق کریں"
+  },
+  "سكن": {
+    "en": "Sakan",
+    "ur": "سکن"
+  },
+  "السوق المفتوح": {
+    "en": "OpenSooq",
+    "ur": "اوپن سوق"
+  },
+  "جابر الأحمد — قطعة 7": {
+    "en": "Jaber Al Ahmad — Block 7",
+    "ur": "جابر الاحمد — بلاک 7"
+  },
+  "شقة للإيجار في جابر الأحمد — قطعة 7": {
+    "en": "Apartment for rent in Jaber Al Ahmad — Block 7",
+    "ur": "جابر الاحمد — بلاک 7 میں فلیٹ کرائے کے لیے"
+  },
+  "العارضية": {
+    "en": "Ardiya",
+    "ur": "عارضیہ"
+  },
+  "شقة للإيجار في العارضية": {
+    "en": "Apartment for rent in Ardiya",
+    "ur": "عارضیہ میں فلیٹ کرائے کے لیے"
+  },
+  "سلوى — قطعة 6": {
+    "en": "Salwa — Block 6",
+    "ur": "سلویٰ — بلاک 6"
+  },
+  "شقة للإيجار في سلوى — قطعة 6": {
+    "en": "Apartment for rent in Salwa — Block 6",
+    "ur": "سلویٰ — بلاک 6 میں فلیٹ کرائے کے لیے"
+  },
+  "صباح السالم": {
+    "en": "Sabah Al Salem",
+    "ur": "صباح السالم"
+  },
+  "شقة للإيجار في صباح السالم": {
+    "en": "Apartment for rent in Sabah Al Salem",
+    "ur": "صباح السالم میں فلیٹ کرائے کے لیے"
+  },
+  "الصباحية — قطعة 4": {
+    "en": "Sabahiya — Block 4",
+    "ur": "صباحیہ — بلاک 4"
+  },
+  "شقة للإيجار في الصباحية — قطعة 4": {
+    "en": "Apartment for rent in Sabahiya — Block 4",
+    "ur": "صباحیہ — بلاک 4 میں فلیٹ کرائے کے لیے"
+  },
+  "جابر الأحمد — قطعة 5": {
+    "en": "Jaber Al Ahmad — Block 5",
+    "ur": "جابر الاحمد — بلاک 5"
+  },
+  "شقة للإيجار في جابر الأحمد — قطعة 5": {
+    "en": "Apartment for rent in Jaber Al Ahmad — Block 5",
+    "ur": "جابر الاحمد — بلاک 5 میں فلیٹ کرائے کے لیے"
+  },
+  "محافظة مبارك الكبير — المنطقة غير محددة": {
+    "en": "Mubarak Al-Kabeer governorate — area unspecified",
+    "ur": "محافظہ مبارک الکبیر — علاقہ غیر متعین"
+  },
+  "شقة للإيجار في محافظة مبارك الكبير — المنطقة غير محددة": {
+    "en": "Apartment for rent in Mubarak Al-Kabeer governorate — area unspecified",
+    "ur": "محافظہ مبارک الکبیر — علاقہ غیر متعین میں فلیٹ کرائے کے لیے"
+  },
+  "الواحة": {
+    "en": "Waha",
+    "ur": "واحہ"
+  },
+  "شقة للإيجار في الواحة": {
+    "en": "Apartment for rent in Waha",
+    "ur": "واحہ میں فلیٹ کرائے کے لیے"
+  },
+  "عبدالله المبارك": {
+    "en": "Abdullah Al Mubarak",
+    "ur": "عبداللہ المبارک"
+  },
+  "بيت للبيع في عبدالله المبارك": {
+    "en": "House for sale in Abdullah Al Mubarak",
+    "ur": "عبداللہ المبارک میں مکان فروخت کے لیے"
+  },
+  "جابر الأحمد — قطعة 6": {
+    "en": "Jaber Al Ahmad — Block 6",
+    "ur": "جابر الاحمد — بلاک 6"
+  },
+  "بيت للبيع في جابر الأحمد — قطعة 6": {
+    "en": "House for sale in Jaber Al Ahmad — Block 6",
+    "ur": "جابر الاحمد — بلاک 6 میں مکان فروخت کے لیے"
+  },
+  "بيان": {
+    "en": "Bayan",
+    "ur": "بیان"
+  },
+  "بيت للبيع في بيان": {
+    "en": "House for sale in Bayan",
+    "ur": "بیان میں مکان فروخت کے لیے"
+  },
+  "الخيران السكنية — قطعة 2": {
+    "en": "Khairan Residential — Block 2",
+    "ur": "خیران رہائشی — بلاک 2"
+  },
+  "فيلا للبيع في الخيران السكنية — قطعة 2": {
+    "en": "Villa for sale in Khairan Residential — Block 2",
+    "ur": "خیران رہائشی — بلاک 2 میں ویلا فروخت کے لیے"
+  },
+  "الشهداء — قطعة 5": {
+    "en": "Shuhada — Block 5",
+    "ur": "شہداء — بلاک 5"
+  },
+  "فيلا للبيع في الشهداء — قطعة 5": {
+    "en": "Villa for sale in Shuhada — Block 5",
+    "ur": "شہداء — بلاک 5 میں ویلا فروخت کے لیے"
+  },
+  "كيفان — قطعة 2": {
+    "en": "Kaifan — Block 2",
+    "ur": "کیفان — بلاک 2"
+  },
+  "فيلا للبيع في كيفان — قطعة 2": {
+    "en": "Villa for sale in Kaifan — Block 2",
+    "ur": "کیفان — بلاک 2 میں ویلا فروخت کے لیے"
+  },
+  "خيطان": {
+    "en": "Khaitan",
+    "ur": "خیطان"
+  },
+  "عمارة للبيع في خيطان": {
+    "en": "Building for sale in Khaitan",
+    "ur": "خیطان میں عمارت فروخت کے لیے"
+  },
+  "المباركية": {
+    "en": "Al-Mubarakiya",
+    "ur": "مبارکیہ"
+  },
+  "مكتب للإيجار في المباركية": {
+    "en": "Office for rent in Al-Mubarakiya",
+    "ur": "مبارکیہ میں دفتر کرائے کے لیے"
+  },
+  "حولي": {
+    "en": "Hawalli",
+    "ur": "حولی"
+  },
+  "مكتب للإيجار في حولي": {
+    "en": "Office for rent in Hawalli",
+    "ur": "حولی میں دفتر کرائے کے لیے"
+  },
+  "شرق": {
+    "en": "Sharq",
+    "ur": "شرق"
+  },
+  "مكتب للإيجار في شرق": {
+    "en": "Office for rent in Sharq",
+    "ur": "شرق میں دفتر کرائے کے لیے"
+  },
+  "محل للإيجار في حولي": {
+    "en": "Shop for rent in Hawalli",
+    "ur": "حولی میں دکان کرائے کے لیے"
+  },
+  "الضجيج — قطعة 1": {
+    "en": "Dajeej — Block 1",
+    "ur": "ضجیج — بلاک 1"
+  },
+  "محل للإيجار في الضجيج — قطعة 1": {
+    "en": "Shop for rent in Dajeej — Block 1",
+    "ur": "ضجیج — بلاک 1 میں دکان کرائے کے لیے"
+  },
+  "السلام — قطعة 1": {
+    "en": "Salam — Block 1",
+    "ur": "سلام — بلاک 1"
+  },
+  "أرض للبيع في السلام — قطعة 1": {
+    "en": "Land for sale in Salam — Block 1",
+    "ur": "سلام — بلاک 1 میں زمین فروخت کے لیے"
+  },
+  "صباح الأحمد البحرية — المرحلة الثالثة": {
+    "en": "Sabah Al-Ahmad Sea City — Phase 3",
+    "ur": "صباح الاحمد سی سٹی — مرحلہ 3"
+  },
+  "أرض للبيع في صباح الأحمد البحرية — المرحلة الثالثة": {
+    "en": "Land for sale in Sabah Al-Ahmad Sea City — Phase 3",
+    "ur": "صباح الاحمد سی سٹی — مرحلہ 3 میں زمین فروخت کے لیے"
+  },
+  "صباح الأحمد البحرية — المرحلة الرابعة": {
+    "en": "Sabah Al-Ahmad Sea City — Phase 4",
+    "ur": "صباح الاحمد سی سٹی — مرحلہ 4"
+  },
+  "أرض للبيع في صباح الأحمد البحرية — المرحلة الرابعة": {
+    "en": "Land for sale in Sabah Al-Ahmad Sea City — Phase 4",
+    "ur": "صباح الاحمد سی سٹی — مرحلہ 4 میں زمین فروخت کے لیے"
+  },
+  "خيطان الجنوبي": {
+    "en": "South Khaitan",
+    "ur": "جنوبی خیطان"
+  },
+  "أرض للبدل في خيطان الجنوبي": {
+    "en": "Land for exchange in South Khaitan",
+    "ur": "جنوبی خیطان میں زمین تبادلے کے لیے"
+  },
+  "الصديق": {
+    "en": "Siddiq",
+    "ur": "صدیق"
+  },
+  "شقة للإيجار في الصديق": {
+    "en": "Apartment for rent in Siddiq",
+    "ur": "صدیق میں فلیٹ کرائے کے لیے"
+  },
+  "الجابرية": {
+    "en": "Jabriya",
+    "ur": "جابریہ"
+  },
+  "شقة للإيجار في الجابرية": {
+    "en": "Apartment for rent in Jabriya",
+    "ur": "جابریہ میں فلیٹ کرائے کے لیے"
+  },
+  "الفنيطيس": {
+    "en": "Funaitees",
+    "ur": "فنیطیس"
+  },
+  "شقة للإيجار في الفنيطيس": {
+    "en": "Apartment for rent in Funaitees",
+    "ur": "فنیطیس میں فلیٹ کرائے کے لیے"
+  },
+  "الفنطاس": {
+    "en": "Fintas",
+    "ur": "فنطاس"
+  },
+  "شقة للإيجار في الفنطاس": {
+    "en": "Apartment for rent in Fintas",
+    "ur": "فنطاس میں فلیٹ کرائے کے لیے"
+  },
+  "السالمية — قطعة 11": {
+    "en": "Salmiya — Block 11",
+    "ur": "سالمیہ — بلاک 11"
+  },
+  "شقة للإيجار في السالمية — قطعة 11": {
+    "en": "Apartment for rent in Salmiya — Block 11",
+    "ur": "سالمیہ — بلاک 11 میں فلیٹ کرائے کے لیے"
+  },
+  "رصد السوق ومصادر البحث": {
+    "en": "Market research and sources",
+    "ur": "مارکیٹ کی تلاش اور ذرائع"
+  }
+};
 export const translations = {
   'قراءة مختصرة للرد الطويل': {en:'Read a shortened version of this long reply',ur:'اس طویل جواب کا مختصر حصہ سنیں'},
   'مساعد ذكي وصوت سحابي': {en:'AI assistant and cloud voice',ur:'ذہین معاون اور کلاؤڈ آواز'},
@@ -1143,6 +1629,7 @@ export const translations = {
   ...initialListings,
   ...policyTranslations,
   ...serverMessages,
+  ...marketUI,
 };
 
 // Short, reusable phrases support dynamically assembled labels and amounts.

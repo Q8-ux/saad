@@ -28,6 +28,7 @@ import {
   initDialog,
 } from "../ui.mjs";
 import { API_URL } from "../config.mjs";
+import {openBatchImport,attachListingMedia} from "./catalog.mjs";
 import { showAuth } from "../auth.mjs";
 const state = {
   page: "overview",
@@ -206,7 +207,7 @@ async function renderOverview() {
       )
       .join(
         "",
-      )}</div><div class="notice warning">${s.reference} عروض أولية مستوردة من بيانات المشروع؛ تحتاج مراجعة التوفر قبل النشر كعروض معتمدة.</div><div class="form-grid"><section class="section-box"><h2>أولوية اليوم</h2><div class="audit-item"><span>اعتماد العروض ومعلومات السعر</span><button class="text-btn" data-page="properties">افتح المراجعة ←</button></div><div class="audit-item"><span>مطابقة طلبات العملاء بالعروض</span><button class="text-btn" data-page="requests">افتح الطلبات ←</button></div><div class="audit-item"><span>تحديد أيام ومواعيد المعاينة</span><button class="text-btn" data-page="settings">اضبط الجدول ←</button></div><div class="audit-item"><span>العمولات المستحقة</span><strong class="gold">${money(Number(s.commission_due))}</strong></div></section><section class="section-box"><h2>التفاعل المسجل</h2><div class="result-amount"><strong>${total}</strong><span>تفاعل لحسابات مسجلة خلال 14 يوماً</span></div><p class="fineprint">هذه إحصاءات أحداث فعلية وليست عدد جميع زوار الموقع أو بيانات البلد والجهاز.</p>${["detail", "whatsapp", "share", "search"].map((k) => `<div class="audit-item"><span>${{ detail: "عرض التفاصيل", whatsapp: "فتح واتساب", share: "مشاركة", search: "بحث مسجل" }[k]}</span><strong>${events.filter((x) => x.kind === k).reduce((a, x) => a + Number(x.total), 0)}</strong></div>`).join("")}</section></div><section class="section-box"><div class="row"><h2>آخر العمليات</h2><button class="text-btn" data-page="audit">كل العمليات ←</button></div>${recent.length ? recent.map((x) => `<div class="audit-item"><span>${esc(actionLabel(x.action))}</span><small>${dateLabel(x.created_at)}</small></div>`).join("") : '<p class="muted">لا توجد عمليات مسجلة بعد.</p>'}</section>`;
+      )}</div><div class="notice warning">${s.reference} عروض أولية وتجريبية من بيانات المشروع ورصد السوق؛ تحتاج مراجعة التوفر والتفويض قبل اعتمادها.</div><div class="form-grid"><section class="section-box"><h2>أولوية اليوم</h2><div class="audit-item"><span>اعتماد العروض ومعلومات السعر</span><button class="text-btn" data-page="properties">افتح المراجعة ←</button></div><div class="audit-item"><span>مطابقة طلبات العملاء بالعروض</span><button class="text-btn" data-page="requests">افتح الطلبات ←</button></div><div class="audit-item"><span>تحديد أيام ومواعيد المعاينة</span><button class="text-btn" data-page="settings">اضبط الجدول ←</button></div><div class="audit-item"><span>العمولات المستحقة</span><strong class="gold">${money(Number(s.commission_due))}</strong></div></section><section class="section-box"><h2>التفاعل المسجل</h2><div class="result-amount"><strong>${total}</strong><span>تفاعل لحسابات مسجلة خلال 14 يوماً</span></div><p class="fineprint">هذه إحصاءات أحداث فعلية وليست عدد جميع زوار الموقع أو بيانات البلد والجهاز.</p>${["detail", "whatsapp", "share", "search"].map((k) => `<div class="audit-item"><span>${{ detail: "عرض التفاصيل", whatsapp: "فتح واتساب", share: "مشاركة", search: "بحث مسجل" }[k]}</span><strong>${events.filter((x) => x.kind === k).reduce((a, x) => a + Number(x.total), 0)}</strong></div>`).join("")}</section></div><section class="section-box"><div class="row"><h2>آخر العمليات</h2><button class="text-btn" data-page="audit">كل العمليات ←</button></div>${recent.length ? recent.map((x) => `<div class="audit-item"><span>${esc(actionLabel(x.action))}</span><small>${dateLabel(x.created_at)}</small></div>`).join("") : '<p class="muted">لا توجد عمليات مسجلة بعد.</p>'}</section>`;
 }
 async function fetchProperties() {
   state.properties = (await api("/admin/properties")).properties;
@@ -220,7 +221,7 @@ async function renderProperties() {
       "كل عرض قبل أن يصل للعميل.",
       "راجع السعر والتوفر والتفويض والصور. لا يعني اعتماد البيانات تحققاً آلياً من الملكية.",
     ) +
-    `<div class="admin-toolbar"><input id="property-search" placeholder="بحث بالعنوان أو المنطقة" aria-label="بحث العقارات"><button class="btn primary" data-action="import">${icon("upload")} استيراد إعلان</button><button class="btn secondary" data-action="export-properties">تصدير البيانات</button></div><div class="category-tabs" id="status-tabs">${["all", "pending", "reference", "active", "paused", "completed"].map((s, i) => `<button class="tab ${i === 0 ? "active" : ""}" data-action="filter-status" data-value="${s}">${s === "all" ? "الكل" : statuses[s]}</button>`).join("")}</div><div id="properties-table" style="margin-top:20px"></div>`;
+    `<div class="admin-toolbar"><input id="property-search" placeholder="بحث بالعنوان أو المنطقة" aria-label="بحث العقارات"><button class="btn primary" data-action="import">${icon("upload")} استيراد إعلان</button><button class="btn secondary" data-action="import-batch">استيراد ملف JSON / CSV</button><button class="btn secondary" data-action="export-properties">تصدير البيانات</button></div><div class="category-tabs" id="status-tabs">${["all", "pending", "reference", "active", "paused", "completed"].map((s, i) => `<button class="tab ${i === 0 ? "active" : ""}" data-action="filter-status" data-value="${s}">${s === "all" ? "الكل" : statuses[s]}</button>`).join("")}</div><div id="properties-table" style="margin-top:20px"></div>`;
   showPropertiesTable();
   $("#property-search").oninput = () =>
     showPropertiesTable($("#status-tabs .active").dataset.value);
@@ -235,10 +236,10 @@ function showPropertiesTable(status = "all") {
     )
     .map((p) =>
       tr([
-        `<button class="file-link" data-action="property-detail" data-id="${p.id}">${esc(p.title)}</button><p class="hint">${esc(p.location)} · ${esc(p.category)}</p>`,
+        `<button class="file-link" data-action="property-detail" data-id="${p.id}">${esc(p.title)}</button><p class="hint">${esc(p.location)} · ${esc(p.category)} · ${esc(p.source || "")}</p>`,
         `<strong>${money(p.priceFils)}</strong><p class="hint">${{ monthly: "شهري", unit_monthly: "إيجار الوحدة شهرياً", exchange_difference: "فرق بدل", total: "السعر الكلي", annual: "سنوي" }[p.priceBasis] || ""}</p>`,
         badge(p.status),
-        `<button class="btn small secondary" data-action="review" data-id="${p.id}">مراجعة</button>${["active", "reference", "paused"].includes(p.status) ? `<button class="btn small ghost" data-action="close-deal" data-id="${p.id}">إغلاق صفقة</button>` : ""}`,
+        `<button class="btn small secondary" data-action="review" data-id="${p.id}">مراجعة</button><button class="btn small ghost" data-action="attach-media" data-id="${p.id}">صور وفيديو</button>${["active", "reference", "paused"].includes(p.status) ? `<button class="btn small ghost" data-action="close-deal" data-id="${p.id}">إغلاق صفقة</button>` : ""}`,
       ]),
     );
   $("#properties-table").innerHTML = table(
@@ -262,14 +263,14 @@ function reviewProperty(id) {
       ],
       p.status,
       null,
-    )}<button class="btn primary wide" type="submit">حفظ القرار</button></form>`,
+    )}${p.sourceKind ? `<div class="section-box">${field("permissionRef","مرجع التفويض","text",p.permissionRef||"",'maxlength="500"')}<label class="check-label"><input name="confirmAuthority" type="checkbox">تحققت من تفويض المكتب بعرض الإعلان ووسائطه.</label><label class="check-label"><input name="confirmAvailability" type="checkbox">أكدت السعر والتوفر الحاليين مع المعلن.</label><p class="fineprint">التأكيدان ومرجع التفويض مطلوبان عند اعتماد عرض خارجي.</p></div>` : ""}<button class="btn primary wide" type="submit">حفظ القرار</button></form>`,
     () => {
       $("#review-form").onsubmit = (e) => {
         e.preventDefault();
         withSubmit(e.target, async () => {
           await api("/admin/properties/" + id + "/status", {
             method: "POST",
-            data: formValues(e.target),
+            data: {...formValues(e.target),confirmAuthority:!!e.target.elements.confirmAuthority?.checked,confirmAvailability:!!e.target.elements.confirmAvailability?.checked},
           });
           closeDialog();
           toast("حُفظ قرار المراجعة");
@@ -317,8 +318,12 @@ async function propertyDetail(id) {
   if (!p) p = (await api("/properties/" + id)).property;
   openDialog(
     "ملف العقار",
-    `<div class="row">${badge(p.status)}<strong class="price">${money(p.priceFils)}</strong></div><h3 class="detail-title">${esc(p.title)}</h3><p>${esc(p.location)} · ${esc(p.type)}</p>${p.images?.length ? `<div class="detail-gallery">${p.images.map((im) => `<img data-file-image="${im}" alt="صورة مرفقة للعقار">`).join("")}</div>` : '<div class="notice">لم ترفق صور بالعقار.</div>'}<div class="detail-meta"><div><small>المساحة</small><strong>${p.area ? p.area + " م²" : "غير محددة"}</strong></div><div><small>غرف النوم</small><strong>${p.bedrooms || "غير محددة"}</strong></div><div><small>الحمامات</small><strong>${p.bathrooms || "غير محددة"}</strong></div></div><p class="text-flow">${esc(p.description || "")}</p><p class="hint">المصدر: ${esc(p.source || "إضافة مستخدم")}</p><p class="hint">رابط المصدر: <bdi>${esc(p.sourceUrl || "غير مرفق")}</bdi></p><p class="hint">هاتف المعلن: <bdi>${esc(p.contact || "غير مرفق")}</bdi></p><button class="btn secondary" data-action="print">طباعة ملف العقار</button>`,
+    `<div class="row">${badge(p.status)}<strong class="price">${money(p.priceFils)}</strong></div><h3 class="detail-title">${esc(p.title)}</h3><p>${esc(p.location)} · ${esc(p.type)}</p>${p.images?.length ? `<div class="detail-gallery">${p.images.map((im) => `<img data-file-image="${im}" alt="صورة مرفقة للعقار">`).join("")}</div>` : '<div class="notice">لم ترفق صور بالعقار.</div>'}<div class="detail-meta"><div><small>المساحة</small><strong>${p.area ? p.area + " م²" : "غير محددة"}</strong></div><div><small>غرف النوم</small><strong>${p.bedrooms || "غير محددة"}</strong></div><div><small>الحمامات</small><strong>${p.bathrooms || "غير محددة"}</strong></div></div><p class="text-flow">${esc(p.description || "")}</p><p class="hint">المصدر: ${esc(p.source || "إضافة مستخدم")}</p><p class="hint">رابط المصدر: <bdi>${esc(p.sourceUrl || "غير مرفق")}</bdi></p><p class="hint">هاتف المعلن: <bdi>${esc(p.contact || "غير مرفق")}</bdi></p>${(p.videos||[]).length ? `<div class="detail-videos">${p.videos.map(id=>`<video controls preload="none" playsinline data-file-video="${id}" aria-label="فيديو العقار"></video>`).join("")}</div>` : ""}<button class="btn secondary" data-action="attach-media" data-id="${p.id}">إرفاق صور وفيديو</button><button class="btn secondary" data-action="print">طباعة ملف العقار</button>`,
   );
+  for (const video of $$("[data-file-video]")) {
+    const r=await fetch(API_URL+'/media/'+video.dataset.fileVideo,{headers:{authorization:'Bearer '+getSession().token}});
+    if(r.ok) {const url=URL.createObjectURL(await r.blob());video.src=url;$('#modal').addEventListener('close',()=>{video.pause();URL.revokeObjectURL(url);},{once:true});}
+  }
   for (const img of $$("[data-file-image]")) {
     const r = await fetch(API_URL + "/images/" + img.dataset.fileImage, {
       headers: { authorization: "Bearer " + getSession().token },
@@ -357,7 +362,7 @@ function importListing() {
                 ? "monthly"
                 : "total",
             null,
-          )}${field("area", "المساحة · م²", "number", f.area ?? "", 'min="1"')}${field("bedrooms", "غرف النوم", "number", f.bedrooms ?? "", 'min="0"')}${field("source", "اسم المصدر", "text", "", 'required maxlength="160"')}${field("sourceUrl", "رابط المصدر (إن وجد)", "url", "", 'dir="ltr"')}<label class="check-label span-full"><input type="checkbox" required>لدي إذن استخدام الإعلان، وسأتحقق من التوفر والمعلومات قبل النشر.</label></div><button class="btn primary wide" type="submit">حفظ للمراجعة ومنع التكرار</button></form>`,
+          )}${field("area", "المساحة · م²", "number", f.area ?? "", 'min="1"')}${field("bedrooms", "غرف النوم", "number", f.bedrooms ?? "", 'min="0"')}${field("source", "اسم المصدر", "text", "", 'required maxlength="160"')}${field("sourceUrl", "رابط المصدر (إن وجد)", "url", "", 'dir="ltr"')}${field("permissionRef","مرجع التفويض","text","",'required maxlength="500"')}<label class="check-label span-full"><input type="checkbox" name="permissionConfirmed" required>لدي إذن استخدام الإعلان، وسأتحقق من التوفر والمعلومات قبل النشر.</label></div><button class="btn primary wide" type="submit">حفظ للمراجعة ومنع التكرار</button></form>`,
           () => {
             $("#import-confirm").onsubmit = (e) => {
               e.preventDefault();
@@ -368,6 +373,8 @@ function importListing() {
                   data: {
                     text: raw,
                     confirm: true,
+                    permissionConfirmed:!!e.target.elements.permissionConfirmed.checked,
+                    permissionRef:b.permissionRef,
                     source: b.source,
                     sourceUrl: b.sourceUrl,
                     title: b.title,
@@ -903,6 +910,8 @@ function actionLabel(a) {
       "account.register": "حساب جديد",
       "property.submitted": "إعلان بانتظار المراجعة",
       "property.imported": "استيراد إعلان",
+      "property.batch_imported":"استيراد دفعة إعلانات",
+      "property.permission_recorded":"تسجيل تفويض الإعلان والوسائط",
       "property.status": "قرار مراجعة عقار",
       "property.edited": "تعديل عقار",
       "property.archived": "أرشفة عقار",
@@ -962,6 +971,8 @@ document.addEventListener("click", async (e) => {
     else if (action === "property-detail") await propertyDetail(id);
     else if (action === "property-edit") editProperty(id);
     else if (action === "import") importListing();
+    else if (action === "import-batch") openBatchImport(()=>loadPage("properties"));
+    else if (action === "attach-media") attachListingMedia(state.properties.find(p=>p.id===id),()=>loadPage("properties"));
     else if (action === "filter-status") {
       $$("#status-tabs .tab").forEach((b) =>
         b.classList.toggle("active", b === button),

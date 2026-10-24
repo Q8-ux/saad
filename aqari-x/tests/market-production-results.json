@@ -1,0 +1,38 @@
+{
+  "checkedAt": "2026-10-24T13:28:13.781Z",
+  "base": "https://br-tiny-bread-b9dsnadw-office.compute.c-7.eu-central-1.aws.neon.tech",
+  "results": [
+    {
+      "label": "Backend release 1.3.0",
+      "passed": true
+    },
+    {
+      "label": "29 research records visible as references",
+      "passed": true
+    },
+    {
+      "label": "Source provenance present, private contacts and permission references omitted",
+      "passed": true
+    },
+    {
+      "label": "Source filters return 24 4Sale and 5 Sakan results",
+      "passed": true
+    },
+    {
+      "label": "Research coverage is explicitly limited",
+      "passed": true
+    },
+    {
+      "label": "Batch import and uploads require authentication",
+      "passed": true
+    },
+    {
+      "label": "Researched Jabriya details keep exact amount and provenance",
+      "passed": true
+    },
+    {
+      "label": "Assistant search includes researched inventory",
+      "passed": true
+    }
+  ]
+}

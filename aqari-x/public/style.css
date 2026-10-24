@@ -2378,3 +2378,13 @@ html[lang="ur"] {line-height:1.9;}
     display: none !important;
   }
 }
+
+/* Research provenance and consented media. */
+.source-provenance {display:grid;gap:3px;font-size:12px;color:var(--muted);margin:8px 0 12px;line-height:1.65}
+.source-provenance strong {color:var(--accent)}
+.market-source-grid {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:20px 0}
+.market-source {display:flex;flex-direction:column;gap:12px;padding:18px;border:1px solid var(--line);border-radius:12px}
+.market-source>strong {font-size:32px}.market-source>small {color:var(--muted)}
+.detail-videos {display:grid;gap:14px;margin:20px 0}.detail-videos video {width:100%;max-height:420px;background:#152a28;border-radius:12px}
+.import-preview {max-height:280px;overflow:auto;margin:18px 0}.import-result {white-space:pre-wrap;overflow-wrap:anywhere}
+@media(max-width:650px){.market-source-grid{grid-template-columns:1fr}}
