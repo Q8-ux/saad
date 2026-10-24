@@ -61,7 +61,7 @@ def prepare():
     shutil.copytree(source, root / "aqari-x", ignore=shutil.ignore_patterns("__qa-*"))
     if protected_manifest(root) != preserved:
         raise RuntimeError("An unrelated project's published content changed")
-    proof = {"version":"1.0.2", "commit":os.environ["GITHUB_SHA"], "baseRun":previous["id"],
+    proof = {"version":"1.0.3", "commit":os.environ["GITHUB_SHA"], "baseRun":previous["id"],
              "preservedFiles":len(preserved), "data":"server-persisted", "admin":"server-authorized"}
     (root / "aqari-x/deployment.json").write_text(json.dumps(proof, indent=2) + "\n")
     print(f"Prepared Aqari X; {len(preserved)} unrelated published files are unchanged.")

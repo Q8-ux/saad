@@ -121,6 +121,7 @@ bdi {
   min-height: 100dvh;
 }
 .sidebar {
+  overflow-y: auto;
   height: 100dvh;
   position: sticky;
   top: 0;
