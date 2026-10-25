@@ -111,6 +111,11 @@ jobs:
         run: npm test && npm run check
       - name: Validate Tamweenat release smoke checks
         run: node tamweenat/tests/release-smoke.cjs
+      - name: Validate Tamweenat published entrypoints
+        run: |
+          test -s tamweenat/index.html
+          test -s tamweenat-admin/index.html
+          test -s tamweenat-api/catalog.json
       - name: Validate Tamweenat assistant
         if: steps.scope.outputs.sabeq_only != 'true' && steps.tamweenat.outputs.only != 'true' && steps.rattil.outputs.only != 'true'
         run: |
