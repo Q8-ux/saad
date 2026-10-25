@@ -2,10 +2,14 @@ import { listManagedUsers, updateManagedUser } from "@/lib/user-management";
 import { mailboxAction } from "@/lib/management-mailboxes";
 import { sadadManagement } from "@/lib/sadad-payments";
 import { programmerAction } from "@/lib/management-programmer";
+import { searchImportedEdition } from "@/lib/legislation-edition-import";
+import { getAuditFile } from "@/lib/legislation-audit";
+import { legislationWorkbench, archiveArticles, archiveAsset } from "@/lib/legislation-workbench";
 import { getD1 } from "@/db";
-import { assertManagementOrigin, exchangeManagerCode, managementJson, managerLogin, requireManager } from "@/lib/management-auth";
+import { assertManagementOrigin, assertManagerAction, exchangeManagerCode, managementJson, managerLogin, managerProfile, passwordManagerLogin, requireManager } from "@/lib/management-auth";
 import { bridgeKeys, managerInbox, managerMemos, managerSnapshot, managerUpdates } from "@/lib/management-data";
 import { mailAction, operationEvent, whatsappAction } from "@/lib/management-integrations";
+import { verificationEmailAction } from "@/lib/verification-email-settings";
 import { cleanMultiline, cleanString, enforceRateLimit, readJsonObject, RequestError } from "@/lib/request-security";
 
 export const dynamic = "force-dynamic";
@@ -21,11 +25,18 @@ export async function GET(request: Request) {
     if (action === "login") { await enforceRateLimit(request, "management-login", 20); return await managerLogin(request); }
     if (action === "jwks") { const keys = await bridgeKeys(); return managementJson({ keys: [keys.publicKey] }); }
     const manager = await requireManager(request), url = new URL(request.url);
+    assertManagerAction(manager, action, "GET");
+    if (action === "verification-email") return managementJson(await verificationEmailAction(null, manager.email));
     if (action === "users") return managementJson(await listManagedUsers(url, 50));
+    if (action === "legislation") return managementJson(await searchImportedEdition(url));
+    if (action === "legislation-workbench") return managementJson(await legislationWorkbench());
+    if (action === "legislation-articles") return managementJson(await archiveArticles(url));
+    if (action === "legislation-asset") return archiveAsset(url,"https://q8-ux.github.io");
+    if (action === "legislation-report") return getAuditFile(url.searchParams.get("id") || "", "https://q8-ux.github.io");
     if (action === "programmer") return managementJson(await programmerAction(null, manager.email));
     if (action === "payments") return managementJson(await sadadManagement(null, manager.email));
     if (action === "mailboxes") return managementJson(await mailboxAction(null, manager.email, Number(url.searchParams.get("offset") || 0)));
-    if (action === "session") return managementJson({ manager: { email: manager.email, name: manager.name } });
+    if (action === "session") return managementJson({ manager: managerProfile(manager) });
     if (action === "snapshot") return managementJson(await managerSnapshot(manager.email));
     if (action === "memos") return managementJson(await managerMemos(url));
     if (action === "inbox") return managementJson(await managerInbox(url));
@@ -39,9 +50,11 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     assertManagementOrigin(request);
-    const action = actionPath(request), data = await readJsonObject(request, 20_000);
+    const action = actionPath(request), data = await readJsonObject(request, action === "password-login" ? 4_096 : 20_000);
     if (action === "exchange") { await enforceRateLimit(request, "management-exchange", 30); return managementJson(await exchangeManagerCode(data)); }
+    if (action === "password-login") return managementJson(await passwordManagerLogin(request, data));
     const manager = await requireManager(request);
+    assertManagerAction(manager, action, "POST");
     await enforceRateLimit(request, "management-write", 150);
     if (action === "programmer") {
       if (data.action === "run") await enforceRateLimit(request, "management-programmer", 20);
@@ -52,6 +65,7 @@ export async function POST(request: Request) {
     if (action === "payments") return managementJson(await sadadManagement(data, manager.email));
     if (action === "mailboxes") return managementJson(await mailboxAction(data, manager.email));
     if (action === "whatsapp") return managementJson(await whatsappAction(data, manager.email));
+    if (action === "verification-email") return managementJson(await verificationEmailAction(data, manager.email));
     if (action === "mail") return managementJson(await mailAction(data, manager.email));
     if (action === "read") {
       if (!Array.isArray(data.ids) || data.ids.length > 100 || data.ids.some(id => typeof id !== "string" || id.length > 200)) throw new RequestError("قائمة التنبيهات غير صحيحة.");

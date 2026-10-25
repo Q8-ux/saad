@@ -1,10 +1,24 @@
 import { env } from "cloudflare:workers";
 import { getD1 } from "@/db";
 import { getChatGPTUser, chatGPTSignInPath } from "@/app/chatgpt-auth";
-import { RequestError } from "@/lib/request-security";
+import { RequestError, enforceRateLimit } from "@/lib/request-security";
+import { authenticateManagementPassword, managementPasswordSession, normalizeManagementUsername } from "@/lib/management-password";
 
 export const MANAGEMENT_HOME = "https://q8-ux.github.io/saad/sabeq-admin-preview/";
 export const MANAGEMENT_ORIGIN = new URL(MANAGEMENT_HOME).origin;
+type Manager = { email: string; name: string; username?: string; role: "operator" | "administrator" };
+const OPERATOR_SECTIONS = ["overview", "memos", "inbox", "notifications", "users", "legislation", "commands", "updates"];
+export function managerProfile(manager: Manager) {
+  return { email: manager.email, name: manager.name, ...(manager.username ? { username: manager.username } : {}), role: manager.role,
+    sections: manager.role === "operator" ? OPERATOR_SECTIONS : [...OPERATOR_SECTIONS, "programmer", "payments", "mailboxes", "whatsapp", "mail"] };
+}
+export function assertManagerAction(manager: Manager, action: string, method: "GET" | "POST") {
+  if (manager.role !== "operator") return;
+  const allowed = method === "GET"
+    ? ["session", "snapshot", "memos", "inbox", "users", "updates", "commands", "legislation", "legislation-workbench", "legislation-articles", "legislation-asset", "legislation-report"]
+    : ["logout", "users", "read", "inbox", "commands"];
+  if (!allowed.includes(action)) throw new RequestError("هذا القسم غير متاح لصلاحيات حساب التشغيل.", 403);
+}
 type Runtime = { AUTH_SECRET?: string; MANAGEMENT_ALLOWED_EMAILS?: string; MANAGEMENT_OWNER_EMAIL?: string };
 export const managementRuntime = () => env as unknown as Runtime;
 export function managerAllowed(email: string) {
@@ -63,15 +77,28 @@ export async function exchangeManagerCode(data: Record<string, unknown>) {
   await getD1().prepare("INSERT INTO management_sessions (token_hash, email, name, expires_at, last_seen_at) VALUES (?, ?, ?, ?, ?)").bind(await digest(token), row.email, row.name, expiresAt, Math.floor(Date.now() / 1000)).run();
   return { token, expiresAt, manager: row };
 }
+export async function passwordManagerLogin(request: Request, data: Record<string, unknown>) {
+  const rateHeaders = new Headers(request.headers);
+  rateHeaders.set("user-agent", "sabeq-control-password");
+  const rateRequest = new Request(request.url, { headers: rateHeaders });
+  await enforceRateLimit(rateRequest, "management-password-login", 30);
+  await enforceRateLimit(rateRequest, `management-password-account:${await digest(normalizeManagementUsername(data.username).slice(0, 64))}`, 8);
+  const account = await authenticateManagementPassword(data);
+  const now = Math.floor(Date.now() / 1000), token = randomToken(), expiresAt = now + 8 * 3600;
+  await getD1().prepare("INSERT INTO management_sessions (token_hash, email, name, expires_at, last_seen_at) VALUES (?, ?, ?, ?, ?)")
+    .bind(await digest(token), account.sessionPrincipal, account.username, expiresAt, now).run();
+  return { token, expiresAt, manager: managerProfile({ email: `staff:${account.username}`, name: account.username, username: account.username, role: "operator" }) };
+}
 export async function requireManager(request: Request) {
   assertManagementOrigin(request);
   const token = request.headers.get("authorization")?.match(/^Bearer ([A-Za-z0-9_-]{43})$/)?.[1];
   if (!token) throw new RequestError("سجّل الدخول إلى الإدارة للمتابعة.", 401);
   const hash = await digest(token), now = Math.floor(Date.now() / 1000);
   const row = await getD1().prepare("SELECT email, name FROM management_sessions WHERE token_hash = ? AND expires_at > ? AND last_seen_at > ?").bind(hash, now, now - 3600).first<{ email: string; name: string }>();
-  if (!row || !managerAllowed(row.email)) throw new RequestError("انتهت الجلسة الإدارية. سجّل الدخول مجدداً.", 401);
+  const staff = row?.email.startsWith("staff:") ? await managementPasswordSession(row.email) : null;
+  if (!row || (row.email.startsWith("staff:") ? !staff : !managerAllowed(row.email))) throw new RequestError("انتهت الجلسة الإدارية. سجّل الدخول مجدداً.", 401);
   await getD1().prepare("UPDATE management_sessions SET last_seen_at = ? WHERE token_hash = ?").bind(now, hash).run();
-  return { ...row, hash };
+  return { email: staff?.identity || row.email, name: staff?.username || row.name, ...(staff ? { username: staff.username } : {}), role: staff ? "operator" as const : "administrator" as const, hash };
 }
 async function vaultKey() {
   const secret = managementRuntime().AUTH_SECRET || "";

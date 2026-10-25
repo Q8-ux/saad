@@ -21,3 +21,5 @@
 .leg-quote{font:inherit;font-size:19px;line-height:1.9;white-space:pre-wrap;overflow-wrap:anywhere;unicode-bidi:plaintext;background:#f4f7f8;padding:18px;border:1px solid var(--line);border-radius:8px;max-block-size:620px;overflow:auto}.leg-hash{overflow-wrap:anywhere;font-size:13px}.leg-result{padding:16px 0;border-block-end:1px solid var(--line)}.leg-result p{overflow-wrap:anywhere}.leg-source-image{display:block;width:100%;max-width:1122px;height:auto;margin:18px auto}.leg-sources{max-block-size:380px;overflow:auto}.leg-directory{max-block-size:560px;overflow:auto}
 
 .leg-nowrap{white-space:nowrap}
+
+.login form{text-align:start;margin-block:24px 12px}.login form .primary{margin-block:8px 0}.login-alternative{display:grid;gap:8px;padding-block:20px 12px;border-block-start:1px solid var(--line)}

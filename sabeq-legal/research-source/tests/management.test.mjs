@@ -5,7 +5,7 @@ import { resolve,dirname } from 'node:path';
 import vm from 'node:vm';
 import { createRequire } from 'node:module';
 import { DatabaseSync } from 'node:sqlite';
-import { webcrypto,createHmac } from 'node:crypto';
+import { webcrypto,createHmac,pbkdf2Sync } from 'node:crypto';
 import ts from 'typescript';
 const require=createRequire(import.meta.url),root=resolve(new URL('..',import.meta.url).pathname);
 function harness(){
@@ -15,18 +15,74 @@ function harness(){
  const db={prepare:statements,async batch(values){const out=[];for(const v of values)out.push(await v.run());return out;}};
  const runtime={AUTH_SECRET:'synthetic-management-secret-'.repeat(3),MANAGEMENT_ALLOWED_EMAILS:'manager@example.test'};
  const cache=new Map(),network=[],identity={value:null};let transport=async()=>Response.json({error:'offline'},{status:503});
+ // Copy noble options into its module realm; the actual KDF runs unchanged across the VM boundary.
  const load=file=>{file=resolve(root,file);if(cache.has(file))return cache.get(file);const exports={};cache.set(file,exports);
   const source=ts.transpileModule(readFileSync(file,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,esModuleInterop:true}}).outputText;
-  const localRequire=name=>{if(name==='@/db')return{getD1:()=>db};if(name==='cloudflare:workers')return{env:runtime};if(name==='next/headers')return{headers:async()=>new Headers(identity.value?{'oai-authenticated-user-id':'synthetic-id','oai-authenticated-user-email':identity.value}: {})};if(name==='next/navigation')return{redirect:()=>{throw Error('unexpected redirect helper');}};if(name.startsWith('@/'))return load(name.slice(2)+'.ts');if(name.startsWith('.'))return load(resolve(dirname(file),name+'.ts'));return require(name);};
+  const localRequire=name=>{if(name==='@/db')return{getD1:()=>db};if(name==='cloudflare:workers')return{env:runtime};if(name==='next/headers')return{headers:async()=>new Headers(identity.value?{'oai-authenticated-user-id':'synthetic-id','oai-authenticated-user-email':identity.value}: {})};if(name==='next/navigation')return{redirect:()=>{throw Error('unexpected redirect helper');}};if(name==='@noble/hashes/pbkdf2.js'){const real=require(name);return {...real,pbkdf2Async:(hash,password,salt,opts)=>real.pbkdf2Async(hash,password,salt,{...opts})};}if(name.startsWith('@/'))return load(name.slice(2)+'.ts');if(name.startsWith('.'))return load(resolve(dirname(file),name+'.ts'));return require(name);};
   vm.runInNewContext(source,{exports,require:localRequire,crypto:webcrypto,URL,URLSearchParams,TextEncoder,TextDecoder,Uint8Array,Headers,Request,Response,AbortSignal,Error,Date,JSON,btoa,atob,console,fetch:async(url,init={})=>{network.push({url:String(url),init});return transport(url,init);}});return exports;
  };
  return{sqlite,db,runtime,load,network,identity,setTransport:f=>transport=f,close:()=>sqlite.close()};
 }
 const request=(path,token,body,origin='https://q8-ux.github.io')=>new Request('https://sabeq-legal-public.centrino.chatgpt.site/api/management/'+path,{method:body?'POST':'GET',headers:{Origin:origin,...(token?{Authorization:'Bearer '+token}:{}),...(body?{'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{})});
+
+const staffNames=['user1','user2','user3','user5','it_user'];
+const staffPepper='synthetic-only-management-pepper-'.repeat(2);
+const staffPasswords=Object.fromEntries(staffNames.map((name,i)=>[name,`Synthetic-${name}-Password-${i}-2026!`]));
+const staffAccounts=staffNames.map((username,i)=>{const salt=Buffer.alloc(16,i+1);return {username,salt:salt.toString('hex'),hash:pbkdf2Sync(createHmac('sha256',staffPepper).update(staffPasswords[username]).digest(),salt,600000,32,'sha256').toString('hex'),enabled:true};});
+function configureStaff(h){h.runtime.MANAGEMENT_PASSWORD_PEPPER=staffPepper;h.runtime.MANAGEMENT_PASSWORD_USERS=JSON.stringify({version:1,accounts:staffAccounts});}
+async function staffLogin(h,username='user1'){const response=await h.load('app/api/management/[...path]/route.ts').POST(request('password-login',null,{username,password:staffPasswords[username]}));assert.equal(response.status,200);return response.json();}
+
+test('password verifier matches the independent Node PBKDF2 vector and normalizes only the username',async()=>{const h=harness();try{configureStaff(h);const result=await h.load('lib/management-password.ts').authenticateManagementPassword({username:' USER1 ',password:staffPasswords.user1});assert.equal(result.username,'user1');assert.match(result.sessionPrincipal,/^staff:user1:[a-f0-9]{32}$/);}finally{h.close();}});
+
+test('five configured control users accept only their own distinct passwords and store only session hashes',async()=>{const h=harness();try{
+ configureStaff(h);const routes=h.load('app/api/management/[...path]/route.ts'),tokens=[];
+ for(const username of staffNames){for(const other of staffNames){const response=await routes.POST(request('password-login',null,{username,password:staffPasswords[other],role:'administrator'}));assert.equal(response.status,username===other?200:401);const body=await response.json();if(username===other){tokens.push(body.token);assert.equal(body.manager.username,username);assert.equal(body.manager.role,'operator');assert.ok(body.expiresAt<=Math.floor(Date.now()/1000)+8*3600);assert.ok(!body.manager.sections.includes('payments'));}else assert.ok(!body.token);for(const secret of [...Object.values(staffPasswords),staffPepper,...staffAccounts.map(a=>a.hash)])assert.ok(!JSON.stringify(body).includes(secret));}}
+ assert.equal(new Set(tokens).size,5);assert.equal(h.sqlite.prepare('SELECT count(*) n FROM management_sessions').get().n,5);
+ const stored=JSON.stringify(h.sqlite.prepare('SELECT * FROM management_sessions').all());for(const token of tokens)assert.ok(!stored.includes(token));for(const secret of Object.values(staffPasswords))assert.ok(!stored.includes(secret));assert.equal(h.sqlite.prepare('SELECT count(*) n FROM public_users').get().n,0);
+}finally{h.close();}});
+
+test('unknown and suspended staff share one failure response; malformed configuration fails closed without blocking existing administrators',async()=>{const h=harness();try{
+ configureStaff(h);const routes=h.load('app/api/management/[...path]/route.ts');const unknown=await routes.POST(request('password-login',null,{username:'unknown_user',password:staffPasswords.user1}));assert.equal(unknown.status,401);const expected=await unknown.json();
+ const config=JSON.parse(h.runtime.MANAGEMENT_PASSWORD_USERS);config.accounts[0].enabled=false;h.runtime.MANAGEMENT_PASSWORD_USERS=JSON.stringify(config);const disabled=await routes.POST(request('password-login',null,{username:'user1',password:staffPasswords.user1}));assert.equal(disabled.status,401);assert.deepEqual(await disabled.json(),expected);
+ h.runtime.MANAGEMENT_PASSWORD_USERS='{invalid';assert.equal((await routes.POST(request('password-login',null,{username:'user1',password:staffPasswords.user1}))).status,503);
+ const owner=await login(h);assert.equal((await routes.GET(request('session',owner.token))).status,200);assert.equal((await routes.GET(request('verification-email',owner.token))).status,200);
+ delete h.runtime.MANAGEMENT_PASSWORD_USERS;delete h.runtime.MANAGEMENT_PASSWORD_PEPPER;assert.equal((await routes.POST(request('password-login',null,{username:'user1',password:staffPasswords.user1}))).status,503);
+}finally{h.close();}});
+
+test('operator permissions are enforced before integrations and cannot be widened through client fields',async()=>{const h=harness();try{
+ configureStaff(h);const session=await staffLogin(h),routes=h.load('app/api/management/[...path]/route.ts');const safe=await(await routes.GET(request('session',session.token))).json();assert.equal(safe.manager.role,'operator');assert.equal(safe.manager.email,'staff:user1');assert.equal((await routes.GET(request('users',session.token))).status,200);
+ const network=h.network.length;
+ for(const path of ['verification-email','payments','programmer','mailboxes','mail','whatsapp']){assert.equal((await routes.GET(request(path,session.token))).status,403);assert.equal((await routes.POST(request(path,session.token,{action:'save',role:'administrator'}))).status,403);}
+ assert.equal(h.network.length,network);assert.equal((await routes.POST(request('commands',session.token,{title:'أمر تشغيل اصطناعي'}))).status,200);assert.equal(h.sqlite.prepare('SELECT created_by FROM management_commands').get().created_by,'staff:user1');
+ assert.equal((await routes.POST(request('password-login',null,{username:'user1',password:staffPasswords.user1},'https://other.example'))).status,403);
+ assert.equal(h.load('lib/admin-service-auth.ts').requireAdminService(request('users',session.token)).status,401);assert.equal(await h.load('lib/public-auth.ts').getPublicUser(request('session',session.token)),null);
+}finally{h.close();}});
+
+test('staff logout is per session and changing one credential, disabling it or expiry revokes access',async()=>{const h=harness();try{
+ configureStaff(h);const one=await staffLogin(h),two=await staffLogin(h,'user2'),routes=h.load('app/api/management/[...path]/route.ts');
+ assert.equal((await routes.POST(request('logout',one.token,{}))).status,200);assert.equal((await routes.GET(request('session',one.token))).status,401);assert.equal((await routes.GET(request('session',two.token))).status,200);
+ h.sqlite.prepare("UPDATE management_sessions SET last_seen_at=0 WHERE name='user2'").run();assert.equal((await routes.GET(request('session',two.token))).status,401);h.sqlite.prepare("UPDATE management_sessions SET last_seen_at=?,expires_at=0 WHERE name='user2'").run(Math.floor(Date.now()/1000));assert.equal((await routes.GET(request('session',two.token))).status,401);
+ const three=await staffLogin(h,'user3'),five=await staffLogin(h,'user5');let config=JSON.parse(h.runtime.MANAGEMENT_PASSWORD_USERS);config.accounts.find(a=>a.username==='user3').hash='0'.repeat(64);h.runtime.MANAGEMENT_PASSWORD_USERS=JSON.stringify(config);assert.equal((await routes.GET(request('session',three.token))).status,401);assert.equal((await routes.GET(request('session',five.token))).status,200);
+ config.accounts.find(a=>a.username==='user5').enabled=false;h.runtime.MANAGEMENT_PASSWORD_USERS=JSON.stringify(config);assert.equal((await routes.GET(request('session',five.token))).status,401);
+}finally{h.close();}});
+
+test('password login throttling cannot be evaded by changing user agent and oversized bodies are rejected',async()=>{
+ for(const perAccount of [true,false]){const h=harness();try{configureStaff(h);const routes=h.load('app/api/management/[...path]/route.ts'),limit=perAccount?8:30;for(let i=0;i<=limit;i++){const req=request('password-login',null,{username:perAccount?'user1':`unknown_${i}`,password:'short'});req.headers.set('user-agent','changed-agent-'+i);const response=await routes.POST(req);assert.equal(response.status,i<limit?401:429);}const oversized=request('password-login',null,{username:'user1',password:'x'.repeat(5000)});assert.equal((await routes.POST(oversized)).status,413);}finally{h.close();}}
+});
+
+test('the control center password form signs into the real routes, clears the password and removes owner-only deep links',async()=>{const h=harness();try{
+ configureStaff(h);const routes=h.load('app/api/management/[...path]/route.ts'),storage=new Map(),nodes=new Map(),listeners=new Map();let cleanPath='';
+ const node=id=>{if(!nodes.has(id))nodes.set(id,{innerHTML:'',textContent:'',addEventListener(){},replaceChildren(){}});return nodes.get(id);};
+ const context=vm.createContext({URL,URLSearchParams,Headers,Request,Response,TextEncoder,TextDecoder,Uint8Array,AbortSignal,crypto:webcrypto,btoa,atob,console,
+ FormData:class{constructor(form){this.values=Object.entries(form.values);}[Symbol.iterator](){return this.values[Symbol.iterator]();}},document:{getElementById:node,addEventListener:(name,handler)=>listeners.set(name,handler)},location:{href:'https://q8-ux.github.io/saad/sabeq-admin-preview/#payments',pathname:'/saad/sabeq-admin-preview/'},history:{replaceState(_s,_t,path){cleanPath=path;}},sessionStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v),removeItem:k=>storage.delete(k)},setInterval(){},setTimeout(){},clearTimeout(){},fetch:async(url,init)=>{const headers=new Headers(init.headers);headers.set('Origin','https://q8-ux.github.io');const req=new Request(url,{...init,headers});return req.method==='POST'?routes.POST(req):routes.GET(req);}});
+ vm.runInContext(readFileSync(root+'/public/management/admin.js','utf8').replace('void boot();','globalThis.bootPromise=boot();'),context);await context.bootPromise;assert.match(node('app').innerHTML,/data-form="password-login"/);assert.match(node('app').innerHTML,/autocomplete="username"/);assert.match(node('app').innerHTML,/الدخول بالحساب الإداري/);
+ const button={disabled:false},password={value:staffPasswords.user1};const form={dataset:{form:'password-login'},values:{username:'user1',password:staffPasswords.user1},elements:{password},matches:()=>true,querySelector:()=>button,reset(){password.value='';}};
+ await listeners.get('submit')({target:form,preventDefault(){}});assert.equal(password.value,'');assert.equal(button.disabled,false);assert.ok(storage.get('sabeq-management-session'));assert.ok(!JSON.stringify([...storage]).includes(staffPasswords.user1));assert.ok(!node('app').innerHTML.includes('data-section="payments"'));assert.ok(!node('app').innerHTML.includes('data-section="programmer"'));assert.match(node('app').innerHTML,/user1/);assert.match(cleanPath,/#overview$/);
+}finally{h.close();}});
 async function login(h){const auth=h.load('lib/management-auth.ts'),verifier=auth.randomToken(),code=auth.randomToken();h.sqlite.prepare('INSERT INTO management_login_codes VALUES (?,?,?,?,?)').run(await auth.digest(code),'manager@example.test','مدير اصطناعي',await auth.proofChallenge(verifier),Math.floor(Date.now()/1000)+60);return{...(await auth.exchangeManagerCode({code,verifier})),code,verifier};}
 
 test('new migration adds isolated management tables without dropping the original service tables',()=>{const h=harness();try{const names=h.sqlite.prepare("SELECT name FROM sqlite_master WHERE type='table'").all().map(r=>r.name);for(const name of ['management_memo_requests','management_vault','management_sessions','contact_messages','public_users','service_records'])assert.ok(names.includes(name));assert.equal(h.sqlite.prepare('SELECT COUNT(*) n FROM public_users').get().n,0);}finally{h.close();}});
-test('unauthenticated and cross-origin management reads/writes never reach client data or external services',async()=>{const h=harness();try{const routes=h.load('app/api/management/[...path]/route.ts');for(const path of ['snapshot','memos','inbox','commands','whatsapp','mail']){assert.equal((await routes.GET(request(path))).status,401);}const session=await login(h);assert.equal((await routes.POST(request('commands',session.token,{title:'أمر اصطناعي'},'https://other.example'))).status,403);assert.equal(h.network.length,0);}finally{h.close();}});
+test('unauthenticated and cross-origin management reads/writes never reach client data or external services',async()=>{const h=harness();try{const routes=h.load('app/api/management/[...path]/route.ts');for(const path of ['snapshot','memos','inbox','commands','whatsapp','mail','legislation','legislation-report','legislation-workbench','legislation-articles','legislation-asset']){assert.equal((await routes.GET(request(path))).status,401);}const session=await login(h);assert.equal((await routes.POST(request('commands',session.token,{title:'أمر اصطناعي'},'https://other.example'))).status,403);assert.equal(h.network.length,0);}finally{h.close();}});
 test('PKCE code is single use, wrong proof does not consume it, expired sessions and revoked allowlist fail closed',async()=>{const h=harness();try{const auth=h.load('lib/management-auth.ts');const verifier=auth.randomToken(),code=auth.randomToken();h.sqlite.prepare('INSERT INTO management_login_codes VALUES(?,?,?,?,?)').run(await auth.digest(code),'manager@example.test','اختبار',await auth.proofChallenge(verifier),Math.floor(Date.now()/1000)+60);await assert.rejects(auth.exchangeManagerCode({code,verifier:auth.randomToken()}));const result=await auth.exchangeManagerCode({code,verifier});await assert.rejects(auth.exchangeManagerCode({code,verifier}));assert.equal((await auth.requireManager(request('session',result.token))).email,'manager@example.test');h.runtime.MANAGEMENT_ALLOWED_EMAILS='';await assert.rejects(auth.requireManager(request('session',result.token)));h.runtime.MANAGEMENT_ALLOWED_EMAILS='manager@example.test';h.sqlite.prepare('UPDATE management_sessions SET expires_at=0').run();await assert.rejects(auth.requireManager(request('session',result.token)));}finally{h.close();}});
 test('login uses the actual platform Request, prevents redirect loops and ignores a conflicting render identity',async()=>{const h=harness();try{
  const auth=h.load('lib/management-auth.ts'),challenge=await auth.proofChallenge(auth.randomToken()),state=auth.randomToken();
@@ -235,4 +291,84 @@ test('a direct Payments bookmark cannot fetch dashboard records before sign-in',
   assert.equal(requests,0);assert.match(node('app').innerHTML,/الدخول بالحساب الإداري/);assert.ok(!node('app').innerHTML.includes('name="clientSecret"'));
   assert.equal(storage.get('sabeq-admin-section'),hash==='payments'?'payments':undefined);
  }
+});
+
+const verificationConfig={action:'save',fromEmail:'noreply@sabeq.legal',apiKey:'re_synthetic_verification_key_12345'};
+const publicAuthRequest=(action,body)=>new Request('https://sabeq-legal-public.centrino.chatgpt.site/api/auth/'+action,{method:'POST',headers:{Origin:'https://q8-ux.github.io','Content-Type':'application/json'},body:JSON.stringify(body)});
+const syntheticApplicant={name:'مستخدم اصطناعي',phone:'00000000',email:'applicant@example.test',language:'ar'};
+
+test('the admin mail screen saves the outgoing key through the protected route, clears it and never stores it in browser storage',async()=>{const h=harness();try{
+ const session=await login(h),routes=h.load('app/api/management/[...path]/route.ts'),storage=new Map([['sabeq-management-session',session.token],['sabeq-admin-section','mail']]),nodes=new Map(),listeners=new Map();
+ const node=id=>{if(!nodes.has(id))nodes.set(id,{innerHTML:'',textContent:'',addEventListener(){},replaceChildren(){}});return nodes.get(id);};
+ const context=vm.createContext({URL,URLSearchParams,Headers,Request,Response,TextEncoder,TextDecoder,Uint8Array,AbortSignal,crypto:webcrypto,btoa,atob,console,
+  FormData:class{constructor(form){this.values=Object.entries(form.values);}[Symbol.iterator](){return this.values[Symbol.iterator]();}},
+  document:{getElementById:node,addEventListener:(name,handler)=>listeners.set(name,handler)},location:{href:'https://q8-ux.github.io/saad/sabeq-admin-preview/#mail',pathname:'/saad/sabeq-admin-preview/'},history:{replaceState(){}},
+  sessionStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v),removeItem:k=>storage.delete(k)},setInterval(){},setTimeout(){},clearTimeout(){},
+  fetch:async(url,init)=>{const headers=new Headers(init.headers);headers.set('Origin','https://q8-ux.github.io');const req=new Request(url,{...init,headers});return req.method==='POST'?routes.POST(req):routes.GET(req);}
+ });
+ vm.runInContext(readFileSync(root+'/public/management/admin.js','utf8').replace('void boot();','globalThis.bootPromise=boot();'),context);await context.bootPromise;
+ assert.match(node('workspace').innerHTML,/إرسال رموز الدخول/);assert.match(node('workspace').innerHTML,/data-form="verification-email"/);assert.match(node('workspace').innerHTML,/name="apiKey" value="" type="password"/);
+ let reset=false;const button={disabled:false};
+ const form={dataset:{form:'verification-email'},values:verificationConfig,matches:()=>true,querySelector:()=>button,reset(){reset=true;}};
+ await listeners.get('submit')({target:form,preventDefault(){}});
+ assert.equal(reset,true);assert.equal(button.disabled,false);assert.match(node('workspace').innerHTML,/إعدادات الإرسال محفوظة/);assert.ok(!node('workspace').innerHTML.includes(verificationConfig.apiKey));assert.ok(!JSON.stringify([...storage]).includes(verificationConfig.apiKey));
+ assert.equal((await h.load('lib/verification-email-settings.ts').verificationEmailDelivery()).apiKey,verificationConfig.apiKey);assert.equal(h.network.length,0);
+}finally{h.close();}});
+
+test('verification email configuration is admin-only, encrypted and independent of inbound mail',async()=>{const h=harness();try{
+ const routes=h.load('app/api/management/[...path]/route.ts');
+ assert.equal((await routes.GET(request('verification-email'))).status,401);
+ assert.equal((await routes.POST(request('verification-email',null,verificationConfig))).status,401);
+ const session=await login(h);
+ assert.equal((await routes.POST(request('verification-email',session.token,verificationConfig,'https://other.example'))).status,403);
+ const initial=await(await routes.GET(request('verification-email',session.token))).json();assert.equal(initial.configured,false);
+ for(const patch of [{fromEmail:'sender@other.example'},{apiKey:'bad'},{apiKey:''}])assert.equal((await routes.POST(request('verification-email',session.token,{...verificationConfig,...patch}))).status,400);
+ const saved=await routes.POST(request('verification-email',session.token,verificationConfig));assert.equal(saved.status,200);
+ const safe=await saved.json();assert.equal(safe.configured,true);assert.equal(safe.source,'management');assert.ok(!JSON.stringify(safe).includes(verificationConfig.apiKey));
+ const row=h.sqlite.prepare("SELECT sealed FROM management_vault WHERE integration='verification-email'").get();assert.ok(row.sealed);assert.ok(!row.sealed.includes(verificationConfig.apiKey));
+ const retained=await routes.POST(request('verification-email',session.token,{...verificationConfig,apiKey:''}));assert.equal(retained.status,200);
+ assert.equal((await h.load('lib/verification-email-settings.ts').verificationEmailDelivery()).apiKey,verificationConfig.apiKey);
+ assert.equal(h.sqlite.prepare("SELECT count(*) n FROM management_vault WHERE integration='email'").get().n,0);
+ assert.ok(!JSON.stringify(h.sqlite.prepare('SELECT * FROM management_events').all()).includes(verificationConfig.apiKey));assert.equal(h.network.length,0);
+}finally{h.close();}});
+
+test('verification email retains environment support and explicitly saved settings take precedence',async()=>{const h=harness();try{
+ h.runtime.RESEND_API_KEY='re_synthetic_environment_key_123';h.runtime.AUTH_FROM_EMAIL='Sabeq Legal <noreply@sabeq.legal>';
+ const settings=h.load('lib/verification-email-settings.ts');
+ const initial=await settings.verificationEmailAction(null,'test');assert.equal(initial.configured,true);assert.equal(initial.source,'environment');assert.equal(initial.fromEmail,'noreply@sabeq.legal');assert.ok(!JSON.stringify(initial).includes(h.runtime.RESEND_API_KEY));
+ await settings.verificationEmailAction(verificationConfig,'test');assert.equal((await settings.verificationEmailDelivery()).apiKey,verificationConfig.apiKey);
+}finally{h.close();}});
+
+test('request and verify execute the real database flow; a wrong or reused code cannot create another session',async()=>{const h=harness();try{
+ await h.load('lib/verification-email-settings.ts').verificationEmailAction(verificationConfig,'test');
+ let code='';h.setTransport(async(url,init)=>{assert.equal(String(url),'https://api.resend.com/emails');assert.equal(init.method,'POST');assert.equal(init.redirect,'error');assert.equal(init.headers.Authorization,'Bearer '+verificationConfig.apiKey);const body=JSON.parse(init.body);assert.equal(body.from,'noreply@sabeq.legal');assert.deepEqual(body.to,[syntheticApplicant.email]);code=body.text.match(/\n\n(\d{6})\n\n/)[1];return Response.json({id:'synthetic-delivery-id'});});
+ const requestRoute=h.load('app/api/auth/request-code/route.ts');
+ const response=await requestRoute.POST(publicAuthRequest('request-code',syntheticApplicant));assert.equal(response.status,200);const challenge=await response.json();assert.equal(challenge.expiresIn,600);assert.ok(!JSON.stringify(challenge).includes(code));assert.ok(!JSON.stringify(challenge).includes(verificationConfig.apiKey));
+ const row=h.sqlite.prepare('SELECT * FROM email_verification_challenges WHERE id=?').get(challenge.challengeId);assert.notEqual(row.code_hash,code);assert.equal(row.attempts,0);
+ const verify=h.load('app/api/auth/verify-code/route.ts');const check=value=>verify.POST(publicAuthRequest('verify-code',{challengeId:challenge.challengeId,email:syntheticApplicant.email,code:value}));
+ assert.equal((await check(code==='000000'?'000001':'000000')).status,401);
+ const accepted=await check(code);assert.equal(accepted.status,200);const session=await accepted.json();assert.equal(session.user.email,syntheticApplicant.email);assert.match(session.token,/^[A-Za-z0-9_-]{43}$/);
+ assert.equal((await check(code)).status,410);assert.equal(h.sqlite.prepare('SELECT count(*) n FROM public_user_sessions').get().n,1);
+ assert.ok(h.sqlite.prepare('SELECT email_verified_at FROM public_users').get().email_verified_at);
+ const caller=new Request('https://example.test',{headers:{Authorization:'Bearer '+session.token}});assert.equal((await h.load('lib/public-auth.ts').requirePublicUser(caller)).email,syntheticApplicant.email);
+ assert.equal((await requestRoute.POST(publicAuthRequest('request-code',syntheticApplicant))).status,429);
+}finally{h.close();}});
+
+test('missing credentials, network failures and unconfirmed provider responses never return a challenge or create an account',async()=>{
+ for(const failure of ['configuration','network','rejected','invalid-receipt']){const h=harness();try{
+  if(failure!=='configuration')await h.load('lib/verification-email-settings.ts').verificationEmailAction(verificationConfig,'test');
+  h.setTransport(async()=>{if(failure==='network')throw Error('private provider detail '+verificationConfig.apiKey);if(failure==='rejected')return Response.json({message:'private provider detail'},{status:403});return Response.json({message:'not a delivery receipt'});});
+  const route=h.load('app/api/auth/request-code/route.ts'),response=await route.POST(publicAuthRequest('request-code',syntheticApplicant));assert.equal(response.status,503);const body=await response.json();assert.ok(body.error);assert.ok(!body.challengeId);assert.ok(!JSON.stringify(body).includes('private provider detail'));assert.ok(!JSON.stringify(body).includes(verificationConfig.apiKey));
+  assert.equal(h.sqlite.prepare('SELECT count(*) n FROM email_verification_challenges').get().n,0);assert.equal(h.sqlite.prepare('SELECT count(*) n FROM public_users').get().n,0);assert.equal(h.sqlite.prepare('SELECT count(*) n FROM public_user_sessions').get().n,0);if(failure==='configuration')assert.equal(h.network.length,0);
+ }finally{h.close();}}
+});
+
+test('an expired challenge and five incorrect attempts cannot establish a public session',async()=>{
+ for(const expired of [true,false]){const h=harness();try{
+  const auth=h.load('lib/public-auth.ts'),id=webcrypto.randomUUID(),code='123456';
+  h.sqlite.prepare('INSERT INTO email_verification_challenges(id,name,phone,email,code_hash,expires_at) VALUES(?,?,?,?,?,?)').run(id,syntheticApplicant.name,syntheticApplicant.phone,syntheticApplicant.email,await auth.verificationCodeHash(id,syntheticApplicant.email,code),expired?0:Math.floor(Date.now()/1000)+600);
+  const route=h.load('app/api/auth/verify-code/route.ts'),verify=value=>route.POST(publicAuthRequest('verify-code',{challengeId:id,email:syntheticApplicant.email,code:value}));
+  if(expired)assert.equal((await verify(code)).status,410);else{for(let i=0;i<5;i++)assert.equal((await verify('000000')).status,401);assert.equal((await verify(code)).status,429);}
+  assert.equal(h.sqlite.prepare('SELECT count(*) n FROM public_user_sessions').get().n,0);assert.equal(h.sqlite.prepare('SELECT count(*) n FROM public_users').get().n,0);
+ }finally{h.close();}}
 });
