@@ -1,0 +1,27 @@
+/* خط Cairo كخط افتراضي لكامل الموقع (مستضاف محلياً لأن سياسة CSP لا تسمح بـ Google Fonts) */
+@font-face {
+  font-family: "Cairo";
+  src: url("./Cairo.ttf") format("truetype");
+  font-weight: 200 1000;
+  font-style: normal;
+  font-display: swap;
+}
+:root { --font-sans: "Cairo", Tahoma, Arial, sans-serif; }
+html, body, body *:not(svg):not(svg *):not(code):not(pre):not(kbd) {
+  font-family: "Cairo", Tahoma, Arial, sans-serif !important;
+}
+
+/* بطاقة "اضغط هنا للدخول على نظام كتابة المذكرات": حجم خط متناسق يحافظ على سطر واحد
+   في الموبايل والديسكتوب (خط Cairo أعرض من الخط السابق فكان النص ينكسر في الموبايل) */
+.site-shell .floating .memo-system-button { container-type: inline-size; }
+.site-shell .floating .memo-entry-caption,
+.site-shell .floating .memo-entry-title { white-space: nowrap; overflow: hidden; text-overflow: clip; }
+.site-shell .floating .memo-entry-caption {
+  font-size: max(12px, min(18px, calc(100cqi / 10))) !important;
+  line-height: 1.5;
+}
+.site-shell .floating .memo-entry-title {
+  font-size: max(14px, min(25px, calc(100cqi / 8.8))) !important;
+  line-height: 1.4 !important;
+  margin-top: 2px;
+}
