@@ -1,0 +1,560 @@
+[
+  {
+    "width": 1440,
+    "lang": "ar",
+    "rows": [
+      {
+        "overflow": false,
+        "size": "18px",
+        "text": "العربيةEnglishاردو",
+        "weight": "400"
+      },
+      {
+        "overflow": false,
+        "size": "18px",
+        "text": "محرك توليد المذكرات",
+        "weight": "500"
+      },
+      {
+        "overflow": false,
+        "size": "18px",
+        "text": "احجز استشارتك الآن",
+        "weight": "500"
+      },
+      {
+        "overflow": false,
+        "size": "19px",
+        "text": "الرئيسية",
+        "weight": "400"
+      },
+      {
+        "overflow": false,
+        "size": "19px",
+        "text": "فريقنا",
+        "weight": "400"
+      },
+      {
+        "overflow": false,
+        "size": "19px",
+        "text": "خدماتنا",
+        "weight": "400"
+      },
+      {
+        "overflow": false,
+        "size": "19px",
+        "text": "سابق ميديا",
+        "weight": "400"
+      },
+      {
+        "overflow": false,
+        "size": "19px",
+        "text": "لماذا نحن",
+        "weight": "400"
+      },
+      {
+        "overflow": false,
+        "size": "19px",
+        "text": "تواصل معنا",
+        "weight": "400"
+      }
+    ]
+  },
+  {
+    "width": 1440,
+    "lang": "en",
+    "rows": [
+      {
+        "overflow": false,
+        "size": "18px",
+        "text": "العربيةEnglishاردو",
+        "weight": "400"
+      },
+      {
+        "overflow": false,
+        "size": "18px",
+        "text": "Legal memo engine",
+        "weight": "500"
+      },
+      {
+        "overflow": false,
+        "size": "18px",
+        "text": "Book a consultation",
+        "weight": "500"
+      },
+      {
+        "overflow": false,
+        "size": "19px",
+        "text": "Home",
+        "weight": "400"
+      },
+      {
+        "overflow": false,
+        "size": "19px",
+        "text": "Our team",
+        "weight": "400"
+      },
+      {
+        "overflow": false,
+        "size": "19px",
+        "text": "Services",
+        "weight": "400"
+      },
+      {
+        "overflow": false,
+        "size": "19px",
+        "text": "Sabeq Media",
+        "weight": "400"
+      },
+      {
+        "overflow": false,
+        "size": "19px",
+        "text": "Why Sabeq",
+        "weight": "400"
+      },
+      {
+        "overflow": false,
+        "size": "19px",
+        "text": "Contact",
+        "weight": "400"
+      }
+    ]
+  },
+  {
+    "width": 1440,
+    "lang": "ur",
+    "rows": [
+      {
+        "overflow": false,
+        "size": "18px",
+        "text": "العربيةEnglishاردو",
+        "weight": "400"
+      },
+      {
+        "overflow": false,
+        "size": "18px",
+        "text": "قانونی یادداشت کا نظام",
+        "weight": "500"
+      },
+      {
+        "overflow": false,
+        "size": "18px",
+        "text": "مشاورت بُک کریں",
+        "weight": "500"
+      },
+      {
+        "overflow": false,
+        "size": "19px",
+        "text": "ہوم",
+        "weight": "400"
+      },
+      {
+        "overflow": false,
+        "size": "19px",
+        "text": "ہماری ٹیم",
+        "weight": "400"
+      },
+      {
+        "overflow": false,
+        "size": "19px",
+        "text": "خدمات",
+        "weight": "400"
+      },
+      {
+        "overflow": false,
+        "size": "19px",
+        "text": "سابق میڈیا",
+        "weight": "400"
+      },
+      {
+        "overflow": false,
+        "size": "19px",
+        "text": "سابق کیوں",
+        "weight": "400"
+      },
+      {
+        "overflow": false,
+        "size": "19px",
+        "text": "رابطہ",
+        "weight": "400"
+      }
+    ]
+  },
+  {
+    "width": 320,
+    "lang": "ar",
+    "rows": [
+      {
+        "overflow": false,
+        "size": "20px",
+        "text": "الرئيسية",
+        "weight": "400"
+      },
+      {
+        "overflow": false,
+        "size": "20px",
+        "text": "فريقنا",
+        "weight": "400"
+      },
+      {
+        "overflow": false,
+        "size": "20px",
+        "text": "خدماتنا",
+        "weight": "400"
+      },
+      {
+        "overflow": false,
+        "size": "20px",
+        "text": "سابق ميديا",
+        "weight": "400"
+      },
+      {
+        "overflow": false,
+        "size": "20px",
+        "text": "لماذا نحن",
+        "weight": "400"
+      },
+      {
+        "overflow": false,
+        "size": "20px",
+        "text": "تواصل معنا",
+        "weight": "400"
+      }
+    ]
+  },
+  {
+    "width": 320,
+    "lang": "en",
+    "rows": [
+      {
+        "overflow": false,
+        "size": "20px",
+        "text": "Home",
+        "weight": "400"
+      },
+      {
+        "overflow": false,
+        "size": "20px",
+        "text": "Our team",
+        "weight": "400"
+      },
+      {
+        "overflow": false,
+        "size": "20px",
+        "text": "Services",
+        "weight": "400"
+      },
+      {
+        "overflow": false,
+        "size": "20px",
+        "text": "Sabeq Media",
+        "weight": "400"
+      },
+      {
+        "overflow": false,
+        "size": "20px",
+        "text": "Why Sabeq",
+        "weight": "400"
+      },
+      {
+        "overflow": false,
+        "size": "20px",
+        "text": "Contact",
+        "weight": "400"
+      }
+    ]
+  },
+  {
+    "width": 320,
+    "lang": "ur",
+    "rows": [
+      {
+        "overflow": false,
+        "size": "20px",
+        "text": "ہوم",
+        "weight": "400"
+      },
+      {
+        "overflow": false,
+        "size": "20px",
+        "text": "ہماری ٹیم",
+        "weight": "400"
+      },
+      {
+        "overflow": false,
+        "size": "20px",
+        "text": "خدمات",
+        "weight": "400"
+      },
+      {
+        "overflow": false,
+        "size": "20px",
+        "text": "سابق میڈیا",
+        "weight": "400"
+      },
+      {
+        "overflow": false,
+        "size": "20px",
+        "text": "سابق کیوں",
+        "weight": "400"
+      },
+      {
+        "overflow": false,
+        "size": "20px",
+        "text": "رابطہ",
+        "weight": "400"
+      }
+    ]
+  },
+  {
+    "width": 390,
+    "lang": "ar",
+    "rows": [
+      {
+        "overflow": false,
+        "size": "20px",
+        "text": "الرئيسية",
+        "weight": "400"
+      },
+      {
+        "overflow": false,
+        "size": "20px",
+        "text": "فريقنا",
+        "weight": "400"
+      },
+      {
+        "overflow": false,
+        "size": "20px",
+        "text": "خدماتنا",
+        "weight": "400"
+      },
+      {
+        "overflow": false,
+        "size": "20px",
+        "text": "سابق ميديا",
+        "weight": "400"
+      },
+      {
+        "overflow": false,
+        "size": "20px",
+        "text": "لماذا نحن",
+        "weight": "400"
+      },
+      {
+        "overflow": false,
+        "size": "20px",
+        "text": "تواصل معنا",
+        "weight": "400"
+      }
+    ]
+  },
+  {
+    "width": 390,
+    "lang": "en",
+    "rows": [
+      {
+        "overflow": false,
+        "size": "20px",
+        "text": "Home",
+        "weight": "400"
+      },
+      {
+        "overflow": false,
+        "size": "20px",
+        "text": "Our team",
+        "weight": "400"
+      },
+      {
+        "overflow": false,
+        "size": "20px",
+        "text": "Services",
+        "weight": "400"
+      },
+      {
+        "overflow": false,
+        "size": "20px",
+        "text": "Sabeq Media",
+        "weight": "400"
+      },
+      {
+        "overflow": false,
+        "size": "20px",
+        "text": "Why Sabeq",
+        "weight": "400"
+      },
+      {
+        "overflow": false,
+        "size": "20px",
+        "text": "Contact",
+        "weight": "400"
+      }
+    ]
+  },
+  {
+    "width": 390,
+    "lang": "ur",
+    "rows": [
+      {
+        "overflow": false,
+        "size": "20px",
+        "text": "ہوم",
+        "weight": "400"
+      },
+      {
+        "overflow": false,
+        "size": "20px",
+        "text": "ہماری ٹیم",
+        "weight": "400"
+      },
+      {
+        "overflow": false,
+        "size": "20px",
+        "text": "خدمات",
+        "weight": "400"
+      },
+      {
+        "overflow": false,
+        "size": "20px",
+        "text": "سابق میڈیا",
+        "weight": "400"
+      },
+      {
+        "overflow": false,
+        "size": "20px",
+        "text": "سابق کیوں",
+        "weight": "400"
+      },
+      {
+        "overflow": false,
+        "size": "20px",
+        "text": "رابطہ",
+        "weight": "400"
+      }
+    ]
+  },
+  {
+    "width": 768,
+    "lang": "ar",
+    "rows": [
+      {
+        "overflow": false,
+        "size": "20px",
+        "text": "الرئيسية",
+        "weight": "400"
+      },
+      {
+        "overflow": false,
+        "size": "20px",
+        "text": "فريقنا",
+        "weight": "400"
+      },
+      {
+        "overflow": false,
+        "size": "20px",
+        "text": "خدماتنا",
+        "weight": "400"
+      },
+      {
+        "overflow": false,
+        "size": "20px",
+        "text": "سابق ميديا",
+        "weight": "400"
+      },
+      {
+        "overflow": false,
+        "size": "20px",
+        "text": "لماذا نحن",
+        "weight": "400"
+      },
+      {
+        "overflow": false,
+        "size": "20px",
+        "text": "تواصل معنا",
+        "weight": "400"
+      }
+    ]
+  },
+  {
+    "width": 768,
+    "lang": "en",
+    "rows": [
+      {
+        "overflow": false,
+        "size": "20px",
+        "text": "Home",
+        "weight": "400"
+      },
+      {
+        "overflow": false,
+        "size": "20px",
+        "text": "Our team",
+        "weight": "400"
+      },
+      {
+        "overflow": false,
+        "size": "20px",
+        "text": "Services",
+        "weight": "400"
+      },
+      {
+        "overflow": false,
+        "size": "20px",
+        "text": "Sabeq Media",
+        "weight": "400"
+      },
+      {
+        "overflow": false,
+        "size": "20px",
+        "text": "Why Sabeq",
+        "weight": "400"
+      },
+      {
+        "overflow": false,
+        "size": "20px",
+        "text": "Contact",
+        "weight": "400"
+      }
+    ]
+  },
+  {
+    "width": 768,
+    "lang": "ur",
+    "rows": [
+      {
+        "overflow": false,
+        "size": "20px",
+        "text": "ہوم",
+        "weight": "400"
+      },
+      {
+        "overflow": false,
+        "size": "20px",
+        "text": "ہماری ٹیم",
+        "weight": "400"
+      },
+      {
+        "overflow": false,
+        "size": "20px",
+        "text": "خدمات",
+        "weight": "400"
+      },
+      {
+        "overflow": false,
+        "size": "20px",
+        "text": "سابق میڈیا",
+        "weight": "400"
+      },
+      {
+        "overflow": false,
+        "size": "20px",
+        "text": "سابق کیوں",
+        "weight": "400"
+      },
+      {
+        "overflow": false,
+        "size": "20px",
+        "text": "رابطہ",
+        "weight": "400"
+      }
+    ]
+  }
+]

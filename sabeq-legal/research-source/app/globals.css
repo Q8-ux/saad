@@ -245,7 +245,7 @@ select {
   background: none;
   color: #e8f5fb;
   font-size: 15px;
-  font-weight: 700;
+  font-weight: 400;
   cursor: pointer;
 }
 
@@ -298,7 +298,7 @@ select {
   color: inherit;
   background: transparent;
   font-size: 15px;
-  font-weight: 800;
+  font-weight: 400;
   cursor: pointer;
 }
 
@@ -375,6 +375,7 @@ select {
   min-height: 40px;
   padding: 9px 12px;
   font-size: 14px;
+  font-weight: 500;
   white-space: nowrap;
 }
 
@@ -2068,7 +2069,7 @@ select {
   color: var(--navy);
 }
 
-.nav-dropdown-head strong { font-size: 16px; }
+.nav-dropdown-head strong { font-size: 16px; font-weight: 500; }
 
 .nav-dropdown .icon-button { display: grid; }
 
@@ -2135,7 +2136,7 @@ select {
   color: #123e55;
   background: rgba(255, 255, 255, 0.38);
   font-size: 16px;
-  font-weight: 800;
+  font-weight: 400;
   cursor: pointer;
 }
 
