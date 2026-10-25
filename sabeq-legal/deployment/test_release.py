@@ -75,6 +75,42 @@ class PublicationTests(unittest.TestCase):
             finally:
                 os.chdir(previous)
 
+    def test_control_module_is_required_local_unique_and_before_admin(self):
+        source = Path(__file__).resolve().parents[2] / "sabeq-admin-preview"
+        with tempfile.TemporaryDirectory() as tmp:
+            previous = os.getcwd()
+            os.chdir(tmp)
+            try:
+                root = Path("_site")
+                (root / "sabeq-legal/assets").mkdir(parents=True)
+                (root / "sabeq-legal/index.html").write_text('<script src="/saad/sabeq-legal/assets/client.js"></script>')
+                (root / "sabeq-legal/assets/client.js").write_text("synthetic")
+                (root / "sabeq-legal/release.json").write_text(json.dumps({"clientSource":"a"*40,"backendSource":"b"*40}))
+                admin = root / "sabeq-admin-preview"
+                shutil.copytree(source, admin)
+                Path("_protected-pages.json").write_text(json.dumps(release.protected_manifest(root)))
+                release.verify()
+                original = (admin / "index.html").read_text()
+                module = (admin / "control.js").read_bytes()
+                (admin / "control.js").unlink()
+                with self.assertRaisesRegex(RuntimeError, "referenced script missing"):
+                    release.verify()
+                (admin / "control.js").write_bytes(module)
+                for replacement in ('https://other.example/control.js',
+                                    './control.js?redirect=other'):
+                    (admin / "index.html").write_text(original.replace('./control.js?v=independent-admin-14-owner-controls', replacement))
+                    with self.assertRaisesRegex(RuntimeError, "Unexpected admin script"):
+                        release.verify()
+                for names in (["control","control","programmer","legislation","admin"],
+                              ["programmer","legislation","admin","control"]):
+                    (admin / "index.html").write_text(''.join('<script src="./'+name+'.js"></script>' for name in names))
+                    with self.assertRaisesRegex(RuntimeError, "Unexpected admin script"):
+                        release.verify()
+                (admin / "index.html").write_text(original)
+                release.verify()
+            finally:
+                os.chdir(previous)
+
     def test_current_index_keeps_main_bundle_first_and_motion_within_asset_scope(self):
         source = Path(__file__).resolve().parents[1]
         import re
