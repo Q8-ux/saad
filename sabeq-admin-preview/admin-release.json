@@ -1,17 +1,17 @@
 {
-  "revision": "independent-admin-14-owner-controls",
-  "backendSource": "1e3a8f4878ad0ca9cb43c8728b499a9ddbb5a3c0",
+  "revision": "independent-admin-15-cairo",
+  "backendSource": "91064b636d773a033cccb80796a4f57e52993007",
   "sourceRepository": "https://github.com/Q8-ux/saad",
   "paymentVisibility": "admin-only-by-default",
   "paymentsLink": "#payments",
   "programmerLink": "#programmer",
   "programmerScope": "advice-and-explicit-follow-up",
   "fccGateway": "requires-independent-configured-service",
-  "backendVersion": 149,
+  "backendVersion": 150,
   "projectProviderConfigured": true,
   "liveInferenceVerified": false,
   "localChecksPassed": 206,
-  "releasePreparedAt": "2026-10-25T22:40:54.441Z",
+  "releasePreparedAt": "2026-10-25T22:59:34.578Z",
   "legislationLink": "#legislation",
   "archiveAssistantUse": "checked-image-fields-only",
   "archiveMemoUse": "blocked",
@@ -32,5 +32,8 @@
   "userDeletion": "recoverable-preserves-legal-records",
   "servicePermissions": "memo-assistant-consultation-library-enforced-on-server",
   "liveApiLoginTested": true,
-  "liveApiLoginVersion": 148
+  "liveApiLoginVersion": 148,
+  "font": "Cairo",
+  "fontSource": "local-variable-200-1000",
+  "fontValidation": "400-and-600-loaded;login-and-form-inheritance;375-and-305px-no-horizontal-page-overflow;native-build-and-9-publication-tests-passed"
 }
