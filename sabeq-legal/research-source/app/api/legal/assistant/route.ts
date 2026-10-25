@@ -96,7 +96,7 @@ export async function POST(request: Request) {
   try {
     assertSameOrigin(request);
     const started = performance.now();
-    const [user] = await Promise.all([requireMemoUserOrGuest(request), requireServiceEnabled("assistant")]);
+    const [user] = await Promise.all([requireMemoUserOrGuest(request), requireServiceEnabled("assistant", request)]);
     const data = await readJsonObject(request, ASSISTANT_REQUEST_BYTES);
     const language = cleanLanguage(data.language);
     let input;

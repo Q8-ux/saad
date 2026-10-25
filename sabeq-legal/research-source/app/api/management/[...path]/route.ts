@@ -1,3 +1,4 @@
+import { siteAction, servicesAction, bookingsAction } from "@/lib/site-controls";
 import { listManagedUsers, updateManagedUser } from "@/lib/user-management";
 import { mailboxAction } from "@/lib/management-mailboxes";
 import { sadadManagement } from "@/lib/sadad-payments";
@@ -27,6 +28,9 @@ export async function GET(request: Request) {
     const manager = await requireManager(request), url = new URL(request.url);
     assertManagerAction(manager, action, "GET");
     if (action === "verification-email") return managementJson(await verificationEmailAction(null, manager.email));
+    if (action === "site") return managementJson(await siteAction(null, manager.email));
+    if (action === "services") return managementJson(await servicesAction(null));
+    if (action === "bookings") return managementJson(await bookingsAction(null));
     if (action === "users") return managementJson(await listManagedUsers(url, 50));
     if (action === "legislation") return managementJson(await searchImportedEdition(url));
     if (action === "legislation-workbench") return managementJson(await legislationWorkbench());
@@ -50,18 +54,21 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     assertManagementOrigin(request);
-    const action = actionPath(request), data = await readJsonObject(request, action === "password-login" ? 4_096 : 20_000);
+    const action = actionPath(request), data = await readJsonObject(request, action === "password-login" ? 4_096 : action === "site" ? 200_000 : 20_000);
     if (action === "exchange") { await enforceRateLimit(request, "management-exchange", 30); return managementJson(await exchangeManagerCode(data)); }
     if (action === "password-login") return managementJson(await passwordManagerLogin(request, data));
     const manager = await requireManager(request);
     assertManagerAction(manager, action, "POST");
     await enforceRateLimit(request, "management-write", 150);
+    if (action === "site") return managementJson(await siteAction(data, manager.email));
+    if (action === "services") return managementJson(await servicesAction(data));
+    if (action === "bookings") return managementJson(await bookingsAction(data));
     if (action === "programmer") {
       if (data.action === "run") await enforceRateLimit(request, "management-programmer", 20);
       return managementJson(await programmerAction(data, manager.email, request.signal));
     }
     if (action === "logout") { await getD1().prepare("DELETE FROM management_sessions WHERE token_hash = ?").bind(manager.hash).run(); return managementJson({ ok: true }); }
-    if (action === "users") { const result = await updateManagedUser(data); await operationEvent("admin", "user-updated", "تم تحديث حساب مستخدم وخدماته"); return managementJson(result); }
+    if (action === "users") { const result = await updateManagedUser(data, manager.email); await operationEvent("admin", "user-updated", "تم تحديث حساب مستخدم وخدماته"); return managementJson(result); }
     if (action === "payments") return managementJson(await sadadManagement(data, manager.email));
     if (action === "mailboxes") return managementJson(await mailboxAction(data, manager.email));
     if (action === "whatsapp") return managementJson(await whatsappAction(data, manager.email));

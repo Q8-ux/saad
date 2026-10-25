@@ -10,20 +10,18 @@ type Manager = { email: string; name: string; username?: string; role: "operator
 const OPERATOR_SECTIONS = ["overview", "memos", "inbox", "notifications", "users", "legislation", "commands", "updates"];
 export function managerProfile(manager: Manager) {
   return { email: manager.email, name: manager.name, ...(manager.username ? { username: manager.username } : {}), role: manager.role,
-    sections: manager.role === "operator" ? OPERATOR_SECTIONS : [...OPERATOR_SECTIONS, "programmer", "payments", "mailboxes", "whatsapp", "mail"] };
+    sections: manager.role === "operator" ? [] : [...OPERATOR_SECTIONS, "site", "services", "bookings", "programmer", "payments", "mailboxes", "whatsapp", "mail"] };
 }
-export function assertManagerAction(manager: Manager, action: string, method: "GET" | "POST") {
-  if (manager.role !== "operator") return;
-  const allowed = method === "GET"
-    ? ["session", "snapshot", "memos", "inbox", "users", "updates", "commands", "legislation", "legislation-workbench", "legislation-articles", "legislation-asset", "legislation-report"]
-    : ["logout", "users", "read", "inbox", "commands"];
-  if (!allowed.includes(action)) throw new RequestError("هذا القسم غير متاح لصلاحيات حساب التشغيل.", 403);
+export function assertManagerAction(manager: Manager, _action: string, _method: "GET" | "POST") {
+  if (manager.role !== "administrator") throw new RequestError("لوحة التحكم متاحة للإداريين فقط.", 403);
 }
 type Runtime = { AUTH_SECRET?: string; MANAGEMENT_ALLOWED_EMAILS?: string; MANAGEMENT_OWNER_EMAIL?: string };
 export const managementRuntime = () => env as unknown as Runtime;
-export function managerAllowed(email: string) {
+export async function managerAllowed(email: string) {
   const runtime = managementRuntime();
-  return `${runtime.MANAGEMENT_ALLOWED_EMAILS || ""},${runtime.MANAGEMENT_OWNER_EMAIL || ""}`.split(/[\s,;]+/).filter(Boolean).map(s => s.toLowerCase()).includes(email.trim().toLowerCase());
+  if (`${runtime.MANAGEMENT_ALLOWED_EMAILS || ""},${runtime.MANAGEMENT_OWNER_EMAIL || ""}`.split(/[\s,;]+/).filter(Boolean).map(s => s.toLowerCase()).includes(email.trim().toLowerCase())) return true;
+  const account = await getD1().prepare("SELECT u.id FROM public_users u JOIN user_access_policies p ON p.user_id = u.id WHERE u.email = ? AND u.status = 'active' AND p.role = 'administrator' LIMIT 1").bind(email.trim().toLowerCase()).first();
+  return !!account;
 }
 export function managementJson(data: unknown, status = 200) {
   return Response.json(data, { status, headers: { "Access-Control-Allow-Origin": MANAGEMENT_ORIGIN, "Vary": "Origin", "Cache-Control": "private, no-store, max-age=0", "Referrer-Policy": "no-referrer", "X-Content-Type-Options": "nosniff" } });
@@ -58,7 +56,7 @@ export async function managerLogin(request: Request) {
     url.searchParams.set("auth_return", "1");
     return new Response(null, { status: 302, headers: { Location: new URL(chatGPTSignInPath(url.pathname + url.search), url.origin).href, "Cache-Control": "no-store", "Referrer-Policy": "no-referrer" } });
   }
-  if (!managerAllowed(user.email)) {
+  if (!(await managerAllowed(user.email))) {
     const target = new URL(MANAGEMENT_HOME); target.searchParams.set("login_error", "not_authorized");
     return new Response(null, { status: 302, headers: { Location: target.href, "Cache-Control": "no-store", "Referrer-Policy": "no-referrer" } });
   }
@@ -72,7 +70,7 @@ export async function exchangeManagerCode(data: Record<string, unknown>) {
   if (!/^[A-Za-z0-9_-]{43}$/.test(code) || !/^[A-Za-z0-9_-]{43,128}$/.test(verifier)) throw new RequestError("انتهى طلب الدخول. أعد المحاولة.", 401);
   const row = await getD1().prepare("DELETE FROM management_login_codes WHERE code_hash = ? AND challenge = ? AND expires_at > ? RETURNING email, name")
     .bind(await digest(code), await proofChallenge(verifier), Math.floor(Date.now() / 1000)).first<{ email: string; name: string }>();
-  if (!row || !managerAllowed(row.email)) throw new RequestError("طلب الدخول غير صالح أو استُخدم سابقاً.", 401);
+  if (!row || !(await managerAllowed(row.email))) throw new RequestError("طلب الدخول غير صالح أو استُخدم سابقاً.", 401);
   const token = randomToken(), expiresAt = Math.floor(Date.now() / 1000) + 12 * 3600;
   await getD1().prepare("INSERT INTO management_sessions (token_hash, email, name, expires_at, last_seen_at) VALUES (?, ?, ?, ?, ?)").bind(await digest(token), row.email, row.name, expiresAt, Math.floor(Date.now() / 1000)).run();
   return { token, expiresAt, manager: row };
@@ -84,10 +82,11 @@ export async function passwordManagerLogin(request: Request, data: Record<string
   await enforceRateLimit(rateRequest, "management-password-login", 30);
   await enforceRateLimit(rateRequest, `management-password-account:${await digest(normalizeManagementUsername(data.username).slice(0, 64))}`, 8);
   const account = await authenticateManagementPassword(data);
+  if (account.role !== "administrator") throw new RequestError("لوحة التحكم متاحة للإداريين فقط.", 403);
   const now = Math.floor(Date.now() / 1000), token = randomToken(), expiresAt = now + 8 * 3600;
   await getD1().prepare("INSERT INTO management_sessions (token_hash, email, name, expires_at, last_seen_at) VALUES (?, ?, ?, ?, ?)")
     .bind(await digest(token), account.sessionPrincipal, account.username, expiresAt, now).run();
-  return { token, expiresAt, manager: managerProfile({ email: `staff:${account.username}`, name: account.username, username: account.username, role: "operator" }) };
+  return { token, expiresAt, manager: managerProfile({ email: `staff-admin:${account.username}`, name: account.username, username: account.username, role: "administrator" }) };
 }
 export async function requireManager(request: Request) {
   assertManagementOrigin(request);
@@ -95,10 +94,12 @@ export async function requireManager(request: Request) {
   if (!token) throw new RequestError("سجّل الدخول إلى الإدارة للمتابعة.", 401);
   const hash = await digest(token), now = Math.floor(Date.now() / 1000);
   const row = await getD1().prepare("SELECT email, name FROM management_sessions WHERE token_hash = ? AND expires_at > ? AND last_seen_at > ?").bind(hash, now, now - 3600).first<{ email: string; name: string }>();
-  const staff = row?.email.startsWith("staff:") ? await managementPasswordSession(row.email) : null;
-  if (!row || (row.email.startsWith("staff:") ? !staff : !managerAllowed(row.email))) throw new RequestError("انتهت الجلسة الإدارية. سجّل الدخول مجدداً.", 401);
+  const passwordSession = !!row && /^(staff|staff-admin):/.test(row.email);
+  const staff = passwordSession ? await managementPasswordSession(row!.email) : null;
+  if (staff?.role === "operator") throw new RequestError("لوحة التحكم متاحة للإداريين فقط.", 403);
+  if (!row || (passwordSession ? !staff : !(await managerAllowed(row.email)))) throw new RequestError("انتهت الجلسة الإدارية. سجّل الدخول مجدداً.", 401);
   await getD1().prepare("UPDATE management_sessions SET last_seen_at = ? WHERE token_hash = ?").bind(now, hash).run();
-  return { email: staff?.identity || row.email, name: staff?.username || row.name, ...(staff ? { username: staff.username } : {}), role: staff ? "operator" as const : "administrator" as const, hash };
+  return { email: staff?.identity || row.email, name: staff?.username || row.name, ...(staff ? { username: staff.username } : {}), role: "administrator" as const, hash };
 }
 async function vaultKey() {
   const secret = managementRuntime().AUTH_SECRET || "";

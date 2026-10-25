@@ -54,8 +54,22 @@
     {
       "idx": 7,
       "version": "6",
-      "when": 1792610000000,
-      "tag": "0007_sadad_credential_versions",
+      "when": 1792859873710,
+      "tag": "0007_silent_praxagora",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1792861985309,
+      "tag": "0008_early_exodus",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1792968000000,
+      "tag": "0009_administrator_user_policies",
       "breakpoints": true
     }
   ]

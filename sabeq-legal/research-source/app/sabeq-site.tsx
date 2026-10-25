@@ -1,5 +1,7 @@
 "use client";
 
+import type { SitePublicSettings } from "@/lib/site-controls";
+
 import { ASSISTANT_MESSAGE_LIMIT, assistantInputCopy, validateAssistantInput } from "@/lib/assistant-input";
 import { runMemoGeneration, MemoGenerationStopped, memoGenerationCopy } from "@/lib/memo-generation";
 import { newPaymentAttempt, loadPaymentAttempt, rememberPaymentAttempt, clearPaymentAttempt, paymentCopy, type SadadCheckout } from "@/lib/sadad-client";
@@ -72,7 +74,7 @@ import {
 import { FormEvent, ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { startVisitorAnalytics } from "@/lib/visitor-analytics";
 import { apiUrl, assetUrl } from "@/lib/runtime-urls";
-import { copy, Language, mediaVideos, SiteCopy, team } from "./site-content";
+import { copy, Language, mediaVideos as defaultMediaVideos, SiteCopy, team as defaultTeam } from "./site-content";
 import { interfaceText as tr, interfaceLabel, interfaceError, canonicalLegalValue } from "@/lib/interface-language";
 
 type ServiceModal = "booking" | "assistant" | "library" | "memo";
@@ -235,7 +237,26 @@ export default function SabeqSite() {
   const [assistantMemoPrefill, setAssistantMemoPrefill] = useState<MemoPrefill | null>(null);
   const [assistantSession, setAssistantSession] = useState<AssistantSession | null>(null);
   const [memoVisited, setMemoVisited] = useState(false);
-  const t = copy[language];
+  const [siteSettings, setSiteSettings] = useState<SitePublicSettings | null>(null);
+  const t = siteSettings?.copy[language] || copy[language];
+  const team = siteSettings?.team || defaultTeam;
+  const mediaVideos = siteSettings?.mediaVideos || defaultMediaVideos;
+  const contact = siteSettings?.contact || {phone1:"22400420",phone2:"22020188",whatsapp:"96550668449",email:"info@sabeq.legal",mapUrl:"https://maps.app.goo.gl/cvPGfK3hvwaV5bnH8",facebook:"https://www.facebook.com/people/Sabeq-Law/pfbid0JoEEKQtwxea1k2NPuyap9VbgTcC2i7VXpaUGVyiz6gkdKHyHGuRzYGGZkMVnuFa6l/",x:"https://x.com/sabik_legal?s=21",instagram:"https://www.instagram.com/sabik_legal",linkedin:"https://www.linkedin.com/in/khalifa-alkhalifa/"};
+  const branding = siteSettings?.branding || {logo:"/images/brand/sabeq-logo.png",heroDesktop:"/images/brand/sabeq-hero-kuwait.jpg",heroMobile:"/images/brand/sabeq-hero-kuwait-mobile.jpg",avatar:"/images/sabeq-assistant-avatar.jpg"};
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch(apiUrl("/api/site-settings"), {cache:"no-store",signal:controller.signal}).then(async response => {
+      if (!response.ok) return;
+      const settings = await response.json() as SitePublicSettings;
+      if (settings.copy?.ar && Array.isArray(settings.team) && Array.isArray(settings.mediaVideos) && Array.isArray(settings.posts) && settings.contact && settings.branding) setSiteSettings(settings);
+    }).catch(()=>{});
+    return () => controller.abort();
+  }, []);
+  useEffect(() => {
+    if (!siteSettings) return;
+    document.documentElement.style.setProperty("--sabeq-hero-desktop", `url("${assetUrl(siteSettings.branding.heroDesktop)}")`);
+    document.documentElement.style.setProperty("--sabeq-hero-mobile", `url("${assetUrl(siteSettings.branding.heroMobile)}")`);
+  }, [siteSettings]);
   const isRtl = t.dir === "rtl";
   const DirectionArrow = isRtl ? ArrowLeft : ArrowRight;
   const year = useMemo(() => new Date().getFullYear(), []);
@@ -367,7 +388,7 @@ export default function SabeqSite() {
         <div className="container">
           <div className="header-row">
             <button className="brand" onClick={() => scrollTo("home")} aria-label={t.nav[0]}>
-              <Image src="/images/brand/sabeq-logo.png" alt="" width={74} height={74} priority unoptimized />
+              <Image src={assetUrl(branding.logo)} alt="" width={74} height={74} priority unoptimized />
             </button>
             <div className="header-actions">
               <div className="language-select">
@@ -476,7 +497,7 @@ export default function SabeqSite() {
                 </button>
               ))}
             </div>
-            <GroupPostsStrip language={language} />
+            <GroupPostsStrip language={language} posts={siteSettings?.posts} />
           </div>
         </section>
 
@@ -497,27 +518,27 @@ export default function SabeqSite() {
                   <span>
                     <small>{t.phone}</small>
                     <span className="contact-numbers" dir="ltr">
-                      <a href="tel:+96522400420" aria-label={`${t.phone} 22400420`}><PhoneCall size={15} />22400420</a>
-                      <a href="tel:+96522020188" aria-label={`${t.phone} 22020188`}><PhoneCall size={15} />22020188</a>
+                      <a href={`tel:${contact.phone1.length===8?"+965":"+"}${contact.phone1}`} aria-label={`${t.phone} ${contact.phone1}`}><PhoneCall size={15} />{contact.phone1}</a>
+                      <a href={`tel:${contact.phone2.length===8?"+965":"+"}${contact.phone2}`} aria-label={`${t.phone} ${contact.phone2}`}><PhoneCall size={15} />{contact.phone2}</a>
                     </span>
                   </span>
                 </div>
-                <a className="contact-card contact-card-action contact-card-whatsapp" href="https://wa.me/96550668449" target="_blank" rel="noreferrer" aria-label={`${t.whatsapp} 5066 8449`}>
-                  <i><BrandIcon name="whatsapp" /></i><span><small>{t.whatsapp}</small><strong dir="ltr">5066 8449</strong></span><DirectionArrow className="contact-card-arrow" size={18} />
+                <a className="contact-card contact-card-action contact-card-whatsapp" href={`https://wa.me/${contact.whatsapp}`} target="_blank" rel="noreferrer" aria-label={`${t.whatsapp} ${contact.whatsapp}`}>
+                  <i><BrandIcon name="whatsapp" /></i><span><small>{t.whatsapp}</small><strong dir="ltr">{contact.whatsapp}</strong></span><DirectionArrow className="contact-card-arrow" size={18} />
                 </a>
-                <a className="contact-card contact-card-action contact-card-email" href="mailto:info@sabeq.legal" aria-label={`${t.email} info@sabeq.legal`}>
-                  <i><Mail size={22} /></i><span><small>{t.email}</small><strong dir="ltr">info@sabeq.legal</strong></span><DirectionArrow className="contact-card-arrow" size={18} />
+                <a className="contact-card contact-card-action contact-card-email" href={`mailto:${contact.email}`} aria-label={`${t.email} ${contact.email}`}>
+                  <i><Mail size={22} /></i><span><small>{t.email}</small><strong dir="ltr">{contact.email}</strong></span><DirectionArrow className="contact-card-arrow" size={18} />
                 </a>
-                <a className="contact-card contact-card-action contact-card-address" href="https://maps.app.goo.gl/cvPGfK3hvwaV5bnH8" target="_blank" rel="noreferrer" aria-label={t.map}>
+                <a className="contact-card contact-card-action contact-card-address" href={contact.mapUrl} target="_blank" rel="noreferrer" aria-label={t.map}>
                   <i><MapPin size={22} /></i><span><small>{t.address}</small><strong>{t.addressText}</strong><span className="map-link">{t.map}<DirectionArrow size={15} /></span></span>
                 </a>
                 <div className="contact-card contact-card-hours"><i><Clock3 size={22} /></i><span><small>{t.hours}</small><strong>{t.hoursText}</strong></span></div>
               </div>
               <div className="socials" aria-label={tr(language, "وسائل التواصل الاجتماعي")}>
-                <a className="social-facebook" href="https://www.facebook.com/people/Sabeq-Law/pfbid0JoEEKQtwxea1k2NPuyap9VbgTcC2i7VXpaUGVyiz6gkdKHyHGuRzYGGZkMVnuFa6l/" target="_blank" rel="noreferrer" aria-label="Facebook" title="Facebook"><BrandIcon name="facebook" /></a>
-                <a className="social-x" href="https://x.com/sabik_legal?s=21" target="_blank" rel="noreferrer" aria-label="X" title="X"><BrandIcon name="x" /></a>
-                <a className="social-instagram" href="https://www.instagram.com/sabik_legal" target="_blank" rel="noreferrer" aria-label="Instagram" title="Instagram"><BrandIcon name="instagram" /></a>
-                <a className="social-linkedin" href="https://www.linkedin.com/in/khalifa-alkhalifa/" target="_blank" rel="noreferrer" aria-label="LinkedIn" title="LinkedIn"><BrandIcon name="linkedin" /></a>
+                <a className="social-facebook" href={contact.facebook} target="_blank" rel="noreferrer" aria-label="Facebook" title="Facebook"><BrandIcon name="facebook" /></a>
+                <a className="social-x" href={contact.x} target="_blank" rel="noreferrer" aria-label="X" title="X"><BrandIcon name="x" /></a>
+                <a className="social-instagram" href={contact.instagram} target="_blank" rel="noreferrer" aria-label="Instagram" title="Instagram"><BrandIcon name="instagram" /></a>
+                <a className="social-linkedin" href={contact.linkedin} target="_blank" rel="noreferrer" aria-label="LinkedIn" title="LinkedIn"><BrandIcon name="linkedin" /></a>
               </div>
             </div>
             <form className="contact-form" onSubmit={(event) => submitForm(event, "/api/contact")}>
@@ -533,9 +554,9 @@ export default function SabeqSite() {
 
       <footer className="footer">
         <div className="container footer-grid">
-          <div className="footer-brand"><Image src="/images/brand/sabeq-logo.png" alt="" width={92} height={92} unoptimized /><span><strong>{t.brand}</strong><small>SABEQ LEGAL GROUP</small><p>{t.footer}</p></span></div>
+          <div className="footer-brand"><Image src={assetUrl(branding.logo)} alt="" width={92} height={92} unoptimized /><span><strong>{t.brand}</strong><small>SABEQ LEGAL GROUP</small><p>{t.footer}</p></span></div>
           <div><h3>{t.quick}</h3>{t.nav.map((item, index) => <button key={item} onClick={() => scrollTo(sectionIds[index])}>{item}</button>)}</div>
-          <div className="footer-contact-list"><h3>{t.contactTitle}</h3><a href="tel:+96522400420"><PhoneCall size={16} /><span dir="ltr">22400420</span></a><a href="tel:+96522020188"><PhoneCall size={16} /><span dir="ltr">22020188</span></a><a href="mailto:info@sabeq.legal"><Mail size={16} /><span dir="ltr">info@sabeq.legal</span></a><a href="https://wa.me/96550668449" target="_blank" rel="noreferrer"><BrandIcon name="whatsapp" /><span dir="ltr">5066 8449</span></a><a href="https://maps.app.goo.gl/cvPGfK3hvwaV5bnH8" target="_blank" rel="noreferrer"><MapPin size={16} /><span>{t.map}</span></a></div>
+          <div className="footer-contact-list"><h3>{t.contactTitle}</h3><a href={`tel:${contact.phone1.length===8?"+965":"+"}${contact.phone1}`}><PhoneCall size={16} /><span dir="ltr">{contact.phone1}</span></a><a href={`tel:${contact.phone2.length===8?"+965":"+"}${contact.phone2}`}><PhoneCall size={16} /><span dir="ltr">{contact.phone2}</span></a><a href={`mailto:${contact.email}`}><Mail size={16} /><span dir="ltr">{contact.email}</span></a><a href={`https://wa.me/${contact.whatsapp}`} target="_blank" rel="noreferrer"><BrandIcon name="whatsapp" /><span dir="ltr">{contact.whatsapp}</span></a><a href={contact.mapUrl} target="_blank" rel="noreferrer"><MapPin size={16} /><span>{t.map}</span></a></div>
         </div>
         <div className="container footer-bottom"><span>© {year} {t.brand}. {t.rights}.</span><PrivacyLink language={language} /><a href="https://wa.me/96551231313" target="_blank" rel="noreferrer">{tr(language, "تصميم وتطوير")} <span className="digizone-name">DigiZone</span></a></div>
       </footer>
@@ -550,13 +571,13 @@ export default function SabeqSite() {
       {(memoVisited || modal === "memo") && <ModalShell language={language} onClose={() => setModal(null)} large active={modal === "memo"}><MemoWizard t={t} language={language} token={authToken} active={modal === "memo"} initialData={assistantMemoPrefill} openAssistant={(context) => { if (!assistantSession) setAssistantSession({ question: context, messages: [], intake: null }); setModal("assistant"); }} /></ModalShell>}
 
       <div className="floating">
-        <button type="button" className="assistant-avatar-button" onClick={() => showModal("assistant")} aria-label={t.assistant} aria-haspopup="dialog"><span className="assistant-portrait"><img src={assetUrl("/images/sabeq-assistant-avatar.jpg")} alt="" width={64} height={64} decoding="async" /></span></button>
+        <button type="button" className="assistant-avatar-button" onClick={() => showModal("assistant")} aria-label={t.assistant} aria-haspopup="dialog"><span className="assistant-portrait"><img src={assetUrl(branding.avatar)} alt="" width={64} height={64} decoding="async" /></span></button>
         <button type="button" className="memo-system-button" dir={t.dir} onClick={() => showModal("memo")} aria-haspopup="dialog" aria-label={language === "ar" ? "اضغط هنا للدخول على نظام كتابة المذكرات" : language === "en" ? "Click here to enter the memorandum writing system" : "قانونی یادداشت لکھنے کے نظام میں داخل ہونے کے لیے یہاں کلک کریں"}>
           <span className="memo-entry-caption">{language === "ar" ? "اضغط هنا للدخول على" : language === "en" ? "Click here to enter the" : "یہاں کلک کریں"}</span>
           <strong className="memo-entry-title">{language === "ar" ? "نظام كتابة المذكرات" : language === "en" ? "Memorandum writing system" : "قانونی یادداشت لکھنے کا نظام"}</strong>
         </button>
       </div>
-      <a className="floating-whatsapp" href="https://wa.me/96550668449" target="_blank" rel="noreferrer" aria-label={t.whatsapp}><BrandIcon name="whatsapp" /></a>
+      <a className="floating-whatsapp" href={`https://wa.me/${contact.whatsapp}`} target="_blank" rel="noreferrer" aria-label={t.whatsapp}><BrandIcon name="whatsapp" /></a>
     </div>
   );
 }
@@ -566,7 +587,7 @@ function SectionHeading({ kicker, title, text, light = false, titleFirst = false
   return <div className={`section-heading${light ? " section-heading-light" : ""}`}>{titleFirst ? <><h2>{title}</h2>{kickerNode}</> : <>{kickerNode}<h2>{title}</h2></>}{text && <p>{text}</p>}</div>;
 }
 
-function MediaViewer({ video, language }: { video: (typeof mediaVideos)[number]; language: Language }) {
+function MediaViewer({ video, language }: { video: {src:string;poster:string;title:string}; language: Language }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
   const playLabel = language === "ar" ? "تشغيل" : language === "en" ? "Play" : "چلائیں";

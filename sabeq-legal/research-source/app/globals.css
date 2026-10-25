@@ -455,7 +455,7 @@ select {
   overflow: hidden;
   color: #fff;
   background-color: #0a2b3d;
-  background-image: url("/images/brand/sabeq-hero-kuwait.jpg");
+  background-image: var(--sabeq-hero-desktop, url("/images/brand/sabeq-hero-kuwait.jpg"));
   background-position: center center;
   background-repeat: no-repeat;
   background-size: cover;
@@ -3627,7 +3627,7 @@ html[data-theme="dark"] .instagram-frame iframe {
   .site-shell[dir="rtl"] .nav-dropdown { inset-inline-end: 12px; }
   .site-shell[dir="ltr"] .nav-dropdown { inset-inline-start: 12px; }
   .hero {
-    background-image: url("/images/brand/sabeq-hero-kuwait-mobile.jpg");
+    background-image: var(--sabeq-hero-mobile, url("/images/brand/sabeq-hero-kuwait-mobile.jpg"));
     background-position: center center;
   }
 }

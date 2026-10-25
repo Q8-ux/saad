@@ -10,6 +10,7 @@ export function apiUrl(path: string) {
 }
 
 export function assetUrl(path: string) {
+  if (path.startsWith("https://")) return path;
   if (usesGitHubFrontend() && (path.startsWith("/images/team/") || path.startsWith("/images/posts/") || path === "/images/sabeq-assistant-avatar.jpg")) return `/saad/sabeq-legal${path}`;
   return usesGitHubFrontend() ? `${SERVICE_ORIGIN}${path}` : path;
 }

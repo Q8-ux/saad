@@ -1,5 +1,67 @@
 import { sql } from "drizzle-orm";
-import { index, integer, real, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
+import { index, integer, primaryKey, real, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
+
+export const legislationReviews = sqliteTable("legislation_reviews", {
+  id: text("id").primaryKey(), sourceId: text("source_id").notNull().references(() => legislationImports.id),
+  sourceSha256: text("source_sha256").notNull(), payloadSha256: text("payload_sha256").notNull(),
+  status: text("status").notNull().default("processing"), summaryJson: text("summary_json").notNull(),
+  detailsJson: text("details_json").notNull(), assetReceiptsJson: text("asset_receipts_json").notNull().default("{}"),
+  reviewedAt: text("reviewed_at").notNull(), completedAt: text("completed_at"),
+});
+export const legislationImageReviews = sqliteTable("legislation_image_reviews", {
+  sourceId: text("source_id").notNull().references(() => legislationImports.id), pdfPage: integer("pdf_page").notNull(),
+  reviewId: text("review_id").notNull().references(() => legislationReviews.id), xref: integer("xref").notNull(),
+  sourceImageSha256: text("source_image_sha256").notNull(), verifiedText: text("verified_text").notNull(),
+  textSha256: text("text_sha256").notNull(), rowsJson: text("rows_json").notNull(), unresolvedJson: text("unresolved_json").notNull(),
+  fullTranscriptionVerified: integer("full_transcription_verified", { mode: "boolean" }).notNull().default(false),
+  reviewMethod: text("review_method").notNull(), objectKey: text("object_key").notNull(), reviewedAt: text("reviewed_at").notNull(),
+}, table => [primaryKey({ columns: [table.sourceId, table.pdfPage] }), index("legislation_image_review_idx").on(table.reviewId)]);
+export const legislationCurrencyChecks = sqliteTable("legislation_currency_checks", {
+  sourceId: text("source_id").notNull().references(() => legislationImports.id), sectionId: text("section_id").notNull(),
+  reviewId: text("review_id").notNull().references(() => legislationReviews.id), identityJson: text("identity_json").notNull(),
+  status: text("status").notNull(), officialSourcesJson: text("official_sources_json").notNull(),
+  findingsJson: text("findings_json").notNull(), currentLawVerified: integer("current_law_verified", { mode: "boolean" }).notNull().default(false),
+  checkedAt: text("checked_at").notNull(),
+}, table => [primaryKey({ columns: [table.sourceId, table.sectionId] }), index("legislation_currency_review_idx").on(table.reviewId)]);
+export const legislationAuditReports = sqliteTable("legislation_audit_reports", {
+  id: text("id").primaryKey(), sourceId: text("source_id").notNull().references(() => legislationImports.id),
+  reviewId: text("review_id").notNull().references(() => legislationReviews.id), title: text("title").notNull(),
+  filename: text("filename").notNull(), objectKey: text("object_key").notNull(), mimeType: text("mime_type").notNull(),
+  bytes: integer("bytes").notNull(), sha256: text("sha256").notNull(), createdAt: text("created_at").notNull(),
+}, table => [index("legislation_reports_source_idx").on(table.sourceId)]);
+
+// Uploaded editions stay separate from the active corpus and from official verification.
+export const legislationImports = sqliteTable("legislation_imports", {
+  id: text("id").primaryKey(), title: text("title").notNull(),
+  sourceSha256: text("source_sha256").notNull(), sourceBytes: integer("source_bytes").notNull(),
+  editionClaim: text("edition_claim").notNull(), pageCount: integer("page_count").notNull(),
+  sectionCount: integer("section_count").notNull(), articleCount: integer("article_count").notNull(),
+  provenance: text("provenance").notNull().default("user_document"),
+  currentLawVerified: integer("current_law_verified", { mode: "boolean" }).notNull().default(false),
+  activeForGeneration: integer("active_for_generation", { mode: "boolean" }).notNull().default(false),
+  status: text("status").notNull().default("importing"), metadataJson: text("metadata_json").notNull(),
+  importedAt: text("imported_at"),
+}, table => [uniqueIndex("legislation_import_sha_uidx").on(table.sourceSha256)]);
+export const legislationSections = sqliteTable("legislation_sections", {
+  id: text("id").primaryKey(), sourceId: text("source_id").notNull().references(() => legislationImports.id),
+  title: text("title").notNull(), startPage: integer("start_page").notNull(), endPage: integer("end_page").notNull(),
+  kind: text("kind").notNull(), boundaryMethod: text("boundary_method").notNull(),
+}, table => [index("legislation_sections_source_idx").on(table.sourceId)]);
+export const legislationPages = sqliteTable("legislation_pages", {
+  sourceId: text("source_id").notNull().references(() => legislationImports.id), pdfPage: integer("pdf_page").notNull(),
+  documentId: text("document_id").references(() => legislationSections.id), printedPage: text("printed_page"),
+  role: text("role").notNull(), text: text("text").notNull(), textSha256: text("text_sha256").notNull(),
+  searchText: text("search_text").notNull(), qualityFlagsJson: text("quality_flags_json").notNull(),
+}, table => [primaryKey({ columns: [table.sourceId, table.pdfPage] }), index("legislation_pages_document_idx").on(table.documentId)]);
+export const legislationArticles = sqliteTable("legislation_articles", {
+  id: text("id").primaryKey(), sourceId: text("source_id").notNull().references(() => legislationImports.id),
+  documentId: text("document_id").notNull().references(() => legislationSections.id), componentId: text("component_id").notNull(),
+  number: text("number").notNull(), heading: text("heading").notNull(), startPage: integer("start_page").notNull(),
+  endPage: integer("end_page").notNull(), text: text("text").notNull(), textSha256: text("text_sha256").notNull(),
+  segmentsJson: text("segments_json").notNull(), boundaryReview: text("boundary_review").notNull(),
+  transcriptionVerified: integer("transcription_verified", { mode: "boolean" }).notNull().default(false),
+  completeArticleVerified: integer("complete_article_verified", { mode: "boolean" }).notNull().default(false),
+}, table => [index("legislation_articles_source_idx").on(table.sourceId), index("legislation_articles_identity_idx").on(table.documentId, table.componentId, table.number)]);
 
 // Drafting forms are not legal authorities and are never indexed as evidence.
 export const legalDraftingTemplates = sqliteTable("legal_drafting_templates", {
@@ -162,6 +224,12 @@ export const publicUsers = sqliteTable(
   (table) => [uniqueIndex("public_users_email_uidx").on(table.email)],
 );
 
+export const userAccessPolicies = sqliteTable("user_access_policies", {
+  userId: text("user_id").primaryKey().references(() => publicUsers.id, { onDelete: "cascade" }),
+  role: text("role").notNull().default("user"), permissionsJson: text("permissions_json").notNull().default("{}"),
+  updatedBy: text("updated_by").notNull(), updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
 export const serviceRecords = sqliteTable(
   "service_records",
   {
@@ -195,7 +263,7 @@ export const serviceSettings = sqliteTable(
 
 export const sadadPayments = sqliteTable("sadad_payments", {
   id: text("id").primaryKey(), tokenHash: text("token_hash").notNull(), inputHash: text("input_hash").notNull(),
-  environment: text("environment").notNull(), credentialRef: text("credential_ref").notNull().default(""), amountFils: integer("amount_fils").notNull(), currency: text("currency").notNull().default("KWD"),
+  environment: text("environment").notNull(), amountFils: integer("amount_fils").notNull(), currency: text("currency").notNull().default("KWD"),
   reference: text("reference").notNull(), invoiceId: text("invoice_id"), invoiceKey: text("invoice_key"), transactionId: text("transaction_id"),
   status: text("status").notNull().default("creating"), generationId: text("generation_id"), leaseUntil: integer("lease_until"),
   resultJson: text("result_json"), resultExpiresAt: integer("result_expires_at"),

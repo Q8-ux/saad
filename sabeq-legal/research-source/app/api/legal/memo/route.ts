@@ -58,7 +58,7 @@ export async function POST(request: Request) {
       return modelGenerateText({ ...options, instructions:`${options.instructions}\n${pleadingAuthorityInstructions}`, signal });
     };
     const user = await requireMemoUserOrGuest(request);
-    await requireServiceEnabled("memo");
+    await requireServiceEnabled("memo", request);
     const raw = await readJsonObject(request, 200_000);
     // Memo sign-in is temporarily disabled for the pilot. The previous guest
     // limit was too low for a normal test flow (retrying after document review
@@ -94,7 +94,7 @@ export async function POST(request: Request) {
       readHandoffEvidence(raw.assistantSourceIds),
     ]);
     let evidence = scopeEvidenceToFacts(Array.from(new Map(
-      [...handoffEvidence, ...cassationEvidence, ...generalEvidence].map((item) => [`${item.documentId}:${item.reference || item.text.slice(0, 80)}`, item]),
+      [...handoffEvidence, ...cassationEvidence, ...generalEvidence].filter(item=>item.corpus?.draftingEligible!==false).map((item) => [`${item.documentId}:${item.reference || item.text.slice(0, 80)}`, item]),
     ).values()).slice(0, 16),facts+" "+caseType+" "+requests);
     let casePlan;
     try { casePlan = await buildCheckedCasePlan(memoInput,evidence,formatEvidence(evidence),generateText); }

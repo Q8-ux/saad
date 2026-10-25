@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import react from "@vitejs/plugin-react";
@@ -43,6 +43,12 @@ function githubBrandAssets(): Plugin {
         transformed = transformed.replaceAll(asset.source, `${githubBase}${asset.output}`);
       }
       return { code: transformed, map: null };
+    },
+    closeBundle() {
+      // Preserve the reviewed additions already present on the published GitHub page.
+      const index = path.join(projectRoot, "github-pages-dist/index.html");
+      const html = readFileSync(index, "utf8");
+      writeFileSync(index, html.replace("</head>", `  <link rel="stylesheet" href="./motion/sabeq-motion.css?v=20261021" />\n    <link rel="stylesheet" href="./fonts/cairo.css?v=20261025-3" />\n    <script type="module" src="/saad/sabeq-legal/assets/service-motion-v1.js"></script>\n  </head>`));
     },
   };
 }
