@@ -110,5 +110,13 @@
   "liveModelGenerationTested": false,
   "caseJourney": "three-stage-retained-draft-and-hosted-sadad",
   "proceduralRecognition": "explicit-facts-current-party-and-forum-with-manual-correction",
-  "caseJourneyValidation": "191-release-checks;20-provider-boundary-tests;both-builds;desktop-ar-en-ur-navigation-and-synthetic-attachment;no-live-charge"
+  "caseJourneyValidation": "191-release-checks;20-provider-boundary-tests;both-builds;desktop-ar-en-ur-navigation-and-synthetic-attachment;no-live-charge",
+  "liveDictationCheck": "browser-understand-text-synthetic-defendant-opponent-appeal-v143-passed",
+  "caseJourneyPublication": {
+    "commit": "241644397fd14068db304c806addac53e42481df",
+    "pagesRun": 40164302835,
+    "result": "success"
+  },
+  "caseJourneyBrowserCheck": "three-stages;current-role-and-court-filled;memorandum-format;50000-fils;assistant-roundtrip-preserved",
+  "liveMemoPaymentTested": false
 }
