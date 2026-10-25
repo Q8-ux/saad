@@ -1,4 +1,17 @@
 export type SadadCheckout = { id: string; checkoutUrl?: string | null; status: string; priceFils: number; currency: string; environment: string };
+export function safeSadadCheckoutUrl(payment: SadadCheckout) {
+  try {
+    const url = new URL(payment.checkoutUrl || "");
+    const host = payment.environment === "sandbox" ? "sandbox.sadadpay.net" : "sadadpay.net";
+    return url.protocol === "https:" && url.hostname === host && !url.username && !url.password && !url.port && /^\/pay\/[^/?#]+\/?$/.test(url.pathname) && !url.search && !url.hash ? url.href : null;
+  } catch { return null; }
+}
+export async function readExistingSadadCheckout(request: (path: string, token: string, init?: RequestInit) => Promise<Response>, attempt: { attemptId: string; paymentToken: string }, signal?: AbortSignal): Promise<SadadCheckout> {
+  const response = await request(`/api/payments/sadad?id=${encodeURIComponent(attempt.attemptId)}`, attempt.paymentToken, { method: "GET", signal });
+  const payment = await response.json();
+  if (!response.ok || payment.id !== attempt.attemptId) throw new Error("PAYMENT_STATUS_UNAVAILABLE");
+  return payment;
+}
 export function newPaymentAttempt() {
   const bytes = crypto.getRandomValues(new Uint8Array(32));
   return { attemptId: crypto.randomUUID(), paymentToken: btoa(String.fromCharCode(...bytes)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "") };

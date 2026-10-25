@@ -1,3 +1,6 @@
+import { applyProceduralPosition } from "@/lib/procedural-position";
+import {guardMatterIntake} from "@/lib/matter-facts";
+import {scopeEvidenceToFacts} from "@/lib/bound-draft";
 import { ASSISTANT_REQUEST_BYTES, validateAssistantInput } from "@/lib/assistant-input";
 import { legalSourceCoverage, formatSourceCoverage } from "@/lib/legal-source-coverage";
 import { interfaceLabel, interfaceError } from "@/lib/interface-language";
@@ -115,11 +118,12 @@ export async function POST(request: Request) {
         Object.assign(step.stage, { status, finishedAt: new Date().toISOString(), durationMs: Math.round(performance.now() - step.clock) });
         send({ type: "stage", stage: { ...step.stage } });
       };
+      const scopeFacts=messages.filter(item=>item.role==="user").map(item=>item.content).join("\n");
       const search = begin("library");
       let evidence: LegalEvidence[] = [], lookupFailed = false;
       try {
         const queries = intakeSearchQueries(message, data.currentState, messages.filter(item => item.role === "user").map(item => item.content));
-        evidence = await searchIntakeLibrary(queries);
+        evidence = scopeEvidenceToFacts(await searchIntakeLibrary(queries),scopeFacts);
       } catch { lookupFailed = true; }
       end(search, lookupFailed ? "failed" : evidence.length ? "completed" : "limited");
       signal.throwIfAborted();
@@ -139,16 +143,17 @@ export async function POST(request: Request) {
       }
       generationMs = analysis.stage.durationMs || 0;
       const review = begin("source_review");
-      const reviewed = reviewIntakeAnalysis(state, evidence, lookupFailed, language);
+      const sourceReviewed = reviewIntakeAnalysis(applyProceduralPosition(state,scopeFacts), evidence, lookupFailed, language);
+      const reviewed = guardMatterIntake(sourceReviewed,scopeFacts,readQuestionMemory(data.currentState),language);
       end(review, reviewed.legalBasis.length ? "completed" : "limited");
       stages.push({ id: "human_review", status: "pending", startedAt: null, finishedAt: null, durationMs: null });
       const sourceCoverage = legalSourceCoverage(evidence, lookupFailed);
-      const finalState = { ...reviewed, research: { ...reviewed.research, catalogueSources: sourceCoverage.sources }, analysisStages: stages };
+      const finalState = { ...reviewed, research: { ...sourceReviewed.research, catalogueSources: sourceCoverage.sources }, analysisStages: stages };
       if(firstTextMs === null) firstTextMs=performance.now()-started;
       send({type:"text",text:reviewed.assistantMessage});
       signal.throwIfAborted();
-      if (user) await recordServiceActivity({ userId: user.id, serviceType: "assistant", title: state.caseType || "مقابلة قانونية", inputText: message, outputText: state.assistantMessage, metadata: { language, phase: state.phase, progress: state.progress, sourceCount: evidence.length, sourceIds: evidence.map(item => item.chunkId || item.documentId), readyForMemo: finalState.readyForMemo, searchMs, generationMs } });
-      return { sourceCoverage: legalSourceCoverage(evidence, lookupFailed), state: finalState, engineRevision: "official-research-sources-1", sourceCount: evidence.length, timing: { searchMs, generationMs, firstTextMs, totalMs: performance.now() - started } };
+      if (user) await recordServiceActivity({ userId: user.id, serviceType: "assistant", title: reviewed.caseType || "مقابلة قانونية", inputText: message, outputText: reviewed.assistantMessage, metadata: { language, phase: reviewed.phase, progress: reviewed.progress, sourceCount: evidence.length, sourceIds: evidence.map(item => item.chunkId || item.documentId), readyForMemo: finalState.readyForMemo, searchMs, generationMs } });
+      return { sourceCoverage: legalSourceCoverage(evidence, lookupFailed), state: finalState, engineRevision: "bound-legislation-factual-scope-2", sourceCount: evidence.length, timing: { searchMs, generationMs, firstTextMs, totalMs: performance.now() - started } };
     }
     if (data.stream === true) {
       const encoder = new TextEncoder();

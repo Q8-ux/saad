@@ -1,0 +1,2 @@
+# التحقق
+شغّل `node --test tests/procedural-position.test.mjs tests/memo-journey.test.mjs tests/connected-intake.test.mjs tests/sadad-payments.test.mjs` ثم `npm run build` و`npm run build:github`. عبر معاينة Sites، أدخل الوصف الاصطناعي لمدعى عليه استأنف خصمه الحكم؛ المتوقع مستأنف ضده أمام الاستئناف ومذكرة بدفاع. أكمل البيانات وارجع للمساعد ثم للمذكرة. لا تضغط دفعاً حقيقياً. راجع استجابة السياسة الحالية دون تغييرها. تحقق من نشر الخادم وصفحات GitHub منفصلين.

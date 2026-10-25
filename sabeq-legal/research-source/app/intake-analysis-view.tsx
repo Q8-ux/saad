@@ -2,6 +2,7 @@
 
 import type { LegalIntakeState } from "@/lib/openai";
 import type { AnalysisStage, IntakeResearch } from "@/lib/intake-analysis";
+import ProceduralPositionView from "./procedural-position-view";
 
 export type ConnectedIntakeState = LegalIntakeState & { research?: IntakeResearch; analysisStages?: AnalysisStage[] };
 
@@ -23,6 +24,7 @@ export default function IntakeAnalysisView({ state, language }: { state: Connect
   const catalogCopy = language === "en" ? { title: "Official research directory", note: "These are discovery links, not verified citations. Some collections require licensed access. Adding a link does not mean its texts have been imported." } : language === "ur" ? { title: "سرکاری تحقیق کے ذرائع", note: "یہ تلاش کے روابط ہیں، تصدیق شدہ حوالے نہیں۔ بعض مجموعوں کے لیے لائسنس درکار ہے۔ ربط شامل کرنے کا مطلب متن درآمد کرنا نہیں۔" } : { title: "دليل البحث في المصادر الرسمية", note: "هذه روابط لاستكمال البحث وليست أسانيد معتمدة. بعض المجموعات تتطلب وصولاً مرخصاً. إدراج الرابط لا يعني استيراد نصوصه." };
   return <section className="connected-analysis" aria-label={t.title}>
     <h3>{t.title}</h3>
+    <ProceduralPositionView position={state.proceduralPosition} language={language === "en" || language === "ur" ? language : "ar"} />
     {state.orientation && <div className="intake-orientation">{state.orientation.categoryReason && <p><strong>{routing.reason}</strong><br />{state.orientation.categoryReason}</p>}{state.orientation.nextAction && <p><strong>{routing.next}</strong><br />{state.orientation.nextAction}</p>}</div>}
     {state.analysisStages && <IntakeStages stages={state.analysisStages} language={language} />}
     <details open><summary>{t.summary}</summary>

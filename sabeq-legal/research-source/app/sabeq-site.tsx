@@ -11,6 +11,10 @@ import VoiceWaveform from "./voice-waveform";
 import { PrivacyLink } from "./privacy-notice";
 import GroupPostsStrip from "./group-posts-strip";
 import MemoVoiceInput from "./memo-voice-input";
+import MemoPaymentDialog from "./memo-payment-dialog";
+import ProceduralPositionView from "./procedural-position-view";
+import { inferProceduralPosition } from "@/lib/procedural-position";
+import { recogniseMemoProcedure } from "@/lib/memo-journey";
 import PleadingPreview from "./pleading-preview";
 import { pleadingFields, renderPleadingHtml, renderArabicMemoHtml, selectPleadingKind, type PleadingDocument } from "@/lib/pleading-document";
 import { exportPleadingDocx } from "@/lib/pleading-docx";
@@ -172,6 +176,7 @@ function CustomSelect({ name, value, defaultValue, options, onChange, ariaLabel,
 
 function CustomComboBox({ name, defaultValue, options, required, ariaLabel }: { name: string; defaultValue?: string; options: readonly string[]; required?: boolean; ariaLabel: string }) {
   const [text, setText] = useState(defaultValue || "");
+  useEffect(() => setText(defaultValue || ""), [defaultValue]);
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const normalized = text.trim().toLocaleLowerCase();
@@ -229,6 +234,7 @@ export default function SabeqSite() {
   const [formStatus, setFormStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [assistantMemoPrefill, setAssistantMemoPrefill] = useState<MemoPrefill | null>(null);
   const [assistantSession, setAssistantSession] = useState<AssistantSession | null>(null);
+  const [memoVisited, setMemoVisited] = useState(false);
   const t = copy[language];
   const isRtl = t.dir === "rtl";
   const DirectionArrow = isRtl ? ArrowLeft : ArrowRight;
@@ -293,7 +299,7 @@ export default function SabeqSite() {
   function showModal(name: ModalName) {
     window.dispatchEvent(new CustomEvent("sabeq-analytics-section", { detail: name }));
     setFormStatus("idle");
-    if (name === "memo") setAssistantMemoPrefill(null);
+    if (name === "memo") setMemoVisited(true);
     if (name === "memo" || name === "assistant") {
       setModal(name);
       return;
@@ -307,7 +313,7 @@ export default function SabeqSite() {
   }
 
   function authenticated(session: { token: string; user: PublicUser }) {
-    setAssistantSession(null); setAssistantMemoPrefill(null);
+    setAssistantSession(null); setAssistantMemoPrefill(null); setMemoVisited(false);
     window.localStorage.setItem("sabeq-session-token", session.token);
     setAuthToken(session.token);
     setAuthUser(session.user);
@@ -320,7 +326,7 @@ export default function SabeqSite() {
     const token = authToken;
     setAuthToken("");
     setAuthUser(null);
-    setAssistantSession(null); setAssistantMemoPrefill(null); setModal(null);
+    setAssistantSession(null); setAssistantMemoPrefill(null); setMemoVisited(false); setModal(null);
     window.localStorage.removeItem("sabeq-session-token");
     setMobileMenu(false);
     if (token) {
@@ -534,14 +540,14 @@ export default function SabeqSite() {
         <div className="container footer-bottom"><span>© {year} {t.brand}. {t.rights}.</span><PrivacyLink language={language} /><a href="https://wa.me/96551231313" target="_blank" rel="noreferrer">{tr(language, "تصميم وتطوير")} <span className="digizone-name">DigiZone</span></a></div>
       </footer>
 
-      {modal && <ModalShell language={language} onClose={() => { if (modal === "auth") setPendingService(null); setModal(null); }} large={modal === "memo"} media={modal === "media"}>
+      {modal && modal !== "memo" && <ModalShell language={language} onClose={() => { if (modal === "auth") setPendingService(null); setModal(null); }} media={modal === "media"}>
         {modal === "auth" && <AuthGate language={language} service={pendingService} onAuthenticated={authenticated} />}
         {modal === "booking" && <Booking t={t} language={language} status={formStatus} submit={submitForm} />}
-        {modal === "assistant" && <Assistant t={t} language={language} token={authToken} initialSession={assistantSession} onSession={setAssistantSession} openBooking={() => showModal("booking")} startMemo={(prefill) => { setAssistantMemoPrefill(prefill); setModal("memo"); }} />}
+        {modal === "assistant" && <><div className="journey-switch"><button type="button" className="button button-outline" onClick={() => showModal("memo")}>{language === "ar" ? "العودة إلى المذكرة" : language === "en" ? "Back to the memo" : "یادداشت پر واپس"}</button></div><Assistant t={t} language={language} token={authToken} initialSession={assistantSession} onSession={setAssistantSession} openBooking={() => showModal("booking")} startMemo={(prefill) => { setAssistantMemoPrefill(prefill); setMemoVisited(true); setModal("memo"); }} /></>}
         {modal === "library" && <Library t={t} language={language} token={authToken} />}
-        {modal === "memo" && <MemoWizard t={t} language={language} token={authToken} initialData={assistantMemoPrefill} />}
         {modal === "media" && <MediaViewer video={mediaVideos[selectedVideo]} language={language} />}
       </ModalShell>}
+      {(memoVisited || modal === "memo") && <ModalShell language={language} onClose={() => setModal(null)} large active={modal === "memo"}><MemoWizard t={t} language={language} token={authToken} active={modal === "memo"} initialData={assistantMemoPrefill} openAssistant={(context) => { if (!assistantSession) setAssistantSession({ question: context, messages: [], intake: null }); setModal("assistant"); }} /></ModalShell>}
 
       <div className="floating">
         <button type="button" className="assistant-avatar-button" onClick={() => showModal("assistant")} aria-label={t.assistant} aria-haspopup="dialog"><span className="assistant-portrait"><img src={assetUrl("/images/sabeq-assistant-avatar.jpg")} alt="" width={64} height={64} decoding="async" /></span></button>
@@ -581,8 +587,8 @@ function MediaViewer({ video, language }: { video: (typeof mediaVideos)[number];
   return <div className="media-viewer" dir="rtl"><div className="media-player"><video ref={videoRef} src={assetUrl(video.src)} poster={assetUrl(video.poster)} playsInline preload="metadata" aria-label={video.title} onClick={togglePlayback} onEnded={() => setPlaying(false)} /><button className={`media-control${playing ? " is-playing" : ""}`} onClick={togglePlayback}>{playing ? <Pause size={24} fill="currentColor" /> : <Play size={24} fill="currentColor" />}<span>{playing ? pauseLabel : playLabel}</span></button></div></div>;
 }
 
-function ModalShell({ children, language, onClose, large = false, media = false }: { children: ReactNode; language: Language; onClose: () => void; large?: boolean; media?: boolean }) {
-  return <div className="modal-backdrop" onMouseDown={onClose}><div className={`modal${large ? " modal-large" : ""}${media ? " modal-media" : ""}`} role="dialog" aria-modal="true" onMouseDown={(event) => event.stopPropagation()}><button className="icon-button modal-close" onClick={onClose} aria-label={tr(language, "إغلاق")}><X /></button>{children}</div></div>;
+function ModalShell({ children, language, onClose, large = false, media = false, active = true }: { children: ReactNode; language: Language; onClose: () => void; large?: boolean; media?: boolean; active?: boolean }) {
+  return <div className="modal-backdrop" hidden={!active} onMouseDown={onClose}><div className={`modal${large ? " modal-large" : ""}${media ? " modal-media" : ""}`} role="dialog" aria-modal="true" onMouseDown={(event) => event.stopPropagation()}><button className="icon-button modal-close" onClick={onClose} aria-label={tr(language, "إغلاق")}><X /></button>{children}</div></div>;
 }
 
 function AuthGate({ language, service, onAuthenticated }: { language: Language; service: ServiceModal | null; onAuthenticated: (session: { token: string; user: PublicUser }) => void }) {
@@ -945,10 +951,13 @@ const emptyAnalysisFields: AnalysisFields = {
   legalIssues: "",
 };
 
-function MemoWizard({ t, language, token, initialData = null }: { t: SiteCopy; language: Language; token: string; initialData?: MemoPrefill | null }) {
+function MemoWizard({ t, language, token, initialData = null, active, openAssistant }: { t: SiteCopy; language: Language; token: string; initialData?: MemoPrefill | null; active: boolean; openAssistant: (context: string) => void }) {
   const [paymentPolicy, setPaymentPolicy] = useState<{ required: boolean; publicCheckoutEnabled: boolean; priceFils: number; ready: boolean; environment: string } | null>(null);
   const [checkout, setCheckout] = useState<SadadCheckout | null>(null);
   const [checkingPayment, setCheckingPayment] = useState(false);
+  const [paymentOpen, setPaymentOpen] = useState(false);
+  const automaticProcedure = useRef<Record<string, string>>({});
+  const appliedHandoff = useRef(initialData);
   const paymentAttempt = useRef<ReturnType<typeof newPaymentAttempt> | null>(null);
   const payUi = paymentCopy[language];
   useEffect(() => {
@@ -958,7 +967,7 @@ function MemoWizard({ t, language, token, initialData = null }: { t: SiteCopy; l
     }).catch(() => undefined);
     return () => controller.abort();
   }, [token]);
-  const [step, setStep] = useState(() => isCompleteMemoHandoff(initialData) ? 3 : 0);
+  const [step, setStep] = useState(() => isCompleteMemoHandoff(initialData) ? 2 : 0);
   const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
   const [memoError, setMemoError] = useState("");
   const [memoApproved, setMemoApproved] = useState(false);
@@ -981,6 +990,7 @@ function MemoWizard({ t, language, token, initialData = null }: { t: SiteCopy; l
   const [voiceEntryBusy, setVoiceEntryBusy] = useState(false);
   const [voiceFormVersion, setVoiceFormVersion] = useState(0);
   const memoFormRef = useRef<HTMLFormElement | null>(null);
+  useEffect(() => { memoFormRef.current?.closest(".modal")?.scrollTo({ top: 0 }); }, [step]);
   const [memoAnalysis, setMemoAnalysis] = useState<{ sourceCount: number; lawCount: number; cassationCount: number; sources: Array<{ marker: string; title: string; reference: string; kind: "cassation" | "legislation"; officialSource: string; sourceUrl?: string; libraryUpdatedAt?: string | null }> } | null>(null);
   const [facts, setFacts] = useState(initialData?.facts || "");
   const [requests, setRequests] = useState(initialData?.requests || "");
@@ -990,14 +1000,43 @@ function MemoWizard({ t, language, token, initialData = null }: { t: SiteCopy; l
   const [draftNotice, setDraftNotice] = useState<{ kind: "success" | "error"; message: string } | null>(null);
   const [draftSources, setDraftSources] = useState<Array<{ title: string; reference: string }>>([]);
   const [memoData, setMemoData] = useState<Record<string, string>>(initialData || {});
+  const recognisedPosition = useMemo(() => inferProceduralPosition(`${facts}\n${requests}`, memoData.clientName || "", memoData.otherParty || ""), [facts, requests, memoData.clientName, memoData.otherParty, initialData]);
   const [documents, setDocuments] = useState<File[]>([]);
   const [dragActive, setDragActive] = useState(false);
   const [analysisStatus, setAnalysisStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [analysisNotice, setAnalysisNotice] = useState("");
   const [analysisFields, setAnalysisFields] = useState<AnalysisFields>(emptyAnalysisFields);
   const [analysisParties, setAnalysisParties] = useState<AnalysisParty[]>([]);
+  const lastAppliedAnalysis = useRef<{ fields: AnalysisFields; parties: AnalysisParty[] } | null>(null);
   const [analysisWarnings, setAnalysisWarnings] = useState<string[]>([]);
   const documentInputRef = useRef<HTMLInputElement | null>(null);
+  const journeySteps = language === "ar" ? ["الوقائع والمستندات", "الصفة وبيانات القضية", "المراجعة والدفع"] : language === "en" ? ["Facts and documents", "Role and case details", "Review and payment"] : ["حقائق اور دستاویزات", "حیثیت اور مقدمے کی تفصیل", "جائزہ اور ادائیگی"];
+  function captureDraft() {
+    const visible = memoFormRef.current ? Object.fromEntries(Array.from(new FormData(memoFormRef.current).entries()).filter((entry): entry is [string, string] => typeof entry[1] === "string")) : {};
+    const next = { ...memoData, ...visible, facts, requests };
+    setMemoData(next);
+    return next;
+  }
+  useEffect(() => {
+    if (!initialData || appliedHandoff.current === initialData) return;
+    appliedHandoff.current = initialData;
+    if (paymentAttempt.current || checkout || memo) {
+      setStatus("error"); setMemoError(payUi.changed); return;
+    }
+    setMemoData(current => ({ ...current, ...initialData }));
+    setFacts(initialData.facts || ""); setRequests(initialData.requests || "");
+    setMemoApproved(false); setVoiceFormVersion(version => version + 1);
+    automaticProcedure.current = {};
+    setStep(isCompleteMemoHandoff(initialData) ? 2 : 0);
+  }, [initialData, checkout, memo, payUi.changed]);
+  useEffect(() => {
+    if (active) return;
+    setPaymentOpen(false);
+    if (autoStopRef.current) clearTimeout(autoStopRef.current);
+    if (recorderRef.current && recorderRef.current.state !== "inactive") { recorderRef.current.onstop = null; recorderRef.current.stop(); }
+    audioStreamRef.current?.getTracks().forEach(track => track.stop());
+    setRecordingField(null);
+  }, [active]);
   useEffect(() => {
     const saved = loadPaymentAttempt();
     if (!saved) return;
@@ -1259,7 +1298,7 @@ function MemoWizard({ t, language, token, initialData = null }: { t: SiteCopy; l
     setMemoAnalysis(null);
     setResultNotice(null);
     setStatus("idle");
-    setStep(1);
+    setStep(0);
   }
 
   function deleteGeneratedMemo() {
@@ -1271,7 +1310,7 @@ function MemoWizard({ t, language, token, initialData = null }: { t: SiteCopy; l
     setMemoAnalysis(null);
     setResultNotice(null);
     setStatus("idle");
-    setStep(3);
+    setStep(2);
   }
 
   function exportGeneratedMemo() {
@@ -1449,7 +1488,7 @@ function MemoWizard({ t, language, token, initialData = null }: { t: SiteCopy; l
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (voiceEntryBusy || generationRequest.current) return;
+    if (!active || voiceEntryBusy || generationRequest.current) return;
     const stepData = Object.fromEntries(Array.from(new FormData(event.currentTarget).entries(), ([key, value]) => [key, String(value)]));
     const allParties = analysisParties
       .filter((party) => party.name.trim() || party.role.trim())
@@ -1457,19 +1496,23 @@ function MemoWizard({ t, language, token, initialData = null }: { t: SiteCopy; l
       .join("\n");
     // Analysis supplements data entered by the user. Empty values extracted
     // from a document must never erase required case details entered earlier.
-    const analysisData = analysisStatus === "success"
+    const hasNewAnalysis = lastAppliedAnalysis.current?.fields !== analysisFields || lastAppliedAnalysis.current?.parties !== analysisParties;
+    const analysisData = analysisStatus === "success" && step === 0 && hasNewAnalysis
       ? Object.fromEntries(Object.entries({ ...analysisFields, allParties, facts, requests }).filter(([, value]) => typeof value === "string" && value.trim().length > 0))
       : {};
-    const nextData: Record<string, string> = { ...memoData, ...analysisData, ...stepData, ...(step === 1 ? { facts, requests } : {}) };
+    const recognised = recogniseMemoProcedure({ ...memoData, ...analysisData, ...stepData, facts, requests }, automaticProcedure.current);
+    const nextData = recognised.fields;
+    if (step === 0 && analysisStatus === "success") lastAppliedAnalysis.current = { fields: analysisFields, parties: analysisParties };
+    automaticProcedure.current = recognised.automatic;
     for (const key of ["caseType", "court", "courtCircuit", "partyRole"]) if (nextData[key]) nextData[key] = canonicalLegalValue(nextData[key]);
     setMemoData(nextData);
-    if (step < 3) {
+    if (step < 2) {
       setDraftNotice(null);
       setStep(step + 1);
       return;
     }
     const requiredCaseFields: Array<[string, 0 | 1]> = [
-      ["caseType", 0], ["court", 0], ["clientName", 0], ["otherParty", 0], ["partyRole", 0], ["facts", 1], ["requests", 1],
+      ["caseType", 1], ["court", 1], ["clientName", 1], ["otherParty", 1], ["partyRole", 1], ["facts", 0], ["requests", 0],
     ];
     const missing = requiredCaseFields.find(([field]) => !nextData[field]?.trim());
     if (missing) {
@@ -1489,8 +1532,8 @@ function MemoWizard({ t, language, token, initialData = null }: { t: SiteCopy; l
       const currentPolicy = await readServiceJson<{ required: boolean; publicCheckoutEnabled: boolean; priceFils: number; ready: boolean; environment: string; error?: string }>(policyResponse);
       if (!policyResponse.ok || typeof currentPolicy.required !== "boolean") throw new Error(currentPolicy.error || payUi.policyError);
       setPaymentPolicy(currentPolicy);
-      if (currentPolicy.required) {
-        if (currentPolicy.publicCheckoutEnabled !== true) throw new Error(payUi.policyError);
+      if (currentPolicy.required || paymentAttempt.current) {
+        if (currentPolicy.publicCheckoutEnabled !== true && !paymentAttempt.current) throw new Error(payUi.policyError);
         setCheckingPayment(true);
         if (!paymentAttempt.current) {
           const attempt = newPaymentAttempt();
@@ -1510,32 +1553,9 @@ function MemoWizard({ t, language, token, initialData = null }: { t: SiteCopy; l
           const payment = await readServiceJson<SadadCheckout & { error?: string }>(statusResponse);
           if (!statusResponse.ok) throw new Error(payment.error || payUi.policyError);
           setCheckout(payment);
-          if (!["paid", "consumed"].includes(payment.status)) { setStatus("idle"); return; }
+          if (!["paid", "consumed"].includes(payment.status)) { setPaymentOpen(true); setStatus("idle"); return; }
           input.paymentId = attempt.attemptId;
           input.paymentToken = attempt.paymentToken;
-        }
-      } else if (paymentAttempt.current) {
-        const attempt = paymentAttempt.current;
-        const statusResponse = await memoFetch(`/api/payments/sadad?id=${encodeURIComponent(attempt.attemptId)}`, attempt.paymentToken, { signal: controller.signal });
-        if (statusResponse.ok) {
-          const payment = await readServiceJson<SadadCheckout>(statusResponse);
-          if (["paid", "consumed"].includes(payment.status)) {
-            const amendedResponse = await memoFetch("/api/payments/sadad", token, { method: "POST", signal: controller.signal, headers: { "Content-Type": "application/json" }, body: JSON.stringify({ attemptId: attempt.attemptId, paymentToken: attempt.paymentToken, input }) });
-            if (amendedResponse.ok) {
-              setCheckout(payment);
-              input.paymentId = attempt.attemptId;
-              input.paymentToken = attempt.paymentToken;
-            } else if (!(payment.status === "consumed" && amendedResponse.status === 409)) {
-              const amended = await readServiceJson<{ error?: string }>(amendedResponse);
-              throw new Error(amended.error || payUi.policyError);
-            }
-          }
-        } else if ([403, 404].includes(statusResponse.status)) {
-          clearPaymentAttempt();
-          paymentAttempt.current = null;
-        } else {
-          const payment = await readServiceJson<{ error?: string }>(statusResponse);
-          throw new Error(payment.error || payUi.policyError);
         }
       }
       setCheckingPayment(false);
@@ -1568,6 +1588,7 @@ function MemoWizard({ t, language, token, initialData = null }: { t: SiteCopy; l
   if (memo) return <div className="memo-result" lang={language} dir={language === "en" ? "ltr" : "rtl"}><p role="note" className="form-notice">{memoApprovalNotice[language]}</p>{memoQuality && <div className="form-notice" role="status"><strong>{language === "ar" ? (memoQuality.status === "incomplete" ? "المذكرة غير مكتملة: توجد وقائع أو أسانيد تحتاج استكمالًا" : "اجتازت المسودة مراجعة الاتساق الآلية وتحتاج مراجعة قانونية") : language === "en" ? (memoQuality.status === "incomplete" ? "Incomplete draft: facts or legal sources need review" : "Draft passed automated consistency review; legal review is required") : (memoQuality.status === "incomplete" ? "مسودہ نامکمل ہے؛ حقائق یا قانونی ماخذ کی جانچ درکار ہے" : "مسودے کی خودکار مطابقت جانچ مکمل؛ قانونی جائزہ ضروری ہے")}</strong>{language === "ar" && <ul>{memoQuality.notices.map((notice,index)=><li key={index}>{notice}</li>)}</ul>}</div>}<div className="modal-icon"><FileCheck2 /></div><h2>{memoDocument ? interfaceLabel(memoDocument.title, language) : tr(language, "المذكرة القانونية")}</h2>{memoAnalysis && <div className="memo-analysis-summary"><strong><Sparkles size={18} /> {tr(language, "مصادر استشهدت بها المسودة")}</strong><span>{tr(language, "مراجع تشريعية مستشهد بها")}: {memoAnalysis.lawCount}</span><span>{tr(language, "استشهادات بمبادئ وأحكام تمييز")}: {memoAnalysis.cassationCount}</span><small>{tr(language, "لا يُدرج النظام مادة أو حكماً غير موجود في المكتبة الموثقة، وتبقى المراجعة النهائية للمجموعة.")}</small><ul>{memoAnalysis.sources.map(source => <li key={source.marker}><strong>{source.marker} — {source.title}</strong><span>{source.officialSource} · {source.reference}</span>{source.sourceUrl ? <a href={source.sourceUrl} target="_blank" rel="noopener noreferrer">{tr(language, "فتح المصدر الأصلي")}</a> : <small>{tr(language, "نص من المكتبة المرفوعة؛ لا يتوفر رابط عام للأصل.")}</small>}{source.libraryUpdatedAt && <small>{tr(language, "تحديث الفهرسة")}: {source.libraryUpdatedAt.slice(0, 10)} — {tr(language, "لا يثبت سريان النص.")}</small>}</li>)}</ul></div>}<>{memoDocument ? <PleadingPreview document={memoDocument} text={memo} language={language}/> : <pre lang="ar" dir="rtl">{memo}</pre>}</><div className="memo-result-tools" aria-label={tr(language, "أدوات المذكرة")}><button type="button" onClick={editGeneratedMemo}><Pencil size={18} />{tr(language, "تعديل")}</button><button type="button" onClick={archiveGeneratedMemo} disabled={archiving}><Archive size={18} />{archiving ? tr(language, "جارٍ الأرشفة") : tr(language, "أرشفة")}</button><button type="button" className="danger" onClick={deleteGeneratedMemo}><Trash2 size={18} />{tr(language, "حذف")}</button><button type="button" onClick={exportGeneratedMemo}><Download size={18} />{tr(language, "تصدير كملف")}</button><button type="button" onClick={() => void printGeneratedMemo()}><Printer size={18} />{tr(language, "طباعة")}</button></div>{resultNotice && <p role="status" className={`form-notice ${resultNotice.kind}`}>{resultNotice.message}</p>}</div>;
   return (
     <div className="memo-modal">
+      <div className="journey-switch"><button type="button" className="button button-outline" disabled={status === "loading"} onClick={() => { captureDraft(); openAssistant(`${facts}\n${requests}`); }}>{language === "ar" ? "المتابعة مع المساعد القانوني" : language === "en" ? "Continue with the legal assistant" : "قانونی معاون کے ساتھ جاری رکھیں"}</button><small>{language === "ar" ? "تبقى مسودتك ومرفقاتك عند الرجوع خلال هذه الجلسة." : language === "en" ? "Your draft and attachments remain here while you switch during this session." : "اس نشست میں واپسی پر مسودہ اور منسلکات محفوظ رہیں گے۔"}</small></div>
       <div className="memo-modal-title"><div className="modal-icon"><FileText /></div><span><h2>{t.memoModal}</h2><p><Languages size={15} />{t.arabicOnly}</p></span></div>
       {memoData.conversationTranscript && <details className="memo-conversation-review" open>
         <summary>{language === "ar" ? "المحادثة وملخص القضية المنقولان من المساعد" : language === "en" ? "Conversation and case summary from the assistant" : "معاون سے منتقل گفتگو اور مقدمے کا خلاصہ"}</summary>
@@ -1576,9 +1597,10 @@ function MemoWizard({ t, language, token, initialData = null }: { t: SiteCopy; l
         <Field label={language === "ar" ? "تفريغ كلام الطرفين" : language === "en" ? "Both sides of the conversation" : "دونوں طرف کی گفتگو"}><textarea rows={7} value={memoData.conversationTranscript} onChange={event => setMemoData(current => ({ ...current, conversationTranscript: event.target.value }))} /></Field>
         {memoData.conversationTranscript.length > 30000 && <p role="alert">{tr(language, "التفريغ طويل. صدّر النسخة الكاملة ثم اختصر النص إلى 30,000 حرف قبل التوليد؛ لن يُحذف جزء منه تلقائياً.")}</p>}
       </details>}
-      <div className="steps">{t.steps.map((item, index) => <div key={item} className={index === step ? "active" : index < step ? "done" : ""}><i>{index < step ? <Check size={14} /> : index + 1}</i><span>{item}</span></div>)}</div>
+      <div className="steps journey-steps" aria-label={t.memoModal}>{journeySteps.map((item, index) => <div key={item} className={index === step ? "active" : index < step ? "done" : ""}><i>{index < step ? <Check size={14} /> : index + 1}</i><span>{item}</span></div>)}</div>
 
-      <MemoVoiceInput language={language} disabled={status === "loading" || analysisStatus === "loading" || Boolean(recordingField || transcribingField || draftAction)} onBusy={setVoiceEntryBusy} request={(path, init) => memoFetch(path, token, init)} apply={patch => {
+      <ProceduralPositionView position={recognisedPosition} language={language} />
+      <div hidden={step === 2}><MemoVoiceInput language={language} active={active} disabled={!active || status === "loading" || analysisStatus === "loading" || Boolean(recordingField || transcribingField || draftAction)} onBusy={setVoiceEntryBusy} request={(path, init) => memoFetch(path, token, init)} apply={patch => {
         const currentFields = memoFormRef.current ? Object.fromEntries(Array.from(new FormData(memoFormRef.current).entries(), ([key,value]) => [key,String(value)])) : {};
         setMemoData(current => ({ ...current, ...currentFields, facts, requests, ...patch }));
         if (patch.facts !== undefined) setFacts(patch.facts);
@@ -1586,10 +1608,10 @@ function MemoWizard({ t, language, token, initialData = null }: { t: SiteCopy; l
         setAnalysisFields(current => ({ ...current, ...Object.fromEntries(Object.entries(patch).filter(([key]) => key in current)) }));
         if (patch.allParties) setAnalysisParties([]);
         setVoiceFormVersion(version => version + 1);
-      }} />
-      <form ref={memoFormRef} key={voiceFormVersion} onSubmit={submit}>
+      }} /></div>
+      <form ref={memoFormRef} key={voiceFormVersion} onSubmit={submit} onChange={event => { if ((event.target as HTMLElement).getAttribute("name")) setMemoApproved(false); }}>
         <div className="step-content">
-          {step === 1 && (
+          {step === 0 && (
             <div className="document-analysis-step">
               <label
                 className={`document-dropzone${dragActive ? " is-dragging" : ""}${analysisStatus === "loading" ? " is-busy" : ""}`}
@@ -1669,7 +1691,7 @@ function MemoWizard({ t, language, token, initialData = null }: { t: SiteCopy; l
               )}
             </div>
           )}
-          {step === 0 && (
+          {step === 1 && (
             <div className="form-grid">
               <Field label={t.caseType}><CustomComboBox name="caseType" ariaLabel={t.caseType} options={t.caseTypes} defaultValue={interfaceLabel(memoData.caseType || "", language)} required /></Field>
               <Field label={ui.caseNumber}><input name="caseNumber" defaultValue={memoData.caseNumber} /></Field>
@@ -1680,13 +1702,13 @@ function MemoWizard({ t, language, token, initialData = null }: { t: SiteCopy; l
               <Field label={ui.allParties} wide><textarea name="allParties" rows={5} defaultValue={memoData.allParties} /><small className="field-hint">{ui.allPartiesHint}</small></Field>
             </div>
           )}
-          {(step === 0 || step === 3) && <details className="pleading-fields">
+          {(step === 1 || step === 2) && <details className="pleading-fields">
             <summary>{language === "ar" ? "الصيغة المعتمدة وبيانات الصحيفة" : language === "en" ? "Approved form and pleading details" : "منظور شدہ قالب اور درخواست کی معلومات"}</summary>
             <p>{language === "ar" ? "يعتمد المحرك صحيفة الدعوى أو الاستئناف المحفوظة بحسب المرحلة والصفة. تُعبأ البيانات المتاحة من الوقائع، وتبقى مواعيد الإعلان والتوقيعات للمراجعة." : language === "en" ? "The engine uses the stored claim or appeal form according to the case stage and party role. Known facts fill the form; service dates and signatures remain for review." : "مقدمے کے مرحلے اور حیثیت کے مطابق محفوظ دعویٰ یا اپیل کا قالب استعمال ہوگا۔ دستیاب حقائق بھریں گے؛ تاریخیں اور دستخط جائزے کے لیے ہیں۔"}</p>
             <div className="form-grid"><Field label={language === "en" ? "Document format" : language === "ur" ? "دستاویز کا قالب" : "صيغة المستند"}><select name="documentKind" defaultValue={memoData.documentKind || "auto"}><option value="auto">{tr(language, "تلقائي بحسب القضية والصفة")}</option><option value="claim">{tr(language, "صحيفة دعوى")}</option><option value="appeal">{tr(language, "صحيفة استئناف")}</option><option value="memorandum">{tr(language, "مذكرة بدفاع")}</option></select></Field>
             {Object.entries(pleadingFields).map(([key,label])=><Field key={key} label={interfaceLabel(label, language)}><textarea name={key} rows={/Grounds|Requests|Operative/.test(key)?3:1} defaultValue={memoData[key] || analysisFields[key as keyof typeof pleadingFields] || ""} maxLength={5000}/></Field>)}</div>
           </details>}
-          {step === 1 && (
+          {step === 0 && (
             <div className="memo-textareas">
               <Field label={t.facts}>
                 <div className="voice-input">
@@ -1713,23 +1735,26 @@ function MemoWizard({ t, language, token, initialData = null }: { t: SiteCopy; l
               {draftSources.length > 0 && <details className="draft-sources"><summary>{ui.sourceList}</summary><ul>{draftSources.map((source, index) => <li key={`${source.title}-${source.reference}-${index}`}><b>{language === "ar" ? "م" : language === "ur" ? "حوالہ " : "Ref "}{index + 1}</b><span>{source.title}<small>{source.reference}</small></span></li>)}</ul></details>}
             </div>
           )}
-          {step === 2 && <div className="research-box"><Search size={30} /><h3>{language === "ar" ? "مسار التحليل القانوني للمذكرة" : t.steps[2]}</h3><p>{language === "ar" ? "يحلّل المحرك الوقائع والطلبات، يصنّف المسائل القانونية، يطابقها مع القوانين والمواد الكويتية، ثم يبحث عن مبادئ وأحكام التمييز المتصلة بذات المسألة والسبب قبل بناء الدفوع بصياغة المحاكم الكويتية." : language === "en" ? "The engine classifies the issues, matches verified Kuwaiti laws and provisions, then retrieves materially related Court of Cassation principles before drafting each argument." : "انجن قانونی مسائل کی درجہ بندی کرتا ہے، مصدقہ کویتی قوانین اور متعلقہ امتیازی عدالتی اصولوں سے مطابقت کرتا ہے، پھر ہر دلیل تیار کرتا ہے۔"}</p><div className="analysis-pipeline"><span>1. {tr(language, "تحليل الوقائع")}</span><span>2. {tr(language, "تحديد المواد")}</span><span>3. {tr(language, "مطابقة أحكام التمييز")}</span><span>4. {tr(language, "بناء الدفوع والطلبات")}</span></div><Field label={language === "ar" ? "ملاحظات قانونية إضافية (اختيارية)" : language === "en" ? "Additional legal notes (optional)" : "اضافی قانونی نوٹس (اختیاری)"}><textarea name="legalIssues" rows={6} defaultValue={memoData.legalIssues} placeholder={tr(language, "اتركها فارغة إن لم تكن لديك ملاحظة؛ سيستنتج النظام المسائل القانونية تلقائياً.")} /></Field><div><ShieldCheck size={18} />{language === "ar" ? "لن تُدرج مادة أو حكم تمييز إلا من مصدر موثق، وسيصرّح النظام عند عدم العثور على تطابق." : language === "en" ? "No law or judgment is included unless it is found in the verified legal database." : "کوئی قانون یا فیصلہ شامل نہیں ہوگا جب تک وہ مصدقہ قانونی ڈیٹابیس میں نہ ہو۔"}</div></div>}
-          {step === 3 && <div className="review-box"><FileCheck2 size={34} /><h3>{t.review}</h3><p>{t.arabicOnly}</p><p className="template-badge">{tr(language, "الصيغة")}: {tr(language, selectPleadingKind(memoData) === "appeal" ? "صحيفة استئناف" : selectPleadingKind(memoData) === "claim" ? "صحيفة دعوى" : "مذكرة بدفاع")}</p><p role="note" className="form-notice">{memoApprovalNotice[language]}</p>
-            {memoData.conversationTranscript && <dl className="memo-handoff-details">{[[t.caseType, "caseType"], [t.court, "court"], [tr(language, "الدائرة"), "courtCircuit"], [tr(language, "مرحلة القضية"), "caseStage"], [t.clientName, "clientName"], [t.role, "partyRole"], [t.otherParty, "otherParty"], [ui.allParties, "allParties"], [t.facts, "facts"], [t.requests, "requests"]].map(([label, key]) => <div key={key}><dt>{label}</dt><dd>{["caseType", "court", "partyRole", "caseStage"].includes(key) ? interfaceLabel(memoData[key] || "", language) : memoData[key]}</dd></div>)}</dl>}
+          {step === 1 && <div className="research-box"><Search size={30} /><h3>{language === "ar" ? "مسار التحليل القانوني للمذكرة" : t.steps[2]}</h3><p>{language === "ar" ? "يحلّل المحرك الوقائع والطلبات، يصنّف المسائل القانونية، يطابقها مع القوانين والمواد الكويتية، ثم يبحث عن مبادئ وأحكام التمييز المتصلة بذات المسألة والسبب قبل بناء الدفوع بصياغة المحاكم الكويتية." : language === "en" ? "The engine classifies the issues, matches verified Kuwaiti laws and provisions, then retrieves materially related Court of Cassation principles before drafting each argument." : "انجن قانونی مسائل کی درجہ بندی کرتا ہے، مصدقہ کویتی قوانین اور متعلقہ امتیازی عدالتی اصولوں سے مطابقت کرتا ہے، پھر ہر دلیل تیار کرتا ہے۔"}</p><div className="analysis-pipeline"><span>1. {tr(language, "تحليل الوقائع")}</span><span>2. {tr(language, "تحديد المواد")}</span><span>3. {tr(language, "مطابقة أحكام التمييز")}</span><span>4. {tr(language, "بناء الدفوع والطلبات")}</span></div><Field label={language === "ar" ? "ملاحظات قانونية إضافية (اختيارية)" : language === "en" ? "Additional legal notes (optional)" : "اضافی قانونی نوٹس (اختیاری)"}><textarea name="legalIssues" rows={6} defaultValue={memoData.legalIssues} placeholder={tr(language, "اتركها فارغة إن لم تكن لديك ملاحظة؛ سيستنتج النظام المسائل القانونية تلقائياً.")} /></Field><div><ShieldCheck size={18} />{language === "ar" ? "لن تُدرج مادة أو حكم تمييز إلا من مصدر موثق، وسيصرّح النظام عند عدم العثور على تطابق." : language === "en" ? "No law or judgment is included unless it is found in the verified legal database." : "کوئی قانون یا فیصلہ شامل نہیں ہوگا جب تک وہ مصدقہ قانونی ڈیٹابیس میں نہ ہو۔"}</div></div>}
+          {step === 2 && <div className="review-box"><FileCheck2 size={34} /><h3>{t.review}</h3><p>{t.arabicOnly}</p><p className="template-badge">{tr(language, "الصيغة")}: {tr(language, selectPleadingKind(memoData) === "appeal" ? "صحيفة استئناف" : selectPleadingKind(memoData) === "claim" ? "صحيفة دعوى" : "مذكرة بدفاع")}</p><p role="note" className="form-notice">{memoApprovalNotice[language]}</p>
+            {<dl className="memo-handoff-details">{[[t.caseType, "caseType"], [t.court, "court"], [tr(language, "الدائرة"), "courtCircuit"], [tr(language, "مرحلة القضية"), "caseStage"], [t.clientName, "clientName"], [t.role, "partyRole"], [t.otherParty, "otherParty"], [ui.allParties, "allParties"], [t.facts, "facts"], [t.requests, "requests"]].map(([label, key]) => <div key={key}><dt>{label}</dt><dd>{["caseType", "court", "partyRole", "caseStage"].includes(key) ? interfaceLabel(memoData[key] || "", language) : memoData[key]}</dd></div>)}</dl>}
+            <button type="button" className="button button-outline" onClick={() => { captureDraft(); setMemoApproved(false); setStep(0); }}>{language === "ar" ? "تعديل الوقائع أو المستندات" : language === "en" ? "Edit facts or documents" : "حقائق یا دستاویزات میں ترمیم"}</button>
             <div><BookOpen size={18} />{t.libraryText}</div>
-            {(paymentPolicy?.publicCheckoutEnabled && paymentPolicy.required) && <section className="memo-payment" aria-label={payUi.title}>
+            {((paymentPolicy?.publicCheckoutEnabled && paymentPolicy.required) || checkout) && <section className="memo-payment" aria-label={payUi.title}>
               <div><h4>{payUi.title}</h4><strong><bdi>{new Intl.NumberFormat(language === "ar" ? "ar-KW" : "en-KW", { style: "currency", currency: "KWD" }).format((checkout?.priceFils ?? paymentPolicy?.priceFils ?? 0) / 1000)}</bdi></strong></div>
               {(checkout?.environment || paymentPolicy?.environment) === "sandbox" && <p>{payUi.test}</p>}
               <p>{checkout ? payUi.waiting : payUi.safety}</p>
-              {checkout?.checkoutUrl && <a className="button button-primary" href={checkout.checkoutUrl} target="_blank" rel="noopener noreferrer">{payUi.open}</a>}
+              {checkout && <button type="button" className="button button-primary" onClick={() => setPaymentOpen(true)}>{payUi.open}</button>}
+              {checkout && ["paid", "consumed"].includes(checkout.status) && <p role="status">{language === "ar" ? "تأكد الدفع لدى سداد." : language === "en" ? "Payment verified by SADAD." : "سداد نے ادائیگی کی تصدیق کردی۔"}</p>}
               {checkout && <small dir="ltr">{checkout.id}</small>}
             </section>}
             <label className="memo-generation-approval"><input type="checkbox" checked={memoApproved} onChange={event => setMemoApproved(event.target.checked)} disabled={status === "loading"} />{generationUi.approval}</label></div>}
         </div>
-        <div className="memo-actions">{step > 0 ? <button type="button" className="button button-outline" disabled={status === "loading"} onClick={() => { setMemoApproved(false); setStep(step - 1); }}>{t.previous}</button> : <span />}<button className="button button-primary" disabled={voiceEntryBusy || status === "loading" || analysisStatus === "loading" || Boolean(step === 1 && documents.length && analysisStatus !== "success") || Boolean(recordingField || transcribingField || draftAction)}>{status === "loading" ? (checkingPayment ? payUi.checking : t.loading) : step === 3 ? paymentPolicy?.publicCheckoutEnabled && paymentPolicy.required ? checkout ? payUi.verify : payUi.pay : t.generate : step === 1 && documents.length === 0 ? ui.continueManual : t.next}<ArrowLeft size={17} /></button></div>
+        <div className="memo-actions">{step > 0 ? <button type="button" className="button button-outline" disabled={status === "loading"} onClick={() => { captureDraft(); setMemoApproved(false); setStep(step - 1); }}>{t.previous}</button> : <span />}<button className="button button-primary" disabled={voiceEntryBusy || status === "loading" || analysisStatus === "loading" || Boolean(step === 0 && documents.length && analysisStatus !== "success") || Boolean(recordingField || transcribingField || draftAction)}>{status === "loading" ? (checkingPayment ? payUi.checking : t.loading) : step === 2 ? (paymentPolicy?.publicCheckoutEnabled && paymentPolicy.required) || checkout ? checkout ? payUi.verify : payUi.pay : t.generate : step === 0 && documents.length === 0 ? ui.continueManual : t.next}<ArrowLeft size={17} /></button></div>
         {status === "loading" && <div className="memo-generation-pending"><p role="status" aria-live="polite">{checkingPayment ? payUi.checking : generationUi.pending}</p><span>{generationSeconds} {generationUi.seconds}</span><small>{checkingPayment ? payUi.safety : generationUi.limit}</small><button type="button" className="button button-outline" onClick={() => generationRequest.current?.abort()}>{generationUi.cancel}</button></div>}
         {status === "error" && <p className="form-notice error">{memoError || t.error}</p>}
       </form>
+      {active && paymentOpen && checkout && paymentAttempt.current && <MemoPaymentDialog payment={checkout} paymentToken={paymentAttempt.current.paymentToken} language={language} request={memoFetch} onPayment={setCheckout} onClose={() => setPaymentOpen(false)} />}
     </div>
   );
 }

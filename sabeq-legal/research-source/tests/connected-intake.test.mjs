@@ -8,7 +8,7 @@ import { spawnSync } from 'node:child_process';
 function load(path, dependencies = {}, globals = {}) {
   const exports = {};
   const js = ts.transpileModule(readFileSync(new URL(path, import.meta.url), 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, esModuleInterop: true } }).outputText;
-  vm.runInNewContext(js, { exports, require: name => {if(name.endsWith("/judgment-evidence"))return load("../lib/judgment-evidence.ts"); if(name.endsWith("/matter-facts")||name==="./matter-facts")return load("../lib/matter-facts.ts");if(name.endsWith("/bound-draft")||name==="./bound-draft")return load("../lib/bound-draft.ts");if(name.endsWith("/case-reasoning")) return load("../lib/case-reasoning.ts"); if(name.endsWith('/legal-voice')) return load('../lib/legal-voice.ts'); if(name === '@/data/legal-sources/reviewed.json') return JSON.parse(readFileSync(new URL('../data/legal-sources/reviewed.json',import.meta.url),'utf8')); if(name.endsWith('/official-legislation')||name === './official-legislation') return load('../lib/official-legislation.ts'); if(name.endsWith('/legal-citation-review')||name === './legal-citation-review') return load('../lib/legal-citation-review.ts'); if (name.endsWith('/memo-language')) return load('../lib/memo-language.ts'); if (name.endsWith('/interface-language')) return load('../lib/interface-language.ts'); if (name === './pleading-document' || name === '@/lib/pleading-document') return load('../lib/pleading-document.ts'); if (name === './legal-language' || name === '@/lib/legal-language') return load('../lib/legal-language.ts'); if (!(name in dependencies)) throw new Error('Missing test dependency: ' + name); return dependencies[name]; }, console, URL, TextDecoder, AbortSignal, setTimeout, ...globals });
+  vm.runInNewContext(js, { exports, require: name => {if(name.endsWith("/procedural-position"))return load("../lib/procedural-position.ts");if(name.endsWith("/judgment-evidence"))return load("../lib/judgment-evidence.ts"); if(name.endsWith("/matter-facts")||name==="./matter-facts")return load("../lib/matter-facts.ts");if(name.endsWith("/bound-draft")||name==="./bound-draft")return load("../lib/bound-draft.ts");if(name.endsWith("/case-reasoning")) return load("../lib/case-reasoning.ts"); if(name.endsWith('/legal-voice')) return load('../lib/legal-voice.ts'); if(name === '@/data/legal-sources/reviewed.json') return JSON.parse(readFileSync(new URL('../data/legal-sources/reviewed.json',import.meta.url),'utf8')); if(name.endsWith('/official-legislation')||name === './official-legislation') return load('../lib/official-legislation.ts'); if(name.endsWith('/legal-citation-review')||name === './legal-citation-review') return load('../lib/legal-citation-review.ts'); if (name.endsWith('/memo-language')) return load('../lib/memo-language.ts'); if (name.endsWith('/interface-language')) return load('../lib/interface-language.ts'); if (name === './pleading-document' || name === '@/lib/pleading-document') return load('../lib/pleading-document.ts'); if (name === './legal-language' || name === '@/lib/legal-language') return load('../lib/legal-language.ts'); if (!(name in dependencies)) throw new Error('Missing test dependency: ' + name); return dependencies[name]; }, console, URL, TextDecoder, AbortSignal, setTimeout, ...globals });
   return exports;
 }
 const context = load('../lib/intake-context.ts');
@@ -52,6 +52,13 @@ test('memo handoff carries reviewed sources and opens review only with all essen
   const packet = handoff.buildMemoHandoff(state, [{ role: 'user', content: 'حالة اصطناعية' }]);
   assert.equal(packet.assistantSourceIds, '[45]'); assert.match(packet.assistantResearch, /2026-01-01/); assert.equal(handoff.isCompleteMemoHandoff(packet), true);
   assert.equal(handoff.isCompleteMemoHandoff({ ...packet, clientName: '' }), false);
+});
+
+test('checked archive table fields stay research context and cannot become legal basis or memo handoff',()=>{
+ const source={chunkId:4_000_001_508,documentId:3100001,title:'جدول اصطناعي للاختبار فقط',documentType:'جدول أرشيفي',text:'عبارة اصطناعية طويلة لاختبار عدم تحويل الجدول إلى سند للمحكمة.',sourceUrl:'https://example.org/test',officialSource:'اختبار',corpus:{scope:'reviewed_archive_image',draftingEligible:false}};
+ const result=review.reviewIntakeAnalysis(baseState({legalBasis:[{passageId:'م1:1',sourceId:'م1',use:'merits',application:'شرح سياق الجدول فقط'}]}),[source],false,'ar');
+ assert.equal(result.legalBasis.length,0);assert.equal(result.research.legislationCount,0);assert.equal(result.research.archivalTableCount,1);assert.equal(result.research.sources[0].kind,'archival_table');
+ const handoff=load('../lib/memo-handoff.ts');const packet=handoff.buildMemoHandoff({...result,legalBasis:[{sourceId:'م1'}]},[]);assert.equal(packet.assistantSourceIds,'[]');
 });
 
 test('a blocked classification question is replaced with a factual candidate in one model call', async () => {
@@ -160,7 +167,7 @@ test('missing source and library outage stay explicit and strip fabricated numer
 test('legislation and reviewed-judgment adapters never call the legacy/private case database', async()=>{
  let calls=0,judgmentCalls=0;
  const bound={searchBoundEvidence:async(_q,_n,kind)=>{calls++;return kind==='judgment'?[]:[{chunkId:1000000001,documentId:1000001,title:'قسم من ملف المستخدم',documentType:'تشريع',text:'نص اصطناعي لاختبار العقد',reference:'صفحة PDF 4'}];},readBoundEvidence:async ids=>ids.filter(id=>id===1000000001).map(chunkId=>({chunkId,text:'نص أعاد الخادم قراءته'}))};
- const actual=load('../lib/legal-search.ts',{'@/db':{getD1:()=>{throw Error('must not access legacy or private cases');}},'./bound-legislation':bound,'./reviewed-judgments':{searchReviewedJudgments:async()=>{judgmentCalls++;return [];},readReviewedJudgments:async()=>[]}});
+ const actual=load('../lib/legal-search.ts',{'@/db':{getD1:()=>{throw Error('must not access legacy or private cases');}},'./bound-legislation':bound,'./legislation-workbench':{searchArchiveForAssistant:async()=>[]},'./reviewed-judgments':{searchReviewedJudgments:async()=>{judgmentCalls++;return [];},readReviewedJudgments:async()=>[]}});
  const found=await actual.searchIntakeLibrary(['موضوع اصطناعي']);assert.equal(found.length,1);assert.equal(found[0].chunkId,1000000001);assert.ok(calls>=1);assert.ok(judgmentCalls>=1);
  assert.equal((await actual.searchCassationEvidenceAcross(['موضوع اصطناعي'])).length,0);
  const transferred=await actual.readHandoffEvidence('[1000000001,3,4,"1 OR 1=1",-2]');assert.equal(transferred.length,1);assert.equal(transferred[0].chunkId,1000000001);
@@ -253,4 +260,14 @@ test('a volunteered friendship blocks a repeated relationship question and missi
  const mock=client([baseState({nextQuestions:['ما هي علاقتك بصديقك ناصر؟','أين يقيم الطرف الآخر؟'],missingInformation:['نوع العلاقة القانونية بين الطرفين.','مكان إقامة الخصم']})]);
  const result=await mock.run({messages:[{role:'user',content:'أقرضت صديقي ناصر 500 دينار'}]});
  assert.equal(result.nextQuestions[0],'أين يقيم الطرف الآخر؟');assert.equal(result.missingInformation.join('|'),'مكان إقامة الخصم');
+});
+
+test('dictation corrects a model role from the stated appeal actor without inventing legal authority', async () => {
+ const openai = load('../lib/openai.ts', { './intake-context': context, './intake-stream': streamHelpers, 'cloudflare:workers': { env: { OPENAI_API_KEY: 'synthetic-test-key' } } }, {
+  fetch: async () => Response.json({output_text:JSON.stringify({clientName:'اسم اصطناعي',otherParty:'خصم اصطناعي',partyRole:'مدعٍ',court:'المحكمة الكلية',parties:[{name:'اسم اصطناعي',role:'مدعٍ'},{name:'خصم اصطناعي',role:'مستأنف'}],facts:'وقائع اصطناعية',requests:'رفض الاستئناف',warnings:[]})}),
+ });
+ const result=await openai.analyzeMemoDictation('أنا المدعى عليه في القضية. استأنف المدعي الحكم.');
+ assert.equal(result.partyRole,'مستأنف ضده');assert.equal(result.court,'محكمة الاستئناف');assert.equal(result.parties[0].role,'مستأنف ضده');assert.equal(result.parties[1].role,'مستأنف');
+ const ambiguous=await openai.analyzeMemoDictation('القضية منظورة أمام محكمة الاستئناف.');
+ assert.equal(ambiguous.partyRole,'');assert.match(ambiguous.warnings.join(' '),/مَن قدّم الطعن/);
 });
