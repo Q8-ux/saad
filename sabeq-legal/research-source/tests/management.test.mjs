@@ -158,6 +158,26 @@ const programmerKey='synthetic-fcc-proxy-credential-123456';
 const programmerConfig={action:'save',mode:'fcc',baseUrl:'https://fcc.vendor.com',apiKey:programmerKey,model:'nvidia_nim/test/model'};
 const programmerReply=()=>Response.json({content:[{type:'text',text:'السبب جمع نصوص. استخدم Number(a) + Number(b)، وتحقق من أن الناتج 15.'}],stop_reason:'end_turn',usage:{input_tokens:60,output_tokens:30}});
 
+test('FCC installation distinguishes a missing provider key from a successful model catalog without fallback',async()=>{
+ const h=harness();try{const api=h.load('lib/management-programmer.ts');
+  const empty=await api.programmerAction(null,'test');assert.equal(empty.connectorInstalled,true);assert.equal(empty.gatewayConfigured,false);assert.equal(empty.providerConfigured,null);
+  await api.programmerAction(programmerConfig,'test');
+  h.setTransport(async(url)=>String(url).includes('/models')?Response.json({data:[{id:programmerConfig.model}],sabeq:{providerConfigured:false}}):Response.json({error:{code:'provider_not_configured'}},{status:409}));
+  const catalog=await api.programmerAction({action:'models'},'test');assert.equal(catalog.providerConfigured,false);assert.equal(catalog.testedAt,null);assert.ok(catalog.catalogCheckedAt);
+  assert.equal((await api.programmerAction(null,'test')).providerConfigured,false);
+  await assert.rejects(api.programmerAction({action:'run',task:'trial'},'test'),error=>error.message.includes('مفتاح مزود الذكاء الاصطناعي'));
+  assert.equal(h.network.length,2);assert.ok(!h.network.some(call=>call.url.includes('api.openai.com')));
+ }finally{h.close();}
+});
+
+test('removing the gateway provider key clears old inference readiness and keeps credentials private',async()=>{
+ const h=harness();try{const api=h.load('lib/management-programmer.ts');await api.programmerAction(programmerConfig,'test');
+  h.setTransport(async()=>programmerReply());assert.ok((await api.programmerAction({action:'run',task:'trial'},'test')).testedAt);
+  h.setTransport(async()=>Response.json({data:[{id:programmerConfig.model}],sabeq:{providerConfigured:false}}));
+  const catalog=await api.programmerAction({action:'models'},'test');assert.equal(catalog.testedAt,null);assert.equal(catalog.testedModel,null);assert.ok(!JSON.stringify(catalog).includes(programmerKey));
+ }finally{h.close();}
+});
+
 test('programmer endpoints enforce manager identity and origin before configuration or inference',async()=>{
  const h=harness();try{const routes=h.load('app/api/management/[...path]/route.ts');
   assert.equal((await routes.GET(request('programmer'))).status,401);

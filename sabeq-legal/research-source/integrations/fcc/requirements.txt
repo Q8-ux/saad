@@ -1,0 +1,1 @@
+free-claude-code @ git+https://github.com/Alishahryar1/free-claude-code.git@707b6ddf677d81e9f1281c52a8c2fd61f649dd72

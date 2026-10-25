@@ -4,7 +4,7 @@ import { managementRuntime, openConfig, sealConfig } from "@/lib/management-auth
 import { operationEvent, saveIntegration } from "@/lib/management-integrations";
 import { cleanMultiline, cleanString, RequestError } from "@/lib/request-security";
 
-type Config = { mode: "fcc" | "project"; baseUrl: string; apiKey: string; model: string; testedAt?: string; testedModel?: string; durationMs?: number };
+type Config = { mode: "fcc" | "project"; baseUrl: string; apiKey: string; model: string; testedAt?: string; testedModel?: string; durationMs?: number; catalogCheckedAt?: string; providerConfigured?: boolean };
 type Runtime = { OPENAI_API_KEY?: string; OPENAI_MODEL?: string };
 const runtime = () => managementRuntime() as unknown as Runtime;
 const trial = "هذا مثال برمجي اصطناعي: الدالة function total(a, b) { return a + b; } تستقبل النصين '10' و'5' فتنتج '105'. وضح السبب ثم اقترح تصحيحاً واختباراً يثبت أن الناتج العددي 15. أجب بالعربية باختصار.";
@@ -20,6 +20,8 @@ export function programmerGateway(raw: string) {
 }
 function view(config: Config | null) {
   return { mode: config?.mode || "fcc", baseUrl: config?.baseUrl || "", model: config?.model || "", hasApiKey: !!config?.apiKey,
+    connectorInstalled: true, gatewayConfigured: !!(config?.baseUrl && config.apiKey), catalogCheckedAt: config?.catalogCheckedAt || null,
+    providerConfigured: typeof config?.providerConfigured === "boolean" ? config.providerConfigured : null,
     projectAvailable: !!runtime().OPENAI_API_KEY?.trim(), projectModel: runtime().OPENAI_MODEL?.trim() || "gpt-5.6",
     testedAt: config?.testedAt || null, testedModel: config?.testedModel || null, durationMs: config?.durationMs ?? null, applied: false };
 }
@@ -30,14 +32,17 @@ async function fccRequest(config: Config, path: string, signal?: AbortSignal, bo
       method: body ? "POST" : "GET", redirect: "error", headers: { Authorization: `Bearer ${config.apiKey}`, Accept: "application/json", "Content-Type": "application/json", "anthropic-version": "2023-06-01" },
       ...(body ? { body: JSON.stringify(body) } : {}), signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(22_000)]) : AbortSignal.timeout(22_000),
     });
-    if (!response.ok) throw new RequestError(response.status === 401 || response.status === 403 ? "رفضت بوابة FCC مفتاح الربط." : response.status === 429 ? "وصل المزود إلى حد الاستخدام. حاول لاحقاً أو غيّر المصدر صراحة." : "تعذر تنفيذ الطلب لدى بوابة FCC.", 502);
     const reader = response.body?.getReader();
     if (!reader) throw new RequestError("لم تصل استجابة من بوابة FCC.", 502);
     const chunks: Uint8Array[] = []; let size = 0;
     try { while (true) { const { value, done } = await reader.read(); if (done) break; size += value.byteLength; if (size > 100_000) { await reader.cancel(); throw new RequestError("استجابة البوابة أكبر من الحد المسموح.", 502); } chunks.push(value); } }
     finally { reader.releaseLock(); }
     const bytes = new Uint8Array(size); let offset = 0; for (const chunk of chunks) { bytes.set(chunk, offset); offset += chunk.length; }
-    return JSON.parse(new TextDecoder().decode(bytes));
+    let result;
+    try { result = JSON.parse(new TextDecoder().decode(bytes)); }
+    catch { if (response.ok) throw new RequestError("لم ترجع بوابة FCC استجابة صالحة.", 502); }
+    if (!response.ok) throw new RequestError(response.status === 401 || response.status === 403 ? "رفضت بوابة FCC مفتاح الربط." : response.status === 429 ? "وصل المزود إلى حد الاستخدام. حاول لاحقاً أو غيّر المصدر صراحة." : response.status === 409 && result?.error?.code === "provider_not_configured" ? "بوابة FCC تعمل، لكن مفتاح مزود الذكاء الاصطناعي لم يُضف بعد إلى خدمة الربط." : "تعذر تنفيذ الطلب لدى بوابة FCC.", 502);
+    return result;
   } catch (error) {
     if (error instanceof RequestError) throw error;
     throw new RequestError(signal?.aborted ? "أُلغي طلب المبرمج." : "تعذر الوصول إلى FCC أو انتهت مهلة الاستجابة. تحقق من تشغيل البوابة.", signal?.aborted ? 499 : 502);
@@ -65,7 +70,7 @@ export async function programmerAction(data: Record<string, unknown> | null, act
       const model = cleanString(data.model, "النموذج", { max: 200, required: false });
       if (model && !/^[A-Za-z0-9][A-Za-z0-9_./:@+-]*$/.test(model)) throw new RequestError("معرف النموذج غير صحيح.");
       const unchanged = config?.mode === "fcc" && config.baseUrl === baseUrl && config.model === model && !supplied;
-      config = { mode: "fcc", baseUrl, apiKey, model, ...(unchanged ? { testedAt: config?.testedAt, testedModel: config?.testedModel, durationMs: config?.durationMs } : {}) };
+      config = { mode: "fcc", baseUrl, apiKey, model, ...(unchanged ? { testedAt: config?.testedAt, testedModel: config?.testedModel, durationMs: config?.durationMs, catalogCheckedAt: config?.catalogCheckedAt, providerConfigured: config?.providerConfigured } : {}) };
     }
     await saveIntegration("programmer", config, actor);
     await operationEvent("admin", "programmer-configuration", "تم تحديث إعدادات المبرمج الاقتصادي");
@@ -76,6 +81,10 @@ export async function programmerAction(data: Record<string, unknown> | null, act
     if (config.mode !== "fcc") throw new RequestError("قائمة النماذج خاصة ببوابة FCC.", 409);
     const result = await fccRequest(config, "v1/models?view=messages", signal);
     if (!Array.isArray(result.data)) throw new RequestError("لم ترجع البوابة قائمة نماذج صالحة.", 502);
+    config = { ...config, catalogCheckedAt: new Date().toISOString(), providerConfigured: typeof result.sabeq?.providerConfigured === "boolean" ? result.sabeq.providerConfigured : undefined };
+    if (config.providerConfigured === false) config = { ...config, testedAt: undefined, testedModel: undefined, durationMs: undefined };
+    await getD1().prepare("UPDATE management_vault SET sealed = ?, updated_by = ?, updated_at = CURRENT_TIMESTAMP WHERE integration = ? AND sealed = ?")
+      .bind(await sealConfig(config), actor, "programmer", stored!.sealed).run();
     return { ...view(config), models: result.data.slice(0, 200).map((m: { id?: unknown }) => String(m.id || "")).filter((id: string) => /^[A-Za-z0-9][A-Za-z0-9_./:@+-]{0,199}$/.test(id)), catalogOnly: true };
   }
   if (data.action !== "run") throw new RequestError("عملية المبرمج غير مدعومة.");
