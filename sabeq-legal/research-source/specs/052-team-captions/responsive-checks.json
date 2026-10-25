@@ -1,0 +1,1136 @@
+[
+  {
+    "width": 721,
+    "font": "Cairo",
+    "lang": "ar",
+    "rows": [
+      {
+        "available": 180,
+        "font": "16px",
+        "height": 25.59375,
+        "lineHeight": "25.6px",
+        "name": "خليفة محمد الخليفة",
+        "overflow": false,
+        "textWidth": 131.734375
+      },
+      {
+        "available": 180,
+        "font": "16px",
+        "height": 25.59375,
+        "lineHeight": "25.6px",
+        "name": "خالد علي الحبيب",
+        "overflow": false,
+        "textWidth": 100.75
+      },
+      {
+        "available": 180,
+        "font": "16px",
+        "height": 25.59375,
+        "lineHeight": "25.6px",
+        "name": "مشعل متعب",
+        "overflow": false,
+        "textWidth": 87.140625
+      },
+      {
+        "available": 180,
+        "font": "16px",
+        "height": 25.59375,
+        "lineHeight": "25.6px",
+        "name": "محمد ساحب الشمري",
+        "overflow": false,
+        "textWidth": 138.625
+      },
+      {
+        "available": 180,
+        "font": "16px",
+        "height": 25.59375,
+        "lineHeight": "25.6px",
+        "name": "عبدالعزيز مشعان العازمي",
+        "overflow": false,
+        "textWidth": 165.625
+      },
+      {
+        "available": 180,
+        "font": "16px",
+        "height": 25.59375,
+        "lineHeight": "25.6px",
+        "name": "حمد ناصر الماضي",
+        "overflow": false,
+        "textWidth": 111.3125
+      },
+      {
+        "available": 180,
+        "font": "16px",
+        "height": 25.59375,
+        "lineHeight": "25.6px",
+        "name": "خالد مشعل الظفيري",
+        "overflow": false,
+        "textWidth": 133.75
+      }
+    ]
+  },
+  {
+    "width": 721,
+    "font": "Cairo",
+    "lang": "en",
+    "rows": [
+      {
+        "available": 180,
+        "font": "12px",
+        "height": 19.1875,
+        "lineHeight": "19.2px",
+        "name": "Dr. Khalifa Mohammed Al Khalifa",
+        "overflow": false,
+        "textWidth": 165.578125
+      },
+      {
+        "available": 180,
+        "font": "12px",
+        "height": 19.1875,
+        "lineHeight": "19.2px",
+        "name": "Khalid Ali Al Habib",
+        "overflow": false,
+        "textWidth": 91.03125
+      },
+      {
+        "available": 180,
+        "font": "12px",
+        "height": 19.1875,
+        "lineHeight": "19.2px",
+        "name": "Mishal Metaab",
+        "overflow": false,
+        "textWidth": 74.90625
+      },
+      {
+        "available": 180,
+        "font": "12px",
+        "height": 19.1875,
+        "lineHeight": "19.2px",
+        "name": "Mohammed Saheb Al Shammari",
+        "overflow": false,
+        "textWidth": 162.484375
+      },
+      {
+        "available": 180,
+        "font": "12px",
+        "height": 19.1875,
+        "lineHeight": "19.2px",
+        "name": "Abdulaziz Mashaan Al Azmi",
+        "overflow": false,
+        "textWidth": 138.453125
+      },
+      {
+        "available": 180,
+        "font": "12px",
+        "height": 19.1875,
+        "lineHeight": "19.2px",
+        "name": "Hamad Nasser Al Madi",
+        "overflow": false,
+        "textWidth": 115.09375
+      },
+      {
+        "available": 180,
+        "font": "12px",
+        "height": 19.1875,
+        "lineHeight": "19.2px",
+        "name": "Khalid Mishal Al Dhafiri",
+        "overflow": false,
+        "textWidth": 116.21875
+      }
+    ]
+  },
+  {
+    "width": 721,
+    "font": "Cairo",
+    "lang": "ur",
+    "rows": [
+      {
+        "available": 180,
+        "font": "12px",
+        "height": 19.1875,
+        "lineHeight": "19.2px",
+        "name": "Dr. Khalifa Mohammed Al Khalifa",
+        "overflow": false,
+        "textWidth": 165.578125
+      },
+      {
+        "available": 180,
+        "font": "12px",
+        "height": 19.1875,
+        "lineHeight": "19.2px",
+        "name": "Khalid Ali Al Habib",
+        "overflow": false,
+        "textWidth": 91.03125
+      },
+      {
+        "available": 180,
+        "font": "12px",
+        "height": 19.1875,
+        "lineHeight": "19.2px",
+        "name": "Mishal Metaab",
+        "overflow": false,
+        "textWidth": 74.90625
+      },
+      {
+        "available": 180,
+        "font": "12px",
+        "height": 19.1875,
+        "lineHeight": "19.2px",
+        "name": "Mohammed Saheb Al Shammari",
+        "overflow": false,
+        "textWidth": 162.484375
+      },
+      {
+        "available": 180,
+        "font": "12px",
+        "height": 19.1875,
+        "lineHeight": "19.2px",
+        "name": "Abdulaziz Mashaan Al Azmi",
+        "overflow": false,
+        "textWidth": 138.453125
+      },
+      {
+        "available": 180,
+        "font": "12px",
+        "height": 19.1875,
+        "lineHeight": "19.2px",
+        "name": "Hamad Nasser Al Madi",
+        "overflow": false,
+        "textWidth": 115.09375
+      },
+      {
+        "available": 180,
+        "font": "12px",
+        "height": 19.1875,
+        "lineHeight": "19.2px",
+        "name": "Khalid Mishal Al Dhafiri",
+        "overflow": false,
+        "textWidth": 116.21875
+      }
+    ]
+  },
+  {
+    "width": 721,
+    "font": "native",
+    "lang": "ar",
+    "rows": [
+      {
+        "available": 180,
+        "font": "16px",
+        "height": 25.59375,
+        "lineHeight": "25.6px",
+        "name": "خليفة محمد الخليفة",
+        "overflow": false,
+        "textWidth": 101.21875
+      },
+      {
+        "available": 180,
+        "font": "16px",
+        "height": 25.59375,
+        "lineHeight": "25.6px",
+        "name": "خالد علي الحبيب",
+        "overflow": false,
+        "textWidth": 87.765625
+      },
+      {
+        "available": 180,
+        "font": "16px",
+        "height": 25.59375,
+        "lineHeight": "25.6px",
+        "name": "مشعل متعب",
+        "overflow": false,
+        "textWidth": 59.234375
+      },
+      {
+        "available": 180,
+        "font": "16px",
+        "height": 25.59375,
+        "lineHeight": "25.6px",
+        "name": "محمد ساحب الشمري",
+        "overflow": false,
+        "textWidth": 109.84375
+      },
+      {
+        "available": 180,
+        "font": "16px",
+        "height": 25.59375,
+        "lineHeight": "25.6px",
+        "name": "عبدالعزيز مشعان العازمي",
+        "overflow": false,
+        "textWidth": 127.734375
+      },
+      {
+        "available": 180,
+        "font": "16px",
+        "height": 25.59375,
+        "lineHeight": "25.6px",
+        "name": "حمد ناصر الماضي",
+        "overflow": false,
+        "textWidth": 96.8125
+      },
+      {
+        "available": 180,
+        "font": "16px",
+        "height": 25.59375,
+        "lineHeight": "25.6px",
+        "name": "خالد مشعل الظفيري",
+        "overflow": false,
+        "textWidth": 103.65625
+      }
+    ]
+  },
+  {
+    "width": 721,
+    "font": "native",
+    "lang": "en",
+    "rows": [
+      {
+        "available": 180,
+        "font": "12px",
+        "height": 19.1875,
+        "lineHeight": "19.2px",
+        "name": "Dr. Khalifa Mohammed Al Khalifa",
+        "overflow": false,
+        "textWidth": 175.421875
+      },
+      {
+        "available": 180,
+        "font": "12px",
+        "height": 19.1875,
+        "lineHeight": "19.2px",
+        "name": "Khalid Ali Al Habib",
+        "overflow": false,
+        "textWidth": 97.40625
+      },
+      {
+        "available": 180,
+        "font": "12px",
+        "height": 19.1875,
+        "lineHeight": "19.2px",
+        "name": "Mishal Metaab",
+        "overflow": false,
+        "textWidth": 78.046875
+      },
+      {
+        "available": 180,
+        "font": "12px",
+        "height": 19.1875,
+        "lineHeight": "19.2px",
+        "name": "Mohammed Saheb Al Shammari",
+        "overflow": false,
+        "textWidth": 172.75
+      },
+      {
+        "available": 180,
+        "font": "12px",
+        "height": 19.1875,
+        "lineHeight": "19.2px",
+        "name": "Abdulaziz Mashaan Al Azmi",
+        "overflow": false,
+        "textWidth": 147.421875
+      },
+      {
+        "available": 180,
+        "font": "12px",
+        "height": 19.1875,
+        "lineHeight": "19.2px",
+        "name": "Hamad Nasser Al Madi",
+        "overflow": false,
+        "textWidth": 122.71875
+      },
+      {
+        "available": 180,
+        "font": "12px",
+        "height": 19.1875,
+        "lineHeight": "19.2px",
+        "name": "Khalid Mishal Al Dhafiri",
+        "overflow": false,
+        "textWidth": 122.71875
+      }
+    ]
+  },
+  {
+    "width": 721,
+    "font": "native",
+    "lang": "ur",
+    "rows": [
+      {
+        "available": 180,
+        "font": "12px",
+        "height": 19.1875,
+        "lineHeight": "19.2px",
+        "name": "Dr. Khalifa Mohammed Al Khalifa",
+        "overflow": false,
+        "textWidth": 175.421875
+      },
+      {
+        "available": 180,
+        "font": "12px",
+        "height": 19.1875,
+        "lineHeight": "19.2px",
+        "name": "Khalid Ali Al Habib",
+        "overflow": false,
+        "textWidth": 97.40625
+      },
+      {
+        "available": 180,
+        "font": "12px",
+        "height": 19.1875,
+        "lineHeight": "19.2px",
+        "name": "Mishal Metaab",
+        "overflow": false,
+        "textWidth": 78.046875
+      },
+      {
+        "available": 180,
+        "font": "12px",
+        "height": 19.1875,
+        "lineHeight": "19.2px",
+        "name": "Mohammed Saheb Al Shammari",
+        "overflow": false,
+        "textWidth": 172.75
+      },
+      {
+        "available": 180,
+        "font": "12px",
+        "height": 19.1875,
+        "lineHeight": "19.2px",
+        "name": "Abdulaziz Mashaan Al Azmi",
+        "overflow": false,
+        "textWidth": 147.421875
+      },
+      {
+        "available": 180,
+        "font": "12px",
+        "height": 19.1875,
+        "lineHeight": "19.2px",
+        "name": "Hamad Nasser Al Madi",
+        "overflow": false,
+        "textWidth": 122.71875
+      },
+      {
+        "available": 180,
+        "font": "12px",
+        "height": 19.1875,
+        "lineHeight": "19.2px",
+        "name": "Khalid Mishal Al Dhafiri",
+        "overflow": false,
+        "textWidth": 122.71875
+      }
+    ]
+  },
+  {
+    "width": 320,
+    "font": "Cairo",
+    "lang": "ar",
+    "rows": [
+      {
+        "font": "16.926px",
+        "height": 27.0625,
+        "lineHeight": "27.0816px",
+        "name": "خليفة محمد الخليفة",
+        "overflow": false
+      },
+      {
+        "font": "16.926px",
+        "height": 27.0625,
+        "lineHeight": "27.0816px",
+        "name": "خالد علي الحبيب",
+        "overflow": false
+      },
+      {
+        "font": "16.926px",
+        "height": 27.0625,
+        "lineHeight": "27.0816px",
+        "name": "مشعل متعب",
+        "overflow": false
+      },
+      {
+        "font": "16.926px",
+        "height": 27.0625,
+        "lineHeight": "27.0816px",
+        "name": "محمد ساحب الشمري",
+        "overflow": false
+      },
+      {
+        "font": "16.926px",
+        "height": 27.0625,
+        "lineHeight": "27.0816px",
+        "name": "عبدالعزيز مشعان العازمي",
+        "overflow": false
+      },
+      {
+        "font": "16.926px",
+        "height": 27.0625,
+        "lineHeight": "27.0816px",
+        "name": "حمد ناصر الماضي",
+        "overflow": false
+      },
+      {
+        "font": "16.926px",
+        "height": 27.0625,
+        "lineHeight": "27.0816px",
+        "name": "خالد مشعل الظفيري",
+        "overflow": false
+      }
+    ]
+  },
+  {
+    "width": 320,
+    "font": "Cairo",
+    "lang": "en",
+    "rows": [
+      {
+        "font": "13.104px",
+        "height": 20.96875,
+        "lineHeight": "20.9664px",
+        "name": "Dr. Khalifa Mohammed Al Khalifa",
+        "overflow": false
+      },
+      {
+        "font": "13.104px",
+        "height": 20.96875,
+        "lineHeight": "20.9664px",
+        "name": "Khalid Ali Al Habib",
+        "overflow": false
+      },
+      {
+        "font": "13.104px",
+        "height": 20.96875,
+        "lineHeight": "20.9664px",
+        "name": "Mishal Metaab",
+        "overflow": false
+      },
+      {
+        "font": "13.104px",
+        "height": 20.96875,
+        "lineHeight": "20.9664px",
+        "name": "Mohammed Saheb Al Shammari",
+        "overflow": false
+      },
+      {
+        "font": "13.104px",
+        "height": 20.96875,
+        "lineHeight": "20.9664px",
+        "name": "Abdulaziz Mashaan Al Azmi",
+        "overflow": false
+      },
+      {
+        "font": "13.104px",
+        "height": 20.96875,
+        "lineHeight": "20.9664px",
+        "name": "Hamad Nasser Al Madi",
+        "overflow": false
+      },
+      {
+        "font": "13.104px",
+        "height": 20.96875,
+        "lineHeight": "20.9664px",
+        "name": "Khalid Mishal Al Dhafiri",
+        "overflow": false
+      }
+    ]
+  },
+  {
+    "width": 320,
+    "font": "Cairo",
+    "lang": "ur",
+    "rows": [
+      {
+        "font": "13.104px",
+        "height": 20.96875,
+        "lineHeight": "20.9664px",
+        "name": "Dr. Khalifa Mohammed Al Khalifa",
+        "overflow": false
+      },
+      {
+        "font": "13.104px",
+        "height": 20.96875,
+        "lineHeight": "20.9664px",
+        "name": "Khalid Ali Al Habib",
+        "overflow": false
+      },
+      {
+        "font": "13.104px",
+        "height": 20.96875,
+        "lineHeight": "20.9664px",
+        "name": "Mishal Metaab",
+        "overflow": false
+      },
+      {
+        "font": "13.104px",
+        "height": 20.96875,
+        "lineHeight": "20.9664px",
+        "name": "Mohammed Saheb Al Shammari",
+        "overflow": false
+      },
+      {
+        "font": "13.104px",
+        "height": 20.96875,
+        "lineHeight": "20.9664px",
+        "name": "Abdulaziz Mashaan Al Azmi",
+        "overflow": false
+      },
+      {
+        "font": "13.104px",
+        "height": 20.96875,
+        "lineHeight": "20.9664px",
+        "name": "Hamad Nasser Al Madi",
+        "overflow": false
+      },
+      {
+        "font": "13.104px",
+        "height": 20.96875,
+        "lineHeight": "20.9664px",
+        "name": "Khalid Mishal Al Dhafiri",
+        "overflow": false
+      }
+    ]
+  },
+  {
+    "width": 390,
+    "font": "Cairo",
+    "lang": "ar",
+    "rows": [
+      {
+        "font": "20px",
+        "height": 32,
+        "lineHeight": "32px",
+        "name": "خليفة محمد الخليفة",
+        "overflow": false
+      },
+      {
+        "font": "20px",
+        "height": 32,
+        "lineHeight": "32px",
+        "name": "خالد علي الحبيب",
+        "overflow": false
+      },
+      {
+        "font": "20px",
+        "height": 32,
+        "lineHeight": "32px",
+        "name": "مشعل متعب",
+        "overflow": false
+      },
+      {
+        "font": "20px",
+        "height": 32,
+        "lineHeight": "32px",
+        "name": "محمد ساحب الشمري",
+        "overflow": false
+      },
+      {
+        "font": "20px",
+        "height": 32,
+        "lineHeight": "32px",
+        "name": "عبدالعزيز مشعان العازمي",
+        "overflow": false
+      },
+      {
+        "font": "20px",
+        "height": 32,
+        "lineHeight": "32px",
+        "name": "حمد ناصر الماضي",
+        "overflow": false
+      },
+      {
+        "font": "20px",
+        "height": 32,
+        "lineHeight": "32px",
+        "name": "خالد مشعل الظفيري",
+        "overflow": false
+      }
+    ]
+  },
+  {
+    "width": 390,
+    "font": "Cairo",
+    "lang": "en",
+    "rows": [
+      {
+        "font": "16.464px",
+        "height": 26.34375,
+        "lineHeight": "26.3424px",
+        "name": "Dr. Khalifa Mohammed Al Khalifa",
+        "overflow": false
+      },
+      {
+        "font": "16.464px",
+        "height": 26.34375,
+        "lineHeight": "26.3424px",
+        "name": "Khalid Ali Al Habib",
+        "overflow": false
+      },
+      {
+        "font": "16.464px",
+        "height": 26.34375,
+        "lineHeight": "26.3424px",
+        "name": "Mishal Metaab",
+        "overflow": false
+      },
+      {
+        "font": "16.464px",
+        "height": 26.34375,
+        "lineHeight": "26.3424px",
+        "name": "Mohammed Saheb Al Shammari",
+        "overflow": false
+      },
+      {
+        "font": "16.464px",
+        "height": 26.34375,
+        "lineHeight": "26.3424px",
+        "name": "Abdulaziz Mashaan Al Azmi",
+        "overflow": false
+      },
+      {
+        "font": "16.464px",
+        "height": 26.34375,
+        "lineHeight": "26.3424px",
+        "name": "Hamad Nasser Al Madi",
+        "overflow": false
+      },
+      {
+        "font": "16.464px",
+        "height": 26.34375,
+        "lineHeight": "26.3424px",
+        "name": "Khalid Mishal Al Dhafiri",
+        "overflow": false
+      }
+    ]
+  },
+  {
+    "width": 390,
+    "font": "Cairo",
+    "lang": "ur",
+    "rows": [
+      {
+        "font": "16.464px",
+        "height": 26.34375,
+        "lineHeight": "26.3424px",
+        "name": "Dr. Khalifa Mohammed Al Khalifa",
+        "overflow": false
+      },
+      {
+        "font": "16.464px",
+        "height": 26.34375,
+        "lineHeight": "26.3424px",
+        "name": "Khalid Ali Al Habib",
+        "overflow": false
+      },
+      {
+        "font": "16.464px",
+        "height": 26.34375,
+        "lineHeight": "26.3424px",
+        "name": "Mishal Metaab",
+        "overflow": false
+      },
+      {
+        "font": "16.464px",
+        "height": 26.34375,
+        "lineHeight": "26.3424px",
+        "name": "Mohammed Saheb Al Shammari",
+        "overflow": false
+      },
+      {
+        "font": "16.464px",
+        "height": 26.34375,
+        "lineHeight": "26.3424px",
+        "name": "Abdulaziz Mashaan Al Azmi",
+        "overflow": false
+      },
+      {
+        "font": "16.464px",
+        "height": 26.34375,
+        "lineHeight": "26.3424px",
+        "name": "Hamad Nasser Al Madi",
+        "overflow": false
+      },
+      {
+        "font": "16.464px",
+        "height": 26.34375,
+        "lineHeight": "26.3424px",
+        "name": "Khalid Mishal Al Dhafiri",
+        "overflow": false
+      }
+    ]
+  },
+  {
+    "width": 768,
+    "font": "Cairo",
+    "lang": "ar",
+    "rows": [
+      {
+        "family": "Cairo, Tahoma, Arial, sans-serif",
+        "font": "16px",
+        "height": 25.59375,
+        "lineHeight": "25.6px",
+        "name": "خليفة محمد الخليفة",
+        "overflow": false
+      },
+      {
+        "family": "Cairo, Tahoma, Arial, sans-serif",
+        "font": "16px",
+        "height": 25.59375,
+        "lineHeight": "25.6px",
+        "name": "خالد علي الحبيب",
+        "overflow": false
+      },
+      {
+        "family": "Cairo, Tahoma, Arial, sans-serif",
+        "font": "16px",
+        "height": 25.59375,
+        "lineHeight": "25.6px",
+        "name": "مشعل متعب",
+        "overflow": false
+      },
+      {
+        "family": "Cairo, Tahoma, Arial, sans-serif",
+        "font": "16px",
+        "height": 25.59375,
+        "lineHeight": "25.6px",
+        "name": "محمد ساحب الشمري",
+        "overflow": false
+      },
+      {
+        "family": "Cairo, Tahoma, Arial, sans-serif",
+        "font": "16px",
+        "height": 25.59375,
+        "lineHeight": "25.6px",
+        "name": "عبدالعزيز مشعان العازمي",
+        "overflow": false
+      },
+      {
+        "family": "Cairo, Tahoma, Arial, sans-serif",
+        "font": "16px",
+        "height": 25.59375,
+        "lineHeight": "25.6px",
+        "name": "حمد ناصر الماضي",
+        "overflow": false
+      },
+      {
+        "family": "Cairo, Tahoma, Arial, sans-serif",
+        "font": "16px",
+        "height": 25.59375,
+        "lineHeight": "25.6px",
+        "name": "خالد مشعل الظفيري",
+        "overflow": false
+      }
+    ]
+  },
+  {
+    "width": 768,
+    "font": "Cairo",
+    "lang": "en",
+    "rows": [
+      {
+        "family": "Cairo, Tahoma, Arial, sans-serif",
+        "font": "12px",
+        "height": 19.1875,
+        "lineHeight": "19.2px",
+        "name": "Dr. Khalifa Mohammed Al Khalifa",
+        "overflow": false
+      },
+      {
+        "family": "Cairo, Tahoma, Arial, sans-serif",
+        "font": "12px",
+        "height": 19.1875,
+        "lineHeight": "19.2px",
+        "name": "Khalid Ali Al Habib",
+        "overflow": false
+      },
+      {
+        "family": "Cairo, Tahoma, Arial, sans-serif",
+        "font": "12px",
+        "height": 19.1875,
+        "lineHeight": "19.2px",
+        "name": "Mishal Metaab",
+        "overflow": false
+      },
+      {
+        "family": "Cairo, Tahoma, Arial, sans-serif",
+        "font": "12px",
+        "height": 19.1875,
+        "lineHeight": "19.2px",
+        "name": "Mohammed Saheb Al Shammari",
+        "overflow": false
+      },
+      {
+        "family": "Cairo, Tahoma, Arial, sans-serif",
+        "font": "12px",
+        "height": 19.1875,
+        "lineHeight": "19.2px",
+        "name": "Abdulaziz Mashaan Al Azmi",
+        "overflow": false
+      },
+      {
+        "family": "Cairo, Tahoma, Arial, sans-serif",
+        "font": "12px",
+        "height": 19.1875,
+        "lineHeight": "19.2px",
+        "name": "Hamad Nasser Al Madi",
+        "overflow": false
+      },
+      {
+        "family": "Cairo, Tahoma, Arial, sans-serif",
+        "font": "12px",
+        "height": 19.1875,
+        "lineHeight": "19.2px",
+        "name": "Khalid Mishal Al Dhafiri",
+        "overflow": false
+      }
+    ]
+  },
+  {
+    "width": 768,
+    "font": "Cairo",
+    "lang": "ur",
+    "rows": [
+      {
+        "family": "Cairo, Tahoma, Arial, sans-serif",
+        "font": "12px",
+        "height": 19.1875,
+        "lineHeight": "19.2px",
+        "name": "Dr. Khalifa Mohammed Al Khalifa",
+        "overflow": false
+      },
+      {
+        "family": "Cairo, Tahoma, Arial, sans-serif",
+        "font": "12px",
+        "height": 19.1875,
+        "lineHeight": "19.2px",
+        "name": "Khalid Ali Al Habib",
+        "overflow": false
+      },
+      {
+        "family": "Cairo, Tahoma, Arial, sans-serif",
+        "font": "12px",
+        "height": 19.1875,
+        "lineHeight": "19.2px",
+        "name": "Mishal Metaab",
+        "overflow": false
+      },
+      {
+        "family": "Cairo, Tahoma, Arial, sans-serif",
+        "font": "12px",
+        "height": 19.1875,
+        "lineHeight": "19.2px",
+        "name": "Mohammed Saheb Al Shammari",
+        "overflow": false
+      },
+      {
+        "family": "Cairo, Tahoma, Arial, sans-serif",
+        "font": "12px",
+        "height": 19.1875,
+        "lineHeight": "19.2px",
+        "name": "Abdulaziz Mashaan Al Azmi",
+        "overflow": false
+      },
+      {
+        "family": "Cairo, Tahoma, Arial, sans-serif",
+        "font": "12px",
+        "height": 19.1875,
+        "lineHeight": "19.2px",
+        "name": "Hamad Nasser Al Madi",
+        "overflow": false
+      },
+      {
+        "family": "Cairo, Tahoma, Arial, sans-serif",
+        "font": "12px",
+        "height": 19.1875,
+        "lineHeight": "19.2px",
+        "name": "Khalid Mishal Al Dhafiri",
+        "overflow": false
+      }
+    ]
+  },
+  {
+    "width": 1440,
+    "font": "Cairo",
+    "lang": "ar",
+    "rows": [
+      {
+        "family": "Cairo, Tahoma, Arial, sans-serif",
+        "font": "17.36px",
+        "height": 27.765625,
+        "lineHeight": "27.776px",
+        "name": "خليفة محمد الخليفة",
+        "overflow": false
+      },
+      {
+        "family": "Cairo, Tahoma, Arial, sans-serif",
+        "font": "17.36px",
+        "height": 27.765625,
+        "lineHeight": "27.776px",
+        "name": "خالد علي الحبيب",
+        "overflow": false
+      },
+      {
+        "family": "Cairo, Tahoma, Arial, sans-serif",
+        "font": "17.36px",
+        "height": 27.765625,
+        "lineHeight": "27.776px",
+        "name": "مشعل متعب",
+        "overflow": false
+      },
+      {
+        "family": "Cairo, Tahoma, Arial, sans-serif",
+        "font": "17.36px",
+        "height": 27.765625,
+        "lineHeight": "27.776px",
+        "name": "محمد ساحب الشمري",
+        "overflow": false
+      },
+      {
+        "family": "Cairo, Tahoma, Arial, sans-serif",
+        "font": "17.36px",
+        "height": 27.765625,
+        "lineHeight": "27.776px",
+        "name": "عبدالعزيز مشعان العازمي",
+        "overflow": false
+      },
+      {
+        "family": "Cairo, Tahoma, Arial, sans-serif",
+        "font": "17.36px",
+        "height": 27.765625,
+        "lineHeight": "27.776px",
+        "name": "حمد ناصر الماضي",
+        "overflow": false
+      },
+      {
+        "family": "Cairo, Tahoma, Arial, sans-serif",
+        "font": "17.36px",
+        "height": 27.765625,
+        "lineHeight": "27.776px",
+        "name": "خالد مشعل الظفيري",
+        "overflow": false
+      }
+    ]
+  },
+  {
+    "width": 1440,
+    "font": "Cairo",
+    "lang": "en",
+    "rows": [
+      {
+        "family": "Cairo, Tahoma, Arial, sans-serif",
+        "font": "13.44px",
+        "height": 21.5,
+        "lineHeight": "21.504px",
+        "name": "Dr. Khalifa Mohammed Al Khalifa",
+        "overflow": false
+      },
+      {
+        "family": "Cairo, Tahoma, Arial, sans-serif",
+        "font": "13.44px",
+        "height": 21.5,
+        "lineHeight": "21.504px",
+        "name": "Khalid Ali Al Habib",
+        "overflow": false
+      },
+      {
+        "family": "Cairo, Tahoma, Arial, sans-serif",
+        "font": "13.44px",
+        "height": 21.5,
+        "lineHeight": "21.504px",
+        "name": "Mishal Metaab",
+        "overflow": false
+      },
+      {
+        "family": "Cairo, Tahoma, Arial, sans-serif",
+        "font": "13.44px",
+        "height": 21.5,
+        "lineHeight": "21.504px",
+        "name": "Mohammed Saheb Al Shammari",
+        "overflow": false
+      },
+      {
+        "family": "Cairo, Tahoma, Arial, sans-serif",
+        "font": "13.44px",
+        "height": 21.5,
+        "lineHeight": "21.504px",
+        "name": "Abdulaziz Mashaan Al Azmi",
+        "overflow": false
+      },
+      {
+        "family": "Cairo, Tahoma, Arial, sans-serif",
+        "font": "13.44px",
+        "height": 21.5,
+        "lineHeight": "21.504px",
+        "name": "Hamad Nasser Al Madi",
+        "overflow": false
+      },
+      {
+        "family": "Cairo, Tahoma, Arial, sans-serif",
+        "font": "13.44px",
+        "height": 21.5,
+        "lineHeight": "21.504px",
+        "name": "Khalid Mishal Al Dhafiri",
+        "overflow": false
+      }
+    ]
+  },
+  {
+    "width": 1440,
+    "font": "Cairo",
+    "lang": "ur",
+    "rows": [
+      {
+        "family": "Cairo, Tahoma, Arial, sans-serif",
+        "font": "13.44px",
+        "height": 21.5,
+        "lineHeight": "21.504px",
+        "name": "Dr. Khalifa Mohammed Al Khalifa",
+        "overflow": false
+      },
+      {
+        "family": "Cairo, Tahoma, Arial, sans-serif",
+        "font": "13.44px",
+        "height": 21.5,
+        "lineHeight": "21.504px",
+        "name": "Khalid Ali Al Habib",
+        "overflow": false
+      },
+      {
+        "family": "Cairo, Tahoma, Arial, sans-serif",
+        "font": "13.44px",
+        "height": 21.5,
+        "lineHeight": "21.504px",
+        "name": "Mishal Metaab",
+        "overflow": false
+      },
+      {
+        "family": "Cairo, Tahoma, Arial, sans-serif",
+        "font": "13.44px",
+        "height": 21.5,
+        "lineHeight": "21.504px",
+        "name": "Mohammed Saheb Al Shammari",
+        "overflow": false
+      },
+      {
+        "family": "Cairo, Tahoma, Arial, sans-serif",
+        "font": "13.44px",
+        "height": 21.5,
+        "lineHeight": "21.504px",
+        "name": "Abdulaziz Mashaan Al Azmi",
+        "overflow": false
+      },
+      {
+        "family": "Cairo, Tahoma, Arial, sans-serif",
+        "font": "13.44px",
+        "height": 21.5,
+        "lineHeight": "21.504px",
+        "name": "Hamad Nasser Al Madi",
+        "overflow": false
+      },
+      {
+        "family": "Cairo, Tahoma, Arial, sans-serif",
+        "font": "13.44px",
+        "height": 21.5,
+        "lineHeight": "21.504px",
+        "name": "Khalid Mishal Al Dhafiri",
+        "overflow": false
+      }
+    ]
+  }
+]

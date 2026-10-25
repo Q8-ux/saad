@@ -737,6 +737,7 @@ select {
 
 .team-card {
   position: relative;
+  container-type: inline-size;
   overflow: hidden;
   min-height: 390px;
   border-radius: 18px;
@@ -773,25 +774,30 @@ select {
 .team-info {
   position: absolute;
   z-index: 2;
-  inset-inline: 23px;
-  bottom: 22px;
+  inset-inline: clamp(10px, 4cqi, 16px);
+  bottom: 18px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2px;
   color: #fff;
 }
 
 .team-info small {
   color: #65c9f4;
-  font-size: 16px;
+  font-size: clamp(12px, 4.8cqi, 14px);
+  line-height: 1.6;
   font-weight: 800;
 }
 
 .team-info h3 {
-  margin: 5px 0 8px;
-  font-size: 24px;
-  line-height: 1.4;
+  margin: 0;
+  font-size: clamp(16px, 6.2cqi, 20px);
+  line-height: 1.6;
+  white-space: nowrap;
 }
 
-.team-card-lead .team-info h3 {
-  font-size: 28px;
+.team-info h3[dir="ltr"] {
+  font-size: clamp(12px, 4.8cqi, 18px);
 }
 
 .team-info span {
@@ -799,8 +805,11 @@ select {
   align-items: center;
   gap: 6px;
   color: #bfd3de;
-  font-size: 14px;
+  font-size: clamp(11px, 4.4cqi, 13px);
+  line-height: 1.6;
 }
+
+.team-info span svg { flex-shrink: 0; }
 
 .memo-band {
   position: relative;
@@ -3883,7 +3892,6 @@ html[data-theme="dark"] .memo-result-tools .danger { border-color: #7b3d48; colo
   object-fit: contain;
   object-position: center;
 }
-.team-grid .team-card-lead .team-info h3 { font-size: 24px; }
 
 /* Approved assistant identity, owned by React rather than a DOM observer. */
 .assistant-portrait{display:block;width:100%;height:100%;border-radius:50%;overflow:hidden;flex-shrink:0}
