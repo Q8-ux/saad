@@ -13,3 +13,7 @@ No physical-device test or two-factor enrollment is claimed.
 Live scripted login was blocked403 by hosting browser-signature protection before the request reached the application. No fingerprint or network bypass was attempted. No successful live login is claimed. Public sign-in form verification follows Pages publication.
 
 tsc --noEmit is not green:21 diagnostics, including the pre-existing missing cloudflare:workers declarations also encountered by the new module. Runtime builds and198 checks pass.
+
+Public Pages deployment succeeded: commit1a900a095e6a433840e8625886f28959253408a4 / run40195523211. Live browser verified the username/password form with masked empty password, current admin.js version11-control-users, and preserved administrative sign-in option. Screenshot live-login.jpg contains no credentials or customer data. Private credential file saved for user delivery; no secret included in public evidence.
+
+Convergence: all buildable authentication, permission, privacy and UI requirements implemented. One high-priority verification limitation remains: successful live authentication is unconfirmed because the direct test client was blocked by hosting browser-signature protection. T010 records the normal-browser follow-up; no code defect or permission to bypass protection is inferred.
