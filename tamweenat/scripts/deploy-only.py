@@ -20,8 +20,12 @@ for name in ("tamweenat","tamweenat-admin","zad-restaurants"):
  target=Path("_site")/name
  if target.exists():shutil.rmtree(target)
  shutil.copytree(name,target)
-for name in ("tamweenat/index.html","tamweenat/catalog-photos.json","tamweenat/storefront-v6.css","tamweenat/assistant-v1.js","tamweenat-admin/index.html","zad-restaurants/login.html"):
+for name in ("tamweenat/index.html","tamweenat/catalog-photos.json","tamweenat/storefront-v7.css","tamweenat/assistant-v1.js","tamweenat/meal-planner-v1.js","tamweenat-admin/index.html","zad-restaurants/login.html"):
  assert (Path("_site")/name).stat().st_size>200
 (Path("_site")/".nojekyll").touch()
-(Path("_site")/"tamweenat"/"release-version.txt").write_text(os.environ.get("GITHUB_SHA","unknown")+"\\n")
-print("Tamweenat updated; unrelated published sites retained")
+(Path("_site")/"tamweenat"/"release-version.txt").write_text(os.environ.get("GITHUB_SHA","unknown")+"\n")
+html=(Path("_site")/"tamweenat"/"index.html").read_text(encoding="utf-8")
+assert "السعر عند التأكيد" not in html, "Old price-on-confirmation text still in published artifact"
+assert "catalog-photos.json" in html, "Old catalog reference in published artifact"
+assert "storefront-v7.css" in html, "New design stylesheet missing"
+print("Tamweenat updated; verified price labels, photos, and design; unrelated sites retained")
