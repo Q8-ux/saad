@@ -6,7 +6,7 @@
     "category": "اللحوم والدجاج",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0032.png",
-    "price": 1.45,
+    "price": 1.49,
     "active": false,
     "priceStatus": "observed_market_price",
     "verifiedAt": "2026-09-01",
@@ -16,9 +16,9 @@
     "categoryUr": "گوشت اور مرغی",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": 1.45,
+    "marketPrice": 1.49,
     "marketPriceCheckedAt": "2026-10-26",
-    "marketPriceSource": "https://makanifoods.com/collections/full-price",
+    "marketPriceSource": "https://www.cityhyper.com/ar/sadia/",
     "marketOffers": [
       {
         "market": "Talabat Mart",
@@ -99,7 +99,7 @@
         "url": "https://www.talabat.com/ar/kuwait/talabat-mart/product/sadia-burger-chicken-20-pcs-1-kg/s/901783"
       }
     ],
-    "marketPriceSource": "https://makanifoods.com/collections/full-price",
+    "marketPriceSource": "https://makanifoods.com/ar/collections/sadia",
     "marketPriceSourceName": "Makani Foods"
   },
   {
@@ -109,9 +109,9 @@
     "category": "اللحوم والدجاج",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0028.png",
-    "price": null,
+    "price": 1.55,
     "active": false,
-    "priceStatus": "unverified",
+    "priceStatus": "observed_market_price",
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "جمبو چکن برگر (پیک کے 10) 1کلو",
@@ -119,7 +119,9 @@
     "categoryUr": "گوشت اور مرغی",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": 1.55,
+    "marketPriceSource": "https://makanifoods.com/ar/collections/frozen_poultry",
+    "marketPriceCheckedAt": "2026-10-26"
   },
   {
     "id": "BRG-0036",
@@ -580,7 +582,7 @@
     "unitEn": "Pack",
     "unitUr": "پیک",
     "marketPrice": 4.1,
-    "marketPriceSource": "https://makanifoods.com/collections/full-price",
+    "marketPriceSource": "https://makanifoods.com/",
     "marketPriceCheckedAt": "2026-10-26"
   },
   {
