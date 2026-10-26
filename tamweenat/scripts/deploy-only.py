@@ -18,6 +18,7 @@ for name in ("tamweenat","tamweenat-admin","zad-restaurants"):
  target=Path("_site")/name
  if target.exists():shutil.rmtree(target)
  shutil.copytree(name,target)
-for name in ("tamweenat/index.html","tamweenat-admin/index.html","zad-restaurants/login.html"):
+for name in ("tamweenat/index.html","tamweenat/catalog-photos.json","tamweenat/storefront-v6.css","tamweenat/assistant-v1.js","tamweenat-admin/index.html","zad-restaurants/login.html"):
  assert (Path("_site")/name).stat().st_size>200
+(Path("_site")/".nojekyll").touch()
 print("Tamweenat updated; unrelated published sites retained")
