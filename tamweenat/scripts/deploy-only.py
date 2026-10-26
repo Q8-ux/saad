@@ -2,9 +2,9 @@ import os, shutil, subprocess, json, tarfile
 from pathlib import Path, PurePosixPath
 def run(*args): return subprocess.check_output(args,text=True).strip()
 repo=os.environ["GITHUB_REPOSITORY"]
-runs=json.loads(run("gh","api",f"repos/{repo}/actions/runs?status=success&per_page=60"))["workflow_runs"]
+runs=json.loads(run("gh","api",f"repos/{repo}/actions/workflows/deploy-pages.yml/runs?status=success&per_page=60"))["workflow_runs"]
 for item in runs:
- if item.get("head_branch")!="main":continue
+ if item.get("head_branch")!="main" or item.get("id")==int(os.environ.get("GITHUB_RUN_ID","0")):continue
  jobs=json.loads(run("gh","api",f"repos/{repo}/actions/runs/{item['id']}/jobs"))["jobs"]
  if not any(step.get("name")=="Deploy" and step.get("conclusion")=="success" for job in jobs for step in job.get("steps",[])):continue
  artifacts=json.loads(run("gh","api",f"repos/{repo}/actions/runs/{item['id']}/artifacts"))["artifacts"]
