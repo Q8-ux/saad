@@ -5,6 +5,8 @@ repo=os.environ["GITHUB_REPOSITORY"]
 runs=json.loads(run("gh","api",f"repos/{repo}/actions/runs?status=success&per_page=60"))["workflow_runs"]
 for item in runs:
  if item.get("head_branch")!="main":continue
+ jobs=json.loads(run("gh","api",f"repos/{repo}/actions/runs/{item['id']}/jobs"))["jobs"]
+ if not any(step.get("name")=="Deploy" and step.get("conclusion")=="success" for job in jobs for step in job.get("steps",[])):continue
  artifacts=json.loads(run("gh","api",f"repos/{repo}/actions/runs/{item['id']}/artifacts"))["artifacts"]
  if any(a["name"]=="github-pages" and not a["expired"] for a in artifacts):
   run("gh","run","download",str(item["id"]),"--repo",repo,"--name","github-pages","--dir","_prior");break
@@ -21,4 +23,5 @@ for name in ("tamweenat","tamweenat-admin","zad-restaurants"):
 for name in ("tamweenat/index.html","tamweenat/catalog-photos.json","tamweenat/storefront-v6.css","tamweenat/assistant-v1.js","tamweenat-admin/index.html","zad-restaurants/login.html"):
  assert (Path("_site")/name).stat().st_size>200
 (Path("_site")/".nojekyll").touch()
+(Path("_site")/"tamweenat"/"release-version.txt").write_text(os.environ.get("GITHUB_SHA","unknown")+"\\n")
 print("Tamweenat updated; unrelated published sites retained")
