@@ -64,6 +64,9 @@ jobs:
           BEFORE_SHA: ${{ github.event.before }}
         run: |
           echo "only=false" >> "$GITHUB_OUTPUT"
+          if [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" ]]; then
+            echo "only=true" >> "$GITHUB_OUTPUT"
+          fi
           if [[ "$GITHUB_EVENT_NAME" == "push" && "$BEFORE_SHA" =~ ^[0-9a-f]{40}$ ]]; then
             git fetch --no-tags --depth=1 origin "$BEFORE_SHA"
             changed="$(git diff --name-only "$BEFORE_SHA" "$GITHUB_SHA")"
