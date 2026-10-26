@@ -6,7 +6,7 @@
     "category": "اللحوم والدجاج",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0032.png",
-    "price": 1.49,
+    "price": 1.495,
     "active": false,
     "priceStatus": "observed_market_price",
     "verifiedAt": "2026-09-01",
@@ -16,9 +16,9 @@
     "categoryUr": "گوشت اور مرغی",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": 1.49,
+    "marketPrice": 1.495,
     "marketPriceCheckedAt": "2026-10-26",
-    "marketPriceSource": "https://www.cityhyper.com/ar/sadia/",
+    "marketPriceSource": "https://www.talabat.com/kuwait/talabat-mart/product/%D8%B3%D8%A7%D8%AF%D9%8A%D8%A7-%D8%A8%D8%B1%D8%BA%D8%B1-%D8%A8%D9%82%D8%B1%D9%8A-%D8%AC%D9%85%D8%A8%D9%88-10-%D9%82%D8%B7%D8%B9%D8%A9-1-%D9%83%D8%BA/s/904091",
     "marketOffers": [
       {
         "market": "Talabat Mart",
@@ -99,7 +99,7 @@
         "url": "https://www.talabat.com/ar/kuwait/talabat-mart/product/sadia-burger-chicken-20-pcs-1-kg/s/901783"
       }
     ],
-    "marketPriceSource": "https://makanifoods.com/ar/collections/sadia",
+    "marketPriceSource": "https://makanifoods.com/ar/collections/frozen_poultry",
     "marketPriceSourceName": "Makani Foods"
   },
   {
