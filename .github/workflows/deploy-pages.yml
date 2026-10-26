@@ -63,17 +63,17 @@ jobs:
         env:
           BEFORE_SHA: ${{ github.event.before }}
         run: |
-          echo "only=false" >> "$GITHUB_OUTPUT"
+          only=false
           if [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" ]]; then
-            echo "only=true" >> "$GITHUB_OUTPUT"
-          fi
-          if [[ "$GITHUB_EVENT_NAME" == "push" && "$BEFORE_SHA" =~ ^[0-9a-f]{40}$ ]]; then
+            only=true
+          elif [[ "$GITHUB_EVENT_NAME" == "push" && "$BEFORE_SHA" =~ ^[0-9a-f]{40}$ && ! "$BEFORE_SHA" =~ ^0+$ ]]; then
             git fetch --no-tags --depth=1 origin "$BEFORE_SHA"
             changed="$(git diff --name-only "$BEFORE_SHA" "$GITHUB_SHA")"
-            if [[ -n "$changed" ]] && ! echo "$changed" | grep -Ev '^(tamweenat/|tamweenat-admin/|zad-restaurants/|\.github/workflows/deploy-pages\.yml$)' ; then
-              echo "only=true" >> "$GITHUB_OUTPUT"
+            if [[ -n "$changed" ]] && ! printf '%s\n' "$changed" | grep -Eqv '^(tamweenat/|tamweenat-admin/|zad-restaurants/|\.github/workflows/deploy-pages\.yml$)' ; then
+              only=true
             fi
           fi
+          echo "only=$only" >> "$GITHUB_OUTPUT"
       - name: Detect Rattil-only update
         id: rattil
         env:
@@ -113,6 +113,7 @@ jobs:
         working-directory: autoclip-studio
         run: npm test && npm run check
       - name: Validate Tamweenat release smoke checks
+        if: steps.scope.outputs.sabeq_only != 'true' || steps.tamweenat.outputs.only == 'true'
         run: node tamweenat/tests/release-smoke.cjs
       - name: Validate Tamweenat published entrypoints
         run: |
