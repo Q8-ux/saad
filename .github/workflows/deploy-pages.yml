@@ -207,6 +207,22 @@ jobs:
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
+      - name: Verify Tamweenat live release version
+        if: steps.tamweenat.outputs.only == 'true'
+        run: |
+          set -euo pipefail
+          url="https://q8-ux.github.io/saad/tamweenat/release-version.txt?run=${GITHUB_RUN_ID}"
+          for attempt in 1 2 3 4 5 6; do
+            live="$(curl --fail --silent --show-error --max-time 15 -H 'Cache-Control: no-cache' "$url" || true)"
+            if [[ "$live" == "$GITHUB_SHA" ]]; then
+              echo "Tamweenat live release verified: $live" >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            echo "Attempt $attempt: expected $GITHUB_SHA, received ${live:-<unavailable>}"
+            sleep 10
+          done
+          echo "::error::Tamweenat GitHub Pages still serves an older release"
+          exit 1
       - name: Record Sabeq deployment
         if: steps.scope.outputs.sabeq_only == 'true' && steps.tamweenat.outputs.only != 'true'
         run: |
