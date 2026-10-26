@@ -6,7 +6,7 @@
     "category": "اللحوم والدجاج",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0032.png",
-    "price": 1.49,
+    "price": 1.495,
     "active": false,
     "priceStatus": "observed_market_price",
     "verifiedAt": "2026-09-01",
@@ -16,9 +16,17 @@
     "categoryUr": "گوشت اور مرغی",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": 1.49,
+    "marketPrice": 1.495,
     "marketPriceCheckedAt": "2026-10-26",
-    "marketPriceSource": "https://www.cityhyper.com/ar/sadia/"
+    "marketPriceSource": "https://www.talabat.com/kuwait/talabat-mart/product/sadia-burger-beef-jumbo-10-pcs-1-kg/s/904091",
+    "marketOffers": [
+      {
+        "market": "Talabat Mart",
+        "price": 1.495,
+        "url": "https://www.talabat.com/kuwait/talabat-mart/product/sadia-burger-beef-jumbo-10-pcs-1-kg/s/904091"
+      }
+    ],
+    "marketPriceSourceName": "Talabat Mart"
   },
   {
     "id": "BRG-0031",
@@ -67,9 +75,9 @@
     "category": "اللحوم والدجاج",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0029.png",
-    "price": null,
+    "price": 1.45,
     "active": false,
-    "priceStatus": "unverified",
+    "priceStatus": "observed_market_price",
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "چکن برگر (پیک کے 20) 1کلو",
@@ -77,7 +85,22 @@
     "categoryUr": "گوشت اور مرغی",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": 1.45,
+    "marketPriceCheckedAt": "2026-10-26",
+    "marketOffers": [
+      {
+        "market": "LuLu Kuwait",
+        "price": 1.45,
+        "url": "https://gcc.luluhypermarket.com/en-kw/PRICE-BREAK-BONANZA/c/CPKWT003"
+      },
+      {
+        "market": "Talabat Mart",
+        "price": 2.09,
+        "url": "https://www.talabat.com/kuwait/talabat-mart/product/sadia-burger-chicken-20-pcs-1-kg/s/901783"
+      }
+    ],
+    "marketPriceSource": "https://gcc.luluhypermarket.com/en-kw/PRICE-BREAK-BONANZA/c/CPKWT003",
+    "marketPriceSourceName": "LuLu Kuwait"
   },
   {
     "id": "BRG-0028",
