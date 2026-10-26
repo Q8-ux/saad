@@ -20,7 +20,8 @@
     "imageSourceUrl": "https://cdn.shopify.com/s/files/1/0980/7020/0611/files/RoundLettuceFresh1pc.jpg?v=1779195030",
     "notes": "سعر الخضار متغير يوميًا؛ يُنصح بالمراجعة قبل الشراء.",
     "priceStatus": "needs_refresh",
-    "categoryKey": "vegetables"
+    "categoryKey": "vegetables",
+    "imageFallbackUrl": "https://cdn.shopify.com/s/files/1/0980/7020/0611/files/RoundLettuceFresh1pc.jpg?v=1779195030"
   },
   {
     "id": "BRG-0006",
@@ -43,7 +44,8 @@
     "imageSourceUrl": "https://cdn.shopify.com/s/files/1/0980/7020/0611/files/FreshJordanianRomaineLettuce1pcs.jpg?v=1782234588",
     "notes": "سعر الخضار متغير يوميًا؛ يُنصح بالمراجعة قبل الشراء.",
     "priceStatus": "needs_refresh",
-    "categoryKey": "vegetables"
+    "categoryKey": "vegetables",
+    "imageFallbackUrl": "https://cdn.shopify.com/s/files/1/0980/7020/0611/files/FreshJordanianRomaineLettuce1pcs.jpg?v=1782234588"
   },
   {
     "id": "BRG-0008",
@@ -66,7 +68,8 @@
     "imageSourceUrl": "https://cdn.shopify.com/s/files/1/0980/7020/0611/files/FreshKuwaitiTomato4kg.jpg?v=1779195778",
     "notes": "سعر الخضار متغير يوميًا؛ يُنصح بالمراجعة قبل الشراء.",
     "priceStatus": "needs_refresh",
-    "categoryKey": "vegetables"
+    "categoryKey": "vegetables",
+    "imageFallbackUrl": "https://cdn.shopify.com/s/files/1/0980/7020/0611/files/FreshKuwaitiTomato4kg.jpg?v=1779195778"
   },
   {
     "id": "BRG-0009",
@@ -89,7 +92,8 @@
     "imageSourceUrl": "https://cdn.shopify.com/s/files/1/0980/7020/0611/files/FreshKuwaitiTomato1kg.jpg?v=1779195637",
     "notes": "سعر الخضار متغير يوميًا؛ يُنصح بالمراجعة قبل الشراء.",
     "priceStatus": "needs_refresh",
-    "categoryKey": "vegetables"
+    "categoryKey": "vegetables",
+    "imageFallbackUrl": "https://cdn.shopify.com/s/files/1/0980/7020/0611/files/FreshKuwaitiTomato1kg.jpg?v=1779195637"
   },
   {
     "id": "BRG-0001",
@@ -112,7 +116,8 @@
     "imageSourceUrl": "https://cdn.shopify.com/s/files/1/0980/7020/0611/files/WhiteOnion1KgFreshOnioninKuwait.jpg?v=1778846168",
     "notes": "سعر الخضار متغير يوميًا؛ يُنصح بالمراجعة قبل الشراء.",
     "priceStatus": "needs_refresh",
-    "categoryKey": "vegetables"
+    "categoryKey": "vegetables",
+    "imageFallbackUrl": "https://cdn.shopify.com/s/files/1/0980/7020/0611/files/WhiteOnion1KgFreshOnioninKuwait.jpg?v=1778846168"
   },
   {
     "id": "BRG-0002",
@@ -135,7 +140,8 @@
     "imageSourceUrl": "https://cdn.shopify.com/s/files/1/0980/7020/0611/files/YemeniRedOnion1kilo.jpg?v=1779196033",
     "notes": "سعر الخضار متغير يوميًا؛ يُنصح بالمراجعة قبل الشراء.",
     "priceStatus": "needs_refresh",
-    "categoryKey": "vegetables"
+    "categoryKey": "vegetables",
+    "imageFallbackUrl": "https://cdn.shopify.com/s/files/1/0980/7020/0611/files/YemeniRedOnion1kilo.jpg?v=1779196033"
   },
   {
     "id": "BRG-0003",
@@ -158,7 +164,8 @@
     "imageSourceUrl": "https://cdn.shopify.com/s/files/1/0980/7020/0611/files/IndianOnion1kg.jpg?v=1779197028",
     "notes": "سعر الخضار متغير يوميًا؛ يُنصح بالمراجعة قبل الشراء.",
     "priceStatus": "needs_refresh",
-    "categoryKey": "vegetables"
+    "categoryKey": "vegetables",
+    "imageFallbackUrl": "https://cdn.shopify.com/s/files/1/0980/7020/0611/files/IndianOnion1kg.jpg?v=1779197028"
   },
   {
     "id": "BRG-0004",
@@ -181,7 +188,8 @@
     "imageSourceUrl": "https://cdn.shopify.com/s/files/1/0980/7020/0611/files/ChineseGarlic1kilo.jpg?v=1777815532",
     "notes": "سعر الخضار متغير يوميًا؛ يُنصح بالمراجعة قبل الشراء.",
     "priceStatus": "needs_refresh",
-    "categoryKey": "vegetables"
+    "categoryKey": "vegetables",
+    "imageFallbackUrl": "https://cdn.shopify.com/s/files/1/0980/7020/0611/files/ChineseGarlic1kilo.jpg?v=1777815532"
   },
   {
     "id": "BRG-0007",
@@ -204,7 +212,8 @@
     "imageSourceUrl": "https://cdn.shopify.com/s/files/1/0980/7020/0611/files/IMG-8063.png?v=1781688123",
     "notes": "سعر الخضار متغير يوميًا؛ يُنصح بالمراجعة قبل الشراء.",
     "priceStatus": "needs_refresh",
-    "categoryKey": "vegetables"
+    "categoryKey": "vegetables",
+    "imageFallbackUrl": "https://cdn.shopify.com/s/files/1/0980/7020/0611/files/IMG-8063.png?v=1781688123"
   },
   {
     "id": "BRG-0010",
@@ -227,7 +236,8 @@
     "imageSourceUrl": "https://cdn.shopify.com/s/files/1/0980/7020/0611/files/KuwaitiMushroom250gm.jpg?v=1778845236",
     "notes": "سعر الخضار متغير يوميًا؛ يُنصح بالمراجعة قبل الشراء.",
     "priceStatus": "needs_refresh",
-    "categoryKey": "vegetables"
+    "categoryKey": "vegetables",
+    "imageFallbackUrl": "https://cdn.shopify.com/s/files/1/0980/7020/0611/files/KuwaitiMushroom250gm.jpg?v=1778845236"
   },
   {
     "id": "BRG-0011",
@@ -250,7 +260,8 @@
     "imageSourceUrl": "https://cdn.shopify.com/s/files/1/0980/7020/0611/files/FreshKuwaitiGreenChiliPepper.jpg?v=1777651567",
     "notes": "سعر الخضار متغير يوميًا؛ يُنصح بالمراجعة قبل الشراء.",
     "priceStatus": "needs_refresh",
-    "categoryKey": "vegetables"
+    "categoryKey": "vegetables",
+    "imageFallbackUrl": "https://cdn.shopify.com/s/files/1/0980/7020/0611/files/FreshKuwaitiGreenChiliPepper.jpg?v=1777651567"
   },
   {
     "id": "BRG-0012",
@@ -273,7 +284,8 @@
     "imageSourceUrl": "https://cdn.shopify.com/s/files/1/0980/7020/0611/files/FreshGreenSweetPepper.jpg?v=1777651274",
     "notes": "سعر الخضار متغير يوميًا؛ يُنصح بالمراجعة قبل الشراء.",
     "priceStatus": "needs_refresh",
-    "categoryKey": "vegetables"
+    "categoryKey": "vegetables",
+    "imageFallbackUrl": "https://cdn.shopify.com/s/files/1/0980/7020/0611/files/FreshGreenSweetPepper.jpg?v=1777651274"
   },
   {
     "id": "BRG-0013",
@@ -296,7 +308,8 @@
     "imageSourceUrl": "https://cdn.shopify.com/s/files/1/0980/7020/0611/files/IMG-8363.png?v=1782673323",
     "notes": "سعر الخضار متغير يوميًا؛ يُنصح بالمراجعة قبل الشراء.",
     "priceStatus": "needs_refresh",
-    "categoryKey": "vegetables"
+    "categoryKey": "vegetables",
+    "imageFallbackUrl": "https://cdn.shopify.com/s/files/1/0980/7020/0611/files/IMG-8363.png?v=1782673323"
   },
   {
     "id": "BRG-0014",
@@ -319,7 +332,8 @@
     "imageSourceUrl": "https://cdn.shopify.com/s/files/1/0980/7020/0611/files/FreshGreenLime1kg.jpg?v=1782821503",
     "notes": "سعر الخضار متغير يوميًا؛ يُنصح بالمراجعة قبل الشراء.",
     "priceStatus": "needs_refresh",
-    "categoryKey": "vegetables"
+    "categoryKey": "vegetables",
+    "imageFallbackUrl": "https://cdn.shopify.com/s/files/1/0980/7020/0611/files/FreshGreenLime1kg.jpg?v=1782821503"
   },
   {
     "id": "TWB-0001",
@@ -1544,5 +1558,73 @@
     "referenceUrl": null,
     "priceBasis": "quote_required",
     "notes": "الأسعار المرجعية ليست عرض توريد ملزمًا، وتحتاج اعتماد الإدارة قبل التنفيذ."
+  },
+  {
+    "id": "KWREF-0001",
+    "name": "خبز برجر 8 حبات",
+    "nameEn": "KFMBC Hamburger Buns 8 pcs",
+    "category": "خبز ومخبوزات",
+    "unit": "عبوة 8 حبات",
+    "price": 0.22,
+    "referenceUrl": "https://gcc.luluhypermarket.com/en-kw/kfmbc-hamburger-buns-8-pcs/p/596715",
+    "sku": "KWREF-0001",
+    "categoryKey": "خبز ومخبوزات",
+    "active": false,
+    "priceStatus": "reference_not_approved",
+    "priceBasis": "public_retail_reference",
+    "verifiedAt": "2026-10-26",
+    "imageUrl": null,
+    "notes": "سعر استرشادي منشور، غير معتمد للبيع أو التوريد."
+  },
+  {
+    "id": "KWREF-0002",
+    "name": "خبز بريوش برجر 4 حبات 250 غ",
+    "nameEn": "KFM Brioche Burger Buns 4 pcs 250g",
+    "category": "خبز ومخبوزات",
+    "unit": "عبوة 4 حبات",
+    "price": 0.38,
+    "referenceUrl": "https://www.cchyper.com/categories/107276/products?catalogProduct=6371877",
+    "sku": "KWREF-0002",
+    "categoryKey": "خبز ومخبوزات",
+    "active": false,
+    "priceStatus": "reference_not_approved",
+    "priceBasis": "public_retail_reference",
+    "verifiedAt": "2026-10-26",
+    "imageUrl": null,
+    "notes": "سعر استرشادي منشور، غير معتمد للبيع أو التوريد."
+  },
+  {
+    "id": "KWREF-0003",
+    "name": "جبنة شيدر للبرجر 200 غ",
+    "nameEn": "President Burger Cheddar Cheese 200 g",
+    "category": "أجبان وألبان",
+    "unit": "عبوة 200 غ",
+    "price": 0.845,
+    "referenceUrl": "https://gcc.luluhypermarket.com/en-kw/president-burger-cheddar-cheese-200-g/p/420911",
+    "sku": "KWREF-0003",
+    "categoryKey": "أجبان وألبان",
+    "active": false,
+    "priceStatus": "reference_not_approved",
+    "priceBasis": "public_retail_reference",
+    "verifiedAt": "2026-10-26",
+    "imageUrl": null,
+    "notes": "سعر استرشادي منشور، غير معتمد للبيع أو التوريد."
+  },
+  {
+    "id": "KWREF-0004",
+    "name": "برجر بقري 20 قطعة",
+    "nameEn": "Americana Beef Burger 20 pcs",
+    "category": "لحوم ودواجن",
+    "unit": "عبوة 20 قطعة",
+    "price": 3.95,
+    "referenceUrl": "https://www.co-opkw.com/",
+    "sku": "KWREF-0004",
+    "categoryKey": "لحوم ودواجن",
+    "active": false,
+    "priceStatus": "reference_not_approved",
+    "priceBasis": "public_retail_reference",
+    "verifiedAt": "2026-10-26",
+    "imageUrl": null,
+    "notes": "سعر استرشادي منشور، غير معتمد للبيع أو التوريد."
   }
 ]
