@@ -1,0 +1,21 @@
+name: Tamweenat price freshness audit
+on:
+  schedule:
+    - cron: '0 4 * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  price-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check market price freshness
+        run: python tamweenat/scripts/audit-prices.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tamweenat-price-audit
+          path: tamweenat/price-audit.md
