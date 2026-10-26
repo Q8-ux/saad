@@ -35,3 +35,17 @@ header .brand:before{content:"ت"!important;background:var(--accent)!important;c
 @media(max-width:900px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}}
 @media(max-width:700px){.hero{display:block!important;padding:25px 21px!important;min-height:unset!important;border-radius:16px!important}.hero h1{font-size:clamp(29px,7.2vw,35px)!important;line-height:1.4!important}.hero p{font-size:17px!important;line-height:1.8!important}.hero .eyebrow{font-size:15px!important}.hero-icon{display:none!important}.feature-strip{grid-template-columns:1fr!important;gap:8px!important}.feature,.feature:last-child{grid-column:auto!important;font-size:16px!important;padding:11px 14px!important}.grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important}.card h3{font-size:17px!important}.photo{height:155px!important}.meta{font-size:15px!important}.price{font-size:18px!important}.wrap{padding:12px 11px 140px!important}.cartbar{max-width:calc(100% - 18px)!important}.cartbar b{font-size:17px!important}}
 @media(max-width:370px){.grid{grid-template-columns:1fr!important}.photo{height:200px!important}}
+
+/* Product photography: eliminate dead space and align all cards */
+.grid{align-items:stretch!important}
+.card{display:flex!important;flex-direction:column!important;overflow:hidden!important}
+.photo{height:auto!important;aspect-ratio:4/3!important;display:flex!important;align-items:center!important;justify-content:center!important;position:relative!important;background:linear-gradient(150deg,#f8faf7,#e9f0e9)!important;border:1px solid #e5ece5!important;overflow:hidden!important;isolation:isolate!important}
+.photo img{width:100%!important;height:100%!important;object-fit:contain!important;object-position:center!important;padding:0!important;transform:scale(1.26)!important;transition:transform .2s ease!important;display:block!important;image-rendering:auto!important}
+.card:hover .photo img{transform:scale(1.32)!important}
+.photo img[src=""]{display:none!important}
+.card h3{margin-top:13px!important;line-height:1.55!important;min-height:3.1em!important}
+.card .meta{margin-bottom:5px!important}
+.card .price{margin-top:auto!important;padding-top:8px!important}
+.card .add{margin-top:9px!important}
+@media(max-width:700px){.photo{aspect-ratio:1/1!important}.photo img{transform:scale(1.18)!important}.card:hover .photo img{transform:scale(1.18)!important}.card h3{min-height:3em!important}}
+@media(prefers-reduced-motion:reduce){.photo img{transition:none!important}}
