@@ -49,3 +49,8 @@ header .brand:before{content:"ت"!important;background:var(--accent)!important;c
 .card .add{margin-top:9px!important}
 @media(max-width:700px){.photo{aspect-ratio:1/1!important}.photo img{transform:scale(1.18)!important}.card:hover .photo img{transform:scale(1.18)!important}.card h3{min-height:3em!important}}
 @media(prefers-reduced-motion:reduce){.photo img{transition:none!important}}
+
+/* Consistent product name typography across all languages and card sizes */
+.grid .card h3{font-family:Cairo,Tahoma,Arial,sans-serif!important;font-size:18px!important;font-weight:800!important;line-height:1.65!important;letter-spacing:0!important;margin:12px 0 8px!important;min-height:3.3em!important;max-height:4.95em!important;overflow:hidden!important;display:-webkit-box!important;-webkit-box-orient:vertical!important;-webkit-line-clamp:3!important;line-clamp:3!important;overflow-wrap:anywhere!important;word-break:normal!important;text-align:start!important}
+@media(max-width:700px){.grid .card h3{font-size:17px!important;line-height:1.65!important;min-height:3.3em!important;max-height:4.95em!important}}
+@media(max-width:370px){.grid .card h3{font-size:18px!important}}
