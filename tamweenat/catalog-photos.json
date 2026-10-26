@@ -6,7 +6,7 @@
     "category": "اللحوم والدجاج",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0032.png",
-    "price": 1.49,
+    "price": 1.45,
     "active": false,
     "priceStatus": "observed_market_price",
     "verifiedAt": "2026-09-01",
@@ -16,9 +16,9 @@
     "categoryUr": "گوشت اور مرغی",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": 1.49,
+    "marketPrice": 1.45,
     "marketPriceCheckedAt": "2026-10-26",
-    "marketPriceSource": "https://www.cityhyper.com/ar/sadia/",
+    "marketPriceSource": "https://makanifoods.com/collections/full-price",
     "marketOffers": [
       {
         "market": "Talabat Mart",
@@ -99,7 +99,7 @@
         "url": "https://www.talabat.com/ar/kuwait/talabat-mart/product/sadia-burger-chicken-20-pcs-1-kg/s/901783"
       }
     ],
-    "marketPriceSource": "https://makanifoods.com/",
+    "marketPriceSource": "https://makanifoods.com/collections/full-price",
     "marketPriceSourceName": "Makani Foods"
   },
   {
@@ -244,9 +244,9 @@
     "category": "اللحوم والدجاج",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0038.png",
-    "price": null,
+    "price": 1.995,
     "active": false,
-    "priceStatus": "unverified",
+    "priceStatus": "observed_market_price",
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "ٹیمپورا چکن نگٹس 750گرام",
@@ -254,7 +254,9 @@
     "categoryUr": "گوشت اور مرغی",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": 1.995,
+    "marketPriceCheckedAt": "2026-10-26",
+    "marketPriceSource": "https://www.cityhyper.com/ar/sadia/"
   },
   {
     "id": "BRG-0039",
@@ -578,7 +580,7 @@
     "unitEn": "Pack",
     "unitUr": "پیک",
     "marketPrice": 4.1,
-    "marketPriceSource": "https://makanifoods.com/",
+    "marketPriceSource": "https://makanifoods.com/collections/full-price",
     "marketPriceCheckedAt": "2026-10-26"
   },
   {
@@ -1060,7 +1062,7 @@
     "unitUr": "پیک",
     "marketPrice": 1.7,
     "marketPriceCheckedAt": "2026-10-26",
-    "marketPriceSource": "https://makanifoods.com/"
+    "marketPriceSource": "https://makanifoods.com/collections/full-price"
   },
   {
     "id": "BRG-0068",
