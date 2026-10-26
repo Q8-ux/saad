@@ -3,7 +3,7 @@
     "id": "BRG-0032",
     "name": "برغر لحم جامبو ساديا – 10 قطع / 1 كغ",
     "nameEn": "Beef Burger Jumbo (Pack of 10) 1kg",
-    "category": "اللحوم والدجاج",
+    "category": "لحوم ودواجن",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0032.png",
     "price": 1.495,
@@ -26,13 +26,15 @@
         "url": "https://www.talabat.com/kuwait/talabat-mart/product/sadia-burger-beef-jumbo-10-pcs-1-kg/s/904091"
       }
     ],
-    "marketPriceSourceName": "Talabat Mart"
+    "marketPriceSourceName": "Talabat Mart",
+    "subcategory": "اللحوم والدجاج",
+    "categoryKey": "لحوم ودواجن"
   },
   {
     "id": "BRG-0031",
     "name": "برغر لحم بالبهارات العربية ساديا – 20 قطعة / 1 كغ",
     "nameEn": "Beef Burger Arabic Spices (Pack of 20) 1kg",
-    "category": "اللحوم والدجاج",
+    "category": "لحوم ودواجن",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0031.png",
     "price": 1.35,
@@ -47,13 +49,15 @@
     "unitUr": "پیک",
     "marketPrice": 1.35,
     "marketPriceCheckedAt": "2026-10-26",
-    "marketPriceSource": "https://makanifoods.com/collections/special-offer"
+    "marketPriceSource": "https://makanifoods.com/collections/special-offer",
+    "subcategory": "اللحوم والدجاج",
+    "categoryKey": "لحوم ودواجن"
   },
   {
     "id": "BRG-0030",
     "name": "أقراص برغر واغيو – 6 × 151 غ",
     "nameEn": "Wagyu Ground Beef Patties (6 x 151g) 907g",
-    "category": "اللحوم والدجاج",
+    "category": "لحوم ودواجن",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0030.png",
     "price": null,
@@ -66,13 +70,15 @@
     "categoryUr": "گوشت اور مرغی",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "اللحوم والدجاج",
+    "categoryKey": "لحوم ودواجن"
   },
   {
     "id": "BRG-0029",
     "name": "برغر دجاج ساديا – 20 قطعة / 1 كغ",
     "nameEn": "Chicken Burger (Pack of 20) 1kg",
-    "category": "اللحوم والدجاج",
+    "category": "لحوم ودواجن",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0029.png",
     "price": 1.63,
@@ -100,13 +106,15 @@
       }
     ],
     "marketPriceSource": "https://makanifoods.com/ar/collections/frozen_poultry",
-    "marketPriceSourceName": "Makani Foods"
+    "marketPriceSourceName": "Makani Foods",
+    "subcategory": "اللحوم والدجاج",
+    "categoryKey": "لحوم ودواجن"
   },
   {
     "id": "BRG-0028",
     "name": "برغر دجاج جامبو ساديا – 10 قطع / 1 كغ",
     "nameEn": "Jumbo Chicken Burger (Pack of 10) 1kg",
-    "category": "اللحوم والدجاج",
+    "category": "لحوم ودواجن",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0028.png",
     "price": 1.55,
@@ -121,13 +129,15 @@
     "unitUr": "پیک",
     "marketPrice": 1.55,
     "marketPriceSource": "https://makanifoods.com/ar/collections/frozen_poultry",
-    "marketPriceCheckedAt": "2026-10-26"
+    "marketPriceCheckedAt": "2026-10-26",
+    "subcategory": "اللحوم والدجاج",
+    "categoryKey": "لحوم ودواجن"
   },
   {
     "id": "BRG-0036",
     "name": "فيليه صدور دجاج ساديا – 1.5 كغ",
     "nameEn": "Chicken Breast Fillet 1.5kg",
-    "category": "اللحوم والدجاج",
+    "category": "لحوم ودواجن",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0036.png",
     "price": null,
@@ -140,13 +150,15 @@
     "categoryUr": "گوشت اور مرغی",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "اللحوم والدجاج",
+    "categoryKey": "لحوم ودواجن"
   },
   {
     "id": "BRG-0027",
     "name": "أجنحة دجاج مطهية بالكامل – 1 كغ",
     "nameEn": "Fully Cooked Chicken Wings 1kg",
-    "category": "اللحوم والدجاج",
+    "category": "لحوم ودواجن",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0027.png",
     "price": null,
@@ -159,13 +171,15 @@
     "categoryUr": "گوشت اور مرغی",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "اللحوم والدجاج",
+    "categoryKey": "لحوم ودواجن"
   },
   {
     "id": "BRG-0033",
     "name": "أصابع دجاج – 1 كغ",
     "nameEn": "Chicken Fries 1kg",
-    "category": "اللحوم والدجاج",
+    "category": "لحوم ودواجن",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0033.png",
     "price": null,
@@ -178,13 +192,15 @@
     "categoryUr": "گوشت اور مرغی",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "اللحوم والدجاج",
+    "categoryKey": "لحوم ودواجن"
   },
   {
     "id": "BRG-0034",
     "name": "بوب كورن دجاج ساديا – 750 غ",
     "nameEn": "Chicken Pop Corn 750g",
-    "category": "اللحوم والدجاج",
+    "category": "لحوم ودواجن",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0034.png",
     "price": null,
@@ -197,13 +213,15 @@
     "categoryUr": "گوشت اور مرغی",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "اللحوم والدجاج",
+    "categoryKey": "لحوم ودواجن"
   },
   {
     "id": "BRG-0035",
     "name": "تندرلوين دجاج بالبقسماط – 1 كغ",
     "nameEn": "Breaded Chicken Tenderloin 1kg",
-    "category": "اللحوم والدجاج",
+    "category": "لحوم ودواجن",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0035.png",
     "price": null,
@@ -216,13 +234,15 @@
     "categoryUr": "گوشت اور مرغی",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "اللحوم والدجاج",
+    "categoryKey": "لحوم ودواجن"
   },
   {
     "id": "BRG-0037",
     "name": "ناجتس دجاج تقليدي ساديا – 750 غ",
     "nameEn": "Traditional Chicken Nuggets 750g",
-    "category": "اللحوم والدجاج",
+    "category": "لحوم ودواجن",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0037.png",
     "price": 1.45,
@@ -237,13 +257,15 @@
     "unitUr": "پیک",
     "marketPrice": 1.45,
     "marketPriceSource": "https://makanifoods.com/",
-    "marketPriceCheckedAt": "2026-10-26"
+    "marketPriceCheckedAt": "2026-10-26",
+    "subcategory": "اللحوم والدجاج",
+    "categoryKey": "لحوم ودواجن"
   },
   {
     "id": "BRG-0038",
     "name": "ناجتس دجاج تمبورا ساديا – 750 غ",
     "nameEn": "Tempura Chicken Nuggets 750g",
-    "category": "اللحوم والدجاج",
+    "category": "لحوم ودواجن",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0038.png",
     "price": 1.995,
@@ -258,13 +280,15 @@
     "unitUr": "پیک",
     "marketPrice": 1.995,
     "marketPriceCheckedAt": "2026-10-26",
-    "marketPriceSource": "https://www.cityhyper.com/ar/sadia/"
+    "marketPriceSource": "https://www.cityhyper.com/ar/sadia/",
+    "subcategory": "اللحوم والدجاج",
+    "categoryKey": "لحوم ودواجن"
   },
   {
     "id": "BRG-0039",
     "name": "ناجتس دجاج ساديا – 1 كغ",
     "nameEn": "Chicken Nuggets 1kg",
-    "category": "اللحوم والدجاج",
+    "category": "لحوم ودواجن",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0039.png",
     "price": null,
@@ -277,13 +301,15 @@
     "categoryUr": "گوشت اور مرغی",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "اللحوم والدجاج",
+    "categoryKey": "لحوم ودواجن"
   },
   {
     "id": "BRG-0021",
     "name": "خبز بريوش للبرغر",
     "nameEn": "Brioch bun",
-    "category": "المخبوزات",
+    "category": "خبز ومخبوزات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0021.png",
     "price": null,
@@ -296,13 +322,15 @@
     "categoryUr": "بریڈ اور بیکری",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "المخبوزات",
+    "categoryKey": "خبز ومخبوزات"
   },
   {
     "id": "BRG-0024",
     "name": "خبز بطاطا للبرغر",
     "nameEn": "Potato bun",
-    "category": "المخبوزات",
+    "category": "خبز ومخبوزات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0024.png",
     "price": null,
@@ -315,13 +343,15 @@
     "categoryUr": "بریڈ اور بیکری",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "المخبوزات",
+    "categoryKey": "خبز ومخبوزات"
   },
   {
     "id": "BRG-0019",
     "name": "خبز بريوش بالسمسم مزدوج اللمعان",
     "nameEn": "Double glaze brioche sesame bun",
-    "category": "المخبوزات",
+    "category": "خبز ومخبوزات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0019.png",
     "price": null,
@@ -334,13 +364,15 @@
     "categoryUr": "بریڈ اور بیکری",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "المخبوزات",
+    "categoryKey": "خبز ومخبوزات"
   },
   {
     "id": "BRG-0022",
     "name": "خبز بريوش مزدوج اللمعان",
     "nameEn": "Double glaze brioch bun",
-    "category": "المخبوزات",
+    "category": "خبز ومخبوزات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0022.png",
     "price": null,
@@ -353,13 +385,15 @@
     "categoryUr": "بریڈ اور بیکری",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "المخبوزات",
+    "categoryKey": "خبز ومخبوزات"
   },
   {
     "id": "BRG-0018",
     "name": "خبز برغر بطاطا طري 3.5 بوصة – 8 قطع",
     "nameEn": "Soft Potato Buns 3.5\" (Pack of 8)",
-    "category": "المخبوزات",
+    "category": "خبز ومخبوزات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0018.png",
     "price": null,
@@ -372,13 +406,15 @@
     "categoryUr": "بریڈ اور بیکری",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "المخبوزات",
+    "categoryKey": "خبز ومخبوزات"
   },
   {
     "id": "BRG-0025",
     "name": "خبز بطاطا مقطع 3.5 بوصة – 8 قطع",
     "nameEn": "Sliced Potato Rolls 3.5\" (Pack of 8)",
-    "category": "المخبوزات",
+    "category": "خبز ومخبوزات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0025.png",
     "price": null,
@@ -391,13 +427,15 @@
     "categoryUr": "بریڈ اور بیکری",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "المخبوزات",
+    "categoryKey": "خبز ومخبوزات"
   },
   {
     "id": "BRG-0015",
     "name": "خبز أسمر بالشوفان",
     "nameEn": "Brown bun oat",
-    "category": "المخبوزات",
+    "category": "خبز ومخبوزات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0015.png",
     "price": null,
@@ -410,13 +448,15 @@
     "categoryUr": "بریڈ اور بیکری",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "المخبوزات",
+    "categoryKey": "خبز ومخبوزات"
   },
   {
     "id": "BRG-0016",
     "name": "خبز بانيني للبرغر",
     "nameEn": "Panini burger bun",
-    "category": "المخبوزات",
+    "category": "خبز ومخبوزات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0016.png",
     "price": null,
@@ -429,13 +469,15 @@
     "categoryUr": "بریڈ اور بیکری",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "المخبوزات",
+    "categoryKey": "خبز ومخبوزات"
   },
   {
     "id": "BRG-0017",
     "name": "خبز برغر أسود",
     "nameEn": "Black burger bun",
-    "category": "المخبوزات",
+    "category": "خبز ومخبوزات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0017.png",
     "price": null,
@@ -448,13 +490,15 @@
     "categoryUr": "بریڈ اور بیکری",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "المخبوزات",
+    "categoryKey": "خبز ومخبوزات"
   },
   {
     "id": "BRG-0020",
     "name": "خبز بريوش سلايدر",
     "nameEn": "Brioche sliders buns",
-    "category": "المخبوزات",
+    "category": "خبز ومخبوزات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0020.png",
     "price": null,
@@ -467,13 +511,15 @@
     "categoryUr": "بریڈ اور بیکری",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "المخبوزات",
+    "categoryKey": "خبز ومخبوزات"
   },
   {
     "id": "BRG-0023",
     "name": "خبز بطاطا سلايدر",
     "nameEn": "Potato slider bun",
-    "category": "المخبوزات",
+    "category": "خبز ومخبوزات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0023.png",
     "price": null,
@@ -486,13 +532,15 @@
     "categoryUr": "بریڈ اور بیکری",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "المخبوزات",
+    "categoryKey": "خبز ومخبوزات"
   },
   {
     "id": "BRG-0026",
     "name": "خبز حليب بالسمسم مزدوج اللمعان",
     "nameEn": "Double glaze sesame Milk Bun",
-    "category": "المخبوزات",
+    "category": "خبز ومخبوزات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0026.png",
     "price": null,
@@ -505,13 +553,15 @@
     "categoryUr": "بریڈ اور بیکری",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "المخبوزات",
+    "categoryKey": "خبز ومخبوزات"
   },
   {
     "id": "BRG-0046",
     "name": "شرائح جبن كرافت الأصلية – 20 شريحة / 400 غ",
     "nameEn": "Original Cheese Slices (20 Slices) 400g",
-    "category": "الأجبان ومنتجات الألبان",
+    "category": "أجبان وألبان",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0046.png",
     "price": null,
@@ -524,13 +574,15 @@
     "categoryUr": "پنیر اور دودھ کی مصنوعات",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "الأجبان ومنتجات الألبان",
+    "categoryKey": "أجبان وألبان"
   },
   {
     "id": "BRG-0045",
     "name": "شرائح جبن سايسكو – 120 شريحة / 2.26 كغ",
     "nameEn": "Cheese Slices (Pack of 120) 2.26kg",
-    "category": "الأجبان ومنتجات الألبان",
+    "category": "أجبان وألبان",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0045.png",
     "price": null,
@@ -543,13 +595,15 @@
     "categoryUr": "پنیر اور دودھ کی مصنوعات",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "الأجبان ومنتجات الألبان",
+    "categoryKey": "أجبان وألبان"
   },
   {
     "id": "BRG-0047",
     "name": "شرائح شيدر أبيض ياسمين – 200 شريحة / 2.27 كغ",
     "nameEn": "White Cheddar Cheese Slices (Pack of 200) 2.27kg",
-    "category": "الأجبان ومنتجات الألبان",
+    "category": "أجبان وألبان",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0047.png",
     "price": null,
@@ -562,13 +616,15 @@
     "categoryUr": "پنیر اور دودھ کی مصنوعات",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "الأجبان ومنتجات الألبان",
+    "categoryKey": "أجبان وألبان"
   },
   {
     "id": "BRG-0048",
     "name": "شرائح شيدر أصفر ياسمين – 200 شريحة / 2.27 كغ",
     "nameEn": "Sliced Yellow Cheddar Cheese (Pack of 200) 2.270kg",
-    "category": "الأجبان ومنتجات الألبان",
+    "category": "أجبان وألبان",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0048.png",
     "price": 4.1,
@@ -583,13 +639,15 @@
     "unitUr": "پیک",
     "marketPrice": 4.1,
     "marketPriceSource": "https://makanifoods.com/",
-    "marketPriceCheckedAt": "2026-10-26"
+    "marketPriceCheckedAt": "2026-10-26",
+    "subcategory": "الأجبان ومنتجات الألبان",
+    "categoryKey": "أجبان وألبان"
   },
   {
     "id": "BRG-0044",
     "name": "شرائح جبن بوك الأصلية – 10 شرائح / 170 غ",
     "nameEn": "Original Cheese Slices (10 Slices) 170g",
-    "category": "الأجبان ومنتجات الألبان",
+    "category": "أجبان وألبان",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0044.png",
     "price": null,
@@ -602,13 +660,15 @@
     "categoryUr": "پنیر اور دودھ کی مصنوعات",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "الأجبان ومنتجات الألبان",
+    "categoryKey": "أجبان وألبان"
   },
   {
     "id": "BRG-0040",
     "name": "جبن شيدر كرافت – 500 غ",
     "nameEn": "Cheddar Cheese 500g",
-    "category": "الأجبان ومنتجات الألبان",
+    "category": "أجبان وألبان",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0040.png",
     "price": null,
@@ -621,13 +681,15 @@
     "categoryUr": "پنیر اور دودھ کی مصنوعات",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "الأجبان ومنتجات الألبان",
+    "categoryKey": "أجبان وألبان"
   },
   {
     "id": "BRG-0041",
     "name": "جبن شيدر مبشور أرلا – 2 كغ",
     "nameEn": "Shredded Cheddar Cheese 2Kg",
-    "category": "الأجبان ومنتجات الألبان",
+    "category": "أجبان وألبان",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0041.png",
     "price": null,
@@ -640,13 +702,15 @@
     "categoryUr": "پنیر اور دودھ کی مصنوعات",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "الأجبان ومنتجات الألبان",
+    "categoryKey": "أجبان وألبان"
   },
   {
     "id": "BRG-0042",
     "name": "جبن موزاريلا مبشور أرلا – 2 كغ",
     "nameEn": "Shredded Mozzarella Cheese 2kg",
-    "category": "الأجبان ومنتجات الألبان",
+    "category": "أجبان وألبان",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0042.png",
     "price": null,
@@ -659,13 +723,15 @@
     "categoryUr": "پنیر اور دودھ کی مصنوعات",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "الأجبان ومنتجات الألبان",
+    "categoryKey": "أجبان وألبان"
   },
   {
     "id": "BRG-0043",
     "name": "زبدة لورباك غير مملحة – 500 غ",
     "nameEn": "Unsalted Butter 500g",
-    "category": "الأجبان ومنتجات الألبان",
+    "category": "أجبان وألبان",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0043.png",
     "price": 2.495,
@@ -680,13 +746,15 @@
     "unitUr": "پیک",
     "marketPrice": 2.495,
     "marketPriceCheckedAt": "2026-10-26",
-    "marketPriceSource": "https://www.co-opkw.com/"
+    "marketPriceSource": "https://www.co-opkw.com/",
+    "subcategory": "الأجبان ومنتجات الألبان",
+    "categoryKey": "أجبان وألبان"
   },
   {
     "id": "BRG-0091",
     "name": "بطاطا مقلية 9×9 مم فريجيس – 2.5 كغ",
     "nameEn": "French Fries 9x9mm 2.5kg",
-    "category": "البطاطا والمقبلات",
+    "category": "بطاطس ومجمدات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0091.png",
     "price": null,
@@ -695,17 +763,19 @@
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "فرینکہ فرائز 9×9مم 2.5کلو",
-    "categoryEn": "Fries & sides",
-    "categoryUr": "فرائز اور سائیڈز",
+    "categoryEn": "Fries & frozen foods",
+    "categoryUr": "فرائز اور منجمد خوراک",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "البطاطا والمقبلات",
+    "categoryKey": "بطاطس ومجمدات"
   },
   {
     "id": "BRG-0090",
     "name": "بطاطا عادية 9×9 مم لامب ويستون – 2.5 كغ",
     "nameEn": "Regular Fries 9x9mm 2.5kg",
-    "category": "البطاطا والمقبلات",
+    "category": "بطاطس ومجمدات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0090.png",
     "price": 1.69,
@@ -714,19 +784,21 @@
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "عام فرائز 9×9مم 2.5کلو",
-    "categoryEn": "Fries & sides",
-    "categoryUr": "فرائز اور سائیڈز",
+    "categoryEn": "Fries & frozen foods",
+    "categoryUr": "فرائز اور منجمد خوراک",
     "unitEn": "Pack",
     "unitUr": "پیک",
     "marketPrice": 1.69,
     "marketPriceSource": "https://makanifoods.com/",
-    "marketPriceCheckedAt": "2026-10-26"
+    "marketPriceCheckedAt": "2026-10-26",
+    "subcategory": "البطاطا والمقبلات",
+    "categoryKey": "بطاطس ومجمدات"
   },
   {
     "id": "BRG-0089",
     "name": "بطاطا ستيلث مستقيمة 9×9 مم – 2.5 كغ",
     "nameEn": "Stealth Fries Straight Cut 9x9mm 2.5kg",
-    "category": "البطاطا والمقبلات",
+    "category": "بطاطس ومجمدات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0089.png",
     "price": null,
@@ -735,17 +807,19 @@
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "ستیالتہ فرائز سیدھی کٹ 9×9مم 2.5کلو",
-    "categoryEn": "Fries & sides",
-    "categoryUr": "فرائز اور سائیڈز",
+    "categoryEn": "Fries & frozen foods",
+    "categoryUr": "فرائز اور منجمد خوراک",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "البطاطا والمقبلات",
+    "categoryKey": "بطاطس ومجمدات"
   },
   {
     "id": "BRG-0088",
     "name": "بطاطا ستيلث بالقشرة 9×9 مم – 2.5 كغ",
     "nameEn": "Stealth Fries Straight Cut, Skin-On 9x9mm 2.5kg",
-    "category": "البطاطا والمقبلات",
+    "category": "بطاطس ومجمدات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0088.png",
     "price": null,
@@ -754,17 +828,19 @@
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "ستیالتہ فرائز سیدھی کٹ, چھلکے-ون 9×9مم 2.5کلو",
-    "categoryEn": "Fries & sides",
-    "categoryUr": "فرائز اور سائیڈز",
+    "categoryEn": "Fries & frozen foods",
+    "categoryUr": "فرائز اور منجمد خوراک",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "البطاطا والمقبلات",
+    "categoryKey": "بطاطس ومجمدات"
   },
   {
     "id": "BRG-0087",
     "name": "بطاطا ستيك هاوس 9×18 مم – 2.5 كغ",
     "nameEn": "Private Reserve Steakhouse Fries 9x18mm 2.5kg",
-    "category": "البطاطا والمقبلات",
+    "category": "بطاطس ومجمدات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0087.png",
     "price": null,
@@ -773,17 +849,19 @@
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "پریواتی ریسیروی ستیاکہووسی فرائز 9×18مم 2.5کلو",
-    "categoryEn": "Fries & sides",
-    "categoryUr": "فرائز اور سائیڈز",
+    "categoryEn": "Fries & frozen foods",
+    "categoryUr": "فرائز اور منجمد خوراک",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "البطاطا والمقبلات",
+    "categoryKey": "بطاطس ومجمدات"
   },
   {
     "id": "BRG-0086",
     "name": "بطاطا رفيعة 7×7 مم فريجيس – 2.5 كغ",
     "nameEn": "French Fries Thin Cut 7x7mm 2.5kg",
-    "category": "البطاطا والمقبلات",
+    "category": "بطاطس ومجمدات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0086.png",
     "price": null,
@@ -792,17 +870,19 @@
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "فرینکہ فرائز باریک کٹ 7×7مم 2.5کلو",
-    "categoryEn": "Fries & sides",
-    "categoryUr": "فرائز اور سائیڈز",
+    "categoryEn": "Fries & frozen foods",
+    "categoryUr": "فرائز اور منجمد خوراک",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "البطاطا والمقبلات",
+    "categoryKey": "بطاطس ومجمدات"
   },
   {
     "id": "BRG-0080",
     "name": "أصابع موزاريلا لامب ويستون – 1 كغ",
     "nameEn": "Mozzarella Sticks 1kg",
-    "category": "البطاطا والمقبلات",
+    "category": "بطاطس ومجمدات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0080.png",
     "price": null,
@@ -811,17 +891,19 @@
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "موزریلا ستیککس 1کلو",
-    "categoryEn": "Fries & sides",
-    "categoryUr": "فرائز اور سائیڈز",
+    "categoryEn": "Fries & frozen foods",
+    "categoryUr": "فرائز اور منجمد خوراک",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "البطاطا والمقبلات",
+    "categoryKey": "بطاطس ومجمدات"
   },
   {
     "id": "BRG-0081",
     "name": "بطاطا حلوة مقلية 9×9 مم ساديا – 2.5 كغ",
     "nameEn": "Sweet Potato Fries 9x9mm 2.5kg",
-    "category": "البطاطا والمقبلات",
+    "category": "بطاطس ومجمدات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0081.png",
     "price": null,
@@ -830,17 +912,19 @@
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "میٹھا آلو فرائز 9×9مم 2.5کلو",
-    "categoryEn": "Fries & sides",
-    "categoryUr": "فرائز اور سائیڈز",
+    "categoryEn": "Fries & frozen foods",
+    "categoryUr": "فرائز اور منجمد خوراک",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "البطاطا والمقبلات",
+    "categoryKey": "بطاطس ومجمدات"
   },
   {
     "id": "BRG-0082",
     "name": "بطاطا برايفت ريزيرف 6×6 مم – 2.5 كغ",
     "nameEn": "Private Reserve Fries 6x6mm 2.5kg",
-    "category": "البطاطا والمقبلات",
+    "category": "بطاطس ومجمدات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0082.png",
     "price": null,
@@ -849,17 +933,19 @@
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "پریواتی ریسیروی فرائز 6×6مم 2.5کلو",
-    "categoryEn": "Fries & sides",
-    "categoryUr": "فرائز اور سائیڈز",
+    "categoryEn": "Fries & frozen foods",
+    "categoryUr": "فرائز اور منجمد خوراک",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "البطاطا والمقبلات",
+    "categoryKey": "بطاطس ومجمدات"
   },
   {
     "id": "BRG-0083",
     "name": "بطاطا جوليان رفيعة – 1.81 كغ",
     "nameEn": "Shoestring 3/16\" Julienne Fries 1.81kg",
-    "category": "البطاطا والمقبلات",
+    "category": "بطاطس ومجمدات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0083.png",
     "price": null,
@@ -868,17 +954,19 @@
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "سہویسترینگ 3/16\" جولییننی فرائز 1.81کلو",
-    "categoryEn": "Fries & sides",
-    "categoryUr": "فرائز اور سائیڈز",
+    "categoryEn": "Fries & frozen foods",
+    "categoryUr": "فرائز اور منجمد خوراک",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "البطاطا والمقبلات",
+    "categoryKey": "بطاطس ومجمدات"
   },
   {
     "id": "BRG-0084",
     "name": "بطاطا ديبسترز لوتوسا – 2.5 كغ",
     "nameEn": "Dipsters Fries 2.5kg",
-    "category": "البطاطا والمقبلات",
+    "category": "بطاطس ومجمدات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0084.png",
     "price": null,
@@ -887,17 +975,19 @@
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "دیپستیرس فرائز 2.5کلو",
-    "categoryEn": "Fries & sides",
-    "categoryUr": "فرائز اور سائیڈز",
+    "categoryEn": "Fries & frozen foods",
+    "categoryUr": "فرائز اور منجمد خوراک",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "البطاطا والمقبلات",
+    "categoryKey": "بطاطس ومجمدات"
   },
   {
     "id": "BRG-0085",
     "name": "بطاطا رستيك لامب ويستون – 2.5 كغ",
     "nameEn": "Rustic Fries Skin-On 2.5kg",
-    "category": "البطاطا والمقبلات",
+    "category": "بطاطس ومجمدات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0085.png",
     "price": null,
@@ -906,17 +996,19 @@
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "روستیک فرائز چھلکے-ون 2.5کلو",
-    "categoryEn": "Fries & sides",
-    "categoryUr": "فرائز اور سائیڈز",
+    "categoryEn": "Fries & frozen foods",
+    "categoryUr": "فرائز اور منجمد خوراک",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "البطاطا والمقبلات",
+    "categoryKey": "بطاطس ومجمدات"
   },
   {
     "id": "BRG-0092",
     "name": "بطاطا مموجة ساديا – 2.5 كغ",
     "nameEn": "Crinkle Cut Fries 2.5kg",
-    "category": "البطاطا والمقبلات",
+    "category": "بطاطس ومجمدات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0092.png",
     "price": null,
@@ -925,17 +1017,19 @@
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "کرینکلی کٹ فرائز 2.5کلو",
-    "categoryEn": "Fries & sides",
-    "categoryUr": "فرائز اور سائیڈز",
+    "categoryEn": "Fries & frozen foods",
+    "categoryUr": "فرائز اور منجمد خوراک",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "البطاطا والمقبلات",
+    "categoryKey": "بطاطس ومجمدات"
   },
   {
     "id": "BRG-0093",
     "name": "حلقات بصل لامب ويستون – 1 كغ",
     "nameEn": "Onion Rings 1kg",
-    "category": "البطاطا والمقبلات",
+    "category": "بطاطس ومجمدات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0093.png",
     "price": null,
@@ -944,17 +1038,19 @@
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "پیاز رنگز 1کلو",
-    "categoryEn": "Fries & sides",
-    "categoryUr": "فرائز اور سائیڈز",
+    "categoryEn": "Fries & frozen foods",
+    "categoryUr": "فرائز اور منجمد خوراک",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "البطاطا والمقبلات",
+    "categoryKey": "بطاطس ومجمدات"
   },
   {
     "id": "BRG-0094",
     "name": "كرات بطاطا بالجبن والهالبينو – 1.5 كغ",
     "nameEn": "Potato Balls with Cheese & Jalapeno 1.5kg",
-    "category": "البطاطا والمقبلات",
+    "category": "بطاطس ومجمدات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0094.png",
     "price": null,
@@ -963,17 +1059,19 @@
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "آلو بالز کے ساتھ پنیر & جالاپینو 1.5کلو",
-    "categoryEn": "Fries & sides",
-    "categoryUr": "فرائز اور سائیڈز",
+    "categoryEn": "Fries & frozen foods",
+    "categoryUr": "فرائز اور منجمد خوراک",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "البطاطا والمقبلات",
+    "categoryKey": "بطاطس ومجمدات"
   },
   {
     "id": "BRG-0095",
     "name": "كرات بطاطا تيتر جيمز – 2.2 كغ",
     "nameEn": "Potato Tater Gems 2.2kg",
-    "category": "البطاطا والمقبلات",
+    "category": "بطاطس ومجمدات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0095.png",
     "price": null,
@@ -982,17 +1080,19 @@
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "آلو تاتیر گیمس 2.2کلو",
-    "categoryEn": "Fries & sides",
-    "categoryUr": "فرائز اور سائیڈز",
+    "categoryEn": "Fries & frozen foods",
+    "categoryUr": "فرائز اور منجمد خوراک",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "البطاطا والمقبلات",
+    "categoryKey": "بطاطس ومجمدات"
   },
   {
     "id": "BRG-0096",
     "name": "هاش براون ساديا – 1 كغ",
     "nameEn": "Hash Browns 1kg",
-    "category": "البطاطا والمقبلات",
+    "category": "بطاطس ومجمدات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0096.png",
     "price": null,
@@ -1001,17 +1101,19 @@
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "ہیش براؤنز 1کلو",
-    "categoryEn": "Fries & sides",
-    "categoryUr": "فرائز اور سائیڈز",
+    "categoryEn": "Fries & frozen foods",
+    "categoryUr": "فرائز اور منجمد خوراک",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "البطاطا والمقبلات",
+    "categoryKey": "بطاطس ومجمدات"
   },
   {
     "id": "BRG-0097",
     "name": "هاش براون مقرمش لوتوسا – 2.5 كغ",
     "nameEn": "Crunchy Hash Browns 2.5kg",
-    "category": "البطاطا والمقبلات",
+    "category": "بطاطس ومجمدات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0097.png",
     "price": null,
@@ -1020,17 +1122,19 @@
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "کرونکہی ہیش براؤنز 2.5کلو",
-    "categoryEn": "Fries & sides",
-    "categoryUr": "فرائز اور سائیڈز",
+    "categoryEn": "Fries & frozen foods",
+    "categoryUr": "فرائز اور منجمد خوراک",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "البطاطا والمقبلات",
+    "categoryKey": "بطاطس ومجمدات"
   },
   {
     "id": "BRG-0066",
     "name": "كاتشاب طماطم شيفز باليت – 5 كغ",
     "nameEn": "Tomato Ketchup 5kg",
-    "category": "الصلصات والتتبيلات",
+    "category": "صلصات وتوابل",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0066.png",
     "price": null,
@@ -1039,17 +1143,19 @@
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "ٹماٹر کیچپ 5کلو",
-    "categoryEn": "Sauces & seasonings",
+    "categoryEn": "Sauces & spices",
     "categoryUr": "ساس اور مصالحے",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "الصلصات والتتبيلات",
+    "categoryKey": "صلصات وتوابل"
   },
   {
     "id": "BRG-0065",
     "name": "كاتشاب طماطم بركة – 5 كغ",
     "nameEn": "Tomato Ketchup 5kg",
-    "category": "الصلصات والتتبيلات",
+    "category": "صلصات وتوابل",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0065.png",
     "price": 1.7,
@@ -1058,19 +1164,21 @@
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "ٹماٹر کیچپ 5کلو",
-    "categoryEn": "Sauces & seasonings",
+    "categoryEn": "Sauces & spices",
     "categoryUr": "ساس اور مصالحے",
     "unitEn": "Pack",
     "unitUr": "پیک",
     "marketPrice": 1.7,
     "marketPriceCheckedAt": "2026-10-26",
-    "marketPriceSource": "https://makanifoods.com/collections/full-price"
+    "marketPriceSource": "https://makanifoods.com/collections/full-price",
+    "subcategory": "الصلصات والتتبيلات",
+    "categoryKey": "صلصات وتوابل"
   },
   {
     "id": "BRG-0068",
     "name": "كاتشاب طماطم هيلمانز – 4.8 كغ",
     "nameEn": "Tomato Ketchup 4.8kg",
-    "category": "الصلصات والتتبيلات",
+    "category": "صلصات وتوابل",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0068.png",
     "price": null,
@@ -1079,17 +1187,19 @@
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "ٹماٹر کیچپ 4.8کلو",
-    "categoryEn": "Sauces & seasonings",
+    "categoryEn": "Sauces & spices",
     "categoryUr": "ساس اور مصالحے",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "الصلصات والتتبيلات",
+    "categoryKey": "صلصات وتوابل"
   },
   {
     "id": "BRG-0067",
     "name": "كاتشاب طماطم فيستيفا – 910 غ",
     "nameEn": "Tomato Ketchup 910g",
-    "category": "الصلصات والتتبيلات",
+    "category": "صلصات وتوابل",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0067.png",
     "price": null,
@@ -1098,17 +1208,19 @@
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "ٹماٹر کیچپ 910گرام",
-    "categoryEn": "Sauces & seasonings",
+    "categoryEn": "Sauces & spices",
     "categoryUr": "ساس اور مصالحے",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "الصلصات والتتبيلات",
+    "categoryKey": "صلصات وتوابل"
   },
   {
     "id": "BRG-0069",
     "name": "مايونيز بريميوم شيفز باليت – 3.78 لتر",
     "nameEn": "Premium Mayonnaise 3.78L",
-    "category": "الصلصات والتتبيلات",
+    "category": "صلصات وتوابل",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0069.png",
     "price": null,
@@ -1117,17 +1229,19 @@
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "پریمیم مایونیز 3.78لیٹر",
-    "categoryEn": "Sauces & seasonings",
+    "categoryEn": "Sauces & spices",
     "categoryUr": "ساس اور مصالحے",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "الصلصات والتتبيلات",
+    "categoryKey": "صلصات وتوابل"
   },
   {
     "id": "BRG-0070",
     "name": "مايونيز فيستيفا – 3.78 لتر",
     "nameEn": "Mayonnaise 3.78L",
-    "category": "الصلصات والتتبيلات",
+    "category": "صلصات وتوابل",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0070.png",
     "price": null,
@@ -1136,17 +1250,19 @@
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "مایونیز 3.78لیٹر",
-    "categoryEn": "Sauces & seasonings",
+    "categoryEn": "Sauces & spices",
     "categoryUr": "ساس اور مصالحے",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "الصلصات والتتبيلات",
+    "categoryKey": "صلصات وتوابل"
   },
   {
     "id": "BRG-0059",
     "name": "زيت صويا سائل شفاف للقلي – 17.3 لتر",
     "nameEn": "Clear Soy Liquid Frying Oil 17.3L",
-    "category": "الصلصات والتتبيلات",
+    "category": "صلصات وتوابل",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0059.png",
     "price": null,
@@ -1155,17 +1271,19 @@
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "کلیار سوی لیقوید فریینگ تیل 17.3لیٹر",
-    "categoryEn": "Sauces & seasonings",
+    "categoryEn": "Sauces & spices",
     "categoryUr": "ساس اور مصالحے",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "الصلصات والتتبيلات",
+    "categoryKey": "صلصات وتوابل"
   },
   {
     "id": "BRG-0060",
     "name": "زيت نباتي سابرينا – 20 لتر",
     "nameEn": "Vegetable Oil 20L",
-    "category": "الصلصات والتتبيلات",
+    "category": "صلصات وتوابل",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0060.png",
     "price": null,
@@ -1174,17 +1292,19 @@
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "سبزی تیل 20لیٹر",
-    "categoryEn": "Sauces & seasonings",
+    "categoryEn": "Sauces & spices",
     "categoryUr": "ساس اور مصالحے",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "الصلصات والتتبيلات",
+    "categoryKey": "صلصات وتوابل"
   },
   {
     "id": "BRG-0061",
     "name": "زيت نباتي هالة – 17 لتر",
     "nameEn": "Vegetable Oil 17L",
-    "category": "الصلصات والتتبيلات",
+    "category": "صلصات وتوابل",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0061.png",
     "price": null,
@@ -1193,17 +1313,19 @@
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "سبزی تیل 17لیٹر",
-    "categoryEn": "Sauces & seasonings",
+    "categoryEn": "Sauces & spices",
     "categoryUr": "ساس اور مصالحے",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "الصلصات والتتبيلات",
+    "categoryKey": "صلصات وتوابل"
   },
   {
     "id": "BRG-0079",
     "name": "ملح سعودي – 1 كغ",
     "nameEn": "Salt 1kg",
-    "category": "الصلصات والتتبيلات",
+    "category": "صلصات وتوابل",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0079.png",
     "price": null,
@@ -1212,17 +1334,19 @@
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "نمک 1کلو",
-    "categoryEn": "Sauces & seasonings",
+    "categoryEn": "Sauces & spices",
     "categoryUr": "ساس اور مصالحے",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "الصلصات والتتبيلات",
+    "categoryKey": "صلصات وتوابل"
   },
   {
     "id": "BRG-0049",
     "name": "صلصة باربكيو شيفز باليت – 3.1 كغ",
     "nameEn": "BBQ Sauce 3.1kg",
-    "category": "الصلصات والتتبيلات",
+    "category": "صلصات وتوابل",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0049.png",
     "price": null,
@@ -1231,17 +1355,19 @@
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "باربی کیو ساس 3.1کلو",
-    "categoryEn": "Sauces & seasonings",
+    "categoryEn": "Sauces & spices",
     "categoryUr": "ساس اور مصالحے",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "الصلصات والتتبيلات",
+    "categoryKey": "صلصات وتوابل"
   },
   {
     "id": "BRG-0050",
     "name": "صلصة باربكيو فيستيفا – 3.78 لتر",
     "nameEn": "BBQ Sauce 4kg",
-    "category": "الصلصات والتتبيلات",
+    "category": "صلصات وتوابل",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0050.png",
     "price": null,
@@ -1250,17 +1376,19 @@
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "باربی کیو ساس 4کلو",
-    "categoryEn": "Sauces & seasonings",
+    "categoryEn": "Sauces & spices",
     "categoryUr": "ساس اور مصالحے",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "الصلصات والتتبيلات",
+    "categoryKey": "صلصات وتوابل"
   },
   {
     "id": "BRG-0051",
     "name": "بابريكا وفلفل أحمر مطحون – 500 غ",
     "nameEn": "Red Chili Paprika Powder 500g",
-    "category": "الصلصات والتتبيلات",
+    "category": "صلصات وتوابل",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0051.png",
     "price": null,
@@ -1269,17 +1397,19 @@
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "سرخ مرچ پاپریکا پاؤڈر 500گرام",
-    "categoryEn": "Sauces & seasonings",
+    "categoryEn": "Sauces & spices",
     "categoryUr": "ساس اور مصالحے",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "الصلصات والتتبيلات",
+    "categoryKey": "صلصات وتوابل"
   },
   {
     "id": "BRG-0052",
     "name": "فلفل شيبوتلي مطحون ماكورميك – 453 غ",
     "nameEn": "Chipotle Chile Pepper Powder 453g",
-    "category": "الصلصات والتتبيلات",
+    "category": "صلصات وتوابل",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0052.png",
     "price": null,
@@ -1288,17 +1418,19 @@
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "کہیپوتلی کہیلی مرچ پاؤڈر 453گرام",
-    "categoryEn": "Sauces & seasonings",
+    "categoryEn": "Sauces & spices",
     "categoryUr": "ساس اور مصالحے",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "الصلصات والتتبيلات",
+    "categoryKey": "صلصات وتوابل"
   },
   {
     "id": "BRG-0053",
     "name": "مسحوق ثوم شيفز تشويس – 500 غ",
     "nameEn": "Garlic Powder 500g",
-    "category": "الصلصات والتتبيلات",
+    "category": "صلصات وتوابل",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0053.png",
     "price": null,
@@ -1307,17 +1439,19 @@
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "لہسن پاؤڈر 500گرام",
-    "categoryEn": "Sauces & seasonings",
+    "categoryEn": "Sauces & spices",
     "categoryUr": "ساس اور مصالحے",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "الصلصات والتتبيلات",
+    "categoryKey": "صلصات وتوابل"
   },
   {
     "id": "BRG-0054",
     "name": "بقسماط – 500 غ",
     "nameEn": "Bread Crumbs 500g",
-    "category": "الصلصات والتتبيلات",
+    "category": "صلصات وتوابل",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0054.png",
     "price": null,
@@ -1326,17 +1460,19 @@
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "بریاد کرومبس 500گرام",
-    "categoryEn": "Sauces & seasonings",
+    "categoryEn": "Sauces & spices",
     "categoryUr": "ساس اور مصالحے",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "الصلصات والتتبيلات",
+    "categoryKey": "صلصات وتوابل"
   },
   {
     "id": "BRG-0055",
     "name": "صلصة خردل بالعسل شيفز باليت – 3.78 لتر",
     "nameEn": "Honey Mustard Sauce 3.78L",
-    "category": "الصلصات والتتبيلات",
+    "category": "صلصات وتوابل",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0055.png",
     "price": null,
@@ -1345,17 +1481,19 @@
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "شہد مسٹرڈ ساس 3.78لیٹر",
-    "categoryEn": "Sauces & seasonings",
+    "categoryEn": "Sauces & spices",
     "categoryUr": "ساس اور مصالحے",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "الصلصات والتتبيلات",
+    "categoryKey": "صلصات وتوابل"
   },
   {
     "id": "BRG-0056",
     "name": "صلصة خردل شيفز باليت – 3.78 لتر",
     "nameEn": "Mustard Sauce 3.78L",
-    "category": "الصلصات والتتبيلات",
+    "category": "صلصات وتوابل",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0056.png",
     "price": null,
@@ -1364,17 +1502,19 @@
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "مسٹرڈ ساس 3.78لیٹر",
-    "categoryEn": "Sauces & seasonings",
+    "categoryEn": "Sauces & spices",
     "categoryUr": "ساس اور مصالحے",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "الصلصات والتتبيلات",
+    "categoryKey": "صلصات وتوابل"
   },
   {
     "id": "BRG-0057",
     "name": "تتبيلة رانش باللبن شيفز باليت – 3.78 لتر",
     "nameEn": "Buttermilk Ranch Dressing 3.78L",
-    "category": "الصلصات والتتبيلات",
+    "category": "صلصات وتوابل",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0057.png",
     "price": null,
@@ -1383,17 +1523,19 @@
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "بوتتیرمیلک رینچ ڈریسنگ 3.78لیٹر",
-    "categoryEn": "Sauces & seasonings",
+    "categoryEn": "Sauces & spices",
     "categoryUr": "ساس اور مصالحے",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "الصلصات والتتبيلات",
+    "categoryKey": "صلصات وتوابل"
   },
   {
     "id": "BRG-0058",
     "name": "تتبيلة رانش فيستيفا – 3.78 لتر",
     "nameEn": "Ranch Dressing 3.78L",
-    "category": "الصلصات والتتبيلات",
+    "category": "صلصات وتوابل",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0058.png",
     "price": null,
@@ -1402,17 +1544,19 @@
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "رینچ ڈریسنگ 3.78لیٹر",
-    "categoryEn": "Sauces & seasonings",
+    "categoryEn": "Sauces & spices",
     "categoryUr": "ساس اور مصالحے",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "الصلصات والتتبيلات",
+    "categoryKey": "صلصات وتوابل"
   },
   {
     "id": "BRG-0062",
     "name": "صلصة برغر حارة بنكهة تاباسكو – 1.85 لتر",
     "nameEn": "Spicy Burger Sauce with Tabasco Sauce Flavor 1.85L",
-    "category": "الصلصات والتتبيلات",
+    "category": "صلصات وتوابل",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0062.png",
     "price": null,
@@ -1421,17 +1565,19 @@
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "تیز برگر ساس کے ساتھ تاباسکو ساس فلاوور 1.85لیٹر",
-    "categoryEn": "Sauces & seasonings",
+    "categoryEn": "Sauces & spices",
     "categoryUr": "ساس اور مصالحے",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "الصلصات والتتبيلات",
+    "categoryKey": "صلصات وتوابل"
   },
   {
     "id": "BRG-0063",
     "name": "صلصة تشولولا الحارة – 5 أونصات",
     "nameEn": "Hot Sauce 150ml",
-    "category": "الصلصات والتتبيلات",
+    "category": "صلصات وتوابل",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0063.png",
     "price": null,
@@ -1440,17 +1586,19 @@
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "تیز ساس 150ملی لیٹر",
-    "categoryEn": "Sauces & seasonings",
+    "categoryEn": "Sauces & spices",
     "categoryUr": "ساس اور مصالحے",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "الصلصات والتتبيلات",
+    "categoryKey": "صلصات وتوابل"
   },
   {
     "id": "BRG-0064",
     "name": "صلصة داينمايت بنكهة تاباسكو – 1.85 لتر",
     "nameEn": "Dynamite Sauce with Tabasco Sauce Flavor 1.85L",
-    "category": "الصلصات والتتبيلات",
+    "category": "صلصات وتوابل",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0064.png",
     "price": null,
@@ -1459,17 +1607,19 @@
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "دینامیتی ساس کے ساتھ تاباسکو ساس فلاوور 1.85لیٹر",
-    "categoryEn": "Sauces & seasonings",
+    "categoryEn": "Sauces & spices",
     "categoryUr": "ساس اور مصالحے",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "الصلصات والتتبيلات",
+    "categoryKey": "صلصات وتوابل"
   },
   {
     "id": "BRG-0071",
     "name": "مايونيز كلاسيك هيلمانز – 3.78 لتر",
     "nameEn": "Classic Mayonnaise 3.78L",
-    "category": "الصلصات والتتبيلات",
+    "category": "صلصات وتوابل",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0071.png",
     "price": null,
@@ -1478,17 +1628,19 @@
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "کلاسک مایونیز 3.78لیٹر",
-    "categoryEn": "Sauces & seasonings",
+    "categoryEn": "Sauces & spices",
     "categoryUr": "ساس اور مصالحے",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "الصلصات والتتبيلات",
+    "categoryKey": "صلصات وتوابل"
   },
   {
     "id": "BRG-0072",
     "name": "مايونيز لايت هيلمانز – 3.78 لتر",
     "nameEn": "Light Mayonnaise 3.78L",
-    "category": "الصلصات والتتبيلات",
+    "category": "صلصات وتوابل",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0072.png",
     "price": null,
@@ -1497,17 +1649,19 @@
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "لائٹ مایونیز 3.78لیٹر",
-    "categoryEn": "Sauces & seasonings",
+    "categoryEn": "Sauces & spices",
     "categoryUr": "ساس اور مصالحے",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "الصلصات والتتبيلات",
+    "categoryKey": "صلصات وتوابل"
   },
   {
     "id": "BRG-0073",
     "name": "مايونيز بالثوم شيفز باليت – 3.78 لتر",
     "nameEn": "Garlic Mayonnaise 3.78L",
-    "category": "الصلصات والتتبيلات",
+    "category": "صلصات وتوابل",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0073.png",
     "price": null,
@@ -1516,17 +1670,19 @@
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "لہسن مایونیز 3.78لیٹر",
-    "categoryEn": "Sauces & seasonings",
+    "categoryEn": "Sauces & spices",
     "categoryUr": "ساس اور مصالحے",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "الصلصات والتتبيلات",
+    "categoryKey": "صلصات وتوابل"
   },
   {
     "id": "BRG-0074",
     "name": "مايونيز حار بنكهة تاباسكو – 1.85 لتر",
     "nameEn": "Spicy Mayonnaise with Tabasco Sauce Flavor 1.85L",
-    "category": "الصلصات والتتبيلات",
+    "category": "صلصات وتوابل",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0074.png",
     "price": null,
@@ -1535,17 +1691,19 @@
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "تیز مایونیز کے ساتھ تاباسکو ساس فلاوور 1.85لیٹر",
-    "categoryEn": "Sauces & seasonings",
+    "categoryEn": "Sauces & spices",
     "categoryUr": "ساس اور مصالحے",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "الصلصات والتتبيلات",
+    "categoryKey": "صلصات وتوابل"
   },
   {
     "id": "BRG-0075",
     "name": "مايونيز شيبوتلي شيفز باليت – 3.78 لتر",
     "nameEn": "Chipotle Mayonnaise 3.78L",
-    "category": "الصلصات والتتبيلات",
+    "category": "صلصات وتوابل",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0075.png",
     "price": null,
@@ -1554,17 +1712,19 @@
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "کہیپوتلی مایونیز 3.78لیٹر",
-    "categoryEn": "Sauces & seasonings",
+    "categoryEn": "Sauces & spices",
     "categoryUr": "ساس اور مصالحے",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "الصلصات والتتبيلات",
+    "categoryKey": "صلصات وتوابل"
   },
   {
     "id": "BRG-0076",
     "name": "مايونيز فلفل حار شيفز باليت – 3.78 لتر",
     "nameEn": "Chili Mayonnaise 3.78L",
-    "category": "الصلصات والتتبيلات",
+    "category": "صلصات وتوابل",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0076.png",
     "price": null,
@@ -1573,17 +1733,19 @@
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "مرچ مایونیز 3.78لیٹر",
-    "categoryEn": "Sauces & seasonings",
+    "categoryEn": "Sauces & spices",
     "categoryUr": "ساس اور مصالحے",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "الصلصات والتتبيلات",
+    "categoryKey": "صلصات وتوابل"
   },
   {
     "id": "BRG-0077",
     "name": "ريليش حلو إم تي أوليف – 473 مل",
     "nameEn": "Sweet Relish 473ml",
-    "category": "الصلصات والتتبيلات",
+    "category": "صلصات وتوابل",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0077.png",
     "price": null,
@@ -1592,17 +1754,19 @@
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "میٹھا ریلیسہ 473ملی لیٹر",
-    "categoryEn": "Sauces & seasonings",
+    "categoryEn": "Sauces & spices",
     "categoryUr": "ساس اور مصالحے",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "الصلصات والتتبيلات",
+    "categoryKey": "صلصات وتوابل"
   },
   {
     "id": "BRG-0078",
     "name": "ريليش شبت إم تي أوليف – 473 مل",
     "nameEn": "Dill Relish 473ml",
-    "category": "الصلصات والتتبيلات",
+    "category": "صلصات وتوابل",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0078.png",
     "price": null,
@@ -1611,17 +1775,19 @@
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "دیلل ریلیسہ 473ملی لیٹر",
-    "categoryEn": "Sauces & seasonings",
+    "categoryEn": "Sauces & spices",
     "categoryUr": "ساس اور مصالحے",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "الصلصات والتتبيلات",
+    "categoryKey": "صلصات وتوابل"
   },
   {
     "id": "BRG-0005",
     "name": "خس دائري طازج – حبة",
     "nameEn": "Fresh Round Lettuce 1pc",
-    "category": "الخضروات الطازجة",
+    "category": "خضروات طازجة",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0005.png",
     "price": null,
@@ -1634,13 +1800,15 @@
     "categoryUr": "تازہ سبزیاں",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "الخضروات الطازجة",
+    "categoryKey": "خضروات طازجة"
   },
   {
     "id": "BRG-0006",
     "name": "خس روماني أردني – حبة",
     "nameEn": "Jordanian Romaine Lettuce 1pc",
-    "category": "الخضروات الطازجة",
+    "category": "خضروات طازجة",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0006.png",
     "price": null,
@@ -1653,13 +1821,15 @@
     "categoryUr": "تازہ سبزیاں",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "الخضروات الطازجة",
+    "categoryKey": "خضروات طازجة"
   },
   {
     "id": "BRG-0008",
     "name": "طماطم طازجة – 3 كغ",
     "nameEn": "Fresh Tomato 3kg",
-    "category": "الخضروات الطازجة",
+    "category": "خضروات طازجة",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0008.png",
     "price": null,
@@ -1672,13 +1842,15 @@
     "categoryUr": "تازہ سبزیاں",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "الخضروات الطازجة",
+    "categoryKey": "خضروات طازجة"
   },
   {
     "id": "BRG-0009",
     "name": "طماطم كويتية طازجة – 1 كغ",
     "nameEn": "Fresh Kuwaiti Tomato 1kg",
-    "category": "الخضروات الطازجة",
+    "category": "خضروات طازجة",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0009.png",
     "price": 0.995,
@@ -1693,13 +1865,15 @@
     "unitUr": "پیک",
     "marketPrice": 0.995,
     "marketPriceCheckedAt": "2026-10-26",
-    "marketPriceSource": "https://www.co-opkw.com/"
+    "marketPriceSource": "https://www.co-opkw.com/",
+    "subcategory": "الخضروات الطازجة",
+    "categoryKey": "خضروات طازجة"
   },
   {
     "id": "BRG-0001",
     "name": "بصل أبيض – 1 كغ",
     "nameEn": "White Onion 1kg",
-    "category": "الخضروات الطازجة",
+    "category": "خضروات طازجة",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0001.png",
     "price": null,
@@ -1712,13 +1886,15 @@
     "categoryUr": "تازہ سبزیاں",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "الخضروات الطازجة",
+    "categoryKey": "خضروات طازجة"
   },
   {
     "id": "BRG-0002",
     "name": "بصل أحمر يمني – 1 كغ",
     "nameEn": "Yemeni Red Onion 1kg",
-    "category": "الخضروات الطازجة",
+    "category": "خضروات طازجة",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0002.png",
     "price": null,
@@ -1731,13 +1907,15 @@
     "categoryUr": "تازہ سبزیاں",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "الخضروات الطازجة",
+    "categoryKey": "خضروات طازجة"
   },
   {
     "id": "BRG-0003",
     "name": "بصل هندي – 1 كغ",
     "nameEn": "Indian Onion 1kg",
-    "category": "الخضروات الطازجة",
+    "category": "خضروات طازجة",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0003.png",
     "price": null,
@@ -1750,13 +1928,15 @@
     "categoryUr": "تازہ سبزیاں",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "الخضروات الطازجة",
+    "categoryKey": "خضروات طازجة"
   },
   {
     "id": "BRG-0004",
     "name": "ثوم صيني – 1 كغ",
     "nameEn": "Chinese Garlic 1kg",
-    "category": "الخضروات الطازجة",
+    "category": "خضروات طازجة",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0004.png",
     "price": null,
@@ -1769,13 +1949,15 @@
     "categoryUr": "تازہ سبزیاں",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "الخضروات الطازجة",
+    "categoryKey": "خضروات طازجة"
   },
   {
     "id": "BRG-0007",
     "name": "خيار كويتي – 2 كغ",
     "nameEn": "Kuwaiti Cucumber 2kg",
-    "category": "الخضروات الطازجة",
+    "category": "خضروات طازجة",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0007.png",
     "price": null,
@@ -1788,13 +1970,15 @@
     "categoryUr": "تازہ سبزیاں",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "الخضروات الطازجة",
+    "categoryKey": "خضروات طازجة"
   },
   {
     "id": "BRG-0010",
     "name": "فطر كويتي – 250 غ",
     "nameEn": "Kuwaiti Mushroom 250g",
-    "category": "الخضروات الطازجة",
+    "category": "خضروات طازجة",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0010.png",
     "price": null,
@@ -1807,13 +1991,15 @@
     "categoryUr": "تازہ سبزیاں",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "الخضروات الطازجة",
+    "categoryKey": "خضروات طازجة"
   },
   {
     "id": "BRG-0011",
     "name": "فلفل أخضر حار كويتي",
     "nameEn": "Kuwaiti Green Chili Pepper",
-    "category": "الخضروات الطازجة",
+    "category": "خضروات طازجة",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0011.png",
     "price": null,
@@ -1826,13 +2012,15 @@
     "categoryUr": "تازہ سبزیاں",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "الخضروات الطازجة",
+    "categoryKey": "خضروات طازجة"
   },
   {
     "id": "BRG-0012",
     "name": "فلفل أخضر حلو كويتي",
     "nameEn": "Kuwaiti Green Sweet Pepper",
-    "category": "الخضروات الطازجة",
+    "category": "خضروات طازجة",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0012.png",
     "price": null,
@@ -1845,13 +2033,15 @@
     "categoryUr": "تازہ سبزیاں",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "الخضروات الطازجة",
+    "categoryKey": "خضروات طازجة"
   },
   {
     "id": "BRG-0013",
     "name": "فلفل حلو كويتي مشكل الألوان",
     "nameEn": "Kuwaiti Mixed Sweet Peppers",
-    "category": "الخضروات الطازجة",
+    "category": "خضروات طازجة",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0013.png",
     "price": null,
@@ -1864,13 +2054,15 @@
     "categoryUr": "تازہ سبزیاں",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "الخضروات الطازجة",
+    "categoryKey": "خضروات طازجة"
   },
   {
     "id": "BRG-0014",
     "name": "ليمون أخضر طازج – 1 كغ",
     "nameEn": "Fresh Green Lime 1kg",
-    "category": "الخضروات الطازجة",
+    "category": "خضروات طازجة",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0014.png",
     "price": null,
@@ -1883,13 +2075,15 @@
     "categoryUr": "تازہ سبزیاں",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "الخضروات الطازجة",
+    "categoryKey": "خضروات طازجة"
   },
   {
     "id": "BRG-0098",
     "name": "بيبسي 1.25 لتر – 6 زجاجات",
     "nameEn": "PEPSI 1.25L 6Pcs",
-    "category": "المشروبات الغازية",
+    "category": "مشروبات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0098.png",
     "price": null,
@@ -1902,13 +2096,15 @@
     "categoryUr": "سافٹ ڈرنکس",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "المشروبات الغازية",
+    "categoryKey": "مشروبات"
   },
   {
     "id": "BRG-0099",
     "name": "بيبسي 2.25 لتر – 6 زجاجات",
     "nameEn": "PEPSI 2.25L 6Pcs",
-    "category": "المشروبات الغازية",
+    "category": "مشروبات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0099.png",
     "price": null,
@@ -1921,13 +2117,15 @@
     "categoryUr": "سافٹ ڈرنکس",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "المشروبات الغازية",
+    "categoryKey": "مشروبات"
   },
   {
     "id": "BRG-0100",
     "name": "بيبسي 250 مل – 30 علبة",
     "nameEn": "PEPSI Can 250ml 30 Pcs",
-    "category": "المشروبات الغازية",
+    "category": "مشروبات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0100.png",
     "price": null,
@@ -1940,13 +2138,15 @@
     "categoryUr": "سافٹ ڈرنکس",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "المشروبات الغازية",
+    "categoryKey": "مشروبات"
   },
   {
     "id": "BRG-0101",
     "name": "بيبسي 330 مل – 24 علبة",
     "nameEn": "PEPSI 330ml 24Pcs",
-    "category": "المشروبات الغازية",
+    "category": "مشروبات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0101.png",
     "price": null,
@@ -1959,13 +2159,15 @@
     "categoryUr": "سافٹ ڈرنکس",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "المشروبات الغازية",
+    "categoryKey": "مشروبات"
   },
   {
     "id": "BRG-0102",
     "name": "بيبسي زيرو 1.25 لتر – 6 زجاجات",
     "nameEn": "PEPSI ZERO 1.250L 6Pcs",
-    "category": "المشروبات الغازية",
+    "category": "مشروبات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0102.png",
     "price": null,
@@ -1978,13 +2180,15 @@
     "categoryUr": "سافٹ ڈرنکس",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "المشروبات الغازية",
+    "categoryKey": "مشروبات"
   },
   {
     "id": "BRG-0103",
     "name": "بيبسي زيرو 250 مل – 30 علبة",
     "nameEn": "PEPSI ZERO Cans 250 ml 30 Pcs",
-    "category": "المشروبات الغازية",
+    "category": "مشروبات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0103.png",
     "price": null,
@@ -1997,13 +2201,15 @@
     "categoryUr": "سافٹ ڈرنکس",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "المشروبات الغازية",
+    "categoryKey": "مشروبات"
   },
   {
     "id": "BRG-0104",
     "name": "بيبسي زيرو 330 مل – 24 علبة",
     "nameEn": "PEPSI ZERO CAN 330ML 24Pcs",
-    "category": "المشروبات الغازية",
+    "category": "مشروبات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0104.png",
     "price": null,
@@ -2016,13 +2222,15 @@
     "categoryUr": "سافٹ ڈرنکس",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "المشروبات الغازية",
+    "categoryKey": "مشروبات"
   },
   {
     "id": "BRG-0105",
     "name": "دايت بيبسي 1.25 لتر – 6 زجاجات",
     "nameEn": "DIET PEPSI 1.25L 6 Pcs",
-    "category": "المشروبات الغازية",
+    "category": "مشروبات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0105.png",
     "price": null,
@@ -2035,13 +2243,15 @@
     "categoryUr": "سافٹ ڈرنکس",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "المشروبات الغازية",
+    "categoryKey": "مشروبات"
   },
   {
     "id": "BRG-0106",
     "name": "دايت بيبسي 250 مل – 30 علبة",
     "nameEn": "DIET PEPSI Can 250 ml 30 Pcs",
-    "category": "المشروبات الغازية",
+    "category": "مشروبات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0106.png",
     "price": null,
@@ -2054,13 +2264,15 @@
     "categoryUr": "سافٹ ڈرنکس",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "المشروبات الغازية",
+    "categoryKey": "مشروبات"
   },
   {
     "id": "BRG-0107",
     "name": "دايت بيبسي 330 مل – 24 علبة",
     "nameEn": "DIET PEPSI 330ml 24 Pcs",
-    "category": "المشروبات الغازية",
+    "category": "مشروبات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0107.png",
     "price": null,
@@ -2073,13 +2285,15 @@
     "categoryUr": "سافٹ ڈرنکس",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "المشروبات الغازية",
+    "categoryKey": "مشروبات"
   },
   {
     "id": "BRG-0108",
     "name": "سبرايت زجاج 250 مل – 24 زجاجة",
     "nameEn": "Sprite Bottle Carton 24x250ml",
-    "category": "المشروبات الغازية",
+    "category": "مشروبات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0108.png",
     "price": null,
@@ -2092,13 +2306,15 @@
     "categoryUr": "سافٹ ڈرنکس",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "المشروبات الغازية",
+    "categoryKey": "مشروبات"
   },
   {
     "id": "BRG-0109",
     "name": "سبرايت زيرو – كرتون 30 علبة",
     "nameEn": "Sprite Zero Can Carton",
-    "category": "المشروبات الغازية",
+    "category": "مشروبات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0109.png",
     "price": null,
@@ -2111,13 +2327,15 @@
     "categoryUr": "سافٹ ڈرنکس",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "المشروبات الغازية",
+    "categoryKey": "مشروبات"
   },
   {
     "id": "BRG-0110",
     "name": "ستينغ رِد – 6 زجاجات",
     "nameEn": "STING RED 6 Bottles",
-    "category": "المشروبات الغازية",
+    "category": "مشروبات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0110.png",
     "price": null,
@@ -2130,13 +2348,15 @@
     "categoryUr": "سافٹ ڈرنکس",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "المشروبات الغازية",
+    "categoryKey": "مشروبات"
   },
   {
     "id": "BRG-0111",
     "name": "سفن أب 250 مل – 30 علبة",
     "nameEn": "7-UP CAN 250 ml 30 Pcs",
-    "category": "المشروبات الغازية",
+    "category": "مشروبات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0111.png",
     "price": null,
@@ -2149,13 +2369,15 @@
     "categoryUr": "سافٹ ڈرنکس",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "المشروبات الغازية",
+    "categoryKey": "مشروبات"
   },
   {
     "id": "BRG-0112",
     "name": "سفن أب 330 مل – 24 علبة",
     "nameEn": "7-UP CAN 330 ml 24Pcs",
-    "category": "المشروبات الغازية",
+    "category": "مشروبات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0112.png",
     "price": null,
@@ -2168,13 +2390,15 @@
     "categoryUr": "سافٹ ڈرنکس",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "المشروبات الغازية",
+    "categoryKey": "مشروبات"
   },
   {
     "id": "BRG-0113",
     "name": "سفن أب زيرو 250 مل – 30 علبة",
     "nameEn": "7UP ZERO CAN 250ML 30Pcs",
-    "category": "المشروبات الغازية",
+    "category": "مشروبات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0113.png",
     "price": null,
@@ -2187,13 +2411,15 @@
     "categoryUr": "سافٹ ڈرنکس",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "المشروبات الغازية",
+    "categoryKey": "مشروبات"
   },
   {
     "id": "BRG-0114",
     "name": "سفن أب زيرو 330 مل – 24 علبة",
     "nameEn": "7-UP Zero CAN 330ML 24Pcs",
-    "category": "المشروبات الغازية",
+    "category": "مشروبات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0114.png",
     "price": null,
@@ -2206,13 +2432,15 @@
     "categoryUr": "سافٹ ڈرنکس",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "المشروبات الغازية",
+    "categoryKey": "مشروبات"
   },
   {
     "id": "BRG-0115",
     "name": "سفن أب موهيتو 250 مل – 30 علبة",
     "nameEn": "7UP-MOJITO CANS 250ml 30Pcs",
-    "category": "المشروبات الغازية",
+    "category": "مشروبات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0115.png",
     "price": null,
@@ -2225,13 +2453,15 @@
     "categoryUr": "سافٹ ڈرنکس",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "المشروبات الغازية",
+    "categoryKey": "مشروبات"
   },
   {
     "id": "BRG-0116",
     "name": "شاني 150 مل – 30 علبة",
     "nameEn": "SHANI CAN 150ML 30Pcs",
-    "category": "المشروبات الغازية",
+    "category": "مشروبات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0116.png",
     "price": null,
@@ -2244,13 +2474,15 @@
     "categoryUr": "سافٹ ڈرنکس",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "المشروبات الغازية",
+    "categoryKey": "مشروبات"
   },
   {
     "id": "BRG-0117",
     "name": "شاني 250 مل – 30 علبة",
     "nameEn": "SHANI CAN 250ML 30Pcs",
-    "category": "المشروبات الغازية",
+    "category": "مشروبات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0117.png",
     "price": null,
@@ -2263,13 +2495,15 @@
     "categoryUr": "سافٹ ڈرنکس",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "المشروبات الغازية",
+    "categoryKey": "مشروبات"
   },
   {
     "id": "BRG-0118",
     "name": "فانتا برتقال 250 مل – 30 علبة",
     "nameEn": "Fanta Orange Can 30x250ml",
-    "category": "المشروبات الغازية",
+    "category": "مشروبات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0118.png",
     "price": null,
@@ -2282,13 +2516,15 @@
     "categoryUr": "سافٹ ڈرنکس",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "المشروبات الغازية",
+    "categoryKey": "مشروبات"
   },
   {
     "id": "BRG-0119",
     "name": "فانتا برتقال زجاج 250 مل – 24 زجاجة",
     "nameEn": "Fanta Orange Bottle 24x250ml",
-    "category": "المشروبات الغازية",
+    "category": "مشروبات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0119.png",
     "price": null,
@@ -2301,13 +2537,15 @@
     "categoryUr": "سافٹ ڈرنکس",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "المشروبات الغازية",
+    "categoryKey": "مشروبات"
   },
   {
     "id": "BRG-0120",
     "name": "فانتا فراولة زجاج 250 مل – 24 زجاجة",
     "nameEn": "Fanta Strawberry Bottle 24x250ml",
-    "category": "المشروبات الغازية",
+    "category": "مشروبات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0120.png",
     "price": null,
@@ -2320,13 +2558,15 @@
     "categoryUr": "سافٹ ڈرنکس",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "المشروبات الغازية",
+    "categoryKey": "مشروبات"
   },
   {
     "id": "BRG-0121",
     "name": "كوكاكولا أصلي 250 مل – 30 علبة",
     "nameEn": "Coca Cola Original Can 30x250ml",
-    "category": "المشروبات الغازية",
+    "category": "مشروبات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0121.png",
     "price": null,
@@ -2339,13 +2579,15 @@
     "categoryUr": "سافٹ ڈرنکس",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "المشروبات الغازية",
+    "categoryKey": "مشروبات"
   },
   {
     "id": "BRG-0122",
     "name": "كوكاكولا زجاج 250 مل – 24 زجاجة",
     "nameEn": "Coca Cola Bottle Carton 24x250ml",
-    "category": "المشروبات الغازية",
+    "category": "مشروبات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0122.png",
     "price": null,
@@ -2358,13 +2600,15 @@
     "categoryUr": "سافٹ ڈرنکس",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "المشروبات الغازية",
+    "categoryKey": "مشروبات"
   },
   {
     "id": "BRG-0123",
     "name": "كوكاكولا زيرو 250 مل – 30 علبة",
     "nameEn": "Coca Cola Zero Sugar Can 30x250ml",
-    "category": "المشروبات الغازية",
+    "category": "مشروبات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0123.png",
     "price": null,
@@ -2377,13 +2621,15 @@
     "categoryUr": "سافٹ ڈرنکس",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "المشروبات الغازية",
+    "categoryKey": "مشروبات"
   },
   {
     "id": "BRG-0124",
     "name": "كوكاكولا لايت زجاج 250 مل – 24 زجاجة",
     "nameEn": "Coca Cola Light Bottle Carton 24x250ml",
-    "category": "المشروبات الغازية",
+    "category": "مشروبات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0124.png",
     "price": null,
@@ -2396,13 +2642,15 @@
     "categoryUr": "سافٹ ڈرنکس",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "المشروبات الغازية",
+    "categoryKey": "مشروبات"
   },
   {
     "id": "BRG-0125",
     "name": "ماونتن ديو 250 مل – 30 علبة",
     "nameEn": "MOUNTAIN DEW CAN 250ML 30Pcs",
-    "category": "المشروبات الغازية",
+    "category": "مشروبات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0125.png",
     "price": null,
@@ -2415,13 +2663,15 @@
     "categoryUr": "سافٹ ڈرنکس",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "المشروبات الغازية",
+    "categoryKey": "مشروبات"
   },
   {
     "id": "BRG-0126",
     "name": "ماونتن ديو 330 مل – 24 علبة",
     "nameEn": "MOUNTAIN DEW CAN 330 ML 24Pcs",
-    "category": "المشروبات الغازية",
+    "category": "مشروبات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0126.png",
     "price": null,
@@ -2434,13 +2684,15 @@
     "categoryUr": "سافٹ ڈرنکس",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "المشروبات الغازية",
+    "categoryKey": "مشروبات"
   },
   {
     "id": "BRG-0127",
     "name": "ماونتن ديو زيرو 250 مل – 30 علبة",
     "nameEn": "MOUNTAIN DEW ZERO SUGAR Cans 250ml 30 Pcs",
-    "category": "المشروبات الغازية",
+    "category": "مشروبات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0127.png",
     "price": null,
@@ -2453,13 +2705,15 @@
     "categoryUr": "سافٹ ڈرنکس",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "المشروبات الغازية",
+    "categoryKey": "مشروبات"
   },
   {
     "id": "BRG-0128",
     "name": "ميرندا برتقال 1.25 لتر – 6 زجاجات",
     "nameEn": "MIRINDA ORANGE 1.25L 6Pcs",
-    "category": "المشروبات الغازية",
+    "category": "مشروبات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0128.png",
     "price": null,
@@ -2472,13 +2726,15 @@
     "categoryUr": "سافٹ ڈرنکس",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "المشروبات الغازية",
+    "categoryKey": "مشروبات"
   },
   {
     "id": "BRG-0129",
     "name": "ميرندا برتقال 250 مل – 30 علبة",
     "nameEn": "MIRINDA ORANGE Cans 250 ml 30 Pcs",
-    "category": "المشروبات الغازية",
+    "category": "مشروبات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0129.png",
     "price": null,
@@ -2491,13 +2747,15 @@
     "categoryUr": "سافٹ ڈرنکس",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "المشروبات الغازية",
+    "categoryKey": "مشروبات"
   },
   {
     "id": "BRG-0130",
     "name": "ميرندا برتقال 330 مل – 24 علبة",
     "nameEn": "MIRINDA ORANGE 330ML 24Pcs",
-    "category": "المشروبات الغازية",
+    "category": "مشروبات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0130.png",
     "price": null,
@@ -2510,13 +2768,15 @@
     "categoryUr": "سافٹ ڈرنکس",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "المشروبات الغازية",
+    "categoryKey": "مشروبات"
   },
   {
     "id": "BRG-0131",
     "name": "ميرندا حمضيات 250 مل – 30 علبة",
     "nameEn": "MIRINDA CITRUS Cans 250 ml 30 Pcs",
-    "category": "المشروبات الغازية",
+    "category": "مشروبات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0131.png",
     "price": null,
@@ -2529,13 +2789,15 @@
     "categoryUr": "سافٹ ڈرنکس",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "المشروبات الغازية",
+    "categoryKey": "مشروبات"
   },
   {
     "id": "BRG-0132",
     "name": "مياه روضتين غازية بالليمون واللايم 240 مل – 24 زجاجة",
     "nameEn": "Rawdatain Lemon & Lime Carbonated Water 240ml x24",
-    "category": "المياه",
+    "category": "مياه",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0132.png",
     "price": null,
@@ -2548,13 +2810,15 @@
     "categoryUr": "پانی",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "المياه",
+    "categoryKey": "مياه"
   },
   {
     "id": "BRG-0133",
     "name": "مياه روضتين غازية زجاج 240 مل – 24 زجاجة",
     "nameEn": "Rawdatain Carbonated Glass Water 240ml x24",
-    "category": "المياه",
+    "category": "مياه",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0133.png",
     "price": null,
@@ -2567,13 +2831,15 @@
     "categoryUr": "پانی",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "المياه",
+    "categoryKey": "مياه"
   },
   {
     "id": "BRG-0134",
     "name": "مياه روضتين غازية طبيعية زجاج 430 مل – 24 زجاجة",
     "nameEn": "Rawdatain Carbonated Mineral Water 430ml x24",
-    "category": "المياه",
+    "category": "مياه",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0134.png",
     "price": null,
@@ -2586,13 +2852,15 @@
     "categoryUr": "پانی",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "المياه",
+    "categoryKey": "مياه"
   },
   {
     "id": "BRG-0135",
     "name": "أكوافينا 1.5 لتر – 12 زجاجة",
     "nameEn": "AQ 1.5 Liters 12 Pcs Drinking Water",
-    "category": "المياه",
+    "category": "مياه",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0135.png",
     "price": null,
@@ -2605,13 +2873,15 @@
     "categoryUr": "پانی",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "المياه",
+    "categoryKey": "مياه"
   },
   {
     "id": "BRG-0136",
     "name": "أكوافينا 17.5 لتر",
     "nameEn": "AQ 17.5 Liters Drinking Water",
-    "category": "المياه",
+    "category": "مياه",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0136.png",
     "price": null,
@@ -2624,13 +2894,15 @@
     "categoryUr": "پانی",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "المياه",
+    "categoryKey": "مياه"
   },
   {
     "id": "BRG-0137",
     "name": "أكوافينا 200 مل – 20 زجاجة",
     "nameEn": "AQ 200ML 20Pcs Drinking Water",
-    "category": "المياه",
+    "category": "مياه",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0137.png",
     "price": null,
@@ -2643,13 +2915,15 @@
     "categoryUr": "پانی",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "المياه",
+    "categoryKey": "مياه"
   },
   {
     "id": "BRG-0138",
     "name": "أكوافينا 330 مل – 20 زجاجة",
     "nameEn": "AQ 330ML 20Pcs Drinking water",
-    "category": "المياه",
+    "category": "مياه",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0138.png",
     "price": null,
@@ -2662,13 +2936,15 @@
     "categoryUr": "پانی",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "المياه",
+    "categoryKey": "مياه"
   },
   {
     "id": "BRG-0139",
     "name": "أكوافينا 600 مل – 24 زجاجة",
     "nameEn": "AQ 600ML 24Pcs Drinking Water",
-    "category": "المياه",
+    "category": "مياه",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0139.png",
     "price": null,
@@ -2681,13 +2957,15 @@
     "categoryUr": "پانی",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "المياه",
+    "categoryKey": "مياه"
   },
   {
     "id": "BRG-0140",
     "name": "أكوافينا فوارة 250 مل – 30 زجاجة",
     "nameEn": "AQ 250ML 30Pcs Sparkling Water",
-    "category": "المياه",
+    "category": "مياه",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0140.png",
     "price": null,
@@ -2700,13 +2978,15 @@
     "categoryUr": "پانی",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "المياه",
+    "categoryKey": "مياه"
   },
   {
     "id": "BRG-0141",
     "name": "مياه أبيار 500 مل – 24 زجاجة",
     "nameEn": "Abyar Water 500ml x24",
-    "category": "المياه",
+    "category": "مياه",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0141.png",
     "price": null,
@@ -2719,13 +2999,15 @@
     "categoryUr": "پانی",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "المياه",
+    "categoryKey": "مياه"
   },
   {
     "id": "BRG-0142",
     "name": "مياه روضتين 1 لتر – 6 زجاجات",
     "nameEn": "Rawdatain Water 1L x6",
-    "category": "المياه",
+    "category": "مياه",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0142.png",
     "price": null,
@@ -2738,13 +3020,15 @@
     "categoryUr": "پانی",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "المياه",
+    "categoryKey": "مياه"
   },
   {
     "id": "BRG-0143",
     "name": "مياه روضتين 1.5 لتر – 6 زجاجات",
     "nameEn": "Rawdatain Water 1.5L x6",
-    "category": "المياه",
+    "category": "مياه",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0143.png",
     "price": null,
@@ -2757,13 +3041,15 @@
     "categoryUr": "پانی",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "المياه",
+    "categoryKey": "مياه"
   },
   {
     "id": "BRG-0144",
     "name": "مياه روضتين 330 مل – 20 زجاجة",
     "nameEn": "Rawdatain Water 330ml x20",
-    "category": "المياه",
+    "category": "مياه",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0144.png",
     "price": null,
@@ -2776,13 +3062,15 @@
     "categoryUr": "پانی",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "المياه",
+    "categoryKey": "مياه"
   },
   {
     "id": "BRG-0145",
     "name": "مياه روضتين 500 مل – 20 زجاجة",
     "nameEn": "Rawdatain Water 500ml x20",
-    "category": "المياه",
+    "category": "مياه",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0145.png",
     "price": null,
@@ -2795,13 +3083,15 @@
     "categoryUr": "پانی",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "المياه",
+    "categoryKey": "مياه"
   },
   {
     "id": "BRG-0146",
     "name": "مياه روضتين زجاج 240 مل – 24 زجاجة",
     "nameEn": "Rawdatain Still Glass Water 240ml x24",
-    "category": "المياه",
+    "category": "مياه",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0146.png",
     "price": null,
@@ -2814,13 +3104,15 @@
     "categoryUr": "پانی",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "المياه",
+    "categoryKey": "مياه"
   },
   {
     "id": "BRG-0147",
     "name": "مياه روضتين طبيعية 1.5 لتر – 12 زجاجة",
     "nameEn": "Rawdatain Natural Mineral Water 1.5L x12",
-    "category": "المياه",
+    "category": "مياه",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0147.png",
     "price": null,
@@ -2833,13 +3125,15 @@
     "categoryUr": "پانی",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "المياه",
+    "categoryKey": "مياه"
   },
   {
     "id": "BRG-0156",
     "name": "علب طعام مربعة بقاعدة سوداء وغطاء 28 أونصة – 5 قطع",
     "nameEn": "LuLu Black Base Square Containers With Lid 28oz 5pcs",
-    "category": "التغليف والنظافة",
+    "category": "تغليف واستهلاكيات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0156.png",
     "price": null,
@@ -2848,17 +3142,19 @@
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "لولو کالا باسی سقواری ڈبے کے ساتھ ڈھکن 28وز 5عدد",
-    "categoryEn": "Packaging & hygiene",
-    "categoryUr": "پیکنگ اور صفائی",
+    "categoryEn": "Packaging & disposables",
+    "categoryUr": "پیکنگ اور استعمالی سامان",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "التغليف والنظافة",
+    "categoryKey": "تغليف واستهلاكيات"
   },
   {
     "id": "BRG-0157",
     "name": "علب مايكروويف هوت باك 500 مل مع غطاء – 5 قطع",
     "nameEn": "Hotpack 500ml Microwavable Container With Lid 5pcs",
-    "category": "التغليف والنظافة",
+    "category": "تغليف واستهلاكيات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0157.png",
     "price": null,
@@ -2867,17 +3163,19 @@
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "ہوتپاکک 500ملی لیٹر میکروواوابلی کونتاینیر کے ساتھ ڈھکن 5عدد",
-    "categoryEn": "Packaging & hygiene",
-    "categoryUr": "پیکنگ اور صفائی",
+    "categoryEn": "Packaging & disposables",
+    "categoryUr": "پیکنگ اور استعمالی سامان",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "التغليف والنظافة",
+    "categoryKey": "تغليف واستهلاكيات"
   },
   {
     "id": "BRG-0150",
     "name": "أكواب ورقية الواحة 9 أونصات بمقبض – 50 قطعة",
     "nameEn": "Al Waha Paper Cups 9oz with Handle 50 pcs",
-    "category": "التغليف والنظافة",
+    "category": "تغليف واستهلاكيات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0150.png",
     "price": null,
@@ -2886,17 +3184,19 @@
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "ال واہا کاغذی کپ 9وز کے ساتھ ہاندلی 50 عدد",
-    "categoryEn": "Packaging & hygiene",
-    "categoryUr": "پیکنگ اور صفائی",
+    "categoryEn": "Packaging & disposables",
+    "categoryUr": "پیکنگ اور استعمالی سامان",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "التغليف والنظافة",
+    "categoryKey": "تغليف واستهلاكيات"
   },
   {
     "id": "BRG-0151",
     "name": "أكواب ورقية سانيتا 9 أونصات – 50 قطعة",
     "nameEn": "Sanita Paper Cups 9oz 50pcs",
-    "category": "التغليف والنظافة",
+    "category": "تغليف واستهلاكيات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0151.png",
     "price": null,
@@ -2905,17 +3205,19 @@
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "سانیتا کاغذی کپ 9وز 50عدد",
-    "categoryEn": "Packaging & hygiene",
-    "categoryUr": "پیکنگ اور صفائی",
+    "categoryEn": "Packaging & disposables",
+    "categoryUr": "پیکنگ اور استعمالی سامان",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "التغليف والنظافة",
+    "categoryKey": "تغليف واستهلاكيات"
   },
   {
     "id": "BRG-0148",
     "name": "أكواب بلاستيكية شفافة 6 أونصات – 50 قطعة",
     "nameEn": "LuLu Plastic Clear Cups 6oz 50pcs",
-    "category": "التغليف والنظافة",
+    "category": "تغليف واستهلاكيات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0148.png",
     "price": null,
@@ -2924,17 +3226,19 @@
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "لولو پلاسٹک کلیار کپ 6وز 50عدد",
-    "categoryEn": "Packaging & hygiene",
-    "categoryUr": "پیکنگ اور صفائی",
+    "categoryEn": "Packaging & disposables",
+    "categoryUr": "پیکنگ اور استعمالی سامان",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "التغليف والنظافة",
+    "categoryKey": "تغليف واستهلاكيات"
   },
   {
     "id": "BRG-0149",
     "name": "أكواب بلاستيكية شفافة مع غطاء – 20 قطعة",
     "nameEn": "LuLu Plastic Clear Cups With Lid 20pcs",
-    "category": "التغليف والنظافة",
+    "category": "تغليف واستهلاكيات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0149.png",
     "price": null,
@@ -2943,17 +3247,19 @@
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "لولو پلاسٹک کلیار کپ کے ساتھ ڈھکن 20عدد",
-    "categoryEn": "Packaging & hygiene",
-    "categoryUr": "پیکنگ اور صفائی",
+    "categoryEn": "Packaging & disposables",
+    "categoryUr": "پیکنگ اور استعمالی سامان",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "التغليف والنظافة",
+    "categoryKey": "تغليف واستهلاكيات"
   },
   {
     "id": "BRG-0152",
     "name": "رقائق ألمنيوم الواحة ثقيلة 45 سم",
     "nameEn": "Waha Aluminum Foil Heavy Duty 13.5 Sq Ft × 45 cm",
-    "category": "التغليف والنظافة",
+    "category": "تغليف واستهلاكيات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0152.png",
     "price": null,
@@ -2962,17 +3268,19 @@
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "واہا الومینوم فوائل ہیاوی دوتی 13.5 سق فت × 45 کم",
-    "categoryEn": "Packaging & hygiene",
-    "categoryUr": "پیکنگ اور صفائی",
+    "categoryEn": "Packaging & disposables",
+    "categoryUr": "پیکنگ اور استعمالی سامان",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "التغليف والنظافة",
+    "categoryKey": "تغليف واستهلاكيات"
   },
   {
     "id": "BRG-0154",
     "name": "شفاطات سوداء لولو 8 مم – 100 قطعة",
     "nameEn": "LuLu Black Straws 8mm 100pcs",
-    "category": "التغليف والنظافة",
+    "category": "تغليف واستهلاكيات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0154.png",
     "price": null,
@@ -2981,17 +3289,19 @@
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "لولو کالا اسٹرا 8مم 100عدد",
-    "categoryEn": "Packaging & hygiene",
-    "categoryUr": "پیکنگ اور صفائی",
+    "categoryEn": "Packaging & disposables",
+    "categoryUr": "پیکنگ اور استعمالی سامان",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "التغليف والنظافة",
+    "categoryKey": "تغليف واستهلاكيات"
   },
   {
     "id": "BRG-0155",
     "name": "شفاطات لولو ملونة 12 مم – 50 قطعة",
     "nameEn": "LuLu Multicolour Straw 12mm 50pcs",
-    "category": "التغليف والنظافة",
+    "category": "تغليف واستهلاكيات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0155.png",
     "price": null,
@@ -3000,17 +3310,19 @@
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "لولو مولتیکولوور ستراو 12مم 50عدد",
-    "categoryEn": "Packaging & hygiene",
-    "categoryUr": "پیکنگ اور صفائی",
+    "categoryEn": "Packaging & disposables",
+    "categoryUr": "پیکنگ اور استعمالی سامان",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "التغليف والنظافة",
+    "categoryKey": "تغليف واستهلاكيات"
   },
   {
     "id": "BRG-0158",
     "name": "قفازات فينيل زرقاء للاستخدام مرة واحدة – 100 قطعة",
     "nameEn": "Disposable Vinyl Gloves blue 100pcs Small",
-    "category": "التغليف والنظافة",
+    "category": "تغليف واستهلاكيات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0158.png",
     "price": null,
@@ -3019,17 +3331,19 @@
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "دیسپوسابلی وینیل دستانے بلوی 100عدد سمالل",
-    "categoryEn": "Packaging & hygiene",
-    "categoryUr": "پیکنگ اور صفائی",
+    "categoryEn": "Packaging & disposables",
+    "categoryUr": "پیکنگ اور استعمالی سامان",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "التغليف والنظافة",
+    "categoryKey": "تغليف واستهلاكيات"
   },
   {
     "id": "BRG-0153",
     "name": "كمامات هوت باك زرقاء 3 طبقات – 50 قطعة",
     "nameEn": "Hotpack Blue Face Mask 3ply 50pcs",
-    "category": "التغليف والنظافة",
+    "category": "تغليف واستهلاكيات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0153.png",
     "price": null,
@@ -3038,17 +3352,19 @@
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "ہوتپاکک بلوی فاکی ماسک 3پلی 50عدد",
-    "categoryEn": "Packaging & hygiene",
-    "categoryUr": "پیکنگ اور صفائی",
+    "categoryEn": "Packaging & disposables",
+    "categoryUr": "پیکنگ اور استعمالی سامان",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "التغليف والنظافة",
+    "categoryKey": "تغليف واستهلاكيات"
   },
   {
     "id": "BRG-0159",
     "name": "مناديل كلينكس ديلي كير طبقتان – 5 × 150 ورقة",
     "nameEn": "Kleenex Daily Care Facial Tissue 2-Ply 5 x 150 Sheets",
-    "category": "التغليف والنظافة",
+    "category": "تغليف واستهلاكيات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0159.png",
     "price": null,
@@ -3057,17 +3373,19 @@
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "کلیینیکس دایلی کاری فاکیال ٹشو 2-پلی 5 × 150 شیٹس",
-    "categoryEn": "Packaging & hygiene",
-    "categoryUr": "پیکنگ اور صفائی",
+    "categoryEn": "Packaging & disposables",
+    "categoryUr": "پیکنگ اور استعمالی سامان",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "التغليف والنظافة",
+    "categoryKey": "تغليف واستهلاكيات"
   },
   {
     "id": "BRG-0160",
     "name": "مناديل لولو مربعة 33×33 سم طبقتان – 25 قطعة",
     "nameEn": "LuLu Paper Napkins Square 33x33cm 2ply 25pcs",
-    "category": "التغليف والنظافة",
+    "category": "تغليف واستهلاكيات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0160.png",
     "price": null,
@@ -3076,17 +3394,19 @@
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "لولو کاغذی نیپکن سقواری 33×33کم 2پلی 25عدد",
-    "categoryEn": "Packaging & hygiene",
-    "categoryUr": "پیکنگ اور صفائی",
+    "categoryEn": "Packaging & disposables",
+    "categoryUr": "پیکنگ اور استعمالی سامان",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "التغليف والنظافة",
+    "categoryKey": "تغليف واستهلاكيات"
   },
   {
     "id": "BRG-0161",
     "name": "مناديل ورقية لولو – 70 قطعة",
     "nameEn": "LuLu Paper Napkins 70pcs",
-    "category": "التغليف والنظافة",
+    "category": "تغليف واستهلاكيات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0161.png",
     "price": null,
@@ -3095,17 +3415,19 @@
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "لولو کاغذی نیپکن 70عدد",
-    "categoryEn": "Packaging & hygiene",
-    "categoryUr": "پیکنگ اور صفائی",
+    "categoryEn": "Packaging & disposables",
+    "categoryUr": "پیکنگ اور استعمالی سامان",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "التغليف والنظافة",
+    "categoryKey": "تغليف واستهلاكيات"
   },
   {
     "id": "BRG-0162",
     "name": "مناديل يد فاين متعددة الاستخدام طبقتان – 150 ورقة",
     "nameEn": "Fine Multiuse Hand Towel 2ply 150 Sheets",
-    "category": "التغليف والنظافة",
+    "category": "تغليف واستهلاكيات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0162.png",
     "price": null,
@@ -3114,11 +3436,13 @@
     "verifiedAt": "2026-09-01",
     "priceBasis": "historical_market_reference",
     "nameUr": "فینی مولتیوسی ہاند توویل 2پلی 150 شیٹس",
-    "categoryEn": "Packaging & hygiene",
-    "categoryUr": "پیکنگ اور صفائی",
+    "categoryEn": "Packaging & disposables",
+    "categoryUr": "پیکنگ اور استعمالی سامان",
     "unitEn": "Pack",
     "unitUr": "پیک",
-    "marketPrice": null
+    "marketPrice": null,
+    "subcategory": "التغليف والنظافة",
+    "categoryKey": "تغليف واستهلاكيات"
   },
   {
     "id": "TWB-0001",
@@ -3138,7 +3462,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "لحوم ودواجن",
+    "categoryKey": "لحوم ودواجن"
   },
   {
     "id": "TWB-0002",
@@ -3158,7 +3484,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "لحوم ودواجن",
+    "categoryKey": "لحوم ودواجن"
   },
   {
     "id": "TWB-0003",
@@ -3178,7 +3506,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "لحوم ودواجن",
+    "categoryKey": "لحوم ودواجن"
   },
   {
     "id": "TWB-0004",
@@ -3198,7 +3528,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "لحوم ودواجن",
+    "categoryKey": "لحوم ودواجن"
   },
   {
     "id": "TWB-0005",
@@ -3218,7 +3550,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "لحوم ودواجن",
+    "categoryKey": "لحوم ودواجن"
   },
   {
     "id": "TWB-0006",
@@ -3238,7 +3572,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "لحوم ودواجن",
+    "categoryKey": "لحوم ودواجن"
   },
   {
     "id": "TWB-0007",
@@ -3258,7 +3594,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "لحوم ودواجن",
+    "categoryKey": "لحوم ودواجن"
   },
   {
     "id": "TWB-0008",
@@ -3278,7 +3616,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "خبز ومخبوزات",
+    "categoryKey": "خبز ومخبوزات"
   },
   {
     "id": "TWB-0009",
@@ -3298,7 +3638,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "خبز ومخبوزات",
+    "categoryKey": "خبز ومخبوزات"
   },
   {
     "id": "TWB-0010",
@@ -3318,7 +3660,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "خبز ومخبوزات",
+    "categoryKey": "خبز ومخبوزات"
   },
   {
     "id": "TWB-0011",
@@ -3338,7 +3682,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "خبز ومخبوزات",
+    "categoryKey": "خبز ومخبوزات"
   },
   {
     "id": "TWB-0012",
@@ -3358,7 +3704,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "خبز ومخبوزات",
+    "categoryKey": "خبز ومخبوزات"
   },
   {
     "id": "TWB-0013",
@@ -3378,7 +3726,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "أجبان وألبان",
+    "categoryKey": "أجبان وألبان"
   },
   {
     "id": "TWB-0014",
@@ -3398,7 +3748,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "أجبان وألبان",
+    "categoryKey": "أجبان وألبان"
   },
   {
     "id": "TWB-0015",
@@ -3418,7 +3770,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "أجبان وألبان",
+    "categoryKey": "أجبان وألبان"
   },
   {
     "id": "TWB-0016",
@@ -3438,7 +3792,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "أجبان وألبان",
+    "categoryKey": "أجبان وألبان"
   },
   {
     "id": "TWB-0017",
@@ -3458,7 +3814,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "أجبان وألبان",
+    "categoryKey": "أجبان وألبان"
   },
   {
     "id": "TWB-0018",
@@ -3478,7 +3836,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "أجبان وألبان",
+    "categoryKey": "أجبان وألبان"
   },
   {
     "id": "TWB-0019",
@@ -3486,9 +3846,9 @@
     "name": "بطاطس مقلية مجمدة 9 مم",
     "nameEn": "",
     "nameUr": "",
-    "category": "بطاط ومجمدات",
-    "categoryEn": "Frozen foods & sides",
-    "categoryUr": "منجمد خوراک",
+    "category": "بطاطس ومجمدات",
+    "categoryEn": "Fries & frozen foods",
+    "categoryUr": "فرائز اور منجمد خوراک",
     "unit": "كرتون",
     "unitEn": "Pack",
     "unitUr": "پیک",
@@ -3498,7 +3858,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "بطاط ومجمدات",
+    "categoryKey": "بطاطس ومجمدات"
   },
   {
     "id": "TWB-0020",
@@ -3506,9 +3868,9 @@
     "name": "بطاطس مقلية مجمدة 6 مم",
     "nameEn": "",
     "nameUr": "",
-    "category": "بطاط ومجمدات",
-    "categoryEn": "Frozen foods & sides",
-    "categoryUr": "منجمد خوراک",
+    "category": "بطاطس ومجمدات",
+    "categoryEn": "Fries & frozen foods",
+    "categoryUr": "فرائز اور منجمد خوراک",
     "unit": "كرتون",
     "unitEn": "Pack",
     "unitUr": "پیک",
@@ -3518,7 +3880,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "بطاط ومجمدات",
+    "categoryKey": "بطاطس ومجمدات"
   },
   {
     "id": "TWB-0021",
@@ -3526,9 +3890,9 @@
     "name": "بطاطس ودجز",
     "nameEn": "",
     "nameUr": "",
-    "category": "بطاط ومجمدات",
-    "categoryEn": "Frozen foods & sides",
-    "categoryUr": "منجمد خوراک",
+    "category": "بطاطس ومجمدات",
+    "categoryEn": "Fries & frozen foods",
+    "categoryUr": "فرائز اور منجمد خوراک",
     "unit": "كرتون",
     "unitEn": "Pack",
     "unitUr": "پیک",
@@ -3538,7 +3902,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "بطاط ومجمدات",
+    "categoryKey": "بطاطس ومجمدات"
   },
   {
     "id": "TWB-0022",
@@ -3546,9 +3912,9 @@
     "name": "حلقات بصل مجمدة",
     "nameEn": "",
     "nameUr": "",
-    "category": "بطاط ومجمدات",
-    "categoryEn": "Frozen foods & sides",
-    "categoryUr": "منجمد خوراک",
+    "category": "بطاطس ومجمدات",
+    "categoryEn": "Fries & frozen foods",
+    "categoryUr": "فرائز اور منجمد خوراک",
     "unit": "كرتون",
     "unitEn": "Pack",
     "unitUr": "پیک",
@@ -3558,7 +3924,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "بطاط ومجمدات",
+    "categoryKey": "بطاطس ومجمدات"
   },
   {
     "id": "TWB-0023",
@@ -3566,9 +3934,9 @@
     "name": "أصابع موزاريلا مجمدة",
     "nameEn": "",
     "nameUr": "",
-    "category": "بطاط ومجمدات",
-    "categoryEn": "Frozen foods & sides",
-    "categoryUr": "منجمد خوراک",
+    "category": "بطاطس ومجمدات",
+    "categoryEn": "Fries & frozen foods",
+    "categoryUr": "فرائز اور منجمد خوراک",
     "unit": "كرتون",
     "unitEn": "Pack",
     "unitUr": "پیک",
@@ -3578,7 +3946,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "بطاط ومجمدات",
+    "categoryKey": "بطاطس ومجمدات"
   },
   {
     "id": "TWB-0024",
@@ -3586,9 +3956,9 @@
     "name": "ناجتس دجاج",
     "nameEn": "",
     "nameUr": "",
-    "category": "بطاط ومجمدات",
-    "categoryEn": "Frozen foods & sides",
-    "categoryUr": "منجمد خوراک",
+    "category": "بطاطس ومجمدات",
+    "categoryEn": "Fries & frozen foods",
+    "categoryUr": "فرائز اور منجمد خوراک",
     "unit": "كرتون",
     "unitEn": "Pack",
     "unitUr": "پیک",
@@ -3598,7 +3968,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "بطاط ومجمدات",
+    "categoryKey": "بطاطس ومجمدات"
   },
   {
     "id": "TWB-0025",
@@ -3606,8 +3978,8 @@
     "name": "كاتشب للمطاعم",
     "nameEn": "",
     "nameUr": "",
-    "category": "صلصات وتتبيلات",
-    "categoryEn": "Sauces & seasonings",
+    "category": "صلصات وتوابل",
+    "categoryEn": "Sauces & spices",
     "categoryUr": "ساس اور مصالحے",
     "unit": "جالون",
     "unitEn": "Pack",
@@ -3618,7 +3990,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "صلصات وتتبيلات",
+    "categoryKey": "صلصات وتوابل"
   },
   {
     "id": "TWB-0026",
@@ -3626,8 +4000,8 @@
     "name": "مايونيز للمطاعم",
     "nameEn": "",
     "nameUr": "",
-    "category": "صلصات وتتبيلات",
-    "categoryEn": "Sauces & seasonings",
+    "category": "صلصات وتوابل",
+    "categoryEn": "Sauces & spices",
     "categoryUr": "ساس اور مصالحے",
     "unit": "جالون",
     "unitEn": "Pack",
@@ -3638,7 +4012,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "صلصات وتتبيلات",
+    "categoryKey": "صلصات وتوابل"
   },
   {
     "id": "TWB-0027",
@@ -3646,8 +4022,8 @@
     "name": "خردل أصفر",
     "nameEn": "",
     "nameUr": "",
-    "category": "صلصات وتتبيلات",
-    "categoryEn": "Sauces & seasonings",
+    "category": "صلصات وتوابل",
+    "categoryEn": "Sauces & spices",
     "categoryUr": "ساس اور مصالحے",
     "unit": "جالون",
     "unitEn": "Pack",
@@ -3658,7 +4034,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "صلصات وتتبيلات",
+    "categoryKey": "صلصات وتوابل"
   },
   {
     "id": "TWB-0028",
@@ -3666,8 +4044,8 @@
     "name": "صلصة برجر خاصة",
     "nameEn": "",
     "nameUr": "",
-    "category": "صلصات وتتبيلات",
-    "categoryEn": "Sauces & seasonings",
+    "category": "صلصات وتوابل",
+    "categoryEn": "Sauces & spices",
     "categoryUr": "ساس اور مصالحے",
     "unit": "جالون",
     "unitEn": "Pack",
@@ -3678,7 +4056,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "صلصات وتتبيلات",
+    "categoryKey": "صلصات وتوابل"
   },
   {
     "id": "TWB-0029",
@@ -3686,8 +4066,8 @@
     "name": "صلصة باربكيو",
     "nameEn": "",
     "nameUr": "",
-    "category": "صلصات وتتبيلات",
-    "categoryEn": "Sauces & seasonings",
+    "category": "صلصات وتوابل",
+    "categoryEn": "Sauces & spices",
     "categoryUr": "ساس اور مصالحے",
     "unit": "جالون",
     "unitEn": "Pack",
@@ -3698,7 +4078,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "صلصات وتتبيلات",
+    "categoryKey": "صلصات وتوابل"
   },
   {
     "id": "TWB-0030",
@@ -3706,8 +4088,8 @@
     "name": "صلصة حارة",
     "nameEn": "",
     "nameUr": "",
-    "category": "صلصات وتتبيلات",
-    "categoryEn": "Sauces & seasonings",
+    "category": "صلصات وتوابل",
+    "categoryEn": "Sauces & spices",
     "categoryUr": "ساس اور مصالحے",
     "unit": "جالون",
     "unitEn": "Pack",
@@ -3718,7 +4100,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "صلصات وتتبيلات",
+    "categoryKey": "صلصات وتوابل"
   },
   {
     "id": "TWB-0031",
@@ -3726,8 +4110,8 @@
     "name": "مخلل خيار شرائح",
     "nameEn": "",
     "nameUr": "",
-    "category": "صلصات وتتبيلات",
-    "categoryEn": "Sauces & seasonings",
+    "category": "صلصات وتوابل",
+    "categoryEn": "Sauces & spices",
     "categoryUr": "ساس اور مصالحے",
     "unit": "جالون",
     "unitEn": "Pack",
@@ -3738,7 +4122,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "صلصات وتتبيلات",
+    "categoryKey": "صلصات وتوابل"
   },
   {
     "id": "TWB-0032",
@@ -3746,8 +4132,8 @@
     "name": "هالبينو شرائح",
     "nameEn": "",
     "nameUr": "",
-    "category": "صلصات وتتبيلات",
-    "categoryEn": "Sauces & seasonings",
+    "category": "صلصات وتوابل",
+    "categoryEn": "Sauces & spices",
     "categoryUr": "ساس اور مصالحے",
     "unit": "جالون",
     "unitEn": "Pack",
@@ -3758,7 +4144,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "صلصات وتتبيلات",
+    "categoryKey": "صلصات وتوابل"
   },
   {
     "id": "TWB-0033",
@@ -3766,8 +4154,8 @@
     "name": "خل أبيض",
     "nameEn": "",
     "nameUr": "",
-    "category": "صلصات وتتبيلات",
-    "categoryEn": "Sauces & seasonings",
+    "category": "صلصات وتوابل",
+    "categoryEn": "Sauces & spices",
     "categoryUr": "ساس اور مصالحے",
     "unit": "لتر",
     "unitEn": "Pack",
@@ -3778,7 +4166,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "صلصات وتتبيلات",
+    "categoryKey": "صلصات وتوابل"
   },
   {
     "id": "TWB-0034",
@@ -3786,8 +4176,8 @@
     "name": "ملح طعام",
     "nameEn": "",
     "nameUr": "",
-    "category": "صلصات وتتبيلات",
-    "categoryEn": "Sauces & seasonings",
+    "category": "صلصات وتوابل",
+    "categoryEn": "Sauces & spices",
     "categoryUr": "ساس اور مصالحے",
     "unit": "كيلو",
     "unitEn": "Pack",
@@ -3798,7 +4188,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "صلصات وتتبيلات",
+    "categoryKey": "صلصات وتوابل"
   },
   {
     "id": "TWB-0035",
@@ -3806,8 +4198,8 @@
     "name": "فلفل أسود مطحون",
     "nameEn": "",
     "nameUr": "",
-    "category": "صلصات وتتبيلات",
-    "categoryEn": "Sauces & seasonings",
+    "category": "صلصات وتوابل",
+    "categoryEn": "Sauces & spices",
     "categoryUr": "ساس اور مصالحے",
     "unit": "كيلو",
     "unitEn": "Pack",
@@ -3818,7 +4210,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "صلصات وتتبيلات",
+    "categoryKey": "صلصات وتوابل"
   },
   {
     "id": "TWB-0036",
@@ -3826,8 +4220,8 @@
     "name": "بابريكا مدخنة",
     "nameEn": "",
     "nameUr": "",
-    "category": "صلصات وتتبيلات",
-    "categoryEn": "Sauces & seasonings",
+    "category": "صلصات وتوابل",
+    "categoryEn": "Sauces & spices",
     "categoryUr": "ساس اور مصالحے",
     "unit": "كيلو",
     "unitEn": "Pack",
@@ -3838,7 +4232,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "صلصات وتتبيلات",
+    "categoryKey": "صلصات وتوابل"
   },
   {
     "id": "TWB-0037",
@@ -3846,8 +4242,8 @@
     "name": "بودرة ثوم",
     "nameEn": "",
     "nameUr": "",
-    "category": "صلصات وتتبيلات",
-    "categoryEn": "Sauces & seasonings",
+    "category": "صلصات وتوابل",
+    "categoryEn": "Sauces & spices",
     "categoryUr": "ساس اور مصالحے",
     "unit": "كيلو",
     "unitEn": "Pack",
@@ -3858,7 +4254,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "صلصات وتتبيلات",
+    "categoryKey": "صلصات وتوابل"
   },
   {
     "id": "TWB-0038",
@@ -3866,8 +4264,8 @@
     "name": "بودرة بصل",
     "nameEn": "",
     "nameUr": "",
-    "category": "صلصات وتتبيلات",
-    "categoryEn": "Sauces & seasonings",
+    "category": "صلصات وتوابل",
+    "categoryEn": "Sauces & spices",
     "categoryUr": "ساس اور مصالحے",
     "unit": "كيلو",
     "unitEn": "Pack",
@@ -3878,7 +4276,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "صلصات وتتبيلات",
+    "categoryKey": "صلصات وتوابل"
   },
   {
     "id": "TWB-0039",
@@ -3886,9 +4286,9 @@
     "name": "زيت قلي نباتي",
     "nameEn": "",
     "nameUr": "",
-    "category": "زيوت ومواد تشغيل غذائية",
-    "categoryEn": "Oils & kitchen staples",
-    "categoryUr": "تیل اور بنیادی اجزاء",
+    "category": "زيوت ومواد غذائية",
+    "categoryEn": "Oils & pantry",
+    "categoryUr": "تیل اور غذائی سامان",
     "unit": "تنكة",
     "unitEn": "Pack",
     "unitUr": "پیک",
@@ -3898,7 +4298,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "زيوت ومواد تشغيل غذائية",
+    "categoryKey": "زيوت ومواد غذائية"
   },
   {
     "id": "TWB-0040",
@@ -3906,9 +4308,9 @@
     "name": "زيت دوار الشمس",
     "nameEn": "",
     "nameUr": "",
-    "category": "زيوت ومواد تشغيل غذائية",
-    "categoryEn": "Oils & kitchen staples",
-    "categoryUr": "تیل اور بنیادی اجزاء",
+    "category": "زيوت ومواد غذائية",
+    "categoryEn": "Oils & pantry",
+    "categoryUr": "تیل اور غذائی سامان",
     "unit": "تنكة",
     "unitEn": "Pack",
     "unitUr": "پیک",
@@ -3918,7 +4320,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "زيوت ومواد تشغيل غذائية",
+    "categoryKey": "زيوت ومواد غذائية"
   },
   {
     "id": "TWB-0041",
@@ -3926,9 +4330,9 @@
     "name": "دقيق متعدد الاستخدام",
     "nameEn": "",
     "nameUr": "",
-    "category": "زيوت ومواد تشغيل غذائية",
-    "categoryEn": "Oils & kitchen staples",
-    "categoryUr": "تیل اور بنیادی اجزاء",
+    "category": "زيوت ومواد غذائية",
+    "categoryEn": "Oils & pantry",
+    "categoryUr": "تیل اور غذائی سامان",
     "unit": "كيس",
     "unitEn": "Pack",
     "unitUr": "پیک",
@@ -3938,7 +4342,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "زيوت ومواد تشغيل غذائية",
+    "categoryKey": "زيوت ومواد غذائية"
   },
   {
     "id": "TWB-0042",
@@ -3946,9 +4352,9 @@
     "name": "نشا ذرة",
     "nameEn": "",
     "nameUr": "",
-    "category": "زيوت ومواد تشغيل غذائية",
-    "categoryEn": "Oils & kitchen staples",
-    "categoryUr": "تیل اور بنیادی اجزاء",
+    "category": "زيوت ومواد غذائية",
+    "categoryEn": "Oils & pantry",
+    "categoryUr": "تیل اور غذائی سامان",
     "unit": "كيس",
     "unitEn": "Pack",
     "unitUr": "پیک",
@@ -3958,7 +4364,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "زيوت ومواد تشغيل غذائية",
+    "categoryKey": "زيوت ومواد غذائية"
   },
   {
     "id": "TWB-0043",
@@ -3966,9 +4374,9 @@
     "name": "سكر أبيض",
     "nameEn": "",
     "nameUr": "",
-    "category": "زيوت ومواد تشغيل غذائية",
-    "categoryEn": "Oils & kitchen staples",
-    "categoryUr": "تیل اور بنیادی اجزاء",
+    "category": "زيوت ومواد غذائية",
+    "categoryEn": "Oils & pantry",
+    "categoryUr": "تیل اور غذائی سامان",
     "unit": "كيس",
     "unitEn": "Pack",
     "unitUr": "پیک",
@@ -3978,7 +4386,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "زيوت ومواد تشغيل غذائية",
+    "categoryKey": "زيوت ومواد غذائية"
   },
   {
     "id": "TWB-0044",
@@ -3986,9 +4396,9 @@
     "name": "سمسم محمص",
     "nameEn": "",
     "nameUr": "",
-    "category": "زيوت ومواد تشغيل غذائية",
-    "categoryEn": "Oils & kitchen staples",
-    "categoryUr": "تیل اور بنیادی اجزاء",
+    "category": "زيوت ومواد غذائية",
+    "categoryEn": "Oils & pantry",
+    "categoryUr": "تیل اور غذائی سامان",
     "unit": "كيلو",
     "unitEn": "Pack",
     "unitUr": "پیک",
@@ -3998,7 +4408,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "زيوت ومواد تشغيل غذائية",
+    "categoryKey": "زيوت ومواد غذائية"
   },
   {
     "id": "TWB-0045",
@@ -4018,7 +4430,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "تغليف واستهلاكيات",
+    "categoryKey": "تغليف واستهلاكيات"
   },
   {
     "id": "TWB-0046",
@@ -4038,7 +4452,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "تغليف واستهلاكيات",
+    "categoryKey": "تغليف واستهلاكيات"
   },
   {
     "id": "TWB-0047",
@@ -4058,7 +4474,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "تغليف واستهلاكيات",
+    "categoryKey": "تغليف واستهلاكيات"
   },
   {
     "id": "TWB-0048",
@@ -4078,7 +4496,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "تغليف واستهلاكيات",
+    "categoryKey": "تغليف واستهلاكيات"
   },
   {
     "id": "TWB-0049",
@@ -4098,7 +4518,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "تغليف واستهلاكيات",
+    "categoryKey": "تغليف واستهلاكيات"
   },
   {
     "id": "TWB-0050",
@@ -4118,7 +4540,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "تغليف واستهلاكيات",
+    "categoryKey": "تغليف واستهلاكيات"
   },
   {
     "id": "TWB-0051",
@@ -4138,7 +4562,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "تغليف واستهلاكيات",
+    "categoryKey": "تغليف واستهلاكيات"
   },
   {
     "id": "TWB-0052",
@@ -4158,7 +4584,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "تغليف واستهلاكيات",
+    "categoryKey": "تغليف واستهلاكيات"
   },
   {
     "id": "TWB-0053",
@@ -4178,7 +4606,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "تغليف واستهلاكيات",
+    "categoryKey": "تغليف واستهلاكيات"
   },
   {
     "id": "TWB-0054",
@@ -4198,7 +4628,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "تغليف واستهلاكيات",
+    "categoryKey": "تغليف واستهلاكيات"
   },
   {
     "id": "TWB-0055",
@@ -4218,7 +4650,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "تغليف واستهلاكيات",
+    "categoryKey": "تغليف واستهلاكيات"
   },
   {
     "id": "TWB-0056",
@@ -4238,7 +4672,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "تغليف واستهلاكيات",
+    "categoryKey": "تغليف واستهلاكيات"
   },
   {
     "id": "TWB-0057",
@@ -4258,7 +4694,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "تغليف واستهلاكيات",
+    "categoryKey": "تغليف واستهلاكيات"
   },
   {
     "id": "TWB-0058",
@@ -4278,7 +4716,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "تغليف واستهلاكيات",
+    "categoryKey": "تغليف واستهلاكيات"
   },
   {
     "id": "TWB-0059",
@@ -4298,7 +4738,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "تغليف واستهلاكيات",
+    "categoryKey": "تغليف واستهلاكيات"
   },
   {
     "id": "TWB-0060",
@@ -4318,7 +4760,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "تغليف واستهلاكيات",
+    "categoryKey": "تغليف واستهلاكيات"
   },
   {
     "id": "TWB-0061",
@@ -4338,7 +4782,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "تغليف واستهلاكيات",
+    "categoryKey": "تغليف واستهلاكيات"
   },
   {
     "id": "TWB-0062",
@@ -4358,7 +4804,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "تغليف واستهلاكيات",
+    "categoryKey": "تغليف واستهلاكيات"
   },
   {
     "id": "TWB-0063",
@@ -4378,7 +4826,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "تغليف واستهلاكيات",
+    "categoryKey": "تغليف واستهلاكيات"
   },
   {
     "id": "TWB-0064",
@@ -4398,7 +4848,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "تنظيف وتعقيم",
+    "categoryKey": "تنظيف وتعقيم"
   },
   {
     "id": "TWB-0065",
@@ -4418,7 +4870,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "تنظيف وتعقيم",
+    "categoryKey": "تنظيف وتعقيم"
   },
   {
     "id": "TWB-0066",
@@ -4438,7 +4892,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "تنظيف وتعقيم",
+    "categoryKey": "تنظيف وتعقيم"
   },
   {
     "id": "TWB-0067",
@@ -4458,7 +4914,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "تنظيف وتعقيم",
+    "categoryKey": "تنظيف وتعقيم"
   },
   {
     "id": "TWB-0068",
@@ -4478,7 +4936,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "تنظيف وتعقيم",
+    "categoryKey": "تنظيف وتعقيم"
   },
   {
     "id": "TWB-0069",
@@ -4498,7 +4958,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "تنظيف وتعقيم",
+    "categoryKey": "تنظيف وتعقيم"
   },
   {
     "id": "TWB-0070",
@@ -4518,7 +4980,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "تنظيف وتعقيم",
+    "categoryKey": "تنظيف وتعقيم"
   },
   {
     "id": "TWB-0071",
@@ -4538,7 +5002,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "تنظيف وتعقيم",
+    "categoryKey": "تنظيف وتعقيم"
   },
   {
     "id": "TWB-0072",
@@ -4558,7 +5024,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "تنظيف وتعقيم",
+    "categoryKey": "تنظيف وتعقيم"
   },
   {
     "id": "KWREF-0001",
@@ -4578,7 +5046,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "خبز ومخبوزات",
+    "categoryKey": "خبز ومخبوزات"
   },
   {
     "id": "KWREF-0002",
@@ -4598,7 +5068,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "خبز ومخبوزات",
+    "categoryKey": "خبز ومخبوزات"
   },
   {
     "id": "KWREF-0003",
@@ -4618,7 +5090,9 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "أجبان وألبان",
+    "categoryKey": "أجبان وألبان"
   },
   {
     "id": "KWREF-0004",
@@ -4638,6 +5112,8 @@
     "priceStatus": "quote_required",
     "catalogStatus": "pending_image_and_price",
     "sourceCatalog": "burger-supplies",
-    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق"
+    "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
+    "subcategory": "لحوم ودواجن",
+    "categoryKey": "لحوم ودواجن"
   }
 ]
