@@ -10,7 +10,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "بیف برگر جمبو (پیک کے 10) 1کلو",
+    "categoryEn": "Meat & poultry",
+    "categoryUr": "گوشت اور مرغی",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0031",
@@ -23,7 +28,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "بیف برگر ارابیک مصالحے (پیک کے 20) 1کلو",
+    "categoryEn": "Meat & poultry",
+    "categoryUr": "گوشت اور مرغی",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0030",
@@ -36,7 +46,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "واگیو قیمہ بیف پیٹیز (6 × 151گرام) 907گرام",
+    "categoryEn": "Meat & poultry",
+    "categoryUr": "گوشت اور مرغی",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0029",
@@ -49,7 +64,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "چکن برگر (پیک کے 20) 1کلو",
+    "categoryEn": "Meat & poultry",
+    "categoryUr": "گوشت اور مرغی",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0028",
@@ -62,7 +82,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "جمبو چکن برگر (پیک کے 10) 1کلو",
+    "categoryEn": "Meat & poultry",
+    "categoryUr": "گوشت اور مرغی",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0036",
@@ -75,7 +100,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "چکن بریسٹ فلیٹ 1.5کلو",
+    "categoryEn": "Meat & poultry",
+    "categoryUr": "گوشت اور مرغی",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0027",
@@ -88,7 +118,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "فوللی کووکید چکن ونگز 1کلو",
+    "categoryEn": "Meat & poultry",
+    "categoryUr": "گوشت اور مرغی",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0033",
@@ -101,7 +136,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "چکن فرائز 1کلو",
+    "categoryEn": "Meat & poultry",
+    "categoryUr": "گوشت اور مرغی",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0034",
@@ -114,7 +154,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "چکن پوپ کورن 750گرام",
+    "categoryEn": "Meat & poultry",
+    "categoryUr": "گوشت اور مرغی",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0035",
@@ -127,7 +172,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "بریادید چکن تیندیرلوین 1کلو",
+    "categoryEn": "Meat & poultry",
+    "categoryUr": "گوشت اور مرغی",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0037",
@@ -140,7 +190,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "روایتی چکن نگٹس 750گرام",
+    "categoryEn": "Meat & poultry",
+    "categoryUr": "گوشت اور مرغی",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0038",
@@ -153,7 +208,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "ٹیمپورا چکن نگٹس 750گرام",
+    "categoryEn": "Meat & poultry",
+    "categoryUr": "گوشت اور مرغی",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0039",
@@ -166,7 +226,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "چکن نگٹس 1کلو",
+    "categoryEn": "Meat & poultry",
+    "categoryUr": "گوشت اور مرغی",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0021",
@@ -179,7 +244,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "بریوکہ بن",
+    "categoryEn": "Bread & bakery",
+    "categoryUr": "بریڈ اور بیکری",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0024",
@@ -192,7 +262,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "آلو بن",
+    "categoryEn": "Bread & bakery",
+    "categoryUr": "بریڈ اور بیکری",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0019",
@@ -205,7 +280,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "دووبلی گلازی بریوش تل بن",
+    "categoryEn": "Bread & bakery",
+    "categoryUr": "بریڈ اور بیکری",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0022",
@@ -218,7 +298,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "دووبلی گلازی بریوکہ بن",
+    "categoryEn": "Bread & bakery",
+    "categoryUr": "بریڈ اور بیکری",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0018",
@@ -231,7 +316,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "نرم آلو بن 3.5\" (پیک کے 8)",
+    "categoryEn": "Bread & bakery",
+    "categoryUr": "بریڈ اور بیکری",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0025",
@@ -244,7 +334,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "سلائس آلو رولز 3.5\" (پیک کے 8)",
+    "categoryEn": "Bread & bakery",
+    "categoryUr": "بریڈ اور بیکری",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0015",
@@ -257,7 +352,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "براؤن بن جو",
+    "categoryEn": "Bread & bakery",
+    "categoryUr": "بریڈ اور بیکری",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0016",
@@ -270,7 +370,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "پانینی برگر بن",
+    "categoryEn": "Bread & bakery",
+    "categoryUr": "بریڈ اور بیکری",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0017",
@@ -283,7 +388,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "کالا برگر بن",
+    "categoryEn": "Bread & bakery",
+    "categoryUr": "بریڈ اور بیکری",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0020",
@@ -296,7 +406,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "بریوش سلیدیرس بن",
+    "categoryEn": "Bread & bakery",
+    "categoryUr": "بریڈ اور بیکری",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0023",
@@ -309,7 +424,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "آلو سلیدیر بن",
+    "categoryEn": "Bread & bakery",
+    "categoryUr": "بریڈ اور بیکری",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0026",
@@ -322,7 +442,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "دووبلی گلازی تل دودھ بن",
+    "categoryEn": "Bread & bakery",
+    "categoryUr": "بریڈ اور بیکری",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0046",
@@ -335,7 +460,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "اصلی پنیر سلیکیس (20 سلیکیس) 400گرام",
+    "categoryEn": "Cheese & dairy",
+    "categoryUr": "پنیر اور دودھ کی مصنوعات",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0045",
@@ -348,7 +478,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "پنیر سلیکیس (پیک کے 120) 2.26کلو",
+    "categoryEn": "Cheese & dairy",
+    "categoryUr": "پنیر اور دودھ کی مصنوعات",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0047",
@@ -361,7 +496,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "سفید چیڈر پنیر سلیکیس (پیک کے 200) 2.27کلو",
+    "categoryEn": "Cheese & dairy",
+    "categoryUr": "پنیر اور دودھ کی مصنوعات",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0048",
@@ -374,7 +514,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "سلائس پیلا چیڈر پنیر (پیک کے 200) 2.270کلو",
+    "categoryEn": "Cheese & dairy",
+    "categoryUr": "پنیر اور دودھ کی مصنوعات",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0044",
@@ -387,7 +532,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "اصلی پنیر سلیکیس (10 سلیکیس) 170گرام",
+    "categoryEn": "Cheese & dairy",
+    "categoryUr": "پنیر اور دودھ کی مصنوعات",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0040",
@@ -400,7 +550,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "چیڈر پنیر 500گرام",
+    "categoryEn": "Cheese & dairy",
+    "categoryUr": "پنیر اور دودھ کی مصنوعات",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0041",
@@ -413,7 +568,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "کدوکش چیڈر پنیر 2کلو",
+    "categoryEn": "Cheese & dairy",
+    "categoryUr": "پنیر اور دودھ کی مصنوعات",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0042",
@@ -426,7 +586,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "کدوکش موزریلا پنیر 2کلو",
+    "categoryEn": "Cheese & dairy",
+    "categoryUr": "پنیر اور دودھ کی مصنوعات",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0043",
@@ -439,7 +604,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "بغیر نمک مکھن 500گرام",
+    "categoryEn": "Cheese & dairy",
+    "categoryUr": "پنیر اور دودھ کی مصنوعات",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0091",
@@ -452,7 +622,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "فرینکہ فرائز 9×9مم 2.5کلو",
+    "categoryEn": "Fries & sides",
+    "categoryUr": "فرائز اور سائیڈز",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0090",
@@ -465,7 +640,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "عام فرائز 9×9مم 2.5کلو",
+    "categoryEn": "Fries & sides",
+    "categoryUr": "فرائز اور سائیڈز",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0089",
@@ -478,7 +658,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "ستیالتہ فرائز سیدھی کٹ 9×9مم 2.5کلو",
+    "categoryEn": "Fries & sides",
+    "categoryUr": "فرائز اور سائیڈز",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0088",
@@ -491,7 +676,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "ستیالتہ فرائز سیدھی کٹ, چھلکے-ون 9×9مم 2.5کلو",
+    "categoryEn": "Fries & sides",
+    "categoryUr": "فرائز اور سائیڈز",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0087",
@@ -504,7 +694,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "پریواتی ریسیروی ستیاکہووسی فرائز 9×18مم 2.5کلو",
+    "categoryEn": "Fries & sides",
+    "categoryUr": "فرائز اور سائیڈز",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0086",
@@ -517,7 +712,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "فرینکہ فرائز باریک کٹ 7×7مم 2.5کلو",
+    "categoryEn": "Fries & sides",
+    "categoryUr": "فرائز اور سائیڈز",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0080",
@@ -530,7 +730,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "موزریلا ستیککس 1کلو",
+    "categoryEn": "Fries & sides",
+    "categoryUr": "فرائز اور سائیڈز",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0081",
@@ -543,7 +748,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "میٹھا آلو فرائز 9×9مم 2.5کلو",
+    "categoryEn": "Fries & sides",
+    "categoryUr": "فرائز اور سائیڈز",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0082",
@@ -556,7 +766,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "پریواتی ریسیروی فرائز 6×6مم 2.5کلو",
+    "categoryEn": "Fries & sides",
+    "categoryUr": "فرائز اور سائیڈز",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0083",
@@ -569,7 +784,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "سہویسترینگ 3/16\" جولییننی فرائز 1.81کلو",
+    "categoryEn": "Fries & sides",
+    "categoryUr": "فرائز اور سائیڈز",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0084",
@@ -582,7 +802,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "دیپستیرس فرائز 2.5کلو",
+    "categoryEn": "Fries & sides",
+    "categoryUr": "فرائز اور سائیڈز",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0085",
@@ -595,7 +820,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "روستیک فرائز چھلکے-ون 2.5کلو",
+    "categoryEn": "Fries & sides",
+    "categoryUr": "فرائز اور سائیڈز",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0092",
@@ -608,7 +838,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "کرینکلی کٹ فرائز 2.5کلو",
+    "categoryEn": "Fries & sides",
+    "categoryUr": "فرائز اور سائیڈز",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0093",
@@ -621,7 +856,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "پیاز رنگز 1کلو",
+    "categoryEn": "Fries & sides",
+    "categoryUr": "فرائز اور سائیڈز",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0094",
@@ -634,7 +874,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "آلو بالز کے ساتھ پنیر & جالاپینو 1.5کلو",
+    "categoryEn": "Fries & sides",
+    "categoryUr": "فرائز اور سائیڈز",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0095",
@@ -647,7 +892,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "آلو تاتیر گیمس 2.2کلو",
+    "categoryEn": "Fries & sides",
+    "categoryUr": "فرائز اور سائیڈز",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0096",
@@ -660,7 +910,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "ہیش براؤنز 1کلو",
+    "categoryEn": "Fries & sides",
+    "categoryUr": "فرائز اور سائیڈز",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0097",
@@ -673,7 +928,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "کرونکہی ہیش براؤنز 2.5کلو",
+    "categoryEn": "Fries & sides",
+    "categoryUr": "فرائز اور سائیڈز",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0066",
@@ -686,7 +946,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "ٹماٹر کیچپ 5کلو",
+    "categoryEn": "Sauces & seasonings",
+    "categoryUr": "ساس اور مصالحے",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0065",
@@ -699,7 +964,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "ٹماٹر کیچپ 5کلو",
+    "categoryEn": "Sauces & seasonings",
+    "categoryUr": "ساس اور مصالحے",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0068",
@@ -712,7 +982,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "ٹماٹر کیچپ 4.8کلو",
+    "categoryEn": "Sauces & seasonings",
+    "categoryUr": "ساس اور مصالحے",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0067",
@@ -725,7 +1000,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "ٹماٹر کیچپ 910گرام",
+    "categoryEn": "Sauces & seasonings",
+    "categoryUr": "ساس اور مصالحے",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0069",
@@ -738,7 +1018,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "پریمیم مایونیز 3.78لیٹر",
+    "categoryEn": "Sauces & seasonings",
+    "categoryUr": "ساس اور مصالحے",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0070",
@@ -751,7 +1036,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "مایونیز 3.78لیٹر",
+    "categoryEn": "Sauces & seasonings",
+    "categoryUr": "ساس اور مصالحے",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0059",
@@ -764,7 +1054,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "کلیار سوی لیقوید فریینگ تیل 17.3لیٹر",
+    "categoryEn": "Sauces & seasonings",
+    "categoryUr": "ساس اور مصالحے",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0060",
@@ -777,7 +1072,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "سبزی تیل 20لیٹر",
+    "categoryEn": "Sauces & seasonings",
+    "categoryUr": "ساس اور مصالحے",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0061",
@@ -790,7 +1090,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "سبزی تیل 17لیٹر",
+    "categoryEn": "Sauces & seasonings",
+    "categoryUr": "ساس اور مصالحے",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0079",
@@ -803,7 +1108,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "نمک 1کلو",
+    "categoryEn": "Sauces & seasonings",
+    "categoryUr": "ساس اور مصالحے",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0049",
@@ -816,7 +1126,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "باربی کیو ساس 3.1کلو",
+    "categoryEn": "Sauces & seasonings",
+    "categoryUr": "ساس اور مصالحے",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0050",
@@ -829,7 +1144,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "باربی کیو ساس 4کلو",
+    "categoryEn": "Sauces & seasonings",
+    "categoryUr": "ساس اور مصالحے",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0051",
@@ -842,7 +1162,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "سرخ مرچ پاپریکا پاؤڈر 500گرام",
+    "categoryEn": "Sauces & seasonings",
+    "categoryUr": "ساس اور مصالحے",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0052",
@@ -855,7 +1180,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "کہیپوتلی کہیلی مرچ پاؤڈر 453گرام",
+    "categoryEn": "Sauces & seasonings",
+    "categoryUr": "ساس اور مصالحے",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0053",
@@ -868,7 +1198,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "لہسن پاؤڈر 500گرام",
+    "categoryEn": "Sauces & seasonings",
+    "categoryUr": "ساس اور مصالحے",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0054",
@@ -881,7 +1216,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "بریاد کرومبس 500گرام",
+    "categoryEn": "Sauces & seasonings",
+    "categoryUr": "ساس اور مصالحے",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0055",
@@ -894,7 +1234,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "شہد مسٹرڈ ساس 3.78لیٹر",
+    "categoryEn": "Sauces & seasonings",
+    "categoryUr": "ساس اور مصالحے",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0056",
@@ -907,7 +1252,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "مسٹرڈ ساس 3.78لیٹر",
+    "categoryEn": "Sauces & seasonings",
+    "categoryUr": "ساس اور مصالحے",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0057",
@@ -920,7 +1270,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "بوتتیرمیلک رینچ ڈریسنگ 3.78لیٹر",
+    "categoryEn": "Sauces & seasonings",
+    "categoryUr": "ساس اور مصالحے",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0058",
@@ -933,7 +1288,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "رینچ ڈریسنگ 3.78لیٹر",
+    "categoryEn": "Sauces & seasonings",
+    "categoryUr": "ساس اور مصالحے",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0062",
@@ -946,7 +1306,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "تیز برگر ساس کے ساتھ تاباسکو ساس فلاوور 1.85لیٹر",
+    "categoryEn": "Sauces & seasonings",
+    "categoryUr": "ساس اور مصالحے",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0063",
@@ -959,7 +1324,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "تیز ساس 150ملی لیٹر",
+    "categoryEn": "Sauces & seasonings",
+    "categoryUr": "ساس اور مصالحے",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0064",
@@ -972,7 +1342,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "دینامیتی ساس کے ساتھ تاباسکو ساس فلاوور 1.85لیٹر",
+    "categoryEn": "Sauces & seasonings",
+    "categoryUr": "ساس اور مصالحے",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0071",
@@ -985,7 +1360,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "کلاسک مایونیز 3.78لیٹر",
+    "categoryEn": "Sauces & seasonings",
+    "categoryUr": "ساس اور مصالحے",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0072",
@@ -998,7 +1378,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "لائٹ مایونیز 3.78لیٹر",
+    "categoryEn": "Sauces & seasonings",
+    "categoryUr": "ساس اور مصالحے",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0073",
@@ -1011,7 +1396,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "لہسن مایونیز 3.78لیٹر",
+    "categoryEn": "Sauces & seasonings",
+    "categoryUr": "ساس اور مصالحے",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0074",
@@ -1024,7 +1414,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "تیز مایونیز کے ساتھ تاباسکو ساس فلاوور 1.85لیٹر",
+    "categoryEn": "Sauces & seasonings",
+    "categoryUr": "ساس اور مصالحے",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0075",
@@ -1037,7 +1432,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "کہیپوتلی مایونیز 3.78لیٹر",
+    "categoryEn": "Sauces & seasonings",
+    "categoryUr": "ساس اور مصالحے",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0076",
@@ -1050,7 +1450,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "مرچ مایونیز 3.78لیٹر",
+    "categoryEn": "Sauces & seasonings",
+    "categoryUr": "ساس اور مصالحے",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0077",
@@ -1063,7 +1468,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "میٹھا ریلیسہ 473ملی لیٹر",
+    "categoryEn": "Sauces & seasonings",
+    "categoryUr": "ساس اور مصالحے",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0078",
@@ -1076,7 +1486,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "دیلل ریلیسہ 473ملی لیٹر",
+    "categoryEn": "Sauces & seasonings",
+    "categoryUr": "ساس اور مصالحے",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0005",
@@ -1089,7 +1504,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "تازہ رووند سلاد پتہ 1پک",
+    "categoryEn": "Fresh vegetables",
+    "categoryUr": "تازہ سبزیاں",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0006",
@@ -1102,7 +1522,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "جوردانیان رومین سلاد پتہ 1پک",
+    "categoryEn": "Fresh vegetables",
+    "categoryUr": "تازہ سبزیاں",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0008",
@@ -1115,7 +1540,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "تازہ ٹماٹر 3کلو",
+    "categoryEn": "Fresh vegetables",
+    "categoryUr": "تازہ سبزیاں",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0009",
@@ -1128,7 +1558,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "تازہ کویتی ٹماٹر 1کلو",
+    "categoryEn": "Fresh vegetables",
+    "categoryUr": "تازہ سبزیاں",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0001",
@@ -1141,7 +1576,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "سفید پیاز 1کلو",
+    "categoryEn": "Fresh vegetables",
+    "categoryUr": "تازہ سبزیاں",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0002",
@@ -1154,7 +1594,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "ییمینی سرخ پیاز 1کلو",
+    "categoryEn": "Fresh vegetables",
+    "categoryUr": "تازہ سبزیاں",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0003",
@@ -1167,7 +1612,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "یندیان پیاز 1کلو",
+    "categoryEn": "Fresh vegetables",
+    "categoryUr": "تازہ سبزیاں",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0004",
@@ -1180,7 +1630,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "کہینیسی لہسن 1کلو",
+    "categoryEn": "Fresh vegetables",
+    "categoryUr": "تازہ سبزیاں",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0007",
@@ -1193,7 +1648,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "کویتی کھیرا 2کلو",
+    "categoryEn": "Fresh vegetables",
+    "categoryUr": "تازہ سبزیاں",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0010",
@@ -1206,7 +1666,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "کویتی مشروم 250گرام",
+    "categoryEn": "Fresh vegetables",
+    "categoryUr": "تازہ سبزیاں",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0011",
@@ -1219,7 +1684,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "کویتی سبز مرچ مرچ",
+    "categoryEn": "Fresh vegetables",
+    "categoryUr": "تازہ سبزیاں",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0012",
@@ -1232,7 +1702,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "کویتی سبز میٹھا مرچ",
+    "categoryEn": "Fresh vegetables",
+    "categoryUr": "تازہ سبزیاں",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0013",
@@ -1245,7 +1720,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "کویتی میکسید میٹھا پیپپیرس",
+    "categoryEn": "Fresh vegetables",
+    "categoryUr": "تازہ سبزیاں",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0014",
@@ -1258,7 +1738,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "تازہ سبز لیموں 1کلو",
+    "categoryEn": "Fresh vegetables",
+    "categoryUr": "تازہ سبزیاں",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0098",
@@ -1271,7 +1756,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "پیپسی 1.25لیٹر 6عدد",
+    "categoryEn": "Soft drinks",
+    "categoryUr": "سافٹ ڈرنکس",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0099",
@@ -1284,7 +1774,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "پیپسی 2.25لیٹر 6عدد",
+    "categoryEn": "Soft drinks",
+    "categoryUr": "سافٹ ڈرنکس",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0100",
@@ -1297,7 +1792,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "پیپسی کین 250ملی لیٹر 30 عدد",
+    "categoryEn": "Soft drinks",
+    "categoryUr": "سافٹ ڈرنکس",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0101",
@@ -1310,7 +1810,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "پیپسی 330ملی لیٹر 24عدد",
+    "categoryEn": "Soft drinks",
+    "categoryUr": "سافٹ ڈرنکس",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0102",
@@ -1323,7 +1828,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "پیپسی زیرو 1.250لیٹر 6عدد",
+    "categoryEn": "Soft drinks",
+    "categoryUr": "سافٹ ڈرنکس",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0103",
@@ -1336,7 +1846,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "پیپسی زیرو کین 250 ملی لیٹر 30 عدد",
+    "categoryEn": "Soft drinks",
+    "categoryUr": "سافٹ ڈرنکس",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0104",
@@ -1349,7 +1864,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "پیپسی زیرو کین 330ملی لیٹر 24عدد",
+    "categoryEn": "Soft drinks",
+    "categoryUr": "سافٹ ڈرنکس",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0105",
@@ -1362,7 +1882,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "ڈائٹ پیپسی 1.25لیٹر 6 عدد",
+    "categoryEn": "Soft drinks",
+    "categoryUr": "سافٹ ڈرنکس",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0106",
@@ -1375,7 +1900,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "ڈائٹ پیپسی کین 250 ملی لیٹر 30 عدد",
+    "categoryEn": "Soft drinks",
+    "categoryUr": "سافٹ ڈرنکس",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0107",
@@ -1388,7 +1918,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "ڈائٹ پیپسی 330ملی لیٹر 24 عدد",
+    "categoryEn": "Soft drinks",
+    "categoryUr": "سافٹ ڈرنکس",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0108",
@@ -1401,7 +1936,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "سپریتی بوتل کارٹن 24×250ملی لیٹر",
+    "categoryEn": "Soft drinks",
+    "categoryUr": "سافٹ ڈرنکس",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0109",
@@ -1414,7 +1954,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "سپریتی زیرو کین کارٹن",
+    "categoryEn": "Soft drinks",
+    "categoryUr": "سافٹ ڈرنکس",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0110",
@@ -1427,7 +1972,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "ستینگ سرخ 6 بوتلیں",
+    "categoryEn": "Soft drinks",
+    "categoryUr": "سافٹ ڈرنکس",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0111",
@@ -1440,7 +1990,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "7-وپ کین 250 ملی لیٹر 30 عدد",
+    "categoryEn": "Soft drinks",
+    "categoryUr": "سافٹ ڈرنکس",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0112",
@@ -1453,7 +2008,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "7-وپ کین 330 ملی لیٹر 24عدد",
+    "categoryEn": "Soft drinks",
+    "categoryUr": "سافٹ ڈرنکس",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0113",
@@ -1466,7 +2026,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "7وپ زیرو کین 250ملی لیٹر 30عدد",
+    "categoryEn": "Soft drinks",
+    "categoryUr": "سافٹ ڈرنکس",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0114",
@@ -1479,7 +2044,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "7-وپ زیرو کین 330ملی لیٹر 24عدد",
+    "categoryEn": "Soft drinks",
+    "categoryUr": "سافٹ ڈرنکس",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0115",
@@ -1492,7 +2062,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "7وپ-موجیتو کین 250ملی لیٹر 30عدد",
+    "categoryEn": "Soft drinks",
+    "categoryUr": "سافٹ ڈرنکس",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0116",
@@ -1505,7 +2080,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "سہانی کین 150ملی لیٹر 30عدد",
+    "categoryEn": "Soft drinks",
+    "categoryUr": "سافٹ ڈرنکس",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0117",
@@ -1518,7 +2098,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "سہانی کین 250ملی لیٹر 30عدد",
+    "categoryEn": "Soft drinks",
+    "categoryUr": "سافٹ ڈرنکس",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0118",
@@ -1531,7 +2116,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "فانتا مالٹا کین 30×250ملی لیٹر",
+    "categoryEn": "Soft drinks",
+    "categoryUr": "سافٹ ڈرنکس",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0119",
@@ -1544,7 +2134,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "فانتا مالٹا بوتل 24×250ملی لیٹر",
+    "categoryEn": "Soft drinks",
+    "categoryUr": "سافٹ ڈرنکس",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0120",
@@ -1557,7 +2152,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "فانتا اسٹرابیری بوتل 24×250ملی لیٹر",
+    "categoryEn": "Soft drinks",
+    "categoryUr": "سافٹ ڈرنکس",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0121",
@@ -1570,7 +2170,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "کوکا کولا اصلی کین 30×250ملی لیٹر",
+    "categoryEn": "Soft drinks",
+    "categoryUr": "سافٹ ڈرنکس",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0122",
@@ -1583,7 +2188,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "کوکا کولا بوتل کارٹن 24×250ملی لیٹر",
+    "categoryEn": "Soft drinks",
+    "categoryUr": "سافٹ ڈرنکس",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0123",
@@ -1596,7 +2206,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "کوکا کولا زیرو سوگار کین 30×250ملی لیٹر",
+    "categoryEn": "Soft drinks",
+    "categoryUr": "سافٹ ڈرنکس",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0124",
@@ -1609,7 +2224,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "کوکا کولا لائٹ بوتل کارٹن 24×250ملی لیٹر",
+    "categoryEn": "Soft drinks",
+    "categoryUr": "سافٹ ڈرنکس",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0125",
@@ -1622,7 +2242,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "موونتاین دیو کین 250ملی لیٹر 30عدد",
+    "categoryEn": "Soft drinks",
+    "categoryUr": "سافٹ ڈرنکس",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0126",
@@ -1635,7 +2260,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "موونتاین دیو کین 330 ملی لیٹر 24عدد",
+    "categoryEn": "Soft drinks",
+    "categoryUr": "سافٹ ڈرنکس",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0127",
@@ -1648,7 +2278,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "موونتاین دیو زیرو سوگار کین 250ملی لیٹر 30 عدد",
+    "categoryEn": "Soft drinks",
+    "categoryUr": "سافٹ ڈرنکس",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0128",
@@ -1661,7 +2296,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "میریندا مالٹا 1.25لیٹر 6عدد",
+    "categoryEn": "Soft drinks",
+    "categoryUr": "سافٹ ڈرنکس",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0129",
@@ -1674,7 +2314,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "میریندا مالٹا کین 250 ملی لیٹر 30 عدد",
+    "categoryEn": "Soft drinks",
+    "categoryUr": "سافٹ ڈرنکس",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0130",
@@ -1687,7 +2332,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "میریندا مالٹا 330ملی لیٹر 24عدد",
+    "categoryEn": "Soft drinks",
+    "categoryUr": "سافٹ ڈرنکس",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0131",
@@ -1700,7 +2350,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "میریندا کیتروس کین 250 ملی لیٹر 30 عدد",
+    "categoryEn": "Soft drinks",
+    "categoryUr": "سافٹ ڈرنکس",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0132",
@@ -1713,7 +2368,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "راوداتاین لیمون & لیموں کاربوناتید پانی 240ملی لیٹر ×24",
+    "categoryEn": "Water",
+    "categoryUr": "پانی",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0133",
@@ -1726,7 +2386,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "راوداتاین کاربوناتید گلاسس پانی 240ملی لیٹر ×24",
+    "categoryEn": "Water",
+    "categoryUr": "پانی",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0134",
@@ -1739,7 +2404,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "راوداتاین کاربوناتید معدنی پانی 430ملی لیٹر ×24",
+    "categoryEn": "Water",
+    "categoryUr": "پانی",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0135",
@@ -1752,7 +2422,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "اق 1.5 لیتیرس 12 عدد پینے کا پانی",
+    "categoryEn": "Water",
+    "categoryUr": "پانی",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0136",
@@ -1765,7 +2440,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "اق 17.5 لیتیرس پینے کا پانی",
+    "categoryEn": "Water",
+    "categoryUr": "پانی",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0137",
@@ -1778,7 +2458,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "اق 200ملی لیٹر 20عدد پینے کا پانی",
+    "categoryEn": "Water",
+    "categoryUr": "پانی",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0138",
@@ -1791,7 +2476,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "اق 330ملی لیٹر 20عدد پینے کا پانی",
+    "categoryEn": "Water",
+    "categoryUr": "پانی",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0139",
@@ -1804,7 +2494,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "اق 600ملی لیٹر 24عدد پینے کا پانی",
+    "categoryEn": "Water",
+    "categoryUr": "پانی",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0140",
@@ -1817,7 +2512,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "اق 250ملی لیٹر 30عدد چمکتا پانی",
+    "categoryEn": "Water",
+    "categoryUr": "پانی",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0141",
@@ -1830,7 +2530,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "ابیار پانی 500ملی لیٹر ×24",
+    "categoryEn": "Water",
+    "categoryUr": "پانی",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0142",
@@ -1843,7 +2548,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "راوداتاین پانی 1لیٹر ×6",
+    "categoryEn": "Water",
+    "categoryUr": "پانی",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0143",
@@ -1856,7 +2566,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "راوداتاین پانی 1.5لیٹر ×6",
+    "categoryEn": "Water",
+    "categoryUr": "پانی",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0144",
@@ -1869,7 +2584,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "راوداتاین پانی 330ملی لیٹر ×20",
+    "categoryEn": "Water",
+    "categoryUr": "پانی",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0145",
@@ -1882,7 +2602,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "راوداتاین پانی 500ملی لیٹر ×20",
+    "categoryEn": "Water",
+    "categoryUr": "پانی",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0146",
@@ -1895,7 +2620,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "راوداتاین ستیلل گلاسس پانی 240ملی لیٹر ×24",
+    "categoryEn": "Water",
+    "categoryUr": "پانی",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0147",
@@ -1908,7 +2638,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "راوداتاین قدرتی معدنی پانی 1.5لیٹر ×12",
+    "categoryEn": "Water",
+    "categoryUr": "پانی",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0156",
@@ -1921,7 +2656,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "لولو کالا باسی سقواری ڈبے کے ساتھ ڈھکن 28وز 5عدد",
+    "categoryEn": "Packaging & hygiene",
+    "categoryUr": "پیکنگ اور صفائی",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0157",
@@ -1934,7 +2674,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "ہوتپاکک 500ملی لیٹر میکروواوابلی کونتاینیر کے ساتھ ڈھکن 5عدد",
+    "categoryEn": "Packaging & hygiene",
+    "categoryUr": "پیکنگ اور صفائی",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0150",
@@ -1947,7 +2692,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "ال واہا کاغذی کپ 9وز کے ساتھ ہاندلی 50 عدد",
+    "categoryEn": "Packaging & hygiene",
+    "categoryUr": "پیکنگ اور صفائی",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0151",
@@ -1960,7 +2710,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "سانیتا کاغذی کپ 9وز 50عدد",
+    "categoryEn": "Packaging & hygiene",
+    "categoryUr": "پیکنگ اور صفائی",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0148",
@@ -1973,7 +2728,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "لولو پلاسٹک کلیار کپ 6وز 50عدد",
+    "categoryEn": "Packaging & hygiene",
+    "categoryUr": "پیکنگ اور صفائی",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0149",
@@ -1986,7 +2746,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "لولو پلاسٹک کلیار کپ کے ساتھ ڈھکن 20عدد",
+    "categoryEn": "Packaging & hygiene",
+    "categoryUr": "پیکنگ اور صفائی",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0152",
@@ -1999,7 +2764,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "واہا الومینوم فوائل ہیاوی دوتی 13.5 سق فت × 45 کم",
+    "categoryEn": "Packaging & hygiene",
+    "categoryUr": "پیکنگ اور صفائی",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0154",
@@ -2012,7 +2782,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "لولو کالا اسٹرا 8مم 100عدد",
+    "categoryEn": "Packaging & hygiene",
+    "categoryUr": "پیکنگ اور صفائی",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0155",
@@ -2025,7 +2800,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "لولو مولتیکولوور ستراو 12مم 50عدد",
+    "categoryEn": "Packaging & hygiene",
+    "categoryUr": "پیکنگ اور صفائی",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0158",
@@ -2038,7 +2818,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "دیسپوسابلی وینیل دستانے بلوی 100عدد سمالل",
+    "categoryEn": "Packaging & hygiene",
+    "categoryUr": "پیکنگ اور صفائی",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0153",
@@ -2051,7 +2836,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "ہوتپاکک بلوی فاکی ماسک 3پلی 50عدد",
+    "categoryEn": "Packaging & hygiene",
+    "categoryUr": "پیکنگ اور صفائی",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0159",
@@ -2064,7 +2854,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "کلیینیکس دایلی کاری فاکیال ٹشو 2-پلی 5 × 150 شیٹس",
+    "categoryEn": "Packaging & hygiene",
+    "categoryUr": "پیکنگ اور صفائی",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0160",
@@ -2077,7 +2872,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "لولو کاغذی نیپکن سقواری 33×33کم 2پلی 25عدد",
+    "categoryEn": "Packaging & hygiene",
+    "categoryUr": "پیکنگ اور صفائی",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0161",
@@ -2090,7 +2890,12 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "لولو کاغذی نیپکن 70عدد",
+    "categoryEn": "Packaging & hygiene",
+    "categoryUr": "پیکنگ اور صفائی",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   },
   {
     "id": "BRG-0162",
@@ -2103,6 +2908,11 @@
     "active": false,
     "priceStatus": "historical_reference_not_approved",
     "verifiedAt": "2026-09-01",
-    "priceBasis": "historical_market_reference"
+    "priceBasis": "historical_market_reference",
+    "nameUr": "فینی مولتیوسی ہاند توویل 2پلی 150 شیٹس",
+    "categoryEn": "Packaging & hygiene",
+    "categoryUr": "پیکنگ اور صفائی",
+    "unitEn": "Pack",
+    "unitUr": "پیک"
   }
 ]
