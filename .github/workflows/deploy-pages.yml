@@ -88,16 +88,16 @@ jobs:
             fi
           fi
       - uses: actions/setup-node@v4
-        if: steps.scope.outputs.sabeq_changed == 'true'
+        if: steps.scope.outputs.sabeq_changed == 'true' && steps.tamweenat.outputs.only != 'true'
         with: { node-version: '22' }
       - uses: actions/setup-python@v5
-        if: steps.scope.outputs.sabeq_changed == 'true'
+        if: steps.scope.outputs.sabeq_changed == 'true' && steps.tamweenat.outputs.only != 'true'
         with: { python-version: '3.12' }
       - name: Install Sabeq verification engine
-        if: steps.scope.outputs.sabeq_changed == 'true'
+        if: steps.scope.outputs.sabeq_changed == 'true' && steps.tamweenat.outputs.only != 'true'
         run: python -m pip install -r legal-memo-platform/tools/internal-verification/requirements.txt
       - name: Validate Sabeq publication safety
-        if: steps.scope.outputs.sabeq_changed == 'true'
+        if: steps.scope.outputs.sabeq_changed == 'true' && steps.tamweenat.outputs.only != 'true'
         run: python legal-memo-platform/tools/internal-verification/verify.py --profile publication
       - uses: actions/configure-pages@v5
       - name: Restore published sites and update Sabeq only
