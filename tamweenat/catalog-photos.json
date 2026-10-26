@@ -6,9 +6,11 @@
     "category": "اللحوم والدجاج",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0032.png",
-    "price": null,
+    "price": 1.45,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0031",
@@ -17,9 +19,11 @@
     "category": "اللحوم والدجاج",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0031.png",
-    "price": null,
+    "price": 1.35,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0030",
@@ -28,9 +32,11 @@
     "category": "اللحوم والدجاج",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0030.png",
-    "price": null,
+    "price": 7.2,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0029",
@@ -39,9 +45,11 @@
     "category": "اللحوم والدجاج",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0029.png",
-    "price": null,
+    "price": 1.63,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0028",
@@ -50,9 +58,11 @@
     "category": "اللحوم والدجاج",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0028.png",
-    "price": null,
+    "price": 1.55,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0036",
@@ -61,9 +71,11 @@
     "category": "اللحوم والدجاج",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0036.png",
-    "price": null,
+    "price": 2.75,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0027",
@@ -72,9 +84,11 @@
     "category": "اللحوم والدجاج",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0027.png",
-    "price": null,
+    "price": 2.25,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0033",
@@ -83,9 +97,11 @@
     "category": "اللحوم والدجاج",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0033.png",
-    "price": null,
+    "price": 2.35,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0034",
@@ -94,9 +110,11 @@
     "category": "اللحوم والدجاج",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0034.png",
-    "price": null,
+    "price": 1.25,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0035",
@@ -105,9 +123,11 @@
     "category": "اللحوم والدجاج",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0035.png",
-    "price": null,
+    "price": 2.85,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0037",
@@ -116,9 +136,11 @@
     "category": "اللحوم والدجاج",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0037.png",
-    "price": null,
+    "price": 1.45,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0038",
@@ -127,9 +149,11 @@
     "category": "اللحوم والدجاج",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0038.png",
-    "price": null,
+    "price": 1.6,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0039",
@@ -138,9 +162,11 @@
     "category": "اللحوم والدجاج",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0039.png",
-    "price": null,
+    "price": 1.88,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0021",
@@ -149,9 +175,11 @@
     "category": "المخبوزات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0021.png",
-    "price": null,
+    "price": 1,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0024",
@@ -160,9 +188,11 @@
     "category": "المخبوزات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0024.png",
-    "price": null,
+    "price": 1,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0019",
@@ -171,9 +201,11 @@
     "category": "المخبوزات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0019.png",
-    "price": null,
+    "price": 1,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0022",
@@ -182,9 +214,11 @@
     "category": "المخبوزات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0022.png",
-    "price": null,
+    "price": 1,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0018",
@@ -193,9 +227,11 @@
     "category": "المخبوزات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0018.png",
-    "price": null,
+    "price": 1.06,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0025",
@@ -204,9 +240,11 @@
     "category": "المخبوزات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0025.png",
-    "price": null,
+    "price": 1.33,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0015",
@@ -215,9 +253,11 @@
     "category": "المخبوزات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0015.png",
-    "price": null,
+    "price": 1,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0016",
@@ -226,9 +266,11 @@
     "category": "المخبوزات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0016.png",
-    "price": null,
+    "price": 1,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0017",
@@ -237,9 +279,11 @@
     "category": "المخبوزات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0017.png",
-    "price": null,
+    "price": 1,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0020",
@@ -248,9 +292,11 @@
     "category": "المخبوزات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0020.png",
-    "price": null,
+    "price": 1,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0023",
@@ -259,9 +305,11 @@
     "category": "المخبوزات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0023.png",
-    "price": null,
+    "price": 1,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0026",
@@ -270,9 +318,11 @@
     "category": "المخبوزات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0026.png",
-    "price": null,
+    "price": 1,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0046",
@@ -281,9 +331,11 @@
     "category": "الأجبان ومنتجات الألبان",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0046.png",
-    "price": null,
+    "price": 1.49,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0045",
@@ -292,9 +344,11 @@
     "category": "الأجبان ومنتجات الألبان",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0045.png",
-    "price": null,
+    "price": 7.5,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0047",
@@ -303,9 +357,11 @@
     "category": "الأجبان ومنتجات الألبان",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0047.png",
-    "price": null,
+    "price": 4.1,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0048",
@@ -314,9 +370,11 @@
     "category": "الأجبان ومنتجات الألبان",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0048.png",
-    "price": null,
+    "price": 4.1,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0044",
@@ -325,9 +383,11 @@
     "category": "الأجبان ومنتجات الألبان",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0044.png",
-    "price": null,
+    "price": 0.49,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0040",
@@ -336,9 +396,11 @@
     "category": "الأجبان ومنتجات الألبان",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0040.png",
-    "price": null,
+    "price": 1.85,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0041",
@@ -347,9 +409,11 @@
     "category": "الأجبان ومنتجات الألبان",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0041.png",
-    "price": null,
+    "price": 6.25,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0042",
@@ -358,9 +422,11 @@
     "category": "الأجبان ومنتجات الألبان",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0042.png",
-    "price": null,
+    "price": 3.75,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0043",
@@ -369,9 +435,11 @@
     "category": "الأجبان ومنتجات الألبان",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0043.png",
-    "price": null,
+    "price": 1.75,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0091",
@@ -380,9 +448,11 @@
     "category": "البطاطا والمقبلات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0091.png",
-    "price": null,
+    "price": 1.23,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0090",
@@ -391,9 +461,11 @@
     "category": "البطاطا والمقبلات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0090.png",
-    "price": null,
+    "price": 1.69,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0089",
@@ -402,9 +474,11 @@
     "category": "البطاطا والمقبلات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0089.png",
-    "price": null,
+    "price": 2.15,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0088",
@@ -413,9 +487,11 @@
     "category": "البطاطا والمقبلات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0088.png",
-    "price": null,
+    "price": 2.2,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0087",
@@ -424,9 +500,11 @@
     "category": "البطاطا والمقبلات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0087.png",
-    "price": null,
+    "price": 2,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0086",
@@ -435,9 +513,11 @@
     "category": "البطاطا والمقبلات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0086.png",
-    "price": null,
+    "price": 1.3,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0080",
@@ -446,9 +526,11 @@
     "category": "البطاطا والمقبلات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0080.png",
-    "price": null,
+    "price": 4.4,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0081",
@@ -457,9 +539,11 @@
     "category": "البطاطا والمقبلات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0081.png",
-    "price": null,
+    "price": 4.75,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0082",
@@ -468,9 +552,11 @@
     "category": "البطاطا والمقبلات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0082.png",
-    "price": null,
+    "price": 2.2,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0083",
@@ -479,9 +565,11 @@
     "category": "البطاطا والمقبلات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0083.png",
-    "price": null,
+    "price": 3.9,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0084",
@@ -490,9 +578,11 @@
     "category": "البطاطا والمقبلات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0084.png",
-    "price": null,
+    "price": 2.6,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0085",
@@ -501,9 +591,11 @@
     "category": "البطاطا والمقبلات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0085.png",
-    "price": null,
+    "price": 2.5,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0092",
@@ -512,9 +604,11 @@
     "category": "البطاطا والمقبلات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0092.png",
-    "price": null,
+    "price": 1.2,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0093",
@@ -523,9 +617,11 @@
     "category": "البطاطا والمقبلات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0093.png",
-    "price": null,
+    "price": 2,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0094",
@@ -534,9 +630,11 @@
     "category": "البطاطا والمقبلات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0094.png",
-    "price": null,
+    "price": 6.49,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0095",
@@ -545,9 +643,11 @@
     "category": "البطاطا والمقبلات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0095.png",
-    "price": null,
+    "price": 5.9,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0096",
@@ -556,9 +656,11 @@
     "category": "البطاطا والمقبلات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0096.png",
-    "price": null,
+    "price": 0.95,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0097",
@@ -567,9 +669,11 @@
     "category": "البطاطا والمقبلات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0097.png",
-    "price": null,
+    "price": 2.85,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0066",
@@ -578,9 +682,11 @@
     "category": "الصلصات والتتبيلات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0066.png",
-    "price": null,
+    "price": 2.7,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0065",
@@ -589,9 +695,11 @@
     "category": "الصلصات والتتبيلات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0065.png",
-    "price": null,
+    "price": 1.7,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0068",
@@ -600,9 +708,11 @@
     "category": "الصلصات والتتبيلات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0068.png",
-    "price": null,
+    "price": 3.68,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0067",
@@ -611,9 +721,11 @@
     "category": "الصلصات والتتبيلات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0067.png",
-    "price": null,
+    "price": 0.52,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0069",
@@ -622,9 +734,11 @@
     "category": "الصلصات والتتبيلات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0069.png",
-    "price": null,
+    "price": 3.7,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0070",
@@ -633,9 +747,11 @@
     "category": "الصلصات والتتبيلات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0070.png",
-    "price": null,
+    "price": 1.4,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0059",
@@ -644,9 +760,11 @@
     "category": "الصلصات والتتبيلات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0059.png",
-    "price": null,
+    "price": 16.75,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0060",
@@ -655,9 +773,11 @@
     "category": "الصلصات والتتبيلات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0060.png",
-    "price": null,
+    "price": 12.5,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0061",
@@ -666,9 +786,11 @@
     "category": "الصلصات والتتبيلات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0061.png",
-    "price": null,
+    "price": 9,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0079",
@@ -677,9 +799,11 @@
     "category": "الصلصات والتتبيلات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0079.png",
-    "price": null,
+    "price": 0.1,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0049",
@@ -688,9 +812,11 @@
     "category": "الصلصات والتتبيلات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0049.png",
-    "price": null,
+    "price": 3.2,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0050",
@@ -699,9 +825,11 @@
     "category": "الصلصات والتتبيلات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0050.png",
-    "price": null,
+    "price": 2.6,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0051",
@@ -710,9 +838,11 @@
     "category": "الصلصات والتتبيلات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0051.png",
-    "price": null,
+    "price": 0.88,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0052",
@@ -721,9 +851,11 @@
     "category": "الصلصات والتتبيلات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0052.png",
-    "price": null,
+    "price": 9.75,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0053",
@@ -732,9 +864,11 @@
     "category": "الصلصات والتتبيلات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0053.png",
-    "price": null,
+    "price": 0.75,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0054",
@@ -743,9 +877,11 @@
     "category": "الصلصات والتتبيلات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0054.png",
-    "price": null,
+    "price": 0.3,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0055",
@@ -754,9 +890,11 @@
     "category": "الصلصات والتتبيلات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0055.png",
-    "price": null,
+    "price": 4.45,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0056",
@@ -765,9 +903,11 @@
     "category": "الصلصات والتتبيلات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0056.png",
-    "price": null,
+    "price": 2,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0057",
@@ -776,9 +916,11 @@
     "category": "الصلصات والتتبيلات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0057.png",
-    "price": null,
+    "price": 3.6,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0058",
@@ -787,9 +929,11 @@
     "category": "الصلصات والتتبيلات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0058.png",
-    "price": null,
+    "price": 2.85,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0062",
@@ -798,9 +942,11 @@
     "category": "الصلصات والتتبيلات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0062.png",
-    "price": null,
+    "price": 4.5,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0063",
@@ -809,9 +955,11 @@
     "category": "الصلصات والتتبيلات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0063.png",
-    "price": null,
+    "price": 1.65,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0064",
@@ -820,9 +968,11 @@
     "category": "الصلصات والتتبيلات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0064.png",
-    "price": null,
+    "price": 4.5,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0071",
@@ -831,9 +981,11 @@
     "category": "الصلصات والتتبيلات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0071.png",
-    "price": null,
+    "price": 5.1,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0072",
@@ -842,9 +994,11 @@
     "category": "الصلصات والتتبيلات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0072.png",
-    "price": null,
+    "price": 3.53,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0073",
@@ -853,9 +1007,11 @@
     "category": "الصلصات والتتبيلات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0073.png",
-    "price": null,
+    "price": 4.75,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0074",
@@ -864,9 +1020,11 @@
     "category": "الصلصات والتتبيلات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0074.png",
-    "price": null,
+    "price": 4.5,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0075",
@@ -875,9 +1033,11 @@
     "category": "الصلصات والتتبيلات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0075.png",
-    "price": null,
+    "price": 5.57,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0076",
@@ -886,9 +1046,11 @@
     "category": "الصلصات والتتبيلات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0076.png",
-    "price": null,
+    "price": 5.4,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0077",
@@ -897,9 +1059,11 @@
     "category": "الصلصات والتتبيلات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0077.png",
-    "price": null,
+    "price": 1.83,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0078",
@@ -908,9 +1072,11 @@
     "category": "الصلصات والتتبيلات",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0078.png",
-    "price": null,
+    "price": 1.83,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0005",
@@ -919,9 +1085,11 @@
     "category": "الخضروات الطازجة",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0005.png",
-    "price": null,
+    "price": 0.45,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0006",
@@ -930,9 +1098,11 @@
     "category": "الخضروات الطازجة",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0006.png",
-    "price": null,
+    "price": 0.45,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0008",
@@ -941,9 +1111,11 @@
     "category": "الخضروات الطازجة",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0008.png",
-    "price": null,
+    "price": 0.99,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0009",
@@ -952,9 +1124,11 @@
     "category": "الخضروات الطازجة",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0009.png",
-    "price": null,
+    "price": 0.35,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0001",
@@ -963,9 +1137,11 @@
     "category": "الخضروات الطازجة",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0001.png",
-    "price": null,
+    "price": 0.7,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0002",
@@ -974,9 +1150,11 @@
     "category": "الخضروات الطازجة",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0002.png",
-    "price": null,
+    "price": 0.45,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0003",
@@ -985,9 +1163,11 @@
     "category": "الخضروات الطازجة",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0003.png",
-    "price": null,
+    "price": 0.49,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0004",
@@ -996,9 +1176,11 @@
     "category": "الخضروات الطازجة",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0004.png",
-    "price": null,
+    "price": 0.99,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0007",
@@ -1007,9 +1189,11 @@
     "category": "الخضروات الطازجة",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0007.png",
-    "price": null,
+    "price": 0.25,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0010",
@@ -1018,9 +1202,11 @@
     "category": "الخضروات الطازجة",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0010.png",
-    "price": null,
+    "price": 1,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0011",
@@ -1029,9 +1215,11 @@
     "category": "الخضروات الطازجة",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0011.png",
-    "price": null,
+    "price": 0.55,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0012",
@@ -1040,9 +1228,11 @@
     "category": "الخضروات الطازجة",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0012.png",
-    "price": null,
+    "price": 0.95,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0013",
@@ -1051,9 +1241,11 @@
     "category": "الخضروات الطازجة",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0013.png",
-    "price": null,
+    "price": 1.45,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0014",
@@ -1062,9 +1254,11 @@
     "category": "الخضروات الطازجة",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0014.png",
-    "price": null,
+    "price": 1.25,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0098",
@@ -1073,9 +1267,11 @@
     "category": "المشروبات الغازية",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0098.png",
-    "price": null,
+    "price": 1,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0099",
@@ -1084,9 +1280,11 @@
     "category": "المشروبات الغازية",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0099.png",
-    "price": null,
+    "price": 1.8,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0100",
@@ -1095,9 +1293,11 @@
     "category": "المشروبات الغازية",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0100.png",
-    "price": null,
+    "price": 2.5,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0101",
@@ -1106,9 +1306,11 @@
     "category": "المشروبات الغازية",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0101.png",
-    "price": null,
+    "price": 2.2,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0102",
@@ -1117,9 +1319,11 @@
     "category": "المشروبات الغازية",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0102.png",
-    "price": null,
+    "price": 1,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0103",
@@ -1128,9 +1332,11 @@
     "category": "المشروبات الغازية",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0103.png",
-    "price": null,
+    "price": 2.5,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0104",
@@ -1139,9 +1345,11 @@
     "category": "المشروبات الغازية",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0104.png",
-    "price": null,
+    "price": 2.2,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0105",
@@ -1150,9 +1358,11 @@
     "category": "المشروبات الغازية",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0105.png",
-    "price": null,
+    "price": 1,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0106",
@@ -1161,9 +1371,11 @@
     "category": "المشروبات الغازية",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0106.png",
-    "price": null,
+    "price": 2.5,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0107",
@@ -1172,9 +1384,11 @@
     "category": "المشروبات الغازية",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0107.png",
-    "price": null,
+    "price": 2.2,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0108",
@@ -1183,9 +1397,11 @@
     "category": "المشروبات الغازية",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0108.png",
-    "price": null,
+    "price": 2.25,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0109",
@@ -1194,9 +1410,11 @@
     "category": "المشروبات الغازية",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0109.png",
-    "price": null,
+    "price": 3.23,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0110",
@@ -1205,9 +1423,11 @@
     "category": "المشروبات الغازية",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0110.png",
-    "price": null,
+    "price": 0.5,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0111",
@@ -1216,9 +1436,11 @@
     "category": "المشروبات الغازية",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0111.png",
-    "price": null,
+    "price": 2.5,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0112",
@@ -1227,9 +1449,11 @@
     "category": "المشروبات الغازية",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0112.png",
-    "price": null,
+    "price": 2.2,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0113",
@@ -1238,9 +1462,11 @@
     "category": "المشروبات الغازية",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0113.png",
-    "price": null,
+    "price": 2.5,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0114",
@@ -1249,9 +1475,11 @@
     "category": "المشروبات الغازية",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0114.png",
-    "price": null,
+    "price": 2.2,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0115",
@@ -1260,9 +1488,11 @@
     "category": "المشروبات الغازية",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0115.png",
-    "price": null,
+    "price": 2.5,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0116",
@@ -1271,9 +1501,11 @@
     "category": "المشروبات الغازية",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0116.png",
-    "price": null,
+    "price": 2,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0117",
@@ -1282,9 +1514,11 @@
     "category": "المشروبات الغازية",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0117.png",
-    "price": null,
+    "price": 2.5,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0118",
@@ -1293,9 +1527,11 @@
     "category": "المشروبات الغازية",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0118.png",
-    "price": null,
+    "price": 3.23,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0119",
@@ -1304,9 +1540,11 @@
     "category": "المشروبات الغازية",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0119.png",
-    "price": null,
+    "price": 2.25,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0120",
@@ -1315,9 +1553,11 @@
     "category": "المشروبات الغازية",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0120.png",
-    "price": null,
+    "price": 2.25,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0121",
@@ -1326,9 +1566,11 @@
     "category": "المشروبات الغازية",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0121.png",
-    "price": null,
+    "price": 2.95,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0122",
@@ -1337,9 +1579,11 @@
     "category": "المشروبات الغازية",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0122.png",
-    "price": null,
+    "price": 2.38,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0123",
@@ -1348,9 +1592,11 @@
     "category": "المشروبات الغازية",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0123.png",
-    "price": null,
+    "price": 3.23,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0124",
@@ -1359,9 +1605,11 @@
     "category": "المشروبات الغازية",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0124.png",
-    "price": null,
+    "price": 2.38,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0125",
@@ -1370,9 +1618,11 @@
     "category": "المشروبات الغازية",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0125.png",
-    "price": null,
+    "price": 2.5,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0126",
@@ -1381,9 +1631,11 @@
     "category": "المشروبات الغازية",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0126.png",
-    "price": null,
+    "price": 2.2,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0127",
@@ -1392,9 +1644,11 @@
     "category": "المشروبات الغازية",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0127.png",
-    "price": null,
+    "price": 2.5,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0128",
@@ -1403,9 +1657,11 @@
     "category": "المشروبات الغازية",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0128.png",
-    "price": null,
+    "price": 1,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0129",
@@ -1414,9 +1670,11 @@
     "category": "المشروبات الغازية",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0129.png",
-    "price": null,
+    "price": 2.5,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0130",
@@ -1425,9 +1683,11 @@
     "category": "المشروبات الغازية",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0130.png",
-    "price": null,
+    "price": 2.2,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0131",
@@ -1436,9 +1696,11 @@
     "category": "المشروبات الغازية",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0131.png",
-    "price": null,
+    "price": 2.5,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0132",
@@ -1447,9 +1709,11 @@
     "category": "المياه",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0132.png",
-    "price": null,
+    "price": 6.75,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0133",
@@ -1458,9 +1722,11 @@
     "category": "المياه",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0133.png",
-    "price": null,
+    "price": 6.25,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0134",
@@ -1469,9 +1735,11 @@
     "category": "المياه",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0134.png",
-    "price": null,
+    "price": 7.25,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0135",
@@ -1480,9 +1748,11 @@
     "category": "المياه",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0135.png",
-    "price": null,
+    "price": 0.8,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0136",
@@ -1491,9 +1761,11 @@
     "category": "المياه",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0136.png",
-    "price": null,
+    "price": 0.73,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0137",
@@ -1502,9 +1774,11 @@
     "category": "المياه",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0137.png",
-    "price": null,
+    "price": 0.56,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0138",
@@ -1513,9 +1787,11 @@
     "category": "المياه",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0138.png",
-    "price": null,
+    "price": 0.64,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0139",
@@ -1524,9 +1800,11 @@
     "category": "المياه",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0139.png",
-    "price": null,
+    "price": 0.8,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0140",
@@ -1535,9 +1813,11 @@
     "category": "المياه",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0140.png",
-    "price": null,
+    "price": 2.5,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0141",
@@ -1546,9 +1826,11 @@
     "category": "المياه",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0141.png",
-    "price": null,
+    "price": 0.85,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0142",
@@ -1557,9 +1839,11 @@
     "category": "المياه",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0142.png",
-    "price": null,
+    "price": 0.55,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0143",
@@ -1568,9 +1852,11 @@
     "category": "المياه",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0143.png",
-    "price": null,
+    "price": 0.575,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0144",
@@ -1579,9 +1865,11 @@
     "category": "المياه",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0144.png",
-    "price": null,
+    "price": 0.73,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0145",
@@ -1590,9 +1878,11 @@
     "category": "المياه",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0145.png",
-    "price": null,
+    "price": 1,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0146",
@@ -1601,9 +1891,11 @@
     "category": "المياه",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0146.png",
-    "price": null,
+    "price": 5.75,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0147",
@@ -1612,9 +1904,11 @@
     "category": "المياه",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0147.png",
-    "price": null,
+    "price": 1.15,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0156",
@@ -1623,9 +1917,11 @@
     "category": "التغليف والنظافة",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0156.png",
-    "price": null,
+    "price": 1.19,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0157",
@@ -1634,9 +1930,11 @@
     "category": "التغليف والنظافة",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0157.png",
-    "price": null,
+    "price": 0.51,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0150",
@@ -1645,9 +1943,11 @@
     "category": "التغليف والنظافة",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0150.png",
-    "price": null,
+    "price": 0.78,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0151",
@@ -1656,9 +1956,11 @@
     "category": "التغليف والنظافة",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0151.png",
-    "price": null,
+    "price": 0.69,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0148",
@@ -1667,9 +1969,11 @@
     "category": "التغليف والنظافة",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0148.png",
-    "price": null,
+    "price": 0.25,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0149",
@@ -1678,9 +1982,11 @@
     "category": "التغليف والنظافة",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0149.png",
-    "price": null,
+    "price": 0.59,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0152",
@@ -1689,9 +1995,11 @@
     "category": "التغليف والنظافة",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0152.png",
-    "price": null,
+    "price": 1.15,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0154",
@@ -1700,9 +2008,11 @@
     "category": "التغليف والنظافة",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0154.png",
-    "price": null,
+    "price": 0.49,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0155",
@@ -1711,9 +2021,11 @@
     "category": "التغليف والنظافة",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0155.png",
-    "price": null,
+    "price": 0.595,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0158",
@@ -1722,9 +2034,11 @@
     "category": "التغليف والنظافة",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0158.png",
-    "price": null,
+    "price": 1,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0153",
@@ -1733,9 +2047,11 @@
     "category": "التغليف والنظافة",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0153.png",
-    "price": null,
+    "price": 0.65,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0159",
@@ -1744,9 +2060,11 @@
     "category": "التغليف والنظافة",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0159.png",
-    "price": null,
+    "price": 1.1,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0160",
@@ -1755,9 +2073,11 @@
     "category": "التغليف والنظافة",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0160.png",
-    "price": null,
+    "price": 0.29,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0161",
@@ -1766,9 +2086,11 @@
     "category": "التغليف والنظافة",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0161.png",
-    "price": null,
+    "price": 0.42,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   },
   {
     "id": "BRG-0162",
@@ -1777,8 +2099,10 @@
     "category": "التغليف والنظافة",
     "unit": "عبوة",
     "imageUrl": "https://q8-ux.github.io/saad/tamweenat/assets/products/BRG-0162.png",
-    "price": null,
+    "price": 0.695,
     "active": false,
-    "priceStatus": "needs_review"
+    "priceStatus": "historical_reference_not_approved",
+    "verifiedAt": "2026-09-01",
+    "priceBasis": "historical_market_reference"
   }
 ]
