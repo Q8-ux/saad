@@ -6,10 +6,10 @@ OUT = Path(__file__).resolve().parents[1] / "corpus.json"
 sources = []
 
 
-def source(id, title, kind, locator, url, summary, *, author="", status="text_checked", use="education", rights="paraphrase", note=""):
+def source(id, title, kind, locator, url, summary, *, author="", status="text_checked", use="education", rights="not-assessed", reuse_mode="editorial-paraphrase-only", note=""):
     sources.append(dict(id=id, title=title, category=kind, locator=locator, url=url,
                         author=author, summary=summary, verification=status, use=use,
-                        rights=rights, reviewed_at="2026-10-27", scholar_reviewed=False, caveat=note))
+                        rights=rights, reuse_mode=reuse_mode, reviewed_at="2026-10-27", scholar_reviewed=False, caveat=note))
 
 
 quran = [
@@ -73,9 +73,9 @@ for id, author, path in [("t-kathir", "ابن كثير", "katheer"), ("t-tabari"
     source(id, f"تفسير {author} — رؤيا الملك", "tafsir", "يوسف: 43 وما بعدها",
            f"https://quran.ksu.edu.sa/tafseer/{path}/sura12-aya43.html",
            "لشرح سياق الآيات والتأويل في قصة يوسف؛ تفسير القرآن لا يتحول بذاته إلى حكم على منام المستخدم.",
-           author=author, status="excerpt_checked", rights="public-domain")
+           author=author, status="excerpt_checked", rights="linked-edition-not-established")
 
-source("f-darifta", "أصول تعبير الرؤى المنامية", "fatwa", "دار الإفتاء المصرية — فتوى 13821",
+source("f-darifta", "أصول تعبير الرؤى المنامية", "fatwa", "دار الإفتاء المصرية — فتوى 3747 (معرّف الصفحة 13821)",
        "https://www.dar-alifta.org/ar/fatwa/details/13821/أصول-تعبير-الرؤى-المنامية",
        "تقرير مشروعية التعبير لمن يحسنه، واحتمال خطأ المعبّر، وأن الرؤيا ليست حجة شرعية.",
        author="دار الإفتاء المصرية", status="excerpt_checked", use="core")
@@ -96,17 +96,17 @@ source("f-afterlife", "هل يُعرف المصير الأخروي من الرؤ
 source("b-nabulsi", "تعطير الأنام في تعبير المنام", "heritage", "مقدمة الكتاب — النص الرقمي، الصفحة المعروضة 5 (المطبوعة 8)",
        "https://usul.ai/ar/t/tactir-anam/5",
        "مصنّف تراثي في التعبير؛ يعرض طرقاً اجتهادية متعددة. اختلاف أحوال الناس والنقول فيه يستلزم مراجعة متخصصة.",
-       author="عبد الغني النابلسي", use="research", rights="public-domain",
+       author="عبد الغني النابلسي", status="excerpt_checked", use="research", rights="linked-edition-not-established",
        note="فُحص موضع محدد فقط؛ لم تُستورد مادته كاملة ولم تُزكَّ جميع تأويلاته.")
 source("b-ibnshahin", "الإشارات في علم العبارات", "heritage", "مقدمة الكتاب — 1/603 في النسخة الرقمية",
        "https://usul.ai/ar/t/isharat-2/1",
        "مصنّف تراثي يورد مصادر سابقة واختلافات في التعبير. ذكر اسم مصدر فيه لا يصحح نسبته أو رواياته.",
-       author="خليل بن شاهين الظاهري", use="research", rights="public-domain",
+       author="خليل بن شاهين الظاهري", status="excerpt_checked", use="research", rights="linked-edition-not-established",
        note="فحص مقدمة وفهرسة إحالات؛ لا اعتماد آلي لتأويلات الكتاب أو دعاوى الغيب فيه.")
 source("b-ibnqutayba", "كتاب تعبير الرؤيا", "heritage", "فهرس المكتبة الوطنية التونسية — SYRACUSE/6221041، تحقيق إبراهيم صالح",
        "https://www.bibliotheque.nat.tn/BNT/doc/SYRACUSE/6221041",
        "مرجع ببليوغرافي لمصنف ابن قتيبة؛ يحتاج الحصول على نسخة محققة ومقابلة صفحاتها قبل استخراج قواعد منسوبة إليه.",
-       author="ابن قتيبة الدينوري", status="catalog_only", use="research", rights="unknown",
+       author="منسوب إلى ابن قتيبة الدينوري", status="catalog_only", use="research", rights="unknown",
        note="تم العثور على الفهرس؛ تعذر جلب الصفحة كاملة وقت المراجعة، ولم يُقرأ الكتاب.")
 source("b-manuscript", "تعطير الأنام — نسخة خطية مصورة", "catalog", "Wellcome Collection — MS Arabic 109",
        "https://wellcomecollection.org/works/zg7mcp5h",
@@ -117,6 +117,76 @@ source("b-ibnsirin", "منتخب الكلام — المنسوب إلى ابن �
        "مرجع متداول تُنازع نسبته إلى ابن سيرين؛ يُحفظ للتوثيق النقدي ولا يُنسب محتواه إليه بصيغة الجزم.",
        author="منسوب إلى ابن سيرين؛ النسبة محل نقد", status="attribution_disputed", use="excluded",
        note="لا نعتمد الجزم بتحديد مؤلف بديل، ولا نسند أقوال هذا الكتاب إلى ابن سيرين آلياً.")
+
+# Official methodological rulings. These records support product limits, not symbol meanings.
+source("f-darifta-program", "حكم تخصيص برنامج لتفسير الرؤى والأحلام", "fatwa", "دار الإفتاء المصرية — فتوى 4529 (معرّف الصفحة 14709)",
+       "https://www.dar-alifta.org/ar/fatwa/details/14709/حكم-تخصيص-برنامج-لتفسير-الرؤى-والأحلام",
+       "تنبيه إلى خطورة التوسع المهني في التعبير أو ادعاء إشراف علمي غير ثابت، مع تقرير احتمال خطأ المعبّر.",
+       author="دار الإفتاء المصرية", status="excerpt_checked", use="core")
+source("f-binbaz-books-official", "حكم قراءة كتب تفسير الأحلام", "fatwa", "موقع ابن باز — فتوى 14507",
+       "https://binbaz.org.sa/fatwas/14507/حكم-قراءة-كتب-تفسير-الاحلام",
+       "الاستفادة من كتب التعبير تكون مع الدليل والقرائن، ولا يكفي الاعتماد على الكتاب أو الجزم عند الاشتباه.",
+       author="عبد العزيز بن باز — الموقع الرسمي", status="excerpt_checked", use="core")
+source("f-binbaz-no-knowledge", "حكم تفسير الرؤيا بلا علم", "fatwa", "موقع ابن باز — فتوى 23378",
+       "https://binbaz.org.sa/fatwas/23378/حكم-تفسير-الرويا-بلا-علم",
+       "منع التفسير بلا معرفة وبصيرة؛ وهو أصل في إظهار الامتناع عند نقص المادة أو السياق.",
+       author="عبد العزيز بن باز — الموقع الرسمي", status="excerpt_checked", use="core")
+source("f-binbaz-act", "حكم العمل بالرؤيا المنامية", "fatwa", "موقع ابن باز — فتوى 4580",
+       "https://binbaz.org.sa/fatwas/4580/حكم-العمل-بالرويا-المنامية",
+       "الرؤيا غير ملزمة، ولا يُغيَّر بسببها قرار صحي أو واقعي دون أسباب معتبرة.",
+       author="عبد العزيز بن باز — الموقع الرسمي", status="excerpt_checked", use="core")
+
+# Institutional manuscript and bibliography records discovered for the ingestion roadmap.
+source("w-nli-ibnqutayba", "كتاب عبارة الرؤيا — شاهد مخطوط منسوب لابن قتيبة", "catalog",
+       "المكتبة الوطنية الإسرائيلية — NNL_ALEPH990032479780205171",
+       "https://www.nli.org.il/en/manuscripts/NNL_ALEPH990032479780205171/NLI",
+       "سجل مخطوط قابل للتنزيل وموسوم بالملك العام؛ يتيح بناء تفريغ مستقل مع إبقاء علامة الاستفهام الببليوغرافية على النسبة حتى مراجعتها.",
+       author="منسوب إلى ابن قتيبة", status="manuscript_record_checked", use="research", rights="public-domain",
+       note="السجل المؤسسي شاهد للنسخة والحقوق، لا اعتماد تلقائي لكل ما في المخطوط.")
+source("w-qdl-ibnshahin", "الإشارات في علم العبارات — المخطوط Add MS 9690", "catalog",
+       "British Library / Qatar Digital Library — Add MS 9690، 574 صورة",
+       "https://www.qdl.qa/en/archive/81055/vdc_100093647399.0x000001",
+       "شاهد مخطوط مفتوح مع فهرس أبواب وصور يمكن ربط التفريغ بها على مستوى الورقة والوجه.",
+       author="خليل بن شاهين الظاهري", status="manuscript_record_checked", use="research", rights="public-domain",
+       note="يلزم OCR مستقل ومقابلة بشرية؛ لا يُعامل النص الرقمي الحالي بديلاً عن المخطوط.")
+source("w-nli-ibnghannam", "المحكم في اختصار المعلم — شاهد مخطوط", "catalog",
+       "المكتبة الوطنية الإسرائيلية — Ms. Yah. Ar.110",
+       "https://www.nli.org.il/en/manuscripts/NNL_ALEPH990031589010205171/NLI",
+       "تلخيص قديم منسوب إلى محب الدين القدسي لكتاب ابن غنام، يصلح للتحقيق والمقارنة لا للإدخال الآلي غير المراجع.",
+       author="محب الدين القدسي؛ عن ابن غنام", status="manuscript_record_checked", use="research", rights="public-domain",
+       note="يجب تمييز المؤلفين المتشابهة أسماؤهم وإثبات علاقة الشاهد بالأصل قبل الاستنباط.")
+source("w-princeton-muallim", "مُعْلِم على حروف المعجم — شاهد مخطوط", "catalog",
+       "Princeton Digital Collections — Garrett 3866Y",
+       "https://digital-collections.princeton.edu/i/معلم-حروف-المعجم-الخ/item/894f0aba-8615-46c7-ac52-c951d42f41a5",
+       "مخطوط مركب في التعبير من القرن السابع عشر، متاح بصور وPDF وموسوم No Known Copyright.",
+       author="لم تُحسم النسبة في سجل المنصة", status="manuscript_record_checked", use="research", rights="no-known-copyright",
+       note="مصدر للاكتشاف والتحقيق؛ لا يدخل الاستدلال قبل تفريغ الأبواب ومراجعتها.")
+source("b-kharkushi-bibliography", "البشارة والنذارة في تعبير الرؤيا — تحقيق نسبة النص", "heritage",
+       "مركز أبوظبي للغة العربية — خبر الإصدار العلمي 2023",
+       "https://alc.ae/ar/الإعلام/الأخبار/مركز-أبوظبي-للغة-العربية-ي-صدر-ك-تب-البشارة-والنذارة-في-تعبير-الرؤيا-و-فقه-تحقيق-النصوص-من-الصنعة-إلى-العلم-و-بنية-الاضطراب-الرواية-العربية-في-الألفية-الثالثة/",
+       "يعرض التحقيق نسبة نص اشتهر مطبوعاً باسم ابن سيرين إلى أبي سعد الخركوشي؛ يستخدم للتاريخ الببليوغرافي لا لنسخ الطبعة الحديثة.",
+       author="أبو سعد الخركوشي؛ تحقيق بلال الأرفه لي ولينا الجمال", status="edition_record_checked", use="research", rights="modern-edition-not-cleared",
+       note="لا نعمم نتيجة التحقيق على كل نص منسوب إلى ابن سيرين، ولا ننسخ الطبعة المحمية.")
+
+# Exact, short research entry points into two attributed classical works. The platform stores
+# editorial paraphrases only; the linked digital edition remains a research witness.
+for sid, title, locator, url, author, summary in [
+    ("p-nabulsi-rain", "تعطير الأنام — المطر", "باب الميم، مطر — الصفحة الرقمية 315 (المطبوعة 318)", "https://usul.ai/ar/t/tactir-anam/315", "عبد الغني النابلسي", "يذكر للمطر غير المؤذي وجوهاً من الخير والرزق والرحمة، ويجعل الضرر قرينة تغيّر الوجه."),
+    ("p-nabulsi-water", "تعطير الأنام — الماء", "باب الميم، ماء — الصفحة الرقمية 316 (المطبوعة 319)", "https://usul.ai/ar/t/tactir-anam/316", "عبد الغني النابلسي", "يربط الماء في تصنيفه بأوجه متعددة، منها الحياة الطيبة عند صفاء الحال، فلا يُفصل اللفظ عن وصف الماء والفعل."),
+    ("p-nabulsi-sea", "تعطير الأنام — البحر", "باب الباء، بحر — الصفحة الرقمية 27 (المطبوعة 30)", "https://usul.ai/ar/t/tactir-anam/27", "عبد الغني النابلسي", "يورد للبحر وجوهاً تتصل بالسلطان أو الأمر المهاب، وتتغير بالشرب والخوض والخوف وحال الرائي."),
+    ("p-nabulsi-snake", "تعطير الأنام — الحية", "باب الحاء، حية — الصفحة الرقمية 94 (المطبوعة 97)", "https://usul.ai/ar/t/tactir-anam/94", "عبد الغني النابلسي", "يورد وجوه الخصومة أو القوة والمال بحسب الخوف والفعل؛ لا يتيح ذلك تعيين شخص بوصفه عدواً."),
+    ("p-nabulsi-key", "تعطير الأنام — المفتاح", "باب الميم، مفتاح — الصفحة الرقمية 327 (المطبوعة 330)", "https://usul.ai/ar/t/tactir-anam/327", "عبد الغني النابلسي", "يذكر للمفتاح أوجهاً منها العون وفتح باب علم أو رزق، مع تعدد كبير يمنع تحويله إلى معنى واحد."),
+    ("p-nabulsi-fire", "تعطير الأنام — النار", "باب النون، نار — الصفحة الرقمية 348 (المطبوعة 351)", "https://usul.ai/ar/t/tactir-anam/348", "عبد الغني النابلسي", "يجمع للنار وجوهاً متباينة من البشارة والإنذار والضرر والمنفعة؛ حالة النار وأثرها لازمان قبل أي مقارنة."),
+    ("p-nabulsi-door", "تعطير الأنام — الباب", "باب الباء، باب — الصفحة الرقمية 30 (المطبوعة 33)", "https://usul.ai/ar/t/tactir-anam/30", "عبد الغني النابلسي", "يورد للباب المفتوح وجوهاً متعلقة بالرزق أو شؤون البيت، مع اعتماد المعنى على فعل الفتح وحالة الباب."),
+    ("p-ibnshahin-rain", "الإشارات — المطر", "الباب الخامس، فصل رؤيا المطر — الصفحة الرقمية 11", "https://usul.ai/ar/t/isharat-2/11", "خليل بن شاهين الظاهري", "ينقل في المطر العام وجوه الخير والرحمة، ويعرض أقوالاً متعددة تتغير بالضرر والموضع والوقت."),
+    ("p-ibnshahin-water", "الإشارات — المياه", "الباب الثامن والثلاثون، فصل المياه — الصفحة الرقمية 124", "https://usul.ai/ar/t/isharat-2/124", "خليل بن شاهين الظاهري", "يجمع أوجهاً كثيرة للماء ويجعل الصفاء والحرارة والفعل وحال الرائي قرائن تغيّر التقرير."),
+    ("p-ibnshahin-sea", "الإشارات — البحور", "الباب الثامن والثلاثون، فصل البحور — الصفحة الرقمية 120", "https://usul.ai/ar/t/isharat-2/120", "خليل بن شاهين الظاهري", "ينقل وجوهاً متعلقة بالسلطان أو العلم، ويفرق بين البحر الهادئ وغيره وبين النظر والخوض والشرب."),
+    ("p-ibnshahin-key", "الإشارات — المفاتيح والأقفال", "الباب الخامس والثلاثون، فصل المفاتيح — الصفحة الرقمية 112", "https://usul.ai/ar/t/isharat-2/112", "خليل بن شاهين الظاهري", "يجعل المفتاح ذا وجوه تتصل بمن تُقضى على يده الأمور وبالفتح، فلا تكفي صورة المفتاح دون فعل وسياق."),
+    ("p-ibnshahin-fire", "الإشارات — النار والشرر", "الباب الثالث والخمسون، فصل النار — الصفحة الرقمية 187", "https://usul.ai/ar/t/isharat-2/187", "خليل بن شاهين الظاهري", "يفرق بين النار النافعة والضارة وبين الدخان والاحتراق وعدم الضرر، ويورد أقوالاً مختلفة بحسب المشهد."),
+]:
+    source(sid, title, "heritage", locator, url, summary, author=author,
+           status="excerpt_checked", use="research", rights="linked-edition-not-established",
+           note="مقتطف موضعي فُحص للبحث؛ التأويل التراثي اجتهاد بشري ولم يراجع تنزيله معبّر مؤهل.")
 
 rules = []
 def rule(id, title, category, explanation, refs, basis="textual"):
@@ -146,7 +216,7 @@ rule("r-context", "ابدأ بالقصة والسياق", "منهج التعبي
 rule("r-specific", "الشاهد الخاص ليس قاموساً عاماً", "منهج التعبير", "ورود اللبن أو القميص في رؤيا نبوية لا يثبت نفس المعنى لكل شخص وفي كل ظرف.", "h-bukhari-7006 h-bukhari-7008", "inference")
 rule("r-variants", "أظهر وجه الاستدلال وحدوده", "منهج التعبير", "تبيّن النتيجة هل الصلة شاهد خاص أو أصلاً عاماً أو اجتهاداً؛ لا يُلصق النص بالتأويل بلا بيان.", "q-isra-36 h-bukhari-7046", "product_policy")
 rule("r-names", "دلالة الأسماء للاستئناس بحذر", "منهج التعبير", "في حديث مسلم مثال خاص على دلالة الأسماء؛ لا نطبقه كحساب حروف أو نبوءة بالأسماء.", "h-muslim-2270", "inference")
-rule("r-books", "استفد من الكتب ولا تعتمدها وحدها", "منهج التعبير", "تفريغ ابن باز يؤكد الدليل والقرائن وعدم الجزم عند الشك؛ استيراد الكتاب لا يصحح محتواه.", "f-binbaz")
+rule("r-books", "استفد من الكتب ولا تعتمدها وحدها", "منهج التعبير", "الكتاب يقدّم وجهاً تراثياً، لكنه لا يكفي دون دليل وقرائن ولا يجيز الجزم عند الاشتباه.", "f-binbaz-books-official")
 rule("r-attribution", "تحقق من نسبة الكتاب والقول", "منهج التعبير", "يُحجز الكتاب المنسوب إلى ابن سيرين المختلف في نسبته؛ وذكر مصدر قديم في فهرس لا يثبت نسبته.", "b-ibnsirin b-ibnshahin", "product_policy")
 rule("r-grade", "راجع الحديث قبل إدخاله", "منهج التعبير", "لا ننقل حكم الصحيحين إلى كل ما في كتب السنن، بل تُراجع كل رواية ودرجتها على حدة.", "c-tirmidhi c-ibnmajah c-abudawud", "product_policy")
 rule("r-unsure", "عند نقص الدليل قل: لا يكفي", "منهج التعبير", "لا تُملأ الفجوات بتأويل منسوب لشرع أو عالم؛ يُظهر النظام ما ينقصه من سياق ومراجع.", "q-isra-36 h-bukhari-7046", "product_policy")
@@ -154,7 +224,8 @@ rule("r-no-accusation", "لا تتهم أحداً بسبب منام", "ضواب�
 rule("r-no-clinic", "لا تشخيص طبي من حلم", "ضوابط المنصة", "لا تُستنتج إصابة أو حمل أو وفاة، ولا يُنصح بإيقاف علاج أو ترك فحص بسبب منام.", "q-isra-36", "product_policy")
 rule("r-no-money", "لا قرار مالي أو زواجي من التأويل وحده", "ضوابط المنصة", "تعرض المنصة مادة للاستئناس؛ القرار يُبنى على الواقع والمشاورة المناسبة.", "f-istikhara q-isra-36", "product_policy")
 rule("r-private", "الخصوصية تبدأ قبل الحفظ", "ضوابط المنصة", "لا يُحفظ نص المنام تلقائياً؛ الحفظ المحلي باختيار المستخدم، مع حذف وتصدير واضحين.", "q-yusuf-5", "product_policy")
-rule("r-review", "المراجعة التقنية ليست إجازة شرعية", "ضوابط المنصة", "توثيق الرابط وفحص الكود لا يغنيان عن مراجعة علمية لمتون المواد وتطبيق القواعد.", "q-isra-36 h-bukhari-7046", "product_policy")
+rule("r-review", "المراجعة التقنية ليست إجازة شرعية", "ضوابط المنصة", "توثيق الرابط وفحص الكود لا يغنيان عن مراجعة علمية لمتون المواد وتطبيق القواعد.", "q-isra-36 h-bukhari-7046 f-darifta-program", "product_policy")
+rule("r-two-scales", "افصل قوة المصدر عن ملاءمة المشهد", "ضوابط المنصة", "قد يكون النص ثابتاً لكن نقله إلى حلم جديد ضعيفاً؛ لذلك تعرض المنصة قوة المصدر وملاءمة المشهد كلًّا على حدة.", "h-bukhari-7046 f-binbaz-no-knowledge", "product_policy")
 
 symbols = []
 def symbol(id, name, terms, kind, evidence, possibility, questions, refs):
@@ -204,13 +275,81 @@ for id, name, terms, text, question in unknowns:
     symbol(id, name, terms, "no_direct_evidence", text,
            "المتاح هنا سؤال السياق وحديث النفس المحتمل؛ لا تتوافر حجة خاصة لتعيين تأويل لهذا الرمز.", [question], refs)
 
+heritage_symbol_updates = {
+    "s-rain": ("قول تراثي مشروط", "فُحص موضعان من النابلسي وابن شاهين يربطان المطر العام غير المؤذي بوجوه خير ورحمة، مع اختلاف المعنى عند الضرر.", "لا يُستعمل هذا الوجه ما لم يوصف أثر المطر وضرره وصلته بواقع الرائي.", ["p-nabulsi-rain", "p-ibnshahin-rain"]),
+    "s-water": ("قول تراثي مشروط", "تورد المصنفات التراثية للماء وجوهاً كثيرة تتغير بالصفاء والحرارة والفعل؛ لا يعمل اللفظ منفرداً.", "يمكن بحث وجه الخير أو الحياة الطيبة للماء الصافي المشروب فقط بوصفه قراءة تراثية محتملة.", ["p-nabulsi-water", "p-ibnshahin-water"]),
+    "s-sea": ("قول تراثي مشروط", "يورد النابلسي وابن شاهين للبحر وجوهاً تتصل بالأمر المهاب أو السلطان أو العلم بحسب الهدوء والخوض والشرب والخوف.", "تعدد الوجوه يجعل البحر وحده غير كافٍ؛ لا يُستنتج منه خطر أو نفوذ أو حدث قادم.", ["p-nabulsi-sea", "p-ibnshahin-sea"]),
+    "s-key": ("قول تراثي مشروط", "تذكر مواضع تراثية للمفتاح وجوهاً من العون والفتح والعلم، وتربطه أيضاً بمن تُقضى على يده الأمور.", "يحتاج المفتاح إلى فعله: فتح، ضياع، كسر أو تسليم؛ ولا يعد بوظيفة أو زواج أو مال.", ["p-nabulsi-key", "p-ibnshahin-key"]),
+    "s-snake": ("قول تراثي محجوب عن الاتهام", "يورد النابلسي وجوهاً من الخصومة أو القوة بحسب الخوف والفعل، وهي قراءة تراثية لا دليل اتهام.", "لا يجوز تعيين قريب أو جار أو شخص بوصفه عدواً أو ساحراً من صورة الحية.", ["p-nabulsi-snake", "q-hujurat-12"]),
+    "s-fire": ("قول تراثي شديد التعدد", "يفرق ابن شاهين بين النار النافعة والضارة، ويجمع النابلسي لها وجوهاً متباينة؛ الأثر والدخان والاحتراق قرائن لازمة.", "لا تُنسب النار إلى عقوبة أو ذنب أو مصيبة آتية؛ عند الفزع تُحجب القراءة الرمزية.", ["p-nabulsi-fire", "p-ibnshahin-fire"]),
+}
+for row in symbols:
+    if row["id"] in heritage_symbol_updates:
+        label, evidence, possibility, refs = heritage_symbol_updates[row["id"]]
+        row.update(kind="heritage_contextual", kind_label=label, evidence=evidence,
+                   possibility=possibility, source_refs=refs)
+
+# Version-two scene model. It separates attributed works, checked passages, scene patterns and
+# safe claims so that a word match cannot silently become a prediction.
+works = [
+    dict(id="work-nabulsi", title="تعطير الأنام في تعبير المنام", author="عبد الغني النابلسي", attribution_status="confirmed", active_for_inference=True, source_refs=["b-nabulsi", "b-manuscript"]),
+    dict(id="work-ibnshahin", title="الإشارات في علم العبارات", author="خليل بن شاهين الظاهري", attribution_status="confirmed", active_for_inference=True, source_refs=["b-ibnshahin", "w-qdl-ibnshahin"]),
+    dict(id="work-ibnqutayba", title="كتاب عبارة الرؤيا", author="منسوب إلى ابن قتيبة", attribution_status="needs_authority_review", active_for_inference=False, source_refs=["b-ibnqutayba", "w-nli-ibnqutayba"]),
+    dict(id="work-ibnghannam-original", title="المعلم في تعبير الرؤيا", author="منسوب إلى ابن غنام", attribution_status="indirect_witness_only", active_for_inference=False, source_refs=["w-nli-ibnghannam"]),
+    dict(id="work-qudsi-muhkam", title="المحكم في اختصار المعلم", author="محب الدين القدسي؛ اختصار لكتاب منسوب إلى ابن غنام", attribution_status="manuscript_record_only", active_for_inference=False, source_refs=["w-nli-ibnghannam"]),
+    dict(id="work-princeton-muallim", title="مُعْلِم على حروف المعجم", author="لم تُحسم النسبة", attribution_status="manuscript_record_only", active_for_inference=False, source_refs=["w-princeton-muallim"]),
+    dict(id="work-kharkushi", title="البشارة والنذارة في تعبير الرؤيا", author="أبو سعد الخركوشي", attribution_status="modern_critical_attribution", active_for_inference=False, source_refs=["b-kharkushi-bibliography"]),
+    dict(id="work-ibnsirin-attributed", title="منتخب الكلام المنسوب إلى ابن سيرين", author="نسبة غير ثابتة", attribution_status="disputed", active_for_inference=False, source_refs=["b-ibnsirin"]),
+]
+
+passages = [
+    dict(id="pass-nabulsi-rain", work_ref="work-nabulsi", source_ref="p-nabulsi-rain", topic="المطر", summary="وجه الخير والرحمة مشروط بانتفاء الضرر.", quote_status="editorial_paraphrase", review_status="excerpt_checked"),
+    dict(id="pass-ibnshahin-rain", work_ref="work-ibnshahin", source_ref="p-ibnshahin-rain", topic="المطر", summary="المطر العام من وجوه الخير في النقل التراثي، وتتغير القراءة بالضرر والوقت.", quote_status="editorial_paraphrase", review_status="excerpt_checked"),
+    dict(id="pass-nabulsi-water", work_ref="work-nabulsi", source_ref="p-nabulsi-water", topic="الماء", summary="تتعدد وجوه الماء، ويقوى وجه الخير مع الصفاء والفعل المناسب.", quote_status="editorial_paraphrase", review_status="excerpt_checked"),
+    dict(id="pass-ibnshahin-water", work_ref="work-ibnshahin", source_ref="p-ibnshahin-water", topic="الماء", summary="الصفاء والحرارة والفعل وحال الرائي شروط مغيرة للوجه.", quote_status="editorial_paraphrase", review_status="excerpt_checked"),
+    dict(id="pass-nabulsi-sea", work_ref="work-nabulsi", source_ref="p-nabulsi-sea", topic="البحر", summary="وجوه البحر تتصل بأمر مهاب وتتغير بالشرب والخوض والخوف.", quote_status="editorial_paraphrase", review_status="excerpt_checked"),
+    dict(id="pass-ibnshahin-sea", work_ref="work-ibnshahin", source_ref="p-ibnshahin-sea", topic="البحر", summary="يفرق النص بين البحر الهادئ وغيره وبين النظر والخوض والشرب.", quote_status="editorial_paraphrase", review_status="excerpt_checked"),
+    dict(id="pass-nabulsi-key", work_ref="work-nabulsi", source_ref="p-nabulsi-key", topic="المفتاح", summary="من الوجوه المذكورة العون وفتح باب علم أو رزق.", quote_status="editorial_paraphrase", review_status="excerpt_checked"),
+    dict(id="pass-ibnshahin-key", work_ref="work-ibnshahin", source_ref="p-ibnshahin-key", topic="المفتاح", summary="يربط المفتاح بالفعل وبمن تُقضى على يده الأمور.", quote_status="editorial_paraphrase", review_status="excerpt_checked"),
+    dict(id="pass-nabulsi-snake", work_ref="work-nabulsi", source_ref="p-nabulsi-snake", topic="الحية", summary="وجوه خصومة أو قوة تتغير بالخوف والفعل، ولا تعين شخصاً.", quote_status="editorial_paraphrase", review_status="excerpt_checked"),
+    dict(id="pass-nabulsi-fire", work_ref="work-nabulsi", source_ref="p-nabulsi-fire", topic="النار", summary="معان متباينة تجعل الأثر والدخان والضرر شروطاً لازمة.", quote_status="editorial_paraphrase", review_status="excerpt_checked"),
+    dict(id="pass-ibnshahin-fire", work_ref="work-ibnshahin", source_ref="p-ibnshahin-fire", topic="النار", summary="يفرق بين النار النافعة والضارة وبين الاحتراق وعدم الضرر.", quote_status="editorial_paraphrase", review_status="excerpt_checked"),
+    dict(id="pass-nabulsi-door", work_ref="work-nabulsi", source_ref="p-nabulsi-door", topic="الباب", summary="يربط الباب المفتوح بأوجه من الرزق وشؤون البيت مع اعتبار حال الباب.", quote_status="editorial_paraphrase", review_status="excerpt_checked"),
+]
+
+scene_patterns = [
+    dict(id="pattern-drink-milk", label="شرب اللبن", concept_terms=["لبن", "حليب"], action_terms=["شرب", "اشرب", "شربت", "ارتشف", "ارتشفت"], require_action=True, require_self=True, support_terms=["معلم", "دراسة", "علم", "تعلم"], contra_terms=["سكب", "انسكب", "فاسد", "دواء"], question="هل شربت اللبن أنت، أم رأيته فقط، وهل كان له صلة بتعلّم أو بطعام قريب؟"),
+    dict(id="pattern-wear-shirt", label="لبس القميص", concept_terms=["قميص", "قمصان"], action_terms=["لبس", "لبست", "ارتدى", "ارتديت"], require_action=True, require_self=True, support_terms=["طويل", "ستر"], contra_terms=["خلع", "ممزق"], question="هل لبست القميص أنت، وما صفته وما صلته بيومك؟"),
+    dict(id="pattern-rain-no-harm", label="مطر بلا ضرر", concept_terms=["مطر", "غيث"], action_terms=[], require_action=False, require_self=False, required_support_count=1, support_terms=["هادئ", "خفيف", "نافع", "بلا ضرر", "دون ضرر", "لم يضر"], contra_terms=["غرق", "هدم", "سيل", "ضرر", "اضر", "أضر", "اذى", "أذى", "فزع"], question="هل سبب المطر ضرراً أو غرقاً، أم كان هادئاً نافعاً؟"),
+    dict(id="pattern-drink-clear-water", label="شرب ماء صافٍ", concept_terms=["ماء", "مياه", "ماي"], action_terms=["شرب", "اشرب", "شربت", "ارتشف", "ارتشفت"], require_action=True, require_self=True, required_support_count=1, support_terms=["صاف", "صافي", "عذب", "بارد"], contra_terms=["كدر", "عكر", "ساخن", "حار", "غرق"], question="هل شربت الماء أنت، وهل كان صافياً أم كدراً أو حاراً؟"),
+    dict(id="pattern-open-with-key", label="فتح بالمفتاح", concept_terms=["مفتاح", "مفاتيح"], concept_role="instrument", action_terms=["فتح", "فتحت", "افتح", "فتحته"], require_action=True, require_self=True, support_terms=["باب", "قفل", "مغلق"], contra_terms=["ضاع", "فقد", "كسر", "مكسور"], question="ماذا فتحت بالمفتاح، وهل انفتح أم تعذر؟"),
+    dict(id="pattern-open-door", label="فتح الباب", concept_terms=["باب", "ابواب", "أبواب"], action_terms=["فتح", "فتحت", "افتح", "فتحته"], require_action=True, require_self=True, support_terms=["واسع", "نور", "انفتح"], contra_terms=["اغلق", "أغلق", "انسد", "مكسور"], question="هل فتحت الباب أم وجدته مفتوحاً، وإلى أين كان يؤدي؟"),
+    dict(id="pattern-calm-sea", label="بحر هادئ", concept_terms=["بحر", "موج"], action_terms=[], require_action=False, require_self=False, required_support_count=1, support_terms=["هادئ", "صافي", "ساكن", "شاطئ"], contra_terms=["غرق", "عاصف", "هائج", "فزع", "خوف"], question="هل كان البحر هادئاً أم هائجاً، وهل دخلته أم رأيته من بعيد؟"),
+    dict(id="pattern-snake", label="الحية أو الثعبان", concept_terms=["حية", "حيه", "ثعبان", "افعى", "أفعى"], action_terms=[], require_action=False, require_self=False, required_support_count=1, support_terms=["هاجم", "يهاجم", "هاجمت", "عض", "عضت", "طارد", "يطارد", "طاردت", "لاحق", "يلاحق", "لدغ", "لدغت", "هرب", "هربت", "قتلت", "خوف", "خفت", "التف"], contra_terms=["سحر", "ساحر", "حسد", "جار"], question="ماذا فعلت الحية وما شعورك؟ لا تذكر أسماء أشخاص ولا تجعل المنام دليلاً عليهم."),
+    dict(id="pattern-useful-fire", label="نار نافعة غير مؤذية", concept_terms=["نار", "حريق"], action_terms=[], require_action=False, require_self=False, required_support_count=1, support_terms=["دفء", "تدفئة", "نور", "اضاءة", "إضاءة", "بلا ضرر", "دون ضرر"], contra_terms=["حرق", "احترق", "دخان", "ضرر", "اضر", "أضر", "هدم", "فزع"], question="هل كانت النار نافعة للدفء أو الضوء، أم أحرقت وأضرّت؟"),
+]
+
+interpretive_claims = [
+    dict(id="claim-milk-knowledge", pattern_ref="pattern-drink-milk", title="وجه العلم والتعلّم", safe_wording="ورد في رؤيا نبوية مخصوصة تأويل اللبن بالعلم؛ يمكن الاستئناس بهذا الوجه إذا اكتمل فعل الشرب ووافق سياق التعلّم.", claim_level="canonical_example", source_reliability="verified_text", transferability="low", source_refs=["h-bukhari-7006"], supports=["فعل الشرب", "صلة بالتعلّم"], against=["مجرد رؤية اللبن", "صلة بطعام أو دواء", "النفي أو السكب"], forbidden_outputs=["وعد بالنجاح", "الحكم على التدين"], priority=100, scholar_reviewed=False),
+    dict(id="claim-shirt-religion", pattern_ref="pattern-wear-shirt", title="وجه الدين في الشاهد الخاص", safe_wording="ورد تأويل القميص بالدين في رؤيا نبوية خاصة؛ لا يُنقل ذلك إلى حكم على تدين الرائي، وإنما يذكر بوصفه شاهداً خاصاً لا قاموساً عاماً.", claim_level="canonical_example", source_reliability="verified_text", transferability="low", source_refs=["h-bukhari-7008"], supports=["فعل اللبس", "وصف القميص"], against=["مجرد وجود القميص", "الخلع أو التمزق يغيران المشهد"], forbidden_outputs=["تزكية الشخص", "الحكم على عقيدته"], priority=95, scholar_reviewed=False),
+    dict(id="claim-rain-mercy", pattern_ref="pattern-rain-no-harm", title="وجه الخير والرحمة في المطر غير المؤذي", safe_wording="في موضعين تراثيين يُذكر للمطر العام غير المؤذي وجه الخير والرحمة؛ الضرر أو السيل يغيّر القراءة، ولا يعني ذلك وعداً بحدث قادم.", claim_level="heritage_report", source_reliability="attributed_heritage_text", transferability="limited", source_refs=["p-nabulsi-rain", "p-ibnshahin-rain"], supports=["انتفاء الضرر", "الهدوء أو النفع"], against=["الغرق أو الهدم", "الفزع", "صلة واضحة بالطقس اليومي"], forbidden_outputs=["وعد بالرزق", "توقيت حدث"], priority=70, scholar_reviewed=False),
+    dict(id="claim-water-life", pattern_ref="pattern-drink-clear-water", title="وجه الخير والحياة الطيبة للماء الصافي", safe_wording="تورد مواضع تراثية للماء الصافي المشروب وجهاً يتصل بالخير أو الحياة الطيبة؛ صفاء الماء والفعل والسياق شروط لا يجوز حذفها.", claim_level="heritage_report", source_reliability="attributed_heritage_text", transferability="limited", source_refs=["p-nabulsi-water", "p-ibnshahin-water"], supports=["الشرب", "الماء الصافي أو العذب"], against=["الماء الكدر أو الحار", "الغرق", "العطش الجسدي قبل النوم"], forbidden_outputs=["تشخيص صحي", "وعد بالعمر أو المال"], priority=68, scholar_reviewed=False),
+    dict(id="claim-key-opening", pattern_ref="pattern-open-with-key", title="وجه العون وفتح باب أمر", safe_wording="تورد مواضع تراثية للمفتاح وجوه العون والفتح والعلم؛ قوة الصلة هنا في فعل الفتح، لا في وجود المفتاح وحده.", claim_level="heritage_report", source_reliability="attributed_heritage_text", transferability="limited", source_refs=["p-nabulsi-key", "p-ibnshahin-key"], supports=["فتح شيء معلوم", "وجود باب أو قفل"], against=["المفتاح المكسور أو الضائع", "عدم معرفة ما فُتح"], forbidden_outputs=["وعد بوظيفة", "وعد بزواج أو مال"], priority=66, scholar_reviewed=False),
+    dict(id="claim-door-opening", pattern_ref="pattern-open-door", title="وجه الانفتاح أو تيسير أمر", safe_wording="يذكر موضع تراثي للباب المفتوح وجوهاً من الانفتاح في شؤون الرائي؛ يظل هذا مجازاً احتمالياً يتغير بحالة الباب وما وراءه.", claim_level="heritage_report", source_reliability="attributed_heritage_text", transferability="limited", source_refs=["p-nabulsi-door"], supports=["فعل الفتح", "وضوح ما وراء الباب"], against=["الإغلاق أو الانسداد", "باب مجهول بلا فعل"], forbidden_outputs=["تأكيد فرصة بعينها", "قرار زواج أو عمل"], priority=64, scholar_reviewed=False),
+    dict(id="claim-sea-awe", pattern_ref="pattern-calm-sea", title="وجه الأمر الواسع أو المهاب", safe_wording="يربط مصنفان تراثيان البحر الهادئ بأمر واسع أو مهاب قد يتصل بسلطان أو علم؛ لا يثبت نفوذاً ولا خطراً، وتغيّر الحركة والخوف المعنى.", claim_level="heritage_report", source_reliability="attributed_heritage_text", transferability="low", source_refs=["p-nabulsi-sea", "p-ibnshahin-sea"], supports=["الهدوء أو الصفاء", "النظر دون ضرر"], against=["الغرق أو الهيجان", "الخوف الشديد", "صلة واقعية بالبحر"], forbidden_outputs=["توقع سلطة أو منصب", "تنبؤ بخطر"], priority=52, scholar_reviewed=False),
+    dict(id="claim-snake-conflict", pattern_ref="pattern-snake", title="قول تراثي في الخصومة — دون تعيين شخص", safe_wording="يورد النابلسي للحية وجوهاً من الخصومة أو القوة بحسب الخوف والفعل؛ لا يجوز تحويل هذا إلى اتهام لشخص أو إثبات سحر أو حسد.", claim_level="heritage_report", source_reliability="attributed_heritage_text", transferability="very_low", source_refs=["p-nabulsi-snake", "q-hujurat-12"], supports=["وصف الفعل والخوف"], against=["محاولة تسمية عدو", "صلة بمشاهدة أو خوف يومي"], forbidden_outputs=["تسمية عدو", "إثبات سحر أو حسد"], priority=30, scholar_reviewed=False),
+    dict(id="claim-fire-benefit", pattern_ref="pattern-useful-fire", title="التمييز بين النار النافعة والضارة", safe_wording="يفرق ابن شاهين بين النار النافعة والضارة، ويورد النابلسي وجوهاً متعددة؛ إن لم يثبت النفع وانتفاء الضرر فلا يكفي المشهد لتعيين قراءة.", claim_level="heritage_report", source_reliability="attributed_heritage_text", transferability="very_low", source_refs=["p-nabulsi-fire", "p-ibnshahin-fire"], supports=["دفء أو ضوء بلا أذى"], against=["احتراق أو دخان أو فزع", "غموض أثر النار"], forbidden_outputs=["عقوبة إلهية", "توقع كارثة"], priority=28, scholar_reviewed=False),
+]
+
 mentions = [
  ("الأصول", "منسوب في المقدمة إلى دانيال"), ("التقسيم", "منسوب في المقدمة إلى جعفر الصادق"),
  ("الجوامع", "منسوب في المقدمة إلى محمد بن سيرين"), ("الدستور", "إبراهيم الكرماني بحسب المقدمة"),
  ("الإرشاد", "جابر المغربي بحسب المقدمة"), ("التعبير", "إسماعيل بن الأشعث بحسب المقدمة"),
  ("كنز الرؤيا", "المأموني بحسب المقدمة"), ("بيان التعبير", "عبدوس بحسب المقدمة"),
  ("جمل الدلائل", "لم يُحسم مؤلفه هنا"), ("مبادئ التعبير", "لم يُحسم مؤلفه هنا"),
- ("كافي الرؤيا", "لم يُحسم مؤلفه هنا"), ("منهاج التعبير", "خالد الأصفهاني بحسب المقدمة"),
+ ("كافي الرؤيا", "لم يُحسم مؤلفه هنا"), ("التعبير للطاموسي", "لم يُحسم مؤلفه هنا"),
+ ("مقرمط الرؤيا", "لم يُحسم مؤلفه هنا"), ("تحفة الملوك", "لم يُحسم مؤلفه هنا"),
+ ("منهاج التعبير", "خالد الأصفهاني بحسب المقدمة"), ("مقدمة التعبير", "لم يُحسم مؤلفه هنا"),
  ("حقائق الرؤيا", "لم يُحسم مؤلفه هنا"), ("الوجيز", "محمد بن شامويه بحسب المقدمة"),
  ("التعبير", "أبو سعيد الواعظ بحسب المقدمة"), ("كامل التعبير", "حبيش بن إبراهيم بحسب المقدمة"),
  ("الإشارات إلى علم العبارات", "أبو عبد الله بن أحمد بن عامر السالمي بحسب المقدمة"),
@@ -223,21 +362,29 @@ historical_mentions = [dict(id=f"m-{i+1:02}", title=title, attribution=author,
                        for i, (title, author) in enumerate(mentions)]
 
 maps = [
- dict(id="map-method", category="المنهج", title="من المنام إلى قراءة مسؤولة", summary="سلسلة عمل أصلية تربط وصف المنام بالقرائن وحدود الاستدلال.", layout="steps", reviewed=True,
+ dict(id="map-method", category="المنهج", title="من المنام إلى قراءة مسؤولة", summary="سلسلة عمل أصلية تربط وصف المنام بالقرائن وحدود الاستدلال.", layout="steps", review_status="editorial-map-checked", scholar_reviewed=False,
       items=[dict(label="الوصف", body="ما تتذكره دون أسماء حساسة أو إضافة تفاصيل."), dict(label="السياق", body="الشعور وصلة المنام بانشغال اليقظة."), dict(label="الشاهد", body="موضع النص ونوع الصلة وحدودها."), dict(label="القراءة", body="وجه محتمل أو تصريح بعدم كفاية الدليل.")],
       action="افصل في قراءتك بين النص الثابت واجتهاد تنزيله على حالتك.", source_refs=["h-muslim-2263", "h-bukhari-7046", "q-isra-36"]),
- dict(id="map-levels", category="المصادر", title="ثبوت النص غير صحة التنزيل", summary="خريطة توضح اختلاف وظائف الأصل والشرح والاجتهاد.", layout="pyramid", reviewed=True,
+ dict(id="map-levels", category="المصادر", title="ثبوت النص غير صحة التنزيل", summary="خريطة توضح اختلاف وظائف الأصل والشرح والاجتهاد.", layout="pyramid", review_status="editorial-map-checked", scholar_reviewed=False,
       items=[dict(label="أصل شرعي", body="قرآن أو حديث ثابت في موضعه."), dict(label="شرح وفهم", body="تفسير وشروح تبيّن السياق."), dict(label="اجتهاد تعبيري", body="نقول بشرية تحتاج نقداً وقرائن."), dict(label="تنزيل على الرائي", body="أكثر المراحل حاجة للتثبت؛ لا يُستنتج آلياً من الرمز.")],
       action="افتح إحالة النتيجة وتحقق هل تدعم المعنى أم تقدم أصلاً عاماً فقط.", source_refs=["f-darifta", "h-bukhari-7046"]),
- dict(id="map-nightmare", category="الآداب", title="عند المنام المكروه", summary="تذكير موجز بالتوجيهات الواردة؛ راجع الأصل لكل توجيه.", layout="steps", reviewed=True,
+ dict(id="map-scene", category="المنهج", title="الرمز وحده لا يكفي", summary="المحرك يقرأ بنية المشهد قبل أن يبحث عن وجه تعبيري.", layout="steps", review_status="editorial-map-checked", scholar_reviewed=False,
+      items=[dict(label="من؟", body="الرائي أم شخص آخر؟"), dict(label="ماذا فعل؟", body="شرب، فتح، لبس، رأى فقط، أو نُفي الفعل؟"), dict(label="بأي صفة؟", body="صافٍ أو كدر، هادئ أو مؤذٍ، سليم أو مكسور."), dict(label="وما النتيجة؟", body="انفتح، انسكب، أضرّ، أو بقي المشهد ناقصاً؟")],
+      action="اختلاف الفعل أو النفي أو الأثر قد يمنع القراءة تماماً، حتى مع بقاء الرمز نفسه.", source_refs=["q-yusuf-36", "q-yusuf-43", "f-binbaz-books-official"]),
+ dict(id="map-two-scales", category="المصادر", title="ميزانان لا نسبة واحدة", summary="تعرض النتيجة قوة المصدر وملاءمة المشهد على مسارين مستقلين.", layout="steps", review_status="editorial-map-checked", scholar_reviewed=False,
+      items=[dict(label="قوة المصدر", body="هل هو نص ثابت، موضع تراثي مفحوص، أم مجرد سجل كتاب؟"), dict(label="ملاءمة المشهد", body="هل تطابق الفعل والصفة والأثر، أم تطابقت كلمة فقط؟"), dict(label="اكتمال السياق", body="هل عُرف الشعور وصلة المنام باليقظة وما الذي فعله الرائي؟"), dict(label="الامتناع", body="عند النقص أو التعارض تكون لا تكفي نتيجة صحيحة.")],
+      action="لا تحوّل المنصة هذه المقاييس إلى احتمال صدق أو تنبؤ بالمستقبل.", source_refs=["h-bukhari-7046", "f-binbaz-no-knowledge", "q-isra-36"]),
+ dict(id="map-nightmare", category="الآداب", title="عند المنام المكروه", summary="تذكير موجز بالتوجيهات الواردة؛ راجع الأصل لكل توجيه.", layout="steps", review_status="editorial-map-checked", scholar_reviewed=False,
       items=[dict(label="استعذ بالله", body="من الشيطان ومن شر ما رأيت."), dict(label="انفث يساراً", body="ثلاثاً، كما ورد في الحديث."), dict(label="غيّر الجنب", body="تحوّل عن الجنب الذي كنت عليه."), dict(label="لا تنشره", body="ورد كذلك القيام للصلاة.")],
       action="قدّم آداب التعامل مع المكروه على البحث عن معنى مخيف.", source_refs=["h-muslim-2262", "h-muslim-2263", "h-bukhari-6985"]),
 ]
 
-data = dict(schema_version=1, title="رؤيا — مكتبة التأسيس", updated_at="2026-10-27",
-            scope="فهرس تأسيسي وإحالات وملخصات محررة؛ ليس حصراً لكل ما أُلف، ولا استيراداً كاملاً للكتب، ولا إجازة شرعية.",
+data = dict(schema_version=2, title="رؤيا — محرك قراءة المشهد بالمصادر", updated_at="2026-10-27",
+            scope="محرك محلي يطابق المشهد والقرائن بمواضع محررة من المصادر؛ ليس حصراً لكل ما أُلف، ولا استيراداً كاملاً للكتب، ولا علماً بالغيب أو إجازة شرعية.",
             sources=sources, rules=rules, symbols=symbols, historical_mentions=historical_mentions,
+            works=works, passages=passages, scene_patterns=scene_patterns,
+            interpretive_claims=interpretive_claims,
             visual_library=dict(title="أصول القراءة", subtitle="الفكرة والشاهد وحدود الاستدلال", author="تحرير منصة رؤيا", language="ar", expected_count=len(maps),
-                                sources=[dict(id=s["id"], title=s["title"], locator=s["locator"], url=s["url"], reviewed=True, rights=s["rights"]) for s in sources if s["id"] in {r for c in maps for r in c["source_refs"]}], cards=maps))
+                                sources=[dict(id=s["id"], title=s["title"], locator=s["locator"], url=s["url"], review_status="source-reference-checked", scholar_reviewed=False, rights=s["rights"], reuse_mode=s["reuse_mode"]) for s in sources if s["id"] in {r for c in maps for r in c["source_refs"]}], cards=maps))
 OUT.write_text(json.dumps(data, ensure_ascii=False, indent=2)+"\n")
-print(json.dumps({k: len(data[k]) for k in ["sources", "rules", "symbols", "historical_mentions"]}, ensure_ascii=False))
+print(json.dumps({k: len(data[k]) for k in ["sources", "rules", "symbols", "historical_mentions", "works", "passages", "scene_patterns", "interpretive_claims"]}, ensure_ascii=False))
