@@ -1,7 +1,14 @@
 @font-face {
-  font-family: Cairo;
-  src: url("./assets/Cairo-Variable.woff2") format("woff2");
-  font-weight: 200 1000;
+  font-family: Amiri;
+  src: url("./assets/Amiri-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: Amiri;
+  src: url("./assets/Amiri-Bold.ttf") format("truetype");
+  font-weight: 700;
   font-style: normal;
   font-display: swap;
 }
@@ -48,7 +55,7 @@ body {
   background: var(--paper);
   color: var(--ink);
   font:
-    18px/1.9 Cairo,
+    18px/1.9 Amiri,
     Tahoma,
     Arial,
     sans-serif;
