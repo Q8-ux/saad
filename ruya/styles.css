@@ -293,6 +293,10 @@ h1 em {
   position: relative;
   z-index: 1;
 }
+.hero .eyebrow,
+.hero .tiny-diamond {
+  color: #f0c98f;
+}
 .hero h1 {
   font-size: clamp(43px, 4.6vw, 64px);
   font-weight: 600;
@@ -2565,7 +2569,7 @@ select,
   .evidence-panel blockquote { font-size: 16px; }
 }
 @media screen and (max-width: 640px) {
-  body { font-size: 17px; }
+  body { font-size: 18px; }
   .header-inner { padding-block: 12px 0; }
   .brand small { font-size: 11px; max-width: 145px; }
   .journal-link { font-size: 13px; }
@@ -2576,6 +2580,17 @@ select,
   .hero-description { font-size: 17px; }
   .hero-links,
   .hero-links .text-link { font-size: 14px; }
+  .hero-art {
+    display: flex;
+    align-items: center;
+    justify-self: start;
+    gap: 14px;
+    max-width: none;
+    text-align: start;
+    padding-top: 12px;
+  }
+  .hero-art svg { width: 94px; max-height: 64px; flex: 0 0 auto; }
+  .hero-art p { font-size: 14px; }
   .composer { padding: 21px 17px 18px; }
   .section-top { align-items: flex-start; }
   .section-top h2 { font-size: 24px; }
