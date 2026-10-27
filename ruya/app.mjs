@@ -1,6 +1,6 @@
-import {normalize, readDream, readingText, searchRows, validateCorpus, validateDraft} from './engine.mjs?v=20261027-2';
+import {normalize, readDream, readingText, searchRows, validateCorpus, validateDraft} from './engine.mjs?v=20261028-1';
 
-const BUILD_ID = '20261027-2';
+const BUILD_ID = '20261028-1';
 
 const $ = id => document.getElementById(id);
 const categories = {quran:'القرآن الكريم',hadith:'الحديث الصحيح',tafsir:'التفسير',fatwa:'الفتاوى والضوابط',heritage:'مصنفات التعبير',collection:'أبواب السنة',catalog:'فهارس المخطوطات'};

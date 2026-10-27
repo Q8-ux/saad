@@ -7,30 +7,30 @@
 }
 :root {
   color-scheme: light;
-  --paper: #f7f5ef;
-  --surface: #fffefa;
-  --ink: #25382f;
-  --muted: #626b61;
-  --green: #183d35;
-  --green-soft: #e7ede4;
-  --gold: #86602c;
-  --line: #718578;
-  --warm: #efe6d6;
+  --paper: #f2f0e8;
+  --surface: #fffdf8;
+  --ink: #20343d;
+  --muted: #52656a;
+  --green: #153e49;
+  --green-soft: #e0ecea;
+  --gold: #8f5d2d;
+  --line: #9aada8;
+  --warm: #f0e6d7;
   --danger: #9c3532;
-  --shadow: 0 8px 35px #25382f06;
-  --radius: 14px;
+  --shadow: 0 18px 54px #173d4812;
+  --radius: 18px;
 }
 html[data-theme="dark"] {
   color-scheme: dark;
-  --paper: #111e19;
-  --surface: #1a2a23;
-  --ink: #f0f0e6;
-  --muted: #b8c5b7;
-  --green: #d1e4cd;
-  --green-soft: #273e31;
-  --gold: #e1bc82;
-  --line: #657a6c;
-  --warm: #393328;
+  --paper: #101c24;
+  --surface: #172832;
+  --ink: #edf3ee;
+  --muted: #b4c5c7;
+  --green: #9bd4ca;
+  --green-soft: #203a3e;
+  --gold: #e7b87f;
+  --line: #5b7378;
+  --warm: #3e3430;
   --danger: #ffb1a8;
   --shadow: none;
 }
@@ -48,7 +48,7 @@ body {
   background: var(--paper);
   color: var(--ink);
   font:
-    17px/1.85 Cairo,
+    18px/1.9 Cairo,
     Tahoma,
     Arial,
     sans-serif;
@@ -118,6 +118,16 @@ h2,
 h3 {
   font-weight: 650;
   line-height: 1.6;
+}
+.hero h1,
+.hero h1 em {
+  color: #fbf7eb;
+}
+.hero h1 em {
+  text-decoration: underline;
+  text-decoration-color: #d5b57d;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 9px;
 }
 h1 em {
   font-style: normal;
@@ -254,28 +264,58 @@ h1 em {
   margin-inline-end: 9px;
 }
 .hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   display: grid;
   grid-template-columns: 1.2fr 0.8fr;
   align-items: center;
   gap: 50px;
-  padding-block: 58px 44px;
+  padding: 48px 48px 40px;
+  margin-block: 28px 30px;
+  border-radius: 22px;
+  color: #f5f4ed;
+  background: linear-gradient(125deg, #12333f 0%, #194a55 64%, #23565b 100%);
+  box-shadow: 0 24px 64px #12343d24;
+}
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  opacity: .38;
+  background:
+    radial-gradient(circle at 85% 18%, #d9bd8d25 0 2px, transparent 3px),
+    radial-gradient(circle at 74% 72%, #f3eee42b 0 1px, transparent 2px),
+    repeating-linear-gradient(132deg, transparent 0 35px, #d9edf011 36px, transparent 37px 72px);
+}
+.hero > * {
+  position: relative;
+  z-index: 1;
 }
 .hero h1 {
-  font-size: clamp(38px, 4.1vw, 56px);
+  font-size: clamp(43px, 4.6vw, 64px);
   font-weight: 600;
   line-height: 1.6;
   margin-block: 16px 13px;
 }
 .hero-description {
-  font-size: 17px;
-  color: var(--muted);
+  font-size: 20px;
+  color: #e0e9e7;
 }
 .hero-links {
   display: flex;
   gap: 18px;
   align-items: center;
-  font-size: 12px;
+  font-size: 16px;
   margin-top: 22px;
+}
+.hero-links a,
+.hero-links .text-link {
+  color: #f5f4ed;
+}
+.hero-links a:hover {
+  color: #f0c98f;
 }
 .text-link {
   color: var(--green);
@@ -297,7 +337,7 @@ h1 em {
   border-radius: 50%;
 }
 .hero-art {
-  color: var(--green);
+  color: #b5d8d1;
   width: 100%;
   max-width: 410px;
   justify-self: end;
@@ -310,8 +350,8 @@ h1 em {
   max-height: 270px;
 }
 .hero-art p {
-  font-size: 11px;
-  color: var(--muted);
+  font-size: 14px;
+  color: #d5e3df;
   margin-top: 5px;
 }
 .workspace {
@@ -1571,10 +1611,10 @@ dialog::backdrop {
   font-size: 13px;
 }
 :root {
-  --control-line: #788673;
+  --control-line: #839995;
 }
 html[data-theme="dark"] {
-  --control-line: #809b84;
+  --control-line: #769296;
 }
 textarea,
 select,
@@ -2404,4 +2444,221 @@ select,
   .inner-view {
     padding: 0;
   }
+}
+
+/* Readability and atmosphere update: inspired by the user's Canva “رؤية وأثر” cover. */
+@media screen {
+  .nav a { font-size: 15px; }
+  .brand small { font-size: 12px; }
+  .journal-link { font-size: 15px; }
+  .eyebrow { font-size: 14px; }
+  .hero h1 { font-size: clamp(43px, 4.6vw, 64px); }
+  .hero-description { font-size: 20px; }
+  .hero-links,
+  .hero-links .text-link { font-size: 16px; }
+  .composer { border-color: #8da8a4; box-shadow: 0 18px 48px #153e4914; }
+  .section-top h2 { font-size: 27px; }
+  .badge { font-size: 13px; }
+  textarea,
+  .composer textarea { font-size: 18px; }
+  .tool-button { font-size: 15px; }
+  .character-count { font-size: 13px; }
+  .field-note { font-size: 15px; }
+  .context-details summary,
+  .context-grid label { font-size: 15px; }
+  .context-details summary > span { font-size: 13px; }
+  .composer-footer > span { font-size: 13px; }
+  .primary,
+  .secondary,
+  .danger-button { font-size: 16px; min-height: 50px; }
+  .evidence-panel h3 { font-size: 28px; }
+  .evidence-panel blockquote { font-size: 18px; }
+  .evidence-panel > p:not(.eyebrow) { font-size: 15px; }
+  .evidence-panel .text-link,
+  .browse-link { font-size: 14px; }
+  .aside-tip strong { font-size: 16px; }
+  .aside-tip p,
+  .aside-meta { font-size: 14px; }
+  .quick-start,
+  .quick-start button { font-size: 15px; }
+  .small-muted,
+  .reading-note p { font-size: 14px; }
+  .foundation-card > span { font-size: 13px; }
+  .foundation-card h3 { font-size: 19px; }
+  .foundation-card p { font-size: 15px; }
+  .footer > p,
+  .footer > div { font-size: 14px; }
+  .page-heading h1 { font-size: clamp(34px, 4vw, 46px); }
+  .page-heading > p:last-child { font-size: 17px; }
+  .summary-item span { font-size: 14px; }
+  .filters button { font-size: 15px; }
+  .list-status { font-size: 14px; }
+  .source-meta { font-size: 13px; }
+  .source-card > p,
+  .source-card small { font-size: 15px; }
+  .source-card .text-link { font-size: 14px; }
+  .historical summary span,
+  .historical > p,
+  .research-tools > p,
+  .historical-item p { font-size: 14px; }
+  .historical-item strong { font-size: 15px; }
+  .visual-card > p,
+  .map-step p,
+  .map-step strong,
+  .rule-card p,
+  .symbol-card p,
+  .symbol-card .symbol-caveat,
+  .empty p,
+  .journal-warning,
+  .journal-card time,
+  .draft-item { font-size: 15px; }
+  .map-step > span { font-size: 13px; }
+  .visual-action { font-size: 14px !important; }
+  .symbol-card h3 { font-size: 15px; }
+  .method-grid p,
+  .method-grid li,
+  .method-privacy p,
+  .method-privacy li { font-size: 16px; }
+  .result-header p,
+  .result-note p,
+  .result-witness p,
+  .result-conclusion,
+  .result-questions li,
+  .nightmare-panel p,
+  .nightmare-panel li,
+  .result-sources li,
+  .result-status p,
+  .result-status span,
+  .understanding-panel > p,
+  .scene-card p,
+  .scene-card span,
+  .reading-card > p,
+  .metric span,
+  .metric p,
+  .factor-list li,
+  .alternatives-panel > p,
+  .followup-panel > p,
+  .abstention p,
+  .trace-list li,
+  .dialog-content p { font-size: 16px; }
+  .metric strong,
+  .metric b,
+  .factor-list h3,
+  .factor-list h4 { font-size: 15px; }
+  .result-sources { padding-inline-start: 26px; }
+  .dialog-content dl,
+  .external-url,
+  .toast { font-size: 14px; }
+}
+@media screen and (max-width: 850px) {
+  .nav a { font-size: 13px; }
+  .brand small { font-size: 11px; }
+  .hero { padding: 32px 30px; }
+  .hero h1 { font-size: clamp(40px, 6vw, 50px); }
+  .hero-description { font-size: 18px; }
+  .workspace { grid-template-columns: minmax(0, 1fr) 240px; }
+  .section-top h2 { font-size: 24px; }
+  .context-grid label { font-size: 14px; }
+  .composer-footer > span { font-size: 13px; }
+  .primary { font-size: 15px; }
+  .evidence-panel h3 { font-size: 25px; }
+  .evidence-panel blockquote { font-size: 16px; }
+}
+@media screen and (max-width: 640px) {
+  body { font-size: 17px; }
+  .header-inner { padding-block: 12px 0; }
+  .brand small { font-size: 11px; max-width: 145px; }
+  .journal-link { font-size: 13px; }
+  .nav a { font-size: 12.5px; }
+  .hero { padding: 27px 22px 25px; margin-block: 15px 22px; border-radius: 18px; }
+  .hero h1 { font-size: clamp(38px, 10vw, 46px); line-height: 1.5; }
+  .hero .eyebrow { font-size: 13px; }
+  .hero-description { font-size: 17px; }
+  .hero-links,
+  .hero-links .text-link { font-size: 14px; }
+  .composer { padding: 21px 17px 18px; }
+  .section-top { align-items: flex-start; }
+  .section-top h2 { font-size: 24px; }
+  .badge { font-size: 12px; }
+  .composer textarea { font-size: 18px; min-height: 180px; }
+  .tool-button { font-size: 14px; }
+  .character-count { font-size: 13px; }
+  .field-note { font-size: 15px; }
+  .context-grid label,
+  .context-details summary { font-size: 14px; }
+  .context-details summary > span { font-size: 13px; }
+  .composer-footer .primary { font-size: 16px; min-height: 52px; }
+  .composer-footer > span { font-size: 13px; }
+  .evidence-panel h3 { font-size: 27px; }
+  .evidence-panel > p:not(.eyebrow) { font-size: 15px; }
+  .evidence-panel .text-link,
+  .browse-link { font-size: 14px; }
+  .stat-row small { font-size: 13px; }
+  .aside-tip strong { font-size: 15px; }
+  .aside-tip p,
+  .aside-meta { font-size: 13px; }
+  .quick-start,
+  .quick-start button { font-size: 14px; }
+  .small-muted { font-size: 13px; }
+  .reading-note p { font-size: 15px; }
+  .foundation-card h3 { font-size: 19px; }
+  .foundation-card p { font-size: 15px; }
+  .footer > p,
+  .footer > div { font-size: 13px; }
+  .page-heading h1 { font-size: 35px; }
+  .page-heading > p:last-child { font-size: 16px; }
+  .summary-item span { font-size: 13px; }
+  .filters button { font-size: 14px; }
+  .source-card > p,
+  .source-card small,
+  .visual-card > p,
+  .map-step p,
+  .rule-card p,
+  .symbol-card p,
+  .symbol-card .symbol-caveat { font-size: 15px; }
+  .historical summary,
+  .research-tools summary { font-size: 16px; }
+  .result-header p,
+  .result-note p,
+  .result-witness p,
+  .result-conclusion,
+  .result-questions li,
+  .nightmare-panel p,
+  .nightmare-panel li,
+  .result-sources li,
+  .result-status p,
+  .result-status span,
+  .understanding-panel > p,
+  .scene-card p,
+  .scene-card span,
+  .reading-card > p,
+  .metric span,
+  .metric p,
+  .factor-list li,
+  .alternatives-panel > p,
+  .followup-panel > p,
+  .abstention p,
+  .trace-list li,
+  .dialog-content p { font-size: 15px; }
+  .method-grid p,
+  .method-grid li,
+  .method-privacy p,
+  .method-privacy li { font-size: 15px; }
+  .dialog-content dl,
+  .external-url,
+  .toast { font-size: 14px; }
+}
+@media screen and (max-width: 360px) {
+  .nav a { font-size: 11.5px; }
+  .brand > span { font-size: 25px; }
+  .hero { padding-inline: 18px; }
+  .hero h1 { font-size: 37px; }
+  .hero .eyebrow { font-size: 12px; }
+  .hero-links,
+  .hero-links .text-link { font-size: 13px; }
+  .section-top h2 { font-size: 22px; }
+  .context-grid label { font-size: 13px; }
+  .tool-button { font-size: 13px; }
+  .context-details summary { font-size: 13px; }
+  .page-heading h1 { font-size: 32px; }
 }
