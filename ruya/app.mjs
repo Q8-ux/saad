@@ -1,4 +1,6 @@
-import {normalize, readDream, readingText, searchRows, validateCorpus, validateDraft} from './engine.mjs';
+import {normalize, readDream, readingText, searchRows, validateCorpus, validateDraft} from './engine.mjs?v=20261027-2';
+
+const BUILD_ID = '20261027-2';
 
 const $ = id => document.getElementById(id);
 const categories = {quran:'القرآن الكريم',hadith:'الحديث الصحيح',tafsir:'التفسير',fatwa:'الفتاوى والضوابط',heritage:'مصنفات التعبير',collection:'أبواب السنة',catalog:'فهارس المخطوطات'};
@@ -268,7 +270,7 @@ function setupEvents() {
 
 try {
   try{const theme=localStorage.getItem('ruya.theme');if(theme==='dark'){document.documentElement.dataset.theme='dark';$('theme').setAttribute('aria-label','تفعيل الوضع النهاري');}}catch{}
-  const response=await fetch(new URL('./corpus.json',import.meta.url));if(!response.ok)throw new Error('لا يمكن تحميل مكتبة المصادر حالياً. أعد تحميل الصفحة بعد قليل.');
+  const response=await fetch(new URL(`./corpus.json?v=${BUILD_ID}`,import.meta.url));if(!response.ok)throw new Error('لا يمكن تحميل مكتبة المصادر حالياً. أعد تحميل الصفحة بعد قليل.');
   corpus=await response.json();const errors=validateCorpus(corpus);if(errors.length)throw new Error('تعذر التحقق من ترابط قاعدة المصادر. أوقفنا القراءة إلى أن تُراجع البيانات.');
   renderLibrarySummary();renderSources();renderRules();renderSymbols();renderMaps();setupEvents();route();updateCount();
 } catch(error) { $('boot-error').hidden=false;$('boot-error').textContent=error.message;$('read-button').disabled=true; }
