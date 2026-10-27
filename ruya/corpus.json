@@ -1,0 +1,2053 @@
+{
+  "schema_version": 1,
+  "title": "رؤيا — مكتبة التأسيس",
+  "updated_at": "2026-10-27",
+  "scope": "فهرس تأسيسي وإحالات وملخصات محررة؛ ليس حصراً لكل ما أُلف، ولا استيراداً كاملاً للكتب، ولا إجازة شرعية.",
+  "sources": [
+    {
+      "id": "q-yusuf-4",
+      "title": "رؤيا يوسف عليه السلام",
+      "category": "quran",
+      "locator": "12:4",
+      "url": "https://quran.com/12/4",
+      "author": "القرآن الكريم",
+      "summary": "ذكر الكواكب والشمس والقمر في رؤيا يوسف؛ مثال قرآني في سياق قصة محددة.",
+      "verification": "text_checked",
+      "use": "core",
+      "rights": "public-domain",
+      "reviewed_at": "2026-10-27",
+      "scholar_reviewed": false,
+      "caveat": "ثبوت النص لا يثبت انطباق تأويل رؤيا بعينها على حلم المستخدم."
+    },
+    {
+      "id": "q-yusuf-5",
+      "title": "حفظ الرؤيا واختيار من تُقص عليه",
+      "category": "quran",
+      "locator": "12:5",
+      "url": "https://quran.com/12/5",
+      "author": "القرآن الكريم",
+      "summary": "توجيه يعقوب ليوسف بألا يقص رؤياه على إخوته في تلك الواقعة.",
+      "verification": "text_checked",
+      "use": "core",
+      "rights": "public-domain",
+      "reviewed_at": "2026-10-27",
+      "scholar_reviewed": false,
+      "caveat": "ثبوت النص لا يثبت انطباق تأويل رؤيا بعينها على حلم المستخدم."
+    },
+    {
+      "id": "q-yusuf-6",
+      "title": "تعليم تأويل الأحاديث",
+      "category": "quran",
+      "locator": "12:6",
+      "url": "https://quran.com/12/6",
+      "author": "القرآن الكريم",
+      "summary": "ذكر تعليم يوسف من تأويل الأحاديث في سياق اصطفائه.",
+      "verification": "text_checked",
+      "use": "core",
+      "rights": "public-domain",
+      "reviewed_at": "2026-10-27",
+      "scholar_reviewed": false,
+      "caveat": "ثبوت النص لا يثبت انطباق تأويل رؤيا بعينها على حلم المستخدم."
+    },
+    {
+      "id": "q-yusuf-36",
+      "title": "رؤيا صاحبي السجن",
+      "category": "quran",
+      "locator": "12:36",
+      "url": "https://quran.com/12/36",
+      "author": "القرآن الكريم",
+      "summary": "وردت رؤيتان مختلفتان فيهما العصر والخبز والطير؛ لا تُفصل الرموز عن القصة.",
+      "verification": "text_checked",
+      "use": "core",
+      "rights": "public-domain",
+      "reviewed_at": "2026-10-27",
+      "scholar_reviewed": false,
+      "caveat": "ثبوت النص لا يثبت انطباق تأويل رؤيا بعينها على حلم المستخدم."
+    },
+    {
+      "id": "q-yusuf-41",
+      "title": "تأويل رؤيتي صاحبي السجن",
+      "category": "quran",
+      "locator": "12:41",
+      "url": "https://quran.com/12/41",
+      "author": "القرآن الكريم",
+      "summary": "تأويل يوسف في واقعة بعينها؛ لا يجيز تنبؤ المنصة بموت شخص أو عقوبته.",
+      "verification": "text_checked",
+      "use": "core",
+      "rights": "public-domain",
+      "reviewed_at": "2026-10-27",
+      "scholar_reviewed": false,
+      "caveat": "ثبوت النص لا يثبت انطباق تأويل رؤيا بعينها على حلم المستخدم."
+    },
+    {
+      "id": "q-yusuf-43",
+      "title": "رؤيا الملك: البقر والسنابل",
+      "category": "quran",
+      "locator": "12:43",
+      "url": "https://quran.com/12/43",
+      "author": "القرآن الكريم",
+      "summary": "عرض الرؤيا بتفاصيل عدد البقر وصفته والسنابل وحالها.",
+      "verification": "text_checked",
+      "use": "core",
+      "rights": "public-domain",
+      "reviewed_at": "2026-10-27",
+      "scholar_reviewed": false,
+      "caveat": "ثبوت النص لا يثبت انطباق تأويل رؤيا بعينها على حلم المستخدم."
+    },
+    {
+      "id": "q-yusuf-44",
+      "title": "أضغاث أحلام وحدود المعرفة",
+      "category": "quran",
+      "locator": "12:44",
+      "url": "https://quran.com/12/44",
+      "author": "القرآن الكريم",
+      "summary": "جواب الملأ عن رؤيا الملك، وهم لم يعرفوا تأويلها؛ وصفهم ليس حكماً بصحة جوابهم.",
+      "verification": "text_checked",
+      "use": "core",
+      "rights": "public-domain",
+      "reviewed_at": "2026-10-27",
+      "scholar_reviewed": false,
+      "caveat": "ثبوت النص لا يثبت انطباق تأويل رؤيا بعينها على حلم المستخدم."
+    },
+    {
+      "id": "q-yusuf-47",
+      "title": "التأويل والتدبير في قصة يوسف",
+      "category": "quran",
+      "locator": "12:47",
+      "url": "https://quran.com/12/47",
+      "author": "القرآن الكريم",
+      "summary": "تأويل خاص بسبع سنوات من الزرع مع تدبير حفظ المحصول.",
+      "verification": "text_checked",
+      "use": "core",
+      "rights": "public-domain",
+      "reviewed_at": "2026-10-27",
+      "scholar_reviewed": false,
+      "caveat": "ثبوت النص لا يثبت انطباق تأويل رؤيا بعينها على حلم المستخدم."
+    },
+    {
+      "id": "q-yusuf-48",
+      "title": "سنوات الشدة في القصة",
+      "category": "quran",
+      "locator": "12:48",
+      "url": "https://quran.com/12/48",
+      "author": "القرآن الكريم",
+      "summary": "استكمال تأويل يوسف لرؤيا الملك في سياق محدد، لا جدول لتوقيت أحلام الناس.",
+      "verification": "text_checked",
+      "use": "core",
+      "rights": "public-domain",
+      "reviewed_at": "2026-10-27",
+      "scholar_reviewed": false,
+      "caveat": "ثبوت النص لا يثبت انطباق تأويل رؤيا بعينها على حلم المستخدم."
+    },
+    {
+      "id": "q-yusuf-49",
+      "title": "عام الغيث في القصة",
+      "category": "quran",
+      "locator": "12:49",
+      "url": "https://quran.com/12/49",
+      "author": "القرآن الكريم",
+      "summary": "خبر يوسف في ختام التأويل؛ لا يُعمم على أي حلم بالمطر.",
+      "verification": "text_checked",
+      "use": "core",
+      "rights": "public-domain",
+      "reviewed_at": "2026-10-27",
+      "scholar_reviewed": false,
+      "caveat": "ثبوت النص لا يثبت انطباق تأويل رؤيا بعينها على حلم المستخدم."
+    },
+    {
+      "id": "q-yusuf-100",
+      "title": "تحقق رؤيا يوسف",
+      "category": "quran",
+      "locator": "12:100",
+      "url": "https://quran.com/12/100",
+      "author": "القرآن الكريم",
+      "summary": "ربط الرؤيا السابقة بتحققها في نهاية القصة؛ لا معيار آلياً لتصديق منام جديد.",
+      "verification": "text_checked",
+      "use": "core",
+      "rights": "public-domain",
+      "reviewed_at": "2026-10-27",
+      "scholar_reviewed": false,
+      "caveat": "ثبوت النص لا يثبت انطباق تأويل رؤيا بعينها على حلم المستخدم."
+    },
+    {
+      "id": "q-saffat-102",
+      "title": "رؤيا إبراهيم عليه السلام",
+      "category": "quran",
+      "locator": "37:102",
+      "url": "https://quran.com/37/102",
+      "author": "القرآن الكريم",
+      "summary": "رؤيا نبي؛ لا تُسوّى بها أوامر أحلام غير الأنبياء ولا تُتخذ ذريعة لإيذاء أحد.",
+      "verification": "text_checked",
+      "use": "core",
+      "rights": "public-domain",
+      "reviewed_at": "2026-10-27",
+      "scholar_reviewed": false,
+      "caveat": "ثبوت النص لا يثبت انطباق تأويل رؤيا بعينها على حلم المستخدم."
+    },
+    {
+      "id": "q-fath-27",
+      "title": "صدق رؤيا الرسول ﷺ",
+      "category": "quran",
+      "locator": "48:27",
+      "url": "https://quran.com/48/27",
+      "author": "القرآن الكريم",
+      "summary": "نص في رؤيا الرسول ودخول المسجد الحرام؛ لا وعد تلقائياً بالحج لكل راءٍ.",
+      "verification": "text_checked",
+      "use": "core",
+      "rights": "public-domain",
+      "reviewed_at": "2026-10-27",
+      "scholar_reviewed": false,
+      "caveat": "ثبوت النص لا يثبت انطباق تأويل رؤيا بعينها على حلم المستخدم."
+    },
+    {
+      "id": "q-naml-65",
+      "title": "الغيب لله",
+      "category": "quran",
+      "locator": "27:65",
+      "url": "https://quran.com/27/65",
+      "author": "القرآن الكريم",
+      "summary": "أصل عام في اختصاص الله بعلم الغيب؛ ليس قاموساً لرموز المنام.",
+      "verification": "text_checked",
+      "use": "core",
+      "rights": "public-domain",
+      "reviewed_at": "2026-10-27",
+      "scholar_reviewed": false,
+      "caveat": "ثبوت النص لا يثبت انطباق تأويل رؤيا بعينها على حلم المستخدم."
+    },
+    {
+      "id": "q-isra-36",
+      "title": "عدم القول بغير علم",
+      "category": "quran",
+      "locator": "17:36",
+      "url": "https://quran.com/17/36",
+      "author": "القرآن الكريم",
+      "summary": "أصل عام لضبط نسبة الأقوال وعدم إيهام السائل بأن التخمين علم.",
+      "verification": "text_checked",
+      "use": "core",
+      "rights": "public-domain",
+      "reviewed_at": "2026-10-27",
+      "scholar_reviewed": false,
+      "caveat": "ثبوت النص لا يثبت انطباق تأويل رؤيا بعينها على حلم المستخدم."
+    },
+    {
+      "id": "q-hujurat-12",
+      "title": "اجتناب كثير من الظن",
+      "category": "quran",
+      "locator": "49:12",
+      "url": "https://quran.com/49/12",
+      "author": "القرآن الكريم",
+      "summary": "أصل عام يحول دون تحويل المنام إلى اتهام للناس أو تجسس عليهم.",
+      "verification": "text_checked",
+      "use": "core",
+      "rights": "public-domain",
+      "reviewed_at": "2026-10-27",
+      "scholar_reviewed": false,
+      "caveat": "ثبوت النص لا يثبت انطباق تأويل رؤيا بعينها على حلم المستخدم."
+    },
+    {
+      "id": "q-najm-28",
+      "title": "حدود الظن",
+      "category": "quran",
+      "locator": "53:28",
+      "url": "https://quran.com/53/28",
+      "author": "القرآن الكريم",
+      "summary": "أصل عام للتفريق بين اليقين والظن، وليس إثباتاً لمعنى رمز بعينه.",
+      "verification": "text_checked",
+      "use": "core",
+      "rights": "public-domain",
+      "reviewed_at": "2026-10-27",
+      "scholar_reviewed": false,
+      "caveat": "ثبوت النص لا يثبت انطباق تأويل رؤيا بعينها على حلم المستخدم."
+    },
+    {
+      "id": "h-muslim-2263",
+      "title": "أقسام الرؤيا وحديث النفس",
+      "category": "hadith",
+      "locator": "مسلم 2263 أ",
+      "url": "https://sunnah.com/muslim:2263a",
+      "author": "مسلم بن الحجاج",
+      "summary": "تقسيم الرؤى إلى بشرى وتحزين وحديث نفس، والتوجيه للصلاة وترك التحديث بالمكروه.",
+      "verification": "text_checked",
+      "use": "core",
+      "rights": "paraphrase",
+      "reviewed_at": "2026-10-27",
+      "scholar_reviewed": false,
+      "caveat": "المتن الأصلي في الصحيح. التطبيق على حلم جديد اجتهاد مستقل، ولا نعيد نشر الترجمة الحديثة."
+    },
+    {
+      "id": "h-bukhari-6985",
+      "title": "حمد الله على الرؤيا المحبوبة",
+      "category": "hadith",
+      "locator": "البخاري 6985",
+      "url": "https://sunnah.com/bukhari:6985",
+      "author": "محمد بن إسماعيل البخاري",
+      "summary": "حمد الله عند رؤية المحبوب، والاستعاذة وعدم نشر المكروه.",
+      "verification": "text_checked",
+      "use": "core",
+      "rights": "paraphrase",
+      "reviewed_at": "2026-10-27",
+      "scholar_reviewed": false,
+      "caveat": "المتن الأصلي في الصحيح. التطبيق على حلم جديد اجتهاد مستقل، ولا نعيد نشر الترجمة الحديثة."
+    },
+    {
+      "id": "h-bukhari-6990",
+      "title": "الرؤيا الصالحة من المبشرات",
+      "category": "hadith",
+      "locator": "البخاري 6990",
+      "url": "https://sunnah.com/bukhari:6990",
+      "author": "محمد بن إسماعيل البخاري",
+      "summary": "بيان المبشرات؛ لا يمنح تعبير المنصة عصمة أو صفة الوحي.",
+      "verification": "text_checked",
+      "use": "core",
+      "rights": "paraphrase",
+      "reviewed_at": "2026-10-27",
+      "scholar_reviewed": false,
+      "caveat": "المتن الأصلي في الصحيح. التطبيق على حلم جديد اجتهاد مستقل، ولا نعيد نشر الترجمة الحديثة."
+    },
+    {
+      "id": "h-bukhari-6994",
+      "title": "رؤية النبي ﷺ في المنام",
+      "category": "hadith",
+      "locator": "البخاري 6994",
+      "url": "https://sunnah.com/bukhari:6994",
+      "author": "محمد بن إسماعيل البخاري",
+      "summary": "النص في رؤية النبي؛ التثبت في تنزيله على وصف شخص في منام يحتاج عالماً، ولا تحسمه المنصة.",
+      "verification": "text_checked",
+      "use": "core",
+      "rights": "paraphrase",
+      "reviewed_at": "2026-10-27",
+      "scholar_reviewed": false,
+      "caveat": "المتن الأصلي في الصحيح. التطبيق على حلم جديد اجتهاد مستقل، ولا نعيد نشر الترجمة الحديثة."
+    },
+    {
+      "id": "h-bukhari-7006",
+      "title": "تأويل اللبن بالعلم في رؤيا نبوية",
+      "category": "hadith",
+      "locator": "البخاري 7006",
+      "url": "https://sunnah.com/bukhari:7006",
+      "author": "محمد بن إسماعيل البخاري",
+      "summary": "ورد تأويل اللبن بالعلم في رؤيا محددة للنبي ﷺ تتعلق بعمر رضي الله عنه.",
+      "verification": "text_checked",
+      "use": "core",
+      "rights": "paraphrase",
+      "reviewed_at": "2026-10-27",
+      "scholar_reviewed": false,
+      "caveat": "المتن الأصلي في الصحيح. التطبيق على حلم جديد اجتهاد مستقل، ولا نعيد نشر الترجمة الحديثة."
+    },
+    {
+      "id": "h-bukhari-7008",
+      "title": "تأويل القميص بالدين في رؤيا نبوية",
+      "category": "hadith",
+      "locator": "البخاري 7008",
+      "url": "https://sunnah.com/bukhari:7008",
+      "author": "محمد بن إسماعيل البخاري",
+      "summary": "ورد تأويل القميص بالدين في رؤيا محددة؛ لا يُقاس تدين الأشخاص من طول لباسهم في أحلام الناس.",
+      "verification": "text_checked",
+      "use": "core",
+      "rights": "paraphrase",
+      "reviewed_at": "2026-10-27",
+      "scholar_reviewed": false,
+      "caveat": "المتن الأصلي في الصحيح. التطبيق على حلم جديد اجتهاد مستقل، ولا نعيد نشر الترجمة الحديثة."
+    },
+    {
+      "id": "h-bukhari-7043",
+      "title": "التحذير من اختلاق الرؤيا",
+      "category": "hadith",
+      "locator": "البخاري 7043",
+      "url": "https://sunnah.com/bukhari:7043",
+      "author": "محمد بن إسماعيل البخاري",
+      "summary": "النهي عن دعوى رؤية ما لم يره الإنسان؛ أمثلة المنصة التعليمية موسومة بأنها أمثلة.",
+      "verification": "text_checked",
+      "use": "core",
+      "rights": "paraphrase",
+      "reviewed_at": "2026-10-27",
+      "scholar_reviewed": false,
+      "caveat": "المتن الأصلي في الصحيح. التطبيق على حلم جديد اجتهاد مستقل، ولا نعيد نشر الترجمة الحديثة."
+    },
+    {
+      "id": "h-bukhari-7046",
+      "title": "المعبّر يصيب ويخطئ",
+      "category": "hadith",
+      "locator": "البخاري 7046",
+      "url": "https://sunnah.com/bukhari:7046",
+      "author": "محمد بن إسماعيل البخاري",
+      "summary": "بيّن النبي ﷺ لأبي بكر أنه أصاب بعض التعبير وأخطأ بعضه؛ فالتعبير يحتمل الخطأ.",
+      "verification": "text_checked",
+      "use": "core",
+      "rights": "paraphrase",
+      "reviewed_at": "2026-10-27",
+      "scholar_reviewed": false,
+      "caveat": "المتن الأصلي في الصحيح. التطبيق على حلم جديد اجتهاد مستقل، ولا نعيد نشر الترجمة الحديثة."
+    },
+    {
+      "id": "h-muslim-2261",
+      "title": "النفث والاستعاذة عند المكروه",
+      "category": "hadith",
+      "locator": "مسلم 2261 أ",
+      "url": "https://sunnah.com/muslim:2261a",
+      "author": "مسلم بن الحجاج",
+      "summary": "التوجيه بالاستعاذة والنفث عند رؤية ما يكره النائم.",
+      "verification": "text_checked",
+      "use": "core",
+      "rights": "paraphrase",
+      "reviewed_at": "2026-10-27",
+      "scholar_reviewed": false,
+      "caveat": "المتن الأصلي في الصحيح. التطبيق على حلم جديد اجتهاد مستقل، ولا نعيد نشر الترجمة الحديثة."
+    },
+    {
+      "id": "h-muslim-2262",
+      "title": "التحول عن الجنب عند الحلم المكروه",
+      "category": "hadith",
+      "locator": "مسلم 2262",
+      "url": "https://sunnah.com/muslim:2262",
+      "author": "مسلم بن الحجاج",
+      "summary": "الاستعاذة والنفث عن اليسار ثلاثاً والتحول عن الجنب الذي كان عليه.",
+      "verification": "text_checked",
+      "use": "core",
+      "rights": "paraphrase",
+      "reviewed_at": "2026-10-27",
+      "scholar_reviewed": false,
+      "caveat": "المتن الأصلي في الصحيح. التطبيق على حلم جديد اجتهاد مستقل، ولا نعيد نشر الترجمة الحديثة."
+    },
+    {
+      "id": "h-muslim-2268",
+      "title": "عدم التحديث بتلاعب الشيطان",
+      "category": "hadith",
+      "locator": "مسلم 2268 د",
+      "url": "https://sunnah.com/muslim:2268d",
+      "author": "مسلم بن الحجاج",
+      "summary": "في خبر المنام المزعج توجيه بترك التحديث به، دون تكلف البحث عن نذير مستقبلي.",
+      "verification": "text_checked",
+      "use": "core",
+      "rights": "paraphrase",
+      "reviewed_at": "2026-10-27",
+      "scholar_reviewed": false,
+      "caveat": "المتن الأصلي في الصحيح. التطبيق على حلم جديد اجتهاد مستقل، ولا نعيد نشر الترجمة الحديثة."
+    },
+    {
+      "id": "h-muslim-2270",
+      "title": "الاستئناس بدلالة الأسماء في واقعة",
+      "category": "hadith",
+      "locator": "مسلم 2270",
+      "url": "https://sunnah.com/muslim:2270",
+      "author": "مسلم بن الحجاج",
+      "summary": "تأويل الرفعة والعاقبة وطيب الدين في رؤيا نبوية وردت فيها أسماء عقبة ورافع وابن طاب.",
+      "verification": "text_checked",
+      "use": "core",
+      "rights": "paraphrase",
+      "reviewed_at": "2026-10-27",
+      "scholar_reviewed": false,
+      "caveat": "المتن الأصلي في الصحيح. التطبيق على حلم جديد اجتهاد مستقل، ولا نعيد نشر الترجمة الحديثة."
+    },
+    {
+      "id": "c-bukhari",
+      "title": "صحيح البخاري — كتاب التعبير",
+      "category": "collection",
+      "locator": "كتاب 91",
+      "url": "https://sunnah.com/bukhari/91",
+      "author": "",
+      "summary": "مدخل بحث إلى الأصل؛ لا تُعتمد أحاديث الباب آلياً. تُراجع الرواية والدرجة واللفظ لكل حديث قبل إضافته.",
+      "verification": "index_checked",
+      "use": "research",
+      "rights": "paraphrase",
+      "reviewed_at": "2026-10-27",
+      "scholar_reviewed": false,
+      "caveat": ""
+    },
+    {
+      "id": "c-muslim",
+      "title": "صحيح مسلم — كتاب الرؤيا",
+      "category": "collection",
+      "locator": "كتاب 42",
+      "url": "https://sunnah.com/muslim/42",
+      "author": "",
+      "summary": "مدخل بحث إلى الأصل؛ لا تُعتمد أحاديث الباب آلياً. تُراجع الرواية والدرجة واللفظ لكل حديث قبل إضافته.",
+      "verification": "index_checked",
+      "use": "research",
+      "rights": "paraphrase",
+      "reviewed_at": "2026-10-27",
+      "scholar_reviewed": false,
+      "caveat": ""
+    },
+    {
+      "id": "c-tirmidhi",
+      "title": "جامع الترمذي — أبواب الرؤيا",
+      "category": "collection",
+      "locator": "كتاب 34",
+      "url": "https://sunnah.com/tirmidhi/34",
+      "author": "",
+      "summary": "مدخل بحث إلى الأصل؛ لا تُعتمد أحاديث الباب آلياً. تُراجع الرواية والدرجة واللفظ لكل حديث قبل إضافته.",
+      "verification": "index_checked",
+      "use": "research",
+      "rights": "paraphrase",
+      "reviewed_at": "2026-10-27",
+      "scholar_reviewed": false,
+      "caveat": ""
+    },
+    {
+      "id": "c-ibnmajah",
+      "title": "سنن ابن ماجه — تعبير الرؤيا",
+      "category": "collection",
+      "locator": "كتاب 35",
+      "url": "https://sunnah.com/ibnmajah/35",
+      "author": "",
+      "summary": "مدخل بحث إلى الأصل؛ لا تُعتمد أحاديث الباب آلياً. تُراجع الرواية والدرجة واللفظ لكل حديث قبل إضافته.",
+      "verification": "index_checked",
+      "use": "research",
+      "rights": "paraphrase",
+      "reviewed_at": "2026-10-27",
+      "scholar_reviewed": false,
+      "caveat": ""
+    },
+    {
+      "id": "c-abudawud",
+      "title": "سنن أبي داود — أبواب الرؤيا من الأدب",
+      "category": "collection",
+      "locator": "الأحاديث 5017 وما بعدها",
+      "url": "https://sunnah.com/abudawud:5017",
+      "author": "",
+      "summary": "مدخل بحث إلى الأصل؛ لا تُعتمد أحاديث الباب آلياً. تُراجع الرواية والدرجة واللفظ لكل حديث قبل إضافته.",
+      "verification": "index_checked",
+      "use": "research",
+      "rights": "paraphrase",
+      "reviewed_at": "2026-10-27",
+      "scholar_reviewed": false,
+      "caveat": ""
+    },
+    {
+      "id": "t-kathir",
+      "title": "تفسير ابن كثير — رؤيا الملك",
+      "category": "tafsir",
+      "locator": "يوسف: 43 وما بعدها",
+      "url": "https://quran.ksu.edu.sa/tafseer/katheer/sura12-aya43.html",
+      "author": "ابن كثير",
+      "summary": "لشرح سياق الآيات والتأويل في قصة يوسف؛ تفسير القرآن لا يتحول بذاته إلى حكم على منام المستخدم.",
+      "verification": "excerpt_checked",
+      "use": "education",
+      "rights": "public-domain",
+      "reviewed_at": "2026-10-27",
+      "scholar_reviewed": false,
+      "caveat": ""
+    },
+    {
+      "id": "t-tabari",
+      "title": "تفسير الطبري — رؤيا الملك",
+      "category": "tafsir",
+      "locator": "يوسف: 43 وما بعدها",
+      "url": "https://quran.ksu.edu.sa/tafseer/tabary/sura12-aya43.html",
+      "author": "الطبري",
+      "summary": "لشرح سياق الآيات والتأويل في قصة يوسف؛ تفسير القرآن لا يتحول بذاته إلى حكم على منام المستخدم.",
+      "verification": "excerpt_checked",
+      "use": "education",
+      "rights": "public-domain",
+      "reviewed_at": "2026-10-27",
+      "scholar_reviewed": false,
+      "caveat": ""
+    },
+    {
+      "id": "t-qurtubi",
+      "title": "تفسير القرطبي — رؤيا الملك",
+      "category": "tafsir",
+      "locator": "يوسف: 43 وما بعدها",
+      "url": "https://quran.ksu.edu.sa/tafseer/qortobi/sura12-aya43.html",
+      "author": "القرطبي",
+      "summary": "لشرح سياق الآيات والتأويل في قصة يوسف؛ تفسير القرآن لا يتحول بذاته إلى حكم على منام المستخدم.",
+      "verification": "excerpt_checked",
+      "use": "education",
+      "rights": "public-domain",
+      "reviewed_at": "2026-10-27",
+      "scholar_reviewed": false,
+      "caveat": ""
+    },
+    {
+      "id": "t-saadi",
+      "title": "تفسير السعدي — رؤيا الملك",
+      "category": "tafsir",
+      "locator": "يوسف: 43 وما بعدها",
+      "url": "https://quran.ksu.edu.sa/tafseer/saadi/sura12-aya43.html",
+      "author": "السعدي",
+      "summary": "لشرح سياق الآيات والتأويل في قصة يوسف؛ تفسير القرآن لا يتحول بذاته إلى حكم على منام المستخدم.",
+      "verification": "excerpt_checked",
+      "use": "education",
+      "rights": "public-domain",
+      "reviewed_at": "2026-10-27",
+      "scholar_reviewed": false,
+      "caveat": ""
+    },
+    {
+      "id": "t-baghawi",
+      "title": "تفسير البغوي — رؤيا الملك",
+      "category": "tafsir",
+      "locator": "يوسف: 43 وما بعدها",
+      "url": "https://quran.ksu.edu.sa/tafseer/baghawy/sura12-aya43.html",
+      "author": "البغوي",
+      "summary": "لشرح سياق الآيات والتأويل في قصة يوسف؛ تفسير القرآن لا يتحول بذاته إلى حكم على منام المستخدم.",
+      "verification": "excerpt_checked",
+      "use": "education",
+      "rights": "public-domain",
+      "reviewed_at": "2026-10-27",
+      "scholar_reviewed": false,
+      "caveat": ""
+    },
+    {
+      "id": "f-darifta",
+      "title": "أصول تعبير الرؤى المنامية",
+      "category": "fatwa",
+      "locator": "دار الإفتاء المصرية — فتوى 13821",
+      "url": "https://www.dar-alifta.org/ar/fatwa/details/13821/أصول-تعبير-الرؤى-المنامية",
+      "author": "دار الإفتاء المصرية",
+      "summary": "تقرير مشروعية التعبير لمن يحسنه، واحتمال خطأ المعبّر، وأن الرؤيا ليست حجة شرعية.",
+      "verification": "excerpt_checked",
+      "use": "core",
+      "rights": "paraphrase",
+      "reviewed_at": "2026-10-27",
+      "scholar_reviewed": false,
+      "caveat": ""
+    },
+    {
+      "id": "f-binbaz",
+      "title": "قراءة كتب تفسير الأحلام — تفريغ نور على الدرب",
+      "category": "fatwa",
+      "locator": "نور على الدرب 708 — تفريغ مستضاف لدى إسلام ويب",
+      "url": "https://audio.islamweb.net/audio/index.php?audioid=300678&page=FullContent",
+      "author": "عبد العزيز بن باز — تفريغ منقول",
+      "summary": "تفريغ منقول عن ابن باز يؤكد النظر في الدليل والقرائن وعدم الاعتماد على الكتاب وحده أو الجزم عند الشك.",
+      "verification": "excerpt_checked",
+      "use": "education",
+      "rights": "paraphrase",
+      "reviewed_at": "2026-10-27",
+      "scholar_reviewed": false,
+      "caveat": "تراجع المطابقة الصوتية قبل نسبة اقتباس حرفي إليه."
+    },
+    {
+      "id": "f-no-ruling",
+      "title": "الرؤيا الصالحة لا تعدو تبشيراً أو تذكيراً",
+      "category": "fatwa",
+      "locator": "إسلام ويب — فتوى 36380",
+      "url": "https://www.islamweb.net/ar/fatwa/36380",
+      "author": "إسلام ويب",
+      "summary": "الرؤيا ليست مصدراً لإثبات حكم شرعي أو إلغاء سنة ثابتة.",
+      "verification": "excerpt_checked",
+      "use": "core",
+      "rights": "paraphrase",
+      "reviewed_at": "2026-10-27",
+      "scholar_reviewed": false,
+      "caveat": ""
+    },
+    {
+      "id": "f-istikhara",
+      "title": "لا يترتب على الرؤيا حكم شرعي",
+      "category": "fatwa",
+      "locator": "إسلام ويب — فتوى 126000",
+      "url": "https://www.islamweb.net/ar/fatwa/126000",
+      "author": "إسلام ويب",
+      "summary": "في واقعة استخارة وزواج: لا يترتب على المنام حكم، ويُنظر إلى الأسباب الواقعية.",
+      "verification": "excerpt_checked",
+      "use": "core",
+      "rights": "paraphrase",
+      "reviewed_at": "2026-10-27",
+      "scholar_reviewed": false,
+      "caveat": ""
+    },
+    {
+      "id": "f-afterlife",
+      "title": "هل يُعرف المصير الأخروي من الرؤى؟",
+      "category": "fatwa",
+      "locator": "إسلام ويب — فتوى 330421",
+      "url": "https://www.islamweb.net/ar/fatwa/330421",
+      "author": "إسلام ويب",
+      "summary": "لا يُقطع بمصير الإنسان في الآخرة من رؤاه، ولا تُبنى عليها تنبؤات قطعية.",
+      "verification": "excerpt_checked",
+      "use": "core",
+      "rights": "paraphrase",
+      "reviewed_at": "2026-10-27",
+      "scholar_reviewed": false,
+      "caveat": ""
+    },
+    {
+      "id": "b-nabulsi",
+      "title": "تعطير الأنام في تعبير المنام",
+      "category": "heritage",
+      "locator": "مقدمة الكتاب — النص الرقمي، الصفحة المعروضة 5 (المطبوعة 8)",
+      "url": "https://usul.ai/ar/t/tactir-anam/5",
+      "author": "عبد الغني النابلسي",
+      "summary": "مصنّف تراثي في التعبير؛ يعرض طرقاً اجتهادية متعددة. اختلاف أحوال الناس والنقول فيه يستلزم مراجعة متخصصة.",
+      "verification": "text_checked",
+      "use": "research",
+      "rights": "public-domain",
+      "reviewed_at": "2026-10-27",
+      "scholar_reviewed": false,
+      "caveat": "فُحص موضع محدد فقط؛ لم تُستورد مادته كاملة ولم تُزكَّ جميع تأويلاته."
+    },
+    {
+      "id": "b-ibnshahin",
+      "title": "الإشارات في علم العبارات",
+      "category": "heritage",
+      "locator": "مقدمة الكتاب — 1/603 في النسخة الرقمية",
+      "url": "https://usul.ai/ar/t/isharat-2/1",
+      "author": "خليل بن شاهين الظاهري",
+      "summary": "مصنّف تراثي يورد مصادر سابقة واختلافات في التعبير. ذكر اسم مصدر فيه لا يصحح نسبته أو رواياته.",
+      "verification": "text_checked",
+      "use": "research",
+      "rights": "public-domain",
+      "reviewed_at": "2026-10-27",
+      "scholar_reviewed": false,
+      "caveat": "فحص مقدمة وفهرسة إحالات؛ لا اعتماد آلي لتأويلات الكتاب أو دعاوى الغيب فيه."
+    },
+    {
+      "id": "b-ibnqutayba",
+      "title": "كتاب تعبير الرؤيا",
+      "category": "heritage",
+      "locator": "فهرس المكتبة الوطنية التونسية — SYRACUSE/6221041، تحقيق إبراهيم صالح",
+      "url": "https://www.bibliotheque.nat.tn/BNT/doc/SYRACUSE/6221041",
+      "author": "ابن قتيبة الدينوري",
+      "summary": "مرجع ببليوغرافي لمصنف ابن قتيبة؛ يحتاج الحصول على نسخة محققة ومقابلة صفحاتها قبل استخراج قواعد منسوبة إليه.",
+      "verification": "catalog_only",
+      "use": "research",
+      "rights": "unknown",
+      "reviewed_at": "2026-10-27",
+      "scholar_reviewed": false,
+      "caveat": "تم العثور على الفهرس؛ تعذر جلب الصفحة كاملة وقت المراجعة، ولم يُقرأ الكتاب."
+    },
+    {
+      "id": "b-manuscript",
+      "title": "تعطير الأنام — نسخة خطية مصورة",
+      "category": "catalog",
+      "locator": "Wellcome Collection — MS Arabic 109",
+      "url": "https://wellcomecollection.org/works/zg7mcp5h",
+      "author": "عبد الغني النابلسي",
+      "summary": "فهرس مخطوط متاح بعلامة الملك العام. الصور تحتاج قراءة ومقابلة قبل اعتماد OCR أو نقل منها.",
+      "verification": "catalog_only",
+      "use": "research",
+      "rights": "public-domain",
+      "reviewed_at": "2026-10-27",
+      "scholar_reviewed": false,
+      "caveat": ""
+    },
+    {
+      "id": "b-ibnsirin",
+      "title": "منتخب الكلام — المنسوب إلى ابن سيرين",
+      "category": "heritage",
+      "locator": "التعريف الببليوغرافي للورّاق — bookid=52",
+      "url": "https://www.alwaraq.net/Core/waraq/coverpage?bookid=52",
+      "author": "منسوب إلى ابن سيرين؛ النسبة محل نقد",
+      "summary": "مرجع متداول تُنازع نسبته إلى ابن سيرين؛ يُحفظ للتوثيق النقدي ولا يُنسب محتواه إليه بصيغة الجزم.",
+      "verification": "attribution_disputed",
+      "use": "excluded",
+      "rights": "paraphrase",
+      "reviewed_at": "2026-10-27",
+      "scholar_reviewed": false,
+      "caveat": "لا نعتمد الجزم بتحديد مؤلف بديل، ولا نسند أقوال هذا الكتاب إلى ابن سيرين آلياً."
+    }
+  ],
+  "rules": [
+    {
+      "id": "r-three",
+      "title": "ليست كل المنامات رؤى قابلة للتعبير",
+      "category": "أقسام المنام",
+      "explanation": "وردت البشرى والتحزين وحديث النفس؛ لذلك لا يُفترض أن لكل منام رسالة رمزية.",
+      "source_refs": [
+        "h-muslim-2263"
+      ],
+      "basis": "textual",
+      "scholar_reviewed": false
+    },
+    {
+      "id": "r-day",
+      "title": "قد يمتد انشغال النهار إلى المنام",
+      "category": "أقسام المنام",
+      "explanation": "تُسأل صلة المنام بما يشغل الرائي في يقظته، مع إبقاء هذا احتمالاً لا تشخيصاً.",
+      "source_refs": [
+        "h-muslim-2263"
+      ],
+      "basis": "inference",
+      "scholar_reviewed": false
+    },
+    {
+      "id": "r-no-score",
+      "title": "لا مقياس آلياً لصدق الرؤيا",
+      "category": "أقسام المنام",
+      "explanation": "ذكر صدق الحديث في الرواية لا يتيح قياس صلاح الشخص أو منح حلمه نسبة تحقق رقمية.",
+      "source_refs": [
+        "h-muslim-2263"
+      ],
+      "basis": "product_policy",
+      "scholar_reviewed": false
+    },
+    {
+      "id": "r-no-repeat",
+      "title": "التكرار لا يثبت تحقق المنام",
+      "category": "أقسام المنام",
+      "explanation": "تكرار المشهد معلومة سياقية؛ لا نجعله دليلاً قطعياً على حدث قادم.",
+      "source_refs": [
+        "q-isra-36",
+        "h-muslim-2263"
+      ],
+      "basis": "product_policy",
+      "scholar_reviewed": false
+    },
+    {
+      "id": "r-thanks",
+      "title": "احمد الله على ما يسرك",
+      "category": "آداب الرؤيا",
+      "explanation": "من التوجيه النبوي حمد الله على المنام المحبوب.",
+      "source_refs": [
+        "h-bukhari-6985"
+      ],
+      "basis": "textual",
+      "scholar_reviewed": false
+    },
+    {
+      "id": "r-discretion",
+      "title": "اختر من تقص عليه",
+      "category": "آداب الرؤيا",
+      "explanation": "تُراعى الحكمة في مشاركة الرؤيا، ولا تتحول إلى منشور عام تلقائياً.",
+      "source_refs": [
+        "q-yusuf-5"
+      ],
+      "basis": "inference",
+      "scholar_reviewed": false
+    },
+    {
+      "id": "r-refuge",
+      "title": "استعذ بالله عند المكروه",
+      "category": "آداب الرؤيا",
+      "explanation": "الاستعاذة من شر المنام ومن الشيطان من التوجيه النبوي عند المكروه.",
+      "source_refs": [
+        "h-muslim-2261",
+        "h-muslim-2262"
+      ],
+      "basis": "textual",
+      "scholar_reviewed": false
+    },
+    {
+      "id": "r-left",
+      "title": "النفث عن اليسار ثلاثاً",
+      "category": "آداب الرؤيا",
+      "explanation": "ورد التوجيه بالنفث أو التفل عن اليسار ثلاثاً عند رؤية ما يكره.",
+      "source_refs": [
+        "h-muslim-2262"
+      ],
+      "basis": "textual",
+      "scholar_reviewed": false
+    },
+    {
+      "id": "r-side",
+      "title": "تحوّل عن الجنب الذي كنت عليه",
+      "category": "آداب الرؤيا",
+      "explanation": "ورد التحول عن الجنب ضمن التوجيه للحلم المكروه.",
+      "source_refs": [
+        "h-muslim-2262"
+      ],
+      "basis": "textual",
+      "scholar_reviewed": false
+    },
+    {
+      "id": "r-pray",
+      "title": "الصلاة عند رؤية ما يُكره",
+      "category": "آداب الرؤيا",
+      "explanation": "ورد القيام والصلاة وترك التحديث بالمكروه.",
+      "source_refs": [
+        "h-muslim-2263"
+      ],
+      "basis": "textual",
+      "scholar_reviewed": false
+    },
+    {
+      "id": "r-notell",
+      "title": "لا تنشر ما يُفزعك",
+      "category": "آداب الرؤيا",
+      "explanation": "لا نجعل المنام المكروه مادة للتهويل؛ يظهر للمستخدم أدب التعامل معه قبل أي رموز.",
+      "source_refs": [
+        "h-bukhari-6985",
+        "h-muslim-2268"
+      ],
+      "basis": "inference",
+      "scholar_reviewed": false
+    },
+    {
+      "id": "r-invent",
+      "title": "لا تختلق رؤيا أو تتممها",
+      "category": "آداب الرؤيا",
+      "explanation": "يُكتب ما يتذكره الرائي كما هو، ويُصرَّح بما نُسي، وتبقى الأمثلة التعليمية موسومة.",
+      "source_refs": [
+        "h-bukhari-7043"
+      ],
+      "basis": "inference",
+      "scholar_reviewed": false
+    },
+    {
+      "id": "r-fallible",
+      "title": "المعبّر قد يصيب وقد يخطئ",
+      "category": "حدود التعبير",
+      "explanation": "في تعبير أبي بكر رضي الله عنه بيان لاحتمال الصواب والخطأ، فلا تعصم الخوارزمية نفسها.",
+      "source_refs": [
+        "h-bukhari-7046"
+      ],
+      "basis": "textual",
+      "scholar_reviewed": false
+    },
+    {
+      "id": "r-no-law",
+      "title": "الرؤيا لا تُنشئ حكماً شرعياً",
+      "category": "حدود التعبير",
+      "explanation": "لا يثبت بها تحليل أو تحريم أو عبادة جديدة؛ تُرد الأحكام إلى أدلتها المعروفة.",
+      "source_refs": [
+        "f-darifta",
+        "f-no-ruling"
+      ],
+      "basis": "textual",
+      "scholar_reviewed": false
+    },
+    {
+      "id": "r-unseen",
+      "title": "لا توقيت جازماً لحدث قادم",
+      "category": "حدود التعبير",
+      "explanation": "لا تحدد المنصة موعد موت أو زواج أو ربح، ولا تدّعي علماً بالغيب.",
+      "source_refs": [
+        "q-naml-65",
+        "q-isra-36"
+      ],
+      "basis": "product_policy",
+      "scholar_reviewed": false
+    },
+    {
+      "id": "r-prophets",
+      "title": "لا تُقاس أوامر منام الناس على رؤيا الأنبياء",
+      "category": "حدود التعبير",
+      "explanation": "خصوصية رؤى الأنبياء لا تبيح اتباع أمر في المنام يخالف الشرع أو يؤذي إنساناً.",
+      "source_refs": [
+        "q-saffat-102",
+        "f-no-ruling"
+      ],
+      "basis": "inference",
+      "scholar_reviewed": false
+    },
+    {
+      "id": "r-istikhara",
+      "title": "الاستخارة لا تشترط حلماً",
+      "category": "حدود التعبير",
+      "explanation": "تُقيَّم قرارات الزواج ونحوها بالأسباب والمشاورة؛ لا نقرر القبول أو الرفض اعتماداً على حلم.",
+      "source_refs": [
+        "f-istikhara"
+      ],
+      "basis": "inference",
+      "scholar_reviewed": false
+    },
+    {
+      "id": "r-afterlife",
+      "title": "لا شهادة بمصير أخروي من المنام",
+      "category": "حدود التعبير",
+      "explanation": "لا يُقطع بجنة شخص أو ناره أو مرتبته من حلم يرويه أحد.",
+      "source_refs": [
+        "f-afterlife"
+      ],
+      "basis": "textual",
+      "scholar_reviewed": false
+    },
+    {
+      "id": "r-prophet-review",
+      "title": "دعوى رؤية النبي ﷺ تحتاج تثبتاً بشرياً",
+      "category": "حدود التعبير",
+      "explanation": "تُعرض الرواية الصحيحة، وتحيل المنصة التنزيل على الوصف إلى أهل العلم دون تصديق آلي.",
+      "source_refs": [
+        "h-bukhari-6994",
+        "f-no-ruling"
+      ],
+      "basis": "product_policy",
+      "scholar_reviewed": false
+    },
+    {
+      "id": "r-context",
+      "title": "ابدأ بالقصة والسياق",
+      "category": "منهج التعبير",
+      "explanation": "الرمز والفعل والمشاعر وما يشغل الرائي تُقرأ معاً؛ لا تُختزل الرؤيا في كلمة.",
+      "source_refs": [
+        "q-yusuf-43",
+        "q-yusuf-47"
+      ],
+      "basis": "inference",
+      "scholar_reviewed": false
+    },
+    {
+      "id": "r-specific",
+      "title": "الشاهد الخاص ليس قاموساً عاماً",
+      "category": "منهج التعبير",
+      "explanation": "ورود اللبن أو القميص في رؤيا نبوية لا يثبت نفس المعنى لكل شخص وفي كل ظرف.",
+      "source_refs": [
+        "h-bukhari-7006",
+        "h-bukhari-7008"
+      ],
+      "basis": "inference",
+      "scholar_reviewed": false
+    },
+    {
+      "id": "r-variants",
+      "title": "أظهر وجه الاستدلال وحدوده",
+      "category": "منهج التعبير",
+      "explanation": "تبيّن النتيجة هل الصلة شاهد خاص أو أصلاً عاماً أو اجتهاداً؛ لا يُلصق النص بالتأويل بلا بيان.",
+      "source_refs": [
+        "q-isra-36",
+        "h-bukhari-7046"
+      ],
+      "basis": "product_policy",
+      "scholar_reviewed": false
+    },
+    {
+      "id": "r-names",
+      "title": "دلالة الأسماء للاستئناس بحذر",
+      "category": "منهج التعبير",
+      "explanation": "في حديث مسلم مثال خاص على دلالة الأسماء؛ لا نطبقه كحساب حروف أو نبوءة بالأسماء.",
+      "source_refs": [
+        "h-muslim-2270"
+      ],
+      "basis": "inference",
+      "scholar_reviewed": false
+    },
+    {
+      "id": "r-books",
+      "title": "استفد من الكتب ولا تعتمدها وحدها",
+      "category": "منهج التعبير",
+      "explanation": "تفريغ ابن باز يؤكد الدليل والقرائن وعدم الجزم عند الشك؛ استيراد الكتاب لا يصحح محتواه.",
+      "source_refs": [
+        "f-binbaz"
+      ],
+      "basis": "textual",
+      "scholar_reviewed": false
+    },
+    {
+      "id": "r-attribution",
+      "title": "تحقق من نسبة الكتاب والقول",
+      "category": "منهج التعبير",
+      "explanation": "يُحجز الكتاب المنسوب إلى ابن سيرين المختلف في نسبته؛ وذكر مصدر قديم في فهرس لا يثبت نسبته.",
+      "source_refs": [
+        "b-ibnsirin",
+        "b-ibnshahin"
+      ],
+      "basis": "product_policy",
+      "scholar_reviewed": false
+    },
+    {
+      "id": "r-grade",
+      "title": "راجع الحديث قبل إدخاله",
+      "category": "منهج التعبير",
+      "explanation": "لا ننقل حكم الصحيحين إلى كل ما في كتب السنن، بل تُراجع كل رواية ودرجتها على حدة.",
+      "source_refs": [
+        "c-tirmidhi",
+        "c-ibnmajah",
+        "c-abudawud"
+      ],
+      "basis": "product_policy",
+      "scholar_reviewed": false
+    },
+    {
+      "id": "r-unsure",
+      "title": "عند نقص الدليل قل: لا يكفي",
+      "category": "منهج التعبير",
+      "explanation": "لا تُملأ الفجوات بتأويل منسوب لشرع أو عالم؛ يُظهر النظام ما ينقصه من سياق ومراجع.",
+      "source_refs": [
+        "q-isra-36",
+        "h-bukhari-7046"
+      ],
+      "basis": "product_policy",
+      "scholar_reviewed": false
+    },
+    {
+      "id": "r-no-accusation",
+      "title": "لا تتهم أحداً بسبب منام",
+      "category": "ضوابط المنصة",
+      "explanation": "لا يثبت الحلم سحراً أو خيانة أو جريمة، ولا يُستخدم للبحث عن متهم.",
+      "source_refs": [
+        "q-hujurat-12",
+        "q-isra-36"
+      ],
+      "basis": "product_policy",
+      "scholar_reviewed": false
+    },
+    {
+      "id": "r-no-clinic",
+      "title": "لا تشخيص طبي من حلم",
+      "category": "ضوابط المنصة",
+      "explanation": "لا تُستنتج إصابة أو حمل أو وفاة، ولا يُنصح بإيقاف علاج أو ترك فحص بسبب منام.",
+      "source_refs": [
+        "q-isra-36"
+      ],
+      "basis": "product_policy",
+      "scholar_reviewed": false
+    },
+    {
+      "id": "r-no-money",
+      "title": "لا قرار مالي أو زواجي من التأويل وحده",
+      "category": "ضوابط المنصة",
+      "explanation": "تعرض المنصة مادة للاستئناس؛ القرار يُبنى على الواقع والمشاورة المناسبة.",
+      "source_refs": [
+        "f-istikhara",
+        "q-isra-36"
+      ],
+      "basis": "product_policy",
+      "scholar_reviewed": false
+    },
+    {
+      "id": "r-private",
+      "title": "الخصوصية تبدأ قبل الحفظ",
+      "category": "ضوابط المنصة",
+      "explanation": "لا يُحفظ نص المنام تلقائياً؛ الحفظ المحلي باختيار المستخدم، مع حذف وتصدير واضحين.",
+      "source_refs": [
+        "q-yusuf-5"
+      ],
+      "basis": "product_policy",
+      "scholar_reviewed": false
+    },
+    {
+      "id": "r-review",
+      "title": "المراجعة التقنية ليست إجازة شرعية",
+      "category": "ضوابط المنصة",
+      "explanation": "توثيق الرابط وفحص الكود لا يغنيان عن مراجعة علمية لمتون المواد وتطبيق القواعد.",
+      "source_refs": [
+        "q-isra-36",
+        "h-bukhari-7046"
+      ],
+      "basis": "product_policy",
+      "scholar_reviewed": false
+    }
+  ],
+  "symbols": [
+    {
+      "id": "s-milk",
+      "name": "اللبن والحليب",
+      "terms": [
+        "لبن",
+        "حليب",
+        "لبنا",
+        "حليبا"
+      ],
+      "kind": "specific_witness",
+      "evidence": "أُوِّل اللبن بالعلم في رؤيا للنبي ﷺ وردت في صحيح البخاري.",
+      "possibility": "قد يُستأنس بوجه العلم والتعلّم عند وجود قرائن مناسبة؛ يبقى انشغال اليقظة والطعام احتمالاً آخر.",
+      "questions": [
+        "هل تنشغل بتعلّم أو دراسة هذه الأيام؟",
+        "هل كان اللبن مألوفاً في يومك قبل النوم؟"
+      ],
+      "source_refs": [
+        "h-bukhari-7006",
+        "h-muslim-2263"
+      ],
+      "caveat": "هذا شاهد للمقارنة، وليس حكماً على منامك أو تنبؤاً بالمستقبل."
+    },
+    {
+      "id": "s-shirt",
+      "name": "القميص",
+      "terms": [
+        "قميص",
+        "قمص",
+        "قميصا",
+        "قمصان"
+      ],
+      "kind": "specific_witness",
+      "evidence": "أُوّل القميص بالدين في رؤيا نبوية خاصة في البخاري.",
+      "possibility": "يمكن بحث معنى الستر أو الالتزام على سبيل الاستئناس عند مناسبة السياق؛ لا نحكم بتدينك أو تدين شخص آخر.",
+      "questions": [
+        "ما الذي ميّز القميص في القصة؟",
+        "هل يرتبط بعمل أو مناسبة أو ذكرى في يقظتك؟"
+      ],
+      "source_refs": [
+        "h-bukhari-7008"
+      ],
+      "caveat": "هذا شاهد للمقارنة، وليس حكماً على منامك أو تنبؤاً بالمستقبل."
+    },
+    {
+      "id": "s-dates",
+      "name": "الرطب والأسماء",
+      "terms": [
+        "رطب",
+        "تمور",
+        "تمر",
+        "طاب",
+        "رافع",
+        "عقبه"
+      ],
+      "kind": "specific_witness",
+      "evidence": "وردت رؤيا فيها رطب ابن طاب ودار عقبة بن رافع، مع تأويل خاص بالرفعة والعاقبة وطيب الدين.",
+      "possibility": "يُستأنس بحسن المعنى في الأسماء ضمن القرائن؛ لا نعد برزق محدد أو ترقية من مجرد الرطب.",
+      "questions": [
+        "هل ورد اسم واضح فعلاً في المنام؟",
+        "هل للتمر أو الاسم صلة بيومك؟"
+      ],
+      "source_refs": [
+        "h-muslim-2270"
+      ],
+      "caveat": "هذا شاهد للمقارنة، وليس حكماً على منامك أو تنبؤاً بالمستقبل."
+    },
+    {
+      "id": "s-sun",
+      "name": "الشمس",
+      "terms": [
+        "شمس",
+        "شمسا"
+      ],
+      "kind": "quran_story",
+      "evidence": "وردت الشمس ضمن رؤيا يوسف، ثم جاء تحققها في نهاية قصته.",
+      "possibility": "يُدرس الشاهد في سياقه الأسري الخاص؛ لا نقرر أن الشمس تعني شخصاً محدداً في حلمك.",
+      "questions": [
+        "من كان حاضراً وما العلاقة في القصة؟"
+      ],
+      "source_refs": [
+        "q-yusuf-4",
+        "q-yusuf-100"
+      ],
+      "caveat": "هذا شاهد للمقارنة، وليس حكماً على منامك أو تنبؤاً بالمستقبل."
+    },
+    {
+      "id": "s-moon",
+      "name": "القمر",
+      "terms": [
+        "قمر",
+        "قمرا"
+      ],
+      "kind": "quran_story",
+      "evidence": "ورد القمر مع الشمس والكواكب في رؤيا يوسف.",
+      "possibility": "المقارنة بالقصة تعليمية؛ تحديد معنى القمر في حلمك يحتاج قرائن ولا يُحسم باللفظ وحده.",
+      "questions": [
+        "كيف ظهر القمر، وما شعورك تجاهه؟"
+      ],
+      "source_refs": [
+        "q-yusuf-4",
+        "q-yusuf-100"
+      ],
+      "caveat": "هذا شاهد للمقارنة، وليس حكماً على منامك أو تنبؤاً بالمستقبل."
+    },
+    {
+      "id": "s-stars",
+      "name": "الكواكب والنجوم",
+      "terms": [
+        "كوكب",
+        "كواكب",
+        "نجم",
+        "نجوم"
+      ],
+      "kind": "quran_story",
+      "evidence": "ورد أحد عشر كوكباً في رؤيا يوسف، بتفاصيل مرتبطة بقصته.",
+      "possibility": "وجود العدد في النص ليس طريقة لحساب أعوام أو أشخاص أو مواعيد حلم جديد.",
+      "questions": [
+        "هل تتذكر العدد فعلاً أم تذكره على التقريب؟"
+      ],
+      "source_refs": [
+        "q-yusuf-4",
+        "q-yusuf-100"
+      ],
+      "caveat": "هذا شاهد للمقارنة، وليس حكماً على منامك أو تنبؤاً بالمستقبل."
+    },
+    {
+      "id": "s-cows",
+      "name": "البقر",
+      "terms": [
+        "بقر",
+        "بقره",
+        "بقرات",
+        "عجاف"
+      ],
+      "kind": "quran_story",
+      "evidence": "رؤيا الملك جمعت سبع بقرات سمان وسبعاً عجافاً ضمن مشهد محدد.",
+      "possibility": "استكمال القصة يبيّن تأويلاً خاصاً للسنوات؛ لا تتحول كل بقرة إلى سنة في المنصة.",
+      "questions": [
+        "ما الصفات والأحداث التي تتذكرها دون إضافة؟"
+      ],
+      "source_refs": [
+        "q-yusuf-43",
+        "q-yusuf-47",
+        "q-yusuf-48"
+      ],
+      "caveat": "هذا شاهد للمقارنة، وليس حكماً على منامك أو تنبؤاً بالمستقبل."
+    },
+    {
+      "id": "s-grain",
+      "name": "السنابل والحصاد",
+      "terms": [
+        "سنبله",
+        "سنابل",
+        "سنبلات",
+        "حصاد",
+        "حصد",
+        "قمح"
+      ],
+      "kind": "quran_story",
+      "evidence": "وردت السنابل وحفظ الحصاد في قصة تأويل يوسف لرؤيا الملك.",
+      "possibility": "قد تدعو القصة إلى التأمل في التدبير، ولا تثبت ربحاً أو خسارة لمحصول أو مشروعك.",
+      "questions": [
+        "هل تعمل في زراعة أو تفكر في ادخار أو مشروع؟"
+      ],
+      "source_refs": [
+        "q-yusuf-43",
+        "q-yusuf-47"
+      ],
+      "caveat": "هذا شاهد للمقارنة، وليس حكماً على منامك أو تنبؤاً بالمستقبل."
+    },
+    {
+      "id": "s-wine",
+      "name": "العصر والخمر",
+      "terms": [
+        "خمر",
+        "خمرا",
+        "اعصر",
+        "عصير"
+      ],
+      "kind": "quran_story",
+      "evidence": "ورد عصر الخمر في رؤيا أحد صاحبي السجن وتأويلها الخاص.",
+      "possibility": "لا ننقل نتيجة الواقعة إلى الرائي، ولا نثبت ارتكاب محرم من مجرد منام.",
+      "questions": [
+        "هل ما تتذكره عصر شيء أم شربه؟"
+      ],
+      "source_refs": [
+        "q-yusuf-36",
+        "q-yusuf-41"
+      ],
+      "caveat": "هذا شاهد للمقارنة، وليس حكماً على منامك أو تنبؤاً بالمستقبل."
+    },
+    {
+      "id": "s-bread",
+      "name": "الخبز والطير",
+      "terms": [
+        "خبز",
+        "خبزا",
+        "رغيف",
+        "ارغفه"
+      ],
+      "kind": "quran_story",
+      "evidence": "ورد حمل الخبز وأكل الطير منه في رؤيا خاصة بقصة صاحبي السجن.",
+      "possibility": "لا تُنقل النهاية الخاصة بالقصة إلى حلمك، ولا يُتنبأ بموت أو عقوبة من رؤية خبز.",
+      "questions": [
+        "ما الفعل الذي وقع للخبز ومن كان حاضراً؟"
+      ],
+      "source_refs": [
+        "q-yusuf-36",
+        "q-yusuf-41"
+      ],
+      "caveat": "هذا شاهد للمقارنة، وليس حكماً على منامك أو تنبؤاً بالمستقبل."
+    },
+    {
+      "id": "s-rope",
+      "name": "الحبل",
+      "terms": [
+        "حبل",
+        "حبلا"
+      ],
+      "kind": "specific_witness",
+      "evidence": "ورد حبل واصل من الأرض إلى السماء في خبر تعبير أبي بكر، مع تصويب جزئي لتعبيره.",
+      "possibility": "يُدرس الخبر مع بيان أن بعض التعبير أخطأ؛ لا نعين جزء الصواب بلا دليل ولا نسقطه على حلمك.",
+      "questions": [
+        "هل كان الحبل واصلاً أم مقطوعاً، وما دورك؟"
+      ],
+      "source_refs": [
+        "h-bukhari-7046"
+      ],
+      "caveat": "هذا شاهد للمقارنة، وليس حكماً على منامك أو تنبؤاً بالمستقبل."
+    },
+    {
+      "id": "s-honey",
+      "name": "العسل والسمن",
+      "terms": [
+        "عسل",
+        "عسلا",
+        "سمن",
+        "سمنا"
+      ],
+      "kind": "specific_witness",
+      "evidence": "وردا في خبر الظلة التي عبّرها أبو بكر، ثم أخبره النبي ﷺ بصواب بعض التعبير وخطأ بعضه.",
+      "possibility": "الشاهد يعلّم التواضع في التعبير؛ لا نستخرج منه وعد شفاء أو مال.",
+      "questions": [
+        "هل لهما صلة بطعام أو خبر أو ذكرى قريبة؟"
+      ],
+      "source_refs": [
+        "h-bukhari-7046"
+      ],
+      "caveat": "هذا شاهد للمقارنة، وليس حكماً على منامك أو تنبؤاً بالمستقبل."
+    },
+    {
+      "id": "s-hajj",
+      "name": "الحرم والحج",
+      "terms": [
+        "حج",
+        "حرم",
+        "كعبه",
+        "عمره",
+        "مكه"
+      ],
+      "kind": "quran_story",
+      "evidence": "ذكرت سورة الفتح صدق رؤيا الرسول ﷺ في دخول المسجد الحرام.",
+      "possibility": "خصوصية الرؤيا النبوية لا تعني ضمان السفر أو الحج لمن يرى الحرم.",
+      "questions": [
+        "هل تفكر في زيارة الحرم أو تتابع محتوى عنه؟"
+      ],
+      "source_refs": [
+        "q-fath-27",
+        "h-muslim-2263"
+      ],
+      "caveat": "هذا شاهد للمقارنة، وليس حكماً على منامك أو تنبؤاً بالمستقبل."
+    },
+    {
+      "id": "s-teeth",
+      "name": "الأسنان",
+      "terms": [
+        "سن",
+        "اسنان",
+        "سني",
+        "ضرس",
+        "اضراس",
+        "اسناني"
+      ],
+      "kind": "no_direct_evidence",
+      "evidence": "لا يوجد في النواة الموثقة هنا دليل خاص يجعل سقوط السن وفاة قريب. لا ننقل هذا الربط الشائع كحقيقة.",
+      "possibility": "المتاح هنا سؤال السياق وحديث النفس المحتمل؛ لا تتوافر حجة خاصة لتعيين تأويل لهذا الرمز.",
+      "questions": [
+        "هل سبقت المنام زيارة أسنان أو قلق أو إحساس جسدي؟"
+      ],
+      "source_refs": [
+        "q-isra-36",
+        "h-muslim-2263"
+      ],
+      "caveat": "هذا شاهد للمقارنة، وليس حكماً على منامك أو تنبؤاً بالمستقبل."
+    },
+    {
+      "id": "s-snake",
+      "name": "الحية والثعبان",
+      "terms": [
+        "حيه",
+        "ثعبان",
+        "افعي",
+        "ثعابين"
+      ],
+      "kind": "no_direct_evidence",
+      "evidence": "لا يوجد في النواة هنا دليل خاص يحدد شخصاً عدواً أو ساحراً من رؤية ثعبان.",
+      "possibility": "المتاح هنا سؤال السياق وحديث النفس المحتمل؛ لا تتوافر حجة خاصة لتعيين تأويل لهذا الرمز.",
+      "questions": [
+        "ما الذي حدث في المشهد، وهل رأيت شيئاً شبيهاً مؤخراً؟"
+      ],
+      "source_refs": [
+        "q-isra-36",
+        "h-muslim-2263"
+      ],
+      "caveat": "هذا شاهد للمقارنة، وليس حكماً على منامك أو تنبؤاً بالمستقبل."
+    },
+    {
+      "id": "s-water",
+      "name": "الماء",
+      "terms": [
+        "ماء",
+        "مياه",
+        "ماي"
+      ],
+      "kind": "no_direct_evidence",
+      "evidence": "ذكر الماء في القرآن لا يثبت وحده معنى له في المنام؛ لم تُعتمد هنا دلالة خاصة ثابتة للماء.",
+      "possibility": "المتاح هنا سؤال السياق وحديث النفس المحتمل؛ لا تتوافر حجة خاصة لتعيين تأويل لهذا الرمز.",
+      "questions": [
+        "هل كان الماء للشرب أو الغسل أو غير ذلك، وهل له صلة بيومك؟"
+      ],
+      "source_refs": [
+        "q-isra-36",
+        "h-muslim-2263"
+      ],
+      "caveat": "هذا شاهد للمقارنة، وليس حكماً على منامك أو تنبؤاً بالمستقبل."
+    },
+    {
+      "id": "s-sea",
+      "name": "البحر",
+      "terms": [
+        "بحر",
+        "بحرا",
+        "موج",
+        "غرق"
+      ],
+      "kind": "no_direct_evidence",
+      "evidence": "لم تُعتمد في النواة دلالة خاصة ثابتة للبحر؛ لا يُستنتج خطر واقعي من صورة الغرق.",
+      "possibility": "المتاح هنا سؤال السياق وحديث النفس المحتمل؛ لا تتوافر حجة خاصة لتعيين تأويل لهذا الرمز.",
+      "questions": [
+        "هل كان شعورك راحة أم خوفاً، وهل ترتبط بالبحر في حياتك؟"
+      ],
+      "source_refs": [
+        "q-isra-36",
+        "h-muslim-2263"
+      ],
+      "caveat": "هذا شاهد للمقارنة، وليس حكماً على منامك أو تنبؤاً بالمستقبل."
+    },
+    {
+      "id": "s-flight",
+      "name": "الطيران والسقوط",
+      "terms": [
+        "طيران",
+        "اطير",
+        "طياره",
+        "سقوط",
+        "اسقط",
+        "سقطت"
+      ],
+      "kind": "no_direct_evidence",
+      "evidence": "لا توجد دلالة شرعية عامة معتمدة هنا تحدد مستقبلاً من الطيران أو السقوط.",
+      "possibility": "المتاح هنا سؤال السياق وحديث النفس المحتمل؛ لا تتوافر حجة خاصة لتعيين تأويل لهذا الرمز.",
+      "questions": [
+        "هل سبق المشهد انشغال بسفر أو ارتفاع أو موقف مشابه؟"
+      ],
+      "source_refs": [
+        "q-isra-36",
+        "h-muslim-2263"
+      ],
+      "caveat": "هذا شاهد للمقارنة، وليس حكماً على منامك أو تنبؤاً بالمستقبل."
+    },
+    {
+      "id": "s-marriage",
+      "name": "الزواج",
+      "terms": [
+        "زواج",
+        "زفاف",
+        "عرس",
+        "عريس",
+        "عروس",
+        "خطوبه",
+        "اتزوج"
+      ],
+      "kind": "no_direct_evidence",
+      "evidence": "المنام ليس قرار قبول أو رفض في الزواج، ولا موعداً لحدوثه؛ يراجع الواقع والمشاورة.",
+      "possibility": "المتاح هنا سؤال السياق وحديث النفس المحتمل؛ لا تتوافر حجة خاصة لتعيين تأويل لهذا الرمز.",
+      "questions": [
+        "هل يشغل موضوع الزواج تفكيرك في اليقظة؟"
+      ],
+      "source_refs": [
+        "f-istikhara",
+        "h-muslim-2263"
+      ],
+      "caveat": "هذا شاهد للمقارنة، وليس حكماً على منامك أو تنبؤاً بالمستقبل."
+    },
+    {
+      "id": "s-death",
+      "name": "الموت والميت",
+      "terms": [
+        "موت",
+        "ميت",
+        "توفي",
+        "وفاه",
+        "جنازه",
+        "اموت",
+        "مات"
+      ],
+      "kind": "no_direct_evidence",
+      "evidence": "رؤية الموت لا تثبت اقتراب الأجل أو مصير المتوفى؛ لا تستخرج المنصة موعداً أو شهادة أخروية.",
+      "possibility": "المتاح هنا سؤال السياق وحديث النفس المحتمل؛ لا تتوافر حجة خاصة لتعيين تأويل لهذا الرمز.",
+      "questions": [
+        "هل ترتبط الصورة بفقد أو ذكرى أو خبر قريب؟"
+      ],
+      "source_refs": [
+        "f-afterlife",
+        "q-isra-36"
+      ],
+      "caveat": "هذا شاهد للمقارنة، وليس حكماً على منامك أو تنبؤاً بالمستقبل."
+    },
+    {
+      "id": "s-school",
+      "name": "المدرسة والامتحان",
+      "terms": [
+        "مدرسه",
+        "امتحان",
+        "اختبار",
+        "درسه",
+        "جامعه"
+      ],
+      "kind": "no_direct_evidence",
+      "evidence": "هذه مفردات سياقية؛ لا يوجد في النواة شاهد خاص يثبت بها نجاحاً أو فشلاً مستقبلياً.",
+      "possibility": "المتاح هنا سؤال السياق وحديث النفس المحتمل؛ لا تتوافر حجة خاصة لتعيين تأويل لهذا الرمز.",
+      "questions": [
+        "هل لديك اختبار أو مسؤولية أو تقييم يشغلك؟"
+      ],
+      "source_refs": [
+        "q-isra-36",
+        "h-muslim-2263"
+      ],
+      "caveat": "هذا شاهد للمقارنة، وليس حكماً على منامك أو تنبؤاً بالمستقبل."
+    },
+    {
+      "id": "s-key",
+      "name": "المفتاح والباب",
+      "terms": [
+        "مفتاح",
+        "مفاتيح",
+        "باب",
+        "ابواب"
+      ],
+      "kind": "no_direct_evidence",
+      "evidence": "لا يُحوَّل تشابه لفظ الفتح إلى وعد بوظيفة أو زواج أو مال؛ يحتاج المعنى إلى قرائن.",
+      "possibility": "المتاح هنا سؤال السياق وحديث النفس المحتمل؛ لا تتوافر حجة خاصة لتعيين تأويل لهذا الرمز.",
+      "questions": [
+        "ما وظيفة الباب أو المفتاح في قصتك؟"
+      ],
+      "source_refs": [
+        "q-isra-36",
+        "h-muslim-2263"
+      ],
+      "caveat": "هذا شاهد للمقارنة، وليس حكماً على منامك أو تنبؤاً بالمستقبل."
+    },
+    {
+      "id": "s-fire",
+      "name": "النار",
+      "terms": [
+        "نار",
+        "حريق",
+        "حرق",
+        "احترق"
+      ],
+      "kind": "no_direct_evidence",
+      "evidence": "لا نحكم بعقوبة أو بذنب شخص من صورة النار؛ عند الفزع تُقدَّم آداب المنام المكروه.",
+      "possibility": "المتاح هنا سؤال السياق وحديث النفس المحتمل؛ لا تتوافر حجة خاصة لتعيين تأويل لهذا الرمز.",
+      "questions": [
+        "هل ترك المنام فزعاً، أم كان جزءاً من مشهد مألوف؟"
+      ],
+      "source_refs": [
+        "q-isra-36",
+        "h-muslim-2263"
+      ],
+      "caveat": "هذا شاهد للمقارنة، وليس حكماً على منامك أو تنبؤاً بالمستقبل."
+    },
+    {
+      "id": "s-phone",
+      "name": "الهاتف والرسائل",
+      "terms": [
+        "هاتف",
+        "تلفون",
+        "جوال",
+        "موبايل",
+        "رساله",
+        "واتساب"
+      ],
+      "kind": "no_direct_evidence",
+      "evidence": "رمز معاصر يُفهم من استعمالك ومشاعرك؛ لا يُنسب له تأويل قديم مختلق.",
+      "possibility": "المتاح هنا سؤال السياق وحديث النفس المحتمل؛ لا تتوافر حجة خاصة لتعيين تأويل لهذا الرمز.",
+      "questions": [
+        "هل تنتظر رسالة أو اتصالاً في الواقع؟"
+      ],
+      "source_refs": [
+        "q-isra-36",
+        "h-muslim-2263"
+      ],
+      "caveat": "هذا شاهد للمقارنة، وليس حكماً على منامك أو تنبؤاً بالمستقبل."
+    },
+    {
+      "id": "s-money",
+      "name": "النقود",
+      "terms": [
+        "فلوس",
+        "مال",
+        "نقود",
+        "دينار",
+        "دنانير",
+        "اموال"
+      ],
+      "kind": "no_direct_evidence",
+      "evidence": "لم تُعتمد دلالة خاصة هنا؛ لا تقدم المنصة توصية استثمار أو توقع ربح من منام.",
+      "possibility": "المتاح هنا سؤال السياق وحديث النفس المحتمل؛ لا تتوافر حجة خاصة لتعيين تأويل لهذا الرمز.",
+      "questions": [
+        "هل لديك التزام أو قرار مالي يشغل تفكيرك؟"
+      ],
+      "source_refs": [
+        "q-isra-36",
+        "h-muslim-2263"
+      ],
+      "caveat": "هذا شاهد للمقارنة، وليس حكماً على منامك أو تنبؤاً بالمستقبل."
+    },
+    {
+      "id": "s-car",
+      "name": "السيارة والطريق",
+      "terms": [
+        "سياره",
+        "قياده",
+        "طريق",
+        "شوارع"
+      ],
+      "kind": "no_direct_evidence",
+      "evidence": "رموز معاصرة لا تُلصق بكتاب قديم؛ لا يثبت منها حادث أو سفر قريب.",
+      "possibility": "المتاح هنا سؤال السياق وحديث النفس المحتمل؛ لا تتوافر حجة خاصة لتعيين تأويل لهذا الرمز.",
+      "questions": [
+        "هل ترتبط بمشوار أو سفر أو مسؤولية يومية؟"
+      ],
+      "source_refs": [
+        "q-isra-36",
+        "h-muslim-2263"
+      ],
+      "caveat": "هذا شاهد للمقارنة، وليس حكماً على منامك أو تنبؤاً بالمستقبل."
+    },
+    {
+      "id": "s-rain",
+      "name": "المطر",
+      "terms": [
+        "مطر",
+        "غيث",
+        "يمطر"
+      ],
+      "kind": "no_direct_evidence",
+      "evidence": "لا نُعمم عام الغيث في قصة يوسف على كل حلم بالمطر؛ السياق مختلف.",
+      "possibility": "المتاح هنا سؤال السياق وحديث النفس المحتمل؛ لا تتوافر حجة خاصة لتعيين تأويل لهذا الرمز.",
+      "questions": [
+        "هل تابعت الطقس أو شهدت مطراً أو اشتقت إليه؟"
+      ],
+      "source_refs": [
+        "q-isra-36",
+        "h-muslim-2263"
+      ],
+      "caveat": "هذا شاهد للمقارنة، وليس حكماً على منامك أو تنبؤاً بالمستقبل."
+    },
+    {
+      "id": "s-child",
+      "name": "الطفل والحمل",
+      "terms": [
+        "طفل",
+        "رضيع",
+        "حمل",
+        "حامل",
+        "ولاده"
+      ],
+      "kind": "no_direct_evidence",
+      "evidence": "لا يثبت المنام وجود حمل أو جنس جنين، ولا يغني عن الفحص عند الحاجة.",
+      "possibility": "المتاح هنا سؤال السياق وحديث النفس المحتمل؛ لا تتوافر حجة خاصة لتعيين تأويل لهذا الرمز.",
+      "questions": [
+        "هل تفكر في أسرة أو رعاية أو خبر متعلق بطفل؟"
+      ],
+      "source_refs": [
+        "q-isra-36",
+        "h-muslim-2263"
+      ],
+      "caveat": "هذا شاهد للمقارنة، وليس حكماً على منامك أو تنبؤاً بالمستقبل."
+    }
+  ],
+  "historical_mentions": [
+    {
+      "id": "m-01",
+      "title": "الأصول",
+      "attribution": "منسوب في المقدمة إلى دانيال",
+      "source_ref": "b-ibnshahin",
+      "locator": "مقدمة الإشارات، قائمة المصادر",
+      "status": "mentioned_only",
+      "use": "excluded",
+      "caveat": "إحالة تاريخية فقط؛ لم نحصل على النسخة ولم نتحقق من نسبتها أو مضمونها."
+    },
+    {
+      "id": "m-02",
+      "title": "التقسيم",
+      "attribution": "منسوب في المقدمة إلى جعفر الصادق",
+      "source_ref": "b-ibnshahin",
+      "locator": "مقدمة الإشارات، قائمة المصادر",
+      "status": "mentioned_only",
+      "use": "excluded",
+      "caveat": "إحالة تاريخية فقط؛ لم نحصل على النسخة ولم نتحقق من نسبتها أو مضمونها."
+    },
+    {
+      "id": "m-03",
+      "title": "الجوامع",
+      "attribution": "منسوب في المقدمة إلى محمد بن سيرين",
+      "source_ref": "b-ibnshahin",
+      "locator": "مقدمة الإشارات، قائمة المصادر",
+      "status": "mentioned_only",
+      "use": "excluded",
+      "caveat": "إحالة تاريخية فقط؛ لم نحصل على النسخة ولم نتحقق من نسبتها أو مضمونها."
+    },
+    {
+      "id": "m-04",
+      "title": "الدستور",
+      "attribution": "إبراهيم الكرماني بحسب المقدمة",
+      "source_ref": "b-ibnshahin",
+      "locator": "مقدمة الإشارات، قائمة المصادر",
+      "status": "mentioned_only",
+      "use": "excluded",
+      "caveat": "إحالة تاريخية فقط؛ لم نحصل على النسخة ولم نتحقق من نسبتها أو مضمونها."
+    },
+    {
+      "id": "m-05",
+      "title": "الإرشاد",
+      "attribution": "جابر المغربي بحسب المقدمة",
+      "source_ref": "b-ibnshahin",
+      "locator": "مقدمة الإشارات، قائمة المصادر",
+      "status": "mentioned_only",
+      "use": "excluded",
+      "caveat": "إحالة تاريخية فقط؛ لم نحصل على النسخة ولم نتحقق من نسبتها أو مضمونها."
+    },
+    {
+      "id": "m-06",
+      "title": "التعبير",
+      "attribution": "إسماعيل بن الأشعث بحسب المقدمة",
+      "source_ref": "b-ibnshahin",
+      "locator": "مقدمة الإشارات، قائمة المصادر",
+      "status": "mentioned_only",
+      "use": "excluded",
+      "caveat": "إحالة تاريخية فقط؛ لم نحصل على النسخة ولم نتحقق من نسبتها أو مضمونها."
+    },
+    {
+      "id": "m-07",
+      "title": "كنز الرؤيا",
+      "attribution": "المأموني بحسب المقدمة",
+      "source_ref": "b-ibnshahin",
+      "locator": "مقدمة الإشارات، قائمة المصادر",
+      "status": "mentioned_only",
+      "use": "excluded",
+      "caveat": "إحالة تاريخية فقط؛ لم نحصل على النسخة ولم نتحقق من نسبتها أو مضمونها."
+    },
+    {
+      "id": "m-08",
+      "title": "بيان التعبير",
+      "attribution": "عبدوس بحسب المقدمة",
+      "source_ref": "b-ibnshahin",
+      "locator": "مقدمة الإشارات، قائمة المصادر",
+      "status": "mentioned_only",
+      "use": "excluded",
+      "caveat": "إحالة تاريخية فقط؛ لم نحصل على النسخة ولم نتحقق من نسبتها أو مضمونها."
+    },
+    {
+      "id": "m-09",
+      "title": "جمل الدلائل",
+      "attribution": "لم يُحسم مؤلفه هنا",
+      "source_ref": "b-ibnshahin",
+      "locator": "مقدمة الإشارات، قائمة المصادر",
+      "status": "mentioned_only",
+      "use": "excluded",
+      "caveat": "إحالة تاريخية فقط؛ لم نحصل على النسخة ولم نتحقق من نسبتها أو مضمونها."
+    },
+    {
+      "id": "m-10",
+      "title": "مبادئ التعبير",
+      "attribution": "لم يُحسم مؤلفه هنا",
+      "source_ref": "b-ibnshahin",
+      "locator": "مقدمة الإشارات، قائمة المصادر",
+      "status": "mentioned_only",
+      "use": "excluded",
+      "caveat": "إحالة تاريخية فقط؛ لم نحصل على النسخة ولم نتحقق من نسبتها أو مضمونها."
+    },
+    {
+      "id": "m-11",
+      "title": "كافي الرؤيا",
+      "attribution": "لم يُحسم مؤلفه هنا",
+      "source_ref": "b-ibnshahin",
+      "locator": "مقدمة الإشارات، قائمة المصادر",
+      "status": "mentioned_only",
+      "use": "excluded",
+      "caveat": "إحالة تاريخية فقط؛ لم نحصل على النسخة ولم نتحقق من نسبتها أو مضمونها."
+    },
+    {
+      "id": "m-12",
+      "title": "منهاج التعبير",
+      "attribution": "خالد الأصفهاني بحسب المقدمة",
+      "source_ref": "b-ibnshahin",
+      "locator": "مقدمة الإشارات، قائمة المصادر",
+      "status": "mentioned_only",
+      "use": "excluded",
+      "caveat": "إحالة تاريخية فقط؛ لم نحصل على النسخة ولم نتحقق من نسبتها أو مضمونها."
+    },
+    {
+      "id": "m-13",
+      "title": "حقائق الرؤيا",
+      "attribution": "لم يُحسم مؤلفه هنا",
+      "source_ref": "b-ibnshahin",
+      "locator": "مقدمة الإشارات، قائمة المصادر",
+      "status": "mentioned_only",
+      "use": "excluded",
+      "caveat": "إحالة تاريخية فقط؛ لم نحصل على النسخة ولم نتحقق من نسبتها أو مضمونها."
+    },
+    {
+      "id": "m-14",
+      "title": "الوجيز",
+      "attribution": "محمد بن شامويه بحسب المقدمة",
+      "source_ref": "b-ibnshahin",
+      "locator": "مقدمة الإشارات، قائمة المصادر",
+      "status": "mentioned_only",
+      "use": "excluded",
+      "caveat": "إحالة تاريخية فقط؛ لم نحصل على النسخة ولم نتحقق من نسبتها أو مضمونها."
+    },
+    {
+      "id": "m-15",
+      "title": "التعبير",
+      "attribution": "أبو سعيد الواعظ بحسب المقدمة",
+      "source_ref": "b-ibnshahin",
+      "locator": "مقدمة الإشارات، قائمة المصادر",
+      "status": "mentioned_only",
+      "use": "excluded",
+      "caveat": "إحالة تاريخية فقط؛ لم نحصل على النسخة ولم نتحقق من نسبتها أو مضمونها."
+    },
+    {
+      "id": "m-16",
+      "title": "كامل التعبير",
+      "attribution": "حبيش بن إبراهيم بحسب المقدمة",
+      "source_ref": "b-ibnshahin",
+      "locator": "مقدمة الإشارات، قائمة المصادر",
+      "status": "mentioned_only",
+      "use": "excluded",
+      "caveat": "إحالة تاريخية فقط؛ لم نحصل على النسخة ولم نتحقق من نسبتها أو مضمونها."
+    },
+    {
+      "id": "m-17",
+      "title": "الإشارات إلى علم العبارات",
+      "attribution": "أبو عبد الله بن أحمد بن عامر السالمي بحسب المقدمة",
+      "source_ref": "b-ibnshahin",
+      "locator": "مقدمة الإشارات، قائمة المصادر",
+      "status": "mentioned_only",
+      "use": "excluded",
+      "caveat": "إحالة تاريخية فقط؛ لم نحصل على النسخة ولم نتحقق من نسبتها أو مضمونها."
+    },
+    {
+      "id": "m-18",
+      "title": "الدر المنظم في السر المعظم",
+      "attribution": "محمد القرشي النصيبي بحسب المقدمة",
+      "source_ref": "b-ibnshahin",
+      "locator": "مقدمة الإشارات، قائمة المصادر",
+      "status": "mentioned_only",
+      "use": "excluded",
+      "caveat": "إحالة تاريخية فقط؛ لم نحصل على النسخة ولم نتحقق من نسبتها أو مضمونها."
+    }
+  ],
+  "visual_library": {
+    "title": "أصول القراءة",
+    "subtitle": "الفكرة والشاهد وحدود الاستدلال",
+    "author": "تحرير منصة رؤيا",
+    "language": "ar",
+    "expected_count": 3,
+    "sources": [
+      {
+        "id": "q-isra-36",
+        "title": "عدم القول بغير علم",
+        "locator": "17:36",
+        "url": "https://quran.com/17/36",
+        "reviewed": true,
+        "rights": "public-domain"
+      },
+      {
+        "id": "h-muslim-2263",
+        "title": "أقسام الرؤيا وحديث النفس",
+        "locator": "مسلم 2263 أ",
+        "url": "https://sunnah.com/muslim:2263a",
+        "reviewed": true,
+        "rights": "paraphrase"
+      },
+      {
+        "id": "h-bukhari-6985",
+        "title": "حمد الله على الرؤيا المحبوبة",
+        "locator": "البخاري 6985",
+        "url": "https://sunnah.com/bukhari:6985",
+        "reviewed": true,
+        "rights": "paraphrase"
+      },
+      {
+        "id": "h-bukhari-7046",
+        "title": "المعبّر يصيب ويخطئ",
+        "locator": "البخاري 7046",
+        "url": "https://sunnah.com/bukhari:7046",
+        "reviewed": true,
+        "rights": "paraphrase"
+      },
+      {
+        "id": "h-muslim-2262",
+        "title": "التحول عن الجنب عند الحلم المكروه",
+        "locator": "مسلم 2262",
+        "url": "https://sunnah.com/muslim:2262",
+        "reviewed": true,
+        "rights": "paraphrase"
+      },
+      {
+        "id": "f-darifta",
+        "title": "أصول تعبير الرؤى المنامية",
+        "locator": "دار الإفتاء المصرية — فتوى 13821",
+        "url": "https://www.dar-alifta.org/ar/fatwa/details/13821/أصول-تعبير-الرؤى-المنامية",
+        "reviewed": true,
+        "rights": "paraphrase"
+      }
+    ],
+    "cards": [
+      {
+        "id": "map-method",
+        "category": "المنهج",
+        "title": "من المنام إلى قراءة مسؤولة",
+        "summary": "سلسلة عمل أصلية تربط وصف المنام بالقرائن وحدود الاستدلال.",
+        "layout": "steps",
+        "reviewed": true,
+        "items": [
+          {
+            "label": "الوصف",
+            "body": "ما تتذكره دون أسماء حساسة أو إضافة تفاصيل."
+          },
+          {
+            "label": "السياق",
+            "body": "الشعور وصلة المنام بانشغال اليقظة."
+          },
+          {
+            "label": "الشاهد",
+            "body": "موضع النص ونوع الصلة وحدودها."
+          },
+          {
+            "label": "القراءة",
+            "body": "وجه محتمل أو تصريح بعدم كفاية الدليل."
+          }
+        ],
+        "action": "افصل في قراءتك بين النص الثابت واجتهاد تنزيله على حالتك.",
+        "source_refs": [
+          "h-muslim-2263",
+          "h-bukhari-7046",
+          "q-isra-36"
+        ]
+      },
+      {
+        "id": "map-levels",
+        "category": "المصادر",
+        "title": "ثبوت النص غير صحة التنزيل",
+        "summary": "خريطة توضح اختلاف وظائف الأصل والشرح والاجتهاد.",
+        "layout": "pyramid",
+        "reviewed": true,
+        "items": [
+          {
+            "label": "أصل شرعي",
+            "body": "قرآن أو حديث ثابت في موضعه."
+          },
+          {
+            "label": "شرح وفهم",
+            "body": "تفسير وشروح تبيّن السياق."
+          },
+          {
+            "label": "اجتهاد تعبيري",
+            "body": "نقول بشرية تحتاج نقداً وقرائن."
+          },
+          {
+            "label": "تنزيل على الرائي",
+            "body": "أكثر المراحل حاجة للتثبت؛ لا يُستنتج آلياً من الرمز."
+          }
+        ],
+        "action": "افتح إحالة النتيجة وتحقق هل تدعم المعنى أم تقدم أصلاً عاماً فقط.",
+        "source_refs": [
+          "f-darifta",
+          "h-bukhari-7046"
+        ]
+      },
+      {
+        "id": "map-nightmare",
+        "category": "الآداب",
+        "title": "عند المنام المكروه",
+        "summary": "تذكير موجز بالتوجيهات الواردة؛ راجع الأصل لكل توجيه.",
+        "layout": "steps",
+        "reviewed": true,
+        "items": [
+          {
+            "label": "استعذ بالله",
+            "body": "من الشيطان ومن شر ما رأيت."
+          },
+          {
+            "label": "انفث يساراً",
+            "body": "ثلاثاً، كما ورد في الحديث."
+          },
+          {
+            "label": "غيّر الجنب",
+            "body": "تحوّل عن الجنب الذي كنت عليه."
+          },
+          {
+            "label": "لا تنشره",
+            "body": "ورد كذلك القيام للصلاة."
+          }
+        ],
+        "action": "قدّم آداب التعامل مع المكروه على البحث عن معنى مخيف.",
+        "source_refs": [
+          "h-muslim-2262",
+          "h-muslim-2263",
+          "h-bukhari-6985"
+        ]
+      }
+    ]
+  }
+}
