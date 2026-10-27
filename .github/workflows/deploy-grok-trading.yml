@@ -1,0 +1,74 @@
+name: Deploy Grok Live Dashboard
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'grok-trading/**'
+      - '.github/workflows/deploy-grok-trading.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages-v2
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate Grok entrypoint and inline JavaScript
+        run: |
+          test -s grok-trading/index.html
+          python - <<'PY'
+          from pathlib import Path
+          page = Path('grok-trading/index.html').read_text()
+          assert page.count('<script>') == 1 and page.count('</script>') == 1
+          assert 'data-stream.binance.vision' in page
+          assert 'data-api.binance.vision' in page
+          assert "grok_live_decisions.csv" in page
+          PY
+          sed -n '/<script>/,/<\/script>/p' grok-trading/index.html | sed '1d;$d' > /tmp/grok-live.js
+          node --check /tmp/grok-live.js
+      - uses: actions/configure-pages@v5
+      - name: Restore deployed sites and overlay Grok only
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python grok-trading/deployment/preserve.py
+      - name: Verify Grok page staged
+        run: |
+          test -s _site/index.html
+          test -s _site/grok-trading/index.html
+          test -s _site/barcode/index.html
+          touch _site/.nojekyll
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+          retention-days: 30
+      - name: Deploy
+        id: deploy
+        uses: actions/deploy-pages@v4
+      - name: Verify live URL
+        run: |
+          set -euo pipefail
+          url="https://q8-ux.github.io/saad/grok-trading/?build=${GITHUB_RUN_ID}"
+          for attempt in 1 2 3 4 5 6; do
+            content="$(curl --location --silent --show-error --max-time 15 "$url" || true)"
+            if printf '%s' "$content" | grep -q 'GROK LIVE'; then
+              echo "Grok Live available: $url" >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "::error::Grok Live still unavailable from Pages"
+          exit 1
