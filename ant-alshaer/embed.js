@@ -18,6 +18,7 @@
   let audioBytes = 0;
   let recordingStartedAt = 0;
   let stoppedForSize = false;
+  let loadingTimeout = null;
 
   if (!(frame instanceof HTMLIFrameElement)) return;
 
@@ -142,6 +143,12 @@
   };
 
   const loadApp = (appPath = route) => {
+    window.clearTimeout(loadingTimeout);
+    if (loader instanceof HTMLElement) {
+      loader.hidden = false;
+      loader.classList.remove("is-slow");
+      loadingTimeout = window.setTimeout(() => loader.classList.add("is-slow"), 7000);
+    }
     const target = new URL(appPath, appOrigin);
     target.search = window.location.search;
     target.hash = window.location.hash;
@@ -196,6 +203,8 @@
   };
 
   frame.addEventListener("load", () => {
+    if (frame.src === "about:blank") return;
+    window.clearTimeout(loadingTimeout);
     if (loader instanceof HTMLElement) loader.hidden = true;
   });
 
@@ -206,7 +215,7 @@
     }
     stopParentRecording();
     frame.src = "about:blank";
-    window.setTimeout(loadApp, 60);
+    window.setTimeout(() => loadApp(routeForGitHubPath(window.location.pathname) || route), 60);
   });
 
   window.addEventListener("message", (event) => {
@@ -231,6 +240,5 @@
     stopTracks();
   });
 
-  window.setTimeout(() => loader?.classList.add("is-slow"), 7000);
   loadApp(recoverRedirectedRoute());
 })();
