@@ -1,13 +1,13 @@
 {
-  "release": "2026-10-28-visible-assistant-memo-action",
-  "clientSource": "fc32951d3d8c9918fb276658940f7e4a144f83c8",
-  "backendSource": "fc32951d3d8c9918fb276658940f7e4a144f83c8",
+  "release": "2026-10-28-analysis-first-intake",
+  "clientSource": "718e3c0214f90c6f53a84f4993209309367436ac",
+  "backendSource": "718e3c0214f90c6f53a84f4993209309367436ac",
   "assistant": "indirect-intake-completeness-1",
   "voice": "gulf-male-voice-4",
   "tools": "legal-tools-1",
   "voiceIndicator": "red-wave-estimated-countdown-1",
   "addressFont": "mohanad-900",
-  "memoHandoff": "requires-essential-facts-and-explicit-review",
+  "memoHandoff": "analysis-ready-preparation-with-complete-form-review-gate",
   "voiceRecording": "manual-finish-no-silence-cutoff-1",
   "memoVoice": "reviewed-dictation-fields-1",
   "requirements": "SABEQ_MASTER_REQUIREMENTS.md",
@@ -21,7 +21,7 @@
   "finalMemo": "clean-no-review-notes-1",
   "memoResultTools": "bottom-vector-actions-1",
   "memoPreview": "document-derived-clean-text-1",
-  "githubPagesAsset": "index-o1c_DHwd.js",
+  "githubPagesAsset": "index-C7yw0277.js",
   "memoLanguage": "ar-KW",
   "memoDirection": "rtl",
   "memoAlignment": "right",
@@ -135,5 +135,7 @@
   "paymentValidation": "24-payment-tests;one-dinar-new-invoice-saved-fee-and-existing-invoice-preserved;no-live-charge",
   "liveIntakeCheck": "v152-synthetic-pending-defendant-missing-name-single-question-transfer-blocked",
   "assistantMemoAction": "always-visible-disabled-with-next-factual-gap-until-reviewed",
-  "assistantMemoActionValidation": "24-targeted-tests;224-internal-checks;both-builds-pass;live-generation-not-tested"
+  "assistantMemoActionValidation": "24-targeted-tests;224-internal-checks;both-builds-pass;live-generation-not-tested",
+  "assistantConversation": "analysis-first-one-essential-question-form-details-deferred",
+  "assistantConversationValidation": "76-focused-tests;227-internal-checks;worker-and-pages-builds;live-synthetic-test-pending"
 }

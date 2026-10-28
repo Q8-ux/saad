@@ -60,6 +60,14 @@ export function memoIntakeGaps(state: IntakeForMemo, language = "ar"): MemoGap[]
   for (const [prefix, values] of [["missing", state.missingInformation], ["jurisdiction", state.jurisdictionMissing], ["document", state.documentsNeeded]] as const) for (const [index, value] of (values || []).entries()) if (value.trim()) add(`${prefix}.${index}`, `ما التفاصيل المتاحة لديك بشأن: ${value.replace(/[؟?]+$/g, "")}؟`, `What details do you have about: ${value.replace(/[؟?]+$/g, "")}?`, `اس بارے میں کیا تفصیل ہے: ${value.replace(/[؟?]+$/g, "")}؟`);
   return gaps;
 }
+// Conversation essentials differ from fields required on the final court form.
+export function memoConversationGaps(state: IntakeForMemo, language = "ar"): MemoGap[] {
+  const essential = new Set(["procedure.stage", "procedure.conflict", "procedure.actor", "client.role", "facts", "relief", "matter.relationship", "memo.judgmentOperative"]);
+  return memoIntakeGaps(state, language).filter(gap => essential.has(gap.key));
+}
+export function canPrepareMemoHandoff(state: IntakeForMemo, messages: ConversationMessage[]) {
+  return messages.some(message => message.role === "user") && !memoConversationGaps(state).length && conversationTranscript(messages).length <= 30000;
+}
 export function canOfferMemoHandoff(state: IntakeForMemo, messages?: ConversationMessage[]) {
   return state.readyForMemo === true && !memoIntakeGaps(state).length && (!messages || conversationTranscript(messages).length <= 30000);
 }

@@ -147,7 +147,8 @@ export async function POST(request: Request) {
       generationMs = analysis.stage.durationMs || 0;
       const review = begin("source_review");
       const sourceReviewed = reviewIntakeAnalysis(applyProceduralPosition(state,scopeFacts), evidence, lookupFailed, language);
-      const reviewed = applyIntakeReadiness(guardMatterIntake(sourceReviewed,scopeFacts,readQuestionMemory(data.currentState),language),readQuestionMemory(data.currentState),language);
+      const analysisMessage = sourceReviewed.assistantMessage;
+      const reviewed = applyIntakeReadiness(guardMatterIntake(sourceReviewed,scopeFacts,readQuestionMemory(data.currentState),language),readQuestionMemory(data.currentState),language,analysisMessage);
       end(review, reviewed.legalBasis.length ? "completed" : "limited");
       stages.push({ id: "human_review", status: "pending", startedAt: null, finishedAt: null, durationMs: null });
       const sourceCoverage = legalSourceCoverage(evidence, lookupFailed);

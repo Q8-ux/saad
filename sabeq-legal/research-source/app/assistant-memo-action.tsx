@@ -1,6 +1,6 @@
 import { FileText, ShieldCheck } from "lucide-react";
 import type { LegalIntakeState } from "@/lib/openai";
-import { buildMemoHandoff, canOfferMemoHandoff, conversationTranscript, memoApprovalNotice, memoIntakeGaps, type ConversationMessage, type MemoPrefill } from "@/lib/memo-handoff";
+import { buildMemoHandoff, canPrepareMemoHandoff, conversationTranscript, memoApprovalNotice, memoConversationGaps, type ConversationMessage, type MemoPrefill } from "@/lib/memo-handoff";
 
 export function AssistantMemoAction({ language, intake, messages, busy, onContinue }: {
   language: "ar" | "en" | "ur";
@@ -9,7 +9,7 @@ export function AssistantMemoAction({ language, intake, messages, busy, onContin
   busy: boolean;
   onContinue: (data: MemoPrefill) => void;
 }) {
-  const ready = !!intake && canOfferMemoHandoff(intake, messages);
+  const ready = !!intake && canPrepareMemoHandoff(intake, messages);
   const label = language === "en" ? "Generate memorandum" : language === "ur" ? "یادداشت تیار کریں" : "توليد المذكرة";
   const status = busy
     ? (language === "en" ? "Wait for the current response to finish." : language === "ur" ? "موجودہ جواب مکمل ہونے کا انتظار کریں۔" : "انتظر اكتمال الرد الحالي.")
@@ -18,7 +18,7 @@ export function AssistantMemoAction({ language, intake, messages, busy, onContin
       : conversationTranscript(messages).length > 30000
         ? (language === "en" ? "Export the conversation and shorten it to 30,000 characters before transfer." : language === "ur" ? "منتقلی سے پہلے گفتگو برآمد کریں اور اسے 30,000 حروف تک مختصر کریں۔" : "صدّر المحادثة واختصرها إلى 30,000 حرف قبل نقلها للمذكرة.")
         : !ready
-          ? memoIntakeGaps(intake, language)[0]?.question || (language === "en" ? "Continue with the assistant to complete the case review." : language === "ur" ? "مقدمے کا جائزہ مکمل کرنے کے لیے معاون کے ساتھ جاری رکھیں۔" : "تابع مع المساعد لاستكمال مراجعة بيانات القضية.")
+          ? memoConversationGaps(intake, language)[0]?.question || (language === "en" ? "Continue with the assistant to complete the case review." : language === "ur" ? "مقدمے کا جائزہ مکمل کرنے کے لیے معاون کے ساتھ جاری رکھیں۔" : "تابع مع المساعد لاستكمال مراجعة بيانات القضية.")
           : (language === "en" ? "Review the case summary, party role and court. Continue to approve the details before generation." : language === "ur" ? "خلاصہ، فریق کی حیثیت اور عدالت دیکھیں؛ تیاری سے پہلے تفصیلات منظور کرنے کے لیے جاری رکھیں۔" : "راجع ملخص القضية والصفة والمحكمة. بالضغط توافق على نقل البيانات لمراجعتها قبل التوليد.");
   return <div className="memo-consent assistant-memo-action">
     <ShieldCheck size={22} aria-hidden="true" />

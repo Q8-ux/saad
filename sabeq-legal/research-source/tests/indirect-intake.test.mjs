@@ -188,30 +188,26 @@ test('memo packets preserve supplied legal-form fields and reject corrupt or ove
   assert.equal(handoff.isCompleteMemoHandoff(handoff.buildMemoHandoff(state, longMessages)), false);
 });
 
-test('the final readiness guard asks one factual question and never promotes false readiness', () => {
-  const state = initialMatter();
-  state.readyForMemo = false;
+test('administrative omissions do not become an interrogation or falsely complete the form', () => {
+  const state = initialMatter(); state.readyForMemo = false;
   state.memoPrefill.clientName = ''; state.memoPrefill.otherParty = '';
+  state.assistantMessage='فهمت أن الخلاف حول رد مبلغ سلّمته للطرف الآخر. يلزم ترتيب ما يثبت التسليم والمطالبة دون افتراض التزام غير ثابت.';
   const result = readiness().applyIntakeReadiness(state, memory(), 'ar');
-  assert.equal(result.readyForMemo, false);
-  assert.equal(result.nextQuestions.length, 1);
-  assert.match(result.nextQuestions[0], /[؟?]/);
-  assert.doesNotMatch(result.nextQuestions[0], /هل أنت.*مدع|اختر.*محكمة|نوع القضية/);
+  assert.equal(result.readyForMemo, false); assert.equal(result.nextQuestions.length, 0);
+  assert.match(result.assistantMessage,/رد مبلغ/);assert.match(result.assistantMessage,/نموذجها/);
+  assert.equal(handoff.canPrepareMemoHandoff(result,messages),true);
+  assert.equal(handoff.isCompleteMemoHandoff(handoff.buildMemoHandoff(result,messages)),false);
 });
 
-test('an unavailable answer remains a gap while intake moves to a different missing fact', () => {
-  const state = initialMatter();
-  state.memoPrefill.clientName = ''; state.memoPrefill.otherParty = '';
-  const first = handoff.memoIntakeGaps(state)[0];
-  const previous = { asked: [{ key: first.key, text: first.question }], resolved: [], unavailable: [first.key] };
-  state.questionMemory = clone(previous);
-  state.unavailableTopics = [first.key];
-  const result = readiness().applyIntakeReadiness(state, previous, 'ar');
-  assert.equal(result.readyForMemo, false);
-  assert.equal(result.nextQuestions.length, 1);
-  assert.notEqual(result.nextQuestions[0], first.question);
-  assert.ok(handoff.memoIntakeGaps(result).some(gap => gap.key === first.key));
-  assert.equal(handoff.canOfferMemoHandoff(result, messages), false);
+test('an unavailable essential fact is not repeated and the next essential gap is selected', () => {
+  const state = initialMatter(); state.facts=[];state.requests=[];
+  state.memoPrefill.facts='';state.memoPrefill.requests='';
+  const first=handoff.memoConversationGaps(state)[0];
+  const previous={asked:[{key:first.key,text:first.question}],resolved:[],unavailable:[first.key]};
+  const result=readiness().applyIntakeReadiness(state,previous,'ar');
+  assert.equal(result.readyForMemo,false);assert.equal(result.nextQuestions.length,1);
+  assert.notEqual(result.nextQuestions[0],first.question);
+  assert.equal(handoff.canPrepareMemoHandoff(result,messages),false);
 });
 
 test('already asked unresolved facts are not repeated or silently treated as complete', () => {
@@ -251,4 +247,32 @@ test('role labels and visitor placeholders are not the legal names of the partie
   const state=initialMatter();state.memoPrefill.clientName=name;
   assert.equal(handoff.canOfferMemoHandoff(state),false,name);
  }
+});
+
+test('appeal understanding needs the disputed outcome and actor, not every form number', () => {
+ const state=appealMatter();state.readyForMemo=false;
+ for(const field of ['caseNumber','clientAddress','otherAddress','judgmentNumber','judgmentDate','judgmentCircuit','judgmentCourt','notificationDate','appealGrounds','originalRequests','originalGrounds','originalPlaintiff','originalDefendant'])delete state.memoFields[field];
+ state.importantDates=[];state.documentsNeeded=['نسخة إضافية للمراجعة'];state.missingInformation=['عنوان الخصم'];
+ assert.equal(handoff.memoConversationGaps(state).length,0);assert.equal(handoff.canPrepareMemoHandoff(state,messages),true);
+ assert.equal(handoff.isCompleteMemoHandoff(handoff.buildMemoHandoff(state,messages)),false);
+ state.proceduralPosition={conflict:false,needsActor:true};assert.equal(handoff.canPrepareMemoHandoff(state,messages),false);
+ state.proceduralPosition={conflict:true,needsActor:false};assert.equal(handoff.canPrepareMemoHandoff(state,messages),false);
+});
+test('all languages preserve reviewed analysis and ask no more than one genuinely essential question', () => {
+ for(const language of ['ar','en','ur']){
+  const state=initialMatter();state.memoPrefill.requests='';state.requests=[];
+  const analysis={ar:'الخلاف يدور حول رد مبلغ وفق الوقائع التي ذكرتها.',en:'The dispute concerns repayment based on the facts you provided.',ur:'آپ کے بتائے حقائق کے مطابق معاملہ رقم کی واپسی کا ہے۔'}[language];
+  const result=readiness().applyIntakeReadiness(state,memory(),language,analysis);
+  assert.ok(result.assistantMessage.startsWith(analysis));assert.equal(result.nextQuestions.length,1);
+  assert.equal(handoff.canPrepareMemoHandoff(result,messages),false);
+ }
+});
+test('unavailable legal research never becomes a demand for visitor-supplied statutes', () => {
+ const state=initialMatter();state.readyForMemo=false;state.court='';state.memoPrefill.court='';
+ state.jurisdictionMissing=['لم يثبت سند الاختصاص'];state.documentsNeeded=['النص القانوني المطلوب'];
+ state.research={status:'unavailable',sources:[]};
+ const result=readiness().applyIntakeReadiness(state,memory(),'ar','تعذر التحقق من الأسانيد؛ التكييف مبدئي ويحتاج مراجعة المجموعة.');
+ assert.equal(result.nextQuestions.length,0);assert.equal(result.readyForMemo,false);
+ assert.match(result.assistantMessage,/تعذر التحقق/);assert.equal(result.legalBasis.length,0);
+ assert.equal(handoff.isCompleteMemoHandoff(handoff.buildMemoHandoff(result,messages)),false);
 });

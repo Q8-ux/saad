@@ -1,0 +1,4 @@
+- [x] T1 Separate conversational essentials from complete-form readiness without removing generation safeguards.
+- [x] T2 Preserve concise reviewed analysis and remove forced administrative questioning.
+- [x] T3 Exercise repeat/unavailable/conflict/actor and early preparation cases with synthetic data.
+- [ ] T4 Build, publish and verify a live synthetic conversation; record remaining limits.

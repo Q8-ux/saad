@@ -26,10 +26,10 @@ test('initial action remains visible and explains how to start in all languages'
  }
 });
 test('missing factual data stays blocked with the exact next question', () => {
- const intake={...complete,memoPrefill:{...complete.memoPrefill,clientName:''}};
+ const intake={...complete,facts:[],memoPrefill:{...complete.memoPrefill,facts:''}};
  let calls=0;const element=control({intake,messages,onContinue:()=>calls++});
  assert.equal(button(element).props.disabled,true);button(element).props.onClick();assert.equal(calls,0);
- assert.ok(renderToStaticMarkup(element).includes(handoff.memoIntakeGaps(intake)[0].question));
+ assert.ok(renderToStaticMarkup(element).includes(handoff.memoConversationGaps(intake)[0].question));
 });
 test('completed action preserves fields and transcript and opens reviewed handoff once', () => {
  const results=[];const element=control({intake:complete,messages,onContinue:data=>results.push(data)});
@@ -37,8 +37,8 @@ test('completed action preserves fields and transcript and opens reviewed handof
  assert.equal(results[0].conversationTranscript,handoff.conversationTranscript(messages));assert.equal(results[0].clientName,complete.memoPrefill.clientName);
  assert.equal(handoff.isCompleteMemoHandoff(results[0]),true);
 });
-test('busy, unreviewed and oversized states cannot invoke the handoff', () => {
- for (const overrides of [{busy:true},{intake:{...complete,readyForMemo:false}},{messages:[{role:'user',content:'س'.repeat(30001)}]}]) {
+test('busy, conflicting and oversized states cannot invoke the handoff', () => {
+ for (const overrides of [{busy:true},{intake:{...complete,contradictions:['تعارض اصطناعي']}},{messages:[{role:'user',content:'س'.repeat(30001)}]}]) {
   let calls=0;const element=control({intake:complete,messages,onContinue:()=>calls++,...overrides});
   assert.equal(button(element).props.disabled,true);button(element).props.onClick();assert.equal(calls,0);
  }
@@ -47,4 +47,12 @@ test('the assistant mounts the action before tools and outside the intake dashbo
  const source=readFileSync(new URL('../app/sabeq-site.tsx',import.meta.url),'utf8');
  assert.ok(source.indexOf('<AssistantMemoAction ')<source.indexOf('<LegalToolsPanel key={toolSession}'));
  assert.ok(source.indexOf('<AssistantMemoAction ')<source.indexOf('{intake && <div className="intake-dashboard">'));
+});
+
+test('missing administrative fields allow preparation but never skip final form review', () => {
+ const intake={...complete,readyForMemo:false,memoFields:{},importantDates:[],memoPrefill:{...complete.memoPrefill,clientName:'',otherParty:''}};
+ const results=[];const element=control({intake,messages,onContinue:data=>results.push(data)});
+ assert.equal(button(element).props.disabled,false);button(element).props.onClick();
+ assert.equal(results.length,1);assert.equal(results[0].clientName,'');
+ assert.equal(results[0].handoffReady,'');assert.equal(handoff.isCompleteMemoHandoff(results[0]),false);
 });
