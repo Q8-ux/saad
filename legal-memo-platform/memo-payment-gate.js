@@ -6,16 +6,16 @@ function memoPaymentGate(transport = fetch) {
   return async (req, res, next) => {
     try {
       const response = await transport(service + '/api/payments/sadad', {
-        headers: { Accept: 'application/json' }, cache: 'no-store', redirect: 'error', signal: AbortSignal.timeout(12000),
+        headers: { Accept: 'application/json', ...(req.headers['x-sabeq-payment-test'] ? { 'X-Sabeq-Payment-Test': req.headers['x-sabeq-payment-test'] } : {}) }, cache: 'no-store', redirect: 'error', signal: AbortSignal.timeout(12000),
       });
       if (!response.ok) throw Error('policy_unavailable');
       const policy = await response.json();
       if (typeof policy.required !== 'boolean' || typeof policy.enabled !== 'boolean') throw Error('invalid_policy');
       if (!policy.enabled) return res.status(503).json({ error: 'خدمة المذكرات متوقفة مؤقتاً بقرار الإدارة.' });
-      if (!policy.required && !req.body?.paymentId) return next();
+      if (!policy.required && policy.mode !== 'mock' && !req.headers['x-sabeq-payment-test'] && !req.body?.paymentId) return next();
       // A paid request uses the authoritative D1 reservation and recovery path.
       const upstream = await transport(service + '/api/legal/memo', {
-        method: 'POST', headers: { 'Content-Type': 'application/json', Origin: 'https://q8-ux.github.io', ...(req.headers.authorization ? { Authorization: req.headers.authorization } : {}) },
+        method: 'POST', headers: { 'Content-Type': 'application/json', Origin: 'https://q8-ux.github.io', ...(req.headers.authorization ? { Authorization: req.headers.authorization } : {}), ...(req.headers['x-sabeq-payment-test'] ? { 'X-Sabeq-Payment-Test': req.headers['x-sabeq-payment-test'] } : {}) },
         body: JSON.stringify(req.body || {}), redirect: 'error', signal: AbortSignal.timeout(250000),
       });
       const body = await upstream.text();
@@ -36,7 +36,7 @@ function legacyMemoPaymentGate(transport = fetch) {
       const policy = await response.json();
       if (typeof policy.required !== 'boolean' || typeof policy.enabled !== 'boolean') throw Error('invalid_policy');
       if (!policy.enabled) return res.status(503).json({ error: 'خدمة المذكرات متوقفة مؤقتاً.' });
-      if (policy.required) return res.status(402).json({ error: 'يلزم إكمال إعداد المذكرة والدفع من مولد المذكرات المعتمد في موقع سابق.', url: 'https://q8-ux.github.io/saad/sabeq-legal/' });
+      if (policy.required || policy.mode === 'mock') return res.status(402).json({ error: 'يلزم إكمال إعداد المذكرة والدفع من مولد المذكرات المعتمد في موقع سابق.', url: 'https://q8-ux.github.io/saad/sabeq-legal/' });
       return next();
     } catch { return res.status(503).json({ error: 'تعذر التحقق من رسوم الخدمة. أعد المحاولة لاحقاً.' }); }
   };

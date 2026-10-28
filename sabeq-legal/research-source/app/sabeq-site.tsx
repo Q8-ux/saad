@@ -4,6 +4,8 @@ import { AssistantMemoAction } from "./assistant-memo-action";
 import type { SitePublicSettings } from "@/lib/site-controls";
 
 import { ASSISTANT_MESSAGE_LIMIT, assistantInputCopy, validateAssistantInput } from "@/lib/assistant-input";
+import { memoFetch } from "@/lib/memo-service";
+import { acceptPaymentTestSession } from "@/lib/payment-test-client";
 import { runMemoGeneration, MemoGenerationStopped, memoGenerationCopy } from "@/lib/memo-generation";
 import { newPaymentAttempt, loadPaymentAttempt, rememberPaymentAttempt, clearPaymentAttempt, paymentCopy, type SadadCheckout } from "@/lib/sadad-client";
 import { readSSE } from "@/lib/intake-stream";
@@ -95,49 +97,13 @@ async function authenticatedFetch(path: string, token: string, init: RequestInit
   return fetch(apiUrl(path), { ...init, headers });
 }
 
-// The memo pilot is temporarily available without an account. Other services
-// continue to use authenticatedFetch and remain behind the verified sign-in gate.
-async function memoFetch(path: string, token: string, init: RequestInit = {}) {
-  const headers = new Headers(init.headers);
-  if (token) headers.set("Authorization", `Bearer ${token}`);
-  headers.set("Accept", ["/api/legal/assistant", "/api/legal/voice-turn"].includes(path) ? "text/event-stream" : "application/json");
-  let lastError: unknown;
-  for (let attempt = 0; attempt < 3; attempt += 1) {
-    try {
-      const response = await fetch(apiUrl(path), {
-        ...init,
-        headers,
-        mode: "cors",
-        credentials: "omit",
-        cache: "no-store",
-      });
-      // Service outages before a response is returned are recoverable. The
-      // server deletes its temporary analysis files after each run, so one
-      // controlled retry for document analysis is safe and prevents the user
-      // from having to choose the files again after a brief connection glitch.
-      const retryableResponse = path === "/api/legal/analyze-documents" && [502, 503, 504].includes(response.status);
-      if (retryableResponse && attempt < 2) {
-        await new Promise((resolve) => window.setTimeout(resolve, 700 * (attempt + 1)));
-        continue;
-      }
-      return response;
-    } catch (error) {
-      if (init.signal?.aborted || ["/api/legal/memo", "/api/legal/assistant", "/api/legal/transcribe", "/api/legal/speech", "/api/legal/voice-turn", "/api/legal/memo-dictation", "/api/legal/tools"].includes(path)) throw error;
-      lastError = error;
-      if (attempt < 2) await new Promise((resolve) => window.setTimeout(resolve, 550 * (attempt + 1)));
-    }
-  }
-  console.error("Memo service request could not be reached", { path, error: lastError instanceof Error ? lastError.name : "unknown" });
-  throw new Error("تعذر الاتصال بخدمة التحليل. لم تُرسل الملفات للقراءة؛ أعد المحاولة بعد لحظات.");
-}
-
 async function readServiceJson<T extends { error?: string }>(response: Response): Promise<T> {
   const body = await response.text();
   try {
     return JSON.parse(body) as T;
   } catch {
-    if (!response.ok) return { error: "تعذر إتمام الطلب من الخدمة. لم تُفقد الملفات؛ أعد المحاولة." } as T;
-    throw new Error("استلمت الخدمة استجابة غير صالحة. لم تُفقد الملفات؛ أعد المحاولة.");
+    if (!response.ok) return { error: "تعذر قراءة رد الخدمة. احتفظ بهذه الجلسة وأعد المحاولة بنفس الطلب." } as T;
+    throw new Error("تعذر قراءة رد الخدمة. احتفظ بهذه الجلسة وأعد المحاولة بنفس الطلب.");
   }
 }
 
@@ -225,6 +191,7 @@ function BrandIcon({ name }: { name: BrandName }) {
 }
 
 export default function SabeqSite() {
+  useEffect(() => acceptPaymentTestSession(), []);
   useEffect(() => startVisitorAnalytics(), []);
   const [language, setLanguage] = useState<Language>("ar");
   const [theme, setTheme] = useState<ColorTheme>("light");
@@ -971,7 +938,7 @@ const emptyAnalysisFields: AnalysisFields = {
 };
 
 function MemoWizard({ t, language, token, initialData = null, assistantSession, active, openAssistant }: { t: SiteCopy; language: Language; token: string; initialData?: MemoPrefill | null; assistantSession: AssistantSession | null; active: boolean; openAssistant: (context: string) => void }) {
-  const [paymentPolicy, setPaymentPolicy] = useState<{ required: boolean; publicCheckoutEnabled: boolean; priceFils: number; ready: boolean; environment: string } | null>(null);
+  const [paymentPolicy, setPaymentPolicy] = useState<{ required: boolean; publicCheckoutEnabled: boolean; priceFils: number; ready: boolean; environment: string; mode?: "real" | "mock" } | null>(null);
   const [checkout, setCheckout] = useState<SadadCheckout | null>(null);
   const [checkingPayment, setCheckingPayment] = useState(false);
   const [paymentOpen, setPaymentOpen] = useState(false);
@@ -1371,6 +1338,7 @@ function MemoWizard({ t, language, token, initialData = null, assistantSession, 
   }
 
   async function archiveGeneratedMemo() {
+    if (checkout?.provider === "mock") { setResultNotice({ kind: "error", message: tr(language, "وضع تجريبي — لن يتم خصم أي مبلغ") }); return; }
     if (!token) {
       setResultNotice({ kind: "error", message: language === "ar" ? "الأرشفة تحتاج تسجيل دخول حتى تُحفظ في حسابك." : language === "en" ? "Archiving requires sign-in so it can be saved to your account." : "آرکائیو کے لیے سائن اِن ضروری ہے۔" });
       return;
@@ -1463,11 +1431,11 @@ function MemoWizard({ t, language, token, initialData = null, assistantSession, 
       const { caseStory: _story, ...memoInput } = nextData;
       const input: Record<string, unknown> = { ...memoInput, interfaceLanguage: language, outputLanguage: "ar" };
       const policyResponse = await memoFetch("/api/payments/sadad", token, { signal: controller.signal });
-      const currentPolicy = await readServiceJson<{ required: boolean; publicCheckoutEnabled: boolean; priceFils: number; ready: boolean; environment: string; error?: string }>(policyResponse);
+      const currentPolicy = await readServiceJson<{ required: boolean; publicCheckoutEnabled: boolean; priceFils: number; ready: boolean; environment: string; mode?: "real" | "mock"; error?: string }>(policyResponse);
       if (!policyResponse.ok || typeof currentPolicy.required !== "boolean") throw new Error(currentPolicy.error || payUi.policyError);
       setPaymentPolicy(currentPolicy);
       if (currentPolicy.required || paymentAttempt.current) {
-        if (currentPolicy.publicCheckoutEnabled !== true && !paymentAttempt.current) throw new Error(payUi.policyError);
+        if (currentPolicy.publicCheckoutEnabled !== true && !paymentAttempt.current) throw new Error(currentPolicy.mode === "mock" ? tr(language, "الدفع التجريبي متاح للمشرف عبر جلسة اختبار مصرح بها فقط.") : payUi.policyError);
         setCheckingPayment(true);
         if (!paymentAttempt.current) {
           const attempt = newPaymentAttempt();
@@ -1483,11 +1451,7 @@ function MemoWizard({ t, language, token, initialData = null, assistantSession, 
         }
         if (created.id) {
           setCheckout(created);
-          const statusResponse = await memoFetch(`/api/payments/sadad?id=${encodeURIComponent(created.id)}`, attempt.paymentToken, { signal: controller.signal });
-          const payment = await readServiceJson<SadadCheckout & { error?: string }>(statusResponse);
-          if (!statusResponse.ok) throw new Error(payment.error || payUi.policyError);
-          setCheckout(payment);
-          if (!["paid", "consumed"].includes(payment.status)) { setPaymentOpen(true); setStatus("idle"); return; }
+          if (!["paid", "consumed"].includes(created.status)) { setPaymentOpen(true); setStatus("idle"); return; }
           input.paymentId = attempt.attemptId;
           input.paymentToken = attempt.paymentToken;
         }
@@ -1519,7 +1483,7 @@ function MemoWizard({ t, language, token, initialData = null, assistantSession, 
     }
   }
 
-  if (memo) return <div className="memo-result" lang={language} dir={language === "en" ? "ltr" : "rtl"}><p role="note" className="form-notice">{memoApprovalNotice[language]}</p>{memoQuality && <div className="form-notice" role="status"><strong>{language === "ar" ? (memoQuality.status === "incomplete" ? "المذكرة غير مكتملة: توجد وقائع أو أسانيد تحتاج استكمالًا" : "اجتازت المسودة مراجعة الاتساق الآلية وتحتاج مراجعة قانونية") : language === "en" ? (memoQuality.status === "incomplete" ? "Incomplete draft: facts or legal sources need review" : "Draft passed automated consistency review; legal review is required") : (memoQuality.status === "incomplete" ? "مسودہ نامکمل ہے؛ حقائق یا قانونی ماخذ کی جانچ درکار ہے" : "مسودے کی خودکار مطابقت جانچ مکمل؛ قانونی جائزہ ضروری ہے")}</strong>{language === "ar" && <ul>{memoQuality.notices.map((notice,index)=><li key={index}>{notice}</li>)}</ul>}</div>}<div className="modal-icon"><FileCheck2 /></div><h2>{memoDocument ? interfaceLabel(memoDocument.title, language) : tr(language, "المذكرة القانونية")}</h2>{memoAnalysis && <div className="memo-analysis-summary"><strong><Sparkles size={18} /> {tr(language, "مصادر استشهدت بها المسودة")}</strong><span>{tr(language, "مراجع تشريعية مستشهد بها")}: {memoAnalysis.lawCount}</span><span>{tr(language, "استشهادات بمبادئ وأحكام تمييز")}: {memoAnalysis.cassationCount}</span><small>{tr(language, "لا يُدرج النظام مادة أو حكماً غير موجود في المكتبة الموثقة، وتبقى المراجعة النهائية للمجموعة.")}</small><ul>{memoAnalysis.sources.map(source => <li key={source.marker}><strong>{source.marker} — {source.title}</strong><span>{source.officialSource} · {source.reference}</span>{source.sourceUrl ? <a href={source.sourceUrl} target="_blank" rel="noopener noreferrer">{tr(language, "فتح المصدر الأصلي")}</a> : <small>{tr(language, "نص من المكتبة المرفوعة؛ لا يتوفر رابط عام للأصل.")}</small>}{source.libraryUpdatedAt && <small>{tr(language, "تحديث الفهرسة")}: {source.libraryUpdatedAt.slice(0, 10)} — {tr(language, "لا يثبت سريان النص.")}</small>}</li>)}</ul></div>}<>{memoDocument ? <PleadingPreview document={memoDocument} text={memo} language={language}/> : <pre lang="ar" dir="rtl">{memo}</pre>}</><div className="memo-result-tools" aria-label={tr(language, "أدوات المذكرة")}><button type="button" onClick={editGeneratedMemo}><Pencil size={18} />{tr(language, "تعديل")}</button><button type="button" onClick={archiveGeneratedMemo} disabled={archiving}><Archive size={18} />{archiving ? tr(language, "جارٍ الأرشفة") : tr(language, "أرشفة")}</button><button type="button" className="danger" onClick={deleteGeneratedMemo}><Trash2 size={18} />{tr(language, "حذف")}</button><button type="button" onClick={exportGeneratedMemo}><Download size={18} />{tr(language, "تصدير كملف")}</button><button type="button" onClick={() => void printGeneratedMemo()}><Printer size={18} />{tr(language, "طباعة")}</button></div>{resultNotice && <p role="status" className={`form-notice ${resultNotice.kind}`}>{resultNotice.message}</p>}</div>;
+  if (memo) return <div className="memo-result" lang={language} dir={language === "en" ? "ltr" : "rtl"}><p role="note" className="form-notice">{memoApprovalNotice[language]}</p>{checkout?.provider === "mock" && <p className="form-notice" role="note">{tr(language, "وضع تجريبي — لن يتم خصم أي مبلغ")}</p>}{memoQuality && <div className="form-notice" role="status"><strong>{language === "ar" ? (memoQuality.status === "incomplete" ? "المذكرة غير مكتملة: توجد وقائع أو أسانيد تحتاج استكمالًا" : "اجتازت المسودة مراجعة الاتساق الآلية وتحتاج مراجعة قانونية") : language === "en" ? (memoQuality.status === "incomplete" ? "Incomplete draft: facts or legal sources need review" : "Draft passed automated consistency review; legal review is required") : (memoQuality.status === "incomplete" ? "مسودہ نامکمل ہے؛ حقائق یا قانونی ماخذ کی جانچ درکار ہے" : "مسودے کی خودکار مطابقت جانچ مکمل؛ قانونی جائزہ ضروری ہے")}</strong>{language === "ar" && <ul>{memoQuality.notices.map((notice,index)=><li key={index}>{notice}</li>)}</ul>}</div>}<div className="modal-icon"><FileCheck2 /></div><h2>{memoDocument ? interfaceLabel(memoDocument.title, language) : tr(language, "المذكرة القانونية")}</h2>{memoAnalysis && <div className="memo-analysis-summary"><strong><Sparkles size={18} /> {tr(language, "مصادر استشهدت بها المسودة")}</strong><span>{tr(language, "مراجع تشريعية مستشهد بها")}: {memoAnalysis.lawCount}</span><span>{tr(language, "استشهادات بمبادئ وأحكام تمييز")}: {memoAnalysis.cassationCount}</span><small>{tr(language, "لا يُدرج النظام مادة أو حكماً غير موجود في المكتبة الموثقة، وتبقى المراجعة النهائية للمجموعة.")}</small><ul>{memoAnalysis.sources.map(source => <li key={source.marker}><strong>{source.marker} — {source.title}</strong><span>{source.officialSource} · {source.reference}</span>{source.sourceUrl ? <a href={source.sourceUrl} target="_blank" rel="noopener noreferrer">{tr(language, "فتح المصدر الأصلي")}</a> : <small>{tr(language, "نص من المكتبة المرفوعة؛ لا يتوفر رابط عام للأصل.")}</small>}{source.libraryUpdatedAt && <small>{tr(language, "تحديث الفهرسة")}: {source.libraryUpdatedAt.slice(0, 10)} — {tr(language, "لا يثبت سريان النص.")}</small>}</li>)}</ul></div>}<>{memoDocument ? <PleadingPreview document={memoDocument} text={memo} language={language}/> : <pre lang="ar" dir="rtl">{memo}</pre>}</><div className="memo-result-tools" aria-label={tr(language, "أدوات المذكرة")}><button type="button" onClick={editGeneratedMemo}><Pencil size={18} />{tr(language, "تعديل")}</button><button type="button" onClick={archiveGeneratedMemo} disabled={archiving}><Archive size={18} />{archiving ? tr(language, "جارٍ الأرشفة") : tr(language, "أرشفة")}</button><button type="button" className="danger" onClick={deleteGeneratedMemo}><Trash2 size={18} />{tr(language, "حذف")}</button><button type="button" onClick={exportGeneratedMemo}><Download size={18} />{tr(language, "تصدير كملف")}</button><button type="button" onClick={() => void printGeneratedMemo()}><Printer size={18} />{tr(language, "طباعة")}</button></div>{resultNotice && <p role="status" className={`form-notice ${resultNotice.kind}`}>{resultNotice.message}</p>}</div>;
   return (
     <div className="memo-modal">
       <div className="journey-switch"><button type="button" className="button button-outline" disabled={status === "loading"} onClick={() => { const draft = captureDraft(); openAssistant(draft.caseStory || memoStoryText(facts, requests)); }}>{language === "ar" ? "المتابعة مع المساعد القانوني" : language === "en" ? "Continue with the legal assistant" : "قانونی معاون کے ساتھ جاری رکھیں"}</button><small>{language === "ar" ? "تبقى مسودتك ومرفقاتك عند الرجوع خلال هذه الجلسة." : language === "en" ? "Your draft and attachments remain here while you switch during this session." : "اس نشست میں واپسی پر مسودہ اور منسلکات محفوظ رہیں گے۔"}</small></div>
@@ -1606,12 +1570,12 @@ function MemoWizard({ t, language, token, initialData = null, assistantSession, 
             {Object.entries(pleadingFields).map(([key,label])=><Field key={key} label={interfaceLabel(label, language)}><textarea name={key} rows={/Grounds|Requests|Operative/.test(key)?3:1} defaultValue={memoData[key] || analysisFields[key as keyof typeof pleadingFields] || ""} maxLength={5000}/></Field>)}</div>
           </details>}
           {step === 1 && !assistantReview && <div className="research-box"><Search size={30} /><h3>{language === "ar" ? "مسار التحليل القانوني للمذكرة" : t.steps[2]}</h3><p>{language === "ar" ? "يحلّل المحرك الوقائع والطلبات، يصنّف المسائل القانونية، يطابقها مع القوانين والمواد الكويتية، ثم يبحث عن مبادئ وأحكام التمييز المتصلة بذات المسألة والسبب قبل بناء الدفوع بصياغة المحاكم الكويتية." : language === "en" ? "The engine classifies the issues, matches verified Kuwaiti laws and provisions, then retrieves materially related Court of Cassation principles before drafting each argument." : "انجن قانونی مسائل کی درجہ بندی کرتا ہے، مصدقہ کویتی قوانین اور متعلقہ امتیازی عدالتی اصولوں سے مطابقت کرتا ہے، پھر ہر دلیل تیار کرتا ہے۔"}</p><div className="analysis-pipeline"><span>1. {tr(language, "تحليل الوقائع")}</span><span>2. {tr(language, "تحديد المواد")}</span><span>3. {tr(language, "مطابقة أحكام التمييز")}</span><span>4. {tr(language, "بناء الدفوع والطلبات")}</span></div><Field label={language === "ar" ? "ملاحظات قانونية إضافية (اختيارية)" : language === "en" ? "Additional legal notes (optional)" : "اضافی قانونی نوٹس (اختیاری)"}><textarea name="legalIssues" rows={6} defaultValue={memoData.legalIssues} placeholder={tr(language, "اتركها فارغة إن لم تكن لديك ملاحظة؛ سيستنتج النظام المسائل القانونية تلقائياً.")} /></Field><div><ShieldCheck size={18} />{language === "ar" ? "لن تُدرج مادة أو حكم تمييز إلا من مصدر موثق، وسيصرّح النظام عند عدم العثور على تطابق." : language === "en" ? "No law or judgment is included unless it is found in the verified legal database." : "کوئی قانون یا فیصلہ شامل نہیں ہوگا جب تک وہ مصدقہ قانونی ڈیٹابیس میں نہ ہو۔"}</div></div>}
-          {(step === 2 || assistantReview) && <div className="review-box"><FileCheck2 size={34} /><h3>{t.review}</h3><p>{t.arabicOnly}</p><p className="template-badge">{tr(language, "الصيغة")}: {tr(language, selectPleadingKind(memoData) === "appeal" ? "صحيفة استئناف" : selectPleadingKind(memoData) === "claim" ? "صحيفة دعوى" : "مذكرة بدفاع")}</p><p role="note" className="form-notice">{memoApprovalNotice[language]}</p>
+          {(step === 2 || assistantReview) && <div className="review-box"><FileCheck2 size={34} /><h3>{t.review}</h3><p>{t.arabicOnly}</p><p className="template-badge">{tr(language, "الصيغة")}: {tr(language, selectPleadingKind(memoData) === "appeal" ? "صحيفة استئناف" : selectPleadingKind(memoData) === "claim" ? "صحيفة دعوى" : "مذكرة بدفاع")}</p><p role="note" className="form-notice">{memoApprovalNotice[language]}</p>{checkout?.provider === "mock" && <p className="form-notice" role="note">{tr(language, "وضع تجريبي — لن يتم خصم أي مبلغ")}</p>}
             {!assistantReview && <dl className="memo-handoff-details">{[[t.caseType, "caseType"], [t.court, "court"], [tr(language, "الدائرة"), "courtCircuit"], [tr(language, "مرحلة القضية"), "caseStage"], [t.clientName, "clientName"], [t.role, "partyRole"], [t.otherParty, "otherParty"], [ui.allParties, "allParties"], [t.facts, "facts"], [t.requests, "requests"]].map(([label, key]) => <div key={key}><dt>{label}</dt><dd>{["caseType", "court", "partyRole", "caseStage"].includes(key) ? interfaceLabel(memoData[key] || "", language) : memoData[key]}</dd></div>)}</dl>}
             <button type="button" className="button button-outline" onClick={() => { captureDraft(); setMemoApproved(false); setStep(0); }}>{assistantReview ? (language === "ar" ? "إرفاق أو استخراج مستندات (اختياري)" : language === "en" ? "Attach or extract documents (optional)" : "دستاویزات منسلک یا اخذ کریں (اختیاری)") : (language === "ar" ? "تعديل الوقائع أو المستندات" : language === "en" ? "Edit facts or documents" : "حقائق یا دستاویزات میں ترمیم")}</button>
             {!assistantReview && <div><BookOpen size={18} />{t.libraryText}</div>}
-            {((paymentPolicy?.publicCheckoutEnabled && paymentPolicy.required) || checkout) && <section className="memo-payment" aria-label={payUi.title}>
-              <div><h4>{payUi.title}</h4><strong><bdi>{new Intl.NumberFormat(language === "ar" ? "ar-KW" : "en-KW", { style: "currency", currency: "KWD" }).format((checkout?.priceFils ?? paymentPolicy?.priceFils ?? 0) / 1000)}</bdi></strong></div>
+            {((paymentPolicy?.mode === "mock" || (paymentPolicy?.publicCheckoutEnabled && paymentPolicy.required)) || checkout) && <section className="memo-payment" aria-label={payUi.title}>
+              <div><h4>{payUi.title}</h4>{(checkout?.provider === "mock" || (!checkout && paymentPolicy?.mode === "mock")) && <p role="note">{tr(language, "وضع تجريبي — لن يتم خصم أي مبلغ")}</p>}<strong><bdi>{new Intl.NumberFormat(language === "ar" ? "ar-KW-u-nu-latn" : "en-KW", { style: "currency", currency: "KWD" }).format((checkout?.priceFils ?? paymentPolicy?.priceFils ?? 0) / 1000)}</bdi></strong></div>
               {(checkout?.environment || paymentPolicy?.environment) === "sandbox" && <p>{payUi.test}</p>}
               <p>{checkout ? payUi.waiting : payUi.safety}</p>
               {checkout && <button type="button" className="button button-primary" onClick={() => setPaymentOpen(true)}>{payUi.open}</button>}
@@ -1620,11 +1584,11 @@ function MemoWizard({ t, language, token, initialData = null, assistantSession, 
             </section>}
             {!assistantReview && <label className="memo-generation-approval"><input type="checkbox" checked={memoApproved} onChange={event => setMemoApproved(event.target.checked)} disabled={status === "loading"} />{generationUi.approval}</label>}</div>}
         </div>
-        <div className="memo-actions">{step > 0 && !assistantReview ? <button type="button" className="button button-outline" disabled={status === "loading"} onClick={() => { captureDraft(); setMemoApproved(false); setStep(step - 1); }}>{t.previous}</button> : <span />}<button className="button button-primary" disabled={voiceEntryBusy || status === "loading" || analysisStatus === "loading" || Boolean(step === 0 && documents.length && analysisStatus !== "success") || storyBusy}>{storyBusy ? (language === "ar" ? "جارٍ فهم الوقائع والطلبات…" : language === "en" ? "Understanding facts and requests…" : "حقائق اور مطالبات سمجھ رہا ہوں…") : status === "loading" ? (checkingPayment ? payUi.checking : t.loading) : assistantReview ? (language === "ar" ? ((paymentPolicy?.required || checkout) ? "أوافق وأتابع للدفع والتوليد" : "أوافق وأولّد المذكرة") : language === "en" ? "Approve and generate memorandum" : "منظور کرکے یادداشت تیار کریں") : step === 2 ? (paymentPolicy?.publicCheckoutEnabled && paymentPolicy.required) || checkout ? checkout ? payUi.verify : payUi.pay : t.generate : step === 0 && documents.length === 0 ? ui.continueManual : t.next}<ArrowLeft size={17} /></button></div>
+        <div className="memo-actions">{step > 0 && !assistantReview ? <button type="button" className="button button-outline" disabled={status === "loading"} onClick={() => { captureDraft(); setMemoApproved(false); setStep(step - 1); }}>{t.previous}</button> : <span />}<button className="button button-primary" disabled={voiceEntryBusy || status === "loading" || analysisStatus === "loading" || Boolean(step === 0 && documents.length && analysisStatus !== "success") || storyBusy || Boolean(step === 2 && paymentPolicy?.mode === "mock" && !paymentPolicy.publicCheckoutEnabled && !checkout)}>{storyBusy ? (language === "ar" ? "جارٍ فهم الوقائع والطلبات…" : language === "en" ? "Understanding facts and requests…" : "حقائق اور مطالبات سمجھ رہا ہوں…") : status === "loading" ? (checkingPayment ? payUi.checking : t.loading) : assistantReview ? (language === "ar" ? ((paymentPolicy?.required || checkout) ? "أوافق وأتابع للدفع والتوليد" : "أوافق وأولّد المذكرة") : language === "en" ? "Approve and generate memorandum" : "منظور کرکے یادداشت تیار کریں") : step === 2 ? (paymentPolicy?.publicCheckoutEnabled && paymentPolicy.required) || checkout ? checkout ? payUi.verify : payUi.pay : t.generate : step === 0 && documents.length === 0 ? ui.continueManual : t.next}<ArrowLeft size={17} /></button></div>
         {status === "loading" && <div className="memo-generation-pending"><p role="status" aria-live="polite">{checkingPayment ? payUi.checking : generationUi.pending}</p><span>{generationSeconds} {generationUi.seconds}</span><small>{checkingPayment ? payUi.safety : generationUi.limit}</small><button type="button" className="button button-outline" onClick={() => generationRequest.current?.abort()}>{generationUi.cancel}</button></div>}
         {status === "error" && <p className="form-notice error">{memoError || t.error}</p>}
       </form>
-      {active && paymentOpen && checkout && paymentAttempt.current && <MemoPaymentDialog payment={checkout} paymentToken={paymentAttempt.current.paymentToken} language={language} request={memoFetch} onPayment={setCheckout} onClose={() => setPaymentOpen(false)} />}
+      {active && paymentOpen && checkout && paymentAttempt.current && <MemoPaymentDialog payment={checkout} paymentToken={paymentAttempt.current.paymentToken} language={language} request={memoFetch} onPayment={setCheckout} onClose={() => setPaymentOpen(false)} onNewTest={() => { if (checkout.provider !== "mock" || !["failed", "cancelled"].includes(checkout.status)) return; clearPaymentAttempt(); paymentAttempt.current = null; setCheckout(null); setPaymentOpen(false); setStatus("idle"); }} />}
     </div>
   );
 }

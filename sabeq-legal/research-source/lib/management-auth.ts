@@ -92,7 +92,10 @@ export async function requireManager(request: Request) {
   assertManagementOrigin(request);
   const token = request.headers.get("authorization")?.match(/^Bearer ([A-Za-z0-9_-]{43})$/)?.[1];
   if (!token) throw new RequestError("سجّل الدخول إلى الإدارة للمتابعة.", 401);
-  const hash = await digest(token), now = Math.floor(Date.now() / 1000);
+  return requireManagerSession(await digest(token));
+}
+export async function requireManagerSession(hash: string) {
+  const now = Math.floor(Date.now() / 1000);
   const row = await getD1().prepare("SELECT email, name FROM management_sessions WHERE token_hash = ? AND expires_at > ? AND last_seen_at > ?").bind(hash, now, now - 3600).first<{ email: string; name: string }>();
   const passwordSession = !!row && /^(staff|staff-admin):/.test(row.email);
   const staff = passwordSession ? await managementPasswordSession(row!.email) : null;

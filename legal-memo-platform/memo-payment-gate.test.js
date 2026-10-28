@@ -3,10 +3,10 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const { memoPaymentGate, legacyMemoPaymentGate } = require('./memo-payment-gate');
 
-async function run(transport, body = {}) {
+async function run(transport, body = {}, headers = {}) {
   let status = 200, data, next = false;
   const res = { status(value) { status = value; return this; }, json(value) { data = value; return this; } };
-  await memoPaymentGate(transport)({ body, headers: {} }, res, () => { next = true; });
+  await memoPaymentGate(transport)({ body, headers }, res, () => { next = true; });
   return { status, data, next };
 }
 test('unpaid rollout retains the existing generator only when the authoritative policy allows it', async () => {
@@ -39,4 +39,16 @@ test('the older case generator refuses unpaid access when payment is required', 
     await legacyMemoPaymentGate(async () => Response.json({ required, enabled: true }))({}, res, () => { next = true; });
     assert.equal(next, !required); assert.equal(status, required ? 402 : 200);
   }
+});
+
+test('mock mode and test-session requests always use authoritative reservation, forwarding scoped proof only to Sabeq',async()=>{
+ for(const mode of ['mock','real']){
+  const calls=[];const result=await run(async(url,options)=>{calls.push({url,options});return url.endsWith('/api/payments/sadad')?Response.json({required:false,enabled:true,mode}):Response.json({paymentMode:'mock',memo:'synthetic test result'});},{paymentId:'synthetic-test-order'},{'x-sabeq-payment-test':'synthetic-test-session'});
+  assert.equal(result.next,false);assert.equal(result.data.paymentMode,'mock');assert.equal(calls.length,2);
+  for(const call of calls){assert.match(call.url,/^https:\/\/sabeq-legal-public\.centrino\.chatgpt\.site\//);assert.equal(call.options.headers['X-Sabeq-Payment-Test'],'synthetic-test-session');}
+ }
+});
+test('legacy generation stays closed in mock mode even if the old required flag is false',async()=>{
+ let next=false,status=200;const res={status(value){status=value;return this;},json(){return this;}};
+ await legacyMemoPaymentGate(async()=>Response.json({required:false,enabled:true,mode:'mock'}))({},res,()=>{next=true;});assert.equal(next,false);assert.equal(status,402);
 });

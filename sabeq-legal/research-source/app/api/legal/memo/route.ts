@@ -11,6 +11,7 @@ import { factualRequirements, correctLegalProse, languageReviewInstructions, leg
 import { formatEvidence, isCassationEvidence, readHandoffEvidence, searchCassationEvidenceAcross, searchLegalEvidenceAcross } from "@/lib/legal-search";
 import { deriveLegalResearchPlan, generateText as modelGenerateText, openAIErrorResponse } from "@/lib/openai";
 import { requireMemoUserOrGuest } from "@/lib/public-auth";
+import { requirePaymentTestActor } from "@/lib/payment-mode";
 import { enforceUserServiceLimit, recordServiceActivity } from "@/lib/service-records";
 import { startMemoRequest, finishMemoRequest } from "@/lib/memo-requests";
 import { requireServiceEnabled } from "@/lib/service-settings";
@@ -57,7 +58,9 @@ export async function POST(request: Request) {
       signal.throwIfAborted();
       return modelGenerateText({ ...options, instructions:`${options.instructions}\n${pleadingAuthorityInstructions}`, signal });
     };
-    const user = await requireMemoUserOrGuest(request);
+    const testToken = request.headers.get("x-sabeq-payment-test") || "";
+    if (testToken) await requirePaymentTestActor(testToken);
+    const user = testToken ? null : await requireMemoUserOrGuest(request);
     await requireServiceEnabled("memo", request);
     const raw = await readJsonObject(request, 200_000);
     // Memo sign-in is temporarily disabled for the pilot. The previous guest
@@ -65,11 +68,11 @@ export async function POST(request: Request) {
     // exhausted it), so retain abuse protection while allowing real testing.
     if (user) await enforceUserServiceLimit(user, "memo");
     const { caseType, clientName, court, courtCircuit, caseNumber, otherParty, partyRole, allParties, facts, requests, legalIssues, conversationTranscript, conversationSummary, assistantResearch, extraFields, documentKind, caseStage } = validateMemoInput(raw);
-    const entitlement = await reserveMemoPayment(raw);
+    const entitlement = await reserveMemoPayment(raw, testToken);
     if (entitlement.result) return privateJson(entitlement.result);
     paymentLease = entitlement.lease;
     await enforceRateLimit(request, paymentLease ? `legal-memo-paid:${paymentLease.id}` : "legal-memo", 12, "hour");
-    managementRequestId = await startMemoRequest({ ...extraFields, clientName, court, courtCircuit, caseNumber, caseType, partyRole, otherParty, allParties, facts, requests, legalIssues, documentKind, caseStage }, user, request.headers.get("origin") || new URL(request.url).origin);
+    if (paymentLease?.provider !== "mock") managementRequestId = await startMemoRequest({ ...extraFields, clientName, court, courtCircuit, caseNumber, caseType, partyRole, otherParty, allParties, facts, requests, legalIssues, documentKind, caseStage }, user, request.headers.get("origin") || new URL(request.url).origin);
     const matter=assessMatterFacts(facts+" "+requests+" "+allParties);
     if(!matter.ready) {
       await finishMemoRequest(managementRequestId, "needs_information", "", "fact_clarification");
@@ -155,8 +158,8 @@ export async function POST(request: Request) {
       const sources = evidence.map((item,index)=>({marker:`م${index+1}`,title:item.title,reference:item.reference||"غير محدد",kind:isCassationEvidence(item)?"cassation":"legislation",officialSource:item.officialSource,sourceUrl:item.sourceUrl,libraryUpdatedAt:item.libraryUpdatedAt||null,verification:item.verification,corpus:item.corpus,sourceAccess:item.sourceUrl?"original_link":"indexed_upload"})).filter(source=>new RegExp(`[【\\[]\\s*${source.marker}\\s*[】\\]]`).test(citedContent));
       signal.throwIfAborted();
       await finishMemoRequest(managementRequestId, "needs_review", finalMemo, "draft_generated");
-      if(user) await recordServiceActivity({userId:user.id,serviceType:"memo",title:`${document.title} — ${clientName}`,inputText:JSON.stringify({...memoInput,legalIssues}),outputText:finalMemo,metadata:{managementRequestId,sourceCount:sources.length,caseNumber,template:template.info,documentKind:document.kind,pageSections:document.pages.length}});
-      const responseData = {requestId:managementRequestId,caseQuality,sourceCoverage:legalSourceCoverage(evidence),memo:finalMemo,document,template:template.info,sourceVerification:officialVerificationSummary(),engineRevision:"case-grounded-memo-1",analysis:{sourceCount:sources.length,lawCount:sources.filter(s=>s.kind==="legislation").length,cassationCount:sources.filter(s=>s.kind==="cassation").length,sources,missingSources:!evidence.length,researchNotice:caseQuality.status==="incomplete"?caseQuality.notices.join(" "):"",...(agentAudit?{agentAudit}:{})}};
+      if(user && paymentLease?.provider !== "mock") await recordServiceActivity({userId:user.id,serviceType:"memo",title:`${document.title} — ${clientName}`,inputText:JSON.stringify({...memoInput,legalIssues}),outputText:finalMemo,metadata:{managementRequestId,sourceCount:sources.length,caseNumber,template:template.info,documentKind:document.kind,pageSections:document.pages.length}});
+      const responseData = {paymentMode:paymentLease?.provider === "mock" ? "mock" : "real",requestId:managementRequestId,caseQuality,sourceCoverage:legalSourceCoverage(evidence),memo:finalMemo,document,template:template.info,sourceVerification:officialVerificationSummary(),engineRevision:"case-grounded-memo-1",analysis:{sourceCount:sources.length,lawCount:sources.filter(s=>s.kind==="legislation").length,cassationCount:sources.filter(s=>s.kind==="cassation").length,sources,missingSources:!evidence.length,researchNotice:caseQuality.status==="incomplete"?caseQuality.notices.join(" "):"",...(agentAudit?{agentAudit}:{})}};
       await completeMemoPayment(paymentLease, responseData);
       return privateJson(responseData);
     }
