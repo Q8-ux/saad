@@ -3854,6 +3854,10 @@ html[data-theme="dark"] .memo-conversation-review{background:#142b35;color:#f1f7
 .memo-voice-entry p, .memo-voice-entry label { font-size: 1.05rem; line-height: 1.8; }
 .memo-voice-entry textarea { width: 100%; min-width: 0; padding: 12px; font: inherit; font-size: 1.1rem; color: #102d39; background: white; border: 1px solid #83a8af; border-radius: 10px; }
 .memo-voice-buttons { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+.memo-story-summary { margin-top: 12px; }
+.memo-story-summary dt { font-weight: 700; margin-top: 12px; }
+.memo-story-summary dd { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.memo-transcript-readonly { white-space: pre-wrap; overflow-wrap: anywhere; font: inherit; }
 .memo-voice-proposal { margin: 12px 0; }
 .memo-voice-proposal label { display: flex; align-items: center; gap: 10px; }
 .memo-voice-proposal input { width: 22px; height: 22px; }

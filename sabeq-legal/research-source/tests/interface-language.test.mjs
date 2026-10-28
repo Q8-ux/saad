@@ -80,11 +80,11 @@ for (const language of ['en','ur']) {
     if (language === 'en') assertEnglish(html);
     else for (const phrase of ['التوجيه للمحكمة مبدئي','أدوات المحادثة','المحكمة المبدئية','Case understanding']) assert.ok(!html.includes(phrase),phrase);
   });
-  for (const step of [0,1,2,3]) test(`${language} memo form step ${step} localizes tools and guidance`, () => {
+  for (const step of [0,1,2]) test(`${language} memo form step ${step} localizes tools and guidance`, () => {
     const {MemoWizard}=modules({step})('app/sabeq-site.tsx');
     const html=renderToStaticMarkup(React.createElement(MemoWizard,props(language)));
     if(language==='en') assertEnglish(html);
-    else { assert.ok(html.includes(copy.ur.steps[step])); assert.ok(!html.includes('اتركها فارغة')); }
+    else { assert.ok(html.includes(['حقائق اور دستاویزات','حیثیت اور مقدمے کی تفصیل','جائزہ اور ادائیگی'][step])); assert.ok(!html.includes('اتركها فارغة')); }
   });
   test(`${language} memo result keeps document Arabic RTL while translating surrounding tools`, () => {
     const {MemoWizard}=modules({memo:'وقائع اصطناعية للاختبار فقط.',memoDocument:sample,memoAnalysis:{lawCount:0,cassationCount:0,sources:[]}})('app/sabeq-site.tsx');
@@ -96,6 +96,48 @@ for (const language of ['en','ur']) {
     if(language==='en') assertEnglish(html);
   });
 }
+test('case entry has one editable story box and a read-only understanding in every language', () => {
+  for (const language of ['ar','en','ur']) {
+    const {MemoWizard}=modules({step:0,facts:'Synthetic case facts.',requests:'Return the synthetic book.'})('app/sabeq-site.tsx');
+    const html=renderToStaticMarkup(React.createElement(MemoWizard,{...props(language),active:true,assistantSession:null}));
+    assert.equal((html.match(/<textarea\b/g)||[]).length,1);
+    assert.match(html,/name="caseStory"/);assert.doesNotMatch(html,/name="(?:facts|requests)"/);
+    assert.match(html,/memo-story-summary/);assert.ok(html.includes('Synthetic case facts.'));assert.ok(html.includes('Return the synthetic book.'));
+    if(language==='en')assertEnglish(html);
+  }
+});
+test('one story is understood through extraction only and retains stated identifiers', async () => {
+  const {understandMemoStory}=load('lib/memo-dictation.ts');const calls=[];
+  const text='Synthetic story 0012/2026: a book was delivered; return it.';
+  const result=await understandMemoStory(async(path,init)=>{calls.push({path,init});return Response.json({analysis:{facts:'A book was delivered.',requests:'Return it.',caseNumber:'0012/2026',phone:'99999999',correctedTranscript:text,warnings:['Review the date.']}});},text,'en');
+  assert.equal(calls.length,1);assert.equal(calls[0].path,'/api/legal/memo-dictation');assert.equal(calls[0].init.method,'POST');
+  assert.deepEqual(JSON.parse(calls[0].init.body),{transcript:text,language:'en'});
+  assert.equal(result.fields.caseNumber,'0012/2026');assert.equal(result.fields.phone,undefined);assert.equal(result.fields.requests,'Return it.');assert.equal(result.text,text);
+});
+test('the short assistant review keeps one story box and no separate facts or requests editors', () => {
+  const {MemoWizard}=modules()('app/sabeq-site.tsx');
+  const initialData={facts:'Synthetic facts.',requests:'Return the book.',conversationTranscript:'Visitor: synthetic conversation.'};
+  const html=renderToStaticMarkup(React.createElement(MemoWizard,{...props('ar'),initialData,active:true,assistantSession:null}));
+  assert.equal((html.match(/name="caseStory"/g)||[]).length,1);assert.doesNotMatch(html,/name="(?:facts|requests)"/);
+  assert.ok(html.includes('أوافق وأولّد المذكرة'));assert.ok(html.includes('Synthetic facts.'));
+});
+test('editing the story hides an older understanding until extraction finishes again', () => {
+  const {MemoWizard}=modules({text:'Edited synthetic story.',facts:'Old synthetic facts.',requests:'Old request.'})('app/sabeq-site.tsx');
+  const html=renderToStaticMarkup(React.createElement(MemoWizard,{...props('en'),active:true,assistantSession:null}));
+  assert.ok(html.includes('Edited synthetic story.'));assert.doesNotMatch(html,/memo-story-summary/);
+});
+test('extraction does not invent an unstated request or reuse a previous story', async () => {
+  const {understandMemoStory}=load('lib/memo-dictation.ts');const stories=[];
+  const request=async(_path,init)=>{const {transcript}=JSON.parse(init.body);stories.push(transcript);return Response.json({analysis:{facts:transcript,requests:''}});};
+  const first=await understandMemoStory(request,'Synthetic facts with no requested outcome.','en');
+  const second=await understandMemoStory(request,'A corrected synthetic story.','en');
+  assert.equal(first.fields.requests,undefined);assert.equal(second.fields.facts,stories[1]);assert.equal(stories.length,2);assert.notEqual(stories[0],stories[1]);
+});
+test('a failed extraction is not retried or converted into a fabricated success', async () => {
+  const {understandMemoStory}=load('lib/memo-dictation.ts');let calls=0;
+  await assert.rejects(understandMemoStory(async()=>{calls++;return Response.json({error:'Synthetic service failure'},{status:503});},'Retain this synthetic input.','en'),/Synthetic service failure/);
+  assert.equal(calls,1);
+});
 test('form labels are complete; source quotations and identifiers stay unchanged', () => {
   const fields={...load('lib/pleading-document.ts').pleadingFields,...load('lib/memo-dictation.ts').memoVoiceFields};
   for(const label of Object.values(fields)) assert.doesNotMatch(locale.interfaceLabel(label,'en'),/[\u0600-\u06ff]/,label);
