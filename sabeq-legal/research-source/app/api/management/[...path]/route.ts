@@ -38,7 +38,7 @@ export async function GET(request: Request) {
     if (action === "legislation-asset") return archiveAsset(url,"https://q8-ux.github.io");
     if (action === "legislation-report") return getAuditFile(url.searchParams.get("id") || "", "https://q8-ux.github.io");
     if (action === "programmer") return managementJson(await programmerAction(null, manager.email));
-    if (action === "payments") return managementJson(await sadadManagement(null, manager.email));
+    if (action === "payments") return managementJson(await sadadManagement(null, manager.email, manager, url.searchParams.get("kind") || "all"));
     if (action === "mailboxes") return managementJson(await mailboxAction(null, manager.email, Number(url.searchParams.get("offset") || 0)));
     if (action === "session") return managementJson({ manager: managerProfile(manager) });
     if (action === "snapshot") return managementJson(await managerSnapshot(manager.email));
@@ -69,7 +69,7 @@ export async function POST(request: Request) {
     }
     if (action === "logout") { await getD1().prepare("DELETE FROM management_sessions WHERE token_hash = ?").bind(manager.hash).run(); return managementJson({ ok: true }); }
     if (action === "users") { const result = await updateManagedUser(data, manager.email); await operationEvent("admin", "user-updated", "تم تحديث حساب مستخدم وخدماته"); return managementJson(result); }
-    if (action === "payments") return managementJson(await sadadManagement(data, manager.email));
+    if (action === "payments") return managementJson(await sadadManagement(data, manager.email, manager));
     if (action === "mailboxes") return managementJson(await mailboxAction(data, manager.email));
     if (action === "whatsapp") return managementJson(await whatsappAction(data, manager.email));
     if (action === "verification-email") return managementJson(await verificationEmailAction(data, manager.email));

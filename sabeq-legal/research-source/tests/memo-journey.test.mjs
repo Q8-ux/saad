@@ -87,8 +87,9 @@ test('short assistant review retains field validation, explicit approval and ser
  assert.match(wizard,/أوافق وأولّد المذكرة/);assert.match(wizard,/أوافق وأتابع للدفع والتوليد/);
  assert.match(wizard,/step === 0 \|\| assistantReview/);
  assert.match(submit,/currentPolicy.required \|\| paymentAttempt.current/);
- assert.match(submit,/if \(!\["paid", "consumed"\].includes\(payment.status\)\)/);
- assert.ok(submit.indexOf('payment.status')<submit.indexOf('runMemoGeneration'));
+ assert.match(submit,/if \(!\["paid", "consumed"\].includes\(created.status\)\)/);
+ const paidGate=submit.indexOf('created.status');
+ assert.ok(paidGate>=0 && paidGate<submit.indexOf('runMemoGeneration'));
  assert.match(submit,/if \(!memoApproved && !assistantReview\)/);
  assert.match(wizard,/!assistantReview && <label className="memo-generation-approval"/);
  assert.match(wizard,/step > 0 && !assistantReview/);

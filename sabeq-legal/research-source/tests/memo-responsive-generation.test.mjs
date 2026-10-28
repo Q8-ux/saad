@@ -25,7 +25,8 @@ test('native confirmation removed, cancel/unmount wired, memo POST excluded from
  const submit=ui.slice(ui.indexOf('async function submit(event: FormEvent<HTMLFormElement>)',ui.indexOf('function MemoWizard')),ui.indexOf('if (memo) return'));
  assert.doesNotMatch(ui,/window.confirm\(memoApprovalNotice/);assert.doesNotMatch(submit,/window.confirm/);assert.match(submit,/generationRequest.current/);assert.match(submit,/runMemoGeneration/);assert.match(submit,/method: "POST", signal/);
  assert.match(ui,/generationRequest.current\?\.abort\(\)/);assert.match(ui,/memo-generation-approval/);assert.match(ui,/generationMounted.current = false/);
- assert.match(ui,/retryableResponse = path === "\/api\/legal\/analyze-documents"/);
+ const transport=readFileSync(new URL('../lib/memo-service.ts',import.meta.url),'utf8');
+ assert.match(transport,/route === "\/api\/legal\/analyze-documents"/);
  const route=readFileSync(new URL('../app/api/legal/memo/route.ts',import.meta.url),'utf8');
  assert.ok(route.indexOf('signal.throwIfAborted();',route.indexOf('const finalMemo'))<route.indexOf('recordServiceActivity({'));
 });

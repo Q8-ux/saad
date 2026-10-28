@@ -1,5 +1,6 @@
-export type SadadCheckout = { id: string; checkoutUrl?: string | null; status: string; priceFils: number; currency: string; environment: string };
+export type SadadCheckout = { id: string; checkoutUrl?: string | null; status: string; priceFils: number; currency: string; environment: string; provider?: "sadad" | "mock"; mode?: "real" | "mock" };
 export function safeSadadCheckoutUrl(payment: SadadCheckout) {
+  if (payment.provider === "mock" || payment.environment === "mock") return null;
   try {
     const url = new URL(payment.checkoutUrl || "");
     const host = payment.environment === "sandbox" ? "sandbox.sadadpay.net" : "sadadpay.net";
