@@ -9,9 +9,27 @@ function load(path, dependencies={}) {
  return exports;
 }
 const procedure=load('../lib/procedural-position.ts');
+const {importMemoFacts}=load('../lib/memo-handoff.ts');
 const {recogniseMemoProcedure}=load('../lib/memo-journey.ts',{'./procedural-position':procedure});
 const {safeSadadCheckoutUrl,readExistingSadadCheckout}=load('../lib/sadad-client.ts');
 const facts='أنا المدعى عليه في دعوى مطالبة. استأنف المدعي الحكم.';
+test('opening a memo imports structured case facts before the raw conversation',()=>{
+ const messages=[{role:'user',content:'وقائع أولية اصطناعية'},{role:'assistant',content:'سؤال من المساعد لا يمثل واقعة'}];
+ assert.equal(importMemoFacts('',{memoPrefill:{facts:'  وقائع منظمة راجعها المستخدم  '},facts:['قائمة أقدم']},messages),'وقائع منظمة راجعها المستخدم');
+ assert.equal(importMemoFacts('',{memoPrefill:{facts:'  '},facts:[' واقعة أولى اصطناعية ','','واقعة ثانية اصطناعية']},messages),'واقعة أولى اصطناعية\nواقعة ثانية اصطناعية');
+});
+test('fallback facts come only from submitted visitor messages',()=>{
+ const messages=[{role:'assistant',content:'تفسير قانوني افتراضي لا يُستورد'},{role:'user',content:'  واقعة اصطناعية أولى  '},{role:'assistant',content:'استنتاج افتراضي لا يُستورد'},{role:'user',content:'تصحيح اصطناعي للواقعة'}];
+ assert.equal(importMemoFacts('',null,messages),'واقعة اصطناعية أولى\n\nتصحيح اصطناعي للواقعة');
+ assert.equal(importMemoFacts('',null,[messages[0]]),'');
+ assert.equal(importMemoFacts('',null,[]),'');
+});
+test('manual and document facts survive repeated openings and later assistant answers',()=>{
+ const edited='  نص عدّله المستخدم أو استخرجه من مستند اصطناعي.\nمع تصحيح يدوي.  ';
+ assert.equal(importMemoFacts(edited,{memoPrefill:{facts:'اقتراح أحدث مختلف'}},[{role:'user',content:'رسالة أخرى'}]),edited);
+ const imported=importMemoFacts('',{facts:['وقائع اصطناعية من المحادثة']});
+ assert.equal(importMemoFacts(imported,{facts:['وقائع لاحقة']}),imported);
+});
 test('story supplies the current procedural fields without discarding the draft',()=>{
  const result=recogniseMemoProcedure({facts,requests:'رفض الاستئناف',conversationTranscript:'synthetic retained conversation',clientName:'طرف اصطناعي'});
  assert.equal(result.fields.partyRole,'مستأنف ضده');assert.equal(result.fields.court,'محكمة الاستئناف');assert.equal(result.fields.conversationTranscript,'synthetic retained conversation');
@@ -46,4 +64,32 @@ test('rechecking a checkout always reads the same attempt and never creates an i
  assert.equal(calls.length,2);for(const [url,token,init] of calls){assert.equal(url,'/api/payments/sadad?id=synthetic-attempt');assert.equal(token,attempt.paymentToken);assert.equal(init.method,'GET');assert.equal(init.body,undefined);}
  await assert.rejects(readExistingSadadCheckout(async()=>Response.json({id:'other-attempt',status:'paid'}),attempt),/PAYMENT_STATUS_UNAVAILABLE/);
  await assert.rejects(readExistingSadadCheckout(async()=>Response.json({error:'unavailable'},{status:503}),attempt),/PAYMENT_STATUS_UNAVAILABLE/);
+});
+
+
+test('assistant handoff has one editable review and no second Next screen',()=>{
+ const journey=load('../lib/memo-journey.ts',{'./procedural-position':procedure});
+ assert.equal(journey.initialMemoStep(true),1);
+ assert.equal(journey.nextMemoStep(1,true),null);
+ assert.equal(journey.nextMemoStep(0,true),1,'optional documents return to the same review');
+ assert.equal(journey.initialMemoStep(false),0);
+ assert.equal(journey.nextMemoStep(0,false),1);
+ assert.equal(journey.nextMemoStep(1,false),2);
+ assert.equal(journey.nextMemoStep(2,false),null);
+});
+test('short assistant review retains field validation, explicit approval and server payment checks',()=>{
+ const ui=readFileSync(new URL('../app/sabeq-site.tsx',import.meta.url),'utf8');
+ const wizard=ui.slice(ui.indexOf('function MemoWizard'));
+ const submit=wizard.slice(wizard.indexOf('async function submit(event: FormEvent<HTMLFormElement>)'),wizard.indexOf('if (memo) return'));
+ assert.match(submit,/nextMemoStep\(step, fromAssistant\)/);
+ assert.match(submit,/if \(missing\)/);assert.match(submit,/setStep\(fromAssistant \? 1 : missing\[1\]\)/);
+ assert.ok(submit.indexOf('if (missing)')<submit.indexOf('const policyResponse'));
+ assert.match(wizard,/أوافق وأولّد المذكرة/);assert.match(wizard,/أوافق وأتابع للدفع والتوليد/);
+ assert.match(wizard,/step === 0 \|\| assistantReview/);
+ assert.match(submit,/currentPolicy.required \|\| paymentAttempt.current/);
+ assert.match(submit,/if \(!\["paid", "consumed"\].includes\(payment.status\)\)/);
+ assert.ok(submit.indexOf('payment.status')<submit.indexOf('runMemoGeneration'));
+ assert.match(submit,/if \(!memoApproved && !assistantReview\)/);
+ assert.match(wizard,/!assistantReview && <label className="memo-generation-approval"/);
+ assert.match(wizard,/step > 0 && !assistantReview/);
 });

@@ -1,0 +1,4 @@
+- [x] T1 Remove Sabeq Tools from assistant while retaining conversation controls.
+- [x] T2 Combine assistant handoff fields, fact review and explicit generation approval on one screen.
+- [ ] T3 Verify transitions, missing fields, payment and generation regressions.
+- [ ] T4 Build, publish and inspect the live primary handoff and record limits.

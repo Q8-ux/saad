@@ -16,3 +16,9 @@ export function recogniseMemoProcedure(fields: Record<string, string>, previous:
   if (next.court !== fields.court) next.courtCircuit = "";
   return { fields: next, automatic, position };
 }
+
+export function initialMemoStep(fromAssistant: boolean) { return fromAssistant ? 1 : 0; }
+export function nextMemoStep(step: number, fromAssistant: boolean): number | null {
+  if (step === 0) return 1;
+  return step === 1 && !fromAssistant ? 2 : null;
+}

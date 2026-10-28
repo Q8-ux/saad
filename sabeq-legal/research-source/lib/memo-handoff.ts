@@ -15,6 +15,12 @@ type IntakeForMemo = {
   parties?: Array<{ name: string; role: string }>;
   proceduralPosition?: { conflict: boolean; needsActor: boolean };
 };
+export function importMemoFacts(current: string, state?: Pick<IntakeForMemo, "memoPrefill" | "facts"> | null, messages: ConversationMessage[] = []) {
+  if (current.trim()) return current;
+  return state?.memoPrefill?.facts?.trim()
+    || state?.facts?.map(fact => fact.trim()).filter(Boolean).join("\n")
+    || messages.filter(message => message.role === "user").map(message => message.content.trim()).filter(Boolean).join("\n\n");
+}
 export type MemoGap = { key: string; question: string };
 const knownValue = (value: unknown, minimum = 2) => typeof value === "string" && value.trim().length >= minimum && !/^(?:غير (?:معروف|معلوم|محدد|متوفر)|لم (?:يذكر|يتحدد)|لا (?:أعرف|اعرف|أعلم|اعلم|أتذكر|اتذكر|أذكر|اذكر)|i (?:do not|don't) know|unknown|not known|معلوم نہیں|n\/a)(?:\s|$)|^[.\s…_-]+$/i.test(value.trim());
 const knownName = (value: unknown) => knownValue(value) && !/^(?:المستخدم|الزائر|أنا|انا|الموكل|المدعي|المدعى عليه|المدعية|المدعى عليها|الخصم|الطرف الآخر|الطرف الاخر|مستخدم|خصم|visitor|user|plaintiff|defendant|client)$/i.test(String(value).trim());

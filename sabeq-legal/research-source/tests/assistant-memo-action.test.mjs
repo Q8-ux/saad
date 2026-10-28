@@ -43,9 +43,9 @@ test('busy, conflicting and oversized states cannot invoke the handoff', () => {
   assert.equal(button(element).props.disabled,true);button(element).props.onClick();assert.equal(calls,0);
  }
 });
-test('the assistant mounts the action before tools and outside the intake dashboard', () => {
+test('the assistant keeps the memo action and has no Sabeq tools panel', () => {
  const source=readFileSync(new URL('../app/sabeq-site.tsx',import.meta.url),'utf8');
- assert.ok(source.indexOf('<AssistantMemoAction ')<source.indexOf('<LegalToolsPanel key={toolSession}'));
+ assert.doesNotMatch(source, /LegalToolsPanel|toolSession/);
  assert.ok(source.indexOf('<AssistantMemoAction ')<source.indexOf('{intake && <div className="intake-dashboard">'));
 });
 
