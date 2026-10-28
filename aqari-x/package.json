@@ -5,12 +5,14 @@
   "type": "module",
   "scripts": {
     "test": "node --test tests/*.test.mjs",
-    "check": "node --check public/app.mjs && node --check public/admin/admin.mjs && node --check public/i18n.mjs && node --check public/locales-dictionary.mjs && node --check public/office-bot.mjs && node --check public/theme.mjs && node --check server/index.mjs && node --check server/assistant.mjs && node --check server/openai-assistant.mjs && node --check server/openai-vault.mjs && node --check public/import-file.mjs && node --check public/media.mjs && node --check public/admin/catalog.mjs && node --check server/catalog-import.mjs && node --check server/market-findings.mjs && node --check public/generated-property-images.mjs",
+    "check": "node --check public/app.mjs && node --check public/admin/admin.mjs && node --check public/i18n.mjs && node --check public/locales-dictionary.mjs && node --check public/office-bot.mjs && node --check public/theme.mjs && node --check server/index.mjs && node --check server/assistant.mjs && node --check server/openai-assistant.mjs && node --check server/openai-vault.mjs && node --check public/import-file.mjs && node --check public/media.mjs && node --check public/admin/catalog.mjs && node --check server/catalog-import.mjs && node --check server/market-findings.mjs && node --check public/generated-property-images.mjs && node --check public/discovery.mjs && node --check public/area-map.mjs && node --check public/property-gallery.mjs && node --check public/kuwait-area-centres.mjs && node --check public/contact-redaction.mjs && node --check public/telegram-import.mjs && node --check public/admin/telegram.mjs && node --check server/telegram-source.mjs",
     "dev": "node server/local.mjs",
     "bundle": "node scripts/bundle.mjs"
   },
   "dependencies": {
     "@neon/functions": "0.11.0",
+    "htmlparser2": "10.0.0",
+    "leaflet": "1.9.4",
     "pg": "8.16.3",
     "ws": "8.22.0"
   },

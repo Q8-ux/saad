@@ -1,10 +1,17 @@
 import { CATEGORIES, TYPES, GOVERNORATES, parseMoney, duplicateKey, numberText } from '../public/core.mjs';
 
+export {redactContacts} from '../public/contact-redaction.mjs';
+import {redactContacts} from '../public/contact-redaction.mjs';
+
 export function safeSourceURL(value) {
   if (!value) return '';
   try {
     const u = new URL(value);
     if (u.protocol !== 'https:' || u.username || u.password || u.port || u.href.length > 1500) return '';
+    if (u.hostname==='t.me') {
+      if(!/^\/soogq8(?:\/[1-9][0-9]{0,9})?\/?$/i.test(u.pathname))return '';
+      u.search='';u.hash='';return u.href;
+    }
     if (!['q84sale.com','www.q84sale.com','sakan.co','api.sakan.co','kw.opensooq.com'].includes(u.hostname)) return '';
     u.search = ''; u.hash = '';
     return u.href;
@@ -12,7 +19,6 @@ export function safeSourceURL(value) {
 }
 
 const text = (v, max=180) => String(v ?? '').trim().slice(0,max);
-export const redactContacts = value => String(value||'').replace(/(?:https?:\/\/|www\.)\S+/gi,'').replace(/[+＋]?(?:[0-9٠-٩۰-۹][\s().-]?){8,}/g,'').trim();
 const number = (v, max) => {
   if (v == null || v === '') return null;
   const n = Number(numberText(v));

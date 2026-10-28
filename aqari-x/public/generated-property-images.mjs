@@ -12,7 +12,9 @@ export const GENERATED_IMAGE_LABEL='صورة مولّدة · للتوضيح';
 export const GENERATED_IMAGE_ALT='صورة عقارية مولّدة للتوضيح ولا تمثل العقار الفعلي';
 export const GENERATED_IMAGE_NOTICE='صورة مولّدة بالذكاء الاصطناعي للتجربة؛ لا تمثل العقار المعروض أو تشطيبه أو موقعه الفعلي.';
 export function generatedPropertyImage(p) {
-  if(!p||p.status!=='reference'||!catalogIds.has(p.id)||p.images?.length)return null;
+  if(!p||p.status!=='reference'||p.images?.length)return null;
+  const telegramTrial=p.source==='تيليجرام · soogQ8'&&p.sourceKind==='market-research'&&p.trialIllustration===true;
+  if(!catalogIds.has(p.id)&&!telegramTrial)return null;
   const hash=[...p.id].reduce((n,c)=>n+c.charCodeAt(0),0);
   const asset=overrides[p.id]||(p.type==='شقة'?apartments[hash%apartments.length]:types[p.type]);
   if(!asset)return null;

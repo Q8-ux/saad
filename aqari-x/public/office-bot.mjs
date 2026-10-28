@@ -1,6 +1,6 @@
-import { api, icon, toast } from './ui.mjs';
-import { getLocale, translate as t } from './i18n.mjs';
-import { escapeHTML as esc, money } from './core.mjs';
+import { api, icon, toast } from './ui.mjs?v=1.4.0';
+import { getLocale, translate as t } from './i18n.mjs?v=1.4.0';
+import { escapeHTML as esc, money } from './core.mjs?v=1.4.0';
 
 let panel, launcher, log, input, sendButton, micButton, voiceButton, status;
 let listening=false, recognition, speaking=false, pending=false, readReplies=false;

@@ -1600,6 +1600,444 @@ const marketUI = {
     "ur": "تلاش 24 اکتوبر 2026 کو کی گئی۔ یہ محدود نتائج ہیں، براہ راست فیڈ یا تمام اشتہارات نہیں۔ کارڈ کی تصاویر مصنوعی ذہانت سے تیار کردہ وضاحتی تصاویر ہیں، اصل جائیدادوں کی تصاویر نہیں۔ اصل اشتہارات کا میڈیا ماخذ کے لنک پر ہے۔"
   }
 };
+const discoveryUI = {
+  "عقاري X / الكويت": {
+    "en": "AQARI X / KUWAIT",
+    "ur": "عقاری X / کویت"
+  },
+  "ابحث عن عقارك في الكويت": {
+    "en": "Find your property in Kuwait",
+    "ur": "کویت میں اپنی جائیداد تلاش کریں"
+  },
+  "بيع، إيجار أو بدل. اختَر ما يناسبك ويتابع المكتب التفاصيل.": {
+    "en": "Buy, rent or exchange. Choose a listing and the office follows up.",
+    "ur": "خرید، کرایہ یا تبادلہ۔ جائیداد منتخب کریں، دفتر تفصیلات کی پیروی کرے گا۔"
+  },
+  "اسأل بالصوت": {
+    "en": "Ask by voice",
+    "ur": "آواز سے پوچھیں"
+  },
+  "المنطقة، المواصفات أو رقم الإعلان…": {
+    "en": "Area, features or listing ID…",
+    "ur": "علاقہ، خصوصیات یا اشتہار نمبر…"
+  },
+  "ابحث بالمنطقة أو المواصفات أو رقم الإعلان": {
+    "en": "Search by area, features or listing ID",
+    "ur": "علاقے، خصوصیات یا اشتہار نمبر سے تلاش کریں"
+  },
+  "اختصارات البحث": {
+    "en": "Quick searches",
+    "ur": "فوری تلاشیں"
+  },
+  "شقق للإيجار": {
+    "en": "Apartments for rent",
+    "ur": "کرایے کے اپارٹمنٹس"
+  },
+  "فلل للبيع": {
+    "en": "Villas for sale",
+    "ur": "فروخت کے ولا"
+  },
+  "بيوت للبيع": {
+    "en": "Houses for sale",
+    "ur": "فروخت کے مکان"
+  },
+  "أراضٍ للبيع": {
+    "en": "Land for sale",
+    "ur": "فروخت کی زمین"
+  },
+  "أراضٍ للبدل": {
+    "en": "Land for exchange",
+    "ur": "تبادلے کی زمین"
+  },
+  "مكاتب للإيجار": {
+    "en": "Offices for rent",
+    "ur": "کرایے کے دفاتر"
+  },
+  "محلات للإيجار": {
+    "en": "Shops for rent",
+    "ur": "کرایے کی دکانیں"
+  },
+  "الفلاتر المطبقة": {
+    "en": "Applied filters",
+    "ur": "لگائے گئے فلٹر"
+  },
+  "إزالة الفلتر": {
+    "en": "Remove filter",
+    "ur": "فلٹر ہٹائیں"
+  },
+  "فُهم من عبارتك:": {
+    "en": "Understood from your search:",
+    "ur": "آپ کی تلاش سے سمجھا گیا:"
+  },
+  "بيانات وصور تجريبية · تحقق من التوفر مع المكتب": {
+    "en": "Trial data and images · Confirm availability with the office",
+    "ur": "تجرباتی معلومات اور تصاویر · دستیابی دفتر سے معلوم کریں"
+  },
+  "طريقة عرض النتائج": {
+    "en": "Results view",
+    "ur": "نتائج کا انداز"
+  },
+  "عرض الخريطة": {
+    "en": "Map view",
+    "ur": "نقشے کا منظر"
+  },
+  "صفحات النتائج": {
+    "en": "Result pages",
+    "ur": "نتائج کے صفحات"
+  },
+  "الصفحة": {
+    "en": "Page",
+    "ur": "صفحہ"
+  },
+  "الحمامات على الأقل": {
+    "en": "Minimum bathrooms",
+    "ur": "کم از کم باتھ روم"
+  },
+  "أساس السعر": {
+    "en": "Price basis",
+    "ur": "قیمت کی بنیاد"
+  },
+  "الوسائط": {
+    "en": "Media",
+    "ur": "میڈیا"
+  },
+  "صور مرفقة من المعلن": {
+    "en": "Advertiser photos attached",
+    "ur": "مشتہر کی منسلک تصاویر"
+  },
+  "صورة مرفقة من المعلن": {
+    "en": "Advertiser photo",
+    "ur": "مشتہر کی تصویر"
+  },
+  "فيديو مرفق": {
+    "en": "Video attached",
+    "ur": "منسلک ویڈیو"
+  },
+  "حالة التوفر": {
+    "en": "Availability status",
+    "ur": "دستیابی کی حالت"
+  },
+  "راجع المكتب التوفر": {
+    "en": "Availability reviewed by the office",
+    "ur": "دفتر نے دستیابی کا جائزہ لیا"
+  },
+  "الأسعار على أسس مختلفة؛ اختر أساس السعر لتقارن مبالغ متجانسة.": {
+    "en": "Prices use different bases. Select a price basis to compare like amounts.",
+    "ur": "قیمتوں کی بنیادیں مختلف ہیں۔ یکساں موازنہ کے لیے قیمت کی بنیاد منتخب کریں۔"
+  },
+  "جارٍ تحميل خريطة المناطق…": {
+    "en": "Loading the area map…",
+    "ur": "علاقوں کا نقشہ لوڈ ہو رہا ہے…"
+  },
+  "استكشف مناطق الكويت": {
+    "en": "Explore areas of Kuwait",
+    "ur": "کویت کے علاقے دیکھیں"
+  },
+  "الأرقام تمثل عدد العروض في المنطقة، وليست مواقع العقارات الدقيقة.": {
+    "en": "Numbers show listing counts by area, not exact property locations.",
+    "ur": "اعداد علاقے میں اشتہارات کی تعداد بتاتے ہیں، جائیدادوں کے درست مقامات نہیں۔"
+  },
+  "عرض كل المناطق": {
+    "en": "Fit all areas",
+    "ur": "تمام علاقے دکھائیں"
+  },
+  "خريطة تجمعات المناطق في الكويت": {
+    "en": "Map of area groups in Kuwait",
+    "ur": "کویت میں علاقوں کے گروہوں کا نقشہ"
+  },
+  "تعذر تحميل بعض أجزاء الخريطة. يمكنك اختيار المنطقة من الأزرار أو متابعة القائمة.": {
+    "en": "Some map tiles could not load. Choose an area below or continue with the list.",
+    "ur": "نقشے کے کچھ حصے لوڈ نہیں ہو سکے۔ نیچے سے علاقہ منتخب کریں یا فہرست استعمال کریں۔"
+  },
+  "مناطق العروض": {
+    "en": "Listing areas",
+    "ur": "اشتہارات کے علاقے"
+  },
+  "مراكز المناطق": {
+    "en": "Approximate area centres",
+    "ur": "علاقوں کے تخمینی مراکز"
+  },
+  "تكبير الخريطة": {
+    "en": "Zoom in",
+    "ur": "نقشہ بڑا کریں"
+  },
+  "تصغير الخريطة": {
+    "en": "Zoom out",
+    "ur": "نقشہ چھوٹا کریں"
+  },
+  "تعذر تحميل الخريطة. العروض والفلاتر متاحة في القائمة أدناه.": {
+    "en": "The map could not load. Listings and filters remain available below.",
+    "ur": "نقشہ لوڈ نہیں ہو سکا۔ اشتہارات اور فلٹر نیچے فہرست میں دستیاب ہیں۔"
+  },
+  "معرض صور العقار": {
+    "en": "Property photo gallery",
+    "ur": "جائیداد کی تصاویر کی گیلری"
+  },
+  "تكبير الصورة": {
+    "en": "Enlarge photo",
+    "ur": "تصویر بڑی کریں"
+  },
+  "تعذر تحميل الصورة. يمكنك متابعة تفاصيل الإعلان.": {
+    "en": "The photo could not load. You can still view the listing details.",
+    "ur": "تصویر لوڈ نہیں ہو سکی۔ آپ اشتہار کی تفصیلات دیکھ سکتے ہیں۔"
+  },
+  "الصورة السابقة": {
+    "en": "Previous photo",
+    "ur": "پچھلی تصویر"
+  },
+  "الصورة التالية": {
+    "en": "Next photo",
+    "ur": "اگلی تصویر"
+  },
+  "اختر صورة": {
+    "en": "Choose a photo",
+    "ur": "تصویر منتخب کریں"
+  },
+  "إغلاق معرض الصور": {
+    "en": "Close gallery",
+    "ur": "گیلری بند کریں"
+  },
+  "لكل م² · محسوب من بيانات الإعلان": {
+    "en": "per m² · calculated from listing data",
+    "ur": "فی مربع میٹر · اشتہار کے اعداد سے حساب"
+  },
+  "رقم الإعلان": {
+    "en": "Listing ID",
+    "ur": "اشتہار نمبر"
+  },
+  "أضيف للمنصة": {
+    "en": "Added to platform",
+    "ur": "پلیٹ فارم پر شامل ہوا"
+  },
+  "تاريخ مراجعة التوفر": {
+    "en": "Availability review date",
+    "ur": "دستیابی کے جائزے کی تاریخ"
+  },
+  "عروض مشابهة": {
+    "en": "Similar listings",
+    "ur": "ملتے جلتے اشتہارات"
+  },
+  "من العروض المسجلة؛ تحقق من السعر والتوفر مع المكتب.": {
+    "en": "From recorded listings. Confirm price and availability with the office.",
+    "ur": "درج شدہ اشتہارات میں سے۔ قیمت اور دستیابی دفتر سے معلوم کریں۔"
+  },
+  "أبلغ المكتب عن الإعلان": {
+    "en": "Report listing to the office",
+    "ur": "اشتہار کی اطلاع دفتر کو دیں"
+  },
+  "يفتح زر المتابعة مسودة واتساب للمكتب. لا يُرسل البلاغ إلا عندما ترسله بنفسك.": {
+    "en": "Continue opens a WhatsApp draft to the office. Send it yourself to submit the report.",
+    "ur": "جاری رکھنے سے دفتر کے لیے واٹس ایپ مسودہ کھلے گا۔ اطلاع جمع کرنے کے لیے اسے خود بھیجیں۔"
+  },
+  "سبب البلاغ": {
+    "en": "Report reason",
+    "ur": "اطلاع کی وجہ"
+  },
+  "العقار غير متاح": {
+    "en": "Property unavailable",
+    "ur": "جائیداد دستیاب نہیں"
+  },
+  "بيانات غير صحيحة": {
+    "en": "Incorrect details",
+    "ur": "غلط معلومات"
+  },
+  "مشكلة في الصور": {
+    "en": "Photo issue",
+    "ur": "تصاویر میں مسئلہ"
+  },
+  "إعلان مكرر": {
+    "en": "Duplicate listing",
+    "ur": "دہرایا گیا اشتہار"
+  },
+  "سبب آخر": {
+    "en": "Another reason",
+    "ur": "دوسری وجہ"
+  },
+  "ملاحظات إضافية": {
+    "en": "Additional notes",
+    "ur": "اضافی نوٹس"
+  },
+  "متابعة عبر واتساب المكتب": {
+    "en": "Continue in office WhatsApp",
+    "ur": "دفتر کے واٹس ایپ پر جاری رکھیں"
+  },
+  "بلاغ بخصوص الإعلان": {
+    "en": "Listing report",
+    "ur": "اشتہار کے متعلق اطلاع"
+  },
+  "البحث": {
+    "en": "Search",
+    "ur": "تلاش"
+  }
+};
+
+const telegramUI = {
+  "تيليجرام · soogQ8": {
+    "en": "Telegram · soogQ8",
+    "ur": "ٹیلیگرام · soogQ8"
+  },
+  "قناة soogQ8 · تيليجرام": {
+    "en": "soogQ8 channel · Telegram",
+    "ur": "soogQ8 چینل · ٹیلیگرام"
+  },
+  "استيراد قناة تيليجرام": {
+    "en": "Import Telegram channel",
+    "ur": "ٹیلیگرام چینل درآمد کریں"
+  },
+  "جلب يدوي من المعاينة العامة أو استيراد تصدير JSON لقناة واحدة. تزال أرقام المعلنين وحساباتهم وروابط التواصل. لا تنقل الصور والفيديو تلقائياً.": {
+    "en": "Fetch the public preview manually or import one channel’s JSON export. Advertiser numbers, handles and contact links are removed. Photos and videos are not copied automatically.",
+    "ur": "عوامی پیش منظر خود حاصل کریں یا ایک چینل کا JSON ایکسپورٹ درآمد کریں۔ مشتہرین کے نمبر، اکاؤنٹ نام اور رابطے کے لنک حذف ہوتے ہیں۔ تصاویر اور ویڈیو خودکار طور پر نقل نہیں ہوتے۔"
+  },
+  "منشورات أقدم من الرقم": {
+    "en": "Posts older than ID",
+    "ur": "اس نمبر سے پرانی پوسٹس"
+  },
+  "جلب آخر المنشورات": {
+    "en": "Fetch recent posts",
+    "ur": "حالیہ پوسٹس حاصل کریں"
+  },
+  "ملف تصدير القناة · JSON": {
+    "en": "Channel export · JSON",
+    "ur": "چینل ایکسپورٹ · JSON"
+  },
+  "اختر تصدير قناة soogQ8 وحدها. يعالج الملف على جهازك؛ لا يرفع التصدير الخام.": {
+    "en": "Choose an export of soogQ8 only. The file is processed on your device; the raw export is not uploaded.",
+    "ur": "صرف soogQ8 کا ایکسپورٹ منتخب کریں۔ فائل آپ کے آلے پر پڑھی جاتی ہے، اصل ایکسپورٹ اپلوڈ نہیں ہوتا۔"
+  },
+  "من Telegram Desktop: قائمة القناة ← تصدير سجل المحادثة ← JSON. حتى 20 إعلاناً عقارياً في الدفعة من آخر 500 رسالة مفحوصة. الرسائل غير العقارية والطلبات تُتجاوز.": {
+    "en": "In Telegram Desktop: channel menu → Export chat history → JSON. Each batch contains up to 20 property offers from the last 500 examined messages. Non-property messages and wanted ads are skipped.",
+    "ur": "Telegram Desktop میں: چینل مینو ← چیٹ ہسٹری ایکسپورٹ ← JSON۔ جانچے گئے آخری 500 پیغامات سے فی بیچ زیادہ سے زیادہ 20 جائیداد کے اشتہارات۔ غیر متعلقہ پیغامات اور مطلوبہ جائیداد کی درخواستیں چھوڑ دی جاتی ہیں۔"
+  },
+  "معاينة ملف القناة": {
+    "en": "Preview channel file",
+    "ur": "چینل فائل کا پیش منظر"
+  },
+  "جارٍ جلب المعاينة العامة…": {
+    "en": "Fetching the public preview…",
+    "ur": "عوامی پیش منظر حاصل ہو رہا ہے…"
+  },
+  "اختر ملف تصدير JSON للقناة": {
+    "en": "Choose the channel JSON export",
+    "ur": "چینل کی JSON ایکسپورٹ فائل منتخب کریں"
+  },
+  "تصدير القناة أكبر من 5 ميغابايت؛ صدّر فترة أقصر": {
+    "en": "The channel export exceeds 5 MB. Export a shorter period.",
+    "ur": "چینل ایکسپورٹ 5 میگابائٹ سے بڑا ہے۔ کم مدت کا ایکسپورٹ بنائیں۔"
+  },
+  "معاينة قناة تيليجرام": {
+    "en": "Telegram channel preview",
+    "ur": "ٹیلیگرام چینل کا پیش منظر"
+  },
+  "لا توجد رسائل عقارية قابلة للاستخلاص في هذه الدفعة. لم يُحفظ أي إعلان.": {
+    "en": "No extractable property offers were found in this batch. No listing was saved.",
+    "ur": "اس بیچ میں قابل استخراج جائیداد کے اشتہارات نہیں ملے۔ کوئی اشتہار محفوظ نہیں ہوا۔"
+  },
+  "راجع إعلانات القناة": {
+    "en": "Review channel listings",
+    "ur": "چینل کے اشتہارات کا جائزہ لیں"
+  },
+  "عدد الرسائل المفحوصة": {
+    "en": "Messages examined",
+    "ur": "جانچے گئے پیغامات"
+  },
+  "مرشحة في هذه المعاينة": {
+    "en": "Candidates in this preview",
+    "ur": "اس پیش منظر میں منتخب اشتہارات"
+  },
+  "الاستخلاص أولي. راجع النوع والمنطقة والسعر وأساسه قبل الحفظ، خصوصاً المنشورات التي تجمع أكثر من عرض. تُحفظ الإعلانات قيد المراجعة، ولا تُعتمد تلقائياً.": {
+    "en": "Extraction is provisional. Review the type, area, price and basis, especially posts with multiple offers. Listings are saved for review and are not approved automatically.",
+    "ur": "استخراج ابتدائی ہے۔ قسم، علاقہ، قیمت اور بنیاد کی جانچ کریں، خاص طور پر متعدد پیشکشوں والی پوسٹس میں۔ اشتہارات جائزے کے لیے محفوظ ہوتے ہیں، خودکار طور پر منظور نہیں ہوتے۔"
+  },
+  "المنشور": {
+    "en": "Post",
+    "ur": "پوسٹ"
+  },
+  "اختر أساس السعر": {
+    "en": "Choose a price basis",
+    "ur": "قیمت کی بنیاد منتخب کریں"
+  },
+  "تاريخ المصدر": {
+    "en": "Source date",
+    "ur": "ماخذ کی تاریخ"
+  },
+  "تاريخ نشر المصدر": {
+    "en": "Source publication date",
+    "ur": "ماخذ کی اشاعت کی تاریخ"
+  },
+  "راجع المنشور الأصلي": {
+    "en": "Review original post",
+    "ur": "اصل پوسٹ دیکھیں"
+  },
+  "راجعت الحقول، والبيانات من قناة soogQ8 المحددة.": {
+    "en": "I reviewed the fields and confirm the data is from the specified soogQ8 channel.",
+    "ur": "میں نے خانوں کا جائزہ لیا ہے اور تصدیق کرتا ہوں کہ معلومات مقررہ soogQ8 چینل سے ہیں۔"
+  },
+  "ملخصات حقول فقط. لا تحفظ أرقام المعلنين أو أسماء حساباتهم أو نصوصهم الخام أو وسائطهم. النشر كتجربة أو اعتماد التوفر يتم لاحقاً من مراجعة العقار.": {
+    "en": "Only field summaries are saved, without advertiser numbers, handles, raw post text or media. Trial publication and availability approval are separate review steps.",
+    "ur": "صرف خانوں کے خلاصے محفوظ ہوتے ہیں؛ مشتہرین کے نمبر، اکاؤنٹ نام، اصل متن یا میڈیا محفوظ نہیں ہوتا۔ تجرباتی اشاعت اور دستیابی کی منظوری الگ جائزے کے مراحل ہیں۔"
+  },
+  "حفظ إعلانات القناة للمراجعة": {
+    "en": "Save channel listings for review",
+    "ur": "چینل کے اشتہارات جائزے کے لیے محفوظ کریں"
+  },
+  "اختر إعلاناً واحداً على الأقل": {
+    "en": "Select at least one listing",
+    "ur": "کم از کم ایک اشتہار منتخب کریں"
+  },
+  "نتيجة استيراد القناة": {
+    "en": "Channel import result",
+    "ur": "چینل درآمد کا نتیجہ"
+  },
+  "لجلب دفعة أقدم، استخدم رقم": {
+    "en": "For an older batch, use ID",
+    "ur": "پرانی بیچ کے لیے یہ نمبر استعمال کریں"
+  },
+  "اختر تصدير JSON لقناة واحدة من تيليجرام": {
+    "en": "Choose a JSON export of one Telegram channel",
+    "ur": "ایک ٹیلیگرام چینل کا JSON ایکسپورٹ منتخب کریں"
+  },
+  "رقم المنشور غير صالح": {
+    "en": "Invalid post ID",
+    "ur": "پوسٹ نمبر درست نہیں"
+  },
+  "تعذر قراءة منشورات القناة من المعاينة العامة. استخدم ملف تصدير JSON للقناة.": {
+    "en": "The public preview could not be read. Use the channel’s JSON export.",
+    "ur": "چینل کا عوامی پیش منظر نہیں پڑھا جا سکا۔ چینل کا JSON ایکسپورٹ استعمال کریں۔"
+  },
+  "تعذر الوصول إلى القناة حالياً. استخدم ملف تصدير JSON للقناة.": {
+    "en": "The channel is currently unreachable. Use its JSON export.",
+    "ur": "اس وقت چینل تک رسائی نہیں ہو سکی۔ اس کا JSON ایکسپورٹ استعمال کریں۔"
+  },
+  "معاينة القناة أكبر من المسموح": {
+    "en": "The channel preview exceeds the size limit",
+    "ur": "چینل کا پیش منظر مقررہ حد سے بڑا ہے"
+  },
+  "تاريخ المصدر غير صالح": {
+    "en": "Invalid source date",
+    "ur": "ماخذ کی تاریخ درست نہیں"
+  },
+  "أكد قناة المصدر ومراجعة البيانات": {
+    "en": "Confirm the source channel and data review",
+    "ur": "ماخذ چینل اور معلومات کے جائزے کی تصدیق کریں"
+  },
+  "الدفعة من إعلان واحد إلى 20 إعلاناً": {
+    "en": "A batch must contain 1 to 20 listings",
+    "ur": "ایک بیچ میں 1 سے 20 اشتہارات ہونے چاہئیں"
+  },
+  "ملخص حقول من منشور القناة. راجع المكتب لتأكيد البيانات والتوفر والتفويض.": {
+    "en": "Field summary from a channel post. Confirm details, availability and marketing authority with the office.",
+    "ur": "چینل کی پوسٹ کے خانوں کا خلاصہ۔ معلومات، دستیابی اور تشہیر کی اجازت دفتر سے تصدیق کریں۔"
+  },
+  "مصدر أضافه صاحب المشروع. تستورد الإدارة ملخصات الإعلانات العقارية بعد تنقية الأرقام وروابط التواصل ومراجعة الحقول. لا توجد مزامنة تلقائية مفعلة.": {
+    "en": "A source selected by the project owner. Staff import property summaries after removing contacts and reviewing fields. Automatic synchronisation is not enabled.",
+    "ur": "منصوبے کے مالک کا منتخب کردہ ماخذ۔ عملہ رابطے ہٹانے اور خانوں کا جائزہ لینے کے بعد جائیداد کے خلاصے درآمد کرتا ہے۔ خودکار ہم وقت سازی فعال نہیں ہے۔"
+  },
+  "عدد النتائج الظاهرة من القناة:": {
+    "en": "Visible results from the channel:",
+    "ur": "چینل سے ظاہر ہونے والے نتائج:"
+  }
+};
+
 export const translations = {
   'قراءة مختصرة للرد الطويل': {en:'Read a shortened version of this long reply',ur:'اس طویل جواب کا مختصر حصہ سنیں'},
   'مساعد ذكي وصوت سحابي': {en:'AI assistant and cloud voice',ur:'ذہین معاون اور کلاؤڈ آواز'},
@@ -1646,6 +2084,8 @@ export const translations = {
   ...policyTranslations,
   ...serverMessages,
   ...marketUI,
+  ...discoveryUI,
+  ...telegramUI,
 };
 
 // Short, reusable phrases support dynamically assembled labels and amounts.

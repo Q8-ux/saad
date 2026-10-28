@@ -9,7 +9,7 @@ import {
   commissionFils,
   parseMoney,
   searchProperties,
-} from "./core.mjs";
+} from "./core.mjs?v=1.4.0";
 import {
   $,
   $$,
@@ -29,13 +29,16 @@ import {
   initDialog,
   imageURL,
   download,
-} from "./ui.mjs";
-import { showAuth, requireAuth } from "./auth.mjs";
-import { getLocale, translate } from './i18n.mjs';
-import {prepareMedia} from './media.mjs';
-import {generatedPropertyImage,GENERATED_IMAGE_LABEL,GENERATED_IMAGE_ALT,GENERATED_IMAGE_NOTICE} from './generated-property-images.mjs';
-import {API_URL} from './config.mjs';
-import { initOfficeAssistant, openOfficeAssistant } from './office-bot.mjs';
+} from "./ui.mjs?v=1.4.0";
+import { showAuth, requireAuth } from "./auth.mjs?v=1.4.0";
+import { getLocale, translate, setLocale } from './i18n.mjs?v=1.4.0';
+import {prepareMedia} from './media.mjs?v=1.4.0';
+import {generatedPropertyImage,GENERATED_IMAGE_LABEL,GENERATED_IMAGE_ALT,GENERATED_IMAGE_NOTICE} from './generated-property-images.mjs?v=1.4.0';
+import {API_URL} from './config.mjs?v=1.4.0';
+import {QUICK_SEARCHES,PRICE_BASES,filterEntries,pageSlice,salePricePerMetre,similarProperties} from './discovery.mjs?v=1.4.0';
+import {mountAreaMap} from './area-map.mjs?v=1.4.0';
+import {galleryHTML,mountGallery} from './property-gallery.mjs?v=1.4.0';
+import { initOfficeAssistant, openOfficeAssistant } from './office-bot.mjs?v=1.4.0';
 const state = {
   view: "home",
   properties: [],
@@ -47,10 +50,12 @@ const state = {
   filters: {...Object.fromEntries(new URLSearchParams(location.search)),lang:getLocale()},
   saved: readIds("aqari-saved"),
   compare: readIds("aqari-compare").slice(0, 3),
-  layout: "grid",
+  layout: ["grid","list","map"].includes(new URLSearchParams(location.search).get("layout"))?new URLSearchParams(location.search).get("layout"):"grid",
+  page: Number(new URLSearchParams(location.search).get("page"))||1,
   advanced: false,
   connected: false,
 };
+let areaMap=null,mapGeneration=0;
 function readIds(key) {
   try {
     const arr = JSON.parse(localStorage.getItem(key) || "[]");
@@ -96,7 +101,7 @@ function generatedPropertyFigure(p) {
 function card(p, i = 0) {
   const saved = state.saved.includes(p.id),
     chosen = state.compare.includes(p.id);
-  return `<article class="property-card" data-id="${esc(p.id)}"><div class="property-media" data-action="details" data-id="${esc(p.id)}" role="button" tabindex="0" aria-label="تفاصيل ${esc(p.title)}">${propertyCardImage(p,i)}<div class="card-flags"><span class="badge">${esc(p.category)}</span>${p.status === "reference" ? `<span class="badge reference">${p.sourceKind === "market-research" ? "رصد تجريبي" : "بيانات أولية"}</span>` : p.status !== "active" ? `<span class="badge ${esc(p.status)}">${esc(statusLabel(p.status))}</span>` : ""}</div><button class="save-button ${saved ? "saved" : ""}" data-action="save" data-id="${esc(p.id)}" aria-label="${saved ? "إزالة من" : "إضافة إلى"} المفضلة" aria-pressed="${saved}">${icon("heart")}</button></div><div class="property-body"><div class="property-location">${icon("pin")} ${esc(p.location)}</div>${provenance(p)}<h2 class="property-title"><button data-action="details" data-id="${esc(p.id)}">${esc(p.title)}</button></h2><div class="price-row"><span class="price">${esc(money(p.priceFils))}</span>${p.priceFils !== null ? `<span class="price-unit">${esc(priceUnit(p))}</span>` : ""}</div><div class="property-specs"><span>${icon("building")}${esc(p.type)}</span>${p.bedrooms ? `<span>${icon("bed")}${p.bedrooms} غرف</span>` : ""}${p.bathrooms ? `<span>${icon("bath")}${p.bathrooms}</span>` : ""}${p.area ? `<span>${icon("area")}${p.area} م²</span>` : "<span>المساحة غير محددة</span>"}</div><div class="card-bottom"><button class="compare-toggle ${chosen ? "chosen" : ""}" data-action="compare-toggle" data-id="${esc(p.id)}" aria-pressed="${chosen}">${icon(chosen ? "check" : "compare")}${chosen ? "أُضيف للمقارنة" : "أضف للمقارنة"}</button><button class="card-contact" data-action="whatsapp" data-id="${esc(p.id)}">${icon("whatsapp")} استفسر الآن</button></div></div></article>`;
+  return `<article class="property-card" data-id="${esc(p.id)}"><div class="property-media"><button class="property-image-button" data-action="details" data-id="${esc(p.id)}" aria-label="تفاصيل ${esc(p.title)}">${propertyCardImage(p,i)}</button><div class="card-flags"><span class="badge">${esc(p.category)}</span>${p.status === "reference" ? `<span class="badge reference">${p.sourceKind === "market-research" ? "رصد تجريبي" : "بيانات أولية"}</span>` : p.status !== "active" ? `<span class="badge ${esc(p.status)}">${esc(statusLabel(p.status))}</span>` : ""}</div><button class="save-button ${saved ? "saved" : ""}" data-action="save" data-id="${esc(p.id)}" aria-label="${saved ? "إزالة من" : "إضافة إلى"} المفضلة" aria-pressed="${saved}">${icon("heart")}</button></div><div class="property-body"><div class="property-location">${icon("pin")} ${esc(p.location)}</div>${provenance(p)}<h2 class="property-title"><button data-action="details" data-id="${esc(p.id)}">${esc(p.title)}</button></h2><div class="price-row"><span class="price">${esc(money(p.priceFils))}</span>${p.priceFils !== null ? `<span class="price-unit">${esc(priceUnit(p))}</span>` : ""}</div><div class="property-specs"><span>${icon("building")}${esc(p.type)}</span>${p.bedrooms ? `<span>${icon("bed")}${p.bedrooms} غرف</span>` : ""}${p.bathrooms ? `<span>${icon("bath")}${p.bathrooms}</span>` : ""}${p.area ? `<span>${icon("area")}${p.area} م²</span>` : "<span>المساحة غير محددة</span>"}</div><div class="card-bottom"><button class="compare-toggle ${chosen ? "chosen" : ""}" data-action="compare-toggle" data-id="${esc(p.id)}" aria-pressed="${chosen}">${icon(chosen ? "check" : "compare")}${chosen ? "أُضيف للمقارنة" : "أضف للمقارنة"}</button><button class="card-contact" data-action="whatsapp" data-id="${esc(p.id)}">${icon("whatsapp")} استفسر الآن</button></div></div></article>`;
 }
 function provenance(p) {
   if (!p.sourceKind) return '';
@@ -125,13 +130,16 @@ function statusLabel(s) {
   );
 }
 function renderList(root, properties) {
-  root.innerHTML = properties.length
-    ? `<div class="property-grid ${state.layout === "list" ? "list-mode" : ""}">${properties.map(card).join("")}</div>`
-    : empty(
-        "لا توجد عروض مطابقة",
-        "جرّب منطقة أخرى أو خفف السعر وعدد الغرف. يمكنك تسجيل طلبك ليتابعه المكتب.",
-        '<button class="btn primary" data-action="request">سجّل طلبك</button>',
-      );
+  const page=pageSlice(properties,state.page);
+  state.page=page.current;
+  root.innerHTML=properties.length?`<div class="property-grid ${state.layout==='list'||state.layout==='map'?'list-mode':''}">${page.items.map(card).join('')}</div><nav class="result-pagination" aria-label="صفحات النتائج"><button type="button" class="btn secondary small" data-action="result-page" data-value="${page.current-1}" ${page.current===1?'disabled':''}>السابق</button><span class="pagination-summary" aria-live="polite"><bdi>${page.start}–${page.end} / ${page.total}</bdi><small><span>الصفحة</span> <bdi>${page.current} / ${page.pages}</bdi></small></span><button type="button" class="btn secondary small" data-action="result-page" data-value="${page.current+1}" ${page.current===page.pages?'disabled':''}>التالي</button></nav>`:empty('لا توجد عروض مطابقة','جرّب منطقة أخرى أو خفف السعر وعدد الغرف. يمكنك تسجيل طلبك ليتابعه المكتب.','<div class="form-actions"><button class="btn primary" data-action="request">سجّل طلبك</button><button class="btn secondary" data-action="reset-filters">مسح الفلاتر</button></div>');
+}
+function searchURL(replace=false) {
+  const params=new URLSearchParams(Object.entries(state.filters).filter(([k,v])=>v!==''&&v!=null&&!['page','layout'].includes(k)));
+  if(state.page>1)params.set('page',state.page);
+  if(state.layout!=='grid')params.set('layout',state.layout);
+  const url=location.pathname+(params.size?'?'+params:'')+location.hash;
+  if(url!==location.pathname+location.search+location.hash)history[replace?'replaceState':'pushState'](null,'',url);
 }
 function updateAccount() {
   const s = getSession();
@@ -156,36 +164,22 @@ function updateNav() {
   closeMenu();
 }
 function renderHome() {
-  $("#page-content").innerHTML =
-    `<section class="hero"><div><span class="eyebrow">بيع · إيجار · بدل</span><h1>العقار المناسب.<br><span>بالتفاصيل التي تهمك.</span></h1><p>ابحث، قارن، واترك للمكتب متابعة التفاصيل.</p></div><div class="hero-art">${architecture("عمارة", 0)}<span class="art-label">AQARI X / KUWAIT</span></div></section><form id="search-form" class="search-box">${icon("search")}<input id="query-input" name="q" value="${esc(state.filters.q || "")}" placeholder="شقة بالجابرية 3 غرف بحدود 500…" aria-label="ابحث بالمنطقة أو المواصفات"><button class="btn primary" type="submit">ابحث</button></form><div class="search-tools"><button class="btn ghost small" id="advanced-toggle" aria-expanded="${state.advanced}">${icon("filter")} بحث متقدم</button><button class="btn ghost small" data-action="save-search">${icon("heart")} احفظ البحث</button><button class="text-btn" data-action="reset-filters">مسح الفلاتر</button></div><div id="advanced-panel" ${state.advanced ? "" : "hidden"}>${advancedHTML()}</div><div id="intent-chips" class="chips"></div><div class="reference-note">${icon("clock")} نسخة تجريبية: تشمل بيانات المكتب ونتائج رصد خارجية محددة. لا تمثل جميع إعلانات السوق، ولم يؤكد المكتب توفر العروض الخارجية أو تفويض تسويقها.</div><div class="result-toolbar"><div class="category-tabs" role="group" aria-label="القسم">${["", ...CATEGORIES].map((c) => `<button class="tab ${(!state.filters.category && !c) || state.filters.category === c ? "active" : ""}" data-action="category" data-value="${esc(c)}">${c || "كل العروض"}</button>`).join("")}</div><span class="result-count" id="result-count"></span><div class="view-switch"><button class="icon-btn ${state.layout === "grid" ? "selected" : ""}" data-action="layout" data-value="grid" aria-label="عرض البطاقات">${icon("grid")}</button><button class="icon-btn ${state.layout === "list" ? "selected" : ""}" data-action="layout" data-value="list" aria-label="عرض القائمة">${icon("list")}</button></div></div><div id="results"></div>`;
-  $("#search-form").onsubmit = (e) => {
-    e.preventDefault();
-    state.filters.q = $("#query-input").value;
-    applyFilters();
+  areaMap?.destroy();areaMap=null;const generation=++mapGeneration;
+  $('#page-content').innerHTML=`<section class="discovery-heading"><div><span class="eyebrow">عقاري X / الكويت</span><h1>ابحث عن عقارك في الكويت</h1><p>بيع، إيجار أو بدل. اختَر ما يناسبك ويتابع المكتب التفاصيل.</p></div><button class="btn secondary small discovery-assistant" data-action="open-assistant">${icon('mic')} اسأل بالصوت</button></section><form id="search-form" class="search-box">${icon('search')}<input id="query-input" name="q" list="kuwait-area-suggestions" autocomplete="off" value="${esc(state.filters.q||'')}" placeholder="المنطقة، المواصفات أو رقم الإعلان…" aria-label="ابحث بالمنطقة أو المواصفات أو رقم الإعلان"><datalist id="kuwait-area-suggestions">${AREAS.map(a=>`<option value="${esc(translate(a.area))}"></option>`).join('')}</datalist><button class="btn primary" type="submit">ابحث</button></form><div class="quick-searches" role="group" aria-label="اختصارات البحث">${QUICK_SEARCHES.map((q,i)=>`<button type="button" class="quick-search ${state.filters.type===q.type&&state.filters.category===q.category?'active':''}" data-action="quick-search" data-value="${i}" aria-pressed="${state.filters.type===q.type&&state.filters.category===q.category}">${icon(q.icon)} ${esc(q.label)}</button>`).join('')}</div><div class="search-tools"><button class="btn secondary small" id="advanced-toggle" aria-expanded="${state.advanced}" aria-controls="advanced-panel">${icon('filter')} بحث متقدم <span id="filter-count" class="filter-count"></span></button><button class="btn ghost small" data-action="save-search">${icon('heart')} احفظ البحث</button><button class="text-btn" data-action="reset-filters">مسح الفلاتر</button></div><div id="advanced-panel" ${state.advanced?'':'hidden'}>${advancedHTML()}</div><div id="active-filters" class="chips active-filters" aria-label="الفلاتر المطبقة"></div><div id="intent-chips" class="chips intent-chips"></div><details class="reference-disclosure"><summary>بيانات وصور تجريبية · تحقق من التوفر مع المكتب</summary><p>نسخة تجريبية: تشمل بيانات المكتب ونتائج رصد خارجية محددة. لا تمثل جميع إعلانات السوق، ولم يؤكد المكتب توفر العروض الخارجية أو تفويض تسويقها.</p></details><div class="result-toolbar"><div class="category-tabs" role="group" aria-label="القسم">${['',...CATEGORIES].map(c=>`<button class="tab ${(!state.filters.category&&!c)||state.filters.category===c?'active':''}" data-action="category" data-value="${esc(c)}" aria-pressed="${(!state.filters.category&&!c)||state.filters.category===c}">${c||'كل العروض'}</button>`).join('')}</div><div class="results-controls"><span class="result-count" id="result-count" role="status"></span><label class="sort-control"><span class="sr-only">ترتيب النتائج</span><select id="result-sort" aria-label="ترتيب النتائج"><option value="newest">الأحدث إضافة</option><option value="price-asc">السعر من الأقل</option><option value="price-desc">السعر من الأعلى</option><option value="area-desc">المساحة من الأكبر</option></select></label><div class="view-switch" role="group" aria-label="طريقة عرض النتائج">${[['grid','grid','عرض البطاقات'],['list','list','عرض القائمة'],['map','pin','عرض الخريطة']].map(([v,i,label])=>`<button type="button" class="icon-btn ${state.layout===v?'selected':''}" data-action="layout" data-value="${v}" aria-label="${label}" aria-pressed="${state.layout===v}">${icon(i)}</button>`).join('')}</div></div></div><section id="area-map" class="area-map" ${state.layout==='map'?'':'hidden'}></section><p id="price-sort-note" class="hint" hidden>الأسعار على أسس مختلفة؛ اختر أساس السعر لتقارن مبالغ متجانسة.</p><div id="results"></div>`;
+  $('#result-sort').value=state.filters.sort||'newest';
+  $('#result-sort').onchange=e=>{state.filters.sort=e.target.value;$('#advanced-form [name=sort]').value=e.target.value;applyFilters();};
+  $('#search-form').onsubmit=e=>{e.preventDefault();state.filters.q=$('#query-input').value;applyFilters();};
+  $('#advanced-toggle').onclick=()=>{state.advanced=!state.advanced;$('#advanced-panel').hidden=!state.advanced;$('#advanced-toggle').setAttribute('aria-expanded',state.advanced);};
+  $('#advanced-form').onsubmit=e=>{e.preventDefault();state.filters={...state.filters,...formValues(e.target)};$('#result-sort').value=state.filters.sort||'newest';applyFilters();};
+  $('#advanced-form [name=governorate]').onchange=e=>{
+    const select=$('#advanced-form [name=area]');select.innerHTML='<option value="">كل المناطق</option>'+(e.target.value?GOVERNORATES[e.target.value]:AREAS.map(a=>a.area)).map(a=>`<option>${esc(a)}</option>`).join('');
   };
-  $("#advanced-toggle").onclick = () => {
-    state.advanced = !state.advanced;
-    $("#advanced-panel").hidden = !state.advanced;
-    $("#advanced-toggle").setAttribute("aria-expanded", state.advanced);
-  };
-  $("#advanced-form").onsubmit = (e) => {
-    e.preventDefault();
-    state.filters = { ...state.filters, ...formValues(e.target) };
-    applyFilters();
-  };
-  $("#advanced-form [name=governorate]").onchange = (e) => {
-    const select = $("#advanced-form [name=area]");
-    select.innerHTML =
-      '<option value="">كل المناطق</option>' +
-      (e.target.value ? GOVERNORATES[e.target.value] : AREAS.map((a) => a.area))
-        .map((a) => `<option>${esc(a)}</option>`)
-        .join("");
-  };
-  applyFilters(false);
+  applyFilters(false,false);
+  if(state.layout==='map')mountAreaMap($('#area-map'),searchProperties(state.properties,state.filters).properties,area=>{state.filters.area=area;state.page=1;renderHome();searchURL();}).then(controller=>{if(generation!==mapGeneration||state.view!=='home'){controller.destroy();return;}areaMap=controller;areaMap.update(searchProperties(state.properties,state.filters).properties);});
 }
 function advancedHTML() {
   const f = state.filters;
-  return `<form id="advanced-form" class="advanced-filters"><div class="form-grid three">${selectField("governorate", "المحافظة", Object.keys(GOVERNORATES), f.governorate)}${selectField("area", "المنطقة", f.governorate ? GOVERNORATES[f.governorate] : AREAS.map((a) => a.area), f.area)}${selectField("type", "نوع العقار", TYPES, f.type)}${selectField("source", "مصدر الإعلان", [...new Set(state.properties.map(p=>p.source).filter(Boolean))], f.source)}${selectField("origin", "نطاق البحث", [["market","الرصد الخارجي"],["office","بيانات المكتب"]], f.origin)}${field("minPrice", "السعر من · د.ك", "text", f.minPrice || "", 'inputmode="decimal"')}${field("maxPrice", "السعر إلى · د.ك", "text", f.maxPrice || "", 'inputmode="decimal"')}${selectField("bedrooms", "غرف النوم على الأقل", [1, 2, 3, 4, 5, 6, 7, 8], f.bedrooms)}${field("minArea", "المساحة من · م²", "number", f.minArea || "", 'min="0"')}${field("maxArea", "المساحة إلى · م²", "number", f.maxArea || "", 'min="0"')}${selectField("position", "مواصفة إضافية", FEATURE_OPTIONS, f.position)}${selectField(
+  return `<form id="advanced-form" class="advanced-filters"><div class="form-grid three">${selectField("governorate", "المحافظة", Object.keys(GOVERNORATES), f.governorate)}${selectField("area", "المنطقة", f.governorate ? GOVERNORATES[f.governorate] : AREAS.map((a) => a.area), f.area)}${selectField("type", "نوع العقار", TYPES, f.type)}${selectField("source", "مصدر الإعلان", [...new Set(state.properties.map(p=>p.source).filter(Boolean))], f.source)}${selectField("origin", "نطاق البحث", [["market","الرصد الخارجي"],["office","بيانات المكتب"]], f.origin)}${field("minPrice", "السعر من · د.ك", "text", f.minPrice || "", 'inputmode="decimal"')}${field("maxPrice", "السعر إلى · د.ك", "text", f.maxPrice || "", 'inputmode="decimal"')}${selectField("bedrooms", "غرف النوم على الأقل", [1, 2, 3, 4, 5, 6, 7, 8], f.bedrooms)}${field("minArea", "المساحة من · م²", "number", f.minArea || "", 'min="0"')}${field("maxArea", "المساحة إلى · م²", "number", f.maxArea || "", 'min="0"')}${selectField("position", "مواصفة إضافية", FEATURE_OPTIONS, f.position)}${selectField('bathrooms','الحمامات على الأقل',[1,2,3,4,5,6],f.bathrooms)}${selectField('priceBasis','أساس السعر',PRICE_BASES,f.priceBasis)}${selectField('media','الوسائط',[['photos','صور مرفقة من المعلن'],['video','فيديو مرفق']],f.media)}${selectField('verified','حالة التوفر',[['yes','راجع المكتب التوفر']],f.verified)}${selectField(
     "sort",
     "ترتيب النتائج",
     [
@@ -198,37 +192,23 @@ function advancedHTML() {
     null,
   )}</div><p class="hint">عند تحديد السعر أو المساحة، تستبعد العروض التي تفتقد هذه البيانات. سعر البدل هو الفرق، وإيجار الوحدة يوضح بجانب السعر.</p><div class="form-actions"><button class="btn primary" type="submit">تطبيق البحث</button></div></form>`;
 }
-function applyFilters(updateURL = true) {
-  state.filters.lang=getLocale();
-  const { properties, intent } = searchProperties(
-    state.properties,
-    state.filters,
-  );
-  $("#result-count").textContent = `${properties.length} عقار`;
-  $("#intent-chips").innerHTML = intent.chips
-    .map((c) => `<span class="chip">${esc(c)}</span>`)
-    .join("");
-  renderList($("#results"), properties);
-  if (updateURL) {
-    const params = new URLSearchParams(
-      Object.fromEntries(
-        Object.entries(state.filters).filter(([k, v]) => v !== ""),
-      ),
-    );
-    history.replaceState(
-      null,
-      "",
-      location.pathname + (params.size ? "?" + params : ""),
-    );
-  }
-  $$("[data-action=category]").forEach((b) =>
-    b.classList.toggle(
-      "active",
-      (state.filters.category || "") === b.dataset.value,
-    ),
-  );
+function applyFilters(updateURL=true,resetPage=true) {
+  state.filters.lang=getLocale();if(resetPage)state.page=1;
+  const {properties,intent}=searchProperties(state.properties,state.filters);
+  $('#result-count').textContent=`${properties.length} عقار`;
+  $('#intent-chips').innerHTML=intent.chips.length?`<span class="hint">فُهم من عبارتك:</span>${intent.chips.map(c=>`<span class="chip">${esc(c)}</span>`).join('')}`:'';
+  const entries=filterEntries(state.filters);
+  $('#active-filters').innerHTML=entries.map(({key,label,value})=>`<button type="button" class="chip filter-chip" data-action="remove-filter" data-value="${key}" aria-label="${esc(translate('إزالة الفلتر')+': '+translate(label))}"><span>${esc(translate(label))}: ${esc(translate(value))}</span>${icon('close')}</button>`).join('');
+  $('#filter-count').textContent=entries.length||'';
+  $('#price-sort-note').hidden=!String(state.filters.sort).startsWith('price')||new Set(properties.map(p=>p.priceBasis)).size<2;
+  renderList($('#results'),properties);areaMap?.update(properties);
+  if(updateURL)searchURL();
+  $$('[data-action=category]').forEach(b=>{const active=(state.filters.category||'')===b.dataset.value;b.classList.toggle('active',active);b.setAttribute('aria-pressed',active);});
+  $$('[data-action=quick-search]').forEach(b=>{const q=QUICK_SEARCHES[b.dataset.value],active=state.filters.type===q.type&&state.filters.category===q.category;b.classList.toggle('active',active);b.setAttribute('aria-pressed',active);});
 }
 async function switchView(view) {
+  if(view!==state.view)state.page=1;
+  if(view!=="home"){areaMap?.destroy();areaMap=null;mapGeneration++;}
   state.view = view;
   updateNav();
   const content = $("#page-content");
@@ -342,7 +322,7 @@ async function askAssistant(message) {
 }
 function renderSources() {
   const market=state.properties.filter(p=>p.sourceKind==='market-research');
-  const marketSources=[['4Sale','https://www.q84sale.com/ar/property'],['سكن','https://sakan.co/ar'],['السوق المفتوح','https://kw.opensooq.com/ar/عقارات']];
+  const marketSources=[['4Sale','https://www.q84sale.com/ar/property'],['سكن','https://sakan.co/ar'],['السوق المفتوح','https://kw.opensooq.com/ar/عقارات'],['تيليجرام · soogQ8','https://t.me/soogQ8']];
   const sourcePanel=`<section class="section-box"><span class="eyebrow">رصد السوق التجريبي</span><h2>${market.length} نتيجة رصد</h2><p>بحث أُجري في 24 أكتوبر 2026. هذه دفعة محددة من نتائج البحث، وليست تغذية مباشرة أو حصراً لجميع العروض. صور البطاقات مولّدة للتجربة ولا تمثل العقارات الفعلية. وسائط الإعلانات الأصلية في رابط المصدر.</p><div class="market-source-grid">${marketSources.map(([name,url])=>`<article class="market-source"><h3>${esc(name)}</h3><strong>${market.filter(p=>p.source===name).length}</strong><small>نتائج داخل المنصة</small><button class="btn secondary small" data-action="source-results" data-value="${esc(name)}">عرض النتائج</button><a class="text-btn" href="${esc(url)}" target="_blank" rel="noopener noreferrer">افتح المصدر</a></article>`).join('')}</div><p class="fineprint">التواصل داخل المنصة مع المكتب فقط. ظهور النتيجة لا يعني أن المكتب مفوض بتسويق العقار. الإعلانات التي تبين توقفها استبعدت.</p></section>`;
   const sources = [
     [
@@ -384,7 +364,7 @@ function renderSources() {
       "رصد السوق ومصادر البحث",
       "بحث المكتب يشمل المحافظات الست ومناطقها. الاستيراد الخارجي يمر بمراجعة المصدر والتكرار والتوفر.",
     ) +
-    sourcePanel + `<section class="section-box">${sources.map(([name, text, url, status], i) => `<article class="source-item"><span class="source-number">0${i + 1}</span><div><h3>${name}</h3><p>${text}</p><a href="${esc(url)}" target="_blank" rel="noopener noreferrer">افتح المصدر ${icon("arrow")}</a><span class="source-status">${status}</span></div></article>`).join("")}</section><div class="notice">لا تُجمع أرقام العملاء أو تعليقاتهم الخاصة تلقائياً. استيراد إعلان لا يجعله موثق الملكية أو متاحاً حالياً.</div>`;
+    sourcePanel + `<section class="section-box"><h2>قناة soogQ8 · تيليجرام</h2><p>مصدر أضافه صاحب المشروع. تستورد الإدارة ملخصات الإعلانات العقارية بعد تنقية الأرقام وروابط التواصل ومراجعة الحقول. لا توجد مزامنة تلقائية مفعلة.</p><p class="fineprint">عدد النتائج الظاهرة من القناة: <bdi>${market.filter(p=>p.source==='تيليجرام · soogQ8').length}</bdi></p></section><section class="section-box">${sources.map(([name, text, url, status], i) => `<article class="source-item"><span class="source-number">0${i + 1}</span><div><h3>${name}</h3><p>${text}</p><a href="${esc(url)}" target="_blank" rel="noopener noreferrer">افتح المصدر ${icon("arrow")}</a><span class="source-status">${status}</span></div></article>`).join("")}</section><div class="notice">لا تُجمع أرقام العملاء أو تعليقاتهم الخاصة تلقائياً. استيراد إعلان لا يجعله موثق الملكية أو متاحاً حالياً.</div>`;
 }
 async function renderMine() {
   const content = $("#page-content");
@@ -438,31 +418,21 @@ async function renderRequests() {
   $("#request-content").innerHTML =
     `<section class="section-box"><h2>الطلبات العقارية</h2>${r.requests.length ? r.requests.map((x) => `<article class="request-item"><span class="badge ${esc(x.status)}">${statusLabel(x.status)}</span><h3>${esc([x.data.type, x.data.category, x.data.area].filter(Boolean).join(" · ") || "استفسار عقاري")}</h3><p>${esc(x.data.notes || "يتابع المكتب تفاصيل الطلب.")}</p><p>الميزانية: ${esc(money(x.data.maxPriceFils))}</p></article>`).join("") : '<p class="muted">لم تسجل أي طلب بعد.</p>'}</section><section class="section-box"><h2>المواعيد · توقيت الكويت</h2>${a.appointments.length ? a.appointments.map((x) => `<article class="request-item"><div class="row"><strong>${dateLabel(x.slot)}</strong><span class="badge ${esc(x.status)}">${statusLabel(x.status)}</span></div><p>${esc(x.title || "زيارة المكتب")}</p></article>`).join("") : '<p class="muted">لا توجد مواعيد مسجلة.</p>'}</section><section class="section-box"><h2>البحوث المحفوظة</h2><p class="fineprint">تحدّث أعداد المطابقات عند فتح هذه الصفحة. لم يفعل إرسال تنبيهات بالبريد أو الواتساب.</p>${s.searches.length ? s.searches.map((x) => `<div class="request-item row"><div><strong>${esc(x.label)}</strong><p>${x.count} عرض مطابق حالياً</p></div><button class="btn secondary small" data-action="load-search" data-filters="${esc(JSON.stringify(x.filters))}">عرض النتائج</button></div>`).join("") : '<p class="muted">احفظ بحثاً من صفحة العقارات ليظهر هنا.</p>'}</section>`;
 }
+function similarHTML(p) {
+  const similar=similarProperties(state.properties,p);if(!similar.length)return '';
+  return `<section class="similar-listings"><h3>عروض مشابهة</h3><p class="hint">من العروض المسجلة؛ تحقق من السعر والتوفر مع المكتب.</p>${similar.map(x=>`<button class="similar-listing" data-action="details" data-id="${esc(x.id)}"><span><strong>${esc(x.title)}</strong><small>${esc(x.location)}</small></span><span><bdi>${esc(money(x.priceFils))}</bdi><small>${esc(priceUnit(x))}</small></span></button>`).join('')}</section>`;
+}
 async function showDetails(id) {
   try {
     const { property: p } = await api("/properties/" + encodeURIComponent(id));
     track("detail", p.id);
     openDialog(
       "تفاصيل العقار",
-      `${p.images?.length ? `<div class="detail-gallery">${p.images.map((im) => `<img ${["active", "reference"].includes(p.status) ? `src="${imageURL(im)}"` : `data-private-image="${esc(im)}"`} alt="صورة للعقار مرفقة من المعلن">`).join("")}</div>` : generatedPropertyFigure(p) || `<div class="detail-blank">${architecture(p.type)}</div><p class="hint">رسم توضيحي للواجهة؛ لم ترفق صور للعقار.</p>`}<div class="row"><span class="badge">${esc(p.category)} · ${esc(p.type)}</span><button class="icon-btn" data-action="share" data-id="${esc(p.id)}" aria-label="مشاركة العقار">${icon("share")}</button></div><h3 class="detail-title">${esc(p.title)}</h3><div class="property-location">${icon("pin")}${esc(p.location)}</div><div class="price-row"><strong class="price">${esc(money(p.priceFils))}</strong><span class="price-unit">${p.priceFils === null ? "" : esc(priceUnit(p))}</span></div>${p.status === "reference" ? '<div class="notice warning">عرض تجريبي أو أولي؛ يحتاج السعر والتوفر والتفويض تأكيداً من المكتب.</div>' : ""}<div class="detail-meta"><div><small>المساحة</small><strong>${p.area ? `${p.area} م²` : "غير مذكورة"}</strong></div><div><small>غرف النوم</small><strong>${p.bedrooms || "غير مذكورة"}</strong></div><div><small>دورات المياه</small><strong>${p.bathrooms || "غير مذكورة"}</strong></div></div><div class="chips">${(p.features || []).map((x) => `<span class="chip">${esc(x)}</span>`).join("")}</div>${provenance(p)}${p.sourceUrl ? `<p><a class="text-btn" href="${esc(p.sourceUrl)}" target="_blank" rel="noopener noreferrer">افتح الإعلان الأصلي ووسائطه ${icon("arrow")}</a></p>` : ""}${p.researchNote ? `<p class="notice warning">${esc(p.researchNote)}</p>` : ""}${(p.videos||[]).length ? `<div class="detail-videos">${p.videos.map(id=>`<video controls preload="none" playsinline src="${API_URL}/media/${esc(id)}" aria-label="فيديو العقار"></video>`).join("")}</div>` : ""}<h3>عن العقار</h3><p class="detail-content">${esc(p.description || "لم يرفق وصف إضافي.")}</p><a class="text-btn" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.location + " الكويت")}" target="_blank" rel="noopener noreferrer">${icon("pin")} البحث عن المنطقة على الخريطة</a><p class="fineprint">الخريطة بحث باسم المنطقة ولا تحدد موقع العقار الدقيق أو تثبت الملكية.</p><div class="detail-actions"><button class="btn primary" data-action="whatsapp" data-id="${esc(p.id)}">${icon("whatsapp")} تواصل مع المكتب</button><button class="btn secondary" data-action="appointment" data-id="${esc(p.id)}">${icon("calendar")} طلب معاينة</button><button class="btn ghost" data-action="request" data-id="${esc(p.id)}">سجّل اهتمامك</button><button class="btn ghost" data-action="print">طباعة / PDF</button></div>`,
+      `${galleryHTML(p)||`<div class="detail-blank">${architecture(p.type)}</div><p class="hint">رسم توضيحي للواجهة؛ لم ترفق صور للعقار.</p>`}<div class="row"><span class="badge">${esc(p.category)} · ${esc(p.type)}</span><button class="icon-btn" data-action="share" data-id="${esc(p.id)}" aria-label="مشاركة العقار">${icon("share")}</button></div><h3 class="detail-title">${esc(p.title)}</h3><div class="property-location">${icon("pin")}${esc(p.location)}</div><div class="price-row"><strong class="price">${esc(money(p.priceFils))}</strong><span class="price-unit">${p.priceFils === null ? "" : esc(priceUnit(p))}</span></div>${salePricePerMetre(p)!==null?`<p class="unit-price"><strong>${esc(money(salePricePerMetre(p)))}</strong> <span>لكل م² · محسوب من بيانات الإعلان</span></p>`:''}${p.status === "reference" ? '<div class="notice warning">عرض تجريبي أو أولي؛ يحتاج السعر والتوفر والتفويض تأكيداً من المكتب.</div>' : ""}<div class="detail-meta"><div><small>المساحة</small><strong>${p.area ? `${p.area} م²` : "غير مذكورة"}</strong></div><div><small>غرف النوم</small><strong>${p.bedrooms || "غير مذكورة"}</strong></div><div><small>دورات المياه</small><strong>${p.bathrooms || "غير مذكورة"}</strong></div></div><div class="chips">${(p.features || []).map((x) => `<span class="chip">${esc(x)}</span>`).join("")}</div>${provenance(p)}${p.sourceUrl ? `<p><a class="text-btn" href="${esc(p.sourceUrl)}" target="_blank" rel="noopener noreferrer">افتح الإعلان الأصلي ووسائطه ${icon("arrow")}</a></p>` : ""}${p.researchNote ? `<p class="notice warning">${esc(p.researchNote)}</p>` : ""}${(p.videos||[]).length ? `<div class="detail-videos">${p.videos.map(id=>`<video controls preload="none" playsinline src="${API_URL}/media/${esc(id)}" aria-label="فيديو العقار"></video>`).join("")}</div>` : ""}<div class="listing-dates"><span><span>رقم الإعلان</span>: <bdi>${esc(p.sourceId||p.id)}</bdi></span>${p.sourcePublishedAt?`<span><span>تاريخ نشر المصدر</span>: ${esc(dateLabel(p.sourcePublishedAt))}</span>`:''}${p.createdAt?`<span><span>أضيف للمنصة</span>: ${esc(dateLabel(p.createdAt))}</span>`:''}${p.availabilityVerified&&p.verifiedAt?`<span><span>تاريخ مراجعة التوفر</span>: ${esc(dateLabel(p.verifiedAt))}</span>`:''}</div><h3>عن العقار</h3><p class="detail-content">${esc(p.description || "لم يرفق وصف إضافي.")}</p><a class="text-btn" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.location + " الكويت")}" target="_blank" rel="noopener noreferrer">${icon("pin")} البحث عن المنطقة على الخريطة</a><p class="fineprint">الخريطة بحث باسم المنطقة ولا تحدد موقع العقار الدقيق أو تثبت الملكية.</p><div class="detail-actions"><button class="btn primary" data-action="whatsapp" data-id="${esc(p.id)}">${icon("whatsapp")} تواصل مع المكتب</button><button class="btn secondary" data-action="appointment" data-id="${esc(p.id)}">${icon("calendar")} طلب معاينة</button><button class="btn ghost" data-action="request" data-id="${esc(p.id)}">سجّل اهتمامك</button><button class="btn ghost" data-action="print">طباعة / PDF</button><button class="text-btn" data-action="report-listing" data-id="${esc(p.id)}">أبلغ المكتب عن الإعلان</button></div>${similarHTML(p)}`,
     );
-    await hydratePrivateImages();
+    mountGallery($('#modal'),p);
   } catch (e) {
     toast(e.message, true);
-  }
-}
-async function hydratePrivateImages() {
-  const { API_URL } = await import("./config.mjs");
-  for (const im of $$("[data-private-image]")) {
-    try {
-      const r = await fetch(`${API_URL}/images/${im.dataset.privateImage}`, {
-        headers: { authorization: "Bearer " + getSession().token },
-      });
-      if (!r.ok) continue;
-      const url = URL.createObjectURL(await r.blob());
-      im.onload = () => URL.revokeObjectURL(url);
-      im.src = url;
-    } catch {}
   }
 }
 function showRequest(propertyId = "") {
@@ -653,6 +623,10 @@ document.addEventListener("click", async (e) => {
     if (action === 'source-results') {state.filters={source:value,origin:'market'};state.advanced=true;switchView('home');return;}
 
     if (action === "details") showDetails(id);
+    else if(action==='report-listing') {
+      const p=state.properties.find(p=>p.id===id);if(!p)return;
+      openDialog('أبلغ المكتب عن الإعلان',`<form id="report-form"><p class="hint">يفتح زر المتابعة مسودة واتساب للمكتب. لا يُرسل البلاغ إلا عندما ترسله بنفسك.</p>${selectField('reason','سبب البلاغ',['العقار غير متاح','بيانات غير صحيحة','مشكلة في الصور','إعلان مكرر','سبب آخر'],'العقار غير متاح',null)}<label class="field"><span>ملاحظات إضافية</span><textarea name="notes" maxlength="1000"></textarea></label><button class="btn primary wide" type="submit">متابعة عبر واتساب المكتب</button></form>`,()=>{$('#report-form').onsubmit=e=>{e.preventDefault();const values=formValues(e.target);const url=new URL(location.href);url.search='';url.hash='property='+id;const text=`${translate('بلاغ بخصوص الإعلان')}: ${p.title}\n${translate(values.reason)}\n${values.notes||''}\n${url}`;window.open(`https://wa.me/${state.settings.phone.replace(/\D/g,'')}?text=${encodeURIComponent(text)}`,'_blank','noopener,noreferrer');};});
+    }
     else if (action === "login") showAuth(() => switchView(state.view));
     else if (action === "add") showAdd();
     else if (action === "request") showRequest(id);
@@ -694,16 +668,24 @@ document.addEventListener("click", async (e) => {
             icon(chosen ? "check" : "compare") +
             (chosen ? "أُضيف للمقارنة" : "أضف للمقارنة");
         });
+    } else if(action==='quick-search') {
+      const q=QUICK_SEARCHES[Number(value)];if(!q)return;
+      state.filters={lang:getLocale(),type:q.type,category:q.category};state.page=1;renderHome();searchURL();
+    } else if(action==='remove-filter') {
+      delete state.filters[value];state.page=1;renderHome();searchURL();
+    } else if(action==='result-page') {
+      state.page=Number(value);if(state.view==='home')applyFilters(true,false);else renderList($('#results'),state.properties.filter(p=>state.saved.includes(p.id)));
+      $('#result-count')?.scrollIntoView({block:'start',behavior:'instant'});
+      $('#results button')?.focus({preventScroll:true});
     } else if (action === "category") {
       state.filters.category = value;
       applyFilters();
     } else if (action === "reset-filters") {
-      state.filters = {};
-      renderHome();
-      history.replaceState(null, "", location.pathname);
+      state.filters = {lang:getLocale()};state.page=1;state.advanced=false;
+      renderHome();searchURL();
     } else if (action === "layout") {
       state.layout = value;
-      renderHome();
+      renderHome();searchURL();
     } else if (action === "print") window.print();
     else if (action === "prompt") askAssistant(value);
     else if (action === "open-assistant") openOfficeAssistant();
@@ -747,8 +729,8 @@ document.addEventListener("click", async (e) => {
         ),
       );
     } else if (action === "load-search") {
-      state.filters = JSON.parse(button.dataset.filters);
-      switchView("home");
+      state.filters = JSON.parse(button.dataset.filters);state.page=1;
+      switchView("home");searchURL();
     } else if (action === "share") {
       const p = state.properties.find((x) => x.id === id),
         url = new URL(location.href);
@@ -793,6 +775,7 @@ document.addEventListener("aqari:session", () => {
 });
 document.addEventListener('aqari:locale',event=>{
   state.filters.lang=event.detail.locale;
+  if(state.view==='home')renderHome();
 });
 document.addEventListener('aqari:property-details',event=>showDetails(event.detail.id).catch(error=>toast(error.message,true)));
 document.addEventListener('aqari:request',event=>showRequest(event.detail.id));
@@ -839,8 +822,8 @@ async function loadProperties() {
   $$("[data-action=area]").forEach(
     (b) =>
       (b.onclick = () => {
-        state.filters = { area: b.dataset.value };
-        switchView("home");
+        state.filters = { area: b.dataset.value };state.page=1;
+        switchView("home");searchURL();
       }),
   );
 }
@@ -874,4 +857,7 @@ async function init() {
       );
   }
 }
+window.addEventListener('popstate',()=>{
+  const params=new URLSearchParams(location.search);state.filters={...Object.fromEntries(params),lang:getLocale()};state.page=Number(params.get('page'))||1;state.layout=['grid','list','map'].includes(params.get('layout'))?params.get('layout'):'grid';state.view='home';updateNav();const requested=params.get('lang');if(['ar','en','ur'].includes(requested)&&requested!==getLocale()){setLocale(requested);return;}renderHome();
+});
 init();

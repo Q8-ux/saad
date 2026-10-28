@@ -1,4 +1,4 @@
-import {api} from './ui.mjs';
+import {api} from './ui.mjs?v=1.4.0';
 export async function prepareMedia(file) {
   const video=['video/mp4','video/webm'].includes(file.type);
   if(video) {

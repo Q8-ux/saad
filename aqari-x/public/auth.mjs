@@ -10,8 +10,8 @@ import {
   getSession,
   setSession,
   toast,
-} from "./ui.mjs";
-import { escapeHTML } from "./core.mjs";
+} from "./ui.mjs?v=1.4.0";
+import { escapeHTML } from "./core.mjs?v=1.4.0";
 export function showAuth(after, mode = "login") {
   if (getSession()) {
     openDialog(

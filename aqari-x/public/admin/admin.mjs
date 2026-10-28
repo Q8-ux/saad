@@ -6,7 +6,7 @@ import {
   escapeHTML as esc,
   money,
   extractListing,
-} from "../core.mjs";
+} from "../core.mjs?v=1.4.0";
 import {
   $,
   $$,
@@ -26,10 +26,11 @@ import {
   dateLabel,
   download,
   initDialog,
-} from "../ui.mjs";
-import { API_URL } from "../config.mjs";
-import {openBatchImport,attachListingMedia} from "./catalog.mjs";
-import { showAuth } from "../auth.mjs";
+} from "../ui.mjs?v=1.4.0";
+import { API_URL } from "../config.mjs?v=1.4.0";
+import {openBatchImport,attachListingMedia} from "./catalog.mjs?v=1.4.0";
+import {openTelegramImport} from "./telegram.mjs?v=1.4.0";
+import { showAuth } from "../auth.mjs?v=1.4.0";
 const state = {
   page: "overview",
   properties: [],
@@ -221,7 +222,7 @@ async function renderProperties() {
       "كل عرض قبل أن يصل للعميل.",
       "راجع السعر والتوفر والتفويض والصور. لا يعني اعتماد البيانات تحققاً آلياً من الملكية.",
     ) +
-    `<div class="admin-toolbar"><input id="property-search" placeholder="بحث بالعنوان أو المنطقة" aria-label="بحث العقارات"><button class="btn primary" data-action="import">${icon("upload")} استيراد إعلان</button><button class="btn secondary" data-action="import-batch">استيراد ملف JSON / CSV</button><button class="btn secondary" data-action="export-properties">تصدير البيانات</button></div><div class="category-tabs" id="status-tabs">${["all", "pending", "reference", "active", "paused", "completed"].map((s, i) => `<button class="tab ${i === 0 ? "active" : ""}" data-action="filter-status" data-value="${s}">${s === "all" ? "الكل" : statuses[s]}</button>`).join("")}</div><div id="properties-table" style="margin-top:20px"></div>`;
+    `<div class="admin-toolbar"><input id="property-search" placeholder="بحث بالعنوان أو المنطقة" aria-label="بحث العقارات"><button class="btn primary" data-action="import">${icon("upload")} استيراد إعلان</button><button class="btn secondary" data-action="import-batch">استيراد ملف JSON / CSV</button><button class="btn secondary" data-action="import-telegram">قناة soogQ8 · تيليجرام</button><button class="btn secondary" data-action="export-properties">تصدير البيانات</button></div><div class="category-tabs" id="status-tabs">${["all", "pending", "reference", "active", "paused", "completed"].map((s, i) => `<button class="tab ${i === 0 ? "active" : ""}" data-action="filter-status" data-value="${s}">${s === "all" ? "الكل" : statuses[s]}</button>`).join("")}</div><div id="properties-table" style="margin-top:20px"></div>`;
   showPropertiesTable();
   $("#property-search").oninput = () =>
     showPropertiesTable($("#status-tabs .active").dataset.value);
@@ -911,6 +912,7 @@ function actionLabel(a) {
       "property.submitted": "إعلان بانتظار المراجعة",
       "property.imported": "استيراد إعلان",
       "property.batch_imported":"استيراد دفعة إعلانات",
+      "property.telegram_imported":"استيراد قناة تيليجرام",
       "property.permission_recorded":"تسجيل تفويض الإعلان والوسائط",
       "property.status": "قرار مراجعة عقار",
       "property.edited": "تعديل عقار",
@@ -971,6 +973,7 @@ document.addEventListener("click", async (e) => {
     else if (action === "property-detail") await propertyDetail(id);
     else if (action === "property-edit") editProperty(id);
     else if (action === "import") importListing();
+    else if (action === "import-telegram") openTelegramImport(()=>loadPage("properties"));
     else if (action === "import-batch") openBatchImport(()=>loadPage("properties"));
     else if (action === "attach-media") attachListingMedia(state.properties.find(p=>p.id===id),()=>loadPage("properties"));
     else if (action === "filter-status") {

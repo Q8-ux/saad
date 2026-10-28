@@ -1,4 +1,4 @@
-import { translations } from './locales-dictionary.mjs';
+import { translations } from './locales-dictionary.mjs?v=1.4.0';
 export const CATEGORIES = ["للبيع", "للإيجار", "للبدل"];
 export const TYPES = [
   "شقة",
@@ -327,7 +327,7 @@ export function searchProperties(properties, filters = {}) {
       ),
     ),
   };
-  for (const key of ["minPrice", "maxPrice", "minArea", "maxArea", "bedrooms"])
+  for (const key of ["minPrice", "maxPrice", "minArea", "maxArea", "bedrooms", "bathrooms"])
     if (f[key] !== undefined && f[key] !== "") {
       const n = Number(numberText(f[key]));
       if (!Number.isFinite(n) || n < 0) return { properties: [], intent };
@@ -337,6 +337,11 @@ export function searchProperties(properties, filters = {}) {
   const filtered = properties.filter((p) => {
     if (f.category && p.category !== f.category) return false;
     if (f.type && p.type !== f.type) return false;
+    if (f.priceBasis && p.priceBasis !== f.priceBasis) return false;
+    if (f.bathrooms && (!p.bathrooms || p.bathrooms < Number(f.bathrooms))) return false;
+    if (f.media === 'photos' && !p.images?.length) return false;
+    if (f.media === 'video' && !p.videos?.length) return false;
+    if (f.verified === 'yes' && !p.availabilityVerified) return false;
     if (f.source && p.source !== f.source) return false;
     if (f.origin === 'market' && p.sourceKind !== 'market-research') return false;
     if (f.origin === 'office' && p.sourceKind === 'market-research') return false;
@@ -361,7 +366,7 @@ export function searchProperties(properties, filters = {}) {
     if (f.position && !(p.features || []).includes(f.position)) return false;
     if (f.status && p.status !== f.status) return false;
     const hay = norm(
-      [p.title, p.location, p.description, p.type, ...(p.features || [])].join(
+      [p.id, p.sourceId, p.title, p.location, p.description, p.type, ...(p.features || [])].join(
         " ",
       ),
     );

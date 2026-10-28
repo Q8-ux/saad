@@ -1,7 +1,7 @@
-import {$,openDialog,closeDialog,field,formValues,withSubmit,api,download,toast} from '../ui.mjs';
-import {escapeHTML} from '../core.mjs';
-import {parseImportFile,importTemplate} from '../import-file.mjs';
-import {prepareMedia} from '../media.mjs';
+import {$,openDialog,closeDialog,field,formValues,withSubmit,api,download,toast} from '../ui.mjs?v=1.4.0';
+import {escapeHTML} from '../core.mjs?v=1.4.0';
+import {parseImportFile,importTemplate} from '../import-file.mjs?v=1.4.0';
+import {prepareMedia} from '../media.mjs?v=1.4.0';
 
 export function openBatchImport(onDone) {
   openDialog('استيراد جماعي من ملف',`<form id="batch-file-form"><p>استورد ملف JSON أو CSV مصرحاً باستخدامه. تُحفظ الإعلانات للمراجعة، مع منع التكرار وإبقاء التواصل مع المكتب.</p><label class="field"><span>ملف الإعلانات</span><input name="file" type="file" accept=".json,.csv" required></label><button class="btn ghost" id="batch-template" type="button">تنزيل نموذج الاستيراد</button><button class="btn primary wide" type="submit">معاينة الدفعة</button></form>`,()=>{

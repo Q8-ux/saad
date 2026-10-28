@@ -4,6 +4,7 @@ import { schema, defaultSettings } from "./schema.mjs";
 import { seedProperties } from "./seed.mjs";
 import {marketFindings, marketResearch} from './market-findings.mjs';
 import {safeSourceURL, normalizeImportRow, isVideo, byteRange,redactContacts} from './catalog-import.mjs';
+import {fetchTelegramPreview,normalizeTelegramRow} from './telegram-source.mjs';
 import { officeAssistant } from './assistant.mjs';
 import { createOpenAIVault } from './openai-vault.mjs';
 import {generateAssistant,synthesizeSpeech,transcribeAudio,newAssistantSession,issueTicket,verifyTicket,assistantLocale,localized,CHAT_MODEL,VOICE_MODEL,TRANSCRIBE_MODEL} from './openai-assistant.mjs';
@@ -293,7 +294,7 @@ async function router(req) {
   if (path === "/health")
     return json({
       ok: true,
-      version: "1.3.0",
+      version: "1.4.0",
       storage: "connected",
       time: new Date().toISOString(),
     });
@@ -842,6 +843,28 @@ async function router(req) {
     if(!r.rowCount)fail('لا يمكن تعديل هذا العقار',409);
     await audit(admin,'property.permission_recorded',mediaPermission[1]);
     return json({ok:true});
+  }
+  if(path==='/admin/telegram/preview'&&method==='POST') {
+    await rate('telegram:preview:'+admin.id,10,3600);
+    const b=await body(req,2000);
+    try{return json(await fetchTelegramPreview(String(b.beforeId||'')));}catch(e){fail(e.message,502);}
+  }
+  if(path==='/admin/import-telegram'&&method==='POST') {
+    const b=await body(req,160000);
+    if(b.channel!=='soogQ8'||b.channelConfirmed!==true)fail('أكد قناة المصدر ومراجعة البيانات');
+    if(!Array.isArray(b.rows)||!b.rows.length||b.rows.length>20)fail('الدفعة من إعلان واحد إلى 20 إعلاناً');
+    await rate('telegram:import:'+admin.id,20,86400);
+    const results=[];
+    for(const [index,row] of b.rows.entries()) {
+      let normalized;try{normalized=normalizeTelegramRow(row);}catch(e){results.push({row:index+1,status:'invalid',message:e.message});continue;}
+      const {property:p,fingerprint}=normalized,id=uid();
+      const existing=await query("SELECT id FROM office_properties WHERE (data->>'source'=$1 AND data->>'sourceId'=$2) OR (fingerprint=$3 AND status NOT IN ('archived','rejected')) LIMIT 1",[p.source,p.sourceId,fingerprint]);
+      if(existing.rowCount){results.push({row:index+1,id:null,status:'duplicate'});continue;}
+      const saved=await query("INSERT INTO office_properties(id,owner_id,status,fingerprint,data) VALUES($1,$2,'pending',$3,$4) ON CONFLICT DO NOTHING RETURNING id",[id,admin.id,fingerprint,p]);
+      results.push({row:index+1,id:saved.rowCount?id:null,status:saved.rowCount?'pending':'duplicate'});
+    }
+    const added=results.filter(r=>r.id).length;await audit(admin,'property.telegram_imported',null,{channel:'soogQ8',rows:b.rows.length,added});
+    return json({results,added});
   }
   if (path === '/admin/import-batch' && method === 'POST') {
     const b=await body(req,1200000);

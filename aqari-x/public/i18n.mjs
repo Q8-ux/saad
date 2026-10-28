@@ -1,4 +1,4 @@
-import { translations, phrases } from './locales-dictionary.mjs';
+import { translations, phrases } from './locales-dictionary.mjs?v=1.4.0';
 
 export const LOCALES = ['ar', 'en', 'ur'];
 const canonical = text => String(text ?? '').replace(/\s+/g, ' ').trim();

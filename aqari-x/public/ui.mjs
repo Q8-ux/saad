@@ -1,7 +1,7 @@
-import { API_URL } from "./config.mjs";
-import { escapeHTML } from "./core.mjs";
-import { getLocale } from "./i18n.mjs";
-import './theme.mjs';
+import { API_URL } from "./config.mjs?v=1.4.0";
+import { escapeHTML } from "./core.mjs?v=1.4.0";
+import { getLocale } from "./i18n.mjs?v=1.4.0";
+import './theme.mjs?v=1.4.0';
 const paths = {
   mic: "M9 5a3 3 0 0 1 6 0v7a3 3 0 0 1-6 0zM5 10v2a7 7 0 0 0 14 0v-2M12 19v3M8 22h8",
   volume: "M4 9h4l5-4v14l-5-4H4zM17 8a6 6 0 0 1 0 8M20 5a10 10 0 0 1 0 14",
@@ -107,6 +107,7 @@ export const imageURL = (id) =>
   `${API_URL.replace(/\/$/, "")}/images/${encodeURIComponent(id)}`;
 export function openDialog(title, html, onReady) {
   const dialog = $("#modal");
+  dialog.dispatchEvent(new Event("aqari:dialog-replace"));
   if (dialog.open) dialog.close();
   $("#modal-title").textContent = title;
   $("#modal-content").innerHTML = html;
