@@ -21,6 +21,24 @@ export function importMemoFacts(current: string, state?: Pick<IntakeForMemo, "me
     || state?.facts?.map(fact => fact.trim()).filter(Boolean).join("\n")
     || messages.filter(message => message.role === "user").map(message => message.content.trim()).filter(Boolean).join("\n\n");
 }
+// Fill only missing fields; reviewed form values always take precedence.
+export function importMemoDraft(current: Record<string, string>, state?: IntakeForMemo | null, messages: ConversationMessage[] = []): Record<string, string> {
+  const nonempty = (data: Record<string, unknown>) => Object.fromEntries(Object.entries(data).filter((entry): entry is [string, string] => typeof entry[1] === "string" && Boolean(entry[1].trim())));
+  const imported = { ...nonempty(state?.memoPrefill || {}), ...nonempty(state?.memoFields || {}) };
+  return {
+    ...nonempty({
+      caseType: state?.caseType, court: state?.court, courtCircuit: state?.courtCircuit, caseStage: state?.caseStage,
+      facts: importMemoFacts("", state, messages), requests: state?.requests?.filter(value => value.trim()).join("\n"),
+      allParties: state?.parties?.map(party => `${party.name}${party.role ? ` — ${party.role}` : ""}`).join("\n"),
+      conversationSummary: state?.caseSummary,
+      conversationTranscript: messages.some(message => message.role === "user") ? conversationTranscript(messages) : "",
+      caseTrack: state?.orientation?.track, judgmentStatus: state?.orientation?.judgment,
+      importantDates: state?.importantDates?.length ? JSON.stringify(state.importantDates) : "",
+    }),
+    ...imported,
+    ...nonempty(current),
+  };
+}
 export type MemoGap = { key: string; question: string };
 const knownValue = (value: unknown, minimum = 2) => typeof value === "string" && value.trim().length >= minimum && !/^(?:غير (?:معروف|معلوم|محدد|متوفر)|لم (?:يذكر|يتحدد)|لا (?:أعرف|اعرف|أعلم|اعلم|أتذكر|اتذكر|أذكر|اذكر)|i (?:do not|don't) know|unknown|not known|معلوم نہیں|n\/a)(?:\s|$)|^[.\s…_-]+$/i.test(value.trim());
 const knownName = (value: unknown) => knownValue(value) && !/^(?:المستخدم|الزائر|أنا|انا|الموكل|المدعي|المدعى عليه|المدعية|المدعى عليها|الخصم|الطرف الآخر|الطرف الاخر|مستخدم|خصم|visitor|user|plaintiff|defendant|client)$/i.test(String(value).trim());

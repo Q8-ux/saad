@@ -1,7 +1,7 @@
 {
-  "release": "2026-10-28-single-case-input",
-  "clientSource": "de2046fbabd8929ea5e68526f81f91595703ef18",
-  "backendSource": "de2046fbabd8929ea5e68526f81f91595703ef18",
+  "release": "2026-10-28-reuse-memo-input",
+  "clientSource": "56cfdb9474f66cb379ad16a44d8a709d570f068e",
+  "backendSource": "56cfdb9474f66cb379ad16a44d8a709d570f068e",
   "assistant": "indirect-intake-completeness-1",
   "voice": "gulf-male-voice-4",
   "tools": "legal-tools-1",
@@ -21,7 +21,7 @@
   "finalMemo": "clean-no-review-notes-1",
   "memoResultTools": "bottom-vector-actions-1",
   "memoPreview": "document-derived-clean-text-1",
-  "githubPagesAsset": "index-CtVJKG1_.js",
+  "githubPagesAsset": "index-DOcxrkDF.js",
   "memoLanguage": "ar-KW",
   "memoDirection": "rtl",
   "memoAlignment": "right",
@@ -143,5 +143,6 @@
   "shortJourneyValidation": "41-focused-tests;232-internal-checks;9-publication-tests;both-builds;privacy-check-passed;live-check-pending",
   "memoCaseInput": "one-editable-case-story-text-or-voice;automatic-facts-and-requests;fresh-extraction-after-edits",
   "memoCaseInputValidation": "232-internal-release-checks;20-localization-and-story-tests;both-builds;private-corpus-absent;official-live-single-story-facts-requests-and-updated-request-auto-next-verified",
-  "memoFactsImport": "empty-field-only-current-assistant-facts-or-user-messages;manual-edits-retained"
+  "memoFactsImport": "empty-field-only-current-assistant-facts-or-user-messages;manual-edits-retained",
+  "memoInputReuse": "all-known-fields-with-optional-story-edit"
 }

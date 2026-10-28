@@ -1,0 +1,2 @@
+# Plan
+Reuse the shared memo-handoff module for nonempty field merging at every client entry point. Initialize and synchronize the memo form from that draft while respecting manual values and in-flight payments. Keep the existing payment and generation services, validation, approval, languages, privacy and identity. Render known facts and requests using the existing summary class and an optional details editor.

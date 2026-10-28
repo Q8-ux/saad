@@ -9,7 +9,7 @@ function load(path, dependencies={}) {
  return exports;
 }
 const procedure=load('../lib/procedural-position.ts');
-const {importMemoFacts}=load('../lib/memo-handoff.ts');
+const {importMemoFacts,importMemoDraft}=load('../lib/memo-handoff.ts');
 const {recogniseMemoProcedure}=load('../lib/memo-journey.ts',{'./procedural-position':procedure});
 const {safeSadadCheckoutUrl,readExistingSadadCheckout}=load('../lib/sadad-client.ts');
 const facts='أنا المدعى عليه في دعوى مطالبة. استأنف المدعي الحكم.';
@@ -92,4 +92,29 @@ test('short assistant review retains field validation, explicit approval and ser
  assert.match(submit,/if \(!memoApproved && !assistantReview\)/);
  assert.match(wizard,/!assistantReview && <label className="memo-generation-approval"/);
  assert.match(wizard,/step > 0 && !assistantReview/);
+});
+
+
+test('all memo entry points import existing requests, names and case details, not just facts',()=>{
+ const state={memoPrefill:{facts:'وقائع اصطناعية سبق ذكرها',requests:'رد المبلغ الاصطناعي',clientName:'اسم اصطناعي أول',otherParty:'اسم اصطناعي ثان',partyRole:'مدعٍ',caseNumber:'SYN-123'},memoFields:{caseNumber:'',clientAddress:'عنوان اصطناعي'},caseType:'مدني',court:'المحكمة الكلية',courtCircuit:'الدائرة الاصطناعية',caseSummary:'ملخص اصطناعي',parties:[{name:'اسم اصطناعي أول',role:'مدعٍ'}]};
+ const messages=[{role:'user',content:'معلومات اصطناعية سبق ذكرها'},{role:'assistant',content:'لا تتحول إجابة المساعد إلى واقعة'}];
+ const draft=importMemoDraft({},state,messages);
+ for(const [key,value] of Object.entries({...state.memoPrefill,clientAddress:state.memoFields.clientAddress,caseType:state.caseType,court:state.court,courtCircuit:state.courtCircuit}))assert.equal(draft[key],value,key);
+ assert.match(draft.conversationTranscript,/معلومات اصطناعية سبق ذكرها/);
+ assert.equal(draft.conversationSummary,state.caseSummary);
+ assert.equal(draft.allParties,'اسم اصطناعي أول — مدعٍ');
+});
+test('reviewed form values survive assistant imports and repeated payment entry',()=>{
+ const current={facts:'وقائع صححها المستخدم',requests:'طلب راجعه المستخدم',clientName:'اسم معدل اصطناعي',caseNumber:'SYN-CORRECTED',caseStory:'نص احتفظ به المستخدم'};
+ const state={memoPrefill:{facts:'وقائع أخرى',requests:'طلب آخر',clientName:'اسم آخر',court:'المحكمة الكلية'},memoFields:{caseNumber:'SYN-OLD'}};
+ const draft=importMemoDraft(current,state);
+ for(const [key,value] of Object.entries(current))assert.equal(draft[key],value,key);
+ assert.equal(draft.court,'المحكمة الكلية');
+ assert.deepEqual(importMemoDraft(draft,state),draft);
+});
+test('unstructured conversation retains visitor text and leaves unknown fields missing',()=>{
+ const draft=importMemoDraft({},null,[{role:'user',content:'واقعة اصطناعية دون أسماء أو طلب محدد'},{role:'assistant',content:'استنتاج ليس واقعة'}]);
+ assert.equal(draft.facts,'واقعة اصطناعية دون أسماء أو طلب محدد');
+ assert.equal(draft.requests,undefined);assert.equal(draft.clientName,undefined);assert.equal(draft.court,undefined);
+ assert.equal(importMemoDraft({},null,[{role:'assistant',content:'رد فقط'}]).conversationTranscript,undefined);
 });

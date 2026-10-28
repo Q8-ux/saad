@@ -25,7 +25,7 @@ import { exportPleadingDocx } from "@/lib/pleading-docx";
 import VoiceCountdown from "./voice-countdown";
 import { LegalVoiceConversation, type VoiceAnalysisResult } from "@/lib/legal-voice-client";
 import { DEFAULT_LEGAL_VOICE, resolveLegalVoice, LEGAL_VOICES, isLegalVoice, voiceCopy, type LegalVoice, type VoicePhase } from "@/lib/legal-voice";
-import { memoApprovalNotice, conversationTranscript, importMemoFacts, type MemoPrefill } from "@/lib/memo-handoff";
+import { memoApprovalNotice, conversationTranscript, importMemoDraft, type MemoPrefill } from "@/lib/memo-handoff";
 
 import Image from "next/image";
 import {
@@ -986,7 +986,10 @@ function MemoWizard({ t, language, token, initialData = null, assistantSession, 
     }).catch(() => undefined);
     return () => controller.abort();
   }, [token]);
-  const fromAssistant = Boolean(initialData?.conversationTranscript?.trim());
+  const [openingData] = useState(() => importMemoDraft(initialData || {}, assistantSession?.intake, assistantSession?.messages));
+  const [memoData, setMemoData] = useState<Record<string, string>>(openingData);
+  const importedSession = useRef(assistantSession);
+  const fromAssistant = Boolean(memoData.conversationTranscript?.trim());
   const [step, setStep] = useState(() => initialMemoStep(fromAssistant));
   const assistantReview = fromAssistant && step === 1;
   const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
@@ -1015,10 +1018,9 @@ function MemoWizard({ t, language, token, initialData = null, assistantSession, 
   const memoFormRef = useRef<HTMLFormElement | null>(null);
   useEffect(() => { memoFormRef.current?.closest(".modal")?.scrollTo({ top: 0 }); }, [step]);
   const [memoAnalysis, setMemoAnalysis] = useState<{ sourceCount: number; lawCount: number; cassationCount: number; sources: Array<{ marker: string; title: string; reference: string; kind: "cassation" | "legislation"; officialSource: string; sourceUrl?: string; libraryUpdatedAt?: string | null }> } | null>(null);
-  const [facts, setFacts] = useState(() => importMemoFacts(initialData?.facts || "", assistantSession?.intake, assistantSession?.messages));
-  const [requests, setRequests] = useState(initialData?.requests || "");
-  const lastUnderstoodStory = useRef(initialData?.facts && initialData?.requests ? memoStoryText(initialData.facts, initialData.requests) : "");
-  const [memoData, setMemoData] = useState<Record<string, string>>(initialData || {});
+  const [facts, setFacts] = useState(openingData.facts || "");
+  const [requests, setRequests] = useState(openingData.requests || "");
+  const lastUnderstoodStory = useRef(openingData.facts && openingData.requests ? memoStoryText(openingData.facts, openingData.requests) : "");
   const recognisedPosition = useMemo(() => inferProceduralPosition(`${facts}\n${requests}`, memoData.clientName || "", memoData.otherParty || ""), [facts, requests, memoData.clientName, memoData.otherParty, initialData]);
   const [documents, setDocuments] = useState<File[]>([]);
   const [dragActive, setDragActive] = useState(false);
@@ -1039,6 +1041,7 @@ function MemoWizard({ t, language, token, initialData = null, assistantSession, 
   useEffect(() => {
     if (!initialData || appliedHandoff.current === initialData) return;
     appliedHandoff.current = initialData;
+    importedSession.current = assistantSession;
     if (paymentAttempt.current || checkout || memo) {
       setStatus("error"); setMemoError(payUi.changed); return;
     }
@@ -1051,8 +1054,13 @@ function MemoWizard({ t, language, token, initialData = null, assistantSession, 
     setStep(initialMemoStep(Boolean(initialData.conversationTranscript?.trim())));
   }, [initialData, checkout, memo, payUi.changed]);
   useEffect(() => {
-    if (!active || !assistantSession || paymentAttempt.current || checkout || memo) return;
-    setFacts(current => importMemoFacts(current, assistantSession.intake, assistantSession.messages));
+    if (!active || !assistantSession || importedSession.current === assistantSession || paymentAttempt.current || checkout || memo) return;
+    importedSession.current = assistantSession;
+    const next = importMemoDraft(captureDraft(), assistantSession.intake, assistantSession.messages);
+    setMemoData(next); setFacts(next.facts || ""); setRequests(next.requests || "");
+    if (!next.caseStory && next.facts && next.requests) lastUnderstoodStory.current = memoStoryText(next.facts, next.requests);
+    setMemoApproved(false); setVoiceFormVersion(version => version + 1);
+    if (next.conversationTranscript?.trim()) setStep(initialMemoStep(true));
   }, [active, assistantSession, checkout, memo]);
   useEffect(() => {
     if (active) return;
@@ -1535,7 +1543,13 @@ function MemoWizard({ t, language, token, initialData = null, assistantSession, 
       {step > 0 && <ProceduralPositionView position={recognisedPosition} language={language} />}
       <form ref={memoFormRef} key={voiceFormVersion} onSubmit={submit} onChange={event => { if ((event.target as HTMLElement).getAttribute("name")) setMemoApproved(false); }}>
         <div className="step-content">
-          {(step === 0 || assistantReview) && <MemoVoiceInput language={language} active={active} disabled={!active || storyBusy || status === "loading" || analysisStatus === "loading"} initialText={memoData.caseStory || memoStoryText(facts, requests)} facts={facts} requests={requests} onBusy={setVoiceEntryBusy} request={(path, init) => memoFetch(path, token, init)} apply={applyCaseStory} />}
+          {(step === 0 || assistantReview) && <>
+            {assistantReview && facts.trim() && requests.trim() && <dl className="memo-handoff-details"><div><dt>{t.facts}</dt><dd>{facts}</dd></div><div><dt>{t.requests}</dt><dd>{requests}</dd></div></dl>}
+            <details open={assistantReview && facts.trim() && requests.trim() ? undefined : true}>
+              <summary>{language === "ar" ? "تعديل الوقائع والطلبات" : language === "en" ? "Edit facts and requests" : "حقائق اور مطالبات میں ترمیم"}</summary>
+              <MemoVoiceInput language={language} active={active} disabled={!active || storyBusy || status === "loading" || analysisStatus === "loading"} initialText={memoData.caseStory || memoStoryText(facts, requests)} facts={facts} requests={requests} onBusy={setVoiceEntryBusy} request={(path, init) => memoFetch(path, token, init)} apply={applyCaseStory} />
+            </details>
+          </>}
           {step === 0 && (
             <div className="document-analysis-step">
               <label className="document-attach-inline"><UploadCloud size={16} />{tr(language, "إرفاق مستندات")}<input className="document-attach-input" type="file" multiple disabled={storyBusy || voiceEntryBusy || analysisStatus === "loading"} accept=".pdf,.docx,.txt,.rtf,.jpg,.jpeg,.png,.webp,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,text/rtf,image/jpeg,image/png,image/webp" onChange={event => addDocuments(Array.from(event.target.files || []))} /></label>
