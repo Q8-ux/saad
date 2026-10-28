@@ -1,0 +1,2 @@
+# Visible assistant memo action
+The assistant currently omits its memo handoff action until every readiness check passes. Keep the action visible above the tools/chat from the initial state, label it clearly in Arabic/English/Urdu, and explain the next missing factual detail. Readiness, explicit review, transcript limits, payment and generation validation remain unchanged. Acceptance: initial/incomplete/busy states show a disabled action and reason; complete states invoke the existing reviewed handoff with retained transcript.

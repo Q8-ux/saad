@@ -1,4 +1,5 @@
 "use client";
+import { AssistantMemoAction } from "./assistant-memo-action";
 
 import type { SitePublicSettings } from "@/lib/site-controls";
 
@@ -24,7 +25,7 @@ import VoiceCountdown from "./voice-countdown";
 import LegalToolsPanel from "./legal-tools-panel";
 import { LegalVoiceConversation, type VoiceAnalysisResult } from "@/lib/legal-voice-client";
 import { DEFAULT_LEGAL_VOICE, resolveLegalVoice, LEGAL_VOICES, isLegalVoice, voiceCopy, type LegalVoice, type VoicePhase } from "@/lib/legal-voice";
-import { memoApprovalNotice, canOfferMemoHandoff, buildMemoHandoff, conversationTranscript, isCompleteMemoHandoff, type MemoPrefill } from "@/lib/memo-handoff";
+import { memoApprovalNotice, conversationTranscript, isCompleteMemoHandoff, type MemoPrefill } from "@/lib/memo-handoff";
 
 import Image from "next/image";
 import {
@@ -911,6 +912,7 @@ function Assistant({ t, language, token, initialSession, onSession, openBooking,
     <div className="intake-progress"><span><b>{intake?.progress || 0}%</b>{` ${tr(language, "اكتمال فهم القضية")}`}</span><i><em style={{ width: `${intake?.progress || 0}%` }} /></i></div>
     <div className="conversation-toolbar" aria-label={tr(language, "أدوات المحادثة")}><button type="button" onClick={newConversation} title={voiceUi.newChat}><Trash2 size={18} /><span>{voiceUi.newChat}</span></button><button type="button" onClick={exportConversation} disabled={!messages.length} title={tr(language, "تصدير المحادثة")}><Download size={18} /><span>{tr(language, "تصدير")}</span></button><button type="button" onClick={shareConversation} disabled={!messages.length} title={tr(language, "إرسال أو مشاركة المحادثة")}><Share2 size={18} /><span>{tr(language, "إرسال")}</span></button></div>
 
+    <AssistantMemoAction language={language} intake={intake} messages={messages} busy={loading || voiceActive} onContinue={data => { stopSpeaking(); startMemo(data); }} />
     <LegalToolsPanel key={toolSession} language={language} disabled={loading || voiceActive} request={(path, init) => memoFetch(path, token, init)} caseText={intake ? [...intake.facts, ...intake.requests].join("\n") : ""} onUseText={text => { setQuestion(text); setToolNotice(tr(language, "راجع النص المنقول ثم أرسله. لم يُضف إلى وقائع القضية تلقائياً.")); }} />
     <div className="intake-chat"><div className="chat-welcome"><Sparkles size={17} />{intro}</div>{messages.map((item, index) => <div key={`${item.role}-${index}`} className={`intake-message ${item.role}`}><b><span>{item.role === "user" ? tr(language, "أنت") : t.assistant}</span><span className="message-tools">{item.role === "user" && <button type="button" className="message-tool" onClick={() => editMessage(index)} aria-label={tr(language, "تعديل الرسالة")} title={tr(language, "تعديل")}><Pencil size={17} /></button>}<button type="button" className="message-tool danger" onClick={() => deleteMessage(index)} aria-label={tr(language, "حذف الرسالة")} title={tr(language, "حذف")}><Trash2 size={17} /></button></span></b><p>{item.content}</p></div>)}{(loading || voiceActive) && streamedAnswer && <div className="intake-message assistant" aria-live="polite"><b>{t.assistant}</b><p>{streamedAnswer}</p></div>}{loading && !streamedAnswer && <div className="intake-thinking"><Sparkles size={16} />{tr(language, "أحلل المعلومات وأحدد السؤال التالي…")}</div>}</div>
     {intake && <div className="intake-dashboard">
@@ -920,7 +922,6 @@ function Assistant({ t, language, token, initialSession, onSession, openBooking,
       {intake.missingInformation.length > 0 && <details open><summary>{tr(language, "وقائع تحتاج توضيحاً منك")}</summary><ul>{intake.missingInformation.map((item) => <li key={item}>{item}</li>)}</ul></details>}
       {intake.documentsNeeded.length > 0 && <details><summary>{tr(language, "مستندات تخص وقائع قضيتك")}</summary><ul>{intake.documentsNeeded.map((item) => <li key={item}>{item}</li>)}</ul></details>}
       <IntakeAnalysisView state={intake} language={language} />
-      {canOfferMemoHandoff(intake, messages) && <div className="memo-consent"><ShieldCheck size={22} /><div><b>{tr(language, "نقل بيانات القضية إلى مولد المذكرات")}</b><p>{tr(language, "اكتملت البيانات اللازمة من إجاباتك. راجع ملخص القضية والصفة والمحكمة، ثم وافق على تعبئتها في المذكرة.")}</p><p role="note">{memoApprovalNotice[language]}</p></div><button className="button button-primary" onClick={() => { stopSpeaking(); startMemo({ ...buildMemoHandoff(intake, messages), conversationTranscript: conversationTranscript(messages, language) }); }}><FileText size={18} />{tr(language, "أفهم وأوافق، انتقل إلى مولد المذكرات")}</button></div>}
     </div>}
     {loading && analysisStages.length > 0 && <IntakeStages stages={analysisStages} language={language} />}
     <div className="assistant-voice-settings">

@@ -1,7 +1,7 @@
 {
-  "release": "2026-10-28-indirect-intake-completeness",
-  "clientSource": "f8e84af6ff59122f0fd131816379b68b5ace22f7",
-  "backendSource": "be6f4165a965e426b37f026448c816bd59877692",
+  "release": "2026-10-28-visible-assistant-memo-action",
+  "clientSource": "fc32951d3d8c9918fb276658940f7e4a144f83c8",
+  "backendSource": "fc32951d3d8c9918fb276658940f7e4a144f83c8",
   "assistant": "indirect-intake-completeness-1",
   "voice": "gulf-male-voice-4",
   "tools": "legal-tools-1",
@@ -21,7 +21,7 @@
   "finalMemo": "clean-no-review-notes-1",
   "memoResultTools": "bottom-vector-actions-1",
   "memoPreview": "document-derived-clean-text-1",
-  "githubPagesAsset": "index-DVwIksfy.js",
+  "githubPagesAsset": "index-o1c_DHwd.js",
   "memoLanguage": "ar-KW",
   "memoDirection": "rtl",
   "memoAlignment": "right",
@@ -133,5 +133,7 @@
   "configuredMemoPriceKwd": 50,
   "temporaryPriceSetting": "SABEQ_MEMO_TEST_ONE_KWD",
   "paymentValidation": "24-payment-tests;one-dinar-new-invoice-saved-fee-and-existing-invoice-preserved;no-live-charge",
-  "liveIntakeCheck": "v152-synthetic-pending-defendant-missing-name-single-question-transfer-blocked"
+  "liveIntakeCheck": "v152-synthetic-pending-defendant-missing-name-single-question-transfer-blocked",
+  "assistantMemoAction": "always-visible-disabled-with-next-factual-gap-until-reviewed",
+  "assistantMemoActionValidation": "24-targeted-tests;224-internal-checks;both-builds-pass;live-generation-not-tested"
 }

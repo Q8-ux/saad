@@ -1,0 +1,3 @@
+- [ ] Replace the conditional assistant action with an always-rendered, guarded control.
+- [ ] Verify initial, incomplete, complete, busy and oversized transcript states with synthetic fixtures.
+- [ ] Build both targets, inspect responsive UI and publish the focused change.
