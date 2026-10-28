@@ -283,3 +283,12 @@ test('memo form fields survive later turns and non-whitelisted personal identifi
  const properties=mock.calls[0].text.format.schema.properties.memoFields.anyOf[0].properties;
  assert.ok(properties.judgmentOperative);assert.equal(properties.civilId,undefined);
 });
+
+
+test('stated filing prevents a model from regressing to pre-filing and volunteered unknown case number is not asked again', async () => {
+ const mock=client([baseState({caseStage:'قبل رفع الدعوى',orientation:{track:'initial',judgment:'none',judgmentQuote:'',categoryReason:'',nextAction:''},nextQuestions:['ما رقم القضية كما هو مكتوب في أوراقها؟','متى حدثت الواقعة؟']})]);
+ const result=await mock.run({messages:[{role:'user',content:'رفع الطرف الآخر دعوى ضدي أمام المحكمة الكلية. لم يصدر حكم. لا أعرف رقم القضية حالياً.'}]});
+ assert.equal(result.orientation.track,'pending');assert.equal(result.caseStage,'قضية منظورة');
+ assert.ok(result.questionMemory.unavailable.includes('procedure.case_number'));assert.doesNotMatch(result.nextQuestions.join(' '),/رقم القضية/);
+ assert.equal(context.proceduralFacts('لا توجد دعوى وأريد أن أرفع قضية.').proceeding,'initial');
+});

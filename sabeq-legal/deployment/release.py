@@ -11,7 +11,7 @@ import tarfile
 
 WORKFLOW = ".github/workflows/deploy-pages.yml"
 SABEQ_DIRECTORIES = ("sabeq-legal", "sabeq-admin-preview")
-SABEQ_TOOL_PREFIXES = ("legal-memo-platform/tools/internal-verification/", "legal-memo-platform/specs/006-internal-verification/", "legal-memo-platform/specs/007-indirect-intake/")
+SABEQ_TOOL_PREFIXES = ("legal-memo-platform/tools/internal-verification/", "legal-memo-platform/specs/006-internal-verification/", "legal-memo-platform/specs/007-indirect-intake/", "legal-memo-platform/specs/008-one-dinar-test/")
 SABEQ_TOOL_FILES = {"legal-memo-platform/package.json", "legal-memo-platform/.gitignore", ".github/workflows/sabeq-internal-verification.yml"}
 
 def command(*args):

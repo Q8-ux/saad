@@ -6,7 +6,7 @@ import { cleanString, RequestError } from "@/lib/request-security";
 import { validateMemoInput } from "@/lib/memo-input";
 
 type Config = { environment: "sandbox" | "live"; clientKey: string; clientSecret: string; testedAt?: string; accountConfirmed?: boolean; callbacksConfirmed?: boolean; publicCheckoutEnabled?: boolean };
-type Payment = { id: string; token_hash: string; input_hash: string; environment: Config["environment"]; credential_ref: string; amount_fils: number; currency: string; reference: string; invoice_id: string | null; invoice_key: string | null; transaction_id: string | null; status: string; generation_id: string | null; lease_until: number | null; result_json: string | null; result_expires_at: number | null };
+type Payment = { id: string; token_hash: string; input_hash: string; environment: Config["environment"]; amount_fils: number; currency: string; reference: string; invoice_id: string | null; invoice_key: string | null; transaction_id: string | null; status: string; generation_id: string | null; lease_until: number | null; result_json: string | null; result_expires_at: number | null };
 export type PaymentLease = { id: string; generationId: string };
 const API = { live: "https://api.sadadpay.net/api", sandbox: "https://apisandbox.sadadpay.net/api" };
 const PAY = { live: "https://sadadpay.net/pay/", sandbox: "https://sandbox.sadadpay.net/pay/" };
@@ -37,20 +37,11 @@ async function configuration(): Promise<Config> {
   const runtime = env as unknown as { SADAD_CLIENT_KEY?: string; SADAD_CLIENT_SECRET?: string; SADAD_ENVIRONMENT?: string };
   return { environment: runtime.SADAD_ENVIRONMENT === "live" ? "live" : "sandbox", clientKey: runtime.SADAD_CLIENT_KEY || "", clientSecret: runtime.SADAD_CLIENT_SECRET || "" };
 }
-async function credentialReference(config: Config) {
-  return digest(`${config.environment}:${config.clientKey}:${config.clientSecret}`);
-}
-async function paymentConfiguration(row: Payment, current?: Config) {
-  current ||= await configuration();
-  if (!row.credential_ref || row.credential_ref === await credentialReference(current)) return current;
-  const archived = await integrationConfig<Config>(`sadad-credentials-${row.credential_ref}`);
-  if (!archived || archived.environment !== row.environment || await credentialReference(archived) !== row.credential_ref) throw new RequestError("تعذر التحقق من فاتورة مرتبطة بإعداد سداد سابق. راجع إدارة المكتب.", 409);
-  return archived;
-}
 async function policy() {
   await purgeExpiredPaymentResults();
   const row = await getD1().prepare("SELECT enabled, payment_required, price_fils, currency FROM service_settings WHERE service_key = 'memo'").first<{ enabled: number; payment_required: number; price_fils: number; currency: string }>();
-  return { enabled: !row || !!row.enabled, required: !!row?.payment_required, priceFils: row?.price_fils || 0, currency: row?.currency || "KWD" };
+  const testPrice = (env as unknown as { SABEQ_MEMO_TEST_ONE_KWD?: string }).SABEQ_MEMO_TEST_ONE_KWD === "true";
+  return { enabled: !row || !!row.enabled, required: !!row?.payment_required, priceFils: testPrice ? 1000 : row?.price_fils || 0, currency: row?.currency || "KWD" };
 }
 const isReady = (config: Config) => !!(config.clientKey && config.clientSecret && config.testedAt && config.accountConfirmed && config.callbacksConfirmed);
 async function purgeExpiredPaymentResults() {
@@ -62,8 +53,9 @@ export async function memoPaymentPolicy() {
 }
 async function provider(config: Config, path: string, authorization: string, body?: unknown): Promise<Record<string, any>> {
   try {
-    // SADAD returns HTTP 411 for bodiless POSTs (no Content-Length); token endpoints get an explicit empty JSON body.
+    // SADAD requires a non-empty HTTP body for token POSTs to avoid HTTP 411.
     const payload = body !== undefined ? body : path.startsWith("/User/") ? {} : undefined;
+    // Workers supports manual redirects; reject non-2xx without forwarding Authorization.
     const response = await fetch(`${API[config.environment]}${path}`, { method: payload !== undefined ? "POST" : "GET", headers: { Authorization: authorization, Accept: "application/json", ...(payload === undefined ? {} : { "Content-Type": "application/json" }) }, ...(payload === undefined ? {} : { body: JSON.stringify(payload) }), redirect: "manual", signal: AbortSignal.timeout(20_000) });
     const text = await response.text();
     if (text.length > 500_000 || !response.ok) throw Error("provider_failed");
@@ -110,7 +102,7 @@ function publicPayment(row: Payment) {
 }
 async function refreshPayment(row: Payment, config?: Config) {
   if (!row.invoice_id || row.status === "consumed" || row.status === "sandbox_closed" || (row.status === "generating" && Number(row.lease_until) >= Date.now())) return row;
-  config = await paymentConfiguration(row, config);
+  config ||= await configuration();
   if (config.environment !== row.environment) throw new RequestError("طلب الدفع تابع لبيئة مختلفة. راجع إدارة المكتب.", 409);
   const remote = await provider(config, `/Invoice/getbyid?id=${encodeURIComponent(row.invoice_id)}`, `Bearer ${await accessToken(config)}`);
   const key = typeof remote.key === "string" && /^[A-Za-z0-9_-]{5,240}$/.test(remote.key) ? remote.key : "";
@@ -137,14 +129,14 @@ export async function createMemoPayment(data: Record<string, unknown>) {
   const input = data.input as Record<string, unknown>;
   validateMemoInput(input);
   if (new TextEncoder().encode(JSON.stringify(input)).byteLength > 190_000) throw new RequestError("بيانات المذكرة أكبر من الحد المسموح للدفع.", 413);
-  const tokenHash = await digest(token), inputHash = await paymentInputHash(input), config = await configuration(), credentialRef = await credentialReference(config);
+  const tokenHash = await digest(token), inputHash = await paymentInputHash(input), config = await configuration();
   let existing = await getD1().prepare("SELECT * FROM sadad_payments WHERE id = ? AND token_hash = ?").bind(id, tokenHash).first<Payment>();
   if (!existing) {
     if (!settings.required) return { required: false };
     if (config.publicCheckoutEnabled !== true) throw new RequestError("خطوة الدفع مخفية عن الموقع؛ راجع إدارة المكتب قبل إنشاء فاتورة.", 409);
     if (!isReady(config) || settings.priceFils <= 0 || settings.currency !== "KWD") throw new RequestError("إعداد التحصيل يحتاج استكمالاً من إدارة المكتب.", 503);
-    const created = await getD1().prepare("INSERT INTO sadad_payments (id, token_hash, input_hash, environment, credential_ref, amount_fils, currency, reference, status) VALUES (?, ?, ?, ?, ?, ?, 'KWD', ?, 'creating') ON CONFLICT(id) DO NOTHING RETURNING id")
-      .bind(id, tokenHash, inputHash, config.environment, credentialRef, settings.priceFils, `sabeq-${id}`).first();
+    const created = await getD1().prepare("INSERT INTO sadad_payments (id, token_hash, input_hash, environment, amount_fils, currency, reference, status) VALUES (?, ?, ?, ?, ?, 'KWD', ?, 'creating') ON CONFLICT(id) DO NOTHING RETURNING id")
+      .bind(id, tokenHash, inputHash, config.environment, settings.priceFils, `sabeq-${id}`).first();
     if (!created) existing = await ownedPayment(id, token);
   }
   if (existing) {
@@ -155,8 +147,7 @@ export async function createMemoPayment(data: Record<string, unknown>) {
       if (!amended) throw new RequestError("لا يمكن تغيير بيانات طلب قيد التوليد أو طلب مكتمل. احتفظ بإيصالك وراجع المكتب.", 409);
     }
     if (existing.invoice_id) return publicPayment(await refreshPayment(existing, config));
-    if (config.publicCheckoutEnabled !== true) throw new RequestError("خطوة الدفع مخفية عن الموقع؛ راجع إدارة المكتب قبل إنشاء فاتورة.", 409);
-    const retry = await getD1().prepare("UPDATE sadad_payments SET status = 'creating', credential_ref = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND status = 'retryable' RETURNING id").bind(credentialRef, id).first();
+    const retry = await getD1().prepare("UPDATE sadad_payments SET status = 'creating', updated_at = CURRENT_TIMESTAMP WHERE id = ? AND status = 'retryable' RETURNING id").bind(id).first();
     if (!retry) throw new RequestError("إنشاء الفاتورة قيد التحقق. لا تنشئ دفعة أخرى؛ راجع المكتب بمعرف الطلب.", 409);
   }
   const order = await ownedPayment(id, token);
@@ -174,7 +165,6 @@ export async function createMemoPayment(data: Record<string, unknown>) {
   }
 }
 export async function memoPaymentStatus(id: unknown, token: unknown) { return publicPayment(await refreshPayment(await ownedPayment(id, token))); }
-export async function memoPaymentHasInvoice(id: unknown, token: unknown) { return !!(await ownedPayment(id, token)).invoice_id; }
 export async function receiveSadadWebhook(data: Record<string, unknown>) {
   const id = invoiceId(data.InvoiceId);
   const config = await configuration();
@@ -226,15 +216,8 @@ export async function sadadManagement(data: Record<string, unknown> | null, acto
     if (!["live", "sandbox"].includes(String(data.environment))) throw new RequestError("بيئة سداد غير صحيحة.");
     const environment = data.environment as Config["environment"];
     const key = cleanString(data.clientKey, "Client Key", { max: 500, required: false }), secret = cleanString(data.clientSecret, "Client Secret", { max: 500, required: false });
-    const environmentChanged = environment !== config.environment;
-    const credentialsChanged = (!!key && key !== config.clientKey) || (!!secret && secret !== config.clientSecret);
-    const changed = environmentChanged || credentialsChanged;
-    if (credentialsChanged && !environmentChanged) {
-      const previousReference = await credentialReference(config);
-      await saveIntegration(`sadad-credentials-${previousReference}`, config, actor);
-      await getD1().prepare("UPDATE sadad_payments SET credential_ref = ? WHERE environment = ? AND credential_ref = '' AND status IN ('creating','pending','uncertain','paid','generating')").bind(previousReference, config.environment).run();
-    }
-    if (environmentChanged) {
+    const changed = environment !== config.environment || !!key || !!secret;
+    if (environment !== config.environment) {
       const pending = await getD1().prepare("SELECT COUNT(*) n FROM sadad_payments WHERE status IN ('creating','pending','uncertain','paid','generating')").first<{ n: number }>();
       if (pending?.n && config.environment === "live") throw new RequestError("توجد طلبات دفع حقيقية لم تنتهِ؛ أكمل تسويتها قبل تبديل البيئة.", 409);
       if (!key || !secret) throw new RequestError("أدخل مفاتيح البيئة الجديدة؛ لا يعاد استخدام مفاتيح بيئة أخرى.");

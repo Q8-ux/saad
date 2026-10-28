@@ -17,6 +17,7 @@ type IntakeForMemo = {
 };
 export type MemoGap = { key: string; question: string };
 const knownValue = (value: unknown, minimum = 2) => typeof value === "string" && value.trim().length >= minimum && !/^(?:غير (?:معروف|معلوم|محدد|متوفر)|لم (?:يذكر|يتحدد)|لا (?:أعرف|اعرف|أعلم|اعلم|أتذكر|اتذكر|أذكر|اذكر)|i (?:do not|don't) know|unknown|not known|معلوم نہیں|n\/a)(?:\s|$)|^[.\s…_-]+$/i.test(value.trim());
+const knownName = (value: unknown) => knownValue(value) && !/^(?:المستخدم|الزائر|أنا|انا|الموكل|المدعي|المدعى عليه|المدعية|المدعى عليها|الخصم|الطرف الآخر|الطرف الاخر|مستخدم|خصم|visitor|user|plaintiff|defendant|client)$/i.test(String(value).trim());
 export function memoIntakeGaps(state: IntakeForMemo, language = "ar"): MemoGap[] {
   const lang = language === "en" ? 1 : language === "ur" ? 2 : 0;
   const gaps: MemoGap[] = [];
@@ -29,8 +30,8 @@ export function memoIntakeGaps(state: IntakeForMemo, language = "ar"): MemoGap[]
   if (state.proceduralPosition?.conflict || state.contradictions?.length) add("procedure.conflict", "ما التصحيح الذي نعتمده بشأن المعلومات المتعارضة في ملخص القضية؟", "Which correction should we use for the conflicting case details?", "متضاد معلومات میں کون سی تصحیح درست ہے؟");
   if (state.proceduralPosition?.needsActor) add("procedure.actor", "من طلب تغيير الحكم بعد صدوره، أنت أم الطرف الآخر؟", "Who asked to change the judgment after it was issued: you or the other party?", "فیصلہ بدلنے کی درخواست کس نے دی: آپ نے یا دوسرے فریق نے؟");
   else if (!knownValue(role)) add("client.role", "من بدأ المطالبة بحق من الآخر، وماذا طلب؟", "Who first claimed something from the other person, and what did they ask for?", "دوسرے سے حق کا مطالبہ پہلے کس نے کیا اور کیا مانگا؟");
-  if (!knownValue(data.clientName)) add("parties.client_name", "ما اسم الشخص الذي نعد المذكرة لمصلحته كما سيظهر فيها؟", "What name should appear for the person this memorandum represents?", "یادداشت کس شخص کے لیے ہے اور اس کا نام کیا لکھیں؟");
-  if (!knownValue(data.otherParty)) add("parties.other_name", "ما اسم الشخص أو الجهة التي تطالبها أو تطالبك؟", "What is the name of the person or organisation making or facing the claim?", "مطالبہ کرنے یا جس سے مطالبہ ہے اس شخص یا ادارے کا نام کیا ہے؟");
+  if (!knownName(data.clientName)) add("parties.client_name", "ما اسم الشخص الذي نعد المذكرة لمصلحته كما سيظهر فيها؟", "What name should appear for the person this memorandum represents?", "یادداشت کس شخص کے لیے ہے اور اس کا نام کیا لکھیں؟");
+  if (!knownName(data.otherParty)) add("parties.other_name", "ما اسم الشخص أو الجهة التي تطالبها أو تطالبك؟", "What is the name of the person or organisation making or facing the claim?", "مطالبہ کرنے یا جس سے مطالبہ ہے اس شخص یا ادارے کا نام کیا ہے؟");
   if (!knownValue(data.facts || state.facts?.join("\n"), 20)) add("facts", "ما الذي حدث بالتسلسل بينك وبين الطرف الآخر؟", "What happened between you and the other party, in order?", "آپ اور دوسرے فریق کے درمیان واقعات کس ترتیب سے ہوئے؟");
   if (!knownValue(data.requests || state.requests?.join("\n"), 5)) add("relief", "ما النتيجة العملية التي تريد الوصول إليها؟", "What practical result do you want?", "آپ کیا عملی نتیجہ چاہتے ہیں؟");
   if (!knownValue(data.caseType || state.caseType)) add("matter.relationship", "ما علاقتك بالطرف الآخر وما سبب الخلاف بينكما؟", "What is your relationship to the other party and what caused the dispute?", "دوسرے فریق سے آپ کا تعلق اور اختلاف کی وجہ کیا ہے؟");

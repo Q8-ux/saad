@@ -559,6 +559,7 @@ export async function conductLegalIntake(input: IntakeInput): Promise<LegalIntak
   const memory = readQuestionMemory(input.currentState);
   memory.resolved = [...new Set([...memory.resolved, ...knownTopicsFromMessages(input.messages)])].slice(-64);
   const latest = normalizeQuestion(input.messages.filter(item => item.role === "user").at(-1)?.content || "");
+  if (/لا اعرف|لا اتذكر|لا اذكر|غير متاكد/.test(latest) && /رقم القضيه|رقم الدعوي/.test(latest)) memory.unavailable = [...new Set([...memory.unavailable, "procedure.case_number"])];
   const prior = memory.asked.at(-1);
   if (prior && /لا اعرف|لا اتذكر|لا اذكر|غير متاكد|لا اريد الاجابه|don t know|do not know|not sure|معلوم نہي|پتہ نہي/.test(latest)) {
     memory.unavailable = [...new Set([...memory.unavailable, prior.key])].slice(-64);
@@ -593,7 +594,7 @@ async function requestLegalIntake(input: IntakeInput, memory: QuestionMemory): P
   const { apiKey } = getOpenAIEnvironment();
   const model = (env as unknown as OpenAIEnvironment).OPENAI_INTAKE_MODEL?.trim() || "gpt-4.1-mini";
   const cleaned = cleanIntakeContext(input.currentState);
-  const statedProcedure = proceduralFacts(input.messages.filter(m => m.role === "user").at(-1)?.content || "");
+  const statedProcedure = proceduralFacts([...(cleaned?.facts || []), ...input.messages.filter(m => m.role === "user").map(m => m.content)].join("\n"));
   const currentState = cleaned ? Object.fromEntries(Object.entries(cleaned).filter(([key]) => key !== "questionMemory")) : null;
   const response = await openAIFetch("responses", "https://api.openai.com/v1/responses", {
     method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
@@ -651,6 +652,10 @@ caseType لطبيعة الحق (مدني، تجاري، عمالي، أسرة، 
     if (statedProcedure.judgment !== "unknown") state.orientation.judgment = statedProcedure.judgment as CaseOrientation["judgment"];
     if (statedProcedure.judgmentQuote) state.orientation.judgmentQuote = statedProcedure.judgmentQuote;
     if (statedProcedure.challenge) state.orientation.track = "challenge";
+    else if (statedProcedure.proceeding === "pending" && !["challenge", "enforcement"].includes(state.orientation.track)) {
+      state.orientation.track = "pending";
+      state.caseStage = input.language === "en" ? "Pending case" : input.language === "ur" ? "زیر سماعت مقدمہ" : "قضية منظورة";
+    }
     if (statedProcedure.judgment === "none") state.orientation.judgmentQuote = "";
     const quote = normalizeQuestion(state.orientation.judgmentQuote);
     const userFacts = [...input.messages.filter(m => m.role === "user").map(m => m.content), ...(cleaned?.facts || []), cleaned?.orientation.judgmentQuote || ""].map(normalizeQuestion);

@@ -134,7 +134,13 @@ export function proceduralFacts(message: string) {
   const q = normalizeQuestion(quote);
   const judgment = negative ? "none" : /استيناف|استئناف/.test(q) ? "appeal" : /تمييز/.test(q) ? "cassation" : /ابتداي|ابتدائي|اول درجه|اول درجة/.test(q) ? "first_instance" : "unknown";
   const challenge = !!quote && /(?:اريد|ابي|اطلب).{0,45}(?:طعن|اعتراض|تغيير|اعاده النظر)|اعترض/.test(normalized);
-  return { judgment, judgmentQuote: quote, challenge };
+  const corrections = [...message.matchAll(/(?:^|[\n.؛])\s*(?:تصحيح|للتصحيح|الصحيح)\s*[:：]/g)];
+  const current = corrections.length ? message.slice(corrections.at(-1)!.index! + corrections.at(-1)![0].length) : message;
+  const clauses = current.split(/[\n،؛.!?]+/).map(normalizeQuestion);
+  const filed = clauses.some(text => /(?:رفعت|اقمت|اقيمت|اقام|رفع)[^\n]{0,65}(?:دعوي|قضيه)|(?:الدعوي|القضيه)\s+(?:منظوره|مرفوعه)/.test(text) && !/(?:لم|لن|اذا|لو|اريد|انوي|سوف)\s+[^\n]{0,20}(?:رفع|رفعت|اقام|اقمت|تق[يم]|يق[يم])/.test(text));
+  const noCase = /لم ارفع (?:اي )?(?:قضيه|دعوي)|لا توجد (?:اي )?(?:قضيه|دعوي)|لم نرفع (?:قضيه|دعوي)/.test(normalizeQuestion(current));
+  return { judgment, judgmentQuote: quote, challenge, proceeding: filed ? "pending" : noCase ? "initial" : "unknown" };
+
 }
 
 export function updateQuestionMemory(memory: QuestionMemory, state: { questionKey: string; nextQuestions: string[]; resolvedTopics: string[]; unavailableTopics: string[] }): QuestionMemory {

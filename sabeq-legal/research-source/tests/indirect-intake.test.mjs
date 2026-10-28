@@ -244,3 +244,11 @@ test('unknown phrases cannot complete names or dates, while notice not served is
   const appeal = appealMatter(); appeal.memoFields.notificationDate = 'لم يتم إعلاني بعد';
   assert.equal(handoff.canOfferMemoHandoff(appeal), true);
 });
+
+
+test('role labels and visitor placeholders are not the legal names of the parties', () => {
+ for (const name of ['المستخدم','الخصم','الطرف الآخر','الموكل','المدعى عليه']) {
+  const state=initialMatter();state.memoPrefill.clientName=name;
+  assert.equal(handoff.canOfferMemoHandoff(state),false,name);
+ }
+});

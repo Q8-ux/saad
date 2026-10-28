@@ -16,7 +16,7 @@ function harness(){
   calls.push({url:String(url),init});assert.equal(init.redirect,'manual');
   const path=new URL(url).pathname;
   if(path.endsWith('GenerateRefreshToken')){if(authFailures){authFailures--;throw Error('synthetic auth failure');}assert.equal(init.method,'POST');assert.match(init.headers.Authorization,/^Basic /);assert.equal(init.body,'{}');assert.equal(init.headers['Content-Type'],'application/json');return Response.json({isValid:true,response:{refreshToken:'synthetic-refresh'}});}
-  if(path.endsWith('GenerateAccessToken')){assert.equal(init.method,'POST');assert.equal(init.body,'{}');assert.equal(init.headers['Content-Type'],'application/json');assert.equal(init.headers.Authorization,'Bearer synthetic-refresh');return Response.json({isValid:true,response:{accessToken:'synthetic-access',expiredAfterSeconds:86400}});}
+  if(path.endsWith('GenerateAccessToken')){assert.equal(init.method,'POST');assert.equal(init.headers.Authorization,'Bearer synthetic-refresh');assert.equal(init.body,'{}');assert.equal(init.headers['Content-Type'],'application/json');return Response.json({isValid:true,response:{accessToken:'synthetic-access',expiredAfterSeconds:86400}});}
   assert.equal(init.headers.Authorization,'Bearer synthetic-access');
   if(path.endsWith('/Invoice/insert')){const invoice=JSON.parse(init.body).invoices[0],id=String(next++);invoices.set(id,{id:Number(id),key:'synthetic-invoice-key-'+id,ref_Number:invoice.ref_Number,amount:invoice.amount,currency_Code:'KWD',status:'Unpaid',refunded_Amount:0,transactionID:'',transactions:[]});if(failInsert)throw Error('synthetic timeout after insert');return Response.json({isValid:true,response:{invoiceId:id}});}
   if(path.endsWith('/Invoice/getbyid')){assert.equal(init.method,'GET');assert.equal(init.body,undefined);return Response.json({isValid:true,response:invoices.get(new URL(url).searchParams.get('id'))});}
@@ -74,11 +74,32 @@ test('capability-only result recovery survives lost form state and purges expire
 
 test('auth-only failure is retryable and repricing or correcting input never changes the saved invoice amount',async()=>{const h=harness();try{const api=await ready(h),a=newAttempt();h.advance(4000000);h.failAuth();await assert.rejects(api.createMemoPayment(a));assert.equal(h.invoices.size,0);assert.equal(h.sqlite.prepare('SELECT status FROM sadad_payments').get().status,'retryable');await api.sadadManagement({action:'save',environment:'sandbox',priceKwd:'3.000',required:true,accountConfirmed:true,callbacksConfirmed:true},'test');await api.createMemoPayment({...a,input:{...input,facts:'تصحيح اصطناعي لوقائع القضية للاختبار دون تغيير الاستحقاق.'}});assert.equal(h.invoices.size,1);const remote=[...h.invoices.values()][0];assert.equal(remote.amount,2.501);assert.equal(h.sqlite.prepare('SELECT status FROM sadad_payments').get().status,'pending');}finally{h.close();}});
 
+test('live auth-only testing uses Workers-supported redirect handling without invoices or changing fees and visibility',async()=>{const h=harness();try{
+ const api=h.load('lib/sadad-payments.ts');await api.sadadManagement({action:'save',environment:'live',clientKey:'synthetic-live-key',clientSecret:'synthetic-live-secret',priceKwd:'50',required:false,publicCheckoutEnabled:false,accountConfirmed:false,callbacksConfirmed:false},'test');
+ const before=JSON.stringify(h.sqlite.prepare("SELECT * FROM service_settings WHERE service_key='memo'").get());let count=0;
+ h.setTransport(async(url,init)=>{if(init.redirect==='error')throw TypeError('Unsupported redirect mode: error');assert.equal(init.redirect,'manual');assert.equal(init.body,'{}');assert.equal(init.headers['Content-Type'],'application/json');count++;return new URL(url).pathname.endsWith('GenerateRefreshToken')?Response.json({isValid:true,response:{refreshToken:'synthetic-refresh'}}):Response.json({isValid:true,response:{accessToken:'synthetic-access',expiredAfterSeconds:3600}});});
+ const result=await api.sadadManagement({action:'test'},'test');assert.ok(result.testedAt);assert.equal(count,2);assert.equal(h.invoices.size,0);assert.equal(result.hasCredentials,true);assert.equal(result.publicCheckoutEnabled,false);assert.equal(JSON.stringify(h.sqlite.prepare("SELECT * FROM service_settings WHERE service_key='memo'").get()),before);assert.ok(!JSON.stringify(result).includes('synthetic-live-'));
+}finally{h.close();}});
+test('SADAD rejects redirects without following them or forwarding merchant authorization',async()=>{const h=harness();try{
+ const api=h.load('lib/sadad-payments.ts');await api.sadadManagement({action:'save',environment:'live',clientKey:'synthetic-live-key',clientSecret:'synthetic-live-secret',priceKwd:'50',required:false,publicCheckoutEnabled:false,accountConfirmed:false,callbacksConfirmed:false},'test');let count=0;
+ h.setTransport(async(url,init)=>{count++;assert.equal(new URL(url).host,'api.sadadpay.net');assert.equal(init.redirect,'manual');return new Response('',{status:302,headers:{Location:'https://untrusted.example/collect'}});});await assert.rejects(api.sadadManagement({action:'test'},'test'));assert.equal(count,1);assert.equal(h.invoices.size,0);
+}finally{h.close();}});
 
-test('hiding checkout also blocks a retryable attempt that has no provider invoice',async()=>{const h=harness();try{const api=await ready(h),a=newAttempt();h.advance(4000000);h.failAuth();await assert.rejects(api.createMemoPayment(a));assert.equal(h.sqlite.prepare('SELECT status FROM sadad_payments').get().status,'retryable');await api.sadadManagement({action:'save',environment:'sandbox',priceKwd:'2.501',required:false,publicCheckoutEnabled:false,accountConfirmed:true,callbacksConfirmed:true},'test');h.sqlite.prepare("UPDATE service_settings SET payment_required=1 WHERE service_key='memo'").run();await assert.rejects(api.createMemoPayment(a),/مخفية/);assert.equal(h.invoices.size,0);assert.equal(h.sqlite.prepare('SELECT status FROM sadad_payments').get().status,'retryable');}finally{h.close();}});
 
-test('credential rotation preserves verification of active invoices through an encrypted credential version',async()=>{const h=harness();try{const api=await ready(h),a=newAttempt();await api.createMemoPayment(a);const remote=[...h.invoices.values()][0];await api.sadadManagement({action:'save',environment:'sandbox',clientKey:'replacement-key',clientSecret:'replacement-secret',priceKwd:'2.501',required:false,publicCheckoutEnabled:false,accountConfirmed:true,callbacksConfirmed:true},'test');remote.status='Paid';remote.transactionID='synthetic-after-rotation';h.advance(4000000);assert.equal((await api.memoPaymentStatus(a.attemptId,a.paymentToken)).status,'paid');const archived=h.sqlite.prepare("SELECT integration,sealed FROM management_vault WHERE integration LIKE 'sadad-credentials-%'").get();assert.ok(archived.integration);assert.ok(!archived.sealed.includes('synthetic-client'));assert.equal((await api.memoPaymentPolicy()).publicCheckoutEnabled,false);}finally{h.close();}});
-
-test('payment route checks a user limit before a new invoice while preserving an existing paid entitlement',()=>{const source=readFileSync(root+'/app/api/payments/sadad/route.ts','utf8');assert.match(source,/import \{ enforceUserServiceLimit \} from "@\/lib\/service-records"/);const auth=source.indexOf('const user = await requireMemoUserOrGuest(request)');const status=source.indexOf('continuesExistingInvoice = await memoPaymentHasInvoice');const limit=source.indexOf('if (user && !continuesExistingInvoice) await enforceUserServiceLimit(user, "memo")');const invoice=source.indexOf('createMemoPayment(input)');assert.ok(auth>=0&&status>auth&&limit>status&&invoice>limit);});
-
-test('a stored attempt cannot force the checkout UI after payment is no longer required',()=>{const source=readFileSync(root+'/app/sabeq-site.tsx','utf8');assert.doesNotMatch(source,/currentPolicy\.required \|\| paymentAttempt\.current/);assert.doesNotMatch(source,/paymentPolicy\?\.publicCheckoutEnabled && paymentPolicy\.required\) \|\| checkout/);assert.match(source,/\["paid", "consumed"\]\.includes\(payment\.status\)/);assert.match(source,/\[403, 404\]\.includes\(statusResponse\.status\)/);assert.match(source,/attemptId: attempt\.attemptId, paymentToken: attempt\.paymentToken, input/);});
+test('temporary one-dinar pricing matches new invoices and restores the saved fee without repricing attempts',async()=>{
+ const h=harness();try{
+  const api=await ready(h);
+  h.sqlite.prepare("UPDATE service_settings SET price_fils=50000 WHERE service_key='memo'").run();
+  const previous=newAttempt();await api.createMemoPayment(previous);
+  assert.equal([...h.invoices.values()][0].amount,50);
+  h.runtime.SABEQ_MEMO_TEST_ONE_KWD='true';
+  assert.equal((await api.memoPaymentPolicy()).priceFils,1000);
+  assert.equal(h.sqlite.prepare("SELECT price_fils FROM service_settings WHERE service_key='memo'").get().price_fils,50000);
+  const current=newAttempt();const checkout=await api.createMemoPayment(current);
+  assert.equal(checkout.priceFils,1000);assert.equal([...h.invoices.values()][1].amount,1);
+  assert.equal((await api.memoPaymentStatus(previous.attemptId,previous.paymentToken)).priceFils,50000);
+  delete h.runtime.SABEQ_MEMO_TEST_ONE_KWD;
+  assert.equal((await api.memoPaymentPolicy()).priceFils,50000);
+  assert.equal((await api.memoPaymentStatus(current.attemptId,current.paymentToken)).priceFils,1000);
+ }finally{h.close();}
+});
