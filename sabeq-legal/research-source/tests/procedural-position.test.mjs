@@ -32,7 +32,7 @@ test('pending appeal with no identified actor requires a factual clarification',
 test('contradictory roles and cross appeals do not choose a side silently',()=>{for(const facts of ['أنا المدعي. أنا المدعى عليه.','أنا المدعي. استأنفت الحكم واستأنف الخصم الحكم.']){const value=infer(facts);assert.equal(value.conflict,true);assert.equal(value.partyRole,'');}});
 test('server enrichment corrects the client role and keeps other parties and source readiness intact',()=>{
  const state={court:'المحكمة الكلية',courtCircuit:'دائرة سابقة',readyForMemo:false,phase:'review',parties:[{name:'الخصم الاصطناعي',role:'مدعٍ'},{name:'الموكل الاصطناعي',role:'مدعٍ'}],memoPrefill:{clientName:'الموكل الاصطناعي',otherParty:'الخصم الاصطناعي',partyRole:'مدعٍ',court:'المحكمة الكلية'}};
- const value=apply(state,'أنا المدعى عليه واستأنف المدعي الحكم.');assert.equal(value.memoPrefill.partyRole,'مستأنف ضده');assert.equal(value.parties[0].role,'مدعٍ');assert.equal(value.parties[1].role,'مستأنف ضده');assert.equal(value.readyForMemo,false);assert.equal(value.courtCircuit,'');
+ const value=apply(state,'أنا المدعى عليه واستأنف المدعي الحكم.');assert.equal(value.memoPrefill.partyRole,'مستأنف ضده');assert.equal(value.parties[0].role,'مستأنف');assert.equal(value.parties[1].role,'مستأنف ضده');assert.equal(value.readyForMemo,false);assert.equal(value.courtCircuit,'');
 });
 
 test('female procedural roles follow the represented party and do not cause a false conflict', () => {
@@ -49,4 +49,21 @@ test('an appeal in another case cannot replace the stated current forum', () => 
 test('filing against an opponent and being sued are separate factual roles',()=>{
  for(const text of ['رفعت دعوى على خصمي للمطالبة بالمبلغ.','أقمت دعوى ضد الخصم.']) { const result=infer(text);assert.equal(result.partyRole,'مدعٍ',text);assert.equal(result.conflict,false);assert.equal(result.court,''); }
  for(const text of ['رفع خصمي علي دعوى مطالبة.','أقام المدعي دعوى ضدي.','رُفعت علي دعوى.']) { const result=infer(text);assert.equal(result.partyRole,'مدعى عليه',text);assert.equal(result.conflict,false); }
+});
+
+
+test('explicit corrections replace the earlier appeal actor and specialist circuit',()=>{
+ const corrected=infer('أنا المدعي. استأنفت الحكم. تصحيح: أنا المدعي ولم أستأنف الحكم. الخصم استأنف الحكم.');
+ assert.equal(corrected.conflict,false);assert.equal(corrected.partyRole,'مستأنف ضده');
+ const civil=infer('الدعوى أمام المحكمة الكلية في الدائرة الإدارية. تصحيح: الدعوى أمام المحكمة الكلية في الدائرة المدنية وليست القضية إدارية.');
+ assert.equal(civil.specialization,'unknown');assert.equal(civil.courtCircuit,'');
+});
+test('a ministry alone or a wish to appeal does not determine specialist jurisdiction or an actual appeal',()=>{
+ assert.equal(infer('وردت بضاعة لوزارة ولم تدفع الفاتورة.').specialization,'unknown');
+ assert.equal(infer('أنا المدعي وأريد تقديم استئناف.').court,'');
+});
+test('current party roles stay consistent in all transferred party fields',()=>{
+ const state={court:'المحكمة الكلية',courtCircuit:'',readyForMemo:false,phase:'review',parties:[{name:'طرف اصطناعي',role:'مدعى عليه'},{name:'خصم اصطناعي',role:'مدعٍ'}],memoPrefill:{clientName:'طرف اصطناعي',otherParty:'خصم اصطناعي',partyRole:'مدعى عليه',court:'المحكمة الكلية',allParties:'قديم'}};
+ const value=apply(state,'أنا المدعى عليه واستأنفت الحكم.');
+ assert.equal(value.parties[0].role,'مستأنف');assert.equal(value.parties[1].role,'مستأنف ضده');assert.equal(value.memoPrefill.allParties,'طرف اصطناعي: مستأنف\nخصم اصطناعي: مستأنف ضده');
 });

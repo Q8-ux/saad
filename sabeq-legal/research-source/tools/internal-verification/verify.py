@@ -127,7 +127,7 @@ def check_plan(profile):
     if profile == "site":
         return [
             node("sources", ["tests/bound-legislation.test.mjs", "tests/reviewed-judgments.test.mjs", "tests/legislation-workbench.test.mjs", "tests/legal-source-coverage.test.mjs"]),
-            node("memo", ["tests/procedural-position.test.mjs", "tests/memo-journey.test.mjs", "tests/payment-dialog.test.mjs", "tests/agent-pipeline.test.mjs", "tests/case-reasoning.test.mjs", "tests/inline-authorities.test.mjs", "tests/connected-intake.test.mjs", "tests/memo-responsive-generation.test.mjs"]),
+            node("memo", ["tests/indirect-intake.test.mjs", "tests/procedural-position.test.mjs", "tests/memo-journey.test.mjs", "tests/payment-dialog.test.mjs", "tests/agent-pipeline.test.mjs", "tests/case-reasoning.test.mjs", "tests/inline-authorities.test.mjs", "tests/connected-intake.test.mjs", "tests/memo-responsive-generation.test.mjs"]),
             node("access", ["tests/management.test.mjs", "tests/analytics-consent.test.mjs", "tests/programmer-client.test.mjs"]),
         ]
     if profile == "backend":

@@ -1,3 +1,4 @@
+import { applyIntakeReadiness } from "@/lib/intake-readiness";
 import { applyProceduralPosition } from "@/lib/procedural-position";
 import {guardMatterIntake} from "@/lib/matter-facts";
 import {scopeEvidenceToFacts} from "@/lib/bound-draft";
@@ -19,7 +20,7 @@ function guessCaseType(text: string) {
   if (/طلاق|نفقة|نفقه|حضانة|حضانه|زواج|أسرة|اسرة|ميراث/u.test(text)) return "أحوال شخصية";
   if (/إيجار|ايجار|مستأجر|مستاجر|مؤجر|إخلاء|اخلاء/u.test(text)) return "إيجارات";
   if (/بلاغ|نصب|احتيال|سرقة|سرقه|اعتداء|ضرب|جزائي|جنحة|جنحه|جناية|جنايه/u.test(text)) return "جزائي";
-  if (/وزارة|وزاره|حكوم|قرار إداري|قرار اداري/u.test(text)) return "إداري";
+  if (/قرار إداري|قرار اداري/u.test(text)) return "إداري";
   if (/شركة|شركه|تجاري|توريد|أسهم|اسهم/u.test(text)) return "تجاري";
   if (/دين|قرض|تعويض|مبلغ|مدني/u.test(text)) return "مدني";
   return "";
@@ -76,7 +77,9 @@ function buildLimitedIntakeState(input: { language: string; message: string; cur
     contradictions: previous?.contradictions || [],
     nextQuestions: question ? [question] : [],
     readyForMemo: false,
+    memoFields: previous?.memoFields || {},
     memoPrefill: {
+      ...previous?.memoFields,
       caseType,
       court: previous?.court || "",
       clientName: memoText("clientName"),
@@ -118,7 +121,7 @@ export async function POST(request: Request) {
         Object.assign(step.stage, { status, finishedAt: new Date().toISOString(), durationMs: Math.round(performance.now() - step.clock) });
         send({ type: "stage", stage: { ...step.stage } });
       };
-      const scopeFacts=messages.filter(item=>item.role==="user").map(item=>item.content).join("\n");
+      const scopeFacts=[...(cleanIntakeContext(data.currentState)?.facts || []), ...messages.filter(item=>item.role==="user").map(item=>item.content)].join("\n");
       const search = begin("library");
       let evidence: LegalEvidence[] = [], lookupFailed = false;
       try {
@@ -144,7 +147,7 @@ export async function POST(request: Request) {
       generationMs = analysis.stage.durationMs || 0;
       const review = begin("source_review");
       const sourceReviewed = reviewIntakeAnalysis(applyProceduralPosition(state,scopeFacts), evidence, lookupFailed, language);
-      const reviewed = guardMatterIntake(sourceReviewed,scopeFacts,readQuestionMemory(data.currentState),language);
+      const reviewed = applyIntakeReadiness(guardMatterIntake(sourceReviewed,scopeFacts,readQuestionMemory(data.currentState),language),readQuestionMemory(data.currentState),language);
       end(review, reviewed.legalBasis.length ? "completed" : "limited");
       stages.push({ id: "human_review", status: "pending", startedAt: null, finishedAt: null, durationMs: null });
       const sourceCoverage = legalSourceCoverage(evidence, lookupFailed);
@@ -153,7 +156,7 @@ export async function POST(request: Request) {
       send({type:"text",text:reviewed.assistantMessage});
       signal.throwIfAborted();
       if (user) await recordServiceActivity({ userId: user.id, serviceType: "assistant", title: reviewed.caseType || "مقابلة قانونية", inputText: message, outputText: reviewed.assistantMessage, metadata: { language, phase: reviewed.phase, progress: reviewed.progress, sourceCount: evidence.length, sourceIds: evidence.map(item => item.chunkId || item.documentId), readyForMemo: finalState.readyForMemo, searchMs, generationMs } });
-      return { sourceCoverage: legalSourceCoverage(evidence, lookupFailed), state: finalState, engineRevision: "bound-legislation-factual-scope-2", sourceCount: evidence.length, timing: { searchMs, generationMs, firstTextMs, totalMs: performance.now() - started } };
+      return { sourceCoverage: legalSourceCoverage(evidence, lookupFailed), state: finalState, engineRevision: "indirect-intake-completeness-1", sourceCount: evidence.length, timing: { searchMs, generationMs, firstTextMs, totalMs: performance.now() - started } };
     }
     if (data.stream === true) {
       const encoder = new TextEncoder();

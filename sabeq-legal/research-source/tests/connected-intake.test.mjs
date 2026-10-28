@@ -8,7 +8,7 @@ import { spawnSync } from 'node:child_process';
 function load(path, dependencies = {}, globals = {}) {
   const exports = {};
   const js = ts.transpileModule(readFileSync(new URL(path, import.meta.url), 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, esModuleInterop: true } }).outputText;
-  vm.runInNewContext(js, { exports, require: name => {if(name.endsWith("/procedural-position"))return load("../lib/procedural-position.ts");if(name.endsWith("/judgment-evidence"))return load("../lib/judgment-evidence.ts"); if(name.endsWith("/matter-facts")||name==="./matter-facts")return load("../lib/matter-facts.ts");if(name.endsWith("/bound-draft")||name==="./bound-draft")return load("../lib/bound-draft.ts");if(name.endsWith("/case-reasoning")) return load("../lib/case-reasoning.ts"); if(name.endsWith('/legal-voice')) return load('../lib/legal-voice.ts'); if(name === '@/data/legal-sources/reviewed.json') return JSON.parse(readFileSync(new URL('../data/legal-sources/reviewed.json',import.meta.url),'utf8')); if(name.endsWith('/official-legislation')||name === './official-legislation') return load('../lib/official-legislation.ts'); if(name.endsWith('/legal-citation-review')||name === './legal-citation-review') return load('../lib/legal-citation-review.ts'); if (name.endsWith('/memo-language')) return load('../lib/memo-language.ts'); if (name.endsWith('/interface-language')) return load('../lib/interface-language.ts'); if (name === './pleading-document' || name === '@/lib/pleading-document') return load('../lib/pleading-document.ts'); if (name === './legal-language' || name === '@/lib/legal-language') return load('../lib/legal-language.ts'); if (!(name in dependencies)) throw new Error('Missing test dependency: ' + name); return dependencies[name]; }, console, URL, TextDecoder, AbortSignal, setTimeout, ...globals });
+  vm.runInNewContext(js, { exports, require: name => {if(name.endsWith("/memo-handoff"))return load("../lib/memo-handoff.ts");if(name.endsWith("/procedural-position"))return load("../lib/procedural-position.ts");if(name.endsWith("/judgment-evidence"))return load("../lib/judgment-evidence.ts"); if(name.endsWith("/matter-facts")||name==="./matter-facts")return load("../lib/matter-facts.ts");if(name.endsWith("/bound-draft")||name==="./bound-draft")return load("../lib/bound-draft.ts");if(name.endsWith("/case-reasoning")) return load("../lib/case-reasoning.ts"); if(name.endsWith('/legal-voice')) return load('../lib/legal-voice.ts'); if(name === '@/data/legal-sources/reviewed.json') return JSON.parse(readFileSync(new URL('../data/legal-sources/reviewed.json',import.meta.url),'utf8')); if(name.endsWith('/official-legislation')||name === './official-legislation') return load('../lib/official-legislation.ts'); if(name.endsWith('/legal-citation-review')||name === './legal-citation-review') return load('../lib/legal-citation-review.ts'); if (name.endsWith('/memo-language')) return load('../lib/memo-language.ts'); if (name.endsWith('/interface-language')) return load('../lib/interface-language.ts'); if (name === './pleading-document' || name === '@/lib/pleading-document') return load('../lib/pleading-document.ts'); if (name === './legal-language' || name === '@/lib/legal-language') return load('../lib/legal-language.ts'); if (!(name in dependencies)) throw new Error('Missing test dependency: ' + name); return dependencies[name]; }, console, URL, TextDecoder, AbortSignal, setTimeout, ...globals });
   return exports;
 }
 const context = load('../lib/intake-context.ts');
@@ -18,7 +18,7 @@ const review = load('../lib/intake-analysis.ts', { './legal-search': search });
 const baseState = (changes = {}) => ({ questionKey: 'amount', phase: 'gathering', assistantMessage: 'فهمت طلبك.', progress: 50, caseType: 'عمالي', caseStage: 'قبل التقاضي', court: 'جهة مبدئية', courtCircuit: '', jurisdictionConfidence: 'high', jurisdictionReason: 'يحتاج مراجعة الاختصاص', jurisdictionMissing: [], caseSummary: 'وقائع اصطناعية للاختبار.', legalBasis: [], analysisWarnings: [], resolvedTopics: [], unavailableTopics: [], parties: [], facts: [], requests: [], legalIssues: [], importantDates: [], documentsNeeded: [], missingInformation: ['قيمة الطلب'], contradictions: [], nextQuestions: ['ما قيمة الطلب؟'], readyForMemo: false, memoPrefill: {}, ...changes });
 
 test('visitor is not asked to choose legal category/court, but may read an existing judgment', () => {
-  for (const q of ['ما نوع القضية؟', 'هل الدعوى مدنية أم جزائية؟', 'أي محكمة تريد رفع الدعوى أمامها؟', 'Which court do you choose?']) assert.equal(context.validIntakeQuestion(q), false, q);
+  for (const q of ['ما نوع القضية؟', 'هل الدعوى مدنية أم جزائية؟', 'أي محكمة تريد رفع الدعوى أمامها؟', 'Which court do you choose?', 'أنت مدعٍ أم مدعى عليه؟', 'قضيتك أمام الكلية أو الاستئناف؟', 'هل الدعوى كلية أم استئناف أم إدارية؟']) assert.equal(context.validIntakeQuestion(q), false, q);
   for (const q of ['ما اسم المحكمة المكتوب على الحكم؟', 'متى صدر الحكم؟', 'ما الذي فعله الطرف الآخر؟']) assert.equal(context.validIntakeQuestion(q), true, q);
 });
 
@@ -48,7 +48,7 @@ test('precedent comparison accepts only retrieved Cassation passages and preserv
 
 test('memo handoff carries reviewed sources and opens review only with all essential case fields', () => {
   const handoff = load('../lib/memo-handoff.ts');
-  const state = baseState({ readyForMemo: true, memoPrefill: { caseType: 'مدني', court: 'المحكمة الكلية', clientName: 'شخص افتراضي', partyRole: 'مدعٍ', otherParty: 'خصم افتراضي', allParties: '', facts: 'وقائع اصطناعية مكتملة الأطراف لأغراض الاختبار فقط', requests: 'رد المبلغ المطالب به', legalIssues: 'مديونية' }, legalBasis: [{ sourceId: 'م1' }], research: { sources: [{ id: 'م1', chunkId: 45 }, { id: 'م2', chunkId: 999 }] }, importantDates: [{ label: 'واقعة', date: '2026-01-01' }] });
+  const state = baseState({ readyForMemo: true, missingInformation:[], caseStage:'قبل إقامة الدعوى', orientation:{track:'initial',judgment:'none'}, memoFields:{clientAddress:'عنوان موكل اصطناعي',otherAddress:'عنوان خصم اصطناعي'}, memoPrefill: { caseType: 'مدني', court: 'المحكمة الكلية', clientName: 'شخص افتراضي', partyRole: 'مدعٍ', otherParty: 'خصم افتراضي', allParties: '', facts: 'وقائع اصطناعية مكتملة الأطراف لأغراض الاختبار فقط', requests: 'رد المبلغ المطالب به', legalIssues: 'مديونية' }, legalBasis: [{ sourceId: 'م1' }], research: { sources: [{ id: 'م1', chunkId: 45 }, { id: 'م2', chunkId: 999 }] }, importantDates: [{ label: 'واقعة', date: '2026-01-01' }] });
   const packet = handoff.buildMemoHandoff(state, [{ role: 'user', content: 'حالة اصطناعية' }]);
   assert.equal(packet.assistantSourceIds, '[45]'); assert.match(packet.assistantResearch, /2026-01-01/); assert.equal(handoff.isCompleteMemoHandoff(packet), true);
   assert.equal(handoff.isCompleteMemoHandoff({ ...packet, clientName: '' }), false);
@@ -195,11 +195,11 @@ test('the issuing court cannot become the next forum solely from its name in the
  assert.equal(result.court, ''); assert.equal(result.readyForMemo, false);
 });
 
-test('understood case can transfer before research finishes without inventing missing names or court', () => {
+test('understood but incomplete case cannot transfer before all essential facts and source review', () => {
   const h = load('../lib/memo-handoff.ts');
   assert.equal(h.canOfferMemoHandoff({facts:[],caseSummary:''}), false);
   const state = baseState({ readyForMemo:false, court:'', facts:['وقائع اصطناعية واضحة عن مطالبة مالية.'], caseSummary:'مطالبة مالية قيد المراجعة', courtCircuit:'', importantDates:[{label:'الواقعة',date:'2026-09-01'}], memoPrefill:{caseType:'مدني',court:'',clientName:'سالم الاختباري',partyRole:'مدعٍ',otherParty:'ناصر الافتراضي',allParties:'سالم: مدعٍ\nناصر: مدعى عليه',facts:'وقائع اصطناعية واضحة عن مطالبة مالية.',requests:'رد المبلغ المطالب به',legalIssues:'إثبات الدين'} });
-  assert.equal(h.canOfferMemoHandoff(state), true);
+  assert.equal(h.canOfferMemoHandoff(state), false);
   const data=h.buildMemoHandoff(state,[{role:'user',content:'بيانات اصطناعية للاختبار'}]);
   for(const key of Object.keys(state.memoPrefill)) assert.equal(data[key],state.memoPrefill[key]);
   assert.equal(data.court,''); assert.equal(h.isCompleteMemoHandoff(data),false);
@@ -270,4 +270,16 @@ test('dictation corrects a model role from the stated appeal actor without inven
  assert.equal(result.partyRole,'مستأنف ضده');assert.equal(result.court,'محكمة الاستئناف');assert.equal(result.parties[0].role,'مستأنف ضده');assert.equal(result.parties[1].role,'مستأنف');
  const ambiguous=await openai.analyzeMemoDictation('القضية منظورة أمام محكمة الاستئناف.');
  assert.equal(ambiguous.partyRole,'');assert.match(ambiguous.warnings.join(' '),/مَن قدّم الطعن/);
+});
+
+test('memo form fields survive later turns and non-whitelisted personal identifiers are dropped', async () => {
+ const previous={memoFields:{caseNumber:'0012/2026',clientAddress:'عنوان اصطناعي للموكل',judgmentOperative:'منطوق حكم اصطناعي',civilId:'must-not-transfer'}};
+ const cleaned=context.cleanIntakeContext(previous);
+ assert.equal(cleaned.memoFields.caseNumber,'0012/2026');assert.equal(cleaned.memoFields.civilId,undefined);
+ const mock=client([baseState({memoFields:null})]);
+ const result=await mock.run({currentState:previous});
+ assert.equal(result.memoFields.caseNumber,'0012/2026');assert.equal(result.memoPrefill.clientAddress,'عنوان اصطناعي للموكل');
+ assert.equal(result.memoFields.civilId,undefined);
+ const properties=mock.calls[0].text.format.schema.properties.memoFields.anyOf[0].properties;
+ assert.ok(properties.judgmentOperative);assert.equal(properties.civilId,undefined);
 });

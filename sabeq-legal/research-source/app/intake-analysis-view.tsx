@@ -32,6 +32,7 @@ export default function IntakeAnalysisView({ state, language }: { state: Connect
       {list(t.facts, state.facts)}{list(t.requests, state.requests)}{list(t.issues, state.legalIssues)}
       {!!state.importantDates?.length && <div><h4>{t.dates}</h4><ul>{state.importantDates.map((item, i) => <li key={i}>{item.label}: {item.date}</li>)}</ul></div>}
     </details>
+    {!!state.memoReadiness?.missing.length && <details><summary>{language === "en" ? "Details still needed for the memorandum" : language === "ur" ? "یادداشت کے لیے باقی ضروری معلومات" : "البيانات المتبقية لإكمال المذكرة"} ({state.memoReadiness.missing.length})</summary><ul>{state.memoReadiness.missing.map(gap => <li key={gap.key}>{gap.question}</li>)}</ul></details>}
     {list(t.missing, state.jurisdictionMissing)}{list(t.contradictions, state.contradictions)}
     <details open className="intake-precedents"><summary>{routing.precedents}</summary>
       {!state.precedentMatches?.length && <p>{routing.empty}</p>}

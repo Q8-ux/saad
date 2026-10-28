@@ -1,5 +1,5 @@
 export type ProceduralPosition = {
-  partyRole: string; originalRole: string; court: string;
+  partyRole: string; originalRole: string; court: string; courtCircuit: string; specialization: "administrative" | "unknown";
   level: "first_instance" | "appeal" | "cassation" | "unknown";
   evidence: string[]; conflict: boolean; needsActor: boolean;
 };
@@ -20,12 +20,15 @@ const courts = { first_instance:"المحكمة الكلية", appeal:"محكم�
 
 /** Extracts stated procedure only; it does not establish jurisdiction or appeal eligibility. */
 export function inferProceduralPosition(text: string, clientName = "", otherParty = ""): ProceduralPosition {
-  const clauses = text.split(/[\n،؛.!?]+/).map(raw=>({raw:raw.trim(),s:normalize(raw.trim())})).filter(x=>x.s);
+  const clauses = text.split(/[\n،؛.!?]+/).map(raw=>({raw:raw.trim(),s:normalize(raw.trim())})).filter(x=>x.s && !/(?:قضيه اخري|دعوي اخري|قال الخصم|ورد في صحيفه الخصم)/.test(x.s));
+  const correction = clauses.findLastIndex(({s}) => /^(?:تصحيح|للتصحيح|الصحيح)\s*[:：]/.test(s));
+  const currentClauses = correction < 0 ? clauses : clauses.slice(correction);
   const evidence: string[] = [], originals = new Set<string>(), explicit = new Set<string>();
   const addEvidence = (raw: string) => { if (!evidence.includes(raw)) evidence.push(raw.slice(0,400)); };
   for (const {raw,s} of clauses) {
     const self = /(?:^|\s)(?:انا|انني|بصفتي|صفتي|موكلي|موكلتي|الطرف الذي امثله)\s+(?:(?:هو|هي|في الدعوي|بصفه)\s+)?((?:ال)?(?:مدعي?|مدعيه|مستانف|مستانفه|طاعن|طاعنه|مطعون)[^،؛.!?\n]{0,18})/.exec(s);
     const role = self && !negated(s,self.index) ? roleOf(self[1]) : "";
+    if (role && /^(?:تصحيح|للتصحيح|الصحيح)\s*[:：]/.test(s)) { originals.clear(); explicit.clear(); }
     if (role) { (firstRole(role) ? originals : explicit).add(role); addEvidence(raw); }
     const filedBySelf = /(?:اقمت|رفعت|قدمت)\s+(?:انا\s+)?دعوي\s+(?:علي|ضد)\s+(?!من\s)\S+/.test(s) && !/(?:لم|لن|اذا|لو)\s+(?:اقمت|رفعت|قدمت)/.test(s);
     if (filedBySelf) { originals.add("مدعٍ"); addEvidence(raw); }
@@ -38,6 +41,7 @@ export function inferProceduralPosition(text: string, clientName = "", otherPart
   type Level = keyof typeof courts;
   const actions: Array<{level:Level;side:"self"|"opponent";raw:string}> = [];
   let statedLevel: Level | undefined;
+  const administrative = currentClauses.some(({s}) => /(?:الدعوي|القضيه|دائره|الدائره|المحكمه)\s+الاداريه|(?:محكمه|المحكمه)\s+(?:الاستيناف|الكليه)[^.\n]{0,25}الاداريه/.test(s) && !/(?:ليست|ليس|لا)\s+(?:الدعوي|القضيه|دائره|الدائره|المحكمه)/.test(s));
   const actorSide = (actor: string) => {
     if (/الخصم|خصمي|الطرف الاخر/.test(actor)) return "opponent" as const;
     if (clientName && actor===normalize(clientName)) return "self" as const;
@@ -46,7 +50,7 @@ export function inferProceduralPosition(text: string, clientName = "", otherPart
     if (firstRole(role) && originalRole) return isDefendant(role)===isDefendant(originalRole) ? "self" as const : "opponent" as const;
     return null;
   };
-  for (const {raw,s} of clauses) {
+  for (const {raw,s} of currentClauses) {
     const forum=/(?:امام|منظوره (?:لدي|في)|الجلسه (?:امام|في))\s+(?:المحكمه|محكمه)?\s*(التمييز|الاستيناف|الكليه)/.exec(s);
     if (forum && !negated(s,forum.index)) { statedLevel=forum[1]==="التمييز"?"cassation":forum[1]==="الاستيناف"?"appeal":"first_instance"; addEvidence(raw); }
     for (const [level,action] of [["cassation",/(?:طعن|طعنت|طعننا|قدم طعنا|قدمت طعنا|تقدم بطعن)\s+(?:[^،؛.!?\n]{0,18}\s+)?بالتمييز/g],["appeal",/(?:استانف(?:ت|نا)?|استيناف|استينافا)/g]] as const) {
@@ -55,7 +59,8 @@ export function inferProceduralPosition(text: string, clientName = "", otherPart
         if (negated(s,match.index!)) continue;
         const before=s.slice(0,match.index).trim(),after=s.slice(match.index!+match[0].length).trim();
         let side: "self"|"opponent"|null = null;
-        if (/استانفت|استانفنا|طعنت|طعننا|قدمت طعنا/.test(match[0]) || /(?:قدمت|رفعت|اقمت|اريد|ارغب في|سوف اقدم)(?:\s+صحيفه)?$/.test(before)) side="self";
+        if (/(?:اريد|ارغب|سوف|انوي|ابي)\s*[^.\n]{0,25}$/.test(before)) continue;
+        if (/استانفت|استانفنا|طعنت|طعننا|قدمت طعنا/.test(match[0]) || /(?:قدمت|رفعت|اقمت)(?:\s+صحيفه)?$/.test(before)) side="self";
         const actors=["المدعي عليها","المدعي عليه","المدعيه","المدعي","الخصم","خصمي","الطرف الاخر",normalize(clientName),normalize(otherParty)].filter(Boolean).sort((a,b)=>b.length-a.length);
         const named=actors.find(actor=>before.endsWith(actor)||after.startsWith(actor+" ")||after===actor||match[0].includes(" "+actor+" "));
         if (named) side=actorSide(named);
@@ -64,6 +69,7 @@ export function inferProceduralPosition(text: string, clientName = "", otherPart
     }
   }
   if (explicitRole.includes("مستأنف")) statedLevel="appeal";
+  if (/طاعن|مطعون/.test(explicitRole)) statedLevel="cassation";
   const level = actions.some(a=>a.level==="cassation") ? "cassation" : actions.some(a=>a.level==="appeal") ? "appeal" : statedLevel || "unknown";
   const current=actions.filter(a=>a.level===level),sides=new Set(current.map(a=>a.side));
   let partyRole = explicitRole;
@@ -71,18 +77,27 @@ export function inferProceduralPosition(text: string, clientName = "", otherPart
   if (sides.size===1) partyRole=level==="cassation" ? (current[0].side==="self"?(female?"طاعنة":"طاعن"):(female?"مطعون ضدها":"مطعون ضده")) : current[0].side==="self"?(female?"مستأنفة":"مستأنف"):(female?"مستأنف ضدها":"مستأنف ضده");
   if (!partyRole && (level==="unknown"||level==="first_instance")) partyRole=originalRole;
   const conflict = originals.size>1 || explicit.size>1 || sides.size>1 || (!!explicitRole && !!partyRole && normalize(explicitRole)!==normalize(partyRole));
-  return { partyRole:conflict?"":partyRole,originalRole,court:level==="unknown"||conflict?"":courts[level],level,evidence:evidence.slice(-4),conflict,needsActor:!conflict&&(level==="appeal"||level==="cassation")&&!partyRole };
+  return { partyRole:conflict?"":partyRole,originalRole,courtCircuit:administrative?"الدائرة الإدارية":"",specialization:administrative?"administrative":"unknown",court:level==="unknown"||conflict?"":courts[level],level,evidence:evidence.slice(-4),conflict,needsActor:!conflict&&(level==="appeal"||level==="cassation")&&!partyRole };
 }
 
-export const proceduralPositionInstructions = `استنتج صفة الطرف الذي تمثله الصحيفة من أفعال الزائر والأطراف: من أقام الدعوى وعلى من؟ ثم من رفع الاستئناف أو الطعن؟ لا تفترض أن أول اسم هو الموكل. افصل الصفة الأصلية عن الحالية؛ المدعى عليه الذي يستأنف يصبح مستأنفاً، ومن يرد على استئناف خصمه يكون مستأنفاً ضده، وفي التمييز طاعن أو مطعون ضده. ذكر حكم تمييز للاستشهاد أو المحكمة التي أصدرت حكماً سابقاً لا يحدد المحكمة الحالية. اجمع من الوقائع من تقدم بالإجراء والمحكمة المنظور أمامها دون مطالبة الزائر باختيار مصطلح قانوني. لا تختلق حكماً أو ميعاداً أو جواز طعن.`;
+export const proceduralPositionInstructions = `استنتج صفة الطرف الذي تمثله الصحيفة من أفعال الزائر والأطراف: من أقام الدعوى وعلى من؟ ثم من رفع الاستئناف أو الطعن؟ لا تفترض أن أول اسم هو الموكل. افصل الصفة الأصلية عن الحالية؛ المدعى عليه الذي يستأنف يصبح مستأنفاً، ومن يرد على استئناف خصمه يكون مستأنفاً ضده، وفي التمييز طاعن أو مطعون ضده. ذكر حكم تمييز للاستشهاد أو المحكمة التي أصدرت حكماً سابقاً لا يحدد المحكمة الحالية. اجمع من الوقائع من تقدم بالإجراء والمحكمة المنظور أمامها دون مطالبة الزائر باختيار مصطلح قانوني. الإداري تخصص مستقل عن الدرجة: قد تكون الدائرة الإدارية في أول درجة أو الاستئناف، فلا تجعل إداري والكلية والاستئناف بدائل متنافية. لا يكفي كون الخصم وزارة لتقرير النزاع الإداري؛ افهم القرار أو العقد أو التصرف محل الطلب وصفة الأطراف. لا تختلق حكماً أو ميعاداً أو جواز طعن.`;
 
-export function applyProceduralPosition<T extends { court:string; courtCircuit:string; readyForMemo:boolean; phase:string; parties:Array<{name:string;role:string}>; memoPrefill:{clientName:string;otherParty:string;partyRole:string;court:string} }>(state:T,text:string) {
+export function applyProceduralPosition<T extends { court:string; courtCircuit:string; readyForMemo:boolean; phase:string; parties:Array<{name:string;role:string}>; memoPrefill:{clientName:string;otherParty:string;partyRole:string;court:string;allParties?:string} }>(state:T,text:string) {
   const position=inferProceduralPosition(text,state.memoPrefill.clientName,state.memoPrefill.otherParty);
   const unresolved=position.conflict||position.needsActor;
   const role=unresolved?"":position.partyRole||state.memoPrefill.partyRole;
   const court=position.conflict?"":position.court||state.court;
-  return {...state,proceduralPosition:position,court,courtCircuit:court!==state.court?"":state.courtCircuit,
+  const parties=state.parties.map(p=>{
+    if (p.name && p.name===state.memoPrefill.clientName) return {...p,role};
+    if (!unresolved && role && state.parties.length===2 && p.name===state.memoPrefill.otherParty && ["appeal","cassation"].includes(position.level)) {
+      const female=/مدعية|عليها|مستأنفة|طاعنة|ضدها/.test(p.role);
+      const opposing=position.level==="appeal" ? (/ضد/.test(role)?(female?"مستأنفة":"مستأنف"):(female?"مستأنف ضدها":"مستأنف ضده")) : /مطعون/.test(role)?(female?"طاعنة":"طاعن"):(female?"مطعون ضدها":"مطعون ضده");
+      return {...p,role:opposing};
+    }
+    return p;
+  });
+  return {...state,proceduralPosition:position,court,courtCircuit:position.conflict?"":position.courtCircuit||(court!==state.court?"":state.courtCircuit),
     readyForMemo:unresolved?false:state.readyForMemo,phase:unresolved&&state.phase==="ready"?"review":state.phase,
-    parties:state.parties.map(p=>p.name&&p.name===state.memoPrefill.clientName?{...p,role}:p),
-    memoPrefill:{...state.memoPrefill,partyRole:role,court}};
+    parties,
+    memoPrefill:{...state.memoPrefill,partyRole:role,court,allParties:parties.map(p=>`${p.name}: ${p.role}`).join("\n")}};
 }

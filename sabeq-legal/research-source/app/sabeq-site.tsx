@@ -782,7 +782,7 @@ function Assistant({ t, language, token, initialSession, onSession, openBooking,
   const voiceUi = voiceCopy[language];
   const voiceActive = !["idle", "stopped", "error"].includes(voicePhase);
   const voiceLabel = voicePhase === "listening" ? voiceUi.finish : voicePhase === "blocked" ? voiceUi.play : voiceActive ? voiceUi.stop : voiceUi.start;
-  const intro = language === "ar" ? "السلام عليكم، أنا سابق مساعدك القانوني. اشرح لي قضيتك بتأني، وسأساعدك خطوة بخطوة حتى تتضح الوقائع والطلبات." : language === "en" ? "Welcome, I’m Sabeq, your legal assistant. Tell me about your case, and I will help you clarify the facts and requested relief step by step." : "السلام علیکم، میں سابق، آپ کا قانونی معاون ہوں۔ اپنا مقدمہ بتائیں؛ میں حقائق اور مطالبات واضح کرنے میں مرحلہ وار مدد کروں گا۔";
+  const intro = language === "ar" ? "السلام عليكم، أنا سابق مساعدك القانوني. سأرتب معلومات قضيتك خطوة بخطوة. ما الذي حدث بينك وبين الطرف الآخر؟" : language === "en" ? "Welcome, I’m Sabeq, your legal assistant. I will help you organise the case details step by step. What happened between you and the other party?" : "السلام علیکم، میں سابق، آپ کا قانونی معاون ہوں۔ اپنا مقدمہ بتائیں؛ میں حقائق اور مطالبات واضح کرنے میں مرحلہ وار مدد کروں گا۔";
   useEffect(() => {
     voiceRef.current = new LegalVoiceConversation(() => optionsRef.current);
     try { const saved = localStorage.getItem("sabeq-assistant-voice"); if (isLegalVoice(saved)) setSelectedVoice(saved); } catch {}
@@ -920,7 +920,7 @@ function Assistant({ t, language, token, initialSession, onSession, openBooking,
       {intake.missingInformation.length > 0 && <details open><summary>{tr(language, "وقائع تحتاج توضيحاً منك")}</summary><ul>{intake.missingInformation.map((item) => <li key={item}>{item}</li>)}</ul></details>}
       {intake.documentsNeeded.length > 0 && <details><summary>{tr(language, "مستندات تخص وقائع قضيتك")}</summary><ul>{intake.documentsNeeded.map((item) => <li key={item}>{item}</li>)}</ul></details>}
       <IntakeAnalysisView state={intake} language={language} />
-      {canOfferMemoHandoff(intake) && <div className="memo-consent"><ShieldCheck size={22} /><div><b>{tr(language, "نقل بيانات القضية إلى مولد المذكرات")}</b><p>{tr(language, "ستُنقل البيانات المستخلصة من المحادثة لمراجعتها وتصحيحها، مع استكمال أي بيانات ناقصة قبل التوليد.")}</p><p role="note">{memoApprovalNotice[language]}</p></div><button className="button button-primary" onClick={() => { stopSpeaking(); startMemo({ ...buildMemoHandoff(intake, messages), conversationTranscript: conversationTranscript(messages, language) }); }}><FileText size={18} />{tr(language, "أفهم وأوافق، انتقل إلى مولد المذكرات")}</button></div>}
+      {canOfferMemoHandoff(intake, messages) && <div className="memo-consent"><ShieldCheck size={22} /><div><b>{tr(language, "نقل بيانات القضية إلى مولد المذكرات")}</b><p>{tr(language, "اكتملت البيانات اللازمة من إجاباتك. راجع ملخص القضية والصفة والمحكمة، ثم وافق على تعبئتها في المذكرة.")}</p><p role="note">{memoApprovalNotice[language]}</p></div><button className="button button-primary" onClick={() => { stopSpeaking(); startMemo({ ...buildMemoHandoff(intake, messages), conversationTranscript: conversationTranscript(messages, language) }); }}><FileText size={18} />{tr(language, "أفهم وأوافق، انتقل إلى مولد المذكرات")}</button></div>}
     </div>}
     {loading && analysisStages.length > 0 && <IntakeStages stages={analysisStages} language={language} />}
     <div className="assistant-voice-settings">
