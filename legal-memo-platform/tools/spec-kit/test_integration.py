@@ -42,18 +42,24 @@ class SpecKitIntegrationTests(unittest.TestCase):
         self.assertTrue(feature.is_relative_to(self.project / 'specs'))
         return feature
 
-    def test_upstream_files_match_pinned_install_manifests(self):
+    def test_installed_files_match_pins_and_reviewed_local_overrides(self):
         source = json.loads((PROJECT / 'tools/spec-kit/source.json').read_text())
         self.assertEqual(source['version'], '1.2.1')
         self.assertEqual(source['ref'], '9dca9bf42a031765ee5e5f2371137f2f26967e11')
+        overrides = source.get('local_overrides', {}).get('files', {})
         checked = set()
         for name in ('codex', 'speckit'):
             manifest = json.loads((PROJECT / f'.specify/integrations/{name}.manifest.json').read_text())
             self.assertEqual(manifest['version'], source['version'])
             for relative, expected in manifest['files'].items():
                 file = PROJECT / relative
+                if relative in overrides:
+                    override = overrides[relative]
+                    self.assertEqual(override['base_sha256'], expected, relative)
+                    expected = override['reviewed_sha256']
                 self.assertEqual(hashlib.sha256(file.read_bytes()).hexdigest(), expected, relative)
                 checked.add(relative)
+        self.assertTrue(set(overrides).issubset(checked), 'Untracked local override')
         self.assertEqual(len(list((PROJECT / '.agents/skills').glob('speckit-*/SKILL.md'))), 10)
         self.assertGreaterEqual(len(checked), 25)
 

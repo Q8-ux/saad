@@ -13,5 +13,52 @@
   ],
   "install_command": "specify init --here --force --non-interactive --integration codex --integration-options=--skills --script py --ignore-agent-tools",
   "optional_extensions_installed": [],
-  "runtime_changes": false
+  "runtime_changes": false,
+  "local_overrides": {
+    "reviewed_date": "2026-10-29",
+    "baseline_install_commit": "b42e1666e7e15c9c2c29523140df14fe6990a7d9",
+    "reason": "Reviewed security boundary instructions and explicit hook authorization; preserve original manifests and reject all other unrecorded changes.",
+    "files": {
+      ".agents/skills/speckit-analyze/SKILL.md": {
+        "base_sha256": "1b1233a3a92cba277cc3f80533b3999a3194f2566b569e1deefad304fad3530a",
+        "reviewed_sha256": "6fc53dc76930757c853a89554e08e9950bb56ae1e93700c2839c395d3f30b433"
+      },
+      ".agents/skills/speckit-clarify/SKILL.md": {
+        "base_sha256": "569c830d56f4d7b6a0ee6f6c6741820472724a8d1f6021912b44cd55888a8fcd",
+        "reviewed_sha256": "8b2f6dfc9af0a6719e1f8eee6e37175f37dd8fc255fadf4e8fb42577fcc2d668"
+      },
+      ".agents/skills/speckit-constitution/SKILL.md": {
+        "base_sha256": "06bf15100066a86df4c5edfac35b16ecfe216751bdbc68db2d98357e9e751508",
+        "reviewed_sha256": "92d1024ef9b2f98cad179ec3bf84318bb39df2f8b9aa0d276f30d0cd148598da"
+      },
+      ".agents/skills/speckit-implement/SKILL.md": {
+        "base_sha256": "ca79e1f816ede6230466e04249be8d3a1f396a9ea2f4c8e8ffc4af3ca5afda8e",
+        "reviewed_sha256": "dd1d3a1211da652e0de8ca9e2bd53d86ee8ad9b2fe25a6801c24101c4e5f8490"
+      },
+      ".agents/skills/speckit-converge/SKILL.md": {
+        "base_sha256": "dc28f28b48f7c74f3828404f0832504358da358d631b12d7dab06266546504a0",
+        "reviewed_sha256": "f169037f1916d5f16024ee6cbdd92c616f6a3ecec30da42c72872c160eaa1a24"
+      },
+      ".agents/skills/speckit-plan/SKILL.md": {
+        "base_sha256": "dffe72852101b265bd93461691caec528b3e0d06459fc7f8d543191cdabe714e",
+        "reviewed_sha256": "1c1baa603be37e0f4332b74950d35475e7c8c26ed271b0dbd70f432f47afe7b5"
+      },
+      ".agents/skills/speckit-checklist/SKILL.md": {
+        "base_sha256": "cf754e4fdb350bac26b0955b0af06bf4ac8f8ff0907e6db696e8f93b06844273",
+        "reviewed_sha256": "0de1a6dd45540939f9c218c4846829d330cc73a0e7b8a9852d551a87e3c66232"
+      },
+      ".agents/skills/speckit-specify/SKILL.md": {
+        "base_sha256": "a505028de7f6489878696d6656c7d057f3a66119ebb8c0cc82d69fabb7b344ff",
+        "reviewed_sha256": "e48468bef1a7205bee7704d08e6d49a50c8573d56de3ee2dc99edcce02ac3e9f"
+      },
+      ".agents/skills/speckit-tasks/SKILL.md": {
+        "base_sha256": "50612808eaee6c5fe32c64329661ba4d833d03fcbf9d7d318ea158e89eb30712",
+        "reviewed_sha256": "293d126ec4f9de4380bc22801089b3d0ee3a29d4fc1cea1cbfbb0a4978269f4a"
+      },
+      ".agents/skills/speckit-taskstoissues/SKILL.md": {
+        "base_sha256": "87ef487de6a939971de3f2d508d18ea8086a839ff00d44ef9e616d95e9019e38",
+        "reviewed_sha256": "2fa693d83ec1ed07e2f76a79e3290e67361f6c7e61e67e7de221f6dee59a84e1"
+      }
+    }
+  }
 }
