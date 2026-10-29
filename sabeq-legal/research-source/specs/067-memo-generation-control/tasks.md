@@ -20,7 +20,7 @@
 ## Phase 6: Verification and publication
 - [x] T008 شغّل الاختبارات ذات الصلة والبناء واكتب الأدلة وحدودها في specs/067-memo-generation-control/validation.md؛ يغطي SC-001 وSC-002.
 - [x] T009 راجع تحقق المتطلبات وأكمل النشر وفحص الإصدارة في specs/067-memo-generation-control/validation.md؛ يغطي SC-003 وFR-008.
-- [ ] T010 انقل الملفات المعدلة فقط إلى sabeq-legal/research-source في مرآة GitHub وافتح طلب الدمج.
+- [x] T010 انقل الملفات المعدلة فقط إلى sabeq-legal/research-source في مرآة GitHub وافتح طلب الدمج.
 
 ## Dependencies and strategy
 T001 ثم T002 ثم T003 قبل تعديل المحقق. T004 قبل T005 لاشتراكهما في الملف. T006 وT007 بعدهما، ثم T008 وT009 وT010. يمكن قراءة حدود المصدر وفحوص التصدير بالتوازي؛ لا تفويض إضافي ولا تعديل متزامن للملف نفسه. اختبر US1 وUS2 مستقلين ثم الرحلة المشتركة. لا تغييرات واجهة أو دفع أو قاعدة بيانات.
