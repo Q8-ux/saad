@@ -103,8 +103,68 @@
   }
   function renderMail(){content().innerHTML=heading()+verificationEmailPanel()+panel('صناديق بريد النطاق',`<div class="panel-body"><p>إنشاء عناوين مستقلة مثل <bdi>info@sabeq.legal</bdi> يتم لدى مزود استضافة البريد، مع صندوق ودخول خاصين لكل حساب.</p><p class="service-status">لم تُنشأ صناديق جديدة من هذه اللوحة. الإعدادات أدناه خاصة باستقبال نسخة من البريد وعرضها هنا بعد تجهيز المزود.</p></div>`)+`<div class="grid"><div>`+panel('إعداد صندوق المكتب',`<form class="panel-body" data-form="mail"><div class="key-state">${icon('shield')}${mail.hasApiKey?'مفتاح مزود البريد محفوظ بصورة مشفرة':'صندوق البريد غير متصل بعد'}</div>${input('address','عنوان البريد المراد متابعته',mail.address,'required type="email" dir="ltr" maxlength="180"')}${input('apiKey',mail.hasApiKey?'مفتاح Resend جديد — اختياري':'مفتاح Resend API','','type="password" dir="ltr" autocomplete="new-password" maxlength="500"')}${input('signingSecret','مفتاح توقيع Webhook موجود — اختياري','','type="password" dir="ltr" autocomplete="new-password" maxlength="500"')}<button class="primary" type="submit">حفظ إعدادات البريد</button></form>`)+`</div><div>`+panel('فحص واستقبال البريد',`<div class="panel-body"><p>يعرض الوارد رسائل عنوان المكتب المحدد فقط، بعد إعداد استقبال البريد لدى المزود أو تحويل رسائل المكتب إليه.</p><div class="source-row"><div><strong>التحقق من المزود</strong><small>${mail.testedAt?date(mail.testedAt):'لم يجر اختبار اتصال بعد'}</small></div>${badge(mail.testedAt?'تم الاختبار':'غير مهيأ',mail.testedAt?'':'warning')}</div><p>${mail.webhookConfigured?badge('توقيع استقبال محفوظ'):badge('استقبال البريد غير مهيأ','warning')}</p><div class="actions"><button data-mail="test">اختبار المفتاح دون إرسال بريد</button><button data-mail="webhook">ربط استقبال البريد</button></div><label class="field"><span>رابط الاستقبال</span><input readonly dir="ltr" value="${esc(mail.webhookUrl)}"></label><p class="service-status">هذا الموصل خاص بـ Resend. بريد Google أو Microsoft الموجود حالياً يحتاج تحويلاً إلى عنوان استقبال معتمد، أو موصلاً مناسباً لمزوده. لا تغيّر سجلات بريد النطاق الحالي دون خطة نقل.</p></div>`)+`</div></div>`;}
   function renderUpdates(data){content().innerHTML=heading()+connectionNotice(snapshot.official.available)+panel('الإصدار ومصادر التشغيل',`<div class="panel-body"><div class="source-row"><div><strong>مركز الإدارة</strong><small><bdi>independent-admin-8-programmer</bdi></small></div>${badge('منشور')}</div><div class="source-row"><div><strong>جسر الموقع الرسمي</strong><small><bdi>${esc(snapshot.official.revision||'لم يرجع إصداراً متحققاً')}</bdi></small></div>${badge(snapshot.official.available?'متصل':'غير متاح',snapshot.official.available?'':'warning')}</div><p class="service-status">سجل المصدر يوضح تغييرات GitHub. ظهور التزام جديد وحده لا يثبت نشره على كل الخدمات.</p></div>`)+panel('آخر تغييرات مصدر سابق',data.available?(data.commits.length?data.commits.map(row=>`<article class="update"><a href="${esc(row.url)}" target="_blank" rel="noopener noreferrer">${esc(row.title)}</a><small>${esc(row.area)} · ${date(row.date)} · <span class="commit-id">${esc(row.sha.slice(0,7))}</span></small></article>`).join(''):empty('لا توجد تغييرات متاحة.')):`<div class="banner">تعذر جلب سجل GitHub الآن. أعد المحاولة لاحقاً.</div>`);}
-  function openDetail(html){detail.innerHTML=html;dialog.showModal();}
-  function pretty(value){try{return JSON.stringify(JSON.parse(value),null,2);}catch{return value;}}
+  function openDetail(html, memo = false) {
+    dialog.classList.toggle('memo-detail', memo);
+    if (memo) dialog.setAttribute('aria-labelledby', 'memo-detail-title');
+    else dialog.removeAttribute('aria-labelledby');
+    detail.innerHTML = html;
+    dialog.showModal();
+    dialog.scrollTop = 0;
+  }
+  function savedValue(value) {
+    for (let depth = 0; depth < 3 && typeof value === 'string'; depth++) {
+      if (!/^[\[{"]/.test(value.trim())) break;
+      try { value = JSON.parse(value); } catch { break; }
+    }
+    return value;
+  }
+  function savedText(value, prose = false, depth = 0) {
+    if (depth > 5) return '';
+    value = savedValue(value);
+    if (Array.isArray(value)) return value.map(item => savedText(item, prose, depth+1)).filter(Boolean).join('\n');
+    if (!['string', 'number', 'boolean'].includes(typeof value)) return '';
+    const text = String(value).trim();
+    return prose ? text.replace(/\\r\\n|\\n|\\r/g, '\n').replace(/\\t/g, '\t').replace(/\r\n?/g, '\n') : text;
+  }
+  function recordProse(value) {
+    const text = savedText(value, true);
+    return text.split(/\n+/).map(line => line.trim()).filter(Boolean).map(line => {
+      const heading = /^#{1,4}\s+(.+)$/.exec(line);
+      const section = line.length < 100 && /^(?:الوقائع|الطلبات|الدفاع(?: والأسانيد)?|الأسانيد|أولا|ثانيا|ثالثا|رابعا|خامسا)(?:\s*[:：ـ-]|$)/u.test(line.replace(/[\u064b-\u065f\u0670]/g,''));
+      return heading || section ? `<h4>${esc(heading ? heading[1] : line)}</h4>` : `<p>${esc(line)}</p>`;
+    }).join('');
+  }
+  function requestDetails(value) {
+    const data = savedValue(value);
+    if (!data || typeof data !== 'object' || Array.isArray(data)) {
+      const text = savedText(data, true);
+      return text && !/^[\[{]/.test(text) ? `<div class="record-prose">${recordProse(text)}</div>` : '<p class="record-empty">لا توجد بيانات طلب قابلة للعرض.</p>';
+    }
+    const sources = [data, data.input, data.caseData, data.fields, data.extraFields].filter(item => item && typeof item === 'object' && !Array.isArray(item));
+    const fields = {clientName:'اسم مقدم المذكرة',civilId:'الرقم المدني',partyRole:'الصفة في الدعوى',otherParty:'الطرف الآخر',caseType:'نوع القضية',court:'المحكمة',courtCircuit:'الدائرة',caseNumber:'رقم القضية',caseStage:'مرحلة القضية',clientAddress:'عنوان مقدم المذكرة',otherAddress:'عنوان الطرف الآخر',allParties:'الأطراف وصفاتهم',facts:'الوقائع',requests:'الطلبات',legalIssues:'المسائل القانونية',judgmentNumber:'رقم الحكم',judgmentDate:'تاريخ الحكم',judgmentCircuit:'دائرة الحكم',judgmentCourt:'المحكمة التي أصدرت الحكم',judgmentOperative:'منطوق الحكم',originalRequests:'الطلبات الأصلية',originalGrounds:'أسباب الدعوى الأصلية',originalPlaintiff:'المدعي في الدعوى الأصلية',originalDefendant:'المدعى عليه في الدعوى الأصلية',notificationDate:'تاريخ إعلان الحكم',appealGrounds:'أسباب الاستئناف',announcementDate:'تاريخ الإعلان',hearingDate:'تاريخ الجلسة',hearingTime:'وقت الجلسة',conversationSummary:'ملخص القضية'};
+    const prose = new Set(['allParties','facts','requests','legalIssues','judgmentOperative','originalRequests','originalGrounds','appealGrounds','conversationSummary']);
+    const rows = Object.entries(fields).flatMap(([key,label]) => {
+      const text = sources.map(item => Object.hasOwn(item,key) ? savedText(item[key],prose.has(key)) : '').find(Boolean);
+      if (!text) return [];
+      return [`<div${prose.has(key)?' class="record-field-wide"':''}><dt>${label}</dt><dd>${prose.has(key)?recordProse(text):`<bdi>${esc(text)}</bdi>`}</dd></div>`];
+    });
+    return rows.length ? `<dl class="record-fields">${rows.join('')}</dl>` : '<p class="record-empty">لا توجد بيانات قضية محفوظة قابلة للعرض.</p>';
+  }
+  function memoContent(value, depth = 0) {
+    const data = savedValue(value);
+    if (data && typeof data === 'object' && !Array.isArray(data)) {
+      if (depth > 3) return '<p class="record-empty">تعذرت قراءة صيغة المذكرة المحفوظة.</p>';
+      for (const key of ['memo','text','output_text','outputText','content']) if (Object.hasOwn(data,key) && data[key]) return memoContent(data[key],depth+1);
+      const parts = [['facts','الوقائع'],['grounds','الدفاع والأسانيد'],['requests','الطلبات']].filter(([key]) => savedText(data[key],true)).map(([key,label]) => `<h4>${label}</h4>${recordProse(data[key])}`).join('');
+      return parts || '<p class="record-empty">تعذرت قراءة صيغة المذكرة المحفوظة.</p>';
+    }
+    const text = savedText(data,true);
+    if (!text) return '<p class="record-empty">لم ينتج هذا الطلب مذكرة محفوظة بعد.</p>';
+    return /^[\[{]/.test(text) ? '<p class="record-empty">تعذرت قراءة صيغة المذكرة المحفوظة.</p>' : recordProse(text);
+  }
+  function memoRecord(memo) {
+    return `<header class="record-heading"><h2 id="memo-detail-title" class="detail-title">${esc(memo.client_name || 'طلب مذكرة')}</h2><p class="detail-meta">${date(memo.created_at)}${memo.case_type?` · ${esc(memo.case_type)}`:''}</p>${badge(memo.status)}</header><div class="record-scroll" tabindex="0" role="region" aria-label="تفاصيل الطلب والمذكرة"><section class="record-section" aria-labelledby="record-input-title"><h3 id="record-input-title">بيانات الطلب</h3>${requestDetails(memo.input_json)}</section><section class="record-section" aria-labelledby="record-output-title"><h3 id="record-output-title">المذكرة المحفوظة</h3><article class="record-document record-prose" dir="rtl" lang="ar">${memoContent(memo.output_text)}</article></section></div>`;
+  }
   async function handleClick(event){const button=event.target.closest('button');if(!button)return;
     if(button.dataset.section){if(busy||!canSection(button.dataset.section))return;globalThis.SabeqControl?.leave();globalThis.SabeqProgrammer?.leave();globalThis.SabeqLegislation?.leave();section=button.dataset.section;sessionStorage.setItem('sabeq-admin-section',section);history.replaceState(null,'',location.pathname+'#'+section);offset=0;query='';memoStatus='';document.querySelectorAll('[data-section]').forEach(b=>{b.classList.toggle('active',b.dataset.section===section);if(b.closest('nav')){if(b.dataset.section===section)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');}});document.getElementById('section-title').textContent=labels[section];document.querySelector('.sidebar').classList.remove('open');document.querySelector('.scrim').classList.remove('open');document.querySelector('.mobile-menu').setAttribute('aria-expanded','false');await load();return;}
     if(button.dataset.action==='menu'){const open=document.querySelector('.sidebar').classList.toggle('open');document.querySelector('.scrim').classList.toggle('open',open);document.querySelector('.mobile-menu').setAttribute('aria-expanded',String(open));return;}
@@ -120,7 +180,7 @@
       if(button.hasAttribute('data-sadad-test')){paymentsData=await api('payments',{action:'test'});renderPayments();toast('نجحت مصادقة سداد. لم تنشأ فاتورة ولم تُسحب رسوم.');}
       if(button.dataset.mailboxTest){mailboxData=await api('mailboxes',{action:'test'});hasMore=mailboxData.hasMore;offset=0;renderMailboxes();toast('تم اختبار التفويض وجلب الحسابات الفعلية.');}
       if(button.dataset.mailboxStatus!==undefined){const u=mailboxData.accounts[Number(button.dataset.mailboxStatus)];openDetail(`<h2 class="detail-title">${u.enabled?'إيقاف صندوق البريد':'إعادة تفعيل صندوق البريد'}</h2><p><bdi>${esc(u.email)}</bdi></p><p>يتغير دخول هذا المستخدم لدى Zoho وخدماته المرتبطة. تبقى بيانات الصندوق والعناوين والمجموعات محفوظة.</p><form data-form="mailbox-status"><input type="hidden" name="id" value="${esc(u.id)}"><input type="hidden" name="zuid" value="${esc(u.zuid)}"><input type="hidden" name="enabled" value="${u.enabled?'false':'true'}"><label class="checkbox"><input name="confirm" type="checkbox" required><span>أؤكد تغيير حالة هذا الحساب لدى المزود.</span></label><button class="primary" type="submit">تأكيد ${u.enabled?'الإيقاف':'التفعيل'}</button></form>`);}
-      if(button.dataset.memo){const d=await api('memos?id='+encodeURIComponent(button.dataset.memo));const m=d.memo;openDetail(`<h2 class="detail-title">${esc(m.client_name||'طلب مذكرة')}</h2><p class="detail-meta">${date(m.created_at)} · ${esc(m.case_type)} · ${badge(m.status)}</p><h3>بيانات الطلب</h3><pre>${esc(pretty(m.input_json||'لا توجد بيانات محفوظة.'))}</pre><h3>المذكرة المحفوظة</h3><pre>${esc(m.output_text||'لم ينتج هذا الطلب مذكرة محفوظة بعد.')}</pre>${m.error_code?`<p class="muted">حالة المعالجة: <bdi>${esc(m.error_code)}</bdi></p>`:''}`);}
+      if(button.dataset.memo){const d=await api('memos?id='+encodeURIComponent(button.dataset.memo));openDetail(memoRecord(d.memo),true);}
       if(button.dataset.message!==undefined){const m=rows[Number(button.dataset.message)];openDetail(`<h2 class="detail-title">${esc(m.subject)}</h2><p class="detail-meta">${esc(m.sender)} · <bdi>${esc(m.email||'')}</bdi> · ${date(m.received_at)}</p><div class="mail-preview">${esc(m.body_text||'لا يوجد نص محفوظ.')}</div>${m.source!=='official'?`<div class="actions"><button data-message-read="${esc(m.id)}">تحديد كمقروء</button><button data-message-archive="${esc(m.id)}">أرشفة</button></div>`:''}`);}
       if(button.dataset.messageRead||button.dataset.messageArchive){await api('inbox',{id:button.dataset.messageRead||button.dataset.messageArchive,status:button.dataset.messageRead?'read':'archived'});dialog.close();await load();toast('تم حفظ حالة الرسالة.');}
       if(button.dataset.read||button.dataset.action==='read-all'){const ids=button.dataset.read?[button.dataset.read]:snapshot.notifications.filter(n=>!n.read).map(n=>n.id);await api('read',{ids});snapshot.notifications.forEach(n=>{if(ids.includes(n.id))n.read=true;});renderSnapshot();toast('تم حفظ حالة القراءة.');}
