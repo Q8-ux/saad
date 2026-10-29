@@ -52,3 +52,5 @@ dialog.memo-detail[open]{display:flex;flex-direction:column;padding:0;overflow:h
 @media(max-width:600px){.record-heading{padding:19px 18px 16px;padding-inline-end:76px}.record-heading .detail-title{font-size:22px}.record-scroll{padding:20px 18px}.record-fields{grid-template-columns:minmax(0,1fr);gap:12px}.record-document{padding:18px 16px}.record-prose{font-size:18px;line-height:1.95}.record-section>h3{font-size:21px}.memo-detail .dialog-close{inset-block-start:17px;inset-inline-end:15px}}
 
 html:has(dialog.memo-detail[open]){overflow:hidden}
+
+.login input[name="username"],.login input[name="password"]{direction:ltr;text-align:left;unicode-bidi:plaintext}
