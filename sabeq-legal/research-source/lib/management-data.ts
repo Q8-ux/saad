@@ -88,7 +88,9 @@ export async function managerSnapshot(email: string) {
   ]);
   const seen = new Set(reads.results.map((row: { event_id: string }) => row.event_id));
   const notifications = [...events.results, ...(official.events || []).map((row: Record<string, unknown>) => ({ ...row, id: `official:${row.id}` }))].map(row => ({ ...row, read: seen.has(String(row.id)) })).sort((a, b) => String(b.created_at).localeCompare(String(a.created_at))).slice(0, 100);
-  return { memo, historical, contacts, mail, commands, appointments, notifications, official: { available: official.available, totals: official.totals, revision: official.revision || null, trackingSince: official.trackingSince || null, error: official.error || null }, updatedAt: new Date().toISOString(), revision: "independent-admin-1" };
+  const updatedAt = new Date().toISOString();
+  // The current GitHub site and management routes share this D1 store; Render is the previous archive.
+  return { memo, historical, contacts, mail, commands, appointments, notifications, connection: { available: true, source: "sabeq-public-service", mode: "shared-database", checkedAt: updatedAt }, official: { available: official.available, totals: official.totals, revision: official.revision || null, trackingSince: official.trackingSince || null, error: official.error || null }, updatedAt, revision: "independent-admin-2" };
 }
 
 export async function managerUpdates() {

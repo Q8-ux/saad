@@ -222,6 +222,25 @@ test('OpenWA signed callback is session scoped, deduplicated and stores no conve
 test('mail signatures use raw body and reject stale, forged or differently addressed email',async()=>{const h=harness();try{const api=h.load('lib/management-integrations.ts'),secret='whsec_'+Buffer.from('synthetic-mail-secret-32-bytes-123').toString('base64');await api.saveIntegration('email',{address:'office@example.test',apiKey:'synthetic-resend',signingSecret:secret},'test');const raw=JSON.stringify({type:'email.received',data:{email_id:sessionId}}),timestamp=String(Math.floor(Date.now()/1000)),id='synthetic-message';const signed=createHmac('sha256',Buffer.from(secret.slice(6),'base64')).update(`${id}.${timestamp}.${raw}`).digest('base64');const make=(signature='v1,'+signed,stamp=timestamp)=>new Request('https://example.org',{method:'POST',headers:{'svix-id':id,'svix-timestamp':stamp,'svix-signature':signature},body:raw});assert.equal(await api.verifyMailSignature(raw,make(),secret),true);assert.equal(await api.verifyMailSignature(raw,make('v1,forged'),secret),false);assert.equal(await api.verifyMailSignature(raw,make('v1,'+signed,'1000000000'),secret),false);h.setTransport(async()=>Response.json({to:['other@example.test'],from:'sender@example.test',subject:'اختبار',text:'نص اصطناعي'}));await api.receiveMail(make());assert.equal(h.sqlite.prepare('SELECT COUNT(*) n FROM management_emails').get().n,0);h.setTransport(async()=>Response.json({to:['office@example.test'],from:'sender@example.test',subject:'رسالة اصطناعية',text:'<script>plain text only</script>'}));await api.receiveMail(make());await api.receiveMail(make());assert.equal(h.sqlite.prepare('SELECT COUNT(*) n FROM management_emails').get().n,1);}finally{h.close();}});
 test('official-source failure is explicit and cannot become a false zero-activity report',async()=>{const h=harness();try{const data=h.load('lib/management-data.ts');const result=await data.managerSnapshot('manager@example.test');assert.equal(result.official.available,false);assert.equal(result.official.totals,null);assert.ok(result.revision);const keys=await data.bridgeKeys();assert.equal(keys.publicKey.d,undefined);const vault=h.sqlite.prepare("SELECT sealed FROM management_vault WHERE integration='operations-signing'").get().sealed;assert.ok(!vault.includes(keys.privateKey.d));}finally{h.close();}});
 
+test('current site requests share management storage even when the previous archive route is absent',async()=>{const h=harness();try{
+ h.setTransport(async()=>new Response('Not found',{status:404}));
+ const ledger=h.load('lib/memo-requests.ts'),id=await ledger.startMemoRequest({clientName:'طلب ربط اصطناعي',facts:'وقائع اختبار الربط'},null,'https://q8-ux.github.io');
+ await ledger.finishMemoRequest(id,'needs_review','مسودة ربط اصطناعية','draft_generated');
+ const auth=await login(h),routes=h.load('app/api/management/[...path]/route.ts');
+ const response=await routes.GET(request('snapshot',auth.token));assert.equal(response.status,200);const result=await response.json();
+ assert.deepEqual(result.connection,{available:true,source:'sabeq-public-service',mode:'shared-database',checkedAt:result.updatedAt});
+ assert.equal(result.memo.total,1);assert.equal(result.official.available,false);assert.equal(result.official.error,'HTTP 404');assert.equal(result.official.totals,null);
+ const listing=await(await routes.GET(request('memos',auth.token))).json();assert.equal(listing.memos.length,1);assert.equal(listing.memos[0].id,id);
+ const detail=await(await routes.GET(request('memos?id='+id,auth.token))).json();assert.equal(detail.memo.output_text,'مسودة ربط اصطناعية');
+ const frontend={};vm.runInNewContext(ts.transpileModule(readFileSync(root+'/lib/runtime-urls.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS}}).outputText,{exports:frontend,window:{location:{hostname:'q8-ux.github.io'}}});
+ assert.equal(new URL(frontend.apiUrl('/api/legal/memo')).origin,new URL(request('snapshot').url).origin);
+}finally{h.close();}});
+
+test('a failed current database read never reports a verified current connection',async()=>{const h=harness();try{
+ const auth=await login(h);h.sqlite.exec('DROP TABLE consultation_requests');
+ const response=await h.load('app/api/management/[...path]/route.ts').GET(request('snapshot',auth.token));assert.equal(response.status,503);const body=await response.json();assert.equal(body.connection,undefined);
+}finally{h.close();}});
+
 test('user administration preserves verified email and records, validates limits and revokes suspended sessions',async()=>{const h=harness();try{
  const routes=h.load('app/api/management/[...path]/route.ts'),auth=await login(h),id='synthetic-user-000000000001';
  h.sqlite.prepare("INSERT INTO public_users(id,name,phone,email,email_verified_at) VALUES(?,?,?,?,CURRENT_TIMESTAMP)").run(id,'عميل اصطناعي','00000000','client@example.test');
