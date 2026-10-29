@@ -6,6 +6,7 @@ const caseData = {caseType:'مدني',court:'المحكمة الكلية',client
 const template = {id:'test',version:1,kind:'claim',title:'نموذج اختبار',sourceSha256:'a'.repeat(64)};
 const evidence = [{documentId:1,chunkId:7,title:'مرجع عام اصطناعي',text:'المادة 12 نص اختبار.',reference:'المادة 12',sourceUrl:'https://example.org/public-test',documentType:'قانون',officialSource:'اختبار'}];
 const content = {facts:caseData.facts,requests:caseData.requests,grounds:'تطبيق اصطناعي 【م1】',fields:{},factualNotes:[],legalResearchNotes:''};
+const { pleadingAuthorityInstructions } = load('../lib/bound-draft.ts');
 function bridge(runtime) {
  const security=load('../lib/request-security.ts',{'@/db':{}});
  const search=load('../lib/legal-search.ts',{'@/db':{}});
@@ -22,6 +23,7 @@ test('bridge sends only server-selected template and evidence with private autho
   sent=JSON.parse(init.body);assert.equal(url.protocol,'https:');assert.equal(init.headers.Authorization,'Bearer '+'t'.repeat(48));assert.equal(init.headers.Origin,undefined);assert.equal(init.redirect,'error');return reply(sent);
  });
  assert.equal(result.content.fields.judgmentNumber,'0045/2026');assert.equal(sent.language,'ar');assert.equal(sent.template.sourceSha256,template.sourceSha256);assert.equal(sent.sources[0].marker,'م1');assert.equal(sent.sources[0].sourceId,'legal:1:7');assert.equal(sent.template.emblemData,undefined);
+ assert.ok(sent.caseReasoning.instructions.includes(pleadingAuthorityInstructions));
 });
 test('unsafe URLs and missing credentials fail before any remote request',async()=>{
  for(const configuration of [{...runtime,SABEQ_AGENT_URL:'http://agents.example.org/internal/sabeq-agents/memo'},{...runtime,SABEQ_AGENT_URL:'https://secret@agents.example.org/internal/sabeq-agents/memo'},{...runtime,SABEQ_AGENT_BRIDGE_TOKEN:''}]){
@@ -108,6 +110,28 @@ function controlledMemoModel(correction,onCorrection=()=>{}) {
   throw Error('unexpected control test call');
  };
 }
+test('direct drafting and its existing correction receive the same concise rules without extra model calls',async t=>{
+ const h=templateHarness();t.after(h.cleanup);let calls=0,audits=0;const drafting=[];
+ const baseline=controlledMemoModel('');
+ const route=memoRoute(h,{sources:[controlSource],pipeline:{agentPipelineEnabled:()=>false},model:async options=>{
+  calls++;
+  if(options.schema?.properties?.facts){
+   drafting.push(options.instructions);
+   return JSON.stringify(content);
+  }
+  if(options.schema?.properties?.checks){
+   audits++;
+   return JSON.stringify({checks:[{issueIndex:0,status:'addressed',reason:'فحص اصطناعي'}],roleConsistent:audits>1,factsPreserved:true,reliefConsistent:true,unsupportedAssertions:[]});
+  }
+  return baseline(options);
+ }});
+ const response=await route.POST(request());assert.equal(response.status,200);const value=await response.json();
+ assert.equal(drafting.length,2);assert.equal(audits,2);assert.equal(calls,5);
+ for(const instructions of drafting)assert.ok(instructions.includes(pleadingAuthorityInstructions));
+ assert.ok(value.memo.includes(caseData.facts));assert.ok(value.memo.includes(caseData.requests));
+ assert.equal(value.caseQuality.humanReviewRequired,true);
+ assert.doesNotMatch(value.memo,/ست قواعد لتحرير|factualNotes|legalResearchNotes|ملاحظات تقنية/);
+});
 test('memo control rejects a wrong repeated article after one correction without a success archive',async t=>{
  const h=templateHarness();t.after(h.cleanup);let corrections=0,archived=0;
  const wrong='المادة (12) مكرر من القانون رقم 98765 لسنة 2000 【م1】';
