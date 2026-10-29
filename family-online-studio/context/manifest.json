@@ -1,0 +1,36 @@
+{
+  "revision": "project-context-1",
+  "project": "writing-studio",
+  "sourceCommit": "726d064d263ab302c7256d1a90579bb6725aafca",
+  "scope": "current-manuscript-and-selected-scene",
+  "workIdentitySource": "server-request-url",
+  "crossWorkMemory": false,
+  "notesAreStoryFacts": false,
+  "conversationIsCanon": false,
+  "textChanged": false,
+  "sourceFiles": [
+    {
+      "path": "lib/project-context.ts",
+      "sha256": "961cffc502643f1a6e01fd2c3d6aa7ffd8c5daa02b95fa5a341d001629b95158"
+    },
+    {
+      "path": "lib/scenarist.ts",
+      "sha256": "c7600f5c941f1a5cd3e17dae1726c56109eb1d187682ca2165ea88e1b4f88b41"
+    },
+    {
+      "path": "app/api/scenarist/route.ts",
+      "sha256": "ab81ca880afc79a58070a15b17422deb1523815fbf8f16d3106716cc0e1c72d5"
+    }
+  ],
+  "checks": {
+    "projectContext": "passed",
+    "knowledgeMemory": "passed",
+    "studioContracts": "passed",
+    "workerBuild": "passed",
+    "liveModelCalls": 0
+  },
+  "publication": "succeeded",
+  "snapshotPolicy": "generic-context-module-only; no manuscripts, seeds, credentials or private build archives",
+  "deployedVersion": "appgprj_6acf275cd3a4819188adb07ac6bee0be~appgver_fa9954dd2a0c81919bd0bbe2f23ec1fc",
+  "deploymentId": "appgdep_6ae3b092b5448191b04f90d9f44e2daa"
+}
