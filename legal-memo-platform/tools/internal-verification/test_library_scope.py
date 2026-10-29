@@ -11,6 +11,9 @@ class LibraryScopeTests(unittest.TestCase):
     def test_development_tools_do_not_ingest(self):
         self.assertFalse(scope.library_required(["legal-memo-platform/tools/internal-verification/verify.py", "legal-memo-platform/specs/006-internal-verification/tasks.md", "legal-memo-platform/.gitignore"]))
 
+    def test_admin_source_migration_and_spec_kit_do_not_ingest(self):
+        self.assertFalse(scope.library_required(["legal-memo-platform/native-admin-console/tests/public-service.test.mjs", "legal-memo-platform/specs/063-continuous-memo-admin/validation-live.md", "legal-memo-platform/tools/spec-kit/source.json", "legal-memo-platform/.agents/skills/speckit-plan/SKILL.md", "legal-memo-platform/.specify/init-options.json"]))
+
     def test_new_verifier_script_does_not_ingest(self):
         before = {"scripts": {"ingest:moj": "node ingest.js"}, "dependencies": {"example": "1"}}
         after = {"scripts": {"ingest:moj": "node ingest.js", "verify:internal": "python verify.py"}, "dependencies": {"example": "1"}}

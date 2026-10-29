@@ -1,0 +1,51 @@
+name: Validate Sabeq Client Admin Contract
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'sabeq-legal/research-source/**'
+      - 'sabeq-admin-preview/research-source/**'
+      - '.github/workflows/sabeq-client-admin-contract.yml'
+  pull_request:
+    paths:
+      - 'sabeq-legal/research-source/**'
+      - 'sabeq-admin-preview/research-source/**'
+      - '.github/workflows/sabeq-client-admin-contract.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+concurrency:
+  group: sabeq-contract-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  public-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: sabeq-legal/research-source
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: node --test tests/admin-bridge-contract.test.mjs tests/memo-preparation.test.mjs tests/prepare-memo-route.test.mjs tests/sadad-payments.test.mjs tests/memo-journey.test.mjs
+      - run: python -m unittest discover -s tools/spec-kit -p 'test_*.py' -v
+  admin-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: sabeq-admin-preview/research-source
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: node --test tests/public-service.test.mjs
+      - run: python -m unittest discover -s tools/spec-kit -p 'test_*.py' -v

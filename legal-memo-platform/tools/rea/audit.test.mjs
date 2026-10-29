@@ -59,9 +59,8 @@ test('partial evidence from a failed REA run stays failed and raw data is omitte
 
 test('the legal-library workflow skips tooling updates and preserves real imports', () => {
   const workflow = readFileSync(new URL('../../../.github/workflows/build-legal-library.yml', import.meta.url), 'utf8');
-  const block = workflow.match(/        run: \|\n((?: {10}[^\n]*(?:\n|$))+)/)?.[1];
-  assert.ok(block, 'The scope step must have a runnable shell block');
-  const script = block.split('\n').map(line => line.slice(10)).join('\n');
+  assert.match(workflow, /run: python legal-memo-platform\/tools\/internal-verification\/library_scope\.py/);
+  const script = readFileSync(new URL('../internal-verification/library_scope.py', import.meta.url), 'utf8');
   const root = mkdtempSync(path.join(tmpdir(), 'sabeq-library-scope-'));
   try {
     execFileSync('git', ['init', '--quiet', root]);
@@ -77,7 +76,7 @@ test('the legal-library workflow skips tooling updates and preserves real import
     const output = path.join(tmpdir(), path.basename(root) + '.output');
     const check = (previous, current, expected, event = 'push') => {
       writeFileSync(output, '');
-      execFileSync('bash', ['-e', '-o', 'pipefail', '-c', script], { cwd: root, env: { ...process.env, BEFORE_SHA: previous, GITHUB_SHA: current, GITHUB_EVENT_NAME: event, GITHUB_OUTPUT: output } });
+      execFileSync('python3', ['-c', script], { cwd: root, env: { ...process.env, BEFORE_SHA: previous, GITHUB_SHA: current, GITHUB_EVENT_NAME: event, GITHUB_OUTPUT: output } });
       assert.equal(readFileSync(output, 'utf8').trim(), `library=${expected}`);
     };
     try {
