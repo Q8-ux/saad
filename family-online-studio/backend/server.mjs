@@ -2,6 +2,7 @@ import http from 'node:http';
 import {createHash,createHmac,randomUUID,timingSafeEqual} from 'node:crypto';
 import {pathToFileURL} from 'node:url';
 import {AuthError,createSmsAuth} from './sms-auth.mjs';
+import {validPasswordHash,verifyPassword} from './credentials.mjs';
 
 const hash=value=>createHash('sha256').update(value).digest('hex');
 const same=(a,b)=>{const x=Buffer.from(a||''),y=Buffer.from(b||'');return x.length===y.length&&timingSafeEqual(x,y);};
@@ -9,12 +10,14 @@ const routes=new Map([['/api/manuscript',['GET','PUT']],['/api/versions',['GET',
 const maxBytes=9_000_000;
 export function createGateway(config,fetchImpl=fetch){
  const {allowedOrigin,upstreamOrigin,siteToken,bridgeKey,accessHash,sessionSecret}=config;
+ const credentialsOnly=config.authMode==='credentials';
+ const credentialsReady=typeof config.username==='string'&&config.username.length>0&&config.username.length<=80&&validPasswordHash(config.passwordHash);
  const openAccess=config.authMode==='open';
  const passwordOnly=config.authMode==='password';
  const remotePassword=passwordOnly&&config.passwordVerification==='upstream';
- const sessionTag=openAccess?'studio-open-session\n':passwordOnly?'studio-password-session\n':'studio-session\n';
+ const sessionTag=credentialsOnly?'studio-credentials-session-v1\n'+hash((config.username||'')+'\n'+(config.passwordHash||''))+'\n':openAccess?'studio-open-session\n':passwordOnly?'studio-password-session\n':'studio-session\n';
  const sms=createSmsAuth(config,fetchImpl);
- const ready=!!(allowedOrigin&&upstreamOrigin&&siteToken&&bridgeKey&&(openAccess||remotePassword||(passwordOnly?accessHash:(accessHash||sms.credentialsReady)))&&sessionSecret);
+ const ready=!!(allowedOrigin&&upstreamOrigin&&siteToken&&bridgeKey&&(credentialsOnly?credentialsReady:(openAccess||remotePassword||(passwordOnly?accessHash:(accessHash||sms.credentialsReady))))&&sessionSecret);
  if(ready&&(!/^https:\/\//.test(allowedOrigin)||!/^https:\/\//.test(upstreamOrigin)))throw new Error('HTTPS configuration required');
  const pacing=new Map();
  function limited(key,limit){const now=Date.now(),old=pacing.get(key);if(pacing.size>2000){for(const [id,v]of pacing)if(v.exp<now)pacing.delete(id);if(pacing.size>2000)return true;}if(!old||old.exp<now){pacing.set(key,{n:1,exp:now+60000});return false;}old.n++;return old.n>limit;}
@@ -40,12 +43,14 @@ export function createGateway(config,fetchImpl=fetch){
    if(Number(req.headers['content-length']||0)>maxBytes)return send(413,{error:'الملف كبير جداً.'});
    const peer=(req.headers['x-forwarded-for']||req.socket.remoteAddress||'unknown').split(',').at(-1).trim();
    if(u.pathname==='/api/auth/options'&&req.method==='GET'){
+    if(credentialsOnly)return send(200,{mode:'credentials',smsConfigured:false,channel:'username-password'});
     if(openAccess)return send(200,{mode:'open',smsConfigured:false,channel:'automatic'});
     if(passwordOnly)return send(200,{mode:'password',smsConfigured:false,legacyAvailable:!!accessHash,channel:'password',passwordMinLength:4});
     try{await sms.prepare();}catch{/* Keep existing access available while provider setup is incomplete. */}
     return send(200,{smsConfigured:sms.ready,legacyAvailable:!!accessHash&&!sms.ready,channel:'sms',trialOnly:true});
    }
    if(['/api/auth/sms/request','/api/auth/sms/verify'].includes(u.pathname)&&req.method==='POST'){
+    if(credentialsOnly)return send(403,{error:'استخدم اسم المستخدم وكلمة المرور للدخول.'});
     if(openAccess||passwordOnly)return send(403,{error:openAccess?'يفتح الاستوديو مباشرة دون رمز دخول.':'الدخول بكلمة المرور فقط.'});
     if(limited('sms:'+u.pathname+':'+peer,8))return send(429,{error:'انتظر دقيقة قبل إعادة محاولة الدخول.',retryAfter:60});
     if(Number(req.headers['content-length']||0)>2048)return send(413,{error:'حجم طلب غير صالح.'});
@@ -57,9 +62,17 @@ export function createGateway(config,fetchImpl=fetch){
     return send(200,{token:session(),expiresIn:7200,deviceToken:result.deviceToken});
    }
    if(u.pathname==='/api/auth'&&req.method==='POST'){
-    if(!openAccess&&!passwordOnly&&sms.ready)return send(403,{error:'استخدم رمز الرسالة للدخول إلى الاستوديو.'});
+    if(!credentialsOnly&&!openAccess&&!passwordOnly&&sms.ready)return send(403,{error:'استخدم رمز الرسالة للدخول إلى الاستوديو.'});
     if(limited('login:'+peer,8))return send(429,{error:'انتظر دقيقة قبل إعادة محاولة الدخول.'});
     const raw=await bytes(req);if(raw.length>2048)return send(413,{error:'حجم طلب غير صالح.'});
+    if(credentialsOnly){
+     let input;try{input=JSON.parse(raw);}catch{return send(400,{error:'طلب غير صالح.'});}
+     const username=input?.username,password=input?.password;
+     if(typeof username!=='string'||username.length>80||typeof password!=='string'||!password||password.length>160)return send(401,{error:'اسم المستخدم أو كلمة المرور غير صحيحة.'});
+     const passwordMatches=await verifyPassword(password,config.passwordHash);
+     if(!same(username.trim(),config.username)||!passwordMatches)return send(401,{error:'اسم المستخدم أو كلمة المرور غير صحيحة.'});
+     return send(200,{token:session(),expiresIn:7200});
+    }
     if(openAccess)return send(200,{token:session(),expiresIn:7200});
     let code;try{code=JSON.parse(raw).code;}catch{return send(400,{error:'طلب غير صالح.'});}
     if(passwordOnly&&typeof code==='string')code=code.trim().replace(/[٠-٩]/g,c=>String(c.charCodeAt(0)-1632)).replace(/[۰-۹]/g,c=>String(c.charCodeAt(0)-1776));
@@ -71,7 +84,7 @@ export function createGateway(config,fetchImpl=fetch){
     }else if(!same(hash(code),accessHash))return send(401,{error:passwordOnly?'كلمة المرور غير صحيحة.':'رمز الدخول غير صحيح.'});
     return send(200,{token:session(),expiresIn:7200});
    }
-   if(!authenticated(req.headers.authorization))return send(401,{error:openAccess?'جارٍ تجديد الاتصال بالاستوديو.':passwordOnly?'أدخل كلمة المرور للدخول إلى الاستوديو.':'انتهت جلسة الدخول. تحقّق من هاتفك للدخول مجدداً.'});
+   if(!authenticated(req.headers.authorization))return send(401,{error:credentialsOnly?'أدخل اسم المستخدم وكلمة المرور للدخول إلى الاستوديو.':openAccess?'جارٍ تجديد الاتصال بالاستوديو.':passwordOnly?'أدخل كلمة المرور للدخول إلى الاستوديو.':'انتهت جلسة الدخول. تحقّق من هاتفك للدخول مجدداً.'});
    if(!routes.get(u.pathname)?.includes(req.method))return send(404,{error:'not_found'});
    if(limited('request:'+peer,100))return send(429,{error:'طلبات كثيرة؛ انتظر قليلاً.'});
    const body=await bytes(req),route=u.pathname+u.search,type=req.headers['content-type']||'';
@@ -82,8 +95,8 @@ export function createGateway(config,fetchImpl=fetch){
   }catch(e){if(res.headersSent)return res.end();if(e instanceof AuthError)return send(e.status,{error:e.message,...(e.retryAfter?{retryAfter:e.retryAfter}:{})});send(e.status===413?413:502,{error:e.status===413?'الملف كبير جداً.':'لم يكتمل الاتصال. مسودتك المحلية لا تزال متاحة.'});}
  });
 }
-// This deployment opens directly, regardless of obsolete password/SMS settings.
-export function fromEnvironment(env=process.env){return {authMode:'open',allowedOrigin:env.STUDIO_ALLOWED_ORIGIN,upstreamOrigin:env.STUDIO_UPSTREAM_ORIGIN,siteToken:env.STUDIO_SITE_TOKEN,bridgeKey:env.STUDIO_BRIDGE_KEY,sessionSecret:env.STUDIO_SESSION_SECRET};}
+// Production requires both credentials; obsolete open/password/SMS settings cannot bypass them.
+export function fromEnvironment(env=process.env){return {authMode:'credentials',username:env.STUDIO_USERNAME,passwordHash:env.STUDIO_PASSWORD_HASH,allowedOrigin:env.STUDIO_ALLOWED_ORIGIN,upstreamOrigin:env.STUDIO_UPSTREAM_ORIGIN,siteToken:env.STUDIO_SITE_TOKEN,bridgeKey:env.STUDIO_BRIDGE_KEY,sessionSecret:env.STUDIO_SESSION_SECRET};}
 if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href){
  const server=createGateway(fromEnvironment());server.requestTimeout=100000;server.headersTimeout=15000;server.listen(Number(process.env.PORT)||10000,'0.0.0.0');
  console.log('Private studio gateway listening.');

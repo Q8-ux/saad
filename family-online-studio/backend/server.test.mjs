@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createHash,createHmac} from 'node:crypto';
 import {once} from 'node:events';
-import {createGateway,fromEnvironment} from './server.mjs';
+import {createGateway} from './server.mjs';
 const hash=x=>createHash('sha256').update(x).digest('hex');
 test('private gateway authenticates sessions, restricts routes and signs binary requests',async()=>{
  const origin='https://writer.example',code='synthetic-private-entry-code-123456';
@@ -80,34 +80,3 @@ test('legacy password mode verifies through the signed private server and revoke
  }finally{await new Promise(resolve=>server.close(resolve));}
 });
 
-test('production opens without credentials and keeps signed transport, expiry and rate limits',async()=>{
- const origin='https://writer.example',key='synthetic-session-key';
- const config=fromEnvironment({STUDIO_AUTH_MODE:'password',STUDIO_ACCESS_SHA256:hash('obsolete-code'),STUDIO_ALLOWED_ORIGIN:origin,STUDIO_UPSTREAM_ORIGIN:'https://private.example',STUDIO_SITE_TOKEN:'synthetic-token',STUDIO_BRIDGE_KEY:'synthetic-bridge-key',STUDIO_SESSION_SECRET:key});
- assert.equal(config.authMode,'open');
- let calls=0;
- const server=createGateway(config,async(url,init)=>{
-  calls++;assert.equal(String(url),'https://private.example/api/external-studio');
-  assert.equal(init.headers['x-studio-route'],'/api/manuscript');
-  const h=init.headers;
-  assert.equal(h['x-studio-signature'],createHmac('sha256',config.bridgeKey).update([h['x-studio-time'],h['x-studio-nonce'],h['x-studio-method'],h['x-studio-route'],h['Content-Type'],hash(init.body)].join('\n')).digest('hex'));
-  return Response.json({synthetic:true});
- });
- server.listen(0,'127.0.0.1');await once(server,'listening');const base='http://127.0.0.1:'+server.address().port;
- const request=(path,options={})=>fetch(base+path,{...options,headers:{Origin:origin,...options.headers}});
- try{
-  assert.equal((await fetch(base+'/health')).status,200);
-  assert.equal((await request('/api/auth/options')).status,200);
-  const options=await (await request('/api/auth/options')).json();assert.equal(options.mode,'open');assert.equal(options.smsConfigured,false);
-  assert.equal((await request('/api/auth',{method:'POST',headers:{Origin:'https://other.example'},body:'{}'})).status,403);
-  assert.equal((await request('/api/auth/sms/request',{method:'POST',body:'{}'})).status,403);
-  assert.equal((await request('/api/auth/sms/verify',{method:'POST',body:'{}'})).status,403);
-  assert.equal((await request('/api/manuscript')).status,401);assert.equal(calls,0);
-  const opened=await request('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});assert.equal(opened.status,200);
-  const {token,expiresIn}=await opened.json();assert.ok(token);assert.equal(expiresIn,7200);assert.equal(calls,0);
-  assert.equal((await request('/api/manuscript',{headers:{Authorization:'Bearer '+token}})).status,200);assert.equal(calls,1);
-  assert.equal((await request('/api/manuscript',{headers:{Authorization:'Bearer '+token+'x'}})).status,401);
-  const sign=(tag,exp)=>{const data=Buffer.from(JSON.stringify({exp,nonce:'synthetic'})).toString('base64url');return data+'.'+createHmac('sha256',key).update(tag+data).digest('base64url');};
-  for(const old of [sign('studio-open-session\n',Math.floor(Date.now()/1000)-1),sign('studio-password-session\n',Math.floor(Date.now()/1000)+7200)])assert.equal((await request('/api/manuscript',{headers:{Authorization:'Bearer '+old}})).status,401);
-  let last;for(let i=0;i<8;i++)last=await request('/api/auth',{method:'POST',body:'{}'});assert.equal(last.status,429);assert.equal(calls,1);
- }finally{await new Promise(resolve=>server.close(resolve));}
-});
