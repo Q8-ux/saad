@@ -97,3 +97,38 @@ test('independent audit rejects a reversed agent defense after one correction wi
  }});
  const response=await route.POST(request());assert.equal(response.status,422);assert.equal(audited,2);assert.equal(revised,1);assert.equal(archived,0);assert.doesNotMatch(await response.text(),/secret/);
 });
+
+// Synthetic legal identities used only to exercise the actual memo route.
+const controlSource={...evidence[0],documentId:98765,title:'قانون اختباري غير حقيقي',lawNumber:98765,lawYear:2000,text:'نص اصطناعي لتجربة بوابة المذكرة.',corpus:{scope:'bound_file_only',sourceId:'user-legislation-source',sourceSha256:'8ffeac9838d7101a6776ca689b06ad08401d69850c27969b3b9959a1c40660bd',articleIdentityUnique:true,articleNumber:'12',lawIdentity:{number:98765,year:2000}}};
+function controlledMemoModel(correction,onCorrection=()=>{}) {
+ return async options=>{
+  if(options.schema?.properties?.clientRole)return JSON.stringify({clientRole:caseData.partyRole,opponentRole:'مدعى عليه',characterization:'مطالبة',issues:[{issue:'المبلغ',factQuote:'مبلغ لم يتم سداده',document:'',sourceMarkers:['م1'],application:'فحص أصل المطالبة',counterargument:'منازعة السداد',response:'فحص المستند',proposedRelief:caseData.requests,missing:''}],missingFacts:[],researchGaps:[]});
+  if(options.schema?.properties?.checks)return JSON.stringify({checks:[{issueIndex:0,status:'addressed',reason:'فحص المطالبة'}],roleConsistent:true,factsPreserved:true,reliefConsistent:true,unsupportedAssertions:[]});
+  if(options.schema?.properties?.grounds&&!options.schema?.properties?.facts){onCorrection();return JSON.stringify({grounds:correction});}
+  throw Error('unexpected control test call');
+ };
+}
+test('memo control rejects a wrong repeated article after one correction without a success archive',async t=>{
+ const h=templateHarness();t.after(h.cleanup);let corrections=0,archived=0;
+ const wrong='المادة (12) مكرر من القانون رقم 98765 لسنة 2000 【م1】';
+ const route=memoRoute(h,{sources:[controlSource],auth:async()=>({id:'control-test-user'}),record:async()=>{archived++;},pipeline:{agentPipelineEnabled:()=>true,generateAgentPleading:async()=>({content:{...content,grounds:wrong},audit:{}})},model:controlledMemoModel(wrong,()=>{corrections++;})});
+ const response=await route.POST(request());assert.equal(response.status,422);const value=await response.json();
+ assert.equal(value.stage,'source_review');assert.ok(value.issues.includes('unverified_article'));assert.equal(corrections,1);assert.equal(archived,0);assert.match(value.error,/احتُفظ ببياناتك/);
+});
+test('memo control accepts a source-corrected draft and preserves facts and requested relief',async t=>{
+ const h=templateHarness();t.after(h.cleanup);let corrections=0;const archived=[];
+ const wrong='المادة (12) مكرر من القانون رقم 98765 لسنة 2000 【م1】';
+ const correct='تنص المادة 12 من القانون رقم 98765 لسنة 2000 على «نص اصطناعي لتجربة بوابة المذكرة.» 【م1】';
+ const route=memoRoute(h,{sources:[controlSource],auth:async()=>({id:'control-test-user'}),record:async value=>{archived.push(value);},pipeline:{agentPipelineEnabled:()=>true,generateAgentPleading:async()=>({content:{...content,grounds:wrong},audit:{}})},model:controlledMemoModel(correct,()=>{corrections++;})});
+ const response=await route.POST(request());assert.equal(response.status,200);const value=await response.json();
+ assert.equal(corrections,1);assert.equal(archived.length,1);assert.ok(value.memo.includes(caseData.facts));assert.ok(value.memo.includes(caseData.requests));assert.doesNotMatch(value.memo,/مكرر|【م\d+】/);assert.equal(value.caseQuality.humanReviewRequired,true);assert.equal(value.memoControlRevision,'memo-generation-control-1');
+});
+
+test('health reports the same control revision used by the memo validator', async () => {
+  const api = load('../app/api/health/route.ts', {
+    '@/db': { getD1: () => ({ prepare: () => ({ first: async () => ({ count: 0 }) }) }) },
+    '@/lib/request-security': { privateJson: Response.json.bind(Response) },
+  });
+  const value = await (await api.GET()).json();
+  assert.equal(value.memoControlRevision, 'memo-generation-control-1');
+});
