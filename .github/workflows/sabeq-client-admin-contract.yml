@@ -33,7 +33,9 @@ jobs:
         with:
           node-version: '24'
       - run: npm ci --ignore-scripts --no-audit --no-fund
-      - run: node --test tests/admin-bridge-contract.test.mjs tests/memo-preparation.test.mjs tests/prepare-memo-route.test.mjs tests/sadad-payments.test.mjs tests/memo-journey.test.mjs
+      # The GitHub source mirror excludes corpus seed databases. Full SADAD
+      # transaction/recovery tests run against the complete native source.
+      - run: node --test tests/admin-bridge-contract.test.mjs tests/memo-preparation.test.mjs tests/prepare-memo-route.test.mjs tests/memo-journey.test.mjs
       - run: python -m unittest discover -s tools/spec-kit -p 'test_*.py' -v
   admin-contract:
     runs-on: ubuntu-latest

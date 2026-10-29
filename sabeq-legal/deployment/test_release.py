@@ -165,6 +165,7 @@ class PublicationTests(unittest.TestCase):
                                 ("sabeq-legal/deployment/release.py\nlegal-memo-platform/tools/internal-verification/verify.py\nlegal-memo-platform/package.json\nlegal-memo-platform/.gitignore\nlegal-memo-platform/specs/006-internal-verification/spec.md\n.github/workflows/sabeq-internal-verification.yml", "true"),
                                 ("sabeq-legal/index.html\nlegal-memo-platform/specs/063-continuous-memo-admin/validation-live.md\nsabeq-admin-preview/research-source/lib/public-service.ts\n.github/workflows/sabeq-client-admin-contract.yml", "true"),
                                 ("sabeq-legal/index.html\nlegal-memo-platform/native-admin-console/app/admin-dashboard.tsx", "true"),
+                                ("sabeq-legal/index.html\nlegal-memo-platform/tools/rea/audit.test.mjs\nlegal-memo-platform/tools/spec-kit/source.json\nlegal-memo-platform/.agents/skills/speckit-plan/SKILL.md", "true"),
                                 ("sabeq-legal/index.html\nlegal-memo-platform/tools/unrelated/tool.py", "false"),
                                 ("sabeq-legal/index.html\n.github/workflows/deploy-barcode-pages.yml", "false"),
                                 ("tamweenat/app.js", "false"),
