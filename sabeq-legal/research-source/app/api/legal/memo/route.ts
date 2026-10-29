@@ -17,7 +17,7 @@ import { enforceUserServiceLimit, recordServiceActivity } from "@/lib/service-re
 import { startMemoRequest, finishMemoRequest } from "@/lib/memo-requests";
 import { requireServiceEnabled } from "@/lib/service-settings";
 import { agentPipelineEnabled, generateAgentPleading } from "@/lib/sabeq-agent-bridge";
-import { reviewLegalCitations, citationFailureMessage } from "@/lib/legal-citation-review";
+import { reviewLegalCitations, citationFailureMessage, memoControlRevision } from "@/lib/legal-citation-review";
 import { officialVerificationSummary } from "@/lib/official-legislation";
 import { assertSameOrigin, cleanMultiline, cleanString, corsPreflight, enforceRateLimit, errorResponse, privateJson, readJsonObject, RequestError } from "@/lib/request-security";
 
@@ -162,7 +162,7 @@ export async function POST(request: Request) {
       signal.throwIfAborted();
       await finishMemoRequest(managementRequestId, "needs_review", finalMemo, "draft_generated");
       if(user) await recordServiceActivity({userId:user.id,serviceType:"memo",title:`${document.title} — ${clientName}`,inputText:JSON.stringify({...memoInput,legalIssues}),outputText:finalMemo,metadata:{managementRequestId,sourceCount:sources.length,caseNumber,template:template.info,documentKind:document.kind,pageSections:document.pages.length}});
-      const responseData = {requestId:managementRequestId,caseQuality,sourceCoverage:legalSourceCoverage(evidence),memo:finalMemo,document,template:template.info,sourceVerification:officialVerificationSummary(),engineRevision:"case-grounded-memo-1",analysis:{sourceCount:sources.length,lawCount:sources.filter(s=>s.kind==="legislation").length,cassationCount:sources.filter(s=>s.kind==="cassation").length,sources,missingSources:!evidence.length,researchNotice:caseQuality.status==="incomplete"?caseQuality.notices.join(" "):"",...(agentAudit?{agentAudit}:{})}};
+      const responseData = {requestId:managementRequestId,caseQuality,sourceCoverage:legalSourceCoverage(evidence),memo:finalMemo,document,template:template.info,sourceVerification:officialVerificationSummary(),memoControlRevision,engineRevision:"case-grounded-memo-1",analysis:{sourceCount:sources.length,lawCount:sources.filter(s=>s.kind==="legislation").length,cassationCount:sources.filter(s=>s.kind==="cassation").length,sources,missingSources:!evidence.length,researchNotice:caseQuality.status==="incomplete"?caseQuality.notices.join(" "):"",...(agentAudit?{agentAudit}:{})}};
       await completeMemoPayment(paymentLease, responseData);
       return privateJson(responseData);
     }

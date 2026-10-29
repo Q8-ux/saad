@@ -144,5 +144,16 @@
   "memoCaseInput": "one-editable-case-story-text-or-voice;automatic-facts-and-requests;fresh-extraction-after-edits",
   "memoCaseInputValidation": "232-internal-release-checks;20-localization-and-story-tests;both-builds;private-corpus-absent;official-live-single-story-facts-requests-and-updated-request-auto-next-verified",
   "memoFactsImport": "empty-field-only-current-assistant-facts-or-user-messages;manual-edits-retained",
-  "memoInputReuse": "all-known-fields-with-optional-story-edit"
+  "memoInputReuse": "all-known-fields-with-optional-story-edit",
+  "memoGenerationControl": {
+    "revision": "memo-generation-control-1",
+    "backendVersion": 166,
+    "backendSource": "80e643f35ffc759486546da688eb45d9518a5aee",
+    "focusedTestsPassed": 86,
+    "internalChecksPassed": 239,
+    "scopedPublicationTestsPassed": 9,
+    "liveHealthVerified": true,
+    "liveModelGenerationTested": false,
+    "livePaymentTested": false
+  }
 }

@@ -37,6 +37,8 @@ jobs:
         run: node scripts/check-dashboard-quality.mjs
       # The GitHub source mirror excludes corpus seed databases. Full SADAD
       # transaction/recovery tests run against the complete native source.
+      - name: Validate memo citation controls without private corpus data
+        run: node --test tests/memo-generation-control.test.mjs
       - run: node --test tests/admin-bridge-contract.test.mjs tests/memo-preparation.test.mjs tests/prepare-memo-route.test.mjs tests/memo-journey.test.mjs tests/admin-memo-display.test.mjs tests/admin-source-status.test.mjs
       - run: node --test tests/management-source-connection.test.mjs
       - run: python -m unittest discover -s tools/spec-kit -p 'test_*.py' -v
