@@ -1,3 +1,4 @@
+import { projectContextInstructions } from "@/lib/project-context";
 import { availableEvidenceMode } from "@/lib/memo-preparation";
 import { validateMemoInput } from "@/lib/memo-input";
 import { reserveMemoPayment, completeMemoPayment, releaseMemoPayment, type PaymentLease } from "@/lib/sadad-payments";
@@ -56,7 +57,7 @@ export async function POST(request: Request) {
     const signal = AbortSignal.any([request.signal, AbortSignal.timeout(240_000)]);
     const generateText = (options: Parameters<typeof modelGenerateText>[0]) => {
       signal.throwIfAborted();
-      return modelGenerateText({ ...options, instructions:`${options.instructions}\n${pleadingAuthorityInstructions}`, signal });
+      return modelGenerateText({ ...options, instructions:`${options.instructions}\n${pleadingAuthorityInstructions}\n${projectContextInstructions}`, signal });
     };
     const user = await requireMemoUserOrGuest(request);
     await requireServiceEnabled("memo", request);

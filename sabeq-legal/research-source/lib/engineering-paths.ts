@@ -3,6 +3,8 @@ import { memoPaymentPolicy } from "./sadad-payments";
 import { integrationConfig } from "./management-integrations";
 
 export const engineeringPaths = [
+  { id: "project-context", name: "إدارة سياق المشروع", kind: "runtime", purpose: "فصل كلام الزائر عن التحليل، وتحديد مصدر التصحيح والنقص داخل القضية الحالية.", status: "available" },
+  { id: "dashboard-quality", name: "تطوير واختبار لوحات التحكم", kind: "development", purpose: "فحوص سلوك المصدر والصلاحيات وعقد اللوحة؛ نتائجها المحلية لا تثبت الاختبار الحي.", status: "installed" },
   { id: "spec-kit", name: "المواصفات وضبط التنفيذ", kind: "development", purpose: "توحيد مواصفات الموقع واللوحة وعقود API واختبارات القبول.", status: "installed" },
   { id: "sabeq-quality", name: "التبسيط والتدقيق البرمجي", kind: "development", purpose: "حصر التغيير ومراجعة الصلاحيات ومنع فقد وظائف سابقة.", status: "installed" },
   { id: "interface-craft", name: "جودة الواجهات", kind: "development", purpose: "مراجعة العربية والجوال ووضوح الحالات والتنقل.", status: "installed" },

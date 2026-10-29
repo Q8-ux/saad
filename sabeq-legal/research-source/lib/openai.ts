@@ -9,6 +9,7 @@ import { correctLegalProse, factualRequirements, isDelegatedResearchRequest, isL
 import { readSSE, partialAssistantMessage } from "./intake-stream";
 import { cleanIntakeContext, cleanCaseOrientation, proceduralFacts, isLegalChoiceQuestion, hasAsked, inferQuestionKey, knownTopicsFromMessages, normalizeQuestion, readQuestionMemory, updateQuestionMemory, validIntakeQuestion, type CaseOrientation, type QuestionMemory } from "./intake-context";
 import { env } from "cloudflare:workers";
+import { prepareCaseContext, projectContextInstructions } from "./project-context";
 
 type OpenAIEnvironment = { OPENAI_API_KEY?: string; OPENAI_MODEL?: string; OPENAI_INTAKE_MODEL?: string };
 type OpenAIOperation = "responses" | "transcription" | "speech" | "file_upload" | "file_delete";
@@ -596,11 +597,13 @@ async function requestLegalIntake(input: IntakeInput, memory: QuestionMemory): P
   const cleaned = cleanIntakeContext(input.currentState);
   const statedProcedure = proceduralFacts([...(cleaned?.facts || []), ...input.messages.filter(m => m.role === "user").map(m => m.content)].join("\n"));
   const currentState = cleaned ? Object.fromEntries(Object.entries(cleaned).filter(([key]) => key !== "questionMemory")) : null;
+  const preparedContext = prepareCaseContext(input.messages, cleaned);
   const response = await openAIFetch("responses", "https://api.openai.com/v1/responses", {
     method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
     body: JSON.stringify({
       model, stream: Boolean(input.onText),
       instructions: `${interfaceReviewInstructions(input.language)}
+${projectContextInstructions}
 ${legalResearchInstructions}
 ${matterFactInstructions}
 ${caseReasoningInstructions}
@@ -616,7 +619,7 @@ caseType لطبيعة الحق (مدني، تجاري، عمالي، أسرة، 
 حلّل وافهم قبل أن تسأل. المحادثة ليست استمارة لاستكمال كل حقل في المذكرة. اقرأ جميع رسائل الزائر مع currentState واستخرج منها الأسماء والوقائع والتواريخ والصفة والطلب دون إعادة سؤال عن المعلوم أو المرفق. اسأل فقط عن غموض يغيّر فهم الواقعة أو الطلب أو مَن طعن في الحكم، بسؤال واحد قصير؛ إن كانت الرواية كافية قدّم التحليل والخطوة التالية واترك nextQuestions فارغة. لا تفترض صحة واقعة غير مذكورة ولا تختلق اسمًا أو تاريخًا أو عنوانًا لتقليل الأسئلة. أجّل طلب الاسم الرسمي والعنوان ورقم القضية والدائرة وأرقام الأحكام وبيانات الإعلان الشكلية إلى نموذج المذكرة، ولا تطلب رفع كل مستند كشرط لفهم الرواية. إذا ذُكر حكم فاستخلص ما قضى به ومن اعترض عليه من الكلام أو المستند؛ اسأل عن ذلك فقط عند غموض مؤثر. في memoFields احتفظ بكل حقل ذُكر فعلاً وبالقيم السابقة؛ اترك الغائب فارغاً. documentsNeeded قائمة توصيات للمراجعة وليست قائمة أسئلة إلزامية. نقص السند القانوني مسؤولية المساعد والمجموعة ولا يعالجه استجواب الزائر. يبقى readyForMemo دالاً على اكتمال المراجعة والحقول، ويستطيع الزائر بدء إعداد المسودة قبل ذلك لاستكمال الشكلية في النموذج.
 نظّم caseSummary والوقائع والتواريخ والطلبات والمسائل والتعارضات. افحص المقتطفات المرفقة فقط. في legalBasis اختر passageId لمقطع ينص فعلاً على سند متعلق بالواقعة، ثم اشرح علاقته باختصار في application. لا تنسخ الاقتباس: الخادم سيضع نص المقطع حرفياً. use=jurisdiction فقط إن كان النص يحدد الاختصاص بالفعل. افصل التشريع عن الحكم. لا تعتمد تشابه العنوان أو تخترع مادة أو رقم طعن. إذا كانت المقاطع غير ملائمة أو غير مقروءة فاترك legalBasis=[] وبيّن ذلك في analysisWarnings. لا ترفع الثقة دون سند صريح وعناصر اختصاص واضحة؛ الفهرسة لا تثبت سريان النص أو جميع تعديلاته.
 لا تطلب الرقم المدني أو الحساب البنكي أو كلمات المرور. لا تولد المذكرة داخل الحوار. readyForMemo=true فقط إذا اتضحت الأطراف والوقائع والطلب والمرحلة والمحكمة دون نقص جوهري أو تعارض، ثم اطلب الموافقة الصريحة على الملخص والانتقال للمذكرة. اكتب facts وrequests وlegalIssues وتسميات التواريخ وجميع الشروحات والتوجيهات والتحذيرات والأسئلة وorientation.categoryReason وorientation.nextAction وjurisdictionReason وlegalBasis.application وprecedentMatches.similarity وprecedentMatches.differences بلغة الواجهة المحددة في language فقط. احتفظ بالأسماء والاقتباسات والأرقام كما وردت. اكتب اسم المحكمة وتصنيف القضية وصفة الطرف فقط بالعربية للمعالجة الداخلية؛ الواجهة تترجم تسمياتها، ومحرك المذكرة المنفصل يصوغ المذكرة النهائية بالعربية دائماً. استخدم null في أي حقل قابل لذلك إذا لم يتغير عن currentState؛ في أول دور استخرج كل المعلومات المذكورة. القائمة غير الفارغة تستبدل القائمة السابقة كاملة: احتفظ بكل الوقائع السابقة ولا تحذفها إلا عند تصحيح صريح. [] أو نص فارغ يمسح القيمة السابقة عند الحاجة. لا تكرر المعلومة في عدة حقول، واختصر التحذيرات والأسئلة إلى الضروري. رد الحوار بلغة الواجهة.`,
-      input: JSON.stringify({ explicitProceduralFacts: statedProcedure, language: input.language, conversation: input.messages.slice(-16), currentState, questionMemory: memory, verifiedLegalSources: input.evidence || "لا توجد نصوص قانونية مطابقة متاحة؛ لا تنشئ أسانيد من الذاكرة." }),
+      input: JSON.stringify({ explicitProceduralFacts: statedProcedure, language: input.language, ...preparedContext, currentState, questionMemory: memory, verifiedLegalSources: input.evidence || "لا توجد نصوص قانونية مطابقة متاحة؛ لا تنشئ أسانيد من الذاكرة." }),
       ...responseModelOptions(model), text: { format: { type: "json_schema", name: "legal_case_intake", description: "Progressive Kuwait legal case intake and memo handoff state.", strict: true, schema: { ...compactIntakeSchema, properties: { ...compactIntakeSchema.properties, legalBasis: { ...legalIntakeSchema.properties.legalBasis, items: { ...legalIntakeSchema.properties.legalBasis.items, properties: { ...legalIntakeSchema.properties.legalBasis.items.properties, passageId: { type: "string", enum: input.passageIds?.length ? input.passageIds : ["unavailable"] } } } } } } } }, max_output_tokens: 4_500, store: false,
     }), signal: input.signal ? AbortSignal.any([input.signal, AbortSignal.timeout(45_000)]) : AbortSignal.timeout(45_000),
   }, 1);

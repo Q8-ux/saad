@@ -33,6 +33,8 @@ jobs:
         with:
           node-version: '24'
       - run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Check context, permissions and dashboard source contracts
+        run: node scripts/check-dashboard-quality.mjs
       # The GitHub source mirror excludes corpus seed databases. Full SADAD
       # transaction/recovery tests run against the complete native source.
       - run: node --test tests/admin-bridge-contract.test.mjs tests/memo-preparation.test.mjs tests/prepare-memo-route.test.mjs tests/memo-journey.test.mjs tests/admin-memo-display.test.mjs tests/admin-source-status.test.mjs
