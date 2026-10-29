@@ -25,11 +25,11 @@ test('initial action remains visible and explains how to start in all languages'
   assert.ok(html.includes(label)); assert.equal(button(element).props.disabled,true); assert.match(html,/assistant-memo-status/);
  }
 });
-test('missing factual data stays blocked with the exact next question', () => {
+test('incomplete structured data continues using visitor facts without another questionnaire', () => {
  const intake={...complete,facts:[],memoPrefill:{...complete.memoPrefill,facts:''}};
- let calls=0;const element=control({intake,messages,onContinue:()=>calls++});
- assert.equal(button(element).props.disabled,true);button(element).props.onClick();assert.equal(calls,0);
- assert.ok(renderToStaticMarkup(element).includes(handoff.memoConversationGaps(intake)[0].question));
+ const results=[];const element=control({intake,messages,onContinue:data=>results.push(data)});
+ assert.equal(button(element).props.disabled,false);button(element).props.onClick();assert.equal(results.length,1);
+ assert.equal(results[0].facts,messages[0].content);assert.equal(handoff.isCompleteMemoHandoff(results[0]),false);
 });
 test('completed action preserves fields and transcript and opens reviewed handoff once', () => {
  const results=[];const element=control({intake:complete,messages,onContinue:data=>results.push(data)});
@@ -37,8 +37,8 @@ test('completed action preserves fields and transcript and opens reviewed handof
  assert.equal(results[0].conversationTranscript,handoff.conversationTranscript(messages));assert.equal(results[0].clientName,complete.memoPrefill.clientName);
  assert.equal(handoff.isCompleteMemoHandoff(results[0]),true);
 });
-test('busy, conflicting and oversized states cannot invoke the handoff', () => {
- for (const overrides of [{busy:true},{intake:{...complete,contradictions:['تعارض اصطناعي']}},{messages:[{role:'user',content:'س'.repeat(30001)}]}]) {
+test('busy and oversized states cannot invoke the handoff', () => {
+ for (const overrides of [{busy:true},{messages:[{role:'user',content:'س'.repeat(30001)}]}]) {
   let calls=0;const element=control({intake:complete,messages,onContinue:()=>calls++,...overrides});
   assert.equal(button(element).props.disabled,true);button(element).props.onClick();assert.equal(calls,0);
  }
@@ -56,3 +56,5 @@ test('missing administrative fields allow preparation but never skip final form 
  assert.equal(results.length,1);assert.equal(results[0].clientName,'');
  assert.equal(results[0].handoffReady,'');assert.equal(handoff.isCompleteMemoHandoff(results[0]),false);
 });
+
+test('conflicts stay marked for review while draft preparation remains available',()=>{const results=[];const intake={...complete,contradictions:['تعارض اصطناعي']};const element=control({intake,messages,onContinue:data=>results.push(data)});assert.equal(button(element).props.disabled,false);button(element).props.onClick();assert.ok(results[0].handoffIssues.includes('procedure.conflict'));assert.equal(handoff.isCompleteMemoHandoff(results[0]),false);});

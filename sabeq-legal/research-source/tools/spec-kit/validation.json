@@ -1,0 +1,12 @@
+{
+  "date": "2026-10-29",
+  "version": "1.2.1",
+  "upstream_ref": "9dca9bf42a031765ee5e5f2371137f2f26967e11",
+  "target": "sabeq-runtime",
+  "spec_kit_tests": {
+    "passed": 5,
+    "failed": 0
+  },
+  "scope": "Project development tools; see source.json for original manifests and reviewed override hashes",
+  "runtime_validation": "See specs/063-continuous-memo-admin/validation.md; no live charge performed"
+}

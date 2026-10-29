@@ -77,7 +77,7 @@ test('missing-source notice remains outside exported memo on existing path',asyn
  const r=await route.POST(request());assert.equal(r.status,200);const value=await r.json();assert.equal(value.analysis.missingSources,true);assert.match(value.analysis.researchNotice,/لا توجد مصادر/);assert.doesNotMatch(value.memo,/لا توجد مصادر/);
 });
 test('knowledge export denies unauthorized users without reading any corpus or template',async()=>{
- let reads=0;const auth=load('../lib/admin-service-auth.ts',{'cloudflare:workers':{env:{ADMIN_SERVICE_TOKEN:'a'.repeat(48)}}});
+ let reads=0;const auth=load('../lib/admin-service-auth.ts',{'cloudflare:workers':{env:{ADMIN_SERVICE_TOKEN:'a'.repeat(48)}},'@/db':{getD1:()=>{reads++;throw Error();}}});
  const route=load('../app/api/admin/agent-knowledge/route.ts',{'@/lib/admin-service-auth':auth,'@/db':{getD1:()=>{reads++;throw Error();}},'@/lib/approved-templates':{loadApprovedTemplate:async()=>{reads++;throw Error();}}});
  const r=await route.GET(new Request('https://example.org/api/admin/agent-knowledge'));assert.equal(r.status,401);assert.equal(reads,0);
 });

@@ -19,7 +19,7 @@ export function AssistantMemoAction({ language, intake, messages, busy, onContin
         ? (language === "en" ? "Export the conversation and shorten it to 30,000 characters before transfer." : language === "ur" ? "منتقلی سے پہلے گفتگو برآمد کریں اور اسے 30,000 حروف تک مختصر کریں۔" : "صدّر المحادثة واختصرها إلى 30,000 حرف قبل نقلها للمذكرة.")
         : !ready
           ? memoConversationGaps(intake, language)[0]?.question || (language === "en" ? "Continue with the assistant to complete the case review." : language === "ur" ? "مقدمے کا جائزہ مکمل کرنے کے لیے معاون کے ساتھ جاری رکھیں۔" : "تابع مع المساعد لاستكمال مراجعة بيانات القضية.")
-          : (language === "en" ? "Review the case summary, party role and court. Continue to approve the details before generation." : language === "ur" ? "خلاصہ، فریق کی حیثیت اور عدالت دیکھیں؛ تیاری سے پہلے تفصیلات منظور کرنے کے لیے جاری رکھیں۔" : "راجع ملخص القضية والصفة والمحكمة. بالضغط توافق على نقل البيانات لمراجعتها قبل التوليد.");
+          : (language === "en" ? "Review the case summary, party role and court. Continue to approve the details before generation." : language === "ur" ? "خلاصہ، فریق کی حیثیت اور عدالت دیکھیں؛ تیاری سے پہلے تفصیلات منظور کرنے کے لیے جاری رکھیں۔" : "سيستكمل المساعد البيانات من المحادثة والمرفقات ويجهّز المسودة للمراجعة دون إعادة الأسئلة.");
   return <div className="memo-consent assistant-memo-action">
     <ShieldCheck size={22} aria-hidden="true" />
     <div><b>{label}</b><p id="assistant-memo-status" role="status">{status}</p>{ready && <p role="note">{memoApprovalNotice[language]}</p>}</div>

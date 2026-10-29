@@ -19,6 +19,6 @@ export function recogniseMemoProcedure(fields: Record<string, string>, previous:
 
 export function initialMemoStep(fromAssistant: boolean) { return fromAssistant ? 1 : 0; }
 export function nextMemoStep(step: number, fromAssistant: boolean): number | null {
-  if (step === 0) return 1;
+  if (step === 0) return fromAssistant ? 1 : 2;
   return step === 1 && !fromAssistant ? 2 : null;
 }

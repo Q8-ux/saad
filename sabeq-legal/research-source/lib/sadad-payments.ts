@@ -52,17 +52,26 @@ export async function memoPaymentPolicy() {
   return { ...settings, publicCheckoutEnabled: config.publicCheckoutEnabled === true, provider: "sadad", ready: config.publicCheckoutEnabled === true && isReady(config) && settings.priceFils > 0 && settings.currency === "KWD", environment: config.environment };
 }
 async function provider(config: Config, path: string, authorization: string, body?: unknown): Promise<Record<string, any>> {
+  let kind = "network", status: number | undefined, providerCode: string | undefined;
   try {
-    // SADAD requires a non-empty HTTP body for token POSTs to avoid HTTP 411.
     const payload = body !== undefined ? body : path.startsWith("/User/") ? {} : undefined;
-    // Workers supports manual redirects; reject non-2xx without forwarding Authorization.
     const response = await fetch(`${API[config.environment]}${path}`, { method: payload !== undefined ? "POST" : "GET", headers: { Authorization: authorization, Accept: "application/json", ...(payload === undefined ? {} : { "Content-Type": "application/json" }) }, ...(payload === undefined ? {} : { body: JSON.stringify(payload) }), redirect: "manual", signal: AbortSignal.timeout(20_000) });
+    status = response.status; kind = "http";
     const text = await response.text();
     if (text.length > 500_000 || !response.ok) throw Error("provider_failed");
+    kind = "response_format";
     const data = JSON.parse(text);
-    if (data.isValid !== true || !data.response || typeof data.response !== "object") throw Error("invalid_provider_response");
+    if (data.isValid !== true || !data.response || typeof data.response !== "object") {
+      kind = "provider_rejected";
+      if (typeof data.errorKey === "string" && /^[A-Z][A-Z0-9_]{0,63}$/.test(data.errorKey)) providerCode = data.errorKey;
+      throw Error("invalid_provider_response");
+    }
     return data.response;
-  } catch { throw new RequestError("تعذر التحقق من سداد. احتفظ بالطلب وأعد المحاولة؛ لم تُعتبر العملية مدفوعة.", 502); }
+  } catch (error) {
+    if (error instanceof Error && ["TimeoutError", "AbortError"].includes(error.name)) kind = "timeout";
+    console.warn("SADAD request failed", { operation: path.split("?")[0], environment: config.environment, kind, status, ...(providerCode ? { providerCode } : {}) });
+    throw new RequestError(kind === "timeout" ? "تأخر رد سداد. طلبك محفوظ؛ أعد التحقق من نفس الطلب دون دفع جديد." : "تعذر الاتصال بسداد. طلبك محفوظ؛ أعد التحقق من نفس الطلب دون إنشاء دفعة أخرى.", 502);
+  }
 }
 async function accessToken(config: Config, force = false) {
   if (!config.clientKey || !config.clientSecret) throw new RequestError("مفاتيح سداد غير مهيأة في الخادم.", 503);

@@ -90,7 +90,7 @@ export function memoConversationGaps(state: IntakeForMemo, language = "ar"): Mem
   return memoIntakeGaps(state, language).filter(gap => essential.has(gap.key));
 }
 export function canPrepareMemoHandoff(state: IntakeForMemo, messages: ConversationMessage[]) {
-  return messages.some(message => message.role === "user") && !memoConversationGaps(state).length && conversationTranscript(messages).length <= 30000;
+  return messages.some(message => message.role === "user" && message.content.trim().length >= 2) && conversationTranscript(messages).length <= 30000;
 }
 export function canOfferMemoHandoff(state: IntakeForMemo, messages?: ConversationMessage[]) {
   return state.readyForMemo === true && !memoIntakeGaps(state).length && (!messages || conversationTranscript(messages).length <= 30000);
@@ -111,7 +111,7 @@ export function buildMemoHandoff(state: IntakeForMemo & { memoPrefill: MemoPrefi
   return {
     ...state.memoPrefill,
     ...Object.fromEntries(intakeMemoFieldNames.flatMap(key => typeof state.memoFields?.[key] === "string" ? [[key, state.memoFields[key]]] : [])),
-    facts: state.memoPrefill.facts || state.facts.join("\n"),
+    facts: importMemoFacts("", state, messages),
     requests: state.memoPrefill.requests || state.requests.join("\n"),
     conversationTranscript: conversationTranscript(messages),
     conversationSummary: state.caseSummary,

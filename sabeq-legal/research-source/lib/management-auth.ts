@@ -10,7 +10,7 @@ type Manager = { email: string; name: string; username?: string; role: "operator
 const OPERATOR_SECTIONS = ["overview", "memos", "inbox", "notifications", "users", "legislation", "commands", "updates"];
 export function managerProfile(manager: Manager) {
   return { email: manager.email, name: manager.name, ...(manager.username ? { username: manager.username } : {}), role: manager.role,
-    sections: manager.role === "operator" ? [] : [...OPERATOR_SECTIONS, "site", "services", "bookings", "programmer", "payments", "mailboxes", "whatsapp", "mail"] };
+    sections: manager.role === "operator" ? [] : [...OPERATOR_SECTIONS, "site", "services", "bookings", "programmer", "paths", "payments", "mailboxes", "whatsapp", "mail"] };
 }
 export function assertManagerAction(manager: Manager, _action: string, _method: "GET" | "POST") {
   if (manager.role !== "administrator") throw new RequestError("لوحة التحكم متاحة للإداريين فقط.", 403);

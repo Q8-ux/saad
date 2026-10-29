@@ -1,0 +1,1 @@
+Add /api/analytics proxy, authenticated via requireAdminPermission before any upstream call. Add isolated dashboard component, keep source secrets server-only and existing admin functions unchanged. Rollback to admin version 3. Public service report verifies HMAC with timestamp and one-use nonce.

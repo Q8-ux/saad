@@ -207,7 +207,8 @@ test('an unavailable essential fact is not repeated and the next essential gap i
   const result=readiness().applyIntakeReadiness(state,previous,'ar');
   assert.equal(result.readyForMemo,false);assert.equal(result.nextQuestions.length,1);
   assert.notEqual(result.nextQuestions[0],first.question);
-  assert.equal(handoff.canPrepareMemoHandoff(result,messages),false);
+  assert.equal(handoff.canPrepareMemoHandoff(result,messages),true);
+  assert.equal(handoff.isCompleteMemoHandoff(handoff.buildMemoHandoff(result,messages)),false);
 });
 
 test('already asked unresolved facts are not repeated or silently treated as complete', () => {
@@ -255,8 +256,8 @@ test('appeal understanding needs the disputed outcome and actor, not every form 
  state.importantDates=[];state.documentsNeeded=['نسخة إضافية للمراجعة'];state.missingInformation=['عنوان الخصم'];
  assert.equal(handoff.memoConversationGaps(state).length,0);assert.equal(handoff.canPrepareMemoHandoff(state,messages),true);
  assert.equal(handoff.isCompleteMemoHandoff(handoff.buildMemoHandoff(state,messages)),false);
- state.proceduralPosition={conflict:false,needsActor:true};assert.equal(handoff.canPrepareMemoHandoff(state,messages),false);
- state.proceduralPosition={conflict:true,needsActor:false};assert.equal(handoff.canPrepareMemoHandoff(state,messages),false);
+ state.proceduralPosition={conflict:false,needsActor:true};assert.equal(handoff.canPrepareMemoHandoff(state,messages),true);
+ state.proceduralPosition={conflict:true,needsActor:false};assert.equal(handoff.canPrepareMemoHandoff(state,messages),true);
 });
 test('all languages preserve reviewed analysis and ask no more than one genuinely essential question', () => {
  for(const language of ['ar','en','ur']){
@@ -264,7 +265,7 @@ test('all languages preserve reviewed analysis and ask no more than one genuinel
   const analysis={ar:'الخلاف يدور حول رد مبلغ وفق الوقائع التي ذكرتها.',en:'The dispute concerns repayment based on the facts you provided.',ur:'آپ کے بتائے حقائق کے مطابق معاملہ رقم کی واپسی کا ہے۔'}[language];
   const result=readiness().applyIntakeReadiness(state,memory(),language,analysis);
   assert.ok(result.assistantMessage.startsWith(analysis));assert.equal(result.nextQuestions.length,1);
-  assert.equal(handoff.canPrepareMemoHandoff(result,messages),false);
+  assert.equal(handoff.canPrepareMemoHandoff(result,messages),true);
  }
 });
 test('unavailable legal research never becomes a demand for visitor-supplied statutes', () => {

@@ -1,0 +1,2 @@
+- [ ] Add protected proxy and analytics navigation/view.
+- [ ] Build and deploy; verify unauthenticated report is rejected.

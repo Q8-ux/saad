@@ -1,3 +1,4 @@
+import { engineeringPathStatus } from "@/lib/engineering-paths";
 import { siteAction, servicesAction, bookingsAction } from "@/lib/site-controls";
 import { listManagedUsers, updateManagedUser } from "@/lib/user-management";
 import { mailboxAction } from "@/lib/management-mailboxes";
@@ -37,6 +38,7 @@ export async function GET(request: Request) {
     if (action === "legislation-articles") return managementJson(await archiveArticles(url));
     if (action === "legislation-asset") return archiveAsset(url,"https://q8-ux.github.io");
     if (action === "legislation-report") return getAuditFile(url.searchParams.get("id") || "", "https://q8-ux.github.io");
+    if (action === "paths") return managementJson(await engineeringPathStatus());
     if (action === "programmer") return managementJson(await programmerAction(null, manager.email));
     if (action === "payments") return managementJson(await sadadManagement(null, manager.email));
     if (action === "mailboxes") return managementJson(await mailboxAction(null, manager.email, Number(url.searchParams.get("offset") || 0)));

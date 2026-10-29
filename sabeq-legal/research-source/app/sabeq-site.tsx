@@ -14,7 +14,7 @@ import VoiceWaveform from "./voice-waveform";
 import { PrivacyLink } from "./privacy-notice";
 import GroupPostsStrip from "./group-posts-strip";
 import MemoVoiceInput from "./memo-voice-input";
-import { memoStoryText, understandMemoStory } from "@/lib/memo-dictation";
+import { memoStoryText } from "@/lib/memo-dictation";
 import MemoPaymentDialog from "./memo-payment-dialog";
 import ProceduralPositionView from "./procedural-position-view";
 import { inferProceduralPosition } from "@/lib/procedural-position";
@@ -128,7 +128,7 @@ async function memoFetch(path: string, token: string, init: RequestInit = {}) {
     }
   }
   console.error("Memo service request could not be reached", { path, error: lastError instanceof Error ? lastError.name : "unknown" });
-  throw new Error("تعذر الاتصال بخدمة التحليل. لم تُرسل الملفات للقراءة؛ أعد المحاولة بعد لحظات.");
+  throw new Error(path.startsWith("/api/payments/") ? "تعذر الاتصال بخدمة الدفع. طلبك محفوظ؛ أعد التحقق من نفس الطلب دون دفع جديد." : "تعذر الاتصال بخدمة سابق. بقيت بياناتك محفوظة؛ أعد المحاولة بعد لحظات.");
 }
 
 async function readServiceJson<T extends { error?: string }>(response: Response): Promise<T> {
@@ -1312,6 +1312,9 @@ function MemoWizard({ t, language, token, initialData = null, assistantSession, 
       setAnalysisWarnings(extracted.warnings || []);
       setAnalysisStatus("success");
       setAnalysisNotice(ui.analysisReady);
+      const patch = Object.fromEntries(Object.entries(extracted).filter(([,value]) => typeof value === "string" && value.trim())) as Record<string,string>;
+      patch.allParties = parties.map(party => `${party.name}${party.role ? ` — ${party.role}` : ""}`).join("\n");
+      return patch;
     } catch (error) {
       setAnalysisStatus("error");
       setAnalysisNotice(interfaceError(error, language, t.error));
@@ -1406,26 +1409,20 @@ function MemoWizard({ t, language, token, initialData = null, assistantSession, 
     if (!active || voiceEntryBusy || storyBusy || generationRequest.current) return;
     const stepData = Object.fromEntries(Array.from(new FormData(event.currentTarget).entries(), ([key, value]) => [key, String(value)]));
     let nextFacts = facts, nextRequests = requests;
-    let storyData: Record<string, string> = {};
+    let documentData: Record<string, string> = {};
+    if (documents.length && analysisStatus !== "success") {
+      const extracted = await analyzeDocuments();
+      if (!extracted) return;
+      documentData = extracted;
+      nextFacts = nextFacts.trim() ? nextFacts : extracted.facts || "";
+      nextRequests = nextRequests.trim() ? nextRequests : extracted.requests || "";
+    }
     if (step === 0 || assistantReview) {
-      const story = stepData.caseStory?.trim() || "";
-      if (story !== lastUnderstoodStory.current) {
-        const controller = new AbortController(); storyRequest.current = controller;
-        setStoryBusy(true); setStatus("idle"); setMemoError("");
-        try {
-          const understood = await understandMemoStory((path, init) => memoFetch(path, token, init), story, language, AbortSignal.any([controller.signal, AbortSignal.timeout(70000)]));
-          if (controller.signal.aborted || !generationMounted.current) return;
-          storyData = understood.fields; nextFacts = storyData.facts || ""; nextRequests = storyData.requests || "";
-          stepData.caseStory = understood.text;
-          applyCaseStory(storyData, understood.text);
-        } catch (error) {
-          if (!controller.signal.aborted && generationMounted.current) { setStatus("error"); setMemoError(interfaceError(error, language, t.error)); }
-          return;
-        } finally {
-          if (storyRequest.current === controller) { storyRequest.current = null; setStoryBusy(false); }
-        }
-      }
-      if (!nextFacts.trim() || !nextRequests.trim()) {
+      const story = stepData.caseStory?.trim() || memoStoryText(nextFacts, nextRequests);
+      // The preparation endpoint extracts missing fields once. Keep the
+      // visitor's words when extraction is unavailable rather than blocking.
+      if (story && story !== lastUnderstoodStory.current) nextFacts = story;
+      if (!nextFacts.trim() && !documents.length) {
         setStatus("error");
         setMemoError(language === "ar" ? "أضف في المربع ما حدث وما تريد الوصول إليه؛ لم تتضح الوقائع أو الطلبات بعد." : language === "en" ? "Add what happened and the outcome you want in the same box; facts or requests are still missing." : "اسی خانے میں واقعہ اور مطلوبہ نتیجہ بتائیں؛ حقائق یا مطالبات ابھی واضح نہیں۔");
         return;
@@ -1441,12 +1438,35 @@ function MemoWizard({ t, language, token, initialData = null, assistantSession, 
     const analysisData = analysisStatus === "success" && step === 0 && hasNewAnalysis
       ? Object.fromEntries(Object.entries({ ...analysisFields, allParties, facts, requests }).filter(([, value]) => typeof value === "string" && value.trim().length > 0))
       : {};
-    const recognised = recogniseMemoProcedure({ ...memoData, ...analysisData, ...stepData, ...storyData, facts: nextFacts, requests: nextRequests }, automaticProcedure.current);
-    const nextData = recognised.fields;
+    const recognised = recogniseMemoProcedure(importMemoDraft({ ...memoData, ...analysisData, ...stepData, facts: nextFacts, requests: nextRequests,
+      ...(Object.keys(documentData).length ? { documentContext: JSON.stringify(documentData) } : {}),
+    }, { memoPrefill: documentData }), automaticProcedure.current);
+    let nextData = recognised.fields;
     if (step === 0 && analysisStatus === "success") lastAppliedAnalysis.current = { fields: analysisFields, parties: analysisParties };
     automaticProcedure.current = recognised.automatic;
     for (const key of ["caseType", "court", "courtCircuit", "partyRole"]) if (nextData[key]) nextData[key] = canonicalLegalValue(nextData[key]);
     setMemoData(nextData);
+    // Prepare once before invoicing; formal gaps stay with the office review.
+    const preparationController = new AbortController();
+    storyRequest.current = preparationController; setStoryBusy(true); setMemoError("");
+    try {
+      const response = await memoFetch("/api/legal/prepare-memo", token, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        signal: AbortSignal.any([preparationController.signal, AbortSignal.timeout(75000)]),
+        body: JSON.stringify({ ...nextData, interfaceLanguage: language }),
+      });
+      const prepared = await readServiceJson<{ input?: Record<string, string>; error?: string }>(response);
+      if (preparationController.signal.aborted || !generationMounted.current) return;
+      if (!response.ok || !prepared.input) throw new Error(prepared.error || t.error);
+      nextData = prepared.input;
+      setMemoData(nextData); setFacts(nextData.facts || ""); setRequests(nextData.requests || "");
+    } catch (error) {
+      if (!preparationController.signal.aborted) { setStatus("error"); setMemoError(interfaceError(error, language, t.error)); }
+      return;
+    } finally {
+      if (storyRequest.current === preparationController) storyRequest.current = null;
+      setStoryBusy(false);
+    }
     const nextStep = nextMemoStep(step, fromAssistant);
     if (nextStep !== null) {
       setStep(nextStep);
@@ -1541,7 +1561,7 @@ function MemoWizard({ t, language, token, initialData = null, assistantSession, 
       {assistantReview ? <p className="form-notice">{language === "ar" ? "راجع البيانات المنقولة وعدّل ما يلزم، ثم وافق وولّد المذكرة من هذه الصفحة." : language === "en" ? "Review the transferred details, edit if needed, then approve and generate here." : "منتقل تفصیلات دیکھیں، ضرورت ہو تو درست کریں، پھر یہیں منظوری دے کر یادداشت تیار کریں۔"}</p> : <div className="steps journey-steps" aria-label={t.memoModal}>{journeySteps.map((item, index) => <div key={item} className={index === step ? "active" : index < step ? "done" : ""}><i>{index < step ? <Check size={14} /> : index + 1}</i><span>{item}</span></div>)}</div>}
 
       {step > 0 && <ProceduralPositionView position={recognisedPosition} language={language} />}
-      <form ref={memoFormRef} key={voiceFormVersion} onSubmit={submit} onChange={event => { if ((event.target as HTMLElement).getAttribute("name")) setMemoApproved(false); }}>
+      <form ref={memoFormRef} key={voiceFormVersion} noValidate onSubmit={submit} onChange={event => { if ((event.target as HTMLElement).getAttribute("name")) setMemoApproved(false); }}>
         <div className="step-content">
           {(step === 0 || assistantReview) && <>
             {assistantReview && facts.trim() && requests.trim() && <dl className="memo-handoff-details"><div><dt>{t.facts}</dt><dd>{facts}</dd></div><div><dt>{t.requests}</dt><dd>{requests}</dd></div></dl>}
@@ -1634,7 +1654,7 @@ function MemoWizard({ t, language, token, initialData = null, assistantSession, 
             </section>}
             {!assistantReview && <label className="memo-generation-approval"><input type="checkbox" checked={memoApproved} onChange={event => setMemoApproved(event.target.checked)} disabled={status === "loading"} />{generationUi.approval}</label>}</div>}
         </div>
-        <div className="memo-actions">{step > 0 && !assistantReview ? <button type="button" className="button button-outline" disabled={status === "loading"} onClick={() => { captureDraft(); setMemoApproved(false); setStep(step - 1); }}>{t.previous}</button> : <span />}<button className="button button-primary" disabled={voiceEntryBusy || status === "loading" || analysisStatus === "loading" || Boolean(step === 0 && documents.length && analysisStatus !== "success") || storyBusy}>{storyBusy ? (language === "ar" ? "جارٍ فهم الوقائع والطلبات…" : language === "en" ? "Understanding facts and requests…" : "حقائق اور مطالبات سمجھ رہا ہوں…") : status === "loading" ? (checkingPayment ? payUi.checking : t.loading) : assistantReview ? (language === "ar" ? ((paymentPolicy?.required || checkout) ? "أوافق وأتابع للدفع والتوليد" : "أوافق وأولّد المذكرة") : language === "en" ? "Approve and generate memorandum" : "منظور کرکے یادداشت تیار کریں") : step === 2 ? (paymentPolicy?.publicCheckoutEnabled && paymentPolicy.required) || checkout ? checkout ? payUi.verify : payUi.pay : t.generate : step === 0 && documents.length === 0 ? ui.continueManual : t.next}<ArrowLeft size={17} /></button></div>
+        <div className="memo-actions">{step > 0 && !assistantReview ? <button type="button" className="button button-outline" disabled={status === "loading"} onClick={() => { captureDraft(); setMemoApproved(false); setStep(step - 1); }}>{t.previous}</button> : <span />}<button className="button button-primary" disabled={voiceEntryBusy || status === "loading" || analysisStatus === "loading" || storyBusy}>{storyBusy ? (language === "ar" ? "جارٍ فهم الوقائع والطلبات…" : language === "en" ? "Understanding facts and requests…" : "حقائق اور مطالبات سمجھ رہا ہوں…") : status === "loading" ? (checkingPayment ? payUi.checking : t.loading) : assistantReview ? (language === "ar" ? ((paymentPolicy?.required || checkout) ? "أوافق وأتابع للدفع والتوليد" : "أوافق وأولّد المذكرة") : language === "en" ? "Approve and generate memorandum" : "منظور کرکے یادداشت تیار کریں") : step === 2 ? (paymentPolicy?.publicCheckoutEnabled && paymentPolicy.required) || checkout ? checkout ? payUi.verify : payUi.pay : t.generate : step === 0 && documents.length === 0 ? ui.continueManual : t.next}<ArrowLeft size={17} /></button></div>
         {status === "loading" && <div className="memo-generation-pending"><p role="status" aria-live="polite">{checkingPayment ? payUi.checking : generationUi.pending}</p><span>{generationSeconds} {generationUi.seconds}</span><small>{checkingPayment ? payUi.safety : generationUi.limit}</small><button type="button" className="button button-outline" onClick={() => generationRequest.current?.abort()}>{generationUi.cancel}</button></div>}
         {status === "error" && <p className="form-notice error">{memoError || t.error}</p>}
       </form>

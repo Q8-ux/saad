@@ -73,7 +73,7 @@ test('assistant handoff has one editable review and no second Next screen',()=>{
  assert.equal(journey.nextMemoStep(1,true),null);
  assert.equal(journey.nextMemoStep(0,true),1,'optional documents return to the same review');
  assert.equal(journey.initialMemoStep(false),0);
- assert.equal(journey.nextMemoStep(0,false),1);
+ assert.equal(journey.nextMemoStep(0,false),2);
  assert.equal(journey.nextMemoStep(1,false),2);
  assert.equal(journey.nextMemoStep(2,false),null);
 });

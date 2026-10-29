@@ -1,3 +1,4 @@
+import { availableEvidenceMode } from "@/lib/memo-preparation";
 import { validateMemoInput } from "@/lib/memo-input";
 import { reserveMemoPayment, completeMemoPayment, releaseMemoPayment, type PaymentLease } from "@/lib/sadad-payments";
 import {assessMatterFacts} from "@/lib/matter-facts";
@@ -64,14 +65,14 @@ export async function POST(request: Request) {
     // limit was too low for a normal test flow (retrying after document review
     // exhausted it), so retain abuse protection while allowing real testing.
     if (user) await enforceUserServiceLimit(user, "memo");
-    const { caseType, clientName, court, courtCircuit, caseNumber, otherParty, partyRole, allParties, facts, requests, legalIssues, conversationTranscript, conversationSummary, assistantResearch, extraFields, documentKind, caseStage } = validateMemoInput(raw);
+    const { caseType, clientName, court, courtCircuit, caseNumber, otherParty, partyRole, allParties, facts, requests, legalIssues, conversationTranscript, conversationSummary, assistantResearch, extraFields, documentKind, caseStage, preparationNotes } = validateMemoInput(raw);
     const entitlement = await reserveMemoPayment(raw);
     if (entitlement.result) return privateJson(entitlement.result);
     paymentLease = entitlement.lease;
     await enforceRateLimit(request, paymentLease ? `legal-memo-paid:${paymentLease.id}` : "legal-memo", 12, "hour");
     managementRequestId = await startMemoRequest({ ...extraFields, clientName, court, courtCircuit, caseNumber, caseType, partyRole, otherParty, allParties, facts, requests, legalIssues, documentKind, caseStage }, user, request.headers.get("origin") || new URL(request.url).origin);
     const matter=assessMatterFacts(facts+" "+requests+" "+allParties);
-    if(!matter.ready) {
+    if(!matter.ready && raw.draftMode !== availableEvidenceMode) {
       await finishMemoRequest(managementRequestId, "needs_information", "", "fact_clarification");
       return privateJson({requestId:managementRequestId,error:"قبل إعداد المذكرة، يلزم توضيح وقائع لتحديد التشريع المناسب: "+matter.missing.map(g=>g.ar).slice(0,3).join(" "),stage:"fact_clarification",missingFacts:matter.missing.map(g=>({key:g.key,question:g.ar})),sourceScope:"bound_file_only"},422);
     }
@@ -102,7 +103,11 @@ export async function POST(request: Request) {
       if (!(error instanceof CasePlanValidationError)) throw error;
       // Reason codes only; never log the prompt, parties or generated case text.
       console.warn("Memo case plan validation failed", { code:error.code, attempts:2 });
-      throw new RequestError(casePlanFailureMessage(error.code),422);
+      if (raw.draftMode !== availableEvidenceMode) throw new RequestError(casePlanFailureMessage(error.code),422);
+      evidence = [];
+      casePlan = { clientRole: partyRole, opponentRole: "", characterization: caseType,
+        issues: [{ issue: "مراجعة المدخلات المتاحة", factQuote: facts.slice(0, 180), document: "المدخلات المقدمة", sourceMarkers: [], application: "", counterargument: "", response: "", proposedRelief: requests, missing: "خطة التحليل تحتاج مراجعة المختص؛ لم يُدرج سند غير متحقق." }],
+        missingFacts: preparationNotes, researchGaps: ["لم تعتمد خطة الاستدلال؛ أُعدت مسودة الوقائع والطلبات المتاحة للمراجعة."] };
     }
     const checkedPlan = casePlan;
     evidence=applyCheckedJudgmentMatches(evidence,checkedPlan);
@@ -133,7 +138,7 @@ export async function POST(request: Request) {
       content.factualNotes = factualRequirements(content.factualNotes);
       content.grounds = stripInternalMemoLanguage(removeDelegatedResearch(content.grounds));
       content.legalResearchNotes = evidence.length ? stripInternalMemoLanguage(removeDelegatedResearch(content.legalResearchNotes)) : "";
-      content.factualNotes = factualRequirements([...new Set([...content.factualNotes,...checkedPlan.missingFacts,...checkedPlan.issues.map(i=>i.missing).filter(Boolean)])]);
+      content.factualNotes = factualRequirements([...new Set([...content.factualNotes,...preparationNotes,...matter.missing.map(g=>g.ar),...checkedPlan.missingFacts,...checkedPlan.issues.map(i=>i.missing).filter(Boolean)])]);
       let caseAudit = null;
       if(evidence.length) {
         try {
