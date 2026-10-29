@@ -1,0 +1,101 @@
+{
+  "revision": "project-context-1",
+  "workId": "barcode",
+  "edition": "نسخة التقديم 4 • 2026",
+  "sourceStatus": "presentation-copy",
+  "latestAuthorVersionVerified": false,
+  "humanReviewRequired": true,
+  "sourceFingerprint": "36a8163d1269cd36e9b5bad4ffbb8123304425071d708661f646d424231d858e",
+  "episodes": [
+    {
+      "number": 1,
+      "title": "البداية — الفاتورة",
+      "sourceTitle": "الحلقة الأولى",
+      "path": "data/episode-1.js",
+      "sha256": "44e4c40bf421d1ebb1974f914d283f3e52758622f1c03635598e7a8b96113c6c",
+      "textCharacters": 11765
+    },
+    {
+      "number": 2,
+      "title": "ثلاث عشرة ثانية",
+      "sourceTitle": "الحلقة الثانية",
+      "path": "data/episode-2.js",
+      "sha256": "9bcc86855a19792ea546b27f9cb93c8ed1671909445489520f0cbbdd93952aca",
+      "textCharacters": 10301
+    },
+    {
+      "number": 3,
+      "title": "من يصنع الدليل",
+      "sourceTitle": "الحلقة الثالثة",
+      "path": "data/episode-3.js",
+      "sha256": "07decaeb72c03bebd1a6a72201ac0e6563f2878b271c8cf52e432739c7a4e4f2",
+      "textCharacters": 10726
+    },
+    {
+      "number": 4,
+      "title": "الإيقاف الكاذب",
+      "sourceTitle": null,
+      "path": "data/episode-4.js",
+      "sha256": "ff5249e51cb8125b55c9df18b9ff431e0276658fd3b73457e9365b875f99cc54",
+      "textCharacters": 9192
+    },
+    {
+      "number": 5,
+      "title": "قيمة الإنسان",
+      "sourceTitle": null,
+      "path": "data/episode-5.js",
+      "sha256": "c4535786226407c5fe34256eb214ebf4a64e34ae2c23bfe7213014ef5d72cc34",
+      "textCharacters": 10723
+    },
+    {
+      "number": 6,
+      "title": "النسخة الأصلية",
+      "sourceTitle": null,
+      "path": "data/episode-6.js",
+      "sha256": "2691f2fe18677b4bdd94d0b4f4737ac26ecf4811634f0406fdaf6e3e80974d6c",
+      "textCharacters": 10308
+    },
+    {
+      "number": 7,
+      "title": "آخر أربعة بالمئة",
+      "sourceTitle": null,
+      "path": "data/episode-7.js",
+      "sha256": "53860d6adaf6308627ae464f732a95c6e12005781c91418f9d12bd83ad94251a",
+      "textCharacters": 10660
+    },
+    {
+      "number": 8,
+      "title": "الساعة الأخيرة",
+      "sourceTitle": null,
+      "path": "data/episode-8.js",
+      "sha256": "837a44f49169d6252a9a5f8c27c4ec6e0f184d82d82740a212dad920f1ac9817",
+      "textCharacters": 8913
+    },
+    {
+      "number": 9,
+      "title": "الميكروفون المفتوح",
+      "sourceTitle": null,
+      "path": "data/episode-9.js",
+      "sha256": "ca1b920523e4ce2d09331cf8501e2cccb7a519a58940bd0b25b1c69714cfa3e9",
+      "textCharacters": 9255
+    },
+    {
+      "number": 10,
+      "title": "أثر من يكتبها",
+      "sourceTitle": null,
+      "path": "data/episode-10.js",
+      "sha256": "780ba375bab3d62f07244b6e1aead280262719df4bc08ea18e27651c2ab356ca",
+      "textCharacters": 12129
+    }
+  ],
+  "rules": {
+    "scope": "this-edition-only",
+    "crossWorkMemory": false,
+    "authorNotesAreStoryFacts": false,
+    "aiSuggestionsAreCanon": false,
+    "changedSourceRequiresRefresh": true
+  },
+  "unresolved": [
+    "مطابقة نسخة التقديم مع أحدث مخطوط اعتمده المؤلف غير متحققة."
+  ]
+}
