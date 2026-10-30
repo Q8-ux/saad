@@ -5,9 +5,10 @@ const root=path.resolve(import.meta.dirname,'..');
 const html=await readFile(path.join(root,'index.html'),'utf8'),app=await readFile(path.join(root,'assets/app.mjs'),'utf8'),css=await readFile(path.join(root,'assets/style.css'),'utf8'),config=await readFile(path.join(root,'assets/config.js'),'utf8');
 const login=await readFile(path.join(root,'assets/login.mjs'),'utf8'),loginCss=await readFile(path.join(root,'assets/login.css'),'utf8');
 assert.ok(app.includes('createStudioLogin'));assert.ok(html.includes('./assets/login.css'));
-assert.ok(login.includes('openStudio();')&&login.includes("code:'open'"));
-assert.ok(!/current-password|studio-password|onSignOut|\/api\/auth\/sms\//.test(login));
-assert.ok(!/h\(['"](?:input|form)['"]/.test(login));assert.ok(loginCss.includes(':focus-visible'));
+assert.ok(login.includes('studio-credentials-v1:')&&login.includes('current-password')&&login.includes('username'));
+assert.ok(!login.includes("code:'open'")&&!login.includes('openStudio();'));
+assert.ok(login.includes('signIn')&&login.includes('setPassword(\'\')'));
+assert.ok(login.includes('h(\'form\'')&&login.includes('dir:\'ltr\''));assert.ok(loginCss.includes(':focus-visible'));
 assert.ok(html.includes('lang="ar" dir="rtl"'));assert.ok(html.includes('noindex,nofollow'));
 assert.ok(app.includes('السينارست'));assert.ok(!/sk-proj-[A-Za-z0-9_-]{20,}/.test(app+config));assert.ok(!config.includes('chatgpt.site'));
 
@@ -19,6 +20,10 @@ assert.ok(initialText.includes('المظهر وراحة القراءة')&&initia
 assert.ok(app.includes('أعمالي')&&initialText.includes('The Art of the Last Line'));
 assert.ok(modules.initial.reduce((sum,item)=>sum+item.bytes,0)<440000,'Initial modules exceed writing workspace budget');
 for(const item of [...modules.initial,...modules.deferred])assert.ok((await readFile(path.join(root,item.file))).length>0);
+const speechModule=modules.deferred.find(item=>item.file.includes('speech-studio'));
+assert.ok(speechModule,'Speech tools must load on demand');
+const speechText=await readFile(path.join(root,speechModule.file),'utf8');
+assert.ok(speechText.includes('تنزيل الصوت WAV')&&speechText.includes('OpenAI')&&speechText.includes('VoiceStudio'));
 assert.ok(modules.deferred.some(item=>item.file.includes('pdf-export')),'Direct PDF exporter must load on demand');
 assert.ok(app.includes('تحميل PDF'),'Direct PDF download button missing');
 assert.ok(Buffer.byteLength(css)<144000,'Stylesheet exceeds writing workspace budget');
