@@ -10,4 +10,11 @@
 .external-login h1{font:700 43px/1.7 Amiri,serif;margin:12px 0 14px;color:#172b3a}
 .external-login p[role=status],.external-login .error-text{font-size:19px;line-height:1.9;color:#566760}
 .external-login .primary{margin-top:20px;min-height:48px;border-radius:11px;font-size:18px;padding:12px 23px;background:#216e67;color:#fff}
+.external-login form{text-align:right;margin-top:26px;display:grid;gap:10px}
+.external-login label{font-size:19px;font-weight:600;color:#172b3a}
+.external-login input{box-sizing:border-box;width:100%;min-height:52px;padding:12px 14px;border:1px solid #92a79f;border-radius:10px;background:#fff;color:#172b3a;font:400 19px/1.5 system-ui,sans-serif;text-align:left}
+.external-login input:focus-visible{outline:3px solid #087f7c;outline-offset:3px}
+.external-login form label:not(:first-child){margin-top:12px}
+.external-login form .primary{width:100%;margin-top:14px;border:0;cursor:pointer;font-family:inherit}
+.external-login .error-text{color:#9e302d;margin:8px 0 0}
 @media(max-width:600px){.external-login{padding:18px}.external-login>section{padding:36px 22px}.external-login h1{font-size:38px}}
