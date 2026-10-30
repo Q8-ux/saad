@@ -294,3 +294,7 @@
 @media screen and (prefers-reduced-motion: reduce) {
   .studio .topbar .top-actions > button { transition: none; }
 }
+
+.book-export-ready{display:grid;gap:12px;margin:20px 0;padding:18px;border:1px solid var(--accent,#087f7c);border-radius:16px;background:var(--accent-light,#e3f2ee)}.book-export-ready p{display:flex;align-items:center;gap:8px;margin:0;font-weight:700}.book-export-ready small{overflow-wrap:anywhere;line-height:1.8}.book-export-ready .book-download-link{display:flex;justify-content:center;align-items:center;gap:10px;text-decoration:none;min-height:48px;white-space:normal;text-align:center}.book-export-error{margin:18px 0;color:#9e2525;line-height:1.9}.dark .book-export-ready{background:#183d3c}.dark .book-export-error{color:#ffb7b7}
+
+.studio-update-banner{display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;padding:14px 20px;background:#e3f2ee;color:#183d3c;font:17px/1.8 Cairo,sans-serif}.studio-update-banner a{color:#06635f;font-weight:700;text-underline-offset:4px}

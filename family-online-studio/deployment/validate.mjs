@@ -1,6 +1,7 @@
 import {readFile} from 'node:fs/promises';
 import path from 'node:path';
 import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
 const root=path.resolve(import.meta.dirname,'..');
 const html=await readFile(path.join(root,'index.html'),'utf8'),app=await readFile(path.join(root,'assets/app.mjs'),'utf8'),css=await readFile(path.join(root,'assets/style.css'),'utf8'),config=await readFile(path.join(root,'assets/config.js'),'utf8');
 const login=await readFile(path.join(root,'assets/login.mjs'),'utf8'),loginCss=await readFile(path.join(root,'assets/login.css'),'utf8');
@@ -15,6 +16,12 @@ assert.ok(app.includes('السينارست'));assert.ok(!/sk-proj-[A-Za-z0-9_-]{
 assert.ok(css.includes('--ui-size')&&css.includes('prefers-reduced-motion')&&css.includes('max-width:1100px'));
 assert.ok(Buffer.byteLength(app)<440000,'Client bundle exceeds writing workspace budget');
 const modules=JSON.parse(await readFile(path.join(root,'assets/export-modules.json'),'utf8'));
+const release=JSON.parse(await readFile(path.join(root,'assets/release.json'),'utf8'));
+assert.equal(release.version,createHash('sha256').update(app).digest('hex').slice(0,12),'Release marker must match the deployed entry');
+assert.ok(html.includes("img-src 'self' data: blob:;"),'Protected illustrations use local blob URLs');
+const bookModule=modules.deferred.find(item=>item.file.includes('book-studio-'));
+assert.ok(bookModule,'Book tools must be packaged');
+assert.ok((await readFile(path.join(root,bookModule.file),'utf8')).includes('book-save-export'),'Book export needs a persistent save link');
 const initialText=(await Promise.all(modules.initial.map(item=>readFile(path.join(root,item.file),'utf8')))).join('\n');
 assert.ok(initialText.includes('المظهر وراحة القراءة')&&initialText.includes('حبر وبحر'));
 assert.ok(app.includes('أعمالي')&&initialText.includes('The Art of the Last Line'));
