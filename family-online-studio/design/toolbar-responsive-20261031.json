@@ -1,0 +1,41 @@
+{
+  "project": "family-online-studio",
+  "surface": "top toolbar",
+  "designWorkflow": "masar-photoshop / existing Compositor identity",
+  "cause": "Equal flex widths combined with min-width:0 and nowrap squeezed labels outside controls.",
+  "layout": {
+    "upTo600px": "two columns",
+    "601to1100px": "three columns",
+    "desktop": "content-sized controls with wrapping toolbar",
+    "mobileMinTarget": 48,
+    "helpMinTarget": 44,
+    "icons": 18
+  },
+  "verification": {
+    "browser": "Chromium through cloud browser",
+    "fixture": "Actual public stylesheet with matching toolbar DOM; no private manuscript",
+    "widths": [
+      320,
+      390,
+      768,
+      1440
+    ],
+    "uiFontSizes": [
+      18,
+      20,
+      36
+    ],
+    "fixedCases": 12,
+    "fixedCasesWithTextOverflowOrOverlappingButtons": 0,
+    "baselineCasesWithFailures": 9,
+    "uiFont": "Tahoma, Arial, sans-serif; existing font retained"
+  },
+  "compositor": {
+    "originalLayers": 3,
+    "editableIdentity": "design/identity-v1/design.comp.zip",
+    "adapterRepack": "passed",
+    "nativeMacApplicationRun": false,
+    "publishedIdentityChanged": false
+  },
+  "scope": "Toolbar CSS and stylesheet loading only; no action removed or script/export/generation change"
+}

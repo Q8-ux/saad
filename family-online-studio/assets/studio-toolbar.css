@@ -1,0 +1,86 @@
+/* Preserve the Compositor paper-and-ink identity while letting controls reflow. */
+@media screen {
+  .studio .topbar {
+    height: auto;
+    min-height: 82px;
+    flex-wrap: wrap;
+    row-gap: 12px;
+  }
+
+  .studio .topbar .top-actions {
+    flex: 0 1 auto;
+    flex-wrap: wrap;
+    gap: 8px;
+    min-inline-size: 0;
+    max-inline-size: 100%;
+  }
+
+  .studio .topbar .top-actions > button {
+    flex: 0 0 auto;
+    inline-size: auto;
+    min-inline-size: max-content;
+    max-inline-size: 100%;
+    white-space: nowrap;
+  }
+
+  .studio .topbar .top-actions > button svg {
+    flex: none;
+    inline-size: 18px;
+    block-size: 18px;
+  }
+
+  .studio .topbar .top-actions > .icon-button {
+    min-inline-size: 44px;
+    min-block-size: 44px;
+  }
+}
+
+@media screen and (max-width: 1100px) {
+  .studio .topbar {
+    min-height: 0;
+    row-gap: 10px;
+  }
+
+  .studio .topbar .top-actions {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    inline-size: 100%;
+    margin: 0;
+    align-items: stretch;
+  }
+
+  .studio .topbar .top-actions > button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: 100%;
+    min-inline-size: 0;
+    max-inline-size: none;
+    min-block-size: 48px;
+    height: auto;
+    padding: 8px 10px;
+    gap: 7px;
+    font-size: var(--ui-size, 18px);
+    line-height: 1.55;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    text-align: center;
+  }
+
+  .studio .topbar .top-actions > .icon-button {
+    border: 1px solid var(--line);
+    border-radius: 11px;
+    background: var(--surface);
+    color: var(--text);
+  }
+
+  .studio .topbar .top-actions > .save-indicator {
+    display: none;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .studio .topbar .top-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
