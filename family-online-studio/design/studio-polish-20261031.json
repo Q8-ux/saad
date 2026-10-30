@@ -1,0 +1,36 @@
+{
+  "project": "family-online-studio",
+  "revision": "editorial-polish-20261031",
+  "identity": "existing paper, ink and sea palette; original Compositor pen mark",
+  "changes": [
+    "Work title leads the mobile header in the installed Amiri font",
+    "Original pen mark visible on phones",
+    "Grouped action toolbar with distinct speech and Scenarist emphasis",
+    "Visible Arabic label for the existing help action",
+    "Single horizontally scrollable mobile tab row with complete labels and icons",
+    "Consistent save controls and editor toolbar framing"
+  ],
+  "verification": {
+    "method": "Real Chromium rendering of production CSS and matching public interface DOM",
+    "privateManuscriptsUsed": false,
+    "widths": [
+      320,
+      390,
+      768,
+      1440
+    ],
+    "controlFontSizes": [
+      18,
+      20,
+      36
+    ],
+    "afterCases": 12,
+    "afterCasesWithTextOverflowOrOverlaps": 0,
+    "afterCasesWithPageOverflow": 0,
+    "visibleTargetsAtLeast44px": true,
+    "installedHeadingFont": "Amiri",
+    "productionBuild": "passed",
+    "publicPackageValidation": "passed"
+  },
+  "scope": "Screen CSS only; existing action handlers and export layouts retained"
+}
