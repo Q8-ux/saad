@@ -84,3 +84,213 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+/* Editorial chrome: the work title leads, actions form one quiet group. */
+@media screen {
+  .studio:not(.book-studio) .topbar {
+    padding-block: 16px;
+    border-bottom: 1px solid var(--line);
+    gap: 18px;
+  }
+
+  .studio:not(.book-studio) .topbar .studio-brand-image {
+    border-radius: 14px;
+    box-shadow: 0 3px 12px #172e3712;
+  }
+
+  .studio:not(.book-studio) .topbar .project-name {
+    min-inline-size: 0;
+    flex-wrap: wrap;
+    column-gap: 12px;
+    row-gap: 2px;
+  }
+
+  .studio:not(.book-studio) .topbar .project-name > button {
+    max-inline-size: 100%;
+    font-family: Amiri, serif;
+    font-size: 28px !important;
+    line-height: 1.45;
+    text-align: start;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .studio:not(.book-studio) .topbar .project-dot { display: none; }
+  .studio:not(.book-studio) .topbar .private-badge {
+    border: 0;
+    background: transparent;
+    padding: 2px 0;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  .studio:not(.book-studio) .topbar .top-actions {
+    padding: 7px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: var(--soft);
+  }
+
+  .studio:not(.book-studio) .topbar .top-actions > button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-block-size: 46px;
+    padding: 9px 14px;
+    border-radius: 11px;
+    gap: 8px;
+    font-size: var(--ui-size, 18px);
+    line-height: 1.5;
+    transition: background-color 160ms, border-color 160ms, box-shadow 160ms;
+  }
+
+  .studio:not(.book-studio) .topbar .top-actions > .button:nth-of-type(2) {
+    background: var(--accent-light);
+    color: var(--accent-ink);
+    border-color: color-mix(in srgb, var(--accent) 24%, var(--line));
+  }
+
+  .studio:not(.book-studio) .topbar .scenarist-top-button {
+    font-weight: 700;
+    box-shadow: 0 2px 7px #172e3712;
+  }
+
+  .studio:not(.book-studio) .topbar [aria-label="مساعدة واختصارات"]::after {
+    content: "مساعدة";
+    font: inherit;
+  }
+
+  .studio:not(.book-studio) .topbar .save-indicator { padding-inline: 5px; }
+  .studio:not(.book-studio) .save-controls {
+    min-height: 64px;
+    gap: 14px;
+    padding-block: 8px;
+  }
+
+  .studio:not(.book-studio) .save-controls .save-now {
+    border-radius: 12px;
+    box-shadow: none;
+  }
+
+  .studio:not(.book-studio) .editor-toolbar {
+    border-radius: 14px;
+    border-color: color-mix(in srgb, var(--accent) 14%, var(--line));
+    box-shadow: 0 4px 18px #172e3707;
+  }
+}
+
+@media screen and (max-width: 1100px) {
+  .studio:not(.book-studio) .topbar {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr);
+    padding: 16px max(14px, env(safe-area-inset-right)) 12px max(14px, env(safe-area-inset-left));
+    gap: 14px 12px;
+  }
+
+  .studio:not(.book-studio) .topbar .brand {
+    display: flex;
+    grid-column: 1;
+    grid-row: 1;
+    inline-size: 44px;
+    min-inline-size: 0;
+    margin: 0;
+  }
+
+  .studio:not(.book-studio) .topbar .brand > div { display: none; }
+  .studio:not(.book-studio) .topbar .studio-brand-image { inline-size: 44px; block-size: 44px; }
+  .studio:not(.book-studio) .topbar .project-name {
+    grid-column: 2;
+    grid-row: 1;
+    inline-size: 100%;
+    margin: 0;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .studio:not(.book-studio) .topbar .top-actions {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    gap: 7px;
+    padding: 7px;
+  }
+
+  .studio:not(.book-studio) .topbar .top-actions > button {
+    min-block-size: 48px;
+    padding: 8px 10px;
+    white-space: normal;
+  }
+
+  .studio:not(.book-studio) .viewbar {
+    padding: 0 max(14px, env(safe-area-inset-right)) 12px max(14px, env(safe-area-inset-left));
+    border-bottom: 1px solid var(--line);
+  }
+
+  .studio:not(.book-studio) .viewbar > .view-tabs {
+    display: flex;
+    flex: 1 1 auto;
+    inline-size: 100%;
+    min-inline-size: 0;
+    height: auto;
+    gap: 4px;
+    padding: 5px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: var(--soft);
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-inline: contain;
+    scroll-padding-inline: 5px;
+    scrollbar-width: thin;
+  }
+
+  .studio:not(.book-studio) .viewbar > .view-tabs > button {
+    flex: 0 0 auto;
+    inline-size: auto;
+    min-inline-size: max-content;
+    min-block-size: 46px;
+    height: auto;
+    padding: 8px 12px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    font-size: var(--ui-size, 18px);
+    line-height: 1.55;
+    white-space: nowrap;
+    overflow-wrap: normal;
+    gap: 7px;
+  }
+
+  .studio:not(.book-studio) .viewbar > .view-tabs > button > svg {
+    display: inline-flex;
+    inline-size: 18px;
+    block-size: 18px;
+    flex: none;
+  }
+
+  .studio:not(.book-studio) .viewbar > .view-tabs > button.selected {
+    border-color: var(--line);
+    background: var(--surface);
+    color: var(--accent-ink);
+    box-shadow: 0 1px 4px #172e370a;
+  }
+
+  .studio:not(.book-studio) .writing-canvas { padding-block-start: 22px; }
+  .studio:not(.book-studio) .writing-heading { margin-block-end: 18px; }
+}
+
+@media screen and (max-width: 600px) {
+  .studio:not(.book-studio) .topbar .top-actions {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, calc(var(--ui-size, 18px) * 6.4)), 1fr));
+  }
+
+  .studio:not(.book-studio) .save-controls { padding-inline: 14px; gap: 10px; }
+}
+
+@media screen and (max-width: 1100px) and (max-height: 560px) {
+  .studio:not(.book-studio) .topbar .brand,
+  .studio:not(.book-studio) .topbar .project-name { display: none; }
+  .studio:not(.book-studio) .topbar { padding-block: 8px; gap: 0; }
+}
+
+@media screen and (prefers-reduced-motion: reduce) {
+  .studio .topbar .top-actions > button { transition: none; }
+}
