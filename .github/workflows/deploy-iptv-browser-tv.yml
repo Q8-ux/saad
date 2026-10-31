@@ -1,0 +1,77 @@
+name: Publish IPTV Browser TV
+on:
+  push:
+    branches: [main]
+    paths:
+      - "iptv-browser-tv/**"
+      - ".github/workflows/deploy-iptv-browser-tv.yml"
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Deploy All GitHub Pages Sites"]
+    types: [completed]
+
+permissions:
+  contents: read
+  actions: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages-v2
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.event_name != "workflow_run" || (github.event.workflow_run.conclusion == "success" && github.event.workflow_run.head_branch == "main")
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/checkout@v4
+        with:
+          repository: 4gray/iptvnator
+          ref: fcfde0364b288f037cfe2c254a6ebd4323e91ad0
+          path: iptv-source
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.22.1
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.0
+          run_install: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install IPTVnator dependencies
+        working-directory: iptv-source
+        run: pnpm install --frozen-lockfile --ignore-scripts
+      - name: Point the UI to the existing Render API
+        working-directory: iptv-source
+        run: |
+          node -e "const fs=require('node:fs'); const p='apps/web/src/environments/environment.prod.ts'; const s=fs.readFileSync(p,'utf8'); const old='https://iptvnator-playlist-parser-api.vercel.app'; if(!s.includes(old)) throw new Error('Expected production API URL was not found'); fs.writeFileSync(p,s.replace(old,'https://iptv-browser-tv.onrender.com'));"
+      - name: Build the PWA
+        working-directory: iptv-source
+        run: pnpm nx build web --configuration=pwa
+      - name: Stage the app and SPA fallback
+        working-directory: iptv-source
+        run: |
+          rm -rf ../iptv-browser-tv/pages-dist
+          mkdir -p ../iptv-browser-tv/pages-dist
+          cp -a dist/apps/web/. ../iptv-browser-tv/pages-dist/
+          cp ../iptv-browser-tv/pages-dist/index.html ../iptv-browser-tv/pages-dist/404.html
+      - uses: actions/configure-pages@v5
+      - name: Restore shared Pages and overlay only IPTV Browser TV
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python iptv-browser-tv/deployment/publish-pages.py
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+          retention-days: 30
+      - name: Deploy
+        id: deploy
+        uses: actions/deploy-pages@v4
