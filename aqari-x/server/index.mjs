@@ -1,4 +1,6 @@
 import pg from "pg";
+import {savePropertyTour} from "./property-tours.mjs";
+import {propertyTour} from "../public/virtual-tour-data.mjs";
 import { attachDatabasePool } from "@neon/functions";
 import { schema, defaultSettings } from "./schema.mjs";
 import { seedProperties } from "./seed.mjs";
@@ -176,6 +178,8 @@ function publicProperty(p) {
   } = p;
   if (p.sourceKind === 'market-research' || p.sourceKind === 'authorized-import') safe.sourceUrl=safeSourceURL(sourceUrl);
   for(const key of ['title','description','source']) if(safe[key]) safe[key]=redactContacts(safe[key]);
+  const tour=propertyTour(p);
+  if(tour) safe.virtualTour=tour; else delete safe.virtualTour;
   return safe;
 }
 async function allProperties() {
@@ -294,7 +298,8 @@ async function router(req) {
   if (path === "/health")
     return json({
       ok: true,
-      version: "1.4.0",
+      version: "1.5.0",
+      capabilities: {virtualTours: true},
       storage: "connected",
       time: new Date().toISOString(),
     });
@@ -834,6 +839,14 @@ async function router(req) {
   }
   if (path === "/admin/properties" && method === "GET")
     return json({ properties: await allProperties() });
+  const tourMatch=path.match(/^\/admin\/properties\/([a-z0-9-]+)\/tour$/);
+  if(tourMatch && method==='PUT') {
+    const b=await body(req,6000);
+    if(!Object.hasOwn(b,'virtualTour')) fail('بيانات الجولة مطلوبة');
+    const result=await savePropertyTour({query,actor:admin,id:tourMatch[1],input:b.virtualTour,expectedUpdatedAt:b.expectedUpdatedAt});
+    await audit(admin,result.virtualTour?'property.tour_updated':'property.tour_removed',tourMatch[1]);
+    return json({ok:true,...result});
+  }
   const mediaPermission=path.match(/^\/admin\/properties\/([a-z0-9-]+)\/permission$/);
   if (mediaPermission && method==='POST') {
     const b=await body(req,2000);

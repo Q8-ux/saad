@@ -33,6 +33,7 @@ jobs:
         working-directory: aqari-x
         run: |
           npm ci --ignore-scripts --no-audit --no-fund
+          npm run viewer:build
           npm test
           npm run check
           python -m py_compile deployment/preserve.py workers/markitdown/server.py

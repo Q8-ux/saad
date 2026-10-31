@@ -15,7 +15,7 @@
     <meta name="color-scheme" content="light" />
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; connect-src 'self' https:; font-src 'self'; media-src 'self' blob: https://br-tiny-bread-b9dsnadw-office.compute.c-7.eu-central-1.aws.neon.tech https://br-empty-brook-b95xjoae-office.compute.c-7.eu-central-1.aws.neon.tech; object-src 'none'; base-uri 'self'; form-action 'self'; frame-src https://www.openstreetmap.org"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; connect-src 'self' https:; font-src 'self'; media-src 'self' blob: https://br-tiny-bread-b9dsnadw-office.compute.c-7.eu-central-1.aws.neon.tech https://br-empty-brook-b95xjoae-office.compute.c-7.eu-central-1.aws.neon.tech; object-src 'none'; base-uri 'self'; form-action 'self'; frame-src 'self' https://www.openstreetmap.org https://superspl.at"
     />
     <meta name="referrer" content="strict-origin-when-cross-origin" />
     <title>عقاري X | المكتب العقاري</title>
@@ -36,7 +36,7 @@
     <meta property="og:image:alt" content="شعار المكتب العقاري — بيت" />
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="stylesheet" href="./vendor/leaflet/leaflet.css" />
-    <link rel="stylesheet" href="./style.css?v=1.4.0" />
+    <link rel="stylesheet" href="./style.css?v=1.5.0" />
     <link
       rel="preload"
       href="./assets/fonts/Cairo-Variable.woff2"
@@ -85,6 +85,7 @@
           <button class="nav-item active" data-view="home" data-icon="home">
             اكتشف العقارات
           </button>
+          <button class="nav-item" data-view="tours" data-icon="building" data-i18n-skip>جولات العقارات 3D</button>
           <button class="nav-item" data-view="saved" data-icon="heart">
             المفضلة <span id="saved-count" class="nav-count">0</span>
           </button>
@@ -220,6 +221,6 @@
       ><button data-view="requests" data-icon="inbox">طلباتي</button
       ><button data-view="compare" data-icon="compare">المقارنة</button>
     </div>
-    <script type="module" src="./app.mjs?v=1.4.0"></script>
+    <script type="module" src="./app.mjs?v=1.5.0"></script>
   </body>
 </html>

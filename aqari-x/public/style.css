@@ -2504,3 +2504,19 @@ html[lang="ur"] {line-height:1.9;}
 .telegram-review-row fieldset:disabled{opacity:.5}
 #telegram-source-form hr{border:0;border-top:1px solid var(--line);margin:20px 0}
 #telegram-fetch-state{font-size:14px;color:var(--danger);overflow-wrap:anywhere}
+
+/* Property tours: the renderer is loaded only after an explicit start. */
+.property-tour{margin:0 0 24px;padding:22px;border:1px solid var(--border,#dce4dc);border-radius:18px;background:var(--surface,#fff)}
+.tour-heading{display:flex;gap:14px;align-items:flex-start;margin-bottom:18px}
+.tour-mark{display:grid;place-items:center;flex:0 0 50px;height:50px;border:1px solid #a8c4ae;border-radius:14px;color:#27573d;background:#ecf4eb;font-size:20px;font-weight:800;direction:ltr}
+.tour-heading h3{margin:0 0 6px;font-size:1.16rem}.tour-heading p{margin:0;line-height:1.8;color:var(--muted,#5f6c65)}
+.tour-actions{display:flex;flex-wrap:wrap;gap:10px}.tour-viewport{height:440px;max-height:65vh;min-height:300px;margin-top:18px;border-radius:12px;overflow:hidden;background:#171d19;direction:ltr}
+.tour-viewport iframe{display:block;width:100%;height:100%;border:0}.tour-viewport:fullscreen{height:100vh;max-height:none;width:100vw;border-radius:0;margin:0}
+.tour-status{margin-top:12px}.tour-fallback{margin-top:8px}.tour-badge{background:#e8f3e7;color:#27573d;border:1px solid #abc8af}
+.tour-stat-row{display:flex;flex-wrap:wrap;gap:24px;margin:0 0 24px}.tour-stat-row b{font-size:1.6rem;margin-inline-end:8px;color:#27573d}
+.tour-property-list{display:grid;gap:12px}.tour-property-row{display:flex;justify-content:space-between;align-items:center;gap:18px;padding:20px;border:1px solid var(--border,#dce4dc);background:var(--surface,#fff);border-radius:14px}
+.tour-property-row h2{font-size:1rem;margin:0 0 6px}.tour-property-row p{margin:0 0 8px;color:var(--muted,#5f6c65)}.tour-property-row .btn{flex-shrink:0}
+.tour-preparation{margin-top:22px;padding:18px;border:1px solid var(--border,#dce4dc);border-radius:12px}.tour-preparation summary{cursor:pointer;font-weight:700}.tour-preparation p{line-height:1.9}
+#tour-preview-root .property-tour{margin-top:24px}.tour-property-row[hidden]{display:none}
+@media(max-width:600px){.property-tour{padding:16px}.tour-viewport{height:390px;max-height:62vh;min-height:280px}.tour-heading{gap:10px}.tour-mark{flex-basis:42px;height:42px}.tour-property-row{padding:16px;align-items:stretch;flex-direction:column}.tour-property-row .btn{align-self:flex-start}.tour-actions>.btn{font-size:14px;min-height:44px}}
+@media print{.property-tour,.tour-badge{display:none}}

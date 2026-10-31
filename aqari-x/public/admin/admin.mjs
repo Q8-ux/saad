@@ -31,6 +31,10 @@ import { API_URL } from "../config.mjs?v=1.4.0";
 import {openBatchImport,attachListingMedia} from "./catalog.mjs?v=1.4.0";
 import {openTelegramImport} from "./telegram.mjs?v=1.4.0";
 import { showAuth } from "../auth.mjs?v=1.4.0";
+import {openPropertyTour,tourDashboardHTML,mountTourDashboard,adminTourText} from './property-tours.mjs?v=1.5.0';
+import {propertyTour} from '../virtual-tour-data.mjs?v=1.5.0';
+import {tourHTML,mountTour} from '../property-tour.mjs?v=1.5.0';
+import {tourText} from '../tour-copy.mjs?v=1.5.0';
 const state = {
   page: "overview",
   properties: [],
@@ -43,6 +47,7 @@ const state = {
 const labels = {
   overview: "نظرة عامة",
   properties: "العقارات والمراجعة",
+  tours: tourText("tours"),
   requests: "طلبات العملاء",
   appointments: "المعاينات والمواعيد",
   commissions: "الصفقات والعمولات",
@@ -129,6 +134,7 @@ async function loadPage(page = state.page) {
       {
         overview: renderOverview,
         properties: renderProperties,
+        tours: renderTours,
         requests: renderRequests,
         appointments: renderAppointments,
         commissions: renderCommissions,
@@ -240,13 +246,19 @@ function showPropertiesTable(status = "all") {
         `<button class="file-link" data-action="property-detail" data-id="${p.id}">${esc(p.title)}</button><p class="hint">${esc(p.location)} · ${esc(p.category)} · ${esc(p.source || "")}</p>`,
         `<strong>${money(p.priceFils)}</strong><p class="hint">${{ monthly: "شهري", unit_monthly: "إيجار الوحدة شهرياً", exchange_difference: "فرق بدل", total: "السعر الكلي", annual: "سنوي" }[p.priceBasis] || ""}</p>`,
         badge(p.status),
-        `<button class="btn small secondary" data-action="review" data-id="${p.id}">مراجعة</button><button class="btn small ghost" data-action="attach-media" data-id="${p.id}">صور وفيديو</button>${["active", "reference", "paused"].includes(p.status) ? `<button class="btn small ghost" data-action="close-deal" data-id="${p.id}">إغلاق صفقة</button>` : ""}`,
+        `<button class="btn small secondary" data-action="review" data-id="${p.id}">مراجعة</button><button class="btn small ghost" data-action="attach-media" data-id="${p.id}">صور وفيديو</button>${!["completed","archived"].includes(p.status)?`<button class="btn small ghost" data-action="manage-tour" data-id="${esc(p.id)}" data-i18n-skip>${esc(tourText('badge'))}</button>`:''}${["active", "reference", "paused"].includes(p.status) ? `<button class="btn small ghost" data-action="close-deal" data-id="${p.id}">إغلاق صفقة</button>` : ""}`,
       ]),
     );
   $("#properties-table").innerHTML = table(
     ["العقار", "القيمة", "الحالة", "الإجراء"],
     rows,
   );
+}
+async function renderTours() {
+  state.properties=(await api('/admin/properties')).properties;
+  if(state.page!=='tours')return;
+  content().innerHTML=tourDashboardHTML(state.properties);
+  mountTourDashboard(content());
 }
 function reviewProperty(id) {
   const p = state.properties.find((p) => p.id === id);
@@ -319,8 +331,9 @@ async function propertyDetail(id) {
   if (!p) p = (await api("/properties/" + id)).property;
   openDialog(
     "ملف العقار",
-    `<div class="row">${badge(p.status)}<strong class="price">${money(p.priceFils)}</strong></div><h3 class="detail-title">${esc(p.title)}</h3><p>${esc(p.location)} · ${esc(p.type)}</p>${p.images?.length ? `<div class="detail-gallery">${p.images.map((im) => `<img data-file-image="${im}" alt="صورة مرفقة للعقار">`).join("")}</div>` : '<div class="notice">لم ترفق صور بالعقار.</div>'}<div class="detail-meta"><div><small>المساحة</small><strong>${p.area ? p.area + " م²" : "غير محددة"}</strong></div><div><small>غرف النوم</small><strong>${p.bedrooms || "غير محددة"}</strong></div><div><small>الحمامات</small><strong>${p.bathrooms || "غير محددة"}</strong></div></div><p class="text-flow">${esc(p.description || "")}</p><p class="hint">المصدر: ${esc(p.source || "إضافة مستخدم")}</p><p class="hint">رابط المصدر: <bdi>${esc(p.sourceUrl || "غير مرفق")}</bdi></p><p class="hint">هاتف المعلن: <bdi>${esc(p.contact || "غير مرفق")}</bdi></p>${(p.videos||[]).length ? `<div class="detail-videos">${p.videos.map(id=>`<video controls preload="none" playsinline data-file-video="${id}" aria-label="فيديو العقار"></video>`).join("")}</div>` : ""}<button class="btn secondary" data-action="attach-media" data-id="${p.id}">إرفاق صور وفيديو</button><button class="btn secondary" data-action="print">طباعة ملف العقار</button>`,
+    `${tourHTML(p)}<div class="row">${badge(p.status)}<strong class="price">${money(p.priceFils)}</strong></div><h3 class="detail-title">${esc(p.title)}</h3><p>${esc(p.location)} · ${esc(p.type)}</p>${p.images?.length ? `<div class="detail-gallery">${p.images.map((im) => `<img data-file-image="${im}" alt="صورة مرفقة للعقار">`).join("")}</div>` : '<div class="notice">لم ترفق صور بالعقار.</div>'}<div class="detail-meta"><div><small>المساحة</small><strong>${p.area ? p.area + " م²" : "غير محددة"}</strong></div><div><small>غرف النوم</small><strong>${p.bedrooms || "غير محددة"}</strong></div><div><small>الحمامات</small><strong>${p.bathrooms || "غير محددة"}</strong></div></div><p class="text-flow">${esc(p.description || "")}</p><p class="hint">المصدر: ${esc(p.source || "إضافة مستخدم")}</p><p class="hint">رابط المصدر: <bdi>${esc(p.sourceUrl || "غير مرفق")}</bdi></p><p class="hint">هاتف المعلن: <bdi>${esc(p.contact || "غير مرفق")}</bdi></p>${(p.videos||[]).length ? `<div class="detail-videos">${p.videos.map(id=>`<video controls preload="none" playsinline data-file-video="${id}" aria-label="فيديو العقار"></video>`).join("")}</div>` : ""}<button class="btn secondary" data-action="attach-media" data-id="${p.id}">إرفاق صور وفيديو</button><button class="btn secondary" data-action="print">طباعة ملف العقار</button>`,
   );
+  mountTour($('#modal'),p);
   for (const video of $$("[data-file-video]")) {
     const r=await fetch(API_URL+'/media/'+video.dataset.fileVideo,{headers:{authorization:'Bearer '+getSession().token}});
     if(r.ok) {const url=URL.createObjectURL(await r.blob());video.src=url;$('#modal').addEventListener('close',()=>{video.pause();URL.revokeObjectURL(url);},{once:true});}
@@ -688,6 +701,7 @@ async function renderFiles() {
   };
 }
 const modules = [
+  ['المسار العقاري — الجولات ثلاثية الأبعاد','ربط مسح العقار، معاينته، عرضه داخل الموقع وتحميله عند الطلب. إنتاج المسح يحتاج تصويراً ومعالجة منفصلين.','active','جاهز لإرفاق الجولات','https://github.com/playcanvas/supersplat'],
   [
     "مسار ذوق الواجهات",
     "واجهة عربية بخط Cairo، قائمة يمين، خط واضح، لوحة منفصلة وتجربة جوال.",
@@ -926,6 +940,8 @@ function actionLabel(a) {
       "file.uploaded": "ملف مرفق",
       "integration.configured": "تحديث إعداد مزود",
       "settings.updated": "تحديث إعدادات المكتب",
+      "property.tour_updated": adminTourText("saved"),
+      "property.tour_removed": adminTourText("removed"),
       "user.permissions_changed": "تعديل الصلاحيات",
       "ai.draft_created": "توليد مسودة إعلان",
       "assistant.chat": "محادثة المساعد الذكي",
@@ -972,6 +988,7 @@ document.addEventListener("click", async (e) => {
     else if (action === "review") reviewProperty(id);
     else if (action === "property-detail") await propertyDetail(id);
     else if (action === "property-edit") editProperty(id);
+    else if (action === "manage-tour") openPropertyTour(state.properties.find(p=>p.id===id),()=>loadPage(state.page));
     else if (action === "import") importListing();
     else if (action === "import-telegram") openTelegramImport(()=>loadPage("properties"));
     else if (action === "import-batch") openBatchImport(()=>loadPage("properties"));
@@ -1060,10 +1077,17 @@ document.addEventListener("keydown", (e) => {
 matchMedia("(max-width:700px)").addEventListener("change", closeMenu);
 closeMenu();
 initDialog();
+const tourNav=document.querySelector('[data-page="tours"]');
+if(tourNav)tourNav.textContent=tourText('tours');
+document.addEventListener('aqari:locale',()=>{
+  labels.tours=tourText('tours');
+  if(tourNav){tourNav.textContent=tourText('tours');hydrateIcons(tourNav.parentElement);}
+  if(state.page==='tours')loadPage('tours');
+});
 hydrateIcons();
 const fragment = new URLSearchParams(location.hash.slice(1));
 const setupToken = fragment.get("setup");
 if (setupToken) {
   history.replaceState(null, "", location.pathname);
   renderSetup(setupToken);
-} else loadPage();
+} else loadPage(fragment.get("page")==="tours"?"tours":undefined);

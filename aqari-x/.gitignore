@@ -10,3 +10,11 @@ __pycache__/
 *.pyc
 
 /.qa/
+
+# Generated from the pinned official viewer during dev and deployment.
+public/tour-viewer/index.js
+public/tour-viewer/index.css
+public/tour-viewer/settings.json
+public/tour-viewer/version.json
+public/tour-viewer/LICENSE
+public/tour-viewer/THIRD_PARTY_NOTICES.md

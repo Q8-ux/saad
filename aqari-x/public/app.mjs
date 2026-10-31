@@ -38,6 +38,9 @@ import {API_URL} from './config.mjs?v=1.4.0';
 import {QUICK_SEARCHES,PRICE_BASES,filterEntries,pageSlice,salePricePerMetre,similarProperties} from './discovery.mjs?v=1.4.0';
 import {mountAreaMap} from './area-map.mjs?v=1.4.0';
 import {galleryHTML,mountGallery} from './property-gallery.mjs?v=1.4.0';
+import {propertyTour} from './virtual-tour-data.mjs?v=1.5.0';
+import {tourHTML,mountTour} from './property-tour.mjs?v=1.5.0';
+import {tourText} from './tour-copy.mjs?v=1.5.0';
 import { initOfficeAssistant, openOfficeAssistant } from './office-bot.mjs?v=1.4.0';
 const state = {
   view: "home",
@@ -101,7 +104,7 @@ function generatedPropertyFigure(p) {
 function card(p, i = 0) {
   const saved = state.saved.includes(p.id),
     chosen = state.compare.includes(p.id);
-  return `<article class="property-card" data-id="${esc(p.id)}"><div class="property-media"><button class="property-image-button" data-action="details" data-id="${esc(p.id)}" aria-label="تفاصيل ${esc(p.title)}">${propertyCardImage(p,i)}</button><div class="card-flags"><span class="badge">${esc(p.category)}</span>${p.status === "reference" ? `<span class="badge reference">${p.sourceKind === "market-research" ? "رصد تجريبي" : "بيانات أولية"}</span>` : p.status !== "active" ? `<span class="badge ${esc(p.status)}">${esc(statusLabel(p.status))}</span>` : ""}</div><button class="save-button ${saved ? "saved" : ""}" data-action="save" data-id="${esc(p.id)}" aria-label="${saved ? "إزالة من" : "إضافة إلى"} المفضلة" aria-pressed="${saved}">${icon("heart")}</button></div><div class="property-body"><div class="property-location">${icon("pin")} ${esc(p.location)}</div>${provenance(p)}<h2 class="property-title"><button data-action="details" data-id="${esc(p.id)}">${esc(p.title)}</button></h2><div class="price-row"><span class="price">${esc(money(p.priceFils))}</span>${p.priceFils !== null ? `<span class="price-unit">${esc(priceUnit(p))}</span>` : ""}</div><div class="property-specs"><span>${icon("building")}${esc(p.type)}</span>${p.bedrooms ? `<span>${icon("bed")}${p.bedrooms} غرف</span>` : ""}${p.bathrooms ? `<span>${icon("bath")}${p.bathrooms}</span>` : ""}${p.area ? `<span>${icon("area")}${p.area} م²</span>` : "<span>المساحة غير محددة</span>"}</div><div class="card-bottom"><button class="compare-toggle ${chosen ? "chosen" : ""}" data-action="compare-toggle" data-id="${esc(p.id)}" aria-pressed="${chosen}">${icon(chosen ? "check" : "compare")}${chosen ? "أُضيف للمقارنة" : "أضف للمقارنة"}</button><button class="card-contact" data-action="whatsapp" data-id="${esc(p.id)}">${icon("whatsapp")} استفسر الآن</button></div></div></article>`;
+  return `<article class="property-card" data-id="${esc(p.id)}"><div class="property-media"><button class="property-image-button" data-action="details" data-id="${esc(p.id)}" aria-label="تفاصيل ${esc(p.title)}">${propertyCardImage(p,i)}</button><div class="card-flags"><span class="badge">${esc(p.category)}</span>${propertyTour(p)?`<span class="badge tour-badge" data-i18n-skip>${esc(tourText('badge'))}</span>`:''}${p.status === "reference" ? `<span class="badge reference">${p.sourceKind === "market-research" ? "رصد تجريبي" : "بيانات أولية"}</span>` : p.status !== "active" ? `<span class="badge ${esc(p.status)}">${esc(statusLabel(p.status))}</span>` : ""}</div><button class="save-button ${saved ? "saved" : ""}" data-action="save" data-id="${esc(p.id)}" aria-label="${saved ? "إزالة من" : "إضافة إلى"} المفضلة" aria-pressed="${saved}">${icon("heart")}</button></div><div class="property-body"><div class="property-location">${icon("pin")} ${esc(p.location)}</div>${provenance(p)}<h2 class="property-title"><button data-action="details" data-id="${esc(p.id)}">${esc(p.title)}</button></h2><div class="price-row"><span class="price">${esc(money(p.priceFils))}</span>${p.priceFils !== null ? `<span class="price-unit">${esc(priceUnit(p))}</span>` : ""}</div><div class="property-specs"><span>${icon("building")}${esc(p.type)}</span>${p.bedrooms ? `<span>${icon("bed")}${p.bedrooms} غرف</span>` : ""}${p.bathrooms ? `<span>${icon("bath")}${p.bathrooms}</span>` : ""}${p.area ? `<span>${icon("area")}${p.area} م²</span>` : "<span>المساحة غير محددة</span>"}</div><div class="card-bottom"><button class="compare-toggle ${chosen ? "chosen" : ""}" data-action="compare-toggle" data-id="${esc(p.id)}" aria-pressed="${chosen}">${icon(chosen ? "check" : "compare")}${chosen ? "أُضيف للمقارنة" : "أضف للمقارنة"}</button><button class="card-contact" data-action="whatsapp" data-id="${esc(p.id)}">${icon("whatsapp")} استفسر الآن</button></div></div></article>`;
 }
 function provenance(p) {
   if (!p.sourceKind) return '';
@@ -156,6 +159,7 @@ function updateNav() {
     assistant: "مساعد البحث",
     calculator: "حاسبة العمولة",
     sources: "دليل البحث الموسع",
+    tours: tourText("tours"),
   };
   $("#page-title").textContent = map[state.view] || map.home;
   $$("[data-view]").forEach((b) =>
@@ -206,6 +210,13 @@ function applyFilters(updateURL=true,resetPage=true) {
   $$('[data-action=category]').forEach(b=>{const active=(state.filters.category||'')===b.dataset.value;b.classList.toggle('active',active);b.setAttribute('aria-pressed',active);});
   $$('[data-action=quick-search]').forEach(b=>{const q=QUICK_SEARCHES[b.dataset.value],active=state.filters.type===q.type&&state.filters.category===q.category;b.classList.toggle('active',active);b.setAttribute('aria-pressed',active);});
 }
+function renderTours() {
+  const properties=state.properties.filter(propertyTour);
+  const root=$('#page-content');
+  root.innerHTML=`<section data-i18n-skip>${intro(tourText('tours'),tourText('intro'))}</section><div id="results"></div>`;
+  if(properties.length) $('#results').innerHTML=`<div class="property-grid">${properties.map(card).join('')}</div>`;
+  else $('#results').innerHTML=`<div data-i18n-skip>${empty(tourText('empty'),tourText('emptyBody'),`<button class="btn primary" data-view="home">${esc(tourText('browse'))}</button>`)}</div>`;
+}
 async function switchView(view) {
   if(view!==state.view)state.page=1;
   if(view!=="home"){areaMap?.destroy();areaMap=null;mapGeneration++;}
@@ -232,6 +243,7 @@ async function switchView(view) {
     else if (view === "calculator") renderCalculator();
     else if (view === "assistant") renderAssistant();
     else if (view === "sources") renderSources();
+    else if (view === "tours") renderTours();
     else if (view === "requests") await renderRequests();
     else if (view === "mine") await renderMine();
     hydrateIcons();
@@ -428,9 +440,10 @@ async function showDetails(id) {
     track("detail", p.id);
     openDialog(
       "تفاصيل العقار",
-      `${galleryHTML(p)||`<div class="detail-blank">${architecture(p.type)}</div><p class="hint">رسم توضيحي للواجهة؛ لم ترفق صور للعقار.</p>`}<div class="row"><span class="badge">${esc(p.category)} · ${esc(p.type)}</span><button class="icon-btn" data-action="share" data-id="${esc(p.id)}" aria-label="مشاركة العقار">${icon("share")}</button></div><h3 class="detail-title">${esc(p.title)}</h3><div class="property-location">${icon("pin")}${esc(p.location)}</div><div class="price-row"><strong class="price">${esc(money(p.priceFils))}</strong><span class="price-unit">${p.priceFils === null ? "" : esc(priceUnit(p))}</span></div>${salePricePerMetre(p)!==null?`<p class="unit-price"><strong>${esc(money(salePricePerMetre(p)))}</strong> <span>لكل م² · محسوب من بيانات الإعلان</span></p>`:''}${p.status === "reference" ? '<div class="notice warning">عرض تجريبي أو أولي؛ يحتاج السعر والتوفر والتفويض تأكيداً من المكتب.</div>' : ""}<div class="detail-meta"><div><small>المساحة</small><strong>${p.area ? `${p.area} م²` : "غير مذكورة"}</strong></div><div><small>غرف النوم</small><strong>${p.bedrooms || "غير مذكورة"}</strong></div><div><small>دورات المياه</small><strong>${p.bathrooms || "غير مذكورة"}</strong></div></div><div class="chips">${(p.features || []).map((x) => `<span class="chip">${esc(x)}</span>`).join("")}</div>${provenance(p)}${p.sourceUrl ? `<p><a class="text-btn" href="${esc(p.sourceUrl)}" target="_blank" rel="noopener noreferrer">افتح الإعلان الأصلي ووسائطه ${icon("arrow")}</a></p>` : ""}${p.researchNote ? `<p class="notice warning">${esc(p.researchNote)}</p>` : ""}${(p.videos||[]).length ? `<div class="detail-videos">${p.videos.map(id=>`<video controls preload="none" playsinline src="${API_URL}/media/${esc(id)}" aria-label="فيديو العقار"></video>`).join("")}</div>` : ""}<div class="listing-dates"><span><span>رقم الإعلان</span>: <bdi>${esc(p.sourceId||p.id)}</bdi></span>${p.sourcePublishedAt?`<span><span>تاريخ نشر المصدر</span>: ${esc(dateLabel(p.sourcePublishedAt))}</span>`:''}${p.createdAt?`<span><span>أضيف للمنصة</span>: ${esc(dateLabel(p.createdAt))}</span>`:''}${p.availabilityVerified&&p.verifiedAt?`<span><span>تاريخ مراجعة التوفر</span>: ${esc(dateLabel(p.verifiedAt))}</span>`:''}</div><h3>عن العقار</h3><p class="detail-content">${esc(p.description || "لم يرفق وصف إضافي.")}</p><a class="text-btn" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.location + " الكويت")}" target="_blank" rel="noopener noreferrer">${icon("pin")} البحث عن المنطقة على الخريطة</a><p class="fineprint">الخريطة بحث باسم المنطقة ولا تحدد موقع العقار الدقيق أو تثبت الملكية.</p><div class="detail-actions"><button class="btn primary" data-action="whatsapp" data-id="${esc(p.id)}">${icon("whatsapp")} تواصل مع المكتب</button><button class="btn secondary" data-action="appointment" data-id="${esc(p.id)}">${icon("calendar")} طلب معاينة</button><button class="btn ghost" data-action="request" data-id="${esc(p.id)}">سجّل اهتمامك</button><button class="btn ghost" data-action="print">طباعة / PDF</button><button class="text-btn" data-action="report-listing" data-id="${esc(p.id)}">أبلغ المكتب عن الإعلان</button></div>${similarHTML(p)}`,
+      `${tourHTML(p)}${galleryHTML(p)||`<div class="detail-blank">${architecture(p.type)}</div><p class="hint">رسم توضيحي للواجهة؛ لم ترفق صور للعقار.</p>`}<div class="row"><span class="badge">${esc(p.category)} · ${esc(p.type)}</span><button class="icon-btn" data-action="share" data-id="${esc(p.id)}" aria-label="مشاركة العقار">${icon("share")}</button></div><h3 class="detail-title">${esc(p.title)}</h3><div class="property-location">${icon("pin")}${esc(p.location)}</div><div class="price-row"><strong class="price">${esc(money(p.priceFils))}</strong><span class="price-unit">${p.priceFils === null ? "" : esc(priceUnit(p))}</span></div>${salePricePerMetre(p)!==null?`<p class="unit-price"><strong>${esc(money(salePricePerMetre(p)))}</strong> <span>لكل م² · محسوب من بيانات الإعلان</span></p>`:''}${p.status === "reference" ? '<div class="notice warning">عرض تجريبي أو أولي؛ يحتاج السعر والتوفر والتفويض تأكيداً من المكتب.</div>' : ""}<div class="detail-meta"><div><small>المساحة</small><strong>${p.area ? `${p.area} م²` : "غير مذكورة"}</strong></div><div><small>غرف النوم</small><strong>${p.bedrooms || "غير مذكورة"}</strong></div><div><small>دورات المياه</small><strong>${p.bathrooms || "غير مذكورة"}</strong></div></div><div class="chips">${(p.features || []).map((x) => `<span class="chip">${esc(x)}</span>`).join("")}</div>${provenance(p)}${p.sourceUrl ? `<p><a class="text-btn" href="${esc(p.sourceUrl)}" target="_blank" rel="noopener noreferrer">افتح الإعلان الأصلي ووسائطه ${icon("arrow")}</a></p>` : ""}${p.researchNote ? `<p class="notice warning">${esc(p.researchNote)}</p>` : ""}${(p.videos||[]).length ? `<div class="detail-videos">${p.videos.map(id=>`<video controls preload="none" playsinline src="${API_URL}/media/${esc(id)}" aria-label="فيديو العقار"></video>`).join("")}</div>` : ""}<div class="listing-dates"><span><span>رقم الإعلان</span>: <bdi>${esc(p.sourceId||p.id)}</bdi></span>${p.sourcePublishedAt?`<span><span>تاريخ نشر المصدر</span>: ${esc(dateLabel(p.sourcePublishedAt))}</span>`:''}${p.createdAt?`<span><span>أضيف للمنصة</span>: ${esc(dateLabel(p.createdAt))}</span>`:''}${p.availabilityVerified&&p.verifiedAt?`<span><span>تاريخ مراجعة التوفر</span>: ${esc(dateLabel(p.verifiedAt))}</span>`:''}</div><h3>عن العقار</h3><p class="detail-content">${esc(p.description || "لم يرفق وصف إضافي.")}</p><a class="text-btn" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.location + " الكويت")}" target="_blank" rel="noopener noreferrer">${icon("pin")} البحث عن المنطقة على الخريطة</a><p class="fineprint">الخريطة بحث باسم المنطقة ولا تحدد موقع العقار الدقيق أو تثبت الملكية.</p><div class="detail-actions"><button class="btn primary" data-action="whatsapp" data-id="${esc(p.id)}">${icon("whatsapp")} تواصل مع المكتب</button><button class="btn secondary" data-action="appointment" data-id="${esc(p.id)}">${icon("calendar")} طلب معاينة</button><button class="btn ghost" data-action="request" data-id="${esc(p.id)}">سجّل اهتمامك</button><button class="btn ghost" data-action="print">طباعة / PDF</button><button class="text-btn" data-action="report-listing" data-id="${esc(p.id)}">أبلغ المكتب عن الإعلان</button></div>${similarHTML(p)}`,
     );
     mountGallery($('#modal'),p);
+    mountTour($('#modal'),p);
   } catch (e) {
     toast(e.message, true);
   }
@@ -776,6 +789,8 @@ document.addEventListener("aqari:session", () => {
 document.addEventListener('aqari:locale',event=>{
   state.filters.lang=event.detail.locale;
   if(state.view==='home')renderHome();
+  if(state.view==='tours')renderTours();
+  const tourNav=document.querySelector('[data-view="tours"]');if(tourNav){tourNav.textContent=tourText('tours');hydrateIcons(tourNav.parentElement);}
 });
 document.addEventListener('aqari:property-details',event=>showDetails(event.detail.id).catch(error=>toast(error.message,true)));
 document.addEventListener('aqari:request',event=>showRequest(event.detail.id));
@@ -830,6 +845,8 @@ async function loadProperties() {
 async function init() {
   initDialog();
   initOfficeAssistant();
+  const tourNav=document.querySelector('[data-view="tours"]');
+  if(tourNav)tourNav.textContent=tourText('tours');
   hydrateIcons();
   persistIds();
   updateAccount();
@@ -846,6 +863,7 @@ async function init() {
     if (getSession()) api("/auth/me").catch(() => updateAccount());
     const h = new URLSearchParams(location.hash.slice(1));
     if (h.has("property")) showDetails(h.get("property"));
+    else if(h.get("view")==="tours") await switchView("tours");
   } catch (e) {
     $("#connection-state").textContent = "الاتصال غير متاح";
     $("#page-content").innerHTML =
