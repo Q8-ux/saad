@@ -29,6 +29,8 @@ jobs:
           node --check dr-hamad/app.js
           node --check dr-hamad/experience.js
           node --check dr-hamad/site.js
+          node --check dr-hamad/joint-anatomy.js
+          node --input-type=module --check < dr-hamad/joint-anatomy-models.js
           node dr-hamad/verify.cjs
       - name: Preserve current websites and add Dr Hamad website
         env:

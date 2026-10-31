@@ -28,5 +28,28 @@
     "IDEA JAMA 2013",
     "AAOS OrthoInfo knee implants and total hip replacement"
   ],
-  "claims": "No fabricated doctor portrait, clinical outcomes, testimonials, appointment availability, credentials, or AI diagnosis"
+  "claims": "No fabricated doctor portrait, clinical outcomes, testimonials, appointment availability, credentials, or AI diagnosis",
+  "joint_anatomy_3d": {
+    "date": "2026-10-31",
+    "technology": "Locally hosted Three.js 0.185.1, OrbitControls, SVGRenderer and Projector; MIT license retained in vendor/three/LICENSE",
+    "inspiration": "https://github.com/thebuggeddev/anatomy — interaction concept and Three.js approach only; no repository code, GLB models or illustrations copied because no explicit license was found",
+    "geometry": "Original procedural knee and unilateral hip schematics. Artistic proportions, colors, separations and a translucent capsule; not clinically reviewed, not a validated anatomy atlas, patient image, biomechanical simulation or surgical instruction.",
+    "features": [
+      "orbit and keyboard controls",
+      "pickable structures with Arabic and English names",
+      "actual tissue-category visibility",
+      "isolate selected structure",
+      "exploded view",
+      "four-question identification quiz",
+      "lazy initialization",
+      "on-demand rendering paused off screen",
+      "WebGL failure fallback to existing SVG explorer",
+      "software 3D renderer when WebGL is unavailable"
+    ],
+    "sources": [
+      "https://orthoinfo.aaos.org/en/treatment/total-knee-replacement/",
+      "https://orthoinfo.aaos.org/en/treatment/total-hip-replacement/"
+    ],
+    "data": "No forms, analytics, medical inference, patient records, runtime API calls or remote CDN assets added."
+  }
 }

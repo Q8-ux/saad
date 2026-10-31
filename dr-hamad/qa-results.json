@@ -37,5 +37,29 @@
     "frontend-taste-path",
     "visual-library-path",
     "sites"
-  ]
+  ],
+  "anatomy_2026_10_31": {
+    "browser": "Managed Chrome, desktop viewport 1350px; responsive iframe widths 320/390/768px (usable client widths 305/375/753px)",
+    "passed": [
+      "Lazy loading when the viewport becomes visible",
+      "Knee and hip switching and corresponding Arabic labels",
+      "Patella selection and description",
+      "Isolation shows only the selected structure",
+      "Cartilage checkbox hides cartilage and meniscus markers",
+      "Exploded view range displays 65% and separates parts",
+      "Four-question hip quiz completed with 4/4 correct",
+      "Exit quiz restores exploration",
+      "Keyboard ArrowLeft changes projected 3D geometry",
+      "No horizontal overflow at measured widths",
+      "All existing 88 slides and search/category/navigation regression check",
+      "Unique HTML IDs, section anchors, local assets",
+      "Finite, non-empty geometry for all 7 knee / 6 hip groups at both detail levels"
+    ],
+    "rendering": "WebGL is disabled in the browser environment. The same 3D scene was interactively verified through the software SVGRenderer fallback.",
+    "limits": [
+      "Accelerated WebGL rendering was not visually tested; high-detail geometry and syntax were checked",
+      "Responsive iframe tests do not emulate touch hardware",
+      "Anatomical models are original simplified educational geometry and have not received clinical review"
+    ]
+  }
 }
