@@ -39,8 +39,9 @@ import {QUICK_SEARCHES,PRICE_BASES,filterEntries,pageSlice,salePricePerMetre,sim
 import {mountAreaMap} from './area-map.mjs?v=1.4.0';
 import {galleryHTML,mountGallery} from './property-gallery.mjs?v=1.4.0';
 import {propertyTour} from './virtual-tour-data.mjs?v=1.5.0';
-import {tourHTML,mountTour} from './property-tour.mjs?v=1.5.0';
-import {tourText} from './tour-copy.mjs?v=1.5.0';
+import {tourHTML,mountTour} from './property-tour.mjs?v=1.5.1';
+import {tourText} from './tour-copy.mjs?v=1.5.1';
+import {TOUR_SAMPLES,sampleText,sampleProperty,sampleCreditHTML,sampleGalleryHTML} from './tour-samples.mjs?v=1.5.1';
 import { initOfficeAssistant, openOfficeAssistant } from './office-bot.mjs?v=1.4.0';
 const state = {
   view: "home",
@@ -213,9 +214,19 @@ function applyFilters(updateURL=true,resetPage=true) {
 function renderTours() {
   const properties=state.properties.filter(propertyTour);
   const root=$('#page-content');
-  root.innerHTML=`<section data-i18n-skip>${intro(tourText('tours'),tourText('intro'))}</section><div id="results"></div>`;
+  root.innerHTML=`<section data-i18n-skip>${intro(tourText('tours'),tourText('intro'))}</section>${sampleGalleryHTML()}<section class="office-tours-heading" data-i18n-skip><h2>${esc(tourText('officeTours'))}</h2></section><div id="results"></div>`;
   if(properties.length) $('#results').innerHTML=`<div class="property-grid">${properties.map(card).join('')}</div>`;
-  else $('#results').innerHTML=`<div data-i18n-skip>${empty(tourText('empty'),tourText('emptyBody'),`<button class="btn primary" data-view="home">${esc(tourText('browse'))}</button>`)}</div>`;
+  else $('#results').innerHTML=`<div class="office-tours-placeholder" data-i18n-skip><p>${esc(tourText('officeToursEmpty'))}</p><button class="btn secondary" data-view="home">${esc(tourText('browse'))}</button></div>`;
+}
+function showTourSample(id) {
+  const sample=TOUR_SAMPLES.find(item=>item.id===id);
+  if(!sample)return;
+  const property=sampleProperty(sample);
+  openDialog(sampleText(sample,'title'),`<div data-i18n-skip><p>${esc(sampleText(sample,'description'))}</p><p class="tour-sample-size">${esc(tourText('sampleSize'))} <bdi>${sample.sizeMB.toFixed(2)} MB</bdi>${sample.sizeMB>100?` · ${esc(tourText('sampleLarge'))}`:''}</p>${tourHTML(property,{sample:true})}${sampleCreditHTML(sample)}</div>`,dialog=>{
+    mountTour(dialog,property);
+    // The gallery button is the visitor's explicit request to load this scene.
+    dialog.querySelector('[data-tour-start]').click();
+  });
 }
 async function switchView(view) {
   if(view!==state.view)state.page=1;
@@ -633,6 +644,7 @@ document.addEventListener("click", async (e) => {
   if (!button) return;
   const { action, id, value } = button.dataset;
   try {
+    if (action === 'tour-sample') {showTourSample(id);return;}
     if (action === 'source-results') {state.filters={source:value,origin:'market'};state.advanced=true;switchView('home');return;}
 
     if (action === "details") showDetails(id);
@@ -789,7 +801,7 @@ document.addEventListener("aqari:session", () => {
 document.addEventListener('aqari:locale',event=>{
   state.filters.lang=event.detail.locale;
   if(state.view==='home')renderHome();
-  if(state.view==='tours')renderTours();
+  if(state.view==='tours'){renderTours();updateNav();}
   const tourNav=document.querySelector('[data-view="tours"]');if(tourNav){tourNav.textContent=tourText('tours');hydrateIcons(tourNav.parentElement);}
 });
 document.addEventListener('aqari:property-details',event=>showDetails(event.detail.id).catch(error=>toast(error.message,true)));

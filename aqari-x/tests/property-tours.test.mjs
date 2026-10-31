@@ -5,6 +5,7 @@ import {normalizeVirtualTour,propertyTour,tourFrameURL} from '../public/virtual-
 import {savePropertyTour} from '../server/property-tours.mjs';
 import {tourHTML} from '../public/property-tour.mjs';
 import {TOUR_COPY,tourText} from '../public/tour-copy.mjs';
+import {TOUR_SAMPLES,SAMPLE_LICENSE,sampleProperty,sampleGalleryHTML} from '../public/tour-samples.mjs';
 
 const scene={kind:'scene',url:'https://superspl.at/scene/3ae6a716?utm_source=ignored',title:'الصالة'};
 const model={kind:'model',url:'https://example.com/room.compressed.ply?download=1',settingsUrl:'https://example.com/settings.json'};
@@ -73,6 +74,27 @@ test('a concurrent property change is reported instead of overwriting a newer to
 test('new customer controls have Arabic, English and Urdu text',()=>{
   for(const key of Object.keys(TOUR_COPY))for(const locale of ['ar','en','ur'])assert.ok(tourText(key,locale)!==key);
   assert.equal(tourText('start','en'),'Start tour');
+});
+test('public capture examples retain source attribution and never become office property actions',()=>{
+  for(const sample of TOUR_SAMPLES){
+    assert.equal(propertyTour(sampleProperty(sample)).url,`https://superspl.at/s?id=${sample.sceneId}`);
+    assert.ok(sample.creator&&sample.originalTitle&&sample.sizeMB>0);
+  }
+  for(const locale of ['ar','en','ur']){
+    const html=sampleGalleryHTML(locale);
+    assert.doesNotMatch(html,/<iframe|data-action="(?:details|whatsapp|appointment)"/);
+    assert.match(html,/data-action="tour-sample"/);
+    assert.ok(html.includes(SAMPLE_LICENSE));
+    for(const sample of TOUR_SAMPLES)assert.ok(html.includes(sample.sourceUrl)&&html.includes(sample.creator));
+    assert.ok(html.includes(tourText('sampleLarge',locale)));
+  }
+});
+test('sample viewer labels are distinct from sales-listing advice and remain unloaded until requested',()=>{
+  const html=tourHTML(sampleProperty(TOUR_SAMPLES[0]),{sample:true});
+  assert.match(html,/data-tour-sample/);
+  assert.ok(html.includes(tourText('sampleNote'))&&html.includes(tourText('sampleFallback')));
+  assert.ok(!html.includes(tourText('note'))&&!html.includes(tourText('fallback')));
+  assert.doesNotMatch(html,/<iframe/);
 });
 test('published pages explicitly allow the same-site viewer and SuperSplat only for frames',async()=>{
   for(const file of ['index.html','admin/index.html']){

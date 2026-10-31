@@ -1,12 +1,12 @@
 import {escapeHTML as esc} from './core.mjs?v=1.4.0';
 import {propertyTour, tourFrameURL} from './virtual-tour-data.mjs?v=1.5.0';
-import {tourText} from './tour-copy.mjs?v=1.5.0';
+import {tourText} from './tour-copy.mjs?v=1.5.1';
 import {getLocale} from './i18n.mjs?v=1.4.0';
 
-export function tourHTML(property) {
+export function tourHTML(property, {sample = false} = {}) {
   const tour = propertyTour(property);
   if (!tour) return '';
-  return `<section class="property-tour" data-i18n-skip aria-label="${esc(tourText('title'))}"><div class="tour-heading"><span class="tour-mark" aria-hidden="true">3D</span><div><h3>${esc(tour.title || tourText('title'))}</h3><p>${esc(tourText('intro'))}</p></div></div><div class="tour-actions"><button class="btn primary" type="button" data-tour-start>${esc(tourText('start'))}</button><button class="btn secondary" type="button" data-tour-stop hidden>${esc(tourText('stop'))}</button><button class="btn secondary small" type="button" data-tour-fullscreen hidden>${esc(tourText('fullscreen'))}</button></div><div class="tour-viewport" hidden></div><p class="tour-status hint" role="status" hidden></p><p class="tour-fallback fineprint" hidden>${esc(tourText('fallback'))}</p><p class="fineprint">${esc(tourText('note'))}</p></section>`;
+  return `<section class="property-tour" ${sample?'data-tour-sample':''} data-i18n-skip aria-label="${esc(tourText('title'))}"><div class="tour-heading"><span class="tour-mark" aria-hidden="true">3D</span><div><h3>${esc(tour.title || tourText('title'))}</h3><p>${esc(tourText(sample?'sampleTag':'intro'))}</p></div></div><div class="tour-actions"><button class="btn primary" type="button" data-tour-start>${esc(tourText(sample?'sampleView':'start'))}</button><button class="btn secondary" type="button" data-tour-stop hidden>${esc(tourText(sample?'sampleStop':'stop'))}</button><button class="btn secondary small" type="button" data-tour-fullscreen hidden>${esc(tourText('fullscreen'))}</button></div><div class="tour-viewport" hidden></div><p class="tour-status hint" role="status" hidden></p><p class="tour-fallback fineprint" hidden>${esc(tourText(sample?'sampleFallback':'fallback'))}</p><p class="fineprint">${esc(tourText(sample?'sampleNote':'note'))}</p></section>`;
 }
 
 export function mountTour(root, property) {
@@ -19,6 +19,7 @@ export function mountTour(root, property) {
   const viewport = panel.querySelector('.tour-viewport');
   const status = panel.querySelector('.tour-status');
   const fallback = panel.querySelector('.tour-fallback');
+  const fallbackKey = panel.hasAttribute('data-tour-sample') ? 'sampleFallback' : 'fallback';
   const listeners = new AbortController();
   let frame, alive = true;
   const reset = (focus = false) => {
@@ -51,11 +52,11 @@ export function mountTour(root, property) {
   stop.addEventListener('click', () => reset(true), {signal: listeners.signal});
   window.addEventListener('message',event=>{
     if(tour.kind!=='model'||!frame||event.source!==frame.contentWindow||event.origin!==new URL(frame.src).origin||event.data?.type!=='aqari:tour-state')return;
-    status.textContent=tourText(event.data.state==='ready'?'help':'fallback');
+    status.textContent=tourText(event.data.state==='ready'?'help':fallbackKey);
   },{signal:listeners.signal});
   fullscreen.addEventListener('click', async () => {
     try { await (viewport.requestFullscreen?.() || frame?.requestFullscreen?.()); }
-    catch { status.textContent = tourText('fallback'); }
+    catch { status.textContent = tourText(fallbackKey); }
   }, {signal: listeners.signal});
   const cleanup = () => {
     if (!alive) return;
