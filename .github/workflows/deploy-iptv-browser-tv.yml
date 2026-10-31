@@ -52,12 +52,16 @@ jobs:
       - name: Build the PWA
         working-directory: iptv-source
         run: pnpm nx build web --configuration=pwa --base-href=/saad/iptv-browser-tv/
-      - name: Stage the app and SPA fallback
+      - name: Stage the app, runtime API URL, and SPA fallback
         working-directory: iptv-source
         run: |
           rm -rf ../iptv-browser-tv/pages-dist
           mkdir -p ../iptv-browser-tv/pages-dist
           cp -a dist/apps/web/. ../iptv-browser-tv/pages-dist/
+          test -f ../iptv-browser-tv/pages-dist/assets/app-config.js
+          cat > ../iptv-browser-tv/pages-dist/assets/app-config.js <<'EOF'
+          window.__IPTVNATOR_CONFIG__ = { BACKEND_URL: "https://iptv-browser-tv.onrender.com" };
+          EOF
           cp ../iptv-browser-tv/pages-dist/index.html ../iptv-browser-tv/pages-dist/404.html
       - uses: actions/configure-pages@v5
       - name: Restore shared Pages and overlay only IPTV Browser TV
