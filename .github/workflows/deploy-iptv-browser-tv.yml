@@ -49,10 +49,6 @@ jobs:
       - name: Install IPTVnator dependencies
         working-directory: iptv-source
         run: pnpm install --frozen-lockfile --ignore-scripts
-      - name: Point the UI to the existing Render API
-        working-directory: iptv-source
-        run: |
-          node -e "const fs=require('node:fs'); const p='apps/web/src/environments/environment.prod.ts'; const s=fs.readFileSync(p,'utf8'); const old='https://iptvnator-playlist-parser-api.vercel.app'; if(!s.includes(old)) throw new Error('Expected production API URL was not found'); fs.writeFileSync(p,s.replace(old,'https://iptv-browser-tv.onrender.com'));"
       - name: Build the PWA
         working-directory: iptv-source
         run: pnpm nx build web --configuration=pwa --base-href=/saad/iptv-browser-tv/
