@@ -61,5 +61,26 @@
       "Responsive iframe tests do not emulate touch hardware",
       "Anatomical models are original simplified educational geometry and have not received clinical review"
     ]
+  },
+  "clinic_notice_and_interview_2026_10_31": {
+    "notice": {
+      "source_image": "Byte-identical copy of user attachment",
+      "browser": "Banner visible and full-image dialog opened in Chrome",
+      "expiry_tests": [
+        "One millisecond before Kuwait midnight remains visible",
+        "At 2026-11-08 00:00 Kuwait, banner and open dialog are removed",
+        "Timezone-independent instant comparison",
+        "Background/foreground resume removes stale notice",
+        "Malformed date fails closed"
+      ]
+    },
+    "video": {
+      "id": "w8qWv5NMbrw",
+      "identity": "Original channel description names Hamad Alenzi, orthopaedic surgeon, Al Razi",
+      "channel": "Official Ministry of Information NewsKTV1, cross-checked against ministry directory",
+      "metadata": "playabilityStatus OK; playableInEmbed true; duration 1160 seconds",
+      "browser": "Inline player loads title and controls; clicking play retains host page URL",
+      "limits": "Media stream remained buffering in the managed preview browser; continuous audiovisual playback is not verified."
+    }
   }
 }

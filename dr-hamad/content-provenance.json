@@ -51,5 +51,30 @@
       "https://orthoinfo.aaos.org/en/treatment/total-hip-replacement/"
     ],
     "data": "No forms, analytics, medical inference, patient records, runtime API calls or remote CDN assets added."
+  },
+  "clinic_leave_notice": {
+    "id": "clinic-leave-notice",
+    "source": "User-supplied 1000411083.jpg, copied byte-for-byte",
+    "image": "assets/clinic-leave-2026-11-08.jpg",
+    "return_date": "2026-11-08",
+    "expires_at": "2026-11-08T00:00:00+03:00",
+    "timezone": "Asia/Kuwait",
+    "behavior": "Shown before the return date; banner and image dialog are removed at the start of the return date, including on pages left open or resumed from background. Hidden by default when JavaScript is unavailable."
+  },
+  "tv_interview": {
+    "video_id": "w8qWv5NMbrw",
+    "title": "مستشفى الرازي يحقق نقلة نوعية في جراحات الركبة",
+    "source_url": "https://www.youtube.com/watch?v=w8qWv5NMbrw",
+    "channel_id": "UCMU5LZUMoX09dP_h3lVx27Q",
+    "channel": "قناة الأخبار / @NewsKTV1 — وزارة الإعلام - دولة الكويت",
+    "channel_verification": "Official YouTube channel description; ministry social-media directory https://media.gov.kw/SocialMedia.aspx lists @newsktv1",
+    "identity_verification": "Video shortDescription: د.حمد العنزي - اختصاصي جراحة عظام - مستشفى الرازي; distinct from Dr Hamad Jabr Alenzi, a neurosurgeon.",
+    "publish_date": "2026-07-22",
+    "duration_seconds": 1160,
+    "playability_verified_at": "2026-10-31",
+    "youtube_playability_status": "OK",
+    "playable_in_embed": true,
+    "presentation": "Original YouTube player embedded inline with youtube-nocookie.com, responsive 16:9, lazy loading, playsinline and fullscreen; no autoplay and no copied/rehosted video.",
+    "claims": "The section attributes the original video title to its source and adds no unverified medical outcomes or transcript summary."
   }
 }
