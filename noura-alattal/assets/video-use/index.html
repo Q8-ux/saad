@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; connect-src 'self'; media-src 'self' blob:; img-src 'self' blob: data:; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>مونتاج الفيديو | استوديو الإنتاج</title>
+  <link rel="stylesheet" href="./studio.css?v=20261031-1">
+  <script type="module" src="./studio.mjs?v=20261031-1"></script>
+</head>
+<body>
+<header class="top"><a id="back" href="../../../../index.html">العودة</a><span class="badge">استوديو الإنتاج</span><span class="privacy"><i></i>تسجيلاتك تبقى على جهازك</span></header>
+<main>
+  <section class="intro"><p class="eyebrow" id="profile-label">للتسجيلات والمسرحيات</p><h1>من تسجيل طويل<br><em>إلى مقطع يستحق المشاهدة.</em></h1><p id="profile-help">اختر لحظتك، حافظ على إيقاعها، وأخرجها بالصوت والكتابة العربية.</p></section>
+  <div class="workspace">
+    <section class="viewer" aria-label="معاينة المونتاج">
+      <div class="preview" id="preview"><div class="empty" id="empty"><span aria-hidden="true">▶</span><h2>ابدأ بتسجيلك</h2><p>فيديو من دورة، بروفة، أو مشهد مصوّر.<br>لن يُرفع إلى أي خادم.</p><label class="primary file-button" for="files">اختيار تسجيلات</label></div><video id="video" playsinline preload="metadata" controls hidden></video><div id="caption-preview" class="caption-preview" aria-hidden="true"></div></div>
+      <div class="viewer-meta"><span id="source-name">لم يُختَر تسجيل بعد</span><output id="time" dir="ltr">00:00 / 00:00</output></div>
+      <div class="trim"><label>البداية · ثانية<input id="start" type="number" min="0" step="0.01" value="0" inputmode="decimal"></label><button id="mark-start" type="button">البداية هنا</button><label>النهاية · ثانية<input id="end" type="number" min="0" step="0.01" value="0" inputmode="decimal"></label><button id="mark-end" type="button">النهاية هنا</button><button id="add" class="primary" type="button">إضافة إلى المونتاج</button></div>
+      <div class="selection"><div class="section-heading"><h2>المقاطع المختارة</h2><output id="total">0:00</output></div><ol id="ranges"></ol><p id="no-ranges" class="hint">حدّد بداية المقطع ونهايته ثم أضفه. يمكن جمع أكثر من تسجيل في فيديو واحد.</p></div>
+    </section>
+    <aside class="settings">
+      <section class="panel"><div class="section-heading"><h2>التسجيلات</h2><label class="small-button file-button" for="files">إضافة</label></div><input id="files" type="file" accept="video/mp4,video/webm,video/quicktime,video/*" multiple hidden><div id="sources" class="sources"></div></section>
+      <section class="panel"><h2>شكل المقطع</h2><label>اسم المشروع<input id="title" maxlength="120" value="مقطع جديد"></label><div class="two"><label>المقاس<select id="aspect"><option value="original">المقاس الأصلي</option><option value="portrait">ريلز · عمودي 9:16</option><option value="landscape">أفقي 16:9</option></select></label><label>الجودة<select id="quality"><option value="720">720p</option><option value="1080">1080p</option></select></label></div><p class="hint">يحافظ تغيير المقاس على كامل الصورة، مع مساحة حولها عند الحاجة.</p></section>
+      <section class="panel"><div class="section-heading"><h2>الكلام على الفيديو</h2><label for="captions" class="small-button file-button">إضافة SRT</label></div><input id="captions" type="file" accept=".srt,text/plain" hidden><p id="caption-status" class="hint">اختياري · أضف ملف الترجمة للتسجيل المحدد، ثم راجع النص والتوقيت.</p><button id="suggest" class="secondary full" type="button">اقتراح 3 مقاطع من الترجمة</button><p class="hint">الاقتراح يعتمد على حدود العبارات، ويحتاج مراجعتك لاختيار الفكرة المكتملة. التفريغ التلقائي للصوت غير مفعّل هنا.</p></section>
+      <section class="panel export-panel"><h2>جاهز للمشاهدة؟</h2><button id="bundle" type="button" class="primary full">تجهيز مشروع التصدير MP4</button><a id="bundle-result" class="result" hidden>تنزيل مشروع التصدير</a><p class="hint">تصدير نهائي على الكمبيوتر بمحرك Video Use. تتضمن الحزمة تعليمات التشغيل؛ أضف إليها التسجيلات الأصلية. التصدير الخادمي المباشر غير مفعّل.</p><button id="export" class="secondary full" type="button">تصدير معاينة من المتصفح</button><button id="cancel" class="secondary full" type="button" hidden>إلغاء التصدير</button><progress id="progress" max="1" value="0" hidden aria-label="تقدم التصدير"></progress><a id="result" class="result" hidden>تنزيل المعاينة</a><p class="hint">معاينة تجريبية؛ قد تقل سلاسة الإطارات أو دقة التزامن حسب الجهاز. أبقِ الصفحة ظاهرة. استخدم المحرك المحلي للنسخة النهائية.</p><div class="two"><button id="save" type="button" class="text-button">حفظ المشروع</button><label for="restore" class="text-button file-button">فتح مشروع</label></div><input id="restore" type="file" accept=".json,application/json" hidden><details><summary>خيارات إضافية</summary><button id="download-srt" type="button" class="secondary full">تنزيل الترجمة</button><p class="hint">المحرك المحلي يحتاج Python وFFmpeg. ضع الأصول في مجلد sources ثم اتبع HOW-TO.</p></details></section>
+    </aside>
+  </div>
+  <p id="status" class="status" role="status" aria-live="polite">اختر تسجيلًا للبدء.</p>
+  <section id="completed" class="completed" hidden><h2>معاينة الملف الناتج</h2><video id="output-video" controls playsinline></video><p class="hint">راجع الصورة والصوت والكتابة قبل النشر.</p></section>
+  <footer>القص قابل للمراجعة · تبقى التسجيلات الأصلية كما هي · لا تُحذف الوقفات الدرامية تلقائيًا</footer>
+</main>
+</body>
+</html>

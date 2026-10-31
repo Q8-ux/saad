@@ -36,6 +36,8 @@ jobs:
           node --check family-online-studio/backend/server.mjs
           node --test family-online-studio/tests/sms-auth.test.mjs
           node --test family-online-studio/tests/motion.test.mjs
+          node --test family-online-studio/tests/video-use.test.mjs
+          python3 family-online-studio/tests/video-use-engine.test.py
           node family-online-studio/deployment/validate.mjs --ready
       - uses: actions/configure-pages@v5
       - name: Preserve other published projects
@@ -47,4 +49,5 @@ jobs:
       - name: Deploy
         id: deploy
         uses: actions/deploy-pages@v4
+
 

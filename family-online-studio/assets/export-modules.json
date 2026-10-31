@@ -31,6 +31,10 @@
     {
       "file": "assets/chunks/chunk-2V77MTNA.mjs",
       "bytes": 605
+    },
+    {
+      "file": "assets/video-use-launch.mjs",
+      "bytes": 2191
     }
   ],
   "deferred": [
@@ -93,6 +97,18 @@
     {
       "file": "assets/chunks/chunk-3YV2JGDK.mjs",
       "bytes": 272
+    },
+    {
+      "file": "assets/video-use/core.mjs",
+      "bytes": 9134
+    },
+    {
+      "file": "assets/video-use/recorder.mjs",
+      "bytes": 10312
+    },
+    {
+      "file": "assets/video-use/studio.mjs",
+      "bytes": 17864
     }
   ]
 }
