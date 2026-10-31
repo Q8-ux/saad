@@ -2,18 +2,18 @@
   "initial": [
     {
       "file": "assets/app.mjs",
-      "bytes": 296652
+      "bytes": 296656
     },
     {
       "file": "assets/chunks/chunk-WUPY7VFN.mjs",
-      "bytes": 13220
+      "bytes": 13224
     },
     {
       "file": "assets/chunks/chunk-F3ZIPD5G.mjs",
       "bytes": 19041
     },
     {
-      "file": "assets/chunks/chunk-ZQZFJAPL.mjs",
+      "file": "assets/chunks/chunk-ZQZFJAPL-400.mjs",
       "bytes": 5794
     },
     {
@@ -44,7 +44,7 @@
   "deferred": [
     {
       "file": "assets/chunks/book-exports-VHZPDRVI.mjs",
-      "bytes": 11367
+      "bytes": 11371
     },
     {
       "file": "assets/chunks/book-studio-DHXOY43D.mjs",
@@ -68,7 +68,7 @@
     },
     {
       "file": "assets/chunks/pdf-export-4GTNPUQF.mjs",
-      "bytes": 6818
+      "bytes": 6822
     },
     {
       "file": "assets/chunks/speech-studio-Q4AIXI3X.mjs",
