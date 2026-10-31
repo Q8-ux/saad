@@ -35,6 +35,10 @@
     {
       "file": "assets/video-use-launch.mjs",
       "bytes": 2191
+    },
+    {
+      "file": "assets/studio-command-menu.mjs",
+      "bytes": 7262
     }
   ],
   "deferred": [

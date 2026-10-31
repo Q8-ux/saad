@@ -1,0 +1,79 @@
+/* Keep the original command buttons and their handlers in the React tree. */
+@font-face{font-family:StudioMenuCairo;src:url("./video-use/Cairo.ttf") format("truetype");font-weight:200 1000;font-display:swap}
+@media screen {
+  .studio-command-toggle {
+    position:fixed;top:max(14px,env(safe-area-inset-top));right:max(14px,env(safe-area-inset-right));z-index:70;
+    display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:46px;padding:8px 14px;
+    border:1px solid #5caaa1;border-radius:12px;background:#087f7c;color:#fff;box-shadow:0 3px 12px #163b3915;
+    font:700 16px/1.5 StudioMenuCairo,Tahoma,sans-serif;cursor:pointer;
+  }
+  .studio-command-icon{font-size:23px;line-height:1}
+  .studio-command-toggle:focus-visible,.studio-command-close:focus-visible{outline:3px solid #087f7c;outline-offset:4px}
+  .studio[data-command-menu-ready] > .topbar {
+    min-height:76px;padding-inline-start:136px;flex-wrap:nowrap;row-gap:0;
+  }
+  .studio-command-backdrop {
+    position:fixed;inset:0;z-index:190;background:#102a36a6;backdrop-filter:blur(2px);touch-action:none;
+  }
+  .studio-command-backdrop[hidden]{display:none!important}
+  .studio .topbar .top-actions[data-command-drawer="true"] {
+    position:fixed!important;inset:0 0 0 auto!important;z-index:200!important;
+    display:flex!important;flex-direction:column;flex-wrap:nowrap!important;align-items:stretch;justify-content:flex-start;gap:9px!important;
+    width:min(360px,88vw)!important;inline-size:min(360px,88vw)!important;min-inline-size:0!important;max-inline-size:none!important;
+    height:100dvh;max-height:100dvh;box-sizing:border-box;margin:0!important;
+    padding:18px 16px max(22px,env(safe-area-inset-bottom))!important;
+    border:0!important;border-left:1px solid var(--line,#d5dfda)!important;border-radius:0!important;
+    background:var(--surface,#fffdf7)!important;color:var(--text,#173b3b);
+    box-shadow:-16px 0 45px #102a3626;overflow-y:auto;overscroll-behavior:contain;
+    visibility:hidden;transform:translateX(105%);transition:transform 180ms ease,visibility 0s 180ms;
+  }
+  .studio .topbar .top-actions[data-command-drawer].command-menu-open {
+    visibility:visible;transform:translateX(0);transition:transform 180ms ease,visibility 0s;
+  }
+  .studio .top-actions[data-command-drawer] > button {
+    display:flex!important;align-items:center!important;justify-content:flex-start!important;flex:0 0 auto!important;
+    width:100%!important;inline-size:100%!important;max-inline-size:100%!important;min-inline-size:0!important;
+    min-height:50px!important;height:auto!important;margin:0!important;padding:12px 15px!important;
+    gap:12px!important;border:1px solid var(--line,#d5dfda)!important;border-radius:11px!important;
+    background:var(--soft,#f5f7f1)!important;color:var(--text,#173b3b)!important;
+    font:500 var(--ui-size,18px)/1.6 StudioMenuCairo,Tahoma,sans-serif!important;text-align:right!important;
+    white-space:normal!important;overflow-wrap:anywhere;
+  }
+  .studio .top-actions[data-command-drawer] > button svg{flex:none;width:21px!important;height:21px!important}
+  .studio .top-actions[data-command-drawer] > button:hover:not(:disabled){background:var(--accent-light,#e3f2ee)!important;border-color:var(--accent,#087f7c)!important}
+  .studio .top-actions[data-command-drawer] > button:focus-visible{outline:3px solid var(--accent,#087f7c);outline-offset:2px}
+  .studio .top-actions[data-command-drawer] > .scenarist-top-button,.studio .top-actions[data-command-drawer] > .vu-launch {
+    color:var(--accent-ink,#086e68)!important;background:var(--accent-light,#e3f2ee)!important;border-color:var(--accent,#087f7c)!important;
+  }
+  .studio .top-actions[data-command-drawer] > .studio-command-save {
+    background:var(--accent,#087f7c)!important;color:#fff!important;border-color:var(--accent,#087f7c)!important;font-weight:700!important;
+  }
+  .studio .top-actions[data-command-drawer] > .studio-command-save:disabled{opacity:.5;cursor:wait}
+  .studio .top-actions[data-command-drawer] > .save-indicator{display:none!important}
+  .studio .top-actions[data-command-drawer] > [aria-label="مساعدة واختصارات"]::after{content:"مساعدة";font:inherit}
+  .studio-command-heading {
+    display:flex;align-items:center;justify-content:space-between;gap:12px;flex:none;
+    margin:0 0 8px;padding:0 0 16px;border-bottom:1px solid var(--line,#d5dfda);
+  }
+  .studio-command-heading h2{margin:0;color:var(--text,#173b3b);font:700 21px/1.6 StudioMenuCairo,Tahoma,sans-serif}
+  .studio-command-close {
+    display:grid;place-items:center;flex:none;width:42px;height:42px;padding:0;border:1px solid var(--line,#d5dfda);
+    border-radius:10px;background:var(--soft,#f5f7f1);color:var(--text,#173b3b);font:28px/1 sans-serif;cursor:pointer;
+  }
+  .studio .studio-command-original-save{display:none!important}
+  .studio[data-command-menu-ready] .save-controls{min-height:0}
+  .studio.focus-mode.command-menu-open > .topbar{display:contents!important}
+  .studio.focus-mode.command-menu-open > .topbar > :not([data-command-drawer]){display:none!important}
+}
+@media screen and (max-width:1100px) {
+  .studio[data-command-menu-ready] > .topbar{display:flex;align-items:center;padding-block:12px;gap:8px}
+  .studio[data-command-menu-ready] > .topbar > .brand{display:none!important}
+  .studio[data-command-menu-ready] > .topbar > .project-name,.studio[data-command-menu-ready] > .topbar > .book-project {
+    flex:1;min-width:0;width:auto;inline-size:auto;margin:0!important;
+  }
+}
+@media(prefers-reduced-motion:reduce){.studio .topbar .top-actions[data-command-drawer]{transition:none!important}}
+@media print {
+  .studio-command-toggle,.studio-command-backdrop,.studio-command-heading,
+  .studio .topbar .top-actions[data-command-drawer]{display:none!important}
+}
