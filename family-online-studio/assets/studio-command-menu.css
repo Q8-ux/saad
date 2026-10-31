@@ -62,6 +62,7 @@
   }
   .studio .studio-command-original-save{display:none!important}
   .studio[data-command-menu-ready] .save-controls{min-height:0}
+  .studio .save-controls.saved .save-feedback > span{display:none}
   .studio.focus-mode.command-menu-open > .topbar{display:contents!important}
   .studio.focus-mode.command-menu-open > .topbar > :not([data-command-drawer]){display:none!important}
 }
