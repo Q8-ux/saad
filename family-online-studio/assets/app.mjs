@@ -96,3 +96,4 @@ react-dom/cjs/react-dom-client.production.js:
    * LICENSE file in the root directory of this source tree.
    *)
 */
+// Barcode catalog: approved workshop edition.
