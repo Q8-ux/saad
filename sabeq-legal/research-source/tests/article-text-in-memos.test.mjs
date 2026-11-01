@@ -33,6 +33,12 @@ test('missing or excluded source text never becomes an apparently complete artic
   }
 });
 
+test('final memo review rejects source wording whose external article identity was removed by cleanup', () => {
+  const result = review(`«${text}» 【م1】`, [source], options);
+  assert.equal(result.ok, false);
+  assert.ok(result.issues.some(i => i.code === 'unverified_article'));
+});
+
 test('a correct inserted text cannot hide an incorrect article, law or fabricated model quote', () => {
   for (const grounds of ['المادة 99 من القانون رقم 98765 لسنة 2000 【م1】', 'المادة 12 مكرر أ من القانون رقم 98766 لسنة 2000 【م1】', 'تنص المادة 12 مكرر أ على «نص مختلق لا أصل له» 【م1】']) {
     const result = bound.prepareBoundDraft({ ...content, grounds }, input, [source]);

@@ -41,6 +41,10 @@ export function reviewLegalCitations(text:string,evidence:LegalEvidence[],option
    const laws=[...authored.matchAll(law)],articles=[...authored.matchAll(article)].flatMap(m=>[...m[1].matchAll(new RegExp(articleNumber,"gu"))].map(n=>({number:articleKey(n[0]),start:m.index!,end:m.index!+m[0].length})));
    articles.push(...[...authored.matchAll(ordinal)].map(m=>({number:/ولى/.test(m[1])?"1":"2",start:m.index!,end:m.index!+m[0].length})));
    articles.sort((a,b)=>a.start-b.start);
+   if(options.requireArticleText)for(const s of selected){
+    const statutory=draftStatutoryText(s);
+    if(statutory&&!articles.some(a=>a.number===articleKey(statutory.number)))issues.push({code:'unverified_article'});
+   }
    const judgments=[...authored.matchAll(judgment)];
    if(options.requireJudgmentAnalogy&&selected.some(s=>hasReviewedJudgment(s)&&!s.judgment?.analogy))issues.push({code:'judgment_not_analogous'});
    const attributedCassation=/(?:استقر|قضت|قضى|قضاء|قررت|أرست|ارست|حكم|مبادئ|مبادي|أحكام|احكام)[^\n]{0,45}(?:التمييز|التمييز)|التمييز[^\n]{0,25}(?:قضت|قررت|قضى)/u.test(authored);

@@ -1,7 +1,7 @@
 {
   "release": "2026-11-01-article-text-in-memos",
   "clientSource": "fd6b0cfd9f04bfec8b952ed2808e5653cdfd5978",
-  "backendSource": "fd6b0cfd9f04bfec8b952ed2808e5653cdfd5978",
+  "backendSource": "05023d478936780d3bbffe7a13ef36e959539540",
   "assistant": "indirect-intake-completeness-1",
   "voice": "gulf-male-voice-4",
   "tools": "legal-tools-1",
@@ -28,7 +28,7 @@
   "interfaceLocalization": "ar-en-ur-tools-guidance-1",
   "memoProseLanguage": "arabic-with-protected-names-and-identifiers-1",
   "builtAt": "2026-11-01",
-  "backendVersion": 175,
+  "backendVersion": 176,
   "pleadingLayout": "first-page-only-sidebar-and-frame-full-width-right-aligned-continuations",
   "citationCorrection": "one-bounded-server-retry-before-archive",
   "legalSourceDirectory": "6-catalogues-3-fetched-0-new-citable-pdfs",
@@ -100,8 +100,8 @@
   "citationAudit": "source-markers-reviewed-before-display;source-trace-retained-outside-court-document",
   "typecheck": "20-existing-Workers-CSS-query-diagnostics;no-new-journey-diagnostic",
   "ssrHarness": "pre-existing-cloudflare-esm-import-failure-reproduced-on-baseline",
-  "nativePublishedAt": "2026-10-28T13:43:47.351607+00:00",
-  "nativeDeployment": "appgdep_6ae1fbfc637c8191b5f8582820fa1f2e",
+  "nativePublishedAt": "2026-11-01T13:31:32.103117+00:00",
+  "nativeDeployment": "appgdep_6ae73f202b3c81919b1cf41c90908486",
   "publicationChecks": "9-scoped-release-tests-and-5-motion-tests-pass",
   "legislationArchive": "2026-04-01-separate-from-primary-2026-10-05",
   "legislationWorkbench": "manager-search-articles-originals-and-report",
@@ -176,12 +176,14 @@
     "revision": "source-wording-in-body-1",
     "source": "bound-file-only-or-existing-source-verification",
     "partialTextLabel": "مقتطف من نص المادة",
-    "nativeChecksPassed": 260,
+    "nativeChecksPassed": 261,
     "focusedTestsPassed": 90,
-    "publicCitationTestsPassed": 18,
+    "publicCitationTestsPassed": 19,
     "exports": "text-HTML-Word;synthetic-Word-rendered-to-PDF-and-browser-RTL-inspected",
     "liveModelGenerationTested": false,
     "livePaymentTested": false,
-    "historicalMemosRegenerated": false
+    "historicalMemosRegenerated": false,
+    "finalRegressionTestsPassed": 40,
+    "articleIdentityRequiredBesideQuote": true
   }
 }
