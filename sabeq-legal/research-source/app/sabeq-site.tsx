@@ -943,7 +943,7 @@ function Assistant({ t, language, token, initialSession, onSession, openBooking,
       <p className="assistant-voice-disclosure">{voiceUi.disclosure}</p>
       <button className="text-button" onClick={openBooking}>{t.book}<ArrowLeft size={15} /></button>
     </details>
-    <p className="disclaimer"><ShieldCheck size={15} />{tr(language, "يجب اعتماده من مجموعة سابق القانونية.")}</p>
+    <p className="disclaimer"><ShieldCheck size={15} />{tr(language, "يجب اعتماد المذكرة من مجموعة سابق القانونية.")}</p>
     </div></div>;
 }
 
