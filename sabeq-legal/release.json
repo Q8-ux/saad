@@ -1,7 +1,7 @@
 {
-  "release": "2026-11-02-team-portraits",
-  "clientSource": "12fe07f5ff0f43fc714e864abe933f7cf2043eb4",
-  "backendSource": "12fe07f5ff0f43fc714e864abe933f7cf2043eb4",
+  "release": "2026-11-02-team-desktop-center",
+  "clientSource": "43684ac483cedb7cc0cef34cde84c8bd055d248a",
+  "backendSource": "43684ac483cedb7cc0cef34cde84c8bd055d248a",
   "assistant": "indirect-intake-completeness-1",
   "voice": "gulf-male-voice-4",
   "tools": "legal-tools-1",
@@ -21,14 +21,14 @@
   "finalMemo": "clean-no-review-notes-1",
   "memoResultTools": "bottom-vector-actions-1",
   "memoPreview": "document-derived-clean-text-1",
-  "githubPagesAsset": "index-B1SEpwVT.js",
+  "githubPagesAsset": "index-DRy2ZNiC.js",
   "memoLanguage": "ar-KW",
   "memoDirection": "rtl",
   "memoAlignment": "right",
   "interfaceLocalization": "ar-en-ur-tools-guidance-1",
   "memoProseLanguage": "arabic-with-protected-names-and-identifiers-1",
   "builtAt": "2026-11-01",
-  "backendVersion": 179,
+  "backendVersion": 180,
   "pleadingLayout": "first-page-only-sidebar-and-frame-full-width-right-aligned-continuations",
   "citationCorrection": "one-bounded-server-retry-before-archive",
   "legalSourceDirectory": "6-catalogues-3-fetched-0-new-citable-pdfs",
@@ -100,8 +100,8 @@
   "citationAudit": "source-markers-reviewed-before-display;source-trace-retained-outside-court-document",
   "typecheck": "20-existing-Workers-CSS-query-diagnostics;no-new-journey-diagnostic",
   "ssrHarness": "pre-existing-cloudflare-esm-import-failure-reproduced-on-baseline",
-  "nativePublishedAt": "2026-11-01T22:05:56.050914+00:00",
-  "nativeDeployment": "appgdep_6ae7b7aa2f84819191d7f5647ed8381e",
+  "nativePublishedAt": "2026-11-01T22:19:25.395480+00:00",
+  "nativeDeployment": "appgdep_6ae7bad1b7b08191b865d60e6a8fc514",
   "publicationChecks": "9-scoped-release-tests-and-5-motion-tests-pass",
   "legislationArchive": "2026-04-01-separate-from-primary-2026-10-05",
   "legislationWorkbench": "manager-search-articles-originals-and-report",
@@ -210,6 +210,15 @@
     "browserPreview": "10-loaded-images;3-columns;380x475px-frames;no-horizontal-overflow",
     "publicationChecks": "9-scoped-release-tests;5-motion-tests;bundle-syntax;10-byte-identical-image-assets",
     "physicalDeviceTested": false,
-    "nativeVersion": 179
+    "nativeVersion": 180,
+    "desktopLastCard": {
+      "name": "حمد الشمري",
+      "minimumWidthPx": 1024,
+      "row": 4,
+      "column": 2,
+      "previewWidthPx": 1363,
+      "centerDifferencePx": 0,
+      "internalReleaseChecksPassed": 261
+    }
   }
 }
