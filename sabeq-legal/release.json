@@ -1,7 +1,7 @@
 {
-  "release": "2026-10-28-reuse-memo-input",
-  "clientSource": "56cfdb9474f66cb379ad16a44d8a709d570f068e",
-  "backendSource": "56cfdb9474f66cb379ad16a44d8a709d570f068e",
+  "release": "2026-11-01-assistant-light-chat-theme",
+  "clientSource": "5c516bf3be37c9fa16982211635c18c28856f506",
+  "backendSource": "5c516bf3be37c9fa16982211635c18c28856f506",
   "assistant": "indirect-intake-completeness-1",
   "voice": "gulf-male-voice-4",
   "tools": "legal-tools-1",
@@ -21,14 +21,14 @@
   "finalMemo": "clean-no-review-notes-1",
   "memoResultTools": "bottom-vector-actions-1",
   "memoPreview": "document-derived-clean-text-1",
-  "githubPagesAsset": "index-DOcxrkDF.js",
+  "githubPagesAsset": "index-5dY26Ev2.js",
   "memoLanguage": "ar-KW",
   "memoDirection": "rtl",
   "memoAlignment": "right",
   "interfaceLocalization": "ar-en-ur-tools-guidance-1",
   "memoProseLanguage": "arabic-with-protected-names-and-identifiers-1",
-  "builtAt": "2026-10-28",
-  "backendVersion": 158,
+  "builtAt": "2026-11-01",
+  "backendVersion": 169,
   "pleadingLayout": "first-page-only-sidebar-and-frame-full-width-right-aligned-continuations",
   "citationCorrection": "one-bounded-server-retry-before-archive",
   "legalSourceDirectory": "6-catalogues-3-fetched-0-new-citable-pdfs",
@@ -155,5 +155,7 @@
     "liveHealthVerified": true,
     "liveModelGenerationTested": false,
     "livePaymentTested": false
-  }
+  },
+  "assistantTheme": "reference-light-neutral-chat-1",
+  "assistantThemeValidation": "62-focused-tests;native-release-gates-and-both-builds;320-390-768-1440-browser-QA;ar-en-ur;dark-surroundings;draft-reopen;no-physical-microphone-test"
 }
