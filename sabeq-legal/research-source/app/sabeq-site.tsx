@@ -906,11 +906,12 @@ function Assistant({ t, language, token, initialSession, onSession, openBooking,
     event.preventDefault(); stopSpeaking();
     try { await submitMessage(question); } catch { /* Error remains beside the preserved input. */ }
   }
-  return <div className="modal-content legal-intake"><div className="assistant-opening-identity"><span className="assistant-portrait assistant-header-portrait"><img src={assetUrl("/images/sabeq-assistant-avatar.jpg")} alt="" width={84} height={84} decoding="async" /></span><h2>{t.assistant}</h2></div>
-    <div className="intake-progress"><span><b>{intake?.progress || 0}%</b>{` ${tr(language, "اكتمال فهم القضية")}`}</span><i><em style={{ width: `${intake?.progress || 0}%` }} /></i></div>
+  return <div className="modal-content legal-intake"><div className="assistant-heading-row"><div className="assistant-opening-identity"><span className="assistant-portrait assistant-header-portrait"><img src={assetUrl("/images/sabeq-assistant-avatar.jpg")} alt="" width={84} height={84} decoding="async" /></span><h2>{t.assistant}</h2></div>
     <div className="conversation-toolbar" aria-label={tr(language, "أدوات المحادثة")}><button type="button" onClick={newConversation} title={voiceUi.newChat}><Trash2 size={18} /><span>{voiceUi.newChat}</span></button><button type="button" onClick={exportConversation} disabled={!messages.length} title={tr(language, "تصدير المحادثة")}><Download size={18} /><span>{tr(language, "تصدير")}</span></button><button type="button" onClick={shareConversation} disabled={!messages.length} title={tr(language, "إرسال أو مشاركة المحادثة")}><Share2 size={18} /><span>{tr(language, "إرسال")}</span></button></div>
-
+    </div>
+    <div className="intake-progress"><span><b>{intake?.progress || 0}%</b>{` ${tr(language, "اكتمال فهم القضية")}`}</span><i><em style={{ width: `${intake?.progress || 0}%` }} /></i></div>
     <AssistantMemoAction language={language} intake={intake} messages={messages} busy={loading || voiceActive} onContinue={data => { stopSpeaking(); startMemo(data); }} />
+    <section className="assistant-conversation" aria-label={language === "ar" ? "المحادثة" : language === "en" ? "Conversation" : "گفتگو"} tabIndex={0}>
     <div className="intake-chat"><div className="chat-welcome"><Sparkles size={17} />{intro}</div>{messages.map((item, index) => <div key={`${item.role}-${index}`} className={`intake-message ${item.role}`}><b><span>{item.role === "user" ? tr(language, "أنت") : t.assistant}</span><span className="message-tools">{item.role === "user" && <button type="button" className="message-tool" onClick={() => editMessage(index)} aria-label={tr(language, "تعديل الرسالة")} title={tr(language, "تعديل")}><Pencil size={17} /></button>}<button type="button" className="message-tool danger" onClick={() => deleteMessage(index)} aria-label={tr(language, "حذف الرسالة")} title={tr(language, "حذف")}><Trash2 size={17} /></button></span></b><p>{item.content}</p></div>)}{(loading || voiceActive) && streamedAnswer && <div className="intake-message assistant" aria-live="polite"><b>{t.assistant}</b><p>{streamedAnswer}</p></div>}{loading && !streamedAnswer && <div className="intake-thinking"><Sparkles size={16} />{tr(language, "أحلل المعلومات وأحدد السؤال التالي…")}</div>}</div>
     {intake && <div className="intake-dashboard">
       <div className="intake-classification"><span><small>{tr(language, "نوع القضية")}</small><b>{interfaceLabel(intake.caseType, language) || tr(language, "قيد التحليل")}</b></span><span><small>{tr(language, "المرحلة")}</small><b>{interfaceLabel(intake.caseStage, language) || tr(language, "غير محددة")}</b></span><span><small>{tr(language, "المحكمة المبدئية")}</small><b>{[intake.court, intake.courtCircuit].filter(Boolean).map(value => interfaceLabel(value, language)).join(" - ") || tr(language, "تحتاج معلومات إضافية")}</b></span><span><small>{tr(language, "درجة الثقة")}</small><b>{intake.jurisdictionConfidence === "high" ? tr(language, "مرتفعة") : intake.jurisdictionConfidence === "medium" ? tr(language, "متوسطة") : tr(language, "منخفضة")}</b></span></div>
@@ -921,10 +922,8 @@ function Assistant({ t, language, token, initialSession, onSession, openBooking,
       <IntakeAnalysisView state={intake} language={language} />
     </div>}
     {loading && analysisStages.length > 0 && <IntakeStages stages={analysisStages} language={language} />}
-    <div className="assistant-voice-settings">
-      <label><input type="checkbox" checked={continuousVoice} onChange={event => setContinuousVoice(event.target.checked)} />{voiceUi.auto}</label>
-      {language !== "ar" && <label className="assistant-voice-select">{voiceUi.voice}<select value={selectedVoice} onChange={event => selectVoice(event.target.value)} disabled={voiceActive}>{LEGAL_VOICES.map(voice => <option key={voice} value={voice}>{voice[0].toUpperCase() + voice.slice(1)}</option>)}</select></label>}
-    </div>
+    </section>
+    <div className="assistant-composer">
     <form className="chat-form voice-chat-form" onSubmit={ask}>
       <textarea aria-label={tr(language, "رسالتك للمساعد القانوني")} value={question} onChange={event => setQuestion(event.target.value)} placeholder={voiceUi.placeholder} rows={4} disabled={voiceActive || loading} />
       <div className="voice-chat-actions"><button type="button" className={`voice-chat-button voice-wave-button phase-${voicePhase}`} onClick={() => { void voiceRef.current?.toggle(); }} disabled={loading && !voiceActive} aria-label={voiceLabel} title={voiceLabel} aria-pressed={voiceActive} aria-describedby="assistant-voice-status"><VoiceWaveform /></button><button type="submit" className="voice-chat-send" aria-label={tr(language, "إرسال الرسالة")} disabled={loading || voiceActive || !question.trim()}><Send size={21} /></button></div>
@@ -932,11 +931,20 @@ function Assistant({ t, language, token, initialSession, onSession, openBooking,
     <p className="assistant-input-limit" aria-live="polite">{question.trim().length.toLocaleString(language)} / {ASSISTANT_MESSAGE_LIMIT.toLocaleString(language)} — {assistantInputCopy(language).hint}</p>
     <p id="assistant-voice-status" className={`assistant-voice-status phase-${voicePhase}`} role="status" aria-live="polite">{voiceUi.phases[voicePhase]}{voicePhase === "listening" && <small>{voiceUi.hint}</small>}</p>
     {["transcribing", "analyzing", "preparing"].includes(voicePhase) && <VoiceCountdown language={language} />}
-    {voicePhase === "listening" && <div className="voice-chat-actions"><button type="button" className="button button-primary" onClick={() => voiceRef.current?.finish()}><Send size={18} />{voiceUi.finish}</button><button type="button" className="text-button" onClick={stopSpeaking}>{voiceUi.stop}</button></div>}
-    <p className="assistant-voice-disclosure">{voiceUi.disclosure}</p>
+    {voicePhase === "listening" && <div className="voice-session-actions"><button type="button" className="button button-primary" onClick={() => voiceRef.current?.finish()}><Send size={18} />{voiceUi.finish}</button><button type="button" className="text-button" onClick={stopSpeaking}>{voiceUi.stop}</button></div>}
     {voiceError && <p className="form-notice error" role="alert">{interfaceError(voiceError, language, voiceUi.failed)}</p>}
     {toolNotice && <p className="conversation-tool-notice" role="status">{toolNotice}</p>}
-    {error && <p className="form-notice error">{error}</p>}<p className="disclaimer"><ShieldCheck size={15} />{tr(language, "التوجيه للمحكمة مبدئي، ويجب اعتماده من محامٍ بعد مراجعة المستندات والمواعيد.")}</p><button className="text-button" onClick={openBooking}>{t.book}<ArrowLeft size={15} /></button></div>;
+    {error && <p className="form-notice error">{error}</p>}
+    <details className="assistant-preferences"><summary>{language === "ar" ? "إعدادات الصوت والمعلومات" : language === "en" ? "Voice settings and information" : "آواز کی ترتیبات اور معلومات"}</summary>
+      <div className="assistant-voice-settings">
+        <label><input type="checkbox" checked={continuousVoice} onChange={event => setContinuousVoice(event.target.checked)} />{voiceUi.auto}</label>
+        {language !== "ar" && <label className="assistant-voice-select">{voiceUi.voice}<select value={selectedVoice} onChange={event => selectVoice(event.target.value)} disabled={voiceActive}>{LEGAL_VOICES.map(voice => <option key={voice} value={voice}>{voice[0].toUpperCase() + voice.slice(1)}</option>)}</select></label>}
+      </div>
+      <p className="assistant-voice-disclosure">{voiceUi.disclosure}</p>
+      <button className="text-button" onClick={openBooking}>{t.book}<ArrowLeft size={15} /></button>
+    </details>
+    <p className="disclaimer"><ShieldCheck size={15} />{tr(language, "التوجيه للمحكمة مبدئي، ويجب اعتماده من محامٍ بعد مراجعة المستندات والمواعيد.")}</p>
+    </div></div>;
 }
 
 function Library({ t, language, token }: { t: SiteCopy; language: Language; token: string }) {
