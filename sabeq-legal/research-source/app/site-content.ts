@@ -4,10 +4,12 @@ export const team = [
   { prefix: { ar: "المحامي الدكتور", en: "Attorney", ur: "Attorney" }, name: { ar: "خليفة محمد الخليفة", en: "Dr. Khalifa Mohammed Al Khalifa", ur: "Dr. Khalifa Mohammed Al Khalifa" }, image: "/images/team/dr-khalifa-original-navy.png" },
   { prefix: { ar: "المحامي", en: "Attorney", ur: "Attorney" }, name: { ar: "خالد علي الحبيب", en: "Khalid Ali Al Habib", ur: "Khalid Ali Al Habib" }, image: "/images/team/khalid-alhabib-navy.png" },
   { prefix: { ar: "المحامي", en: "Attorney", ur: "Attorney" }, name: { ar: "مشعل متعب", en: "Mishal Metaab", ur: "Mishal Metaab" }, image: "/images/team/mishal-metaab-navy.png" },
-  { prefix: { ar: "المحامي", en: "Attorney", ur: "Attorney" }, name: { ar: "محمد ساحب الشمري", en: "Mohammed Saheb Al Shammari", ur: "Mohammed Saheb Al Shammari" }, image: "/images/team/mohammed-saheb-navy.png" },
   { prefix: { ar: "المحامي", en: "Attorney", ur: "Attorney" }, name: { ar: "عبدالعزيز مشعان العازمي", en: "Abdulaziz Mashaan Al Azmi", ur: "Abdulaziz Mashaan Al Azmi" }, image: "/images/team/abdulaziz-mashaan-navy.png" },
+  { prefix: { ar: "المحامية", en: "Attorney", ur: "Attorney" }, name: { ar: "شوق الموسوي", en: "Shouq Al Mousawi", ur: "Shouq Al Mousawi" }, image: "/images/team/shouq-almousawi-navy.png" },
+  { prefix: { ar: "المحامي", en: "Attorney", ur: "Attorney" }, name: { ar: "محمد ساحب الشمري", en: "Mohammed Saheb Al Shammari", ur: "Mohammed Saheb Al Shammari" }, image: "/images/team/mohammed-saheb-navy.png" },
   { prefix: { ar: "المحامي", en: "Attorney", ur: "Attorney" }, name: { ar: "حمد ناصر الماضي", en: "Hamad Nasser Al Madi", ur: "Hamad Nasser Al Madi" }, image: "/images/team/hamad-almadi-navy.png" },
   { prefix: { ar: "المحامي", en: "Attorney", ur: "Attorney" }, name: { ar: "خالد مشعل الظفيري", en: "Khalid Mishal Al Dhafiri", ur: "Khalid Mishal Al Dhafiri" }, image: "/images/team/khalid-aldhafiri-navy.png" },
+  { prefix: { ar: "المحامي", en: "Attorney", ur: "Attorney" }, name: { ar: "حمد الشمري", en: "Hamad Al Shammari", ur: "Hamad Al Shammari" }, image: "/images/team/hamad-alshammari-navy.png" },
 ] as const;
 
 export const mediaVideos = [

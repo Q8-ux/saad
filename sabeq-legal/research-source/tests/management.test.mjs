@@ -15,14 +15,14 @@ function harness(){
  const statements=query=>{let args=[];return{bind(...values){args=values;return this;},async first(){return sqlite.prepare(query).get(...args)||null;},async all(){return{results:sqlite.prepare(query).all(...args)};},async run(){const result=sqlite.prepare(query).run(...args);return{success:true,meta:{changes:Number(result.changes)}};}};};
  const db={prepare:statements,async batch(values){const out=[];for(const v of values)out.push(await v.run());return out;}};
  const runtime={AUTH_SECRET:'synthetic-management-secret-'.repeat(3),MANAGEMENT_ALLOWED_EMAILS:'manager@example.test'};
- const cache=new Map(),network=[],identity={value:null};let transport=async()=>Response.json({error:'offline'},{status:503});
+ const cache=new Map(),network=[],logs=[],identity={value:null};let transport=async()=>Response.json({error:'offline'},{status:503});
  // Copy noble options into its module realm; the actual KDF runs unchanged across the VM boundary.
  const load=file=>{file=resolve(root,file);if(cache.has(file))return cache.get(file);const exports={};cache.set(file,exports);
   const source=ts.transpileModule(readFileSync(file,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,esModuleInterop:true}}).outputText;
   const localRequire=name=>{if(name==='@/db')return{getD1:()=>db};if(name==='cloudflare:workers')return{env:runtime};if(name==='next/headers')return{headers:async()=>new Headers(identity.value?{'oai-authenticated-user-id':'synthetic-id','oai-authenticated-user-email':identity.value}: {})};if(name==='next/navigation')return{redirect:()=>{throw Error('unexpected redirect helper');}};if(name==='@noble/hashes/pbkdf2.js'){const real=require(name);return {...real,pbkdf2Async:(hash,password,salt,opts)=>real.pbkdf2Async(hash,password,salt,{...opts})};}if(name.startsWith('@/'))return load(name.slice(2)+'.ts');if(name.startsWith('.'))return load(resolve(dirname(file),name+'.ts'));return require(name);};
-  vm.runInNewContext(source,{exports,require:localRequire,crypto:webcrypto,URL,URLSearchParams,TextEncoder,TextDecoder,Uint8Array,Headers,Request,Response,AbortSignal,Error,Date,JSON,btoa,atob,console,fetch:async(url,init={})=>{network.push({url:String(url),init});return transport(url,init);}});return exports;
+  vm.runInNewContext(source,{exports,require:localRequire,crypto:webcrypto,URL,URLSearchParams,TextEncoder,TextDecoder,Uint8Array,Headers,Request,Response,AbortSignal,Error,Date,JSON,btoa,atob,console:{...console,error:(...args)=>logs.push(args)},fetch:async(url,init={})=>{network.push({url:String(url),init});return transport(url,init);}});return exports;
  };
- return{sqlite,db,runtime,load,network,identity,setTransport:f=>transport=f,close:()=>sqlite.close()};
+ return{sqlite,db,runtime,load,network,logs,identity,setTransport:f=>transport=f,close:()=>sqlite.close()};
 }
 const request=(path,token,body,origin='https://q8-ux.github.io')=>new Request('https://sabeq-legal-public.centrino.chatgpt.site/api/management/'+path,{method:body?'POST':'GET',headers:{Origin:origin,...(token?{Authorization:'Bearer '+token}:{}),...(body?{'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{})});
 
@@ -353,7 +353,7 @@ test('verification email retains environment support and explicitly saved settin
 
 test('request and verify execute the real database flow; a wrong or reused code cannot create another session',async()=>{const h=harness();try{
  await h.load('lib/verification-email-settings.ts').verificationEmailAction(verificationConfig,'test');
- let code='';h.setTransport(async(url,init)=>{assert.equal(String(url),'https://api.resend.com/emails');assert.equal(init.method,'POST');assert.equal(init.redirect,'error');assert.equal(init.headers.Authorization,'Bearer '+verificationConfig.apiKey);const body=JSON.parse(init.body);assert.equal(body.from,'noreply@sabeq.legal');assert.deepEqual(body.to,[syntheticApplicant.email]);code=body.text.match(/\n\n(\d{6})\n\n/)[1];return Response.json({id:'synthetic-delivery-id'});});
+ let code='';h.setTransport(async(url,init)=>{assert.equal(String(url),'https://api.resend.com/emails');assert.equal(init.method,'POST');assert.equal(init.redirect,'manual');assert.equal(init.headers.Authorization,'Bearer '+verificationConfig.apiKey);const body=JSON.parse(init.body);assert.equal(body.from,'noreply@sabeq.legal');assert.deepEqual(body.to,[syntheticApplicant.email]);code=body.text.match(/\n\n(\d{6})\n\n/)[1];return Response.json({id:'synthetic-delivery-id'});});
  const requestRoute=h.load('app/api/auth/request-code/route.ts');
  const response=await requestRoute.POST(publicAuthRequest('request-code',syntheticApplicant));assert.equal(response.status,200);const challenge=await response.json();assert.equal(challenge.expiresIn,600);assert.ok(!JSON.stringify(challenge).includes(code));assert.ok(!JSON.stringify(challenge).includes(verificationConfig.apiKey));
  const row=h.sqlite.prepare('SELECT * FROM email_verification_challenges WHERE id=?').get(challenge.challengeId);assert.notEqual(row.code_hash,code);assert.equal(row.attempts,0);
@@ -367,11 +367,13 @@ test('request and verify execute the real database flow; a wrong or reused code 
 }finally{h.close();}});
 
 test('missing credentials, network failures and unconfirmed provider responses never return a challenge or create an account',async()=>{
- for(const failure of ['configuration','network','rejected','invalid-receipt']){const h=harness();try{
+ for(const failure of ['configuration','network','rejected','invalid-receipt','unverified-domain','invalid-key','restricted-test-recipient']){const h=harness();try{
   if(failure!=='configuration')await h.load('lib/verification-email-settings.ts').verificationEmailAction(verificationConfig,'test');
-  h.setTransport(async()=>{if(failure==='network')throw Error('private provider detail '+verificationConfig.apiKey);if(failure==='rejected')return Response.json({message:'private provider detail'},{status:403});return Response.json({message:'not a delivery receipt'});});
+  h.setTransport(async()=>{if(failure==='network')throw Error('private provider detail '+verificationConfig.apiKey);if(failure==='rejected')return Response.json({message:'private provider detail'},{status:403});if(failure==='unverified-domain')return Response.json({message:'The example.test domain is not verified. '+verificationConfig.apiKey},{status:403});if(failure==='invalid-key')return Response.json({message:'Invalid API key '+verificationConfig.apiKey},{status:401});if(failure==='restricted-test-recipient')return Response.json({message:'You can only send testing emails to private@example.test'},{status:403});return Response.json({message:'not a delivery receipt'});});
   const route=h.load('app/api/auth/request-code/route.ts'),response=await route.POST(publicAuthRequest('request-code',syntheticApplicant));assert.equal(response.status,503);const body=await response.json();assert.ok(body.error);assert.ok(!body.challengeId);assert.ok(!JSON.stringify(body).includes('private provider detail'));assert.ok(!JSON.stringify(body).includes(verificationConfig.apiKey));
   assert.equal(h.sqlite.prepare('SELECT count(*) n FROM email_verification_challenges').get().n,0);assert.equal(h.sqlite.prepare('SELECT count(*) n FROM public_users').get().n,0);assert.equal(h.sqlite.prepare('SELECT count(*) n FROM public_user_sessions').get().n,0);if(failure==='configuration')assert.equal(h.network.length,0);
+  const logs=JSON.stringify(h.logs);for(const secret of [verificationConfig.apiKey,'private provider detail','private@example.test'])assert.ok(!logs.includes(secret));
+  if(failure==='unverified-domain')assert.match(logs,/sender_domain_unverified/);if(failure==='invalid-key')assert.match(logs,/api_key_rejected/);if(failure==='restricted-test-recipient')assert.match(logs,/restricted_test_recipient/);
  }finally{h.close();}}
 });
 
