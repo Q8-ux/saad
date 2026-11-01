@@ -90,7 +90,7 @@ jobs:
           if [[ "$GITHUB_EVENT_NAME" == "push" && "$BEFORE_SHA" =~ ^[0-9a-f]{40}$ ]]; then
             git fetch --no-tags --depth=1 origin "$BEFORE_SHA"
             changed="$(git diff --name-only "$BEFORE_SHA" "$GITHUB_SHA")"
-            if [[ -n "$changed" ]] && ! echo "$changed" | grep -Ev '^(rattil/|\.github/workflows/deploy-pages\.yml$)' ; then
+            if [[ -n "$changed" ]] && echo "$changed" | grep -Eq '^rattil/' && ! echo "$changed" | grep -Ev '^(rattil/|\.github/workflows/deploy-pages\.yml$)' ; then
               echo "only=true" >> "$GITHUB_OUTPUT"
             fi
           fi
