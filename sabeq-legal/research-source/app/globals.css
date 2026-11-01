@@ -3897,7 +3897,7 @@ html[data-theme="dark"] .memo-result-tools .danger { border-color: #7b3d48; colo
   object-position: center;
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 721px) {
   .team-grid > .team-card:last-child:nth-child(3n + 1) { grid-column: 2; }
 }
 
