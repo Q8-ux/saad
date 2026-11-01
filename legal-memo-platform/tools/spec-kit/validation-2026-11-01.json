@@ -1,0 +1,116 @@
+{
+  "reviewed_date": "2026-11-01",
+  "scope": "Sabeq development workflow and existing acceptance checks",
+  "spec_kit": {
+    "version": "1.2.1",
+    "ref": "9dca9bf42a031765ee5e5f2371137f2f26967e11",
+    "upgraded": false,
+    "new_extensions": []
+  },
+  "github_baseline": "f6c17313fe564a7e5227243dcf47014398395d6b",
+  "native_source": {
+    "saved_version": 168,
+    "commit": "0675479f6a5beebc30c12045dee8a03c19393eeb"
+  },
+  "checks": {
+    "spec_kit_integration": {
+      "backend": 5,
+      "native": 5,
+      "public_mirror": 5,
+      "status": "passed"
+    },
+    "native_memo_acceptance": {
+      "status": "passed",
+      "command": [
+        "node",
+        "--test",
+        "tests/memo-preparation.test.mjs",
+        "tests/prepare-memo-route.test.mjs",
+        "tests/memo-journey.test.mjs",
+        "tests/assistant-memo-action.test.mjs",
+        "tests/memo-import-render.test.mjs",
+        "tests/payment-dialog.test.mjs",
+        "tests/pleading-layout.test.mjs",
+        "tests/memo-generation-control.test.mjs",
+        "tests/sadad-payments.test.mjs"
+      ],
+      "tests": 70,
+      "pass": 70,
+      "fail": 0,
+      "skipped": 0
+    },
+    "public_mirror_acceptance": {
+      "status": "passed",
+      "command": [
+        "node",
+        "--test",
+        "tests/memo-generation-control.test.mjs",
+        "tests/admin-bridge-contract.test.mjs",
+        "tests/memo-preparation.test.mjs",
+        "tests/prepare-memo-route.test.mjs",
+        "tests/memo-journey.test.mjs",
+        "tests/admin-memo-display.test.mjs",
+        "tests/admin-source-status.test.mjs",
+        "tests/assistant-memo-action.test.mjs",
+        "tests/memo-import-render.test.mjs",
+        "tests/payment-dialog.test.mjs",
+        "tests/pleading-layout.test.mjs",
+        "tests/management-source-connection.test.mjs"
+      ],
+      "tests": 64,
+      "pass": 64,
+      "fail": 0,
+      "skipped": 0
+    },
+    "dashboard_quality": {
+      "status": "passed",
+      "command": [
+        "node",
+        "scripts/check-dashboard-quality.mjs"
+      ]
+    },
+    "workflow_trigger_scope": {
+      "status": "passed",
+      "events": [
+        "push",
+        "pull_request"
+      ],
+      "unrelated_project_excluded": true
+    }
+  },
+  "matched_native_and_mirror_source_sha256": {
+    "app/api/legal/memo/route.ts": "4e2fcdab07810c448f57241482203571e4cdaaa3880c0828ceff232744a30732",
+    "lib/memo-preparation.ts": "825f36462e9b0634b9c21ea4ccfd477be8ee518d815eb79b1e43fc02467a882c",
+    "lib/memo-handoff.ts": "75f60002ad8ce62b290100da6db9ccf7237b2f9ab6b62fc7e31b49c82baa8f47",
+    "lib/memo-journey.ts": "665942caed777277e262726ee5c47756095f1a96c052a4ed775561c9ed238d21",
+    "lib/pleading-document.ts": "52fe5f38923c8bfc37c96abba4ef27789145ef2d417ce69b13881c5dd0deb87e",
+    "lib/legal-citation-review.ts": "42e9f0f99b0f84f4568a8efc5c87897b60aa66de6910a4379489c6d4ee2b3f18",
+    "lib/sadad-payments.ts": "0f7b54855b95279dd4a4fbb15695981ed29460c7fb12b859eccb2130a94e7bad",
+    "app/memo-payment-dialog.tsx": "3e978325d4bc7480c2165358ffdda55194427c0e5b6a32371daa61b865b28b4d"
+  },
+  "payment_test_transport": "in-memory SQLite with synthetic HTTP responses; no payment gateway calls",
+  "live_browser_test": "not_run",
+  "live_memo_generation": "not_run",
+  "real_payment": "not_run",
+  "new_word_pdf_visual_export": "not_run",
+  "legal_currency_verification": "not_run",
+  "runtime_changes": false,
+  "ci_status_at_record_creation": "pending_pull_request",
+  "github_verification": {
+    "pull_request": "https://github.com/Q8-ux/saad/pull/78",
+    "tested_head": "6a503eb00a41ba7d08694161c954aad12e03f61f",
+    "spec_kit": {
+      "conclusion": "success",
+      "run": "https://github.com/Q8-ux/saad/actions/runs/41277591894"
+    },
+    "memo_contract": {
+      "conclusion": "success",
+      "run": "https://github.com/Q8-ux/saad/actions/runs/41277591895"
+    },
+    "internal_release_checks": {
+      "conclusion": "success",
+      "run": "https://github.com/Q8-ux/saad/actions/runs/41277591917"
+    },
+    "note": "CI results identify the tested revision; completing this record changes documentation only."
+  }
+}
