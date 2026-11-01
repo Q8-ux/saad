@@ -65,16 +65,22 @@ jobs:
           BEFORE_SHA: ${{ github.event.before }}
         run: |
           only=false
+          changed_scope=false
           if [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" ]]; then
             only=true
+            changed_scope=true
           elif [[ "$GITHUB_EVENT_NAME" == "push" && "$BEFORE_SHA" =~ ^[0-9a-f]{40}$ && ! "$BEFORE_SHA" =~ ^0+$ ]]; then
             git fetch --no-tags --depth=1 origin "$BEFORE_SHA"
             changed="$(git diff --name-only "$BEFORE_SHA" "$GITHUB_SHA")"
+            if printf '%s\n' "$changed" | grep -Eq '^(tamweenat/|tamweenat-admin/|zad-restaurants/)' ; then
+              changed_scope=true
+            fi
             if [[ -n "$changed" ]] && ! printf '%s\n' "$changed" | grep -Eqv '^(tamweenat/|tamweenat-admin/|zad-restaurants/|\.github/workflows/deploy-pages\.yml$)' ; then
               only=true
             fi
           fi
           echo "only=$only" >> "$GITHUB_OUTPUT"
+          echo "changed=$changed_scope" >> "$GITHUB_OUTPUT"
       - name: Detect Rattil-only update
         id: rattil
         env:
@@ -122,7 +128,7 @@ jobs:
           test -s tamweenat-admin/index.html
           test -s tamweenat-api/catalog.json
       - name: Validate Tamweenat assistant
-        if: steps.scope.outputs.sabeq_only != 'true' && steps.tamweenat.outputs.only != 'true' && steps.rattil.outputs.only != 'true'
+        if: steps.tamweenat.outputs.changed == 'true' && steps.scope.outputs.sabeq_only != 'true' && steps.rattil.outputs.only != 'true'
         run: |
           node --check tamweenat/assets/support-runtime.js
           node --check tamweenat/assets/voice-assistant.js
