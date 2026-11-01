@@ -1,7 +1,7 @@
 {
-  "release": "2026-11-01-email-transport-team-three-columns",
-  "clientSource": "99e263019e53f25ba0400f0f1da8e2b2f750f341",
-  "backendSource": "3315ba7e854e89931ac6a6051e35b34e21d83772",
+  "release": "2026-11-01-article-text-in-memos",
+  "clientSource": "fd6b0cfd9f04bfec8b952ed2808e5653cdfd5978",
+  "backendSource": "fd6b0cfd9f04bfec8b952ed2808e5653cdfd5978",
   "assistant": "indirect-intake-completeness-1",
   "voice": "gulf-male-voice-4",
   "tools": "legal-tools-1",
@@ -21,14 +21,14 @@
   "finalMemo": "clean-no-review-notes-1",
   "memoResultTools": "bottom-vector-actions-1",
   "memoPreview": "document-derived-clean-text-1",
-  "githubPagesAsset": "index-BTeYgSjR.js",
+  "githubPagesAsset": "index-CRLgk942.js",
   "memoLanguage": "ar-KW",
   "memoDirection": "rtl",
   "memoAlignment": "right",
   "interfaceLocalization": "ar-en-ur-tools-guidance-1",
   "memoProseLanguage": "arabic-with-protected-names-and-identifiers-1",
   "builtAt": "2026-11-01",
-  "backendVersion": 174,
+  "backendVersion": 175,
   "pleadingLayout": "first-page-only-sidebar-and-frame-full-width-right-aligned-continuations",
   "citationCorrection": "one-bounded-server-retry-before-archive",
   "legalSourceDirectory": "6-catalogues-3-fetched-0-new-citable-pdfs",
@@ -171,5 +171,17 @@
     "providerStatus": 403,
     "reason": "sender_domain_unverified",
     "deliveryVerified": false
+  },
+  "memoArticleText": {
+    "revision": "source-wording-in-body-1",
+    "source": "bound-file-only-or-existing-source-verification",
+    "partialTextLabel": "مقتطف من نص المادة",
+    "nativeChecksPassed": 260,
+    "focusedTestsPassed": 90,
+    "publicCitationTestsPassed": 18,
+    "exports": "text-HTML-Word;synthetic-Word-rendered-to-PDF-and-browser-RTL-inspected",
+    "liveModelGenerationTested": false,
+    "livePaymentTested": false,
+    "historicalMemosRegenerated": false
   }
 }

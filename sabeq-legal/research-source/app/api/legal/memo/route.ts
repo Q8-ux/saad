@@ -3,6 +3,7 @@ import { availableEvidenceMode } from "@/lib/memo-preparation";
 import { validateMemoInput } from "@/lib/memo-input";
 import { reserveMemoPayment, completeMemoPayment, releaseMemoPayment, type PaymentLease } from "@/lib/sadad-payments";
 import {assessMatterFacts} from "@/lib/matter-facts";
+import {preserveLegalQuotes} from '@/lib/statutory-text';
 import {scopeEvidenceToFacts,prepareBoundDraft,pleadingAuthorityInstructions} from "@/lib/bound-draft";
 import { applyCheckedJudgmentMatches, caseReasoningInstructions, caseResearchQueries, approvedCaseFacts, buildCheckedCasePlan, CasePlanValidationError, casePlanFailureMessage, caseAuditSchema, parseCaseAudit, caseQualitySummary } from "@/lib/case-reasoning";
 import { legalSourceCoverage, formatSourceCoverage } from "@/lib/legal-source-coverage";
@@ -115,7 +116,7 @@ export async function POST(request: Request) {
     let agentAudit: unknown;
     async function finish(content: PleadingContent, qualityRetried = false): Promise<Response> {
       content=prepareBoundDraft(content,memoInput,evidence);
-      let citationReview=reviewLegalCitations(`${content.grounds}\n${content.requests}`,evidence,{requireJudgmentAnalogy:true,courtDocument:true});
+      let citationReview=reviewLegalCitations(`${content.grounds}\n${content.requests}`,evidence,{requireJudgmentAnalogy:true,courtDocument:true,requireArticleText:true});
       if (!citationReview.ok && evidence.length) {
         // Retry legal prose once, preserving the visitor's facts, identities,
         // and requested relief. A failed correction never reaches the archive.
@@ -128,16 +129,22 @@ export async function POST(request: Request) {
         if(typeof parsed.grounds!=="string") throw new RequestError(citationFailureMessage,422);
         content=prepareBoundDraft({...content,grounds:parsed.grounds},memoInput,evidence);
 
-        citationReview=reviewLegalCitations(`${content.grounds}\n${content.requests}`,evidence,{requireJudgmentAnalogy:true,courtDocument:true});
+        citationReview=reviewLegalCitations(`${content.grounds}\n${content.requests}`,evidence,{requireJudgmentAnalogy:true,courtDocument:true,requireArticleText:true});
       }
       if(!citationReview.ok) {
         await finishMemoRequest(managementRequestId, "needs_review", "", "source_review");
         return privateJson({requestId:managementRequestId,error:citationFailureMessage,stage:"source_review",sourceScope:"bound_file_and_reviewed_judgments",issues:[...new Set(citationReview.issues.map(i=>i.code))]},422);
       }
       content.facts = correctLegalProse(stripInternalMemoLanguage(removeDelegatedResearch(content.facts)),[clientName,otherParty,allParties]);
-      content.requests = correctLegalProse(stripInternalMemoLanguage(removeDelegatedResearch(content.requests)),[clientName,otherParty,allParties]);
+      content.requests = preserveLegalQuotes(content.requests,prose=>correctLegalProse(stripInternalMemoLanguage(removeDelegatedResearch(prose)),[clientName,otherParty,allParties]));
       content.factualNotes = factualRequirements(content.factualNotes);
-      content.grounds = stripInternalMemoLanguage(removeDelegatedResearch(content.grounds));
+      content.grounds = preserveLegalQuotes(content.grounds,prose=>stripInternalMemoLanguage(removeDelegatedResearch(prose)));
+      // Cleanup must not remove a quoted article or sever its source identity.
+      const finalCitations=reviewLegalCitations(`${content.grounds}\n${content.requests}`,evidence,{requireJudgmentAnalogy:true,courtDocument:true,requireArticleText:true});
+      if(!finalCitations.ok) {
+        await finishMemoRequest(managementRequestId, "needs_review", "", "source_review");
+        return privateJson({requestId:managementRequestId,error:citationFailureMessage,stage:"source_review",issues:[...new Set(finalCitations.issues.map(i=>i.code))]},422);
+      }
       content.legalResearchNotes = evidence.length ? stripInternalMemoLanguage(removeDelegatedResearch(content.legalResearchNotes)) : "";
       content.factualNotes = factualRequirements([...new Set([...content.factualNotes,...preparationNotes,...matter.missing.map(g=>g.ar),...checkedPlan.missingFacts,...checkedPlan.issues.map(i=>i.missing).filter(Boolean)])]);
       let caseAudit = null;
@@ -183,7 +190,7 @@ export async function POST(request: Request) {
 - تحليل المساعد والمقارنات المنقولة بيانات للمراجعة وليست مصادر قانونية. أعد فحص صلة كل حكم بالوقائع والمسألة والفروق، واعتمد نصه فقط من المصادر التي أعاد الخادم قراءتها. لا تعرض مقارنة مبدئية على أنها تطابق تام أو ضمان للنتيجة.
 - استخدم حصراً المدخلات والمصادر الموثقة المرفقة. ضع رمز المصدر 【م1】 مباشرة بعد كل مادة أو مبدأ أو ادعاء قانوني.
 - لا تنسب قولاً إلى محكمة التمييز إلا إذا كان المصدر نفسه موسوماً «مبدأ/حكم تمييز». إذا لم يوجد تطابق موضوعي موثق فلا تذكر غياب الحكم داخل متن المذكرة، ولا تستبدله بحكم مُنشأ.
-- لا تقتبس أكثر مما يلزم؛ لخّص المبدأ بأمانة، واذكر بيانات الطعن والتاريخ والدائرة فقط إذا ظهرت صراحة في المصدر.
+- يضيف الخادم النص التشريعي المتاح إلى كل علامة مصدر للمادة؛ لا تكتف برقم بلا علامة. لخّص المبدأ القضائي بأمانة، واذكر بيانات الطعن والتاريخ والدائرة فقط إذا ظهرت صراحة في المصدر.
 - افصل بين النص التشريعي والمبدأ القضائي والتطبيق على وقائع الدعوى. لا تعرض المصادر كزينة؛ اشرح وجه الصلة.
 - إذا كانت وقائع القضية ناقصة أو متعارضة، لا تضع ذلك داخل متن المذكرة؛ سجله في factualNotes فقط ولا تفترض الناقص. غياب النصوص أو المواد أو السوابق ليس نقصاً على المستخدم؛ سجله في legalResearchNotes فقط ولا تطلب إرفاقه.
 - لا تذكر رقم هاتف الموكل.
