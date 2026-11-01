@@ -1,0 +1,1 @@
+{"name":"kuwait-fiqh-reader","private":true,"type":"module","scripts":{"test":"node --test tests/*.test.mjs","check":"node --check app.mjs && node --check engine.mjs && node --check search-worker.mjs && node --check sw.js"}}

@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#f7f5ef">
+  <meta name="description" content="اقرأ الموسوعة الفقهية الكويتية وابحث في مجلداتها مع الإحالة إلى ملفات وزارة الأوقاف الأصلية. مفضلة وملاحظات وقراءة مريحة.">
+  <title>الموسوعة الفقهية الكويتية | مكتبة البحث والقراءة</title>
+  <link rel="icon" href="./assets/icon.svg" type="image/svg+xml">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="preload" href="./assets/fonts/Cairo-Variable.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="./assets/fonts/Amiri-Regular.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="stylesheet" href="./styles.css">
+  <script type="module" src="./app.mjs"></script>
+</head>
+<body>
+<a class="skip" href="#main">انتقل إلى المحتوى</a>
+<header class="topbar">
+  <a class="brand" href="#library" aria-label="الموسوعة الفقهية الكويتية، المكتبة">
+    <svg viewBox="0 0 48 48" width="44" height="44" aria-hidden="true"><path d="M24 12c-6-5-13-5-19-3v29c7-2 13-1 19 3 6-4 12-5 19-3V9c-6-2-13-2-19 3Z" fill="none" stroke="currentColor" stroke-width="2.3"/><path d="M24 12v29M11 16c3-1 5 0 8 1m-8 6c3-1 5 0 8 1m10-7c3-1 5-2 8-1m-8 8c3-2 5-2 8-1" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+    <span>الموسوعة الفقهية<span class="brand-sub">الكويتية · مكتبة البحث والقراءة</span></span>
+  </a>
+  <nav class="main-nav" aria-label="التنقل الرئيسي">
+    <a href="#library" data-nav="library">المكتبة</a>
+    <a href="#research" data-nav="research">الباحث الفقهي</a>
+    <a href="#saved" data-nav="saved">محفوظاتي <span id="saved-count">٠</span></a>
+  </nav>
+  <div class="header-actions"><button id="theme" class="icon-button" aria-label="تفعيل الوضع الليلي" title="تبديل المظهر">◐</button><button id="about" class="quiet">عن المكتبة</button></div>
+</header>
+<main id="main" tabindex="-1">
+  <div id="startup" class="loading-state" role="status">جارٍ فتح فهرس الموسوعة…</div>
+  <section id="library-view" hidden>
+    <div class="hero">
+      <div class="hero-copy"><div class="eyebrow"><span class="line"></span> من أصول الفقه إلى تفاصيل المسألة</div>
+        <h1>الفقهُ بين يديك،<br><span>بكامل سياقه.</span></h1>
+        <p>ابحث في الموسوعة، واقرأ النص، وارجع إلى أصله.<br>مساحة هادئة لطالب العلم والباحث.</p>
+        <form id="search-form" class="search-box" role="search">
+          <label for="query" class="sr-only">ابحث في نص الموسوعة</label>
+          <svg viewBox="0 0 24 24" width="23" height="23" aria-hidden="true"><circle cx="10" cy="10" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="m15 15 6 6" stroke="currentColor" stroke-width="2"/></svg>
+          <input id="query" name="query" type="search" placeholder="مسألة، مصطلح، أو عبارة فقهية…" autocomplete="off" maxlength="240">
+          <button type="button" id="voice-search" class="icon-button" aria-label="البحث بالصوت" title="البحث بالصوت"><svg width="19" height="23" viewBox="0 0 20 24" aria-hidden="true"><rect x="6" y="2" width="8" height="13" rx="4" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M3 11v2a7 7 0 0 0 14 0v-2M10 20v3M6 23h8" fill="none" stroke="currentColor" stroke-width="1.7"/></svg></button>
+          <button class="primary" type="submit">ابحث</button>
+        </form>
+        <div class="quick-topics"><span>ابدأ بموضوع</span><button data-topic="الصلاة">الصلاة</button><button data-topic="زكاة الفطر">زكاة الفطر</button><button data-topic="الوقف">الوقف</button><button data-topic="الإجارة">الإجارة</button></div>
+      </div>
+      <aside class="library-mark" aria-label="المجلدات ومصدرها"><span class="edition">المكتبة الفقهية</span><div class="large-number">٤٥</div><div class="vol-label">مجلدًا في رحاب الفقه</div><div class="ornament" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 20 20"><path d="M10 1 12 8 19 10 12 12 10 19 8 12 1 10 8 8Z" fill="currentColor"/></svg></div><p>العمل الأصلي<br><strong>وزارة الأوقاف والشؤون الإسلامية</strong><br>دولة الكويت</p><a href="#sources">تعرّف على المصادر <span aria-hidden="true">←</span></a></aside>
+    </div>
+    <div class="library-toolbar"><div><div class="eyebrow">على رفّ المكتبة</div><h2>مجلدات الموسوعة</h2></div><div class="catalog-controls"><label for="volume-filter" class="sr-only">اختيار مجلد</label><select id="volume-filter"><option value="all">جميع المجلدات</option><option value="1-15">المجلدات ١–١٥</option><option value="16-30">المجلدات ١٦–٣٠</option><option value="31-45">المجلدات ٣١–٤٥</option></select><button id="resume" class="outline" hidden>تابع قراءتك ←</button></div></div>
+    <div id="volume-grid" class="volume-grid"></div>
+    <div class="catalog-bottom"><span id="catalog-status"></span><button id="show-all" class="outline">عرض المجلدات الـ٤٥</button></div>
+    <section class="research-invite"><div><span class="eyebrow">سؤالٌ يقود إلى نصّ</span><h2>تتبّع المسألة في مواضعها.</h2><p>اكتب موضوع بحثك للوصول إلى النصوص ذات الصلة، ثم اقرأ ما قبلها وما بعدها.</p></div><a class="primary" href="#research">افتح الباحث الفقهي <span aria-hidden="true">←</span></a></section>
+  </section>
+  <section id="research-view" class="research-view" hidden>
+    <div class="page-heading"><div class="eyebrow">بحث من المصدر</div><h1>الباحث الفقهي</h1><p>النتائج نصوص من الموسوعة مع مواضعها. لا ينشئ الباحث فتاوى أو أحكامًا جديدة.</p></div>
+    <form id="research-form" class="research-form"><label for="research-query">ما المسألة التي تبحث عنها؟</label><div class="search-box"><input id="research-query" name="research_query" type="search" placeholder="مثال: شروط الوقف، زكاة الفطر…" maxlength="240" autocomplete="off"><button class="primary" type="submit">ابحث في النصوص</button></div><div class="search-filters"><label>نطاق البحث <select id="search-volume" name="volume"><option value="all">كل المجلدات</option></select></label><label><input type="checkbox" id="exact-phrase"> العبارة كما هي</label><span>يتجاهل البحث التشكيل وفروق الهمزات.</span></div></form>
+    <div id="research-status" class="results-status" role="status" aria-live="polite">جرّب موضوعًا فقهيًا أو مصطلحًا من الموسوعة.</div>
+    <div id="results" class="results"></div><button id="more-results" class="outline" hidden>المزيد من النتائج</button>
+  </section>
+  <section id="reader-view" class="reader-layout" hidden>
+    <aside class="reader-sidebar"><a href="#library" class="back-link">→ المكتبة</a><div class="eyebrow">تصفح المجلد</div><h2 id="sidebar-title"></h2><label class="sr-only" for="reader-volume">المجلد</label><select id="reader-volume"></select><label class="toc-label" for="toc-filter">عناوين المجلد</label><input type="search" id="toc-filter" placeholder="تصفية العناوين…" autocomplete="off"><div id="toc" class="toc"></div></aside>
+    <div class="reader-main"><div class="reader-toolbar"><div class="reader-tools"><button id="reader-save" class="outline">حفظ الموضع</button><button id="reader-copy" class="quiet">نسخ المرجع</button><button id="reader-print" class="quiet">طباعة</button><button id="reader-speak" class="quiet">استمع</button></div><div class="reader-font"><button id="font-smaller" class="icon-button" aria-label="تصغير خط القراءة">أ−</button><button id="font-larger" class="icon-button" aria-label="تكبير خط القراءة">أ+</button><button id="diacritics" class="quiet" aria-pressed="true">التشكيل</button></div></div>
+      <div id="reader-loading" class="loading-state" role="status" hidden>جارٍ فتح المجلد…</div>
+      <article id="reading-sheet" class="reading-sheet"><div class="reading-meta" id="reading-meta"></div><h1 id="reading-title"></h1><p class="extraction-note">نص مستخرج آليًا من ملف Word الرسمي. للتثبت من الآيات والرموز والحواشي راجع النسخة المصوّرة. أرقام المواضع هنا رقمية، وليست صفحات المطبوع.</p><div id="reading-text" class="reading-text"></div><div class="source-bar"><span>تحقّق من الأصل</span><a id="source-pdf" class="outline" target="_blank" rel="noopener">النسخة المصوّرة PDF ↗</a><a id="source-doc" target="_blank" rel="noopener">ملف Word الرسمي ↗</a></div></article>
+      <div class="reader-pagination"><button id="previous" class="outline">→ المواضع السابقة</button><form id="jump-form"><label for="jump-location">انتقل إلى موضع</label><input id="jump-location" name="location" type="number" inputmode="numeric" min="1"><button class="quiet" type="submit">انتقل</button></form><button id="next" class="outline">المواضع التالية ←</button></div>
+      <section class="note-box"><label for="reader-note">ملاحظتك على هذا الموضع <span>محفوظة على جهازك</span></label><textarea id="reader-note" rows="3" maxlength="15000" placeholder="دوّن فكرة، مقارنة، أو مرجعًا…"></textarea><button id="save-note" class="primary">حفظ الملاحظة</button></section>
+    </div>
+  </section>
+  <section id="saved-view" hidden><div class="page-heading"><div class="eyebrow">رفّك الخاص</div><h1>محفوظاتي وملاحظاتي</h1><p>تُحفظ على هذا المتصفح. صدّر نسخة احتياطية لتحتفظ بها أو تنقلها إلى جهاز آخر.</p><div class="saved-actions"><button id="export-notes" class="outline">تصدير نسخة احتياطية</button><label class="button outline" for="import-notes">استيراد نسخة<input type="file" id="import-notes" accept="application/json,.json" class="sr-only"></label></div></div><div id="saved-items" class="results"></div></section>
+  <section id="sources-view" hidden><div class="page-heading"><div class="eyebrow">أمانةُ النقل</div><h1>عن المكتبة ومصادرها</h1></div><div class="about-content"><h2>المصدر الأصلي</h2><p>الموسوعة الفقهية الكويتية من إصدار وزارة الأوقاف والشؤون الإسلامية في دولة الكويت. روابط ملفات المجلدات الـ٤٥ مأخوذة من موقع إدارة البحوث والموسوعات الإسلامية.</p><a class="outline" href="https://bohoth.awqaf.gov.kw/ar/الموسوعة%20الفقهية" target="_blank" rel="noopener">فهرس الوزارة الأصلي ↗</a><h2>كيف أُعدّت النصوص؟</h2><p>استُخرجت نصوص القراءة والبحث آليًا من ملفات Word الرسمية بتاريخ ١ نوفمبر ٢٠٢٦. قد لا تنتقل بعض الرموز والآيات والخطوط المتخصصة بدقة. كل موضع يحمل رابط المجلد الأصلي بصيغتي Word وPDF، والنسخة المصوّرة هي مرجع التحقق. لم تُختلق أرقام صفحات للمطبوع.</p><h2>الباحث والقراءة الصوتية</h2><p>الباحث يسترجع النصوص بالبحث اللغوي، ويعرض كلمات البحث في سياقها. لا يستخدم نموذجًا لتوليد الفتاوى ولا يختار قولًا فقهيًا عن المستخدم. الإدخال الصوتي والاستماع يعتمدان على دعم جهازك ومتصفحك، وقد يستخدم التعرف على الصوت خدمة تابعة للمتصفح بعد إذنك.</p><h2>خصوصيتك</h2><p>لا حساب مطلوب، ولا أدوات تتبع أو تحليلات مضافة. ملاحظاتك ومفضلتك محفوظة في متصفحك، ولا تُرسل إلى خادم خاص بنا. قراءة ملف للمرة الأولى تحتاج اتصالًا، ثم يُتاح ما خزّنه المتصفح دون اتصال. حذف بيانات المتصفح يحذف الملاحظات؛ استخدم النسخة الاحتياطية.</p><h2>صفة المشروع</h2><p>هذه منصة قراءة وبحث مستقلة وليست موقعًا رسميًا للوزارة، وليست نسخة ويب صادرة عن مطوّر تطبيق ويندوز.</p><a href="https://github.com/Q8-ux/saad/tree/main/kuwait-fiqh" target="_blank" rel="noopener">مصدر المشروع على GitHub ↗</a></div></section>
+</main>
+<footer class="footer"><span>الموسوعة الفقهية الكويتية <span class="footer-dot">·</span> العلم في سياقه، والنص إلى مصدره.</span><a href="#sources">المصادر والخصوصية</a></footer>
+<div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+<noscript><p class="loading-state">فعّل JavaScript للبحث والقراءة، أو استخدم <a href="https://bohoth.awqaf.gov.kw/ar/الموسوعة%20الفقهية">فهرس الوزارة الأصلي</a>.</p></noscript>
+</body>
+</html>

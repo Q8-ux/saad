@@ -1,0 +1,6 @@
+.openai/
+node_modules/
+.preview/
+dist/
+__pycache__/
+data/

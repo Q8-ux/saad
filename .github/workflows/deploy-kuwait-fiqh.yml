@@ -1,0 +1,92 @@
+name: Publish Kuwait Fiqh Encyclopedia
+on:
+  push:
+    branches: [main]
+    paths: ['kuwait-fiqh/**', '.github/workflows/deploy-kuwait-fiqh.yml']
+  workflow_dispatch:
+  workflow_run:
+    workflows: ['Deploy All GitHub Pages Sites']
+    types: [completed]
+    branches: [main]
+permissions:
+  contents: read
+  actions: read
+  deployments: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages-v2
+  cancel-in-progress: false
+jobs:
+  publish:
+    if: github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_repository.full_name == github.repository)
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && 'main' || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Obtain the pinned Word extraction tool
+        uses: actions/checkout@v4
+        with:
+          repository: grobian/antiword
+          ref: 82515aad16ceedc1061ae3777acb99c90d3d3e08
+          path: .fiqh-antiword
+          persist-credentials: false
+      - name: Compile the reviewed extraction tool
+        run: make -C .fiqh-antiword -j2 antiword
+      - uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/fiqh-documents
+          key: fiqh-official-docs-${{ hashFiles('kuwait-fiqh/official-sources.json') }}
+      - name: Rebuild verified source data
+        run: >-
+          python -u kuwait-fiqh/tools/import_official.py
+          --links kuwait-fiqh/official-links.json
+          --cache "${{ runner.temp }}/fiqh-documents"
+          --antiword "$GITHUB_WORKSPACE/.fiqh-antiword/antiword"
+          --resources "$GITHUB_WORKSPACE/.fiqh-antiword/Resources"
+      - name: Verify source corpus and search behavior
+        working-directory: kuwait-fiqh
+        run: npm test && npm run check
+      - uses: actions/configure-pages@v5
+      - name: Preserve current sites and add the encyclopedia only
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GITHUB_SHA: ${{ github.event_name == 'workflow_run' && '' || github.sha }}
+        run: |
+          export GITHUB_SHA="$(git rev-parse HEAD)"
+          python kuwait-fiqh/deployment/publish.py
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+          retention-days: 30
+      - uses: actions/deploy-pages@v4
+        id: deploy
+      - name: Verify deployed release
+        run: |
+          python - <<'PY'
+          import subprocess, time, urllib.request
+          sha = subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()
+          url = 'https://q8-ux.github.io/saad/kuwait-fiqh/release-version.txt'
+          for attempt in range(8):
+              try:
+                  req = urllib.request.Request(url + '?release=' + sha, headers={'Cache-Control': 'no-cache'})
+                  with urllib.request.urlopen(req, timeout=20) as response:
+                      if response.read().decode().strip() == sha:
+                          print('Verified live encyclopedia release:', sha)
+                          break
+              except Exception as error:
+                  print('Awaiting live release:', type(error).__name__)
+              time.sleep(8)
+          else:
+              raise SystemExit('Live release did not match the deployed source')
+          PY
