@@ -95,5 +95,22 @@
   "new_word_pdf_visual_export": "not_run",
   "legal_currency_verification": "not_run",
   "runtime_changes": false,
-  "ci_status_at_record_creation": "pending_pull_request"
+  "ci_status_at_record_creation": "pending_pull_request",
+  "github_verification": {
+    "pull_request": "https://github.com/Q8-ux/saad/pull/78",
+    "tested_head": "6a503eb00a41ba7d08694161c954aad12e03f61f",
+    "spec_kit": {
+      "conclusion": "success",
+      "run": "https://github.com/Q8-ux/saad/actions/runs/41277591894"
+    },
+    "memo_contract": {
+      "conclusion": "success",
+      "run": "https://github.com/Q8-ux/saad/actions/runs/41277591895"
+    },
+    "internal_release_checks": {
+      "conclusion": "success",
+      "run": "https://github.com/Q8-ux/saad/actions/runs/41277591917"
+    },
+    "note": "CI results identify the tested revision; completing this record changes documentation only."
+  }
 }
