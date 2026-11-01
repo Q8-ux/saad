@@ -75,7 +75,7 @@ jobs:
             if printf '%s\n' "$changed" | grep -Eq '^(tamweenat/|tamweenat-admin/|zad-restaurants/)' ; then
               changed_scope=true
             fi
-            if [[ -n "$changed" ]] && ! printf '%s\n' "$changed" | grep -Eqv '^(tamweenat/|tamweenat-admin/|zad-restaurants/|\.github/workflows/deploy-pages\.yml$)' ; then
+            if [[ "$changed_scope" == "true" && -n "$changed" ]] && ! printf '%s\n' "$changed" | grep -Eqv '^(tamweenat/|tamweenat-admin/|zad-restaurants/|\.github/workflows/deploy-pages\.yml$)' ; then
               only=true
             fi
           fi
