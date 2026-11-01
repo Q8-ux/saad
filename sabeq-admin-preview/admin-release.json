@@ -1,13 +1,13 @@
 {
   "revision": "independent-admin-15-cairo",
-  "backendSource": "91064b636d773a033cccb80796a4f57e52993007",
+  "backendSource": "3315ba7e854e89931ac6a6051e35b34e21d83772",
   "sourceRepository": "https://github.com/Q8-ux/saad",
   "paymentVisibility": "admin-only-by-default",
   "paymentsLink": "#payments",
   "programmerLink": "#programmer",
   "programmerScope": "advice-and-explicit-follow-up",
   "fccGateway": "requires-independent-configured-service",
-  "backendVersion": 150,
+  "backendVersion": 174,
   "projectProviderConfigured": true,
   "liveInferenceVerified": false,
   "localChecksPassed": 206,
@@ -19,7 +19,7 @@
   "authenticatedBrowserTested": false,
   "liveReadOnlyChecksPassed": true,
   "verificationEmailLink": "#mail",
-  "verificationEmailConfigured": false,
+  "verificationEmailConfigured": true,
   "verificationEmailDeliveryVerified": false,
   "verificationEmailRequires": "resend-sending-key-and-verified-domain",
   "presentationChecksPassed": 5,
@@ -35,5 +35,7 @@
   "liveApiLoginVersion": 148,
   "font": "Cairo",
   "fontSource": "local-variable-200-1000",
-  "fontValidation": "400-and-600-loaded;login-and-form-inheritance;375-and-305px-no-horizontal-page-overflow;native-build-and-9-publication-tests-passed"
+  "fontValidation": "400-and-600-loaded;login-and-form-inheritance;375-and-305px-no-horizontal-page-overflow;native-build-and-9-publication-tests-passed",
+  "verificationEmailTransport": "workerd-compatible-manual-redirects;4-worker-regressions-passed",
+  "verificationEmailDeliveryBlocker": "sender_domain_unverified;Resend-403;requires-DNS-verification"
 }

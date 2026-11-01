@@ -116,7 +116,7 @@ export async function boundedEventBody(request: Request, limit: number) {
 }
 async function resendRequest(config: MailConfig, path: string, method = "GET", data?: unknown) {
   try {
-    const response = await fetch(`https://api.resend.com/${path}`, { method, redirect: "error", headers: { Authorization: `Bearer ${config.apiKey}`, "Content-Type": "application/json" }, ...(data ? { body: JSON.stringify(data) } : {}), signal: AbortSignal.timeout(15_000) });
+    const response = await fetch(`https://api.resend.com/${path}`, { method, redirect: "manual", headers: { Authorization: `Bearer ${config.apiKey}`, "Content-Type": "application/json" }, ...(data ? { body: JSON.stringify(data) } : {}), signal: AbortSignal.timeout(15_000) });
     if (!response.ok) throw new RequestError(`رفض مزود البريد الطلب (HTTP ${response.status}).`, 502);
     const text = await response.text();
     if (text.length > 1_000_000) throw new RequestError("رسالة البريد أكبر من الحد المسموح للعرض.", 413);

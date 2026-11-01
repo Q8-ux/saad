@@ -732,7 +732,7 @@ select {
 
 .team-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 20px;
 }
 
@@ -747,7 +747,7 @@ select {
 }
 
 .team-card-lead {
-  grid-column: span 2;
+  grid-column: span 1;
 }
 
 .team-photo {
@@ -794,7 +794,7 @@ select {
   margin: 0;
   font-size: clamp(16px, 6.2cqi, 20px);
   line-height: 1.6;
-  white-space: nowrap;
+  white-space: normal;
 }
 
 .team-info h3[dir="ltr"] {
@@ -3556,7 +3556,6 @@ html[data-theme="dark"] .instagram-frame iframe {
   .section,
   .memo-band { padding-block: 74px; }
   .section-heading { margin-bottom: 35px; }
-  .team-grid,
   .services-grid,
   .packages-grid,
   .media-grid,
@@ -3896,6 +3895,18 @@ html[data-theme="dark"] .memo-result-tools .danger { border-color: #7b3d48; colo
 .team-grid .team-photo img {
   object-fit: contain;
   object-position: center;
+}
+
+@media (max-width: 720px) {
+  .team-grid { gap: 12px 8px; }
+  .team-grid .team-card { display: flex; flex-direction: column; aspect-ratio: auto; border-radius: 12px; }
+  .team-grid .team-photo { position: relative; aspect-ratio: 4 / 5; flex-shrink: 0; }
+  .team-grid .team-photo::after { background: none; }
+  .team-grid .team-info { position: static; padding: 8px 6px 12px; gap: 4px; }
+  .team-grid .team-info h3 { font-size: 16px; line-height: 1.6; overflow-wrap: anywhere; }
+  .team-grid .team-info h3[dir="ltr"] { font-size: 14px; }
+  .team-grid .team-info span { align-items: flex-start; gap: 4px; font-size: 12px; }
+  .team-grid .team-info span svg { width: 12px; height: 12px; margin-block-start: 3px; }
 }
 
 /* Approved assistant identity, owned by React rather than a DOM observer. */

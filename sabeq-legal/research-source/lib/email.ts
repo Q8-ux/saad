@@ -61,7 +61,7 @@ export async function sendVerificationCode(options: {
   try {
     response = await fetch("https://api.resend.com/emails", {
       method: "POST",
-      redirect: "error",
+      redirect: "manual",
       headers: {
         Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
@@ -82,11 +82,22 @@ export async function sendVerificationCode(options: {
       }),
       signal: AbortSignal.timeout(12_000),
     });
-  } catch {
+  } catch (error) {
+    console.error("verification_email_delivery_failed", { stage: "transport", reason: error instanceof Error && error.name === "TimeoutError" ? "timeout" : "connection" });
     throw new EmailDeliveryError("delivery");
   }
 
   if (!response.ok) {
+    let reason = response.status === 401 ? "api_key_rejected" : "provider_rejected";
+    if (response.status === 403) {
+      try {
+        const result = await response.json() as { message?: unknown };
+        const message = typeof result.message === "string" ? result.message : "";
+        if (/domain is not verified/i.test(message)) reason = "sender_domain_unverified";
+        else if (/only send testing emails/i.test(message)) reason = "restricted_test_recipient";
+      } catch { /* Provider response details are never logged. */ }
+    }
+    console.error("verification_email_delivery_failed", { stage: "provider", status: response.status, reason });
     throw new EmailDeliveryError("delivery");
   }
   try {
@@ -95,6 +106,7 @@ export async function sendVerificationCode(options: {
       throw new EmailDeliveryError("delivery");
     }
   } catch {
+    console.error("verification_email_delivery_failed", { stage: "receipt", reason: "invalid_receipt" });
     throw new EmailDeliveryError("delivery");
   }
 }
