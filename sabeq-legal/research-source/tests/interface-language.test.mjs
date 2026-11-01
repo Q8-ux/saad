@@ -74,7 +74,7 @@ for (const language of ['en','ur']) {
     const intake = {caseType:'عمالي',caseStage:'قبل التقاضي',court:'المحكمة الكلية',courtCircuit:'الدائرة العمالية',jurisdictionConfidence:'low',facts:['Synthetic case facts for testing.'],requests:[],legalIssues:[],importantDates:[],documentsNeeded:[],missingInformation:[],jurisdictionMissing:[],contradictions:[],nextQuestions:[],caseSummary:'Synthetic case.',jurisdictionReason:'',progress:50,memoPrefill:{},legalBasis:[],precedentMatches:[],analysisWarnings:[]};
     const components = modules()('app/sabeq-site.tsx');
     const html = renderToStaticMarkup(React.createElement(components.Assistant,{...props(language),initialSession:{question:'',messages:[],intake}}));
-    assert.ok(html.includes(locale.interfaceText(language,'التوجيه للمحكمة مبدئي، ويجب اعتماده من محامٍ بعد مراجعة المستندات والمواعيد.')));
+    assert.ok(html.includes(locale.interfaceText(language,'يجب اعتماده من مجموعة سابق القانونية.')));
     assert.ok(html.includes(locale.interfaceText(language,'أدوات المحادثة')));
     assert.ok(html.includes(locale.interfaceText(language,'الدائرة العمالية')));
     if (language === 'en') assertEnglish(html);

@@ -4,7 +4,7 @@ export type InterfaceLanguage = "ar" | "en" | "ur";
 // translated by this lookup; the Arabic memorandum has its own document root.
 export const interfaceCopy = [
   ["تعذر توثيق أرقام المواد في هذه النتيجة؛ تتولى المجموعة استكمال البحث القانوني.", "The provision numbers in this result could not be verified; the legal team will complete the research.", "اس نتیجے میں قانونی دفعات کے نمبروں کی تصدیق نہیں ہو سکی؛ قانونی ٹیم تحقیق مکمل کرے گی۔"],
-  ["التوجيه للمحكمة مبدئي، ويجب اعتماده من محامٍ بعد مراجعة المستندات والمواعيد.", "Court guidance is provisional and must be confirmed by a lawyer after reviewing the documents and deadlines.", "عدالت کے بارے میں رہنمائی ابتدائی ہے؛ دستاویزات اور قانونی مدتوں کا جائزہ لینے کے بعد وکیل کی تصدیق ضروری ہے۔"],
+  ["يجب اعتماده من مجموعة سابق القانونية.", "It must be approved by Sabeq Legal Group.", "سابق لیگل گروپ کی منظوری ضروری ہے۔"],
   ["اكتمال فهم القضية", "Case understanding", "مقدمے کی تفہیم"],
   ["أدوات المحادثة", "Conversation tools", "گفتگو کے اوزار"],
   ["تصدير المحادثة", "Export conversation", "گفتگو برآمد کریں"],
