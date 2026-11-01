@@ -1,7 +1,7 @@
 {
   "release": "2026-11-01-assistant-light-chat-theme",
-  "clientSource": "5c516bf3be37c9fa16982211635c18c28856f506",
-  "backendSource": "5c516bf3be37c9fa16982211635c18c28856f506",
+  "clientSource": "f5979d38aa574e1691a4037807db4e75006b935e",
+  "backendSource": "f5979d38aa574e1691a4037807db4e75006b935e",
   "assistant": "indirect-intake-completeness-1",
   "voice": "gulf-male-voice-4",
   "tools": "legal-tools-1",
@@ -21,14 +21,14 @@
   "finalMemo": "clean-no-review-notes-1",
   "memoResultTools": "bottom-vector-actions-1",
   "memoPreview": "document-derived-clean-text-1",
-  "githubPagesAsset": "index-5dY26Ev2.js",
+  "githubPagesAsset": "index-gpt6A3l3.js",
   "memoLanguage": "ar-KW",
   "memoDirection": "rtl",
   "memoAlignment": "right",
   "interfaceLocalization": "ar-en-ur-tools-guidance-1",
   "memoProseLanguage": "arabic-with-protected-names-and-identifiers-1",
   "builtAt": "2026-11-01",
-  "backendVersion": 169,
+  "backendVersion": 170,
   "pleadingLayout": "first-page-only-sidebar-and-frame-full-width-right-aligned-continuations",
   "citationCorrection": "one-bounded-server-retry-before-archive",
   "legalSourceDirectory": "6-catalogues-3-fetched-0-new-citable-pdfs",
@@ -157,5 +157,6 @@
     "livePaymentTested": false
   },
   "assistantTheme": "reference-light-neutral-chat-1",
-  "assistantThemeValidation": "62-focused-tests;native-release-gates-and-both-builds;320-390-768-1440-browser-QA;ar-en-ur;dark-surroundings;draft-reopen;no-physical-microphone-test"
+  "assistantThemeValidation": "62-focused-tests;native-release-gates-and-both-builds;320-390-768-1440-browser-QA;ar-en-ur;dark-surroundings;draft-reopen;no-physical-microphone-test",
+  "assistantThemeFont": "ar-Al-Mohanad-local-exception-to-Pages-Cairo"
 }
