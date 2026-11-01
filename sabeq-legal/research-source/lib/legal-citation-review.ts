@@ -1,5 +1,6 @@
 import type { LegalEvidence } from "./legal-search";
 import {hasReviewedJudgment,matchesReviewedAppeal,matchesReviewedSession} from './judgment-evidence';
+import {draftStatutoryText} from './statutory-text';
 const digits=(s:string)=>s.normalize("NFKC").replace(/[٠-٩۰-۹]/g,c=>String("٠١٢٣٤٥٦٧٨٩۰۱۲۳۴۵۶۷۸۹".indexOf(c)%10));
 const boundArticle=(s:LegalEvidence,number:string)=>s.corpus?.scope==="bound_file_only"&&s.corpus?.sourceId==="user-legislation-source"&&s.corpus?.sourceSha256==="8ffeac9838d7101a6776ca689b06ad08401d69850c27969b3b9959a1c40660bd"&&s.corpus.articleIdentityUnique&&articleKey(s.corpus.articleNumber||"")===number;
 const boundLaw=(s:LegalEvidence,n:number,y:number)=>s.corpus?.scope==="bound_file_only"&&s.corpus.sourceSha256==="8ffeac9838d7101a6776ca689b06ad08401d69850c27969b3b9959a1c40660bd"&&s.corpus.lawIdentity?.number===n&&s.corpus.lawIdentity?.year===y;
@@ -14,25 +15,39 @@ const ordinal=/(?:المادة|مادة)\s+(الأولى|الاولى|أولى|�
 const statutoryQuote=/(?:تنص|نصت)\s+(?:المادة|الماده)\s+[^«“"\n]{0,350}?(?:على|بأن|بأنه|بانه)\s*[:：]?\s*[«“"]([^»”"\n]+)[»”"]/gu;
 const judgment=/(?:الطعن|طعن|حكم|judgment|appeal)\s*(?:رقم|no\.?|number)?\s*[（(]?([\d٠-٩۰-۹]+)(?:\s*(?:[/،]|لسنة|لسنه)\s*([\d٠-٩۰-۹]+))?/giu;
 export const memoControlRevision="memo-generation-control-1";
-export type CitationIssue={code:"unknown_source"|"missing_source"|"unverified_article"|"wrong_law"|"unverified_quote"|"unverified_judgment"|"judgment_not_analogous"|"wrong_judgment_date"|"repealed_article"|"research_reference_in_pleading";marker?:string};
+export type CitationIssue={code:"unknown_source"|"missing_source"|"missing_article_text"|"unverified_article"|"wrong_law"|"unverified_quote"|"unverified_judgment"|"judgment_not_analogous"|"wrong_judgment_date"|"repealed_article"|"research_reference_in_pleading";marker?:string};
 /** Each claim is paired with its own adjacent source markers. No cross-law
  * matching of numbers, trust in case text, or reliance on OCR quality. */
-export function reviewLegalCitations(text:string,evidence:LegalEvidence[],options:{requireJudgmentAnalogy?:boolean;courtDocument?:boolean}={}) {
+export function reviewLegalCitations(text:string,evidence:LegalEvidence[],options:{requireJudgmentAnalogy?:boolean;courtDocument?:boolean;requireArticleText?:boolean}={}) {
  const issues:CitationIssue[]=[];const sources=new Map(evidence.map((s,i)=>[`م${i+1}`,s]));
- for(const paragraph of text.split(/\n+/).filter(Boolean)) {
+ for(const paragraph of text.replace(/«[^»]*»|“[^”]*”|"[^"\n]*"/gu,quote=>quote.replace(/\n/g,' ')).split(/\n+/).filter(Boolean)) {
   if(options.courtDocument&&(/^\s*(?:[-#*]+\s*)?(?:المرجع|المصدر|الحاشية|الهامش|المراجع(?: القانونية)?|المصادر(?: القانونية)?)\s*[:：]/u.test(paragraph)||/^\s*(?:قائمة\s+)?(?:المراجع|المصادر)(?:\s+القانونية)?\s*$/u.test(paragraph)||/(?:المصدر|المرجع)\s*[:：]\s*(?:منشورات\s+)?(?:وزارة\s+العدل|موقع\s+وزارة|بوابة\s+وزارة|https?:\/\/)|(?:راجع|انظر)\s+(?:موقع|بوابة|منشورات)\s+وزارة\s+العدل|صفح(?:ة|ات)\s+PDF\s*[\d٠-٩۰-۹]/iu.test(paragraph)))issues.push({code:'research_reference_in_pleading'});
   const pieces=paragraph.split(/((?:[【\[]\s*م\d+\s*[】\]]\s*)+)/g);
   for(let i=0;i<pieces.length;i+=2) {
    const claim=pieces[i],ids=[...(pieces[i+1]||"").matchAll(/م\d+/g)].map(m=>m[0]);
    for(const id of ids)if(!sources.has(id))issues.push({code:"unknown_source",marker:id});
    const selected=ids.flatMap(id=>sources.has(id)?[sources.get(id)!]:[]);
+   if(options.requireArticleText)for(const s of selected.filter(s=>!s.judgment&&(s.corpus?.articleNumber||s.verification?.articleNumber))){
+    const statutory=draftStatutoryText(s);
+    if(!statutory||!claim.includes(statutory.quote))issues.push({code:'missing_article_text'});
+   }
    if(options.courtDocument&&selected.some(s=>s.corpus?.draftingEligible===false))issues.push({code:'unverified_article'});
-   const laws=[...claim.matchAll(law)],articles=[...claim.matchAll(article)].flatMap(m=>[...m[1].matchAll(new RegExp(articleNumber,"gu"))].map(n=>({number:articleKey(n[0]),start:m.index!,end:m.index!+m[0].length})));
-   articles.push(...[...claim.matchAll(ordinal)].map(m=>({number:/ولى/.test(m[1])?"1":"2",start:m.index!,end:m.index!+m[0].length})));
+   // A literal source passage can itself refer to other laws/articles. Mask
+   // its content only after matching the selected source; retain offsets so
+   // the external article/law identity and authored quotations are checked.
+   const literalQuotes=[...claim.matchAll(/«([^»]+)»|“([^”]+)”|"([^"\n]+)"/gu)].filter(m=>selected.some(s=>draftStatutoryText(s)&&normal(s.text).includes(normal(m[1]||m[2]||m[3]))));
+   let authored=claim;
+   for(const m of literalQuotes)authored=authored.slice(0,m.index)+' '.repeat(m[0].length)+authored.slice(m.index!+m[0].length);
+   const laws=[...authored.matchAll(law)],articles=[...authored.matchAll(article)].flatMap(m=>[...m[1].matchAll(new RegExp(articleNumber,"gu"))].map(n=>({number:articleKey(n[0]),start:m.index!,end:m.index!+m[0].length})));
+   articles.push(...[...authored.matchAll(ordinal)].map(m=>({number:/ولى/.test(m[1])?"1":"2",start:m.index!,end:m.index!+m[0].length})));
    articles.sort((a,b)=>a.start-b.start);
-   const judgments=[...claim.matchAll(judgment)];
+   if(options.requireArticleText)for(const s of selected){
+    const statutory=draftStatutoryText(s);
+    if(statutory&&!articles.some(a=>a.number===articleKey(statutory.number)))issues.push({code:'unverified_article'});
+   }
+   const judgments=[...authored.matchAll(judgment)];
    if(options.requireJudgmentAnalogy&&selected.some(s=>hasReviewedJudgment(s)&&!s.judgment?.analogy))issues.push({code:'judgment_not_analogous'});
-   const attributedCassation=/(?:استقر|قضت|قضى|قضاء|قررت|أرست|ارست|حكم|مبادئ|مبادي|أحكام|احكام)[^\n]{0,45}(?:التمييز|التمييز)|التمييز[^\n]{0,25}(?:قضت|قررت|قضى)/u.test(claim);
+   const attributedCassation=/(?:استقر|قضت|قضى|قضاء|قررت|أرست|ارست|حكم|مبادئ|مبادي|أحكام|احكام)[^\n]{0,45}(?:التمييز|التمييز)|التمييز[^\n]{0,25}(?:قضت|قررت|قضى)/u.test(authored);
    if(!laws.length&&!articles.length&&!judgments.length&&!attributedCassation)continue;
    if(!selected.length){issues.push({code:"missing_source"});continue;}
    // A literal statutory quotation may refer to other provisions (e.g. a
@@ -59,6 +74,7 @@ export function reviewLegalCitations(text:string,evidence:LegalEvidence[],option
     return {...ref,sources:matching};
    });
    for(const quote of claim.matchAll(statutoryQuote)){
+    if(literalQuotes.some(m=>quote.index!>=m.index!&&quote.index!<m.index!+m[0].length))continue;
     const ref=checkedArticles.find(a=>a.start>=quote.index!&&a.start<quote.index!+quote[0].indexOf(quote[1]));
     if(!ref?.sources.some(s=>normal(s.text).includes(normal(quote[1]))))issues.push({code:"unverified_quote"});
    }
@@ -70,4 +86,4 @@ export function reviewLegalCitations(text:string,evidence:LegalEvidence[],option
  }
  return {ok:issues.length===0,issues};
 }
-export const citationFailureMessage="لم تجتز الصياغة التحقق من أرقام القوانين والمواد ومصادرها. احتُفظ ببياناتك؛ البحث والمراجعة القانونية من مسؤولية المجموعة، ويمكن إعادة المحاولة دون إضافة نصوص قانونية منك.";
+export const citationFailureMessage="لم تجتز الصياغة التحقق من نصوص المواد وأرقامها والقوانين ومصادرها. احتُفظ ببياناتك؛ البحث والمراجعة القانونية من مسؤولية المجموعة، ويمكن إعادة المحاولة دون إضافة نصوص قانونية منك.";

@@ -21,6 +21,7 @@ const word = load('../lib/pleading-docx.ts');
 test('available legal identities are in the body without PDF provenance; preparation is idempotent', () => {
   const result = bound.prepareBoundDraft(content, input, evidence);
   assert.match(result.grounds, /المادة 9 من قانون اختباري غير حقيقي، القانون رقم 98765 لسنة 2000/);
+  assert.ok(result.grounds.includes(`«${article.text}»`), 'article identity alone is insufficient; include its source wording');
   assert.match(result.grounds, /محكمة التمييز.*الطعن رقم 987654 لسنة 1999.*جلسة 03\/02\/2001/);
   assert.doesNotMatch(result.grounds, /صفحة PDF/);
   assert.equal(result.facts, facts);
@@ -65,6 +66,7 @@ test('claim, appeal and defence retain substantive facts and legal identities ac
       assert.doesNotMatch(rendered, /【م\d+】|\[م\d+\]|صفحة PDF|المصدر:|المرجع:/);
       assert.match(rendered, /987654/);
       assert.match(rendered, /98765/);
+      assert.ok(rendered.includes(article.text), `${kind} must retain the statutory text`);
       assert.match(rendered, /وزارة العدل/);
       assert.match(rendered, /https:\/\/example.org\/contract/);
     }

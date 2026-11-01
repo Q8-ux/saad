@@ -129,8 +129,21 @@ test('direct drafting and its existing correction receive the same concise rules
  assert.equal(drafting.length,2);assert.equal(audits,2);assert.equal(calls,5);
  for(const instructions of drafting)assert.ok(instructions.includes(pleadingAuthorityInstructions));
  assert.ok(value.memo.includes(caseData.facts));assert.ok(value.memo.includes(caseData.requests));
+ assert.ok(value.memo.includes(controlSource.text));
  assert.equal(value.caseQuality.humanReviewRequired,true);
  assert.doesNotMatch(value.memo,/ست قواعد لتحرير|factualNotes|legalResearchNotes|ملاحظات تقنية/);
+});
+
+test('actual agent finalization retains statutory wording through language cleanup and success archiving',async t=>{
+ const h=templateHarness();t.after(h.cleanup);const archived=[];
+ // These words trigger prose cleanup outside quotes, but are protected in a
+ // fictional statutory passage. No real law or private case is used.
+ const source={...controlSource,text:'نص اصطناعي عن المساعد الاختباري: مطلوب إرفاق نص القانون في تجربة البرمجيات فقط.'};
+ const route=memoRoute(h,{sources:[source],auth:async()=>({id:'synthetic-article-test'}),record:async row=>archived.push(row),pipeline:{agentPipelineEnabled:()=>true,generateAgentPleading:async()=>({content:{...content},audit:{}})},model:controlledMemoModel('')});
+ const response=await route.POST(request());assert.equal(response.status,200);const value=await response.json();
+ assert.ok(value.memo.includes(source.text));assert.ok(JSON.stringify(value.document.pages).includes(source.text));
+ assert.equal(archived.length,1);assert.ok(archived[0].outputText.includes(source.text));
+ assert.doesNotMatch(value.memo,/يتولى المساعد البحث/);
 });
 test('memo control rejects a wrong repeated article after one correction without a success archive',async t=>{
  const h=templateHarness();t.after(h.cleanup);let corrections=0,archived=0;
