@@ -271,3 +271,13 @@ footer,
     justify-self: end;
   }
 }
+
+
+/* Ayah currently synchronized with full-surah playback. */
+.ayah-card.rattil-synced-ayah {
+  border-color: rgba(158, 116, 47, 0.55) !important;
+  box-shadow: 0 10px 30px rgba(158, 116, 47, 0.12) !important;
+}
+.ayah-card.rattil-synced-ayah .quran-text {
+  color: #0a3a31 !important;
+}
