@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import react from "@vitejs/plugin-react";
 import { defineConfig, type Plugin } from "vite";
 import { groupPostArtworks } from "./app/group-post-artworks";
+import { team } from "./app/site-content";
 
 const projectRoot = path.dirname(fileURLToPath(import.meta.url));
 const serviceOrigin = "https://sabeq-legal-public.centrino.chatgpt.site";
@@ -16,7 +17,7 @@ function githubBrandAssets(): Plugin {
     { source: "/source.html", input: "public/source.html", output: "source.html" },
     { source: "/source-viewer.js", input: "public/source-viewer.js", output: "source-viewer.js" },
     { source: "/images/sabeq-assistant-avatar.jpg", input: "public/images/sabeq-assistant-avatar.jpg", output: "images/sabeq-assistant-avatar.jpg" },
-    ...["dr-khalifa-original-navy.png", "khalid-alhabib-navy.png", "mishal-metaab-navy.png", "mohammed-saheb-navy.png", "abdulaziz-mashaan-navy.png", "hamad-almadi-navy.png", "khalid-aldhafiri-navy.png"].map(name => ({ source: `/images/team/${name}`, input: `public/images/team/${name}`, output: `images/team/${name}` })),
+    ...team.map(member => ({ source: member.image, input: `public${member.image}`, output: member.image.slice(1) })),
     { source: "/fonts/AL-Mohanad.ttf", input: "public/fonts/AL-Mohanad.ttf", output: "assets/al-mohanad.ttf" },
     { source: "/fonts/AL-Mohanad-Bold.ttf", input: "public/fonts/AL-Mohanad-Bold.ttf", output: "assets/al-mohanad-bold.ttf" },
     { source: "/fonts/AL-Mohanad-Extra-Bold.ttf", input: "public/fonts/AL-Mohanad-Extra-Bold.ttf", output: "assets/al-mohanad-extra-bold.ttf" },
