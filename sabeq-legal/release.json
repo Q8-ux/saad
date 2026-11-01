@@ -1,7 +1,7 @@
 {
-  "release": "2026-11-01-article-text-in-memos",
+  "release": "2026-11-01-generated-memos-dashboard",
   "clientSource": "fd6b0cfd9f04bfec8b952ed2808e5653cdfd5978",
-  "backendSource": "05023d478936780d3bbffe7a13ef36e959539540",
+  "backendSource": "e4a3e444b67cf4c0336e0e4c9408695bbe8bc1f5",
   "assistant": "indirect-intake-completeness-1",
   "voice": "gulf-male-voice-4",
   "tools": "legal-tools-1",
@@ -28,7 +28,7 @@
   "interfaceLocalization": "ar-en-ur-tools-guidance-1",
   "memoProseLanguage": "arabic-with-protected-names-and-identifiers-1",
   "builtAt": "2026-11-01",
-  "backendVersion": 176,
+  "backendVersion": 177,
   "pleadingLayout": "first-page-only-sidebar-and-frame-full-width-right-aligned-continuations",
   "citationCorrection": "one-bounded-server-retry-before-archive",
   "legalSourceDirectory": "6-catalogues-3-fetched-0-new-citable-pdfs",
@@ -100,8 +100,8 @@
   "citationAudit": "source-markers-reviewed-before-display;source-trace-retained-outside-court-document",
   "typecheck": "20-existing-Workers-CSS-query-diagnostics;no-new-journey-diagnostic",
   "ssrHarness": "pre-existing-cloudflare-esm-import-failure-reproduced-on-baseline",
-  "nativePublishedAt": "2026-11-01T13:31:32.103117+00:00",
-  "nativeDeployment": "appgdep_6ae73f202b3c81919b1cf41c90908486",
+  "nativePublishedAt": "2026-11-01T14:01:33.787932+00:00",
+  "nativeDeployment": "appgdep_6ae7461fdb8081918dec7af4e2073117",
   "publicationChecks": "9-scoped-release-tests-and-5-motion-tests-pass",
   "legislationArchive": "2026-04-01-separate-from-primary-2026-10-05",
   "legislationWorkbench": "manager-search-articles-originals-and-report",
@@ -185,5 +185,19 @@
     "historicalMemosRegenerated": false,
     "finalRegressionTestsPassed": 40,
     "articleIdentityRequiredBesideQuote": true
+  },
+  "memoDashboard": {
+    "revision": "saved-memo-record-links-1",
+    "storage": "existing-shared-ledger",
+    "defaultView": "generated-output-only",
+    "allRequestsPreserved": true,
+    "recordLinksRequireExistingAdminAuthorization": true,
+    "automaticRefreshSeconds": 45,
+    "targetedTestsPassed": 21,
+    "mirroredTestsPassed": 21,
+    "internalChecksPassed": 261,
+    "browserValidation": "synthetic-desktop-and-390px-RTL",
+    "livePrivateMemoContentOpened": false,
+    "liveGenerationOrPaymentPerformed": false
   }
 }

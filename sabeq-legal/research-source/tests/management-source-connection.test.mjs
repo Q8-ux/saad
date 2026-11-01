@@ -30,3 +30,31 @@ test('a current storage failure rejects the snapshot instead of returning connec
   h.sqlite.exec('DROP TABLE consultation_requests');
   await assert.rejects(h.load('lib/management-data.ts').managerSnapshot('synthetic@example.test'));
 }finally{h.close();}});
+
+test('generated memo view follows saved output for guests and users, not a status label',async()=>{const h=harness();try{
+ const ledger=h.load('lib/memo-requests.ts'),data=h.load('lib/management-data.ts');
+ const guest=await ledger.startMemoRequest({clientName:'ضيف اصطناعي',facts:'وقائع اختبار'},null,'https://q8-ux.github.io');
+ await ledger.finishMemoRequest(guest,'needs_review','نص مذكرة اصطناعية كاملة.');
+ const user=await ledger.startMemoRequest({clientName:'مستخدم اصطناعي'},{id:'synthetic-user',email:'synthetic@example.test'},'https://q8-ux.github.io');
+ await ledger.finishMemoRequest(user,'needs_review','نص مذكرة ثانية للاختبار.');
+ const empty=await ledger.startMemoRequest({clientName:'مراجعة دون نص'},null,'https://q8-ux.github.io');
+ await ledger.finishMemoRequest(empty,'needs_review',' \n\t\r ','source_review');
+ await ledger.startMemoRequest({clientName:'طلب قيد التنفيذ'},null,'https://q8-ux.github.io');
+ const generated=await data.managerMemos(new URL('https://test.invalid/api/management/memos?view=generated'));
+ assert.deepEqual(new Set(generated.memos.map(r=>r.id)),new Set([guest,user]));
+ assert.ok(generated.memos.every(r=>Number(r.has_output)===1));
+ assert.ok(generated.memos.every(r=>!Object.hasOwn(r,'output_text')));
+ assert.equal((await data.managerMemos(new URL('https://test.invalid/api/management/memos'))).memos.length,4);
+ assert.equal((await data.managerMemos(new URL('https://test.invalid/api/management/memos?view=generated&q='+encodeURIComponent('ضيف اصطناعي')))).memos.length,1);
+ assert.equal((await data.managerMemos(new URL('https://test.invalid/api/management/memos?id='+guest))).memo.output_text,'نص مذكرة اصطناعية كاملة.');
+}finally{h.close();}});
+
+test('the generated view keeps saved historical memos and applies its filter before pagination',async()=>{const h=harness();try{
+ const ledger=h.load('lib/memo-requests.ts'),data=h.load('lib/management-data.ts');
+ for(let i=0;i<53;i++)await ledger.startMemoRequest({clientName:'محاولة اصطناعية '+i},null,'https://q8-ux.github.io');
+ const id=await ledger.startMemoRequest({clientName:'مذكرة اصطناعية'},null,'https://q8-ux.github.io');await ledger.finishMemoRequest(id,'needs_review','مذكرة اختبار.');
+ h.sqlite.prepare("INSERT INTO public_users (id,name,phone,email,email_verified_at) VALUES ('synthetic-user','شخص اختبار','000','synthetic@example.test','2026-01-01')").run();
+ h.sqlite.prepare("INSERT INTO service_records (id,user_id,service_type,title,output_text) VALUES ('old-test','synthetic-user','memo_archive','أرشيف اصطناعي','نص أرشيف اختبار.')").run();
+ const result=await data.managerMemos(new URL('https://test.invalid/api/management/memos?view=generated'));
+ assert.deepEqual(new Set(result.memos.map(r=>r.id)),new Set([id,'legacy:old-test']));assert.equal(result.hasMore,false);
+}finally{h.close();}});

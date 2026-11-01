@@ -1,13 +1,13 @@
 {
-  "revision": "independent-admin-15-cairo",
-  "backendSource": "3315ba7e854e89931ac6a6051e35b34e21d83772",
+  "revision": "independent-admin-16-generated-memo-links",
+  "backendSource": "e4a3e444b67cf4c0336e0e4c9408695bbe8bc1f5",
   "sourceRepository": "https://github.com/Q8-ux/saad",
   "paymentVisibility": "admin-only-by-default",
   "paymentsLink": "#payments",
   "programmerLink": "#programmer",
   "programmerScope": "advice-and-explicit-follow-up",
   "fccGateway": "requires-independent-configured-service",
-  "backendVersion": 174,
+  "backendVersion": 177,
   "projectProviderConfigured": true,
   "liveInferenceVerified": false,
   "localChecksPassed": 206,
@@ -37,5 +37,12 @@
   "fontSource": "local-variable-200-1000",
   "fontValidation": "400-and-600-loaded;login-and-form-inheritance;375-and-305px-no-horizontal-page-overflow;native-build-and-9-publication-tests-passed",
   "verificationEmailTransport": "workerd-compatible-manual-redirects;4-worker-regressions-passed",
-  "verificationEmailDeliveryBlocker": "sender_domain_unverified;Resend-403;requires-DNS-verification"
+  "verificationEmailDeliveryBlocker": "sender_domain_unverified;Resend-403;requires-DNS-verification",
+  "memosLink": "#memos",
+  "memoRecordLinks": "#memos?record=<record-id>",
+  "memoDefaultView": "generated-output-only",
+  "memoAllRequestsView": "all",
+  "memoRecordAuthentication": "existing-administrator-session-or-PKCE-first",
+  "memoLinkValidation": "21-targeted-and-mirrored-tests;desktop-and-390px-synthetic-browser-QA",
+  "livePrivateMemoContentOpened": false
 }

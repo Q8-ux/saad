@@ -6,7 +6,7 @@ export const dashboardChecks=[
  {id:'case-context',files:['tests/project-context.test.mjs','tests/dashboard-quality.test.mjs']},
  {id:'memo-article-text',files:['tests/article-text-in-memos.test.mjs']},
  {id:'admin-permissions-and-failures',files:['tests/management.test.mjs','tests/email-worker-transport.test.mjs']},
- {id:'admin-service-contract',files:['tests/admin-bridge-contract.test.mjs','tests/management-source-connection.test.mjs','tests/admin-source-status.test.mjs']},
+ {id:'admin-service-contract',files:['tests/admin-bridge-contract.test.mjs','tests/management-source-connection.test.mjs','tests/admin-source-status.test.mjs','tests/admin-memo-link.test.mjs']},
  {id:'programmer-client',files:['tests/programmer-client.test.mjs']},
 ];
 export function runDashboardChecks(execute=spawnSync,cwd=path.resolve(fileURLToPath(new URL('..',import.meta.url)))){
