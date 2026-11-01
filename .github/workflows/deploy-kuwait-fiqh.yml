@@ -42,7 +42,7 @@ jobs:
           path: .fiqh-antiword
           persist-credentials: false
       - name: Compile the reviewed extraction tool
-        run: make -C .fiqh-antiword -j2 antiword
+        run: make -C .fiqh-antiword -j2 -o Unix-only/fontinfo.h antiword
       - uses: actions/cache@v4
         with:
           path: ${{ runner.temp }}/fiqh-documents
