@@ -190,3 +190,79 @@ footer,
     font-size: 17px;
   }
 }
+
+
+/* Reading mode: automatic scrolling with adjustable speed. */
+.rattil-auto-scroll {
+  position: fixed;
+  z-index: 120;
+  inset-inline-end: 16px;
+  bottom: 18px;
+  width: min(330px, calc(100vw - 32px));
+  padding: 12px;
+  border: 1px solid rgba(10, 58, 49, 0.18);
+  border-radius: 18px;
+  background: rgba(255, 254, 251, 0.96);
+  box-shadow: 0 16px 42px rgba(7, 48, 40, 0.18);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  font-family: "RattilAmiri", "Amiri", serif !important;
+}
+.rattil-auto-scroll[hidden] { display: none !important; }
+.rattil-auto-scroll-toggle {
+  width: 100%;
+  min-height: 46px;
+  border: 0;
+  border-radius: 12px;
+  background: #0a3a31;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  font: inherit;
+  font-size: 17px;
+  font-weight: 700;
+}
+.rattil-auto-scroll.is-running .rattil-auto-scroll-toggle {
+  background: #9e742f;
+}
+.rattil-auto-scroll-icon {
+  width: 24px;
+  display: inline-grid;
+  place-items: center;
+}
+.rattil-auto-scroll-speed-wrap {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 10px;
+  margin-top: 11px;
+  color: #173f37;
+  font-size: 15px;
+}
+.rattil-auto-scroll-speed {
+  width: 100%;
+  accent-color: #0a3a31;
+}
+.rattil-auto-scroll-value {
+  min-width: 2.2em;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+@media (max-width: 620px) {
+  .rattil-auto-scroll {
+    inset-inline: 12px;
+    bottom: 12px;
+    width: auto;
+    padding: 10px;
+    border-radius: 16px;
+  }
+  .rattil-auto-scroll-toggle {
+    min-height: 48px;
+    font-size: 18px;
+  }
+  .rattil-auto-scroll-speed-wrap {
+    font-size: 16px;
+  }
+}
