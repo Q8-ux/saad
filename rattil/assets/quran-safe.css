@@ -192,26 +192,23 @@ footer,
 }
 
 
-/* Reading mode: automatic scrolling with adjustable speed. */
+
+/* Reading mode: full-surah playback + inline automatic scrolling. */
 .rattil-auto-scroll {
-  position: fixed;
-  z-index: 120;
-  inset-inline-end: 16px;
-  bottom: 18px;
-  width: min(330px, calc(100vw - 32px));
-  padding: 12px;
+  position: static;
+  z-index: auto;
+  width: min(100%, 760px);
+  margin: 18px auto 22px;
+  padding: 14px;
   border: 1px solid rgba(10, 58, 49, 0.18);
   border-radius: 18px;
   background: rgba(255, 254, 251, 0.96);
-  box-shadow: 0 16px 42px rgba(7, 48, 40, 0.18);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 10px 28px rgba(7, 48, 40, 0.10);
   font-family: "RattilAmiri", "Amiri", serif !important;
 }
-.rattil-auto-scroll[hidden] { display: none !important; }
 .rattil-auto-scroll-toggle {
   width: 100%;
-  min-height: 46px;
+  min-height: 48px;
   border: 0;
   border-radius: 12px;
   background: #0a3a31;
@@ -221,11 +218,14 @@ footer,
   justify-content: center;
   gap: 9px;
   font: inherit;
-  font-size: 17px;
+  font-size: 18px;
   font-weight: 700;
 }
 .rattil-auto-scroll.is-running .rattil-auto-scroll-toggle {
   background: #9e742f;
+}
+.rattil-auto-scroll.is-unavailable .rattil-auto-scroll-toggle {
+  background: #7b8984;
 }
 .rattil-auto-scroll-icon {
   width: 24px;
@@ -234,35 +234,40 @@ footer,
 }
 .rattil-auto-scroll-speed-wrap {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: auto minmax(120px, 1fr) auto;
   align-items: center;
-  gap: 10px;
-  margin-top: 11px;
+  gap: 12px;
+  margin-top: 12px;
   color: #173f37;
-  font-size: 15px;
+  font-size: 16px;
 }
 .rattil-auto-scroll-speed {
   width: 100%;
   accent-color: #0a3a31;
 }
 .rattil-auto-scroll-value {
-  min-width: 2.2em;
+  min-width: 2.4em;
   text-align: center;
   font-variant-numeric: tabular-nums;
+  font-weight: 700;
 }
 @media (max-width: 620px) {
   .rattil-auto-scroll {
-    inset-inline: 12px;
-    bottom: 12px;
-    width: auto;
-    padding: 10px;
-    border-radius: 16px;
+    width: 100%;
+    margin: 14px 0 18px;
+    padding: 12px;
+    border-radius: 15px;
   }
   .rattil-auto-scroll-toggle {
-    min-height: 48px;
+    min-height: 50px;
     font-size: 18px;
   }
   .rattil-auto-scroll-speed-wrap {
+    grid-template-columns: 1fr;
+    gap: 7px;
     font-size: 16px;
+  }
+  .rattil-auto-scroll-value {
+    justify-self: end;
   }
 }
