@@ -70,7 +70,7 @@
       : error==='HTTP 404'
         ? 'خدمة أرشيف الموقع السابق لا تستجيب في المسار المتوقع.'
         : 'أرشيف الموقع السابق غير متاح مؤقتًا؛ قد يكون الخادم في مرحلة إعادة التشغيل.';
-    return `<div class="banner" role="status">${reason} السجلات الحالية محفوظة ومعروضة بصورة مستقلة. <button type="button" data-action="refresh">إعادة محاولة الاتصال بالأرشيف</button></div>`;
+    return `<div class="banner" role="status">${reason} السجلات الحالية محفوظة ومعروضة بصورة مستقلة؛ قد توجد سجلات أقدم غير معروضة حتى يعود اتصال الأرشيف. <button type="button" data-action="refresh">إعادة محاولة الاتصال بالأرشيف</button></div>`;
   }
   function currentSiteConnection(s) {
     const connected=s.connection?.available===true&&s.connection.source==='sabeq-public-service'&&s.connection.mode==='shared-database';
