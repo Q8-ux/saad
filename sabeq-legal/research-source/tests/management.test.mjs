@@ -403,6 +403,26 @@ test('verification sender inspection is administrator-only and checks only sendi
  records[2].status='pending';assert.equal((await settings.verificationEmailAction({action:'check'},'test')).check.status,'domain_unverified');
 }finally{h.close();}});
 
+test('verified Resend CNAME-only sending configuration does not require legacy SPF rows',async()=>{const h=harness();try{
+ const settings=h.load('lib/verification-email-settings.ts');
+ await settings.verificationEmailAction({...verificationConfig,fromEmail:'noreplay@sabeq.legal'},'test');
+ const domainId='11111111-1111-4111-8111-111111111111';
+ const dkim={record:'DKIM',name:'resend._domainkey',type:'CNAME',value:'dkim.resend.example.test',status:'verified'};
+ let sending='enabled';
+ h.setTransport(async(url,init)=>{
+   assert.equal(init.method,'GET');assert.equal(init.redirect,'manual');
+   if(String(url)==='https://api.resend.com/domains')return Response.json({data:[{name:'sabeq.legal',id:domainId}],has_more:false});
+   assert.equal(String(url),'https://api.resend.com/domains/'+domainId);
+   return Response.json({name:'sabeq.legal',status:'partially_verified',capabilities:{sending},records:[dkim]});
+ });
+ const verified=await settings.verificationEmailAction({action:'check'},'test');
+ assert.equal(verified.check.status,'verified');assert.equal(verified.check.deliveryTested,false);
+ assert.equal(verified.check.records.length,1);
+ sending='disabled';assert.equal((await settings.verificationEmailAction({action:'check'},'test')).check.status,'domain_unverified');
+ sending='enabled';dkim.status='pending';assert.equal((await settings.verificationEmailAction({action:'check'},'test')).check.status,'domain_unverified');
+ assert.equal(h.network.every(call=>call.init.method==='GET'),true);
+}finally{h.close();}});
+
 test('verification sender inspection distinguishes missing settings, auth, scope, missing domain and unsafe provider failures',async()=>{const h=harness();try{
  const api=h.load('lib/verification-email-settings.ts');assert.equal((await api.verificationEmailAction({action:'check'},'test')).check.status,'missing_settings');assert.equal(h.network.length,0);
  await api.verificationEmailAction(verificationConfig,'test');
