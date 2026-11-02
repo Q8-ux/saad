@@ -1,0 +1,44 @@
+name: Sabeq email DNS readiness (read-only)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/sabeq-email-dns-check.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  dns-readiness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Inspect publicly visible Resend DNS records (no credentials or messages)
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo 'Domain: sabeq.legal'
+          echo 'Note: Public DNS alone cannot establish which Resend team/key owns the domain, or whether delivery succeeds.'
+          if dig +short TXT resend._domainkey.sabeq.legal | grep -q .; then
+            echo 'Legacy Resend DKIM selector: PRESENT'
+          else
+            echo 'Legacy Resend DKIM selector: NOT FOUND (newer domains may use different selectors)'
+          fi
+          if dig +short TXT send.sabeq.legal | grep -qi 'spf1'; then
+            echo 'Legacy send subdomain SPF: PRESENT'
+          else
+            echo 'Legacy send subdomain SPF: NOT FOUND (CNAME-based setups may be valid)'
+          fi
+          if dig +short MX send.sabeq.legal | grep -q .; then
+            echo 'Legacy send MX: PRESENT'
+          else
+            echo 'Legacy send MX: NOT FOUND (CNAME-based setups may be valid)'
+          fi
+          if dig +short CNAME send.sabeq.legal | grep -q .; then
+            echo 'New-style send CNAME: PRESENT'
+          else
+            echo 'New-style send CNAME: NOT FOUND'
+          fi
+          echo 'Authoritative sending status must be checked in the connected Resend team.'
