@@ -81,8 +81,7 @@ async function accountRoster() {
     const account = accounts.find(a => a.id === override.id);
     if (account) Object.assign(account, { username: override.username, salt: override.salt, hash: override.hash, sessionVersion: override.sessionVersion });
     else if (override.id.startsWith("reviewer:")) {
-      if (override.id !== "reviewer:" + override.username) invalid();
-      accounts.push({ username: override.username, seedUsername: override.username, role: "reviewer",
+      accounts.push({ username: override.username, seedUsername: override.id.slice("reviewer:".length), role: "reviewer",
         id: override.id, salt: override.salt, hash: override.hash, sessionVersion: override.sessionVersion,
         enabled: true, pepper: reviewerPepper() });
     } else invalid();
