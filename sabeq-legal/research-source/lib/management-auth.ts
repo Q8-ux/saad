@@ -7,7 +7,7 @@ export { sealConfig, openConfig } from "@/lib/management-vault";
 
 export const MANAGEMENT_HOME = "https://q8-ux.github.io/saad/sabeq-admin-preview/";
 export const MANAGEMENT_ORIGIN = new URL(MANAGEMENT_HOME).origin;
-type Manager = { email: string; name: string; username?: string; role: "operator" | "administrator" };
+type Manager = { email: string; name: string; username?: string; role: "operator" | "administrator" | "reviewer" };
 const OPERATOR_SECTIONS = ["overview", "memos", "inbox", "notifications", "users", "legislation", "commands", "updates"];
 // Only expressly scoped operations are available to staff. Unknown actions fail closed.
 const OPERATOR_READ = new Set(["session", "snapshot", "memos", "inbox", "users", "updates", "commands",
@@ -15,10 +15,11 @@ const OPERATOR_READ = new Set(["session", "snapshot", "memos", "inbox", "users",
 const OPERATOR_WRITE = new Set(["logout", "users", "read", "inbox", "commands"]);
 export function managerProfile(manager: Manager) {
   return { email: manager.email, name: manager.name, ...(manager.username ? { username: manager.username } : {}), role: manager.role,
-    sections: manager.role === "operator" ? [...OPERATOR_SECTIONS] : [...OPERATOR_SECTIONS, "site", "services", "bookings", "programmer", "paths", "payments", "mailboxes", "whatsapp", "mail"] };
+    sections: manager.role === "reviewer" ? ["memos"] : manager.role === "operator" ? [...OPERATOR_SECTIONS] : [...OPERATOR_SECTIONS, "site", "services", "bookings", "programmer", "paths", "payments", "mailboxes", "whatsapp", "mail"] };
 }
 export function assertManagerAction(manager: Manager, action: string, method: "GET" | "POST") {
   if (manager.role === "administrator") return;
+  if (manager.role === "reviewer" && (method === "GET" ? ["session", "memos"].includes(action) : action === "logout")) return;
   if (manager.role !== "operator" || !(method === "GET" ? OPERATOR_READ : OPERATOR_WRITE).has(action)) {
     throw new RequestError("ليست لديك صلاحية لإجراء هذه العملية.", 403);
   }
@@ -101,9 +102,9 @@ export async function requireManager(request: Request) {
   if (!token) throw new RequestError("سجّل الدخول إلى الإدارة للمتابعة.", 401);
   const hash = await digest(token), now = Math.floor(Date.now() / 1000);
   const row = await getD1().prepare("SELECT email, name FROM management_sessions WHERE token_hash = ? AND expires_at > ? AND last_seen_at > ?").bind(hash, now, now - 3600).first<{ email: string; name: string }>();
-  const passwordSession = !!row && /^(staff|staff-admin):/.test(row.email);
+  const passwordSession = !!row && /^(staff|staff-admin|staff-reviewer):/.test(row.email);
   const staff = passwordSession ? await managementPasswordSession(row!.email) : null;
    if (!row || (passwordSession ? !staff : !(await managerAllowed(row.email)))) throw new RequestError("انتهت الجلسة الإدارية. سجّل الدخول مجدداً.", 401);
   await getD1().prepare("UPDATE management_sessions SET last_seen_at = ? WHERE token_hash = ?").bind(now, hash).run();
-  return { email: staff?.identity || row.email, name: staff?.username || row.name, ...(staff ? { username: staff.username } : {}), role: (staff?.role || "administrator") as "operator" | "administrator", hash };
+  return { email: staff?.identity || row.email, name: staff?.username || row.name, ...(staff ? { username: staff.username } : {}), role: (staff?.role || "administrator") as "operator" | "administrator" | "reviewer", hash };
 }
