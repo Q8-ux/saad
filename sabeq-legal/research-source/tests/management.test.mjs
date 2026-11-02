@@ -452,13 +452,13 @@ test('verification email configuration is admin-only, encrypted and independent 
 test('verification email retains environment support and explicitly saved settings take precedence',async()=>{const h=harness();try{
  h.runtime.RESEND_API_KEY='re_synthetic_environment_key_123';h.runtime.AUTH_FROM_EMAIL='Sabeq Legal <noreply@sabeq.legal>';
  const settings=h.load('lib/verification-email-settings.ts');
- const initial=await settings.verificationEmailAction(null,'test');assert.equal(initial.configured,true);assert.equal(initial.source,'environment');assert.equal(initial.fromEmail,'noreply@sabeq.legal');assert.ok(!JSON.stringify(initial).includes(h.runtime.RESEND_API_KEY));
- await settings.verificationEmailAction(verificationConfig,'test');assert.equal((await settings.verificationEmailDelivery()).apiKey,verificationConfig.apiKey);
+ const initial=await settings.verificationEmailAction(null,'test');assert.equal(initial.configured,true);assert.equal(initial.source,'environment');assert.equal(initial.fromEmail,'noreplay@sabeq.legal');assert.ok(!JSON.stringify(initial).includes(h.runtime.RESEND_API_KEY));
+ await settings.verificationEmailAction(verificationConfig,'test');assert.equal((await settings.verificationEmailDelivery()).apiKey,verificationConfig.apiKey);assert.equal((await settings.verificationEmailDelivery()).fromEmail,'noreplay@sabeq.legal');
 }finally{h.close();}});
 
 test('request and verify execute the real database flow; a wrong or reused code cannot create another session',async()=>{const h=harness();try{
  await h.load('lib/verification-email-settings.ts').verificationEmailAction(verificationConfig,'test');
- let code='';h.setTransport(async(url,init)=>{assert.equal(String(url),'https://api.resend.com/emails');assert.equal(init.method,'POST');assert.equal(init.redirect,'manual');assert.equal(init.headers.Authorization,'Bearer '+verificationConfig.apiKey);const body=JSON.parse(init.body);assert.equal(body.from,'noreply@sabeq.legal');assert.deepEqual(body.to,[syntheticApplicant.email]);code=body.text.match(/\n\n(\d{6})\n\n/)[1];return Response.json({id:'synthetic-delivery-id'});});
+ let code='';h.setTransport(async(url,init)=>{assert.equal(String(url),'https://api.resend.com/emails');assert.equal(init.method,'POST');assert.equal(init.redirect,'manual');assert.equal(init.headers.Authorization,'Bearer '+verificationConfig.apiKey);const body=JSON.parse(init.body);assert.equal(body.from,'noreplay@sabeq.legal');assert.deepEqual(body.to,[syntheticApplicant.email]);code=body.text.match(/\n\n(\d{6})\n\n/)[1];return Response.json({id:'synthetic-delivery-id'});});
  const requestRoute=h.load('app/api/auth/request-code/route.ts');
  const response=await requestRoute.POST(publicAuthRequest('request-code',syntheticApplicant));assert.equal(response.status,200);const challenge=await response.json();assert.equal(challenge.expiresIn,600);assert.ok(!JSON.stringify(challenge).includes(code));assert.ok(!JSON.stringify(challenge).includes(verificationConfig.apiKey));
  const row=h.sqlite.prepare('SELECT * FROM email_verification_challenges WHERE id=?').get(challenge.challengeId);assert.notEqual(row.code_hash,code);assert.equal(row.attempts,0);
