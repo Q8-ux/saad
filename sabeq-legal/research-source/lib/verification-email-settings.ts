@@ -66,7 +66,10 @@ async function checkSender(config: Awaited<ReturnType<typeof verificationEmailDe
       base.records.push({ record: row.record, name: row.name, type: row.type, value: row.value, status: row.status, ...(Number.isSafeInteger(row.priority) ? { priority: row.priority } : {}) });
     }
     const capabilities = detail.data.capabilities as { sending?: string } | undefined;
-    const verified = capabilities?.sending === "enabled" && records.some(row => row.record === "SPF") && records.some(row => row.record === "DKIM") && records.every(row => row.status === "verified");
+    // Resend's sending capability is authoritative. New domain configurations may
+    // use CNAME records without a separate SPF entry, so do not require both
+    // legacy record labels. Still reject any sending record marked unverified.
+    const verified = capabilities?.sending === "enabled" && records.every(row => row.status === "verified");
     return result(verified ? "verified" : "domain_unverified");
   } catch { return result("unknown"); }
 }
