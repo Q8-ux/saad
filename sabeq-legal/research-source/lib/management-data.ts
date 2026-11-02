@@ -24,7 +24,7 @@ export async function officialOperations(params = new URLSearchParams()) {
     const payload = base64url(new TextEncoder().encode(JSON.stringify({ iss: SERVICE_ORIGIN, aud: "sabeq-official-operations", exp: Math.floor(Date.now() / 1000) + 45, path, nonce: crypto.randomUUID() })));
     const key = await crypto.subtle.importKey("jwk", keys.privateKey, { name: "ECDSA", namedCurve: "P-256" }, false, ["sign"]);
     const signature = base64url(new Uint8Array(await crypto.subtle.sign({ name: "ECDSA", hash: "SHA-256" }, key, new TextEncoder().encode(payload))));
-    const response = await fetch(`${OFFICIAL_BACKEND}${path}`, { headers: { "X-Sabeq-Operations": `${payload}.${signature}`, Accept: "application/json" }, cache: "no-store", redirect: "error", signal: AbortSignal.timeout(12_000) });
+    const response = await fetch(`${OFFICIAL_BACKEND}${path}`, { headers: { "X-Sabeq-Operations": `${payload}.${signature}`, Accept: "application/json" }, cache: "no-store", redirect: "manual", signal: AbortSignal.timeout(12_000) });
     if (!response.ok) return { available: false, error: `HTTP ${response.status}`, memos: [], inbox: [], totals: null };
     const body = await response.text();
     if (body.length > 1_000_000) throw Error("oversize");
