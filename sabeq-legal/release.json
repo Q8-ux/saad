@@ -1,7 +1,7 @@
 {
-  "release": "2026-11-02-team-circular-360",
+  "release": "2026-11-02-control-accounts-and-email-tests",
   "clientSource": "a4efb21485dc4eccc059a9156a4f186842370297",
-  "backendSource": "a4efb21485dc4eccc059a9156a4f186842370297",
+  "backendSource": "59092caf21919597d2ccc6db1cd20bb12ac5f21c",
   "assistant": "indirect-intake-completeness-1",
   "voice": "gulf-male-voice-4",
   "tools": "legal-tools-1",
@@ -28,7 +28,7 @@
   "interfaceLocalization": "ar-en-ur-tools-guidance-1",
   "memoProseLanguage": "arabic-with-protected-names-and-identifiers-1",
   "builtAt": "2026-11-01",
-  "backendVersion": 183,
+  "backendVersion": 184,
   "pleadingLayout": "first-page-only-sidebar-and-frame-full-width-right-aligned-continuations",
   "citationCorrection": "one-bounded-server-retry-before-archive",
   "legalSourceDirectory": "6-catalogues-3-fetched-0-new-citable-pdfs",
@@ -100,8 +100,8 @@
   "citationAudit": "source-markers-reviewed-before-display;source-trace-retained-outside-court-document",
   "typecheck": "20-existing-Workers-CSS-query-diagnostics;no-new-journey-diagnostic",
   "ssrHarness": "pre-existing-cloudflare-esm-import-failure-reproduced-on-baseline",
-  "nativePublishedAt": "2026-11-02T04:12:56.213084+00:00",
-  "nativeDeployment": "appgdep_6ae80da97eec81918b2dbac475cc3de0",
+  "nativePublishedAt": "2026-11-02T04:50:11.834982+00:00",
+  "nativeDeployment": "appgdep_6ae8166573f481918d4c01ddff2c12f0",
   "publicationChecks": "9-scoped-release-tests-and-5-motion-tests-pass",
   "legislationArchive": "2026-04-01-separate-from-primary-2026-10-05",
   "legislationWorkbench": "manager-search-articles-originals-and-report",
@@ -123,11 +123,11 @@
   "teamCaptionsValidation": "unchanged-ordered-names;responsive-portrait-frames;no-page-horizontal-overflow",
   "headerTypography": "navigation-language-400-header-actions-500",
   "headerTypographyValidation": "81-browser-label-checks;ar-en-ur;320-390-768-1440px;menu-navigation-and-memo-open;191-release-checks;both-builds;privacy-check;physical-device-not-tested",
-  "controlCenterUsers": "administrator-only-user-crud-and-service-permissions",
+  "controlCenterUsers": "administrator-only-login-username-password-editing-and-existing-public-user-controls",
   "controlCenterLogin": "independent-saad-administrator-or-delegated-administrative-identity",
-  "controlCenterValidation": "206-internal-release-checks;9-publication-and-5-presentation-tests;both-builds;375-and-305px-local-UI;live-v148-login-read-logout-revocation-verified",
+  "controlCenterValidation": "270-internal-release-checks;synthetic-390px-and-desktop-UI;live-current-version-authentication-pending",
   "siteContentControl": "durable-ar-en-ur-copy-contact-branding-team-media-news",
-  "controlCenterNativeSource": "1e3a8f4878ad0ca9cb43c8728b499a9ddbb5a3c0",
+  "controlCenterNativeSource": "59092caf21919597d2ccc6db1cd20bb12ac5f21c",
   "indirectIntakeValidation": "224-internal-tests;75-focused-tests;explicit-filing-stage-and-party-name-guards;worker-and-pages-builds-passed",
   "temporaryMemoPriceKwd": 1,
   "configuredMemoPriceKwd": 50,
@@ -164,7 +164,7 @@
   "teamGrid": "circular-horizontal-single-row-preserved-order",
   "teamGridValidation": "two-Arabic-cycles-both-directions;one-English-cycle-both-directions;320-390-768-1440px;resize-keeps-active-lawyer;10-accessible-headings",
   "verificationEmailTransport": "workerd-compatible-manual-redirects;redirects-rejected;4-real-workerd-regressions-passed",
-  "verificationEmailDiagnostics": "redacted-stage-status-reason-only;no-provider-response-or-recipient-or-OTP",
+  "verificationEmailDiagnostics": "administrator-only-SPF-DKIM-sending-check;no-send-probe;read-scope-refusal-not-delivery-failure",
   "verificationEmailLiveCheck": {
     "backendVersion": 174,
     "requestStatus": 503,
@@ -235,5 +235,12 @@
     "loopUnitTestsPassed": 3,
     "newComponentTypeErrors": 0,
     "physicalTouchDeviceTested": false
+  },
+  "verificationEmailTest": {
+    "requestedSender": "noreplay@sabeq.legal",
+    "message": "fixed-test-email-with-provider-receipt",
+    "limitPerHour": 5,
+    "createsVisitorOrOTP": false,
+    "liveAttempt": "pending-secure-administrator-session"
   }
 }

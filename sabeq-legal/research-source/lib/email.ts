@@ -1,9 +1,10 @@
 import { verificationEmailDelivery } from "@/lib/verification-email-settings";
+import { cleanEmail, RequestError } from "@/lib/request-security";
 
 export class EmailDeliveryError extends Error {
   kind: "configuration" | "delivery";
 
-  constructor(kind: "configuration" | "delivery") {
+  constructor(kind: "configuration" | "delivery", public reason = "unknown") {
     super(`EMAIL_${kind.toUpperCase()}`);
     this.name = "EmailDeliveryError";
     this.kind = kind;
@@ -57,16 +58,7 @@ export async function sendVerificationCode(options: {
       ? "یہ کوڈ 10 منٹ میں ختم ہو جائے گا۔ اگر آپ نے درخواست نہیں کی تو اس پیغام کو نظر انداز کریں۔"
       : "تنتهي صلاحية الرمز خلال 10 دقائق. إذا لم تطلبه فتجاهل هذه الرسالة.";
 
-  let response: Response;
-  try {
-    response = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      redirect: "manual",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
+  return deliverEmail(apiKey, {
         from,
         to: [options.to],
         subject,
@@ -79,12 +71,25 @@ export async function sendVerificationCode(options: {
             <p style="font-size:14px;line-height:1.8;color:#667784;margin:20px 0 0">${expiry}</p>
           </div>
         </div>`,
-      }),
+  });
+}
+
+async function deliverEmail(apiKey: string, message: { from: string; to: string[]; subject: string; text: string; html?: string }) {
+  let response: Response;
+  try {
+    response = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      redirect: "manual",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(message),
       signal: AbortSignal.timeout(12_000),
     });
   } catch (error) {
     console.error("verification_email_delivery_failed", { stage: "transport", reason: error instanceof Error && error.name === "TimeoutError" ? "timeout" : "connection" });
-    throw new EmailDeliveryError("delivery");
+    throw new EmailDeliveryError("delivery", "transport");
   }
 
   if (!response.ok) {
@@ -98,15 +103,36 @@ export async function sendVerificationCode(options: {
       } catch { /* Provider response details are never logged. */ }
     }
     console.error("verification_email_delivery_failed", { stage: "provider", status: response.status, reason });
-    throw new EmailDeliveryError("delivery");
+    throw new EmailDeliveryError("delivery", reason);
   }
   try {
     const result = await response.json() as { id?: unknown };
     if (typeof result.id !== "string" || !/^[A-Za-z0-9_-]{8,100}$/.test(result.id)) {
       throw new EmailDeliveryError("delivery");
     }
+    return result.id;
   } catch {
     console.error("verification_email_delivery_failed", { stage: "receipt", reason: "invalid_receipt" });
     throw new EmailDeliveryError("delivery");
+  }
+}
+
+export async function sendTestEmail(recipient: unknown, expectedSender: unknown) {
+  const to = cleanEmail(recipient), expectedFromEmail = cleanEmail(expectedSender).toLowerCase();
+  const config = await verificationEmailDelivery();
+  const fromEmail = (config.fromEmail.match(/<([^<>]+)>$/)?.[1] || config.fromEmail).trim().toLowerCase();
+  if (!config.apiKey || !fromEmail) throw new RequestError("احفظ إعدادات إرسال البريد أولاً.", 409);
+  if (fromEmail !== expectedFromEmail) throw new RequestError("تغير عنوان المرسل المحفوظ. حدّث الإعدادات قبل إرسال الاختبار.", 409);
+  try {
+    const time = new Intl.DateTimeFormat("ar-KW", { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Kuwait" }).format(new Date());
+    const messageId = await deliverEmail(config.apiKey, { from: config.fromEmail, to: [to], subject: "رسالة تجريبية من مجموعة سابق القانونية", text: `هذه رسالة اختبار لتأكيد إعدادات الإرسال من مجموعة سابق القانونية.\n\nالمرسل: ${fromEmail}\nوقت الاختبار بتوقيت الكويت: ${time}` });
+    return { ok: true, accepted: true, fromEmail, to, messageId };
+  } catch (error) {
+    const message = error instanceof EmailDeliveryError && error.reason === "sender_domain_unverified"
+      ? "رفض مزود البريد الإرسال: نطاق sabeq.legal غير موثّق. يلزم استكمال توثيق النطاق لدى المزود."
+      : error instanceof EmailDeliveryError && error.reason === "api_key_rejected"
+        ? "رفض مزود البريد مفتاح الإرسال المحفوظ."
+        : "لم يؤكد مزود البريد قبول رسالة الاختبار. راجع اتصال المزود وإعداداته قبل إعادة المحاولة.";
+    throw new RequestError(message, 502);
   }
 }

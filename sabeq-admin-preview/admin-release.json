@@ -1,16 +1,16 @@
 {
-  "revision": "independent-admin-16-generated-memo-links",
-  "backendSource": "e4a3e444b67cf4c0336e0e4c9408695bbe8bc1f5",
+  "revision": "independent-admin-17-control-accounts-mail-test",
+  "backendSource": "59092caf21919597d2ccc6db1cd20bb12ac5f21c",
   "sourceRepository": "https://github.com/Q8-ux/saad",
   "paymentVisibility": "admin-only-by-default",
   "paymentsLink": "#payments",
   "programmerLink": "#programmer",
   "programmerScope": "advice-and-explicit-follow-up",
   "fccGateway": "requires-independent-configured-service",
-  "backendVersion": 177,
+  "backendVersion": 184,
   "projectProviderConfigured": true,
   "liveInferenceVerified": false,
-  "localChecksPassed": 206,
+  "localChecksPassed": 270,
   "releasePreparedAt": "2026-10-25T22:59:34.578Z",
   "legislationLink": "#legislation",
   "archiveAssistantUse": "checked-image-fields-only",
@@ -44,5 +44,11 @@
   "memoAllRequestsView": "all",
   "memoRecordAuthentication": "existing-administrator-session-or-PKCE-first",
   "memoLinkValidation": "21-targeted-and-mirrored-tests;desktop-and-390px-synthetic-browser-QA",
-  "livePrivateMemoContentOpened": false
+  "livePrivateMemoContentOpened": false,
+  "controlAccountsLink": "#users",
+  "controlAccountEditing": "administrator-only-username-and-password;retains-role;invalidates-target-sessions",
+  "requestedVerificationSender": "noreplay@sabeq.legal",
+  "verificationEmailDomainCheck": "SPF-DKIM-read-only;restricted-sending-key-supported",
+  "testEmail": "administrator-only-fixed-message;expected-sender-check;5-per-hour;provider-receipt",
+  "currentVersionLiveLoginTested": false
 }

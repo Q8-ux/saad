@@ -54,3 +54,5 @@ dialog.memo-detail[open]{display:flex;flex-direction:column;padding:0;overflow:h
 html:has(dialog.memo-detail[open]){overflow:hidden}
 
 .login input[name="username"],.login input[name="password"]{direction:ltr;text-align:left;unicode-bidi:plaintext}
+
+.control-login-row{flex-wrap:wrap;gap:12px}.control-login-row>div{min-width:0}.control-login-row bdi{overflow-wrap:anywhere}.control-login-row button{white-space:normal}@media(max-width:680px){.control-login-row button{width:100%}}

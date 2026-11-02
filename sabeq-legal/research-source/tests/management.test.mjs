@@ -10,7 +10,6 @@ import ts from 'typescript';
 const require=createRequire(import.meta.url),root=resolve(new URL('..',import.meta.url).pathname);
 function harness(){
  const sqlite=new DatabaseSync(':memory:');
- sqlite.exec(readFileSync(root+'/tests/fixtures/dashboard-base-schema.sql','utf8'));
  for(const file of readdirSync(root+'/drizzle').filter(f=>f.endsWith('.sql')).sort())sqlite.exec(readFileSync(root+'/drizzle/'+file,'utf8'));
  const statements=query=>{let args=[];return{bind(...values){args=values;return this;},async first(){return sqlite.prepare(query).get(...args)||null;},async all(){return{results:sqlite.prepare(query).all(...args)};},async run(){const result=sqlite.prepare(query).run(...args);return{success:true,meta:{changes:Number(result.changes)}};}};};
  const db={prepare:statements,async batch(values){const out=[];for(const v of values)out.push(await v.run());return out;}};
@@ -39,6 +38,76 @@ const adminSalt=Buffer.alloc(16,77);
 const adminAccount={username:'saad',salt:adminSalt.toString('hex'),hash:pbkdf2Sync(createHmac('sha256',adminPepper).update(adminPassword).digest(),adminSalt,600000,32,'sha256').toString('hex'),enabled:true};
 function configureAdministrator(h){h.runtime.MANAGEMENT_ADMIN_PASSWORD_PEPPER=adminPepper;h.runtime.MANAGEMENT_ADMIN_PASSWORD_USERS=JSON.stringify({version:1,accounts:[adminAccount]});}
 async function adminLogin(h,username='Saad'){const response=await h.load('app/api/management/[...path]/route.ts').POST(request('password-login',null,{username,password:adminPassword,role:'user'}));assert.equal(response.status,200);return response.json();}
+
+test('only administrators can list and edit control login accounts, and listing has no credential material',async()=>{const h=harness();try{
+ configureStaff(h);configureAdministrator(h);const routes=h.load('app/api/management/[...path]/route.ts');
+ assert.equal((await routes.GET(request('control-accounts'))).status,401);
+ assert.equal((await routes.POST(request('control-accounts',null,{username:'changed'}))).status,401);
+ const auth=h.load('lib/management-auth.ts'),staff=await h.load('lib/management-password.ts').authenticateManagementPassword({username:'user1',password:staffPasswords.user1});
+ const token=auth.randomToken(),now=Math.floor(Date.now()/1000);h.sqlite.prepare('INSERT INTO management_sessions VALUES(?,?,?,?,?)').run(await auth.digest(token),staff.sessionPrincipal,'user1',now+3600,now);
+ assert.equal((await routes.GET(request('control-accounts',token))).status,403);
+ assert.equal((await routes.POST(request('control-accounts',token,{username:'changed'}))).status,403);
+ const manager=await adminLogin(h),response=await routes.GET(request('control-accounts',manager.token));assert.equal(response.status,200);const list=await response.json();
+ assert.equal(list.accounts.length,6);assert.equal(list.accounts.find(a=>a.username==='saad').self,true);
+ const text=JSON.stringify(list);for(const secret of [adminPassword,adminPepper,adminAccount.hash,adminAccount.salt,staffPasswords.user1,staffPepper])assert.ok(!text.includes(secret));
+ assert.ok(!text.includes('sessionVersion'));assert.equal(h.network.length,0);
+}finally{h.close();}});
+
+test('administrator renames a staff login without changing its password, role or stable identity',async()=>{const h=harness();try{
+ configureStaff(h);configureAdministrator(h);const manager=await adminLogin(h),routes=h.load('app/api/management/[...path]/route.ts'),passwords=h.load('lib/management-password.ts');
+ const before=await passwords.authenticateManagementPassword({username:'user1',password:staffPasswords.user1});
+ const list=await (await routes.GET(request('control-accounts',manager.token))).json();
+ const response=await routes.POST(request('control-accounts',manager.token,{id:'operator:user1',username:' NEW_USER ',newPassword:'',confirmPassword:'',revision:list.revision}));assert.equal(response.status,200);
+ assert.equal((await response.json()).reauthenticate,false);
+ await assert.rejects(passwords.authenticateManagementPassword({username:'user1',password:staffPasswords.user1}),e=>e.status===401);
+ const after=await passwords.authenticateManagementPassword({username:'new_user',password:staffPasswords.user1});assert.equal(after.role,'operator');assert.equal(after.identity,'staff:user1');
+ assert.equal(await passwords.managementPasswordSession(before.sessionPrincipal),null);
+ assert.equal((await routes.POST(request('password-login',null,{username:'new_user',password:staffPasswords.user1,role:'administrator'}))).status,403);
+ assert.equal((await routes.GET(request('session',manager.token))).status,200);
+}finally{h.close();}});
+
+test('resetting another administrator password persists encrypted, rejects the old password and revokes only their sessions',async()=>{const h=harness();try{
+ configureAdministrator(h);h.runtime.MANAGEMENT_ADMIN_PASSWORD_USERS=JSON.stringify({version:1,accounts:[adminAccount,{...adminAccount,username:'other_admin'}]});
+ const manager=await adminLogin(h),other=await adminLogin(h,'other_admin'),routes=h.load('app/api/management/[...path]/route.ts');
+ const list=await (await routes.GET(request('control-accounts',manager.token))).json(),password='New-Synthetic-Password-2026!';
+ const response=await routes.POST(request('control-accounts',manager.token,{id:'administrator:other_admin',username:'other_admin',newPassword:password,confirmPassword:password,revision:list.revision}));assert.equal(response.status,200);
+ assert.equal((await routes.GET(request('session',other.token))).status,401);assert.equal((await routes.GET(request('session',manager.token))).status,200);
+ assert.equal((await routes.POST(request('password-login',null,{username:'other_admin',password:adminPassword}))).status,401);
+ const signed=await routes.POST(request('password-login',null,{username:'other_admin',password}));assert.equal(signed.status,200);
+ const stored=h.sqlite.prepare("SELECT sealed,updated_by FROM management_vault WHERE integration='control-accounts'").get();assert.ok(stored);assert.equal(stored.updated_by,'staff-admin:saad');
+ for(const secret of [password,adminPassword,adminPepper,adminAccount.hash])assert.ok(!stored.sealed.includes(secret));
+ const safe=JSON.stringify(await response.json());assert.ok(!safe.includes(password));assert.ok(!safe.includes('hash'));assert.equal(h.logs.length,0);
+ h.runtime.MANAGEMENT_ADMIN_PASSWORD_USERS=JSON.stringify({version:1,accounts:[adminAccount,{...adminAccount,username:'other_admin',enabled:false}]});
+ assert.equal((await routes.GET(request('session',(await signed.json()).token))).status,401);
+}finally{h.close();}});
+
+test('duplicate names, malformed changes, role injection and stale versions leave accounts unchanged',async()=>{const h=harness();try{
+ configureStaff(h);configureAdministrator(h);const manager=await adminLogin(h),routes=h.load('app/api/management/[...path]/route.ts');
+ const list=await (await routes.GET(request('control-accounts',manager.token))).json();const base={id:'operator:user1',username:'user1',revision:list.revision};
+ for(const [change,status] of [[{username:'SAAD'},409],[{username:'a'},400],[{username:'bad<script>'},400],[{newPassword:'short',confirmPassword:'short'},400],[{newPassword:'Valid-Synthetic-Password',confirmPassword:'different'},400],[{role:'administrator'},400],[{enabled:true},400],[{id:'operator:missing'},404],[{revision:'stale'},409]]){
+  assert.equal((await routes.POST(request('control-accounts',manager.token,{...base,...change}))).status,status);
+ }
+ assert.equal(h.sqlite.prepare("SELECT COUNT(*) n FROM management_vault WHERE integration='control-accounts'").get().n,0);
+ const results=await Promise.all(['renamed_one','renamed_two'].map(username=>routes.POST(request('control-accounts',manager.token,{...base,username}))));
+ assert.deepEqual(results.map(r=>r.status).sort(),[200,409]);
+ assert.equal((await routes.POST(request('control-accounts',manager.token,{...base,username:'outdated'}))).status,409);
+}finally{h.close();}});
+
+test('self rename requires login again, preserves administrator identity and never resurrects a prior session on rename back',async()=>{const h=harness();try{
+ configureAdministrator(h);const manager=await adminLogin(h),routes=h.load('app/api/management/[...path]/route.ts');
+ const list=await (await routes.GET(request('control-accounts',manager.token))).json();
+ const changed=await routes.POST(request('control-accounts',manager.token,{id:'administrator:saad',username:'supervisor',revision:list.revision}));assert.equal(changed.status,200);assert.equal((await changed.json()).reauthenticate,true);
+ assert.equal((await routes.GET(request('session',manager.token))).status,401);const next=await adminLogin(h,'supervisor');assert.equal(next.manager.email,'staff-admin:saad');
+ const fresh=await (await routes.GET(request('control-accounts',next.token))).json();assert.equal(fresh.accounts[0].self,true);
+ const restored=await routes.POST(request('control-accounts',next.token,{id:'administrator:saad',username:'saad',revision:fresh.revision}));assert.equal(restored.status,200);
+ assert.equal((await routes.GET(request('session',manager.token))).status,401);assert.equal((await routes.GET(request('session',next.token))).status,401);
+ assert.equal((await (await routes.GET(request('session',(await adminLogin(h)).token))).json()).manager.username,'saad');
+}finally{h.close();}});
+
+test('corrupt saved control credentials fail closed without falling back to old environment credentials',async()=>{const h=harness();try{
+ configureAdministrator(h);h.sqlite.prepare("INSERT INTO management_vault(integration,sealed,updated_by) VALUES('control-accounts','corrupt','synthetic')").run();
+ const response=await h.load('app/api/management/[...path]/route.ts').POST(request('password-login',null,{username:'saad',password:adminPassword}));assert.equal(response.status,503);assert.ok(!(await response.json()).token);
+}finally{h.close();}});
 
 test('password verifier preserves the independent PBKDF2 vector while staff no longer enter the administration',async()=>{const h=harness();try{configureStaff(h);const result=await h.load('lib/management-password.ts').authenticateManagementPassword({username:' USER1 ',password:staffPasswords.user1});assert.equal(result.username,'user1');assert.match(result.sessionPrincipal,/^staff:user1:[a-f0-9]{32}$/);assert.equal((await h.load('app/api/management/[...path]/route.ts').POST(request('password-login',null,{username:'user1',password:staffPasswords.user1,role:'administrator'}))).status,403);}finally{h.close();}});
 
@@ -306,6 +375,41 @@ test('a direct Payments bookmark cannot fetch dashboard records before sign-in',
 });
 
 const verificationConfig={action:'save',fromEmail:'noreply@sabeq.legal',apiKey:'re_synthetic_verification_key_12345'};
+
+test('administrator sends a fixed test email from the expected saved sender without creating a visitor or OTP',async()=>{const h=harness();try{
+ const routes=h.load('app/api/management/[...path]/route.ts'),data={action:'send-test',to:'test-recipient@example.test',expectedFromEmail:'noreplay@sabeq.legal'};
+ assert.equal((await routes.POST(request('verification-email',null,data))).status,401);assert.equal(h.network.length,0);
+ const manager=await login(h);await h.load('lib/verification-email-settings.ts').verificationEmailAction({...verificationConfig,fromEmail:'noreplay@sabeq.legal'},'test');
+ assert.equal((await routes.POST(request('verification-email',manager.token,{...data,expectedFromEmail:'noreply@sabeq.legal'}))).status,409);assert.equal(h.network.length,0);
+ h.setTransport(async(url,init)=>{assert.equal(String(url),'https://api.resend.com/emails');assert.equal(init.method,'POST');assert.equal(init.redirect,'manual');const body=JSON.parse(init.body);assert.equal(body.from,'noreplay@sabeq.legal');assert.deepEqual(body.to,[data.to]);assert.match(body.subject,/رسالة تجريبية/);assert.ok(!body.text.includes('رمز التحقق'));assert.equal(body.cc,undefined);return Response.json({id:'synthetic-test-message-id'});});
+ const response=await routes.POST(request('verification-email',manager.token,data));assert.equal(response.status,200);const result=await response.json();assert.equal(result.accepted,true);assert.equal(result.messageId,'synthetic-test-message-id');assert.ok(!JSON.stringify(result).includes(verificationConfig.apiKey));
+ assert.equal(h.sqlite.prepare('SELECT COUNT(*) n FROM public_users').get().n,0);assert.equal(h.sqlite.prepare('SELECT COUNT(*) n FROM email_verification_challenges').get().n,0);
+ h.setTransport(async()=>Response.json({message:'The sabeq.legal domain is not verified.'},{status:403}));const failed=await routes.POST(request('verification-email',manager.token,data));assert.equal(failed.status,502);assert.match((await failed.json()).error,/غير موثّق/);
+ for(let attempt=0;attempt<2;attempt++)assert.equal((await routes.POST(request('verification-email',manager.token,data))).status,502);
+ const calls=h.network.length;assert.equal((await routes.POST(request('verification-email',manager.token,data))).status,429);assert.equal(h.network.length,calls);
+ const changedAgent=request('verification-email',manager.token,data);changedAgent.headers.set('user-agent','different-client');assert.equal((await routes.POST(changedAgent)).status,429);assert.equal(h.network.length,calls);
+}finally{h.close();}});
+
+test('verification sender inspection is administrator-only and checks only sending DNS records without sending or saving',async()=>{const h=harness();try{
+ const routes=h.load('app/api/management/[...path]/route.ts');assert.equal((await routes.POST(request('verification-email',null,{action:'check'}))).status,401);
+ const manager=await login(h),settings=h.load('lib/verification-email-settings.ts');await settings.verificationEmailAction({...verificationConfig,fromEmail:'noreplay@sabeq.legal'},'test');
+ const before=h.sqlite.prepare("SELECT sealed FROM management_vault WHERE integration='verification-email'").get().sealed;
+ const domainId='11111111-1111-4111-8111-111111111111';const records=[{record:'SPF',name:'send',type:'TXT',value:'v=spf1 include:amazonses.com ~all',status:'verified'},{record:'SPF',name:'send',type:'MX',value:'feedback-smtp.us-east-1.amazonses.com',status:'verified',priority:10},{record:'DKIM',name:'resend._domainkey',type:'TXT',value:'p=public-synthetic-key',status:'verified'},{record:'Receiving',name:'@',type:'MX',value:'inbound.example.test',status:'pending'}];
+ h.setTransport(async(url,init)=>{assert.equal(init.method,'GET');assert.equal(init.redirect,'manual');assert.equal(init.headers.Authorization,'Bearer '+verificationConfig.apiKey);if(String(url)==='https://api.resend.com/domains')return Response.json({data:[{id:domainId,name:'sabeq.legal'},{id:'unrelated',name:'private.example.test'}],has_more:false});assert.equal(String(url),'https://api.resend.com/domains/'+domainId);return Response.json({name:'sabeq.legal',status:'partially_verified',capabilities:{sending:'enabled',receiving:'enabled'},records});});
+ const response=await routes.POST(request('verification-email',manager.token,{action:'check'}));assert.equal(response.status,200);const result=await response.json();assert.equal(result.fromEmail,'noreplay@sabeq.legal');assert.equal(result.check.status,'verified');assert.equal(result.check.deliveryTested,false);assert.equal(result.check.records.length,3);
+ const safe=JSON.stringify(result);for(const secret of [verificationConfig.apiKey,'private.example.test','inbound.example.test'])assert.ok(!safe.includes(secret));assert.equal(h.network.length,2);
+ assert.equal(h.sqlite.prepare("SELECT sealed FROM management_vault WHERE integration='verification-email'").get().sealed,before);
+ records[2].status='pending';assert.equal((await settings.verificationEmailAction({action:'check'},'test')).check.status,'domain_unverified');
+}finally{h.close();}});
+
+test('verification sender inspection distinguishes missing settings, auth, scope, missing domain and unsafe provider failures',async()=>{const h=harness();try{
+ const api=h.load('lib/verification-email-settings.ts');assert.equal((await api.verificationEmailAction({action:'check'},'test')).check.status,'missing_settings');assert.equal(h.network.length,0);
+ await api.verificationEmailAction(verificationConfig,'test');
+ for(const [transport,status] of [[()=>Response.json({}, {status:401}),'key_rejected'],[()=>Response.json({}, {status:403}),'domain_read_forbidden'],[()=>Response.json({data:[],has_more:false}),'domain_missing'],[()=>Response.json({data:[],has_more:true}),'unknown'],[()=>new Response('',{status:302,headers:{Location:'https://other.example'}}),'unknown'],[()=>{throw Error('connection failed')},'unknown'],[()=>new Response('malformed'),'unknown']]){
+  h.setTransport(transport);assert.equal((await api.verificationEmailAction({action:'check'},'test')).check.status,status);
+ }
+ assert.ok(h.network.every(call=>call.init.method==='GET'&&call.url==='https://api.resend.com/domains'));assert.equal(h.logs.length,0);
+}finally{h.close();}});
 const publicAuthRequest=(action,body)=>new Request('https://sabeq-legal-public.centrino.chatgpt.site/api/auth/'+action,{method:'POST',headers:{Origin:'https://q8-ux.github.io','Content-Type':'application/json'},body:JSON.stringify(body)});
 const syntheticApplicant={name:'مستخدم اصطناعي',phone:'00000000',email:'applicant@example.test',language:'ar'};
 

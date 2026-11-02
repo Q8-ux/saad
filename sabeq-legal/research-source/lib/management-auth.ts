@@ -3,6 +3,7 @@ import { getD1 } from "@/db";
 import { getChatGPTUser, chatGPTSignInPath } from "@/app/chatgpt-auth";
 import { RequestError, enforceRateLimit } from "@/lib/request-security";
 import { authenticateManagementPassword, managementPasswordSession, normalizeManagementUsername } from "@/lib/management-password";
+export { sealConfig, openConfig } from "@/lib/management-vault";
 
 export const MANAGEMENT_HOME = "https://q8-ux.github.io/saad/sabeq-admin-preview/";
 export const MANAGEMENT_ORIGIN = new URL(MANAGEMENT_HOME).origin;
@@ -86,7 +87,7 @@ export async function passwordManagerLogin(request: Request, data: Record<string
   const now = Math.floor(Date.now() / 1000), token = randomToken(), expiresAt = now + 8 * 3600;
   await getD1().prepare("INSERT INTO management_sessions (token_hash, email, name, expires_at, last_seen_at) VALUES (?, ?, ?, ?, ?)")
     .bind(await digest(token), account.sessionPrincipal, account.username, expiresAt, now).run();
-  return { token, expiresAt, manager: managerProfile({ email: `staff-admin:${account.username}`, name: account.username, username: account.username, role: "administrator" }) };
+  return { token, expiresAt, manager: managerProfile({ email: account.identity, name: account.username, username: account.username, role: "administrator" }) };
 }
 export async function requireManager(request: Request) {
   assertManagementOrigin(request);
@@ -100,21 +101,4 @@ export async function requireManager(request: Request) {
   if (!row || (passwordSession ? !staff : !(await managerAllowed(row.email)))) throw new RequestError("انتهت الجلسة الإدارية. سجّل الدخول مجدداً.", 401);
   await getD1().prepare("UPDATE management_sessions SET last_seen_at = ? WHERE token_hash = ?").bind(now, hash).run();
   return { email: staff?.identity || row.email, name: staff?.username || row.name, ...(staff ? { username: staff.username } : {}), role: "administrator" as const, hash };
-}
-async function vaultKey() {
-  const secret = managementRuntime().AUTH_SECRET || "";
-  if (secret.length < 32) throw new RequestError("مفتاح حماية التكامل غير مهيأ.", 503);
-  return crypto.subtle.importKey("raw", await crypto.subtle.digest("SHA-256", new TextEncoder().encode(`sabeq-management-vault:${secret}`)), "AES-GCM", false, ["encrypt", "decrypt"]);
-}
-export async function sealConfig(value: unknown) {
-  const iv = crypto.getRandomValues(new Uint8Array(12));
-  const ciphertext = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, await vaultKey(), new TextEncoder().encode(JSON.stringify(value)));
-  return `${base64url(iv)}.${base64url(new Uint8Array(ciphertext))}`;
-}
-export async function openConfig<T>(value: string): Promise<T> {
-  try {
-    const [iv, ciphertext] = value.split(".").map(part => Uint8Array.from(atob(part.replace(/-/g, "+").replace(/_/g, "/")), c => c.charCodeAt(0)));
-    const plaintext = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, await vaultKey(), ciphertext);
-    return JSON.parse(new TextDecoder().decode(plaintext));
-  } catch { throw new RequestError("تعذرت قراءة إعدادات التكامل المحمية. أعد حفظ المفتاح.", 503); }
 }

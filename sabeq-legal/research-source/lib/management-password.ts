@@ -2,13 +2,19 @@ import { env } from "cloudflare:workers";
 import { pbkdf2Async } from "@noble/hashes/pbkdf2.js";
 import { sha256 } from "@noble/hashes/sha2.js";
 import { RequestError } from "@/lib/request-security";
+import { getD1 } from "@/db";
+import { openConfig, sealConfig } from "@/lib/management-vault";
 
-type PasswordAccount = { username: string; salt: string; hash: string; enabled: boolean };
+type PasswordAccount = { username: string; salt: string; hash: string; enabled: boolean; sessionVersion?: string };
+type AccountOverride = Pick<PasswordAccount, "username" | "salt" | "hash"> & { id: string; sessionVersion: string };
+type AccountStore = { version: 1; revision: string; accounts: AccountOverride[] };
+type EffectiveAccount = PasswordAccount & { id: string; seedUsername: string; role: "operator" | "administrator"; pepper: string };
 type PasswordRuntime = { MANAGEMENT_PASSWORD_USERS?: string; MANAGEMENT_PASSWORD_PEPPER?: string; MANAGEMENT_ADMIN_PASSWORD_USERS?: string; MANAGEMENT_ADMIN_PASSWORD_PEPPER?: string };
 const USERNAME = /^[a-z][a-z0-9_]{2,31}$/;
 const ITERATIONS = 600_000;
 const INVALID = "اسم المستخدم أو كلمة المرور غير صحيحين.";
 const encoder = new TextEncoder();
+const VAULT_KEY = "control-accounts";
 
 export function normalizeManagementUsername(value: unknown) {
   return typeof value === "string" ? value.trim().toLowerCase() : "";
@@ -46,29 +52,82 @@ async function peppered(value: string, pepper: string) {
   return new Uint8Array(await crypto.subtle.sign("HMAC", key, encoder.encode(value)));
 }
 async function credentialTag(account: PasswordAccount, pepper: string) {
-  return toHex(await peppered(`management-session-v1:${account.username}:${account.salt}:${account.hash}`, pepper)).slice(0, 32);
+  return toHex(await peppered(`management-session-v1:${account.username}:${account.salt}:${account.hash}${account.sessionVersion ? `:${account.sessionVersion}` : ""}`, pepper)).slice(0, 32);
+}
+
+async function accountRoster() {
+  const accounts: EffectiveAccount[] = [];
+  for (const role of ["administrator", "operator"] as const) {
+    const config = configuration(role);
+    for (const account of config?.accounts || []) accounts.push({ ...account, id: `${role}:${account.username}`, seedUsername: account.username, role, pepper: config!.pepper });
+  }
+  const row = await getD1().prepare("SELECT sealed FROM management_vault WHERE integration = ?").bind(VAULT_KEY).first<{ sealed: string }>();
+  const saved = row ? await openConfig<AccountStore>(row.sealed) : { version: 1, revision: "environment", accounts: [] } as AccountStore;
+  const invalid = () => { throw new RequestError("تعذرت قراءة حسابات دخول اللوحة المحفوظة. تواصل مع مسؤول النظام.", 503); };
+  if (!saved || saved.version !== 1 || typeof saved.revision !== "string" || (row && !/^[a-f0-9]{32}$/.test(saved.revision)) || !Array.isArray(saved.accounts) || saved.accounts.length > 50) invalid();
+  const ids = new Set<string>();
+  for (const override of saved.accounts) {
+    if (!override || typeof override.id !== "string" || !/^(administrator|operator):[a-z][a-z0-9_]{2,31}$/.test(override.id) || ids.has(override.id) || typeof override.username !== "string" || !USERNAME.test(override.username) || typeof override.salt !== "string" || !/^[a-f0-9]{32}$/.test(override.salt) || typeof override.hash !== "string" || !/^[a-f0-9]{64}$/.test(override.hash) || typeof override.sessionVersion !== "string" || !/^[a-f0-9]{32}$/.test(override.sessionVersion)) invalid();
+    ids.add(override.id);
+    const account = accounts.find(a => a.id === override.id);
+    if (account) Object.assign(account, { username: override.username, salt: override.salt, hash: override.hash, sessionVersion: override.sessionVersion });
+  }
+  if (new Set(accounts.map(a => a.username)).size !== accounts.length) invalid();
+  return { accounts, saved, sealed: row?.sealed || "" };
+}
+const accountIdentity = (account: EffectiveAccount) => `${account.role === "administrator" ? "staff-admin" : "staff"}:${account.seedUsername}`;
+type AccountManager = { role: string; email: string; username?: string };
+function safeAccounts(roster: Awaited<ReturnType<typeof accountRoster>>, manager: AccountManager) {
+  return { revision: roster.saved.revision, accounts: roster.accounts.map(account => ({ id: account.id, username: account.username, role: account.role, enabled: account.enabled, self: account.role === "administrator" && manager.username === account.username })) };
+}
+export async function managementAccounts(data: Record<string, unknown> | null, manager: AccountManager) {
+  if (manager.role !== "administrator") throw new RequestError("تعديل حسابات دخول اللوحة متاح للمشرف فقط.", 403);
+  const roster = await accountRoster();
+  if (!data) return safeAccounts(roster, manager);
+  if (Object.keys(data).some(key => !["id", "username", "newPassword", "confirmPassword", "revision"].includes(key))) throw new RequestError("يمكن تعديل اسم المستخدم وكلمة المرور فقط.");
+  if (typeof data.revision !== "string" || data.revision !== roster.saved.revision) throw new RequestError("تغيرت حسابات اللوحة أثناء التعديل. حدّث القائمة ثم أعد المحاولة.", 409);
+  const account = roster.accounts.find(a => a.id === data.id);
+  if (!account) throw new RequestError("حساب دخول اللوحة غير موجود.", 404);
+  const username = normalizeManagementUsername(data.username);
+  if (!USERNAME.test(username)) throw new RequestError("اسم المستخدم من 3 إلى 32 محرفاً، يبدأ بحرف إنجليزي ويحتوي حروفاً وأرقاماً وشرطة سفلية فقط.");
+  if (roster.accounts.some(a => a.id !== account.id && a.username === username)) throw new RequestError("اسم المستخدم مستخدم لحساب آخر. اختر اسماً مختلفاً.", 409);
+  const password = data.newPassword ?? "", confirmation = data.confirmPassword ?? "";
+  if (typeof password !== "string" || typeof confirmation !== "string" || (password && (password.length < 16 || password.length > 256 || !/\S/.test(password)))) throw new RequestError("كلمة المرور الجديدة من 16 إلى 256 محرفاً.");
+  if (password !== confirmation) throw new RequestError("تأكيد كلمة المرور غير مطابق.");
+  if (username === account.username && !password) return { ok: true, reauthenticate: false, ...safeAccounts(roster, manager) };
+  const override: AccountOverride = { id: account.id, username, salt: account.salt, hash: account.hash, sessionVersion: toHex(crypto.getRandomValues(new Uint8Array(16))) };
+  if (password) {
+    override.salt = toHex(crypto.getRandomValues(new Uint8Array(16)));
+    override.hash = toHex(await pbkdf2Async(sha256, await peppered(password, account.pepper), fromHex(override.salt), { c: ITERATIONS, dkLen: 32, asyncTick: 10 }));
+  }
+  const next: AccountStore = { version: 1, revision: toHex(crypto.getRandomValues(new Uint8Array(16))), accounts: [...roster.saved.accounts.filter(a => a.id !== account.id), override] };
+  const sealed = await sealConfig(next);
+  const result = await getD1().prepare("INSERT INTO management_vault (integration, sealed, updated_by) VALUES (?, ?, ?) ON CONFLICT(integration) DO UPDATE SET sealed = excluded.sealed, updated_by = excluded.updated_by, updated_at = CURRENT_TIMESTAMP WHERE management_vault.sealed = ?")
+    .bind(VAULT_KEY, sealed, manager.email, roster.sealed).run();
+  if (result.meta.changes !== 1) throw new RequestError("حفظ مشرف آخر تعديلاً متزامناً. حدّث القائمة ثم أعد المحاولة.", 409);
+  const self = account.role === "administrator" && manager.username === account.username;
+  return { ok: true, reauthenticate: self };
 }
 
 export async function authenticateManagementPassword(data: Record<string, unknown>) {
   const username = normalizeManagementUsername(data.username), password = data.password;
   if (!USERNAME.test(username) || typeof password !== "string" || password.length < 10 || password.length > 256) throw new RequestError(INVALID, 401);
-  const administrator = configuration("administrator");
-  const config = administrator?.accounts.some(row => row.username === username) ? administrator : configuration() || administrator;
-  if (!config) throw new RequestError("دخول حسابات التشغيل غير مهيأ حالياً. تواصل مع الإدارة.", 503);
-  const account = config.accounts.find(row => row.username === username && row.enabled);
+  const { accounts } = await accountRoster();
+  const account = accounts.find(row => row.username === username && row.enabled), fallback = account || accounts[0];
+  if (!fallback) throw new RequestError("دخول حسابات التشغيل غير مهيأ حالياً. تواصل مع الإدارة.", 503);
   const salt = fromHex(account?.salt || "00".repeat(16));
   // Workers caps native PBKDF2 below this cost; the server-only implementation preserves 600000.
-  const actual = await pbkdf2Async(sha256, await peppered(password, config.pepper), salt, { c: ITERATIONS, dkLen: 32, asyncTick: 10 });
+  const actual = await pbkdf2Async(sha256, await peppered(password, fallback.pepper), salt, { c: ITERATIONS, dkLen: 32, asyncTick: 10 });
   const valid = sameBytes(actual, fromHex(account?.hash || "00".repeat(32)));
-  if (!account || !valid || (config.role === "operator" && password.length < 16)) throw new RequestError(INVALID, 401);
-  return { username, role: config.role, sessionPrincipal: `${config.role === "administrator" ? "staff-admin" : "staff"}:${username}:${await credentialTag(account, config.pepper)}` };
+  if (!account || !valid || (account.role === "operator" && password.length < 16)) throw new RequestError(INVALID, 401);
+  return { username, role: account.role, identity: accountIdentity(account), sessionPrincipal: `${account.role === "administrator" ? "staff-admin" : "staff"}:${username}:${await credentialTag(account, account.pepper)}` };
 }
 
 export async function managementPasswordSession(principal: string) {
   const match = principal.match(/^(staff|staff-admin):([a-z][a-z0-9_]{2,31}):([a-f0-9]{32})$/);
   if (!match) return null;
-  const config = configuration(match[1] === "staff-admin" ? "administrator" : "operator");
-  const account = config?.accounts.find(row => row.username === match[2] && row.enabled);
-  if (!config || !account || !sameBytes(fromHex(match[3]), fromHex(await credentialTag(account, config.pepper)))) return null;
-  return { username: account.username, role: config.role, identity: `${match[1]}:${account.username}` };
+  const { accounts } = await accountRoster();
+  const account = accounts.find(row => row.username === match[2] && row.enabled && row.role === (match[1] === "staff-admin" ? "administrator" : "operator"));
+  if (!account || !sameBytes(fromHex(match[3]), fromHex(await credentialTag(account, account.pepper)))) return null;
+  return { username: account.username, role: account.role, identity: accountIdentity(account) };
 }

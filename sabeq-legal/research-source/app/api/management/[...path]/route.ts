@@ -1,6 +1,7 @@
 import { engineeringPathStatus } from "@/lib/engineering-paths";
 import { siteAction, servicesAction, bookingsAction } from "@/lib/site-controls";
 import { listManagedUsers, updateManagedUser } from "@/lib/user-management";
+import { managementAccounts } from "@/lib/management-password";
 import { mailboxAction } from "@/lib/management-mailboxes";
 import { sadadManagement } from "@/lib/sadad-payments";
 import { programmerAction } from "@/lib/management-programmer";
@@ -12,6 +13,7 @@ import { assertManagementOrigin, assertManagerAction, exchangeManagerCode, manag
 import { bridgeKeys, managerInbox, managerMemos, managerSnapshot, managerUpdates } from "@/lib/management-data";
 import { mailAction, operationEvent, whatsappAction } from "@/lib/management-integrations";
 import { verificationEmailAction } from "@/lib/verification-email-settings";
+import { sendTestEmail } from "@/lib/email";
 import { cleanMultiline, cleanString, enforceRateLimit, readJsonObject, RequestError } from "@/lib/request-security";
 
 export const dynamic = "force-dynamic";
@@ -28,6 +30,7 @@ export async function GET(request: Request) {
     if (action === "jwks") { const keys = await bridgeKeys(); return managementJson({ keys: [keys.publicKey] }); }
     const manager = await requireManager(request), url = new URL(request.url);
     assertManagerAction(manager, action, "GET");
+    if (action === "control-accounts") return managementJson(await managementAccounts(null, manager));
     if (action === "verification-email") return managementJson(await verificationEmailAction(null, manager.email));
     if (action === "site") return managementJson(await siteAction(null, manager.email));
     if (action === "services") return managementJson(await servicesAction(null));
@@ -62,6 +65,7 @@ export async function POST(request: Request) {
     const manager = await requireManager(request);
     assertManagerAction(manager, action, "POST");
     await enforceRateLimit(request, "management-write", 150);
+    if (action === "control-accounts") return managementJson(await managementAccounts(data, manager));
     if (action === "site") return managementJson(await siteAction(data, manager.email));
     if (action === "services") return managementJson(await servicesAction(data));
     if (action === "bookings") return managementJson(await bookingsAction(data));
@@ -74,7 +78,17 @@ export async function POST(request: Request) {
     if (action === "payments") return managementJson(await sadadManagement(data, manager.email));
     if (action === "mailboxes") return managementJson(await mailboxAction(data, manager.email));
     if (action === "whatsapp") return managementJson(await whatsappAction(data, manager.email));
-    if (action === "verification-email") return managementJson(await verificationEmailAction(data, manager.email));
+    if (action === "verification-email") {
+      if (data.action === "check" || data.action === "send-test") {
+        const rateHeaders = new Headers(request.headers);
+        rateHeaders.set("user-agent", "sabeq-management-email");
+        await enforceRateLimit(new Request(request.url, { headers: rateHeaders }), data.action === "check" ? "management-email-check" : "management-email-send-test", data.action === "check" ? 20 : 5);
+      }
+      if (data.action === "send-test") {
+        return managementJson(await sendTestEmail(data.to, data.expectedFromEmail));
+      }
+      return managementJson(await verificationEmailAction(data, manager.email));
+    }
     if (action === "mail") return managementJson(await mailAction(data, manager.email));
     if (action === "read") {
       if (!Array.isArray(data.ids) || data.ids.length > 100 || data.ids.some(id => typeof id !== "string" || id.length > 200)) throw new RequestError("قائمة التنبيهات غير صحيحة.");
