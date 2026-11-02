@@ -117,6 +117,35 @@ async function deliverEmail(apiKey: string, message: { from: string; to: string[
   }
 }
 
+
+/**
+ * Administrative registration invitation, not a verification/activation code.
+ * The visitor must request and verify their own one-time code on the public site.
+ * A successful provider receipt does not mean delivered or email verified.
+ */
+export async function sendRegistrationInvitation(recipient: unknown, recipientName: unknown) {
+  const to = cleanEmail(recipient).trim().toLowerCase();
+  const name = typeof recipientName === "string" ? recipientName.trim().slice(0, 120) : "";
+  const config = await verificationEmailDelivery();
+  if (!config.apiKey?.trim() || !config.fromEmail?.trim()) throw new EmailDeliveryError("configuration", "missing_settings");
+  const website = "https://www.sabeq.legal/";
+  const intro = name ? `مرحباً ${name}،` : "مرحباً،";
+  const instructions = "أنشئ المكتب حساباً لك في مجموعة سابق القانونية. لإكمال التحقق، افتح الموقع واختر تسجيل الدخول، ثم أدخل اسمك وهاتفك وبريدك الإلكتروني واضغط إرسال رمز التحقق. سيصلك رمز صالح لمدة عشر دقائق؛ لن يُفعّل الحساب حتى تُدخله في الموقع.";
+  return deliverEmail(config.apiKey, {
+    from: config.fromEmail,
+    to: [to],
+    subject: "إكمال تسجيل حسابك لدى مجموعة سابق القانونية",
+    text: `${intro}\n\n${instructions}\n\n${website}\n\nإذا لم تطلب إنشاء الحساب، تجاهل هذه الرسالة.`,
+    html: `<div dir="rtl" style="font:17px/1.9 Tahoma,Arial,sans-serif;color:#173643;background:#f3f8fa;padding:24px">
+      <div style="max-width:520px;margin:auto;padding:25px;background:white;border:1px solid #dfebf0;border-radius:16px">
+        <h2 style="margin:0 0 12px">دعوة إكمال تسجيل حسابك</h2>
+        <p>${escapeHtml(intro)}</p><p>${escapeHtml(instructions)}</p>
+        <p><a href="${website}" style="color:#006b79;font-weight:bold">فتح موقع سابق القانونية</a></p>
+        <p style="color:#647b83;font-size:14px">إذا لم تطلب إنشاء الحساب، تجاهل هذه الرسالة.</p>
+      </div></div>`,
+  });
+}
+
 export async function sendTestEmail(recipient: unknown, expectedSender: unknown) {
   const to = cleanEmail(recipient), expectedFromEmail = cleanEmail(expectedSender).toLowerCase();
   const config = await verificationEmailDelivery();
