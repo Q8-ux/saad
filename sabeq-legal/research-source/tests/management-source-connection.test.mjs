@@ -36,6 +36,32 @@ test('the memo archive bridge uses the supported Cloudflare redirect mode and in
  assert.equal(h.archiveCalls.length,2);
 }finally{h.close();}});
 
+test('legacy archive retries one transient deployment outage with a fresh signed nonce',async()=>{let calls=0;const h=harness(async(url,init)=>{
+  calls++;
+  if(calls===1)return Response.json({error:'render restarting'},{status:503});
+  return Response.json({revision:'operations-monitor-1',memos:[{id:'recover',client_name:'طلب اختباري',status:'needs_review',created_at:'2026-11-02 11:00:00'}],hasMore:false});
+ });try{
+ const data=h.load('lib/management-data.ts');
+ const result=await data.managerMemos(new URL('https://test.invalid/api/management/memos?view=all'));
+ assert.equal(result.officialAvailable,true);
+ assert.equal(result.officialError,null);
+ assert.equal(result.memos.some(row=>row.id==='official:recover'),true);
+ assert.equal(calls,2);
+ const credentials=h.archiveCalls.map(call=>call.init.headers['X-Sabeq-Operations'].split('.')[0]);
+ assert.notEqual(credentials[0],credentials[1]);
+}finally{h.close();}});
+
+test('archive signing failures do not retry authorization denials or block current memo records',async()=>{const h=harness(async()=>Response.json({error:'not_authorized'},{status:401}));try{
+ const data=h.load('lib/management-data.ts');
+ const ledger=h.load('lib/memo-requests.ts');
+ const id=await ledger.startMemoRequest({clientName:'طلب حالي اصطناعي'},null,'https://q8-ux.github.io');
+ const result=await data.managerMemos(new URL('https://test.invalid/api/management/memos?view=all'));
+ assert.equal(result.officialAvailable,false);
+ assert.equal(result.officialError,'HTTP 401');
+ assert.equal(result.memos.some(row=>row.id===id),true);
+ assert.equal(h.archiveCalls.length,1);
+}finally{h.close();}});
+
 test('the real request ledger and dashboard share current records when the previous archive returns 404',async()=>{const h=harness();try{
   const ledger=h.load('lib/memo-requests.ts'),data=h.load('lib/management-data.ts');
   const id=await ledger.startMemoRequest({clientName:'طلب اختبار اصطناعي',facts:'وقائع اختبار'},null,'https://q8-ux.github.io');
