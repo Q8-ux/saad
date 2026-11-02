@@ -96,7 +96,12 @@ test('administrator renames a staff login without changing its password, role or
  await assert.rejects(passwords.authenticateManagementPassword({username:'user1',password:staffPasswords.user1}),e=>e.status===401);
  const after=await passwords.authenticateManagementPassword({username:'new_user',password:staffPasswords.user1});assert.equal(after.role,'operator');assert.equal(after.identity,'staff:user1');
  assert.equal(await passwords.managementPasswordSession(before.sessionPrincipal),null);
- assert.equal((await routes.POST(request('password-login',null,{username:'new_user',password:staffPasswords.user1,role:'administrator'}))).status,403);
+ const scoped=await routes.POST(request('password-login',null,{username:'new_user',password:staffPasswords.user1,role:'administrator'});
+ assert.equal(scoped.status,200);
+ const operator=await scoped.json();
+ assert.equal(operator.manager.role,'operator');
+ assert.ok(operator.manager.sections.includes('memos'));
+ assert.ok(!operator.manager.sections.includes('payments'));
  assert.equal((await routes.GET(request('session',manager.token))).status,200);
 }finally{h.close();}});
 
