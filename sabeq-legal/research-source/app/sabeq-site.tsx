@@ -13,6 +13,7 @@ import IntakeAnalysisView, { IntakeStages, type ConnectedIntakeState } from "./i
 import VoiceWaveform from "./voice-waveform";
 import { PrivacyLink } from "./privacy-notice";
 import GroupPostsStrip from "./group-posts-strip";
+import TeamCarousel from "./team-carousel";
 import MemoVoiceInput from "./memo-voice-input";
 import { memoStoryText } from "@/lib/memo-dictation";
 import MemoPaymentDialog from "./memo-payment-dialog";
@@ -433,14 +434,7 @@ export default function SabeqSite() {
         <section className="section" id="team">
           <div className="container">
             <SectionHeading kicker={t.teamKicker} title={t.teamTitle} text={t.teamText} />
-            <div className="team-grid" role="region" aria-label={t.teamTitle} tabIndex={0}>
-              {team.map((member, index) => (
-                <article className={`team-card${index === 0 ? " team-card-lead" : ""}${member.image.includes("dr-khalifa") ? " team-card-khalifa" : ""}`} key={member.name.ar} dir={language === "en" ? "ltr" : "rtl"}>
-                  <div className="team-photo"><Image src={member.image} alt={`${member.prefix[language]} ${member.name[language]}`} fill sizes="(max-width: 720px) 86vw, 380px" unoptimized /></div>
-                  <div className="team-info"><small>{member.prefix[language]}</small><h3 dir={language === "ar" ? "rtl" : "ltr"}>{member.name[language]}</h3><span><Scale size={15} />{t.brand}</span></div>
-                </article>
-              ))}
-            </div>
+            <TeamCarousel members={team} language={language} title={t.teamTitle} brand={t.brand} />
           </div>
         </section>
 
