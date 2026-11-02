@@ -2,6 +2,7 @@ import importlib.util
 import io
 import json
 import os
+import re
 from pathlib import Path
 import tarfile
 import tempfile
@@ -96,9 +97,10 @@ class PublicationTests(unittest.TestCase):
                 with self.assertRaisesRegex(RuntimeError, "referenced script missing"):
                     release.verify()
                 (admin / "control.js").write_bytes(module)
+                control_src = re.search(r'<script[^>]+src="(\./control\.js(?:\?v=[^"]+)?)"', original).group(1)
                 for replacement in ('https://other.example/control.js',
                                     './control.js?redirect=other'):
-                    (admin / "index.html").write_text(original.replace('./control.js?v=independent-admin-14-owner-controls', replacement))
+                    (admin / "index.html").write_text(original.replace(control_src, replacement, 1))
                     with self.assertRaisesRegex(RuntimeError, "Unexpected admin script"):
                         release.verify()
                 for names in (["control","control","programmer","legislation","admin"],
