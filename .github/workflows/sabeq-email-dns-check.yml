@@ -20,6 +20,15 @@ jobs:
         run: |
           set -euo pipefail
           echo 'Domain: sabeq.legal'
+          echo '--- Authoritative nameservers ---'
+          dig +short NS sabeq.legal | sort
+          echo '--- SOA (DNS authority) ---'
+          dig +short SOA sabeq.legal
+          echo '--- Current main-domain MX, to preserve existing inbound mail ---'
+          dig +short MX sabeq.legal | sort
+          echo '--- Existing main-domain SPF/DMARC (values for diagnosis only) ---'
+          dig +short TXT sabeq.legal | grep -i spf1 || true
+          dig +short TXT _dmarc.sabeq.legal || true
           echo 'Note: Public DNS alone cannot establish which Resend team/key owns the domain, or whether delivery succeeds.'
           if dig +short TXT resend._domainkey.sabeq.legal | grep -q .; then
             echo 'Legacy Resend DKIM selector: PRESENT'
