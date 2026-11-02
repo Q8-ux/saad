@@ -2,7 +2,7 @@ name: Sabeq email DNS readiness (read-only)
 
 on:
   push:
-    branches: [main]
+    branches: [diagnostics/resend-check-20261102-1948]
     paths:
       - '.github/workflows/sabeq-email-dns-check.yml'
   workflow_dispatch:
@@ -51,3 +51,24 @@ jobs:
             echo 'New-style send CNAME: NOT FOUND'
           fi
           echo 'Authoritative sending status must be checked in the connected Resend team.'
+          echo '--- Explicit Resend CNAME selectors ---'
+          for host in rsend.sabeq.legal send.sabeq.legal; do
+            echo "$host"
+            dig +short CNAME "$host" || true
+          done
+      - name: Attempt authorized provider delivery test only when a GitHub Resend secret exists
+        shell: bash
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -z "${RESEND_API_KEY:-}" ]; then
+            echo 'SKIPPED: no RESEND_API_KEY available in GitHub Actions; the live Cloudflare/Resend configuration is not readable here.'
+            exit 0
+          fi
+          echo 'Configured GitHub Resend secret exists (value never printed).'
+          body='{"from":"noreplay@sabeq.legal","to":["saad.alrawdan@gmail.com"],"subject":"اختبار إرسال بريد سابق القانونية","text":"رسالة اختبار تقنية من نظام سابق القانونية للتحقق من إرسال البريد عبر Resend. لا تتضمن هذه الرسالة رمز دخول."}'
+          status="$(curl -sS --max-time 25 -o /tmp/resend-result -w '%{http_code}' -X POST 'https://api.resend.com/emails' -H "Authorization: Bearer ${RESEND_API_KEY}" -H 'Content-Type: application/json' --data "$body")"
+          echo "Resend send response HTTP: $status"
+          node -e 'const fs=require("fs");const d=JSON.parse(fs.readFileSync("/tmp/resend-result","utf8"));if(process.argv[1]==="200"||process.argv[1]==="201"){console.log("Resend accepted message, ID: "+(d.id||"missing"));}else{console.log("Resend rejected test; provider reason: "+(typeof d.message==="string"?d.message.slice(0,200):"unspecified"));}}' "$status"
+
