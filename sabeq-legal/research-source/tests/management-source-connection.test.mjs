@@ -62,6 +62,36 @@ test('archive signing failures do not retry authorization denials or block curre
  assert.equal(h.archiveCalls.length,1);
 }finally{h.close();}});
 
+test('date-scoped memo recovery inventories surviving D1 records without copying legal text',async()=>{const h=harness();try{
+ const ledger=h.load('lib/memo-requests.ts'),management=h.load('lib/management-data.ts');
+ const date=new Date().toISOString().slice(0,10);
+ const first=await ledger.startMemoRequest({clientName:'Test current memo'},null,'https://q8-ux.github.io');
+ await ledger.finishMemoRequest(first,'needs_review','Synthetic full draft');
+ await ledger.startMemoRequest({clientName:'Test incomplete memo'},null,'https://sabeq.legal');
+ h.sqlite.prepare("INSERT INTO public_users (id,name,phone,email,email_verified_at) VALUES ('test-audit-user','Synthetic User','000','synthetic@example.test','2026-01-01')").run();
+ h.sqlite.prepare("INSERT INTO service_records (id,user_id,service_type,title,output_text) VALUES ('test-legacy','test-audit-user','memo_archive','Synthetic archive','Text from the archive')").run();
+ const audit=await management.managerMemoRecovery(new URL('https://test.invalid/api/management/memo-recovery?start='+date+'&end='+date));
+ assert.equal(audit.current.total,2);
+ assert.equal(audit.current.withText,1);
+ assert.equal(audit.current.withoutText,1);
+ assert.equal(audit.savedHistory.total,1);
+ assert.equal(audit.savedHistory.withText,1);
+ assert.equal(audit.currentOrigins.github,1);
+ assert.equal(audit.currentOrigins.official,1);
+ assert.equal(audit.olderRender.available,false);
+ assert.equal(audit.olderRender.totalAllTime,null);
+ assert.ok(!JSON.stringify(audit).includes('Synthetic full draft'));
+ const earlier=await management.managerMemoRecovery(new URL('https://test.invalid/api/management/memo-recovery?start=1990-01-01&end=1990-01-01'));
+ assert.equal(earlier.current.total,0);assert.equal(earlier.savedHistory.total,0);
+}finally{h.close();}});
+
+test('recovery inventory rejects impossible dates and backwards windows',async()=>{const h=harness();try{
+ const data=h.load('lib/management-data.ts');
+ for(const suffix of ['start=2026-02-30','end=2026-13-01','start=2026-11-03&end=2026-11-02']){
+  await assert.rejects(data.managerMemoRecovery(new URL('https://test.invalid/api/management/memo-recovery?'+suffix)));
+ }
+}finally{h.close();}});
+
 test('the real request ledger and dashboard share current records when the previous archive returns 404',async()=>{const h=harness();try{
   const ledger=h.load('lib/memo-requests.ts'),data=h.load('lib/management-data.ts');
   const id=await ledger.startMemoRequest({clientName:'طلب اختبار اصطناعي',facts:'وقائع اختبار'},null,'https://q8-ux.github.io');
