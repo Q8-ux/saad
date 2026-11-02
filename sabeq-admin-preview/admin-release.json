@@ -40,7 +40,7 @@
   "verificationEmailDeliveryBlocker": "sender_domain_unverified;Resend-403;requires-DNS-verification",
   "memosLink": "#memos",
   "memoRecordLinks": "#memos?record=<record-id>",
-  "memoDefaultView": "generated-output-only",
+  "memoDefaultView": "all-requests",
   "memoAllRequestsView": "all",
   "memoRecordAuthentication": "existing-administrator-session-or-PKCE-first",
   "memoLinkValidation": "21-targeted-and-mirrored-tests;desktop-and-390px-synthetic-browser-QA",
