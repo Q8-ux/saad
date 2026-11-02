@@ -13,18 +13,18 @@ async function fixture(options={}){
  await new Promise(resolve=>setImmediate(resolve));
  return{calls,timers,document,node,storage,submit:async values=>{await events.get('submit')({preventDefault(){},target:{dataset:{form:'search'},matches:()=>true,values,querySelector:()=>({disabled:false})}});await new Promise(resolve=>setImmediate(resolve));}};
 }
-test('Memos opens the generated view on the same backend and keeps access to all requests',async()=>{
+test('Memos opens the all-requests view on the same backend and retains the generated filter',async()=>{
  const f=await fixture(),request=f.calls.find(c=>c.url.includes('/memos?'));
  assert.equal(new URL(request.url).origin,'https://sabeq-legal-public.centrino.chatgpt.site');
- assert.equal(new URL(request.url).searchParams.get('view'),'generated');
- assert.match(f.node('workspace').innerHTML,/المذكرات المولدة|المذكرات المولّدة/);
- assert.match(f.node('workspace').innerHTML,/كل طلبات التوليد/);
+ assert.equal(new URL(request.url).searchParams.get('view'),'all');
+ assert.match(f.node('workspace').innerHTML,/سجل طلبات التوليد/);
+ assert.match(f.node('workspace').innerHTML,/كل طلبات المذكرات/);
  assert.match(f.node('workspace').innerHTML,/data-memo="synthetic-memo"/);
  assert.equal(request.init.headers.Authorization,'Bearer synthetic-test-session');
 });
-test('switching to all requests retains search and status on the server',async()=>{
- const f=await fixture();await f.submit({view:'all',q:'اسم اختبار',status:'failed'});
- const url=new URL(f.calls.at(-1).url);assert.equal(url.searchParams.get('view'),'all');assert.equal(url.searchParams.get('q'),'اسم اختبار');assert.equal(url.searchParams.get('status'),'failed');
+test('switching to generated requests retains search and status on the server',async()=>{
+ const f=await fixture();await f.submit({view:'generated',q:'اسم اختبار',status:'failed'});
+ const url=new URL(f.calls.at(-1).url);assert.equal(url.searchParams.get('view'),'generated');assert.equal(url.searchParams.get('q'),'اسم اختبار');assert.equal(url.searchParams.get('status'),'failed');
 });
 test('the visible memo list refreshes without discarding an open memo or polling a hidden page',async()=>{
  const f=await fixture();let n=f.calls.length;await f.timers[0]();assert.equal(f.calls.length,n+1);
