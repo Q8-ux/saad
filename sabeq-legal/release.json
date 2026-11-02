@@ -189,7 +189,7 @@
   "memoDashboard": {
     "revision": "saved-memo-record-links-1",
     "storage": "existing-shared-ledger",
-    "defaultView": "generated-output-only",
+    "defaultView": "all-requests",
     "allRequestsPreserved": true,
     "recordLinksRequireExistingAdminAuthorization": true,
     "automaticRefreshSeconds": 45,
