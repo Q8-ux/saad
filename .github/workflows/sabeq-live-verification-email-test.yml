@@ -1,0 +1,35 @@
+name: Sabeq one-time live verification email test
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/sabeq-live-verification-email-test.yml
+
+permissions:
+  contents: read
+
+jobs:
+  test-email:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - name: Request exactly one real verification email from Sabeq public auth
+        shell: bash
+        run: |
+          set -euo pipefail
+          payload='{"name":"اختبار بريد سابق","phone":"00000000","email":"saad.alrawdan@gmail.com","language":"ar"}'
+          code="$(curl --silent --show-error --max-time 65 --retry 0 \
+            -o /tmp/sabeq-verification-email-response.json -w '%{http_code}' \
+            -X POST 'https://sabeq-legal-public.centrino.chatgpt.site/api/auth/request-code' \
+            -H 'Origin: https://q8-ux.github.io' \
+            -H 'Content-Type: application/json' \
+            -H 'Accept: application/json' \
+            --data-binary "$payload")"
+          echo "Sabeq verification request HTTP status: $code"
+          if [ "$code" = 200 ]; then
+            node -e "const fs=require('fs');const x=JSON.parse(fs.readFileSync('/tmp/sabeq-verification-email-response.json','utf8'));if(!x.ok||typeof x.challengeId!=='string')process.exit(2);console.log('PASS: server returned a verification challenge after email-provider acceptance. Inbox delivery is NOT proven.');"
+          else
+            node -e "const fs=require('fs');let x={};try{x=JSON.parse(fs.readFileSync('/tmp/sabeq-verification-email-response.json','utf8'));}catch{};console.log('FAIL: provider acceptance not confirmed; server response: '+String(x.error||'non-json response').slice(0,250));"
+            exit 1
+          fi
