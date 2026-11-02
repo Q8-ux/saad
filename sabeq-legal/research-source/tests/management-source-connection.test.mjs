@@ -6,16 +6,36 @@ import {webcrypto} from 'node:crypto';
 import vm from 'node:vm';
 import ts from 'typescript';
 const root=new URL('../',import.meta.url);
-function harness(){
+function harness(transport){
   const sqlite=new DatabaseSync(':memory:');
   sqlite.exec(readFileSync(new URL('tests/fixtures/management-source-tables.sql',root),'utf8'));
   sqlite.exec(readFileSync(new URL('drizzle/0005_icy_dark_phoenix.sql',root),'utf8'));
   const db={prepare(sql){let args=[];return{bind(...values){args=values;return this;},async first(){return sqlite.prepare(sql).get(...args)||null;},async all(){return{results:sqlite.prepare(sql).all(...args)};},async run(){return sqlite.prepare(sql).run(...args);}};}};
+  const archiveCalls=[];
   // Authentication routes and encrypted-vault isolation are covered by the full native management suite.
   const dependencies={'@/db':{getD1:()=>db},'@/lib/management-auth':{base64url:value=>Buffer.from(value).toString('base64url'),sealConfig:async value=>JSON.stringify(value),openConfig:async value=>JSON.parse(value)},'@/lib/management-integrations':{SERVICE_ORIGIN:'https://sabeq-legal-public.centrino.chatgpt.site'},'@/lib/request-security':{RequestError:class extends Error{}}};
-  function load(file){const exports={};vm.runInNewContext(ts.transpileModule(readFileSync(new URL(file,root),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{exports,require:name=>{if(!dependencies[name])throw Error('Unexpected test dependency: '+name);return dependencies[name];},crypto:webcrypto,TextEncoder,URL,URLSearchParams,AbortSignal,fetch:async()=>new Response('Not found',{status:404})});return exports;}
-  return{sqlite,load,close:()=>sqlite.close()};
+  function load(file){const exports={};vm.runInNewContext(ts.transpileModule(readFileSync(new URL(file,root),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{exports,require:name=>{if(!dependencies[name])throw Error('Unexpected test dependency: '+name);return dependencies[name];},crypto:webcrypto,TextEncoder,URL,URLSearchParams,AbortSignal,fetch:async(url,init)=>{ archiveCalls.push({url:String(url), init}); return transport ? transport(url,init) : new Response('Not found',{status:404}); }});return exports;}
+  return{sqlite,load,archiveCalls,close:()=>sqlite.close()};
 }
+test('the memo archive bridge uses the supported Cloudflare redirect mode and includes former-site requests',async()=>{const h=harness(async(url,init)=>{
+ assert.equal(String(url).split('?')[0],'https://sabeq-legal-research-api.onrender.com/api/admin/operations');
+ assert.equal(init.redirect,'manual');
+ assert.equal(init.cache,'no-store');
+ assert.match(init.headers['X-Sabeq-Operations'],/^[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+$/);
+ if(String(url).includes('recordId='))return Response.json({revision:'operations-monitor-1',record:{id:'old-case',client_name:'اختبار أرشيف قديم',status:'needs_review',output_text:''}});
+ return Response.json({revision:'operations-monitor-1',memos:[{id:'old-case',client_name:'اختبار أرشيف قديم',created_at:'2026-10-01 10:00:00',status:'needs_review'}],hasMore:false});
+ });try{
+ const data=h.load('lib/management-data.ts');
+ const result=await data.managerMemos(new URL('https://test.invalid/api/management/memos?view=all'));
+ assert.equal(result.officialAvailable,true);
+ assert.equal(result.memos.length,1);
+ assert.equal(result.memos[0].id,'official:old-case');
+ assert.equal(result.memos[0].source,'official');
+ const detail=await data.managerMemos(new URL('https://test.invalid/api/management/memos?id=official:old-case'));
+ assert.equal(detail.memo.client_name,'اختبار أرشيف قديم');
+ assert.equal(h.archiveCalls.length,2);
+}finally{h.close();}});
+
 test('the real request ledger and dashboard share current records when the previous archive returns 404',async()=>{const h=harness();try{
   const ledger=h.load('lib/memo-requests.ts'),data=h.load('lib/management-data.ts');
   const id=await ledger.startMemoRequest({clientName:'طلب اختبار اصطناعي',facts:'وقائع اختبار'},null,'https://q8-ux.github.io');
