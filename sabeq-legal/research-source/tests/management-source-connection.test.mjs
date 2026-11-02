@@ -21,7 +21,7 @@ test('the memo archive bridge uses the supported Cloudflare redirect mode and in
  assert.equal(String(url).split('?')[0],'https://sabeq-legal-research-api.onrender.com/api/admin/operations');
  assert.equal(init.redirect,'manual');
  assert.equal(init.cache,'no-store');
- assert.match(init.headers['X-Sabeq-Operations'],/^[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+$/);
+ assert.match(init.headers['X-Sabeq-Operations'],/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/);
  if(String(url).includes('recordId='))return Response.json({revision:'operations-monitor-1',record:{id:'old-case',client_name:'اختبار أرشيف قديم',status:'needs_review',output_text:''}});
  return Response.json({revision:'operations-monitor-1',memos:[{id:'old-case',client_name:'اختبار أرشيف قديم',created_at:'2026-10-01 10:00:00',status:'needs_review'}],hasMore:false});
  });try{
