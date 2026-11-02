@@ -40,6 +40,39 @@ const adminAccount={username:'saad',salt:adminSalt.toString('hex'),hash:pbkdf2Sy
 function configureAdministrator(h){h.runtime.MANAGEMENT_ADMIN_PASSWORD_PEPPER=adminPepper;h.runtime.MANAGEMENT_ADMIN_PASSWORD_USERS=JSON.stringify({version:1,accounts:[adminAccount]});}
 async function adminLogin(h,username='Saad'){const response=await h.load('app/api/management/[...path]/route.ts').POST(request('password-login',null,{username,password:adminPassword,role:'user'}));assert.equal(response.status,200);return response.json();}
 
+test('an administrator creates a memo-only reviewer and every other management section stays forbidden',async()=>{const h=harness();try{
+ configureStaff(h);configureAdministrator(h);
+ const routes=h.load('app/api/management/[...path]/route.ts'),admin=await adminLogin(h);
+ const list=await (await routes.GET(request('control-accounts',admin.token))).json();
+ const credential='Rv123456!';
+ const create={action:'create-reviewer',username:'memo_audit',newPassword:credential,confirmPassword:credential,revision:list.revision};
+ assert.equal((await routes.POST(request('control-accounts',null,create))).status,401);
+ const invalid=await routes.POST(request('control-accounts',admin.token,{...create,newPassword:'123',confirmPassword:'123'}));
+ assert.equal(invalid.status,400);
+ const created=await routes.POST(request('control-accounts',admin.token,create));
+ assert.equal(created.status,200);
+ const response=await created.json();
+ assert.equal(response.username,'memo_audit');assert.equal(response.role,'reviewer');
+ assert.ok(!JSON.stringify(response).includes(credential));
+ const persisted=h.sqlite.prepare("SELECT sealed FROM management_vault WHERE integration='control-accounts'").get();
+ assert.ok(persisted.sealed&&!persisted.sealed.includes(credential));
+ assert.equal((await routes.POST(request('control-accounts',admin.token,create))).status,409);
+ const signed=await routes.POST(request('password-login',null,{username:'memo_audit',password:credential,role:'administrator'}));
+ assert.equal(signed.status,200);const session=await signed.json();
+ assert.equal(session.manager.role,'reviewer');
+ assert.deepEqual(Array.from(session.manager.sections),['memos']);
+ assert.equal((await routes.GET(request('session',session.token))).status,200);
+ assert.equal((await routes.GET(request('memos',session.token))).status,200);
+ for(const path of ['snapshot','users','inbox','updates','commands','site','payments','mail','control-accounts','verification-email','legislation']){
+   const denied=await routes.GET(request(path,session.token));assert.equal(denied.status,403,path);
+ }
+ for(const path of ['users','commands','read','inbox','payments','control-accounts','memos']){
+   const denied=await routes.POST(request(path,session.token,{action:'save'}));assert.equal(denied.status,403,path);
+ }
+ assert.equal((await routes.POST(request('logout',session.token,{}))).status,200);
+ assert.equal((await routes.GET(request('memos',session.token))).status,401);
+}finally{h.close();}});
+
 test('only administrators can list and edit control login accounts, and listing has no credential material',async()=>{const h=harness();try{
  configureStaff(h);configureAdministrator(h);const routes=h.load('app/api/management/[...path]/route.ts');
  assert.equal((await routes.GET(request('control-accounts'))).status,401);
