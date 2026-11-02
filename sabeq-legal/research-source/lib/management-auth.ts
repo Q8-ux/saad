@@ -9,12 +9,19 @@ export const MANAGEMENT_HOME = "https://q8-ux.github.io/saad/sabeq-admin-preview
 export const MANAGEMENT_ORIGIN = new URL(MANAGEMENT_HOME).origin;
 type Manager = { email: string; name: string; username?: string; role: "operator" | "administrator" };
 const OPERATOR_SECTIONS = ["overview", "memos", "inbox", "notifications", "users", "legislation", "commands", "updates"];
+// Only expressly scoped operations are available to staff. Unknown actions fail closed.
+const OPERATOR_READ = new Set(["session", "snapshot", "memos", "inbox", "users", "updates", "commands",
+  "legislation", "legislation-workbench", "legislation-articles", "legislation-asset", "legislation-report"]);
+const OPERATOR_WRITE = new Set(["logout", "users", "read", "inbox", "commands"]);
 export function managerProfile(manager: Manager) {
   return { email: manager.email, name: manager.name, ...(manager.username ? { username: manager.username } : {}), role: manager.role,
-    sections: manager.role === "operator" ? [] : [...OPERATOR_SECTIONS, "site", "services", "bookings", "programmer", "paths", "payments", "mailboxes", "whatsapp", "mail"] };
+    sections: manager.role === "operator" ? [...OPERATOR_SECTIONS] : [...OPERATOR_SECTIONS, "site", "services", "bookings", "programmer", "paths", "payments", "mailboxes", "whatsapp", "mail"] };
 }
-export function assertManagerAction(manager: Manager, _action: string, _method: "GET" | "POST") {
-  if (manager.role !== "administrator") throw new RequestError("لوحة التحكم متاحة للإداريين فقط.", 403);
+export function assertManagerAction(manager: Manager, action: string, method: "GET" | "POST") {
+  if (manager.role === "administrator") return;
+  if (manager.role !== "operator" || !(method === "GET" ? OPERATOR_READ : OPERATOR_WRITE).has(action)) {
+    throw new RequestError("ليست لديك صلاحية لإجراء هذه العملية.", 403);
+  }
 }
 type Runtime = { AUTH_SECRET?: string; MANAGEMENT_ALLOWED_EMAILS?: string; MANAGEMENT_OWNER_EMAIL?: string };
 export const managementRuntime = () => env as unknown as Runtime;
@@ -83,11 +90,10 @@ export async function passwordManagerLogin(request: Request, data: Record<string
   await enforceRateLimit(rateRequest, "management-password-login", 30);
   await enforceRateLimit(rateRequest, `management-password-account:${await digest(normalizeManagementUsername(data.username).slice(0, 64))}`, 8);
   const account = await authenticateManagementPassword(data);
-  if (account.role !== "administrator") throw new RequestError("لوحة التحكم متاحة للإداريين فقط.", 403);
-  const now = Math.floor(Date.now() / 1000), token = randomToken(), expiresAt = now + 8 * 3600;
+   const now = Math.floor(Date.now() / 1000), token = randomToken(), expiresAt = now + 8 * 3600;
   await getD1().prepare("INSERT INTO management_sessions (token_hash, email, name, expires_at, last_seen_at) VALUES (?, ?, ?, ?, ?)")
     .bind(await digest(token), account.sessionPrincipal, account.username, expiresAt, now).run();
-  return { token, expiresAt, manager: managerProfile({ email: account.identity, name: account.username, username: account.username, role: "administrator" }) };
+  return { token, expiresAt, manager: managerProfile({ email: account.identity, name: account.username, username: account.username, role: account.role }) };
 }
 export async function requireManager(request: Request) {
   assertManagementOrigin(request);
@@ -97,8 +103,7 @@ export async function requireManager(request: Request) {
   const row = await getD1().prepare("SELECT email, name FROM management_sessions WHERE token_hash = ? AND expires_at > ? AND last_seen_at > ?").bind(hash, now, now - 3600).first<{ email: string; name: string }>();
   const passwordSession = !!row && /^(staff|staff-admin):/.test(row.email);
   const staff = passwordSession ? await managementPasswordSession(row!.email) : null;
-  if (staff?.role === "operator") throw new RequestError("لوحة التحكم متاحة للإداريين فقط.", 403);
-  if (!row || (passwordSession ? !staff : !(await managerAllowed(row.email)))) throw new RequestError("انتهت الجلسة الإدارية. سجّل الدخول مجدداً.", 401);
+   if (!row || (passwordSession ? !staff : !(await managerAllowed(row.email)))) throw new RequestError("انتهت الجلسة الإدارية. سجّل الدخول مجدداً.", 401);
   await getD1().prepare("UPDATE management_sessions SET last_seen_at = ? WHERE token_hash = ?").bind(now, hash).run();
-  return { email: staff?.identity || row.email, name: staff?.username || row.name, ...(staff ? { username: staff.username } : {}), role: "administrator" as const, hash };
+  return { email: staff?.identity || row.email, name: staff?.username || row.name, ...(staff ? { username: staff.username } : {}), role: (staff?.role || "administrator") as "operator" | "administrator", hash };
 }
