@@ -74,7 +74,7 @@ export async function POST(request: Request) {
       return managementJson(await programmerAction(data, manager.email, request.signal));
     }
     if (action === "logout") { await getD1().prepare("DELETE FROM management_sessions WHERE token_hash = ?").bind(manager.hash).run(); return managementJson({ ok: true }); }
-    if (action === "users") { const result = await updateManagedUser(data, manager.email); await operationEvent("admin", "user-updated", "تم تحديث حساب مستخدم وخدماته"); return managementJson(result); }
+    if (action === "users") { const result = await updateManagedUser(data, manager.email, manager.role); await operationEvent("admin", "user-updated", "تم تحديث حساب مستخدم وخدماته"); return managementJson(result); }
     if (action === "payments") return managementJson(await sadadManagement(data, manager.email));
     if (action === "mailboxes") return managementJson(await mailboxAction(data, manager.email));
     if (action === "whatsapp") return managementJson(await whatsappAction(data, manager.email));
