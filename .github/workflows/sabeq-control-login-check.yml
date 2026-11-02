@@ -37,3 +37,16 @@ jobs:
             echo "BLOCKER: unexpected login status $login_status"
             exit 1
           fi
+      - name: Verify published login page, session protection and current browser assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          page='https://q8-ux.github.io/saad/sabeq-admin-preview/'
+          origin='https://sabeq-legal-public.centrino.chatgpt.site'
+          curl --fail --location --silent --show-error --max-time 30 "$page" > admin-index.html
+          grep -F 'admin.js?v=control-login-20261102-v2' admin-index.html >/dev/null
+          grep -F 'control.js?v=control-login-20261102-v2' admin-index.html >/dev/null
+          echo 'PASS: deployed dashboard loads current login asset version'
+          session_status=$(curl --silent --show-error --max-time 30 -o /dev/null -w '%{http_code}' -H 'Origin: https://q8-ux.github.io' "$origin/api/management/session")
+          echo "Anonymous management session HTTP status: $session_status"
+          test "$session_status" = 401
