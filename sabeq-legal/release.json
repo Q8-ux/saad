@@ -1,7 +1,7 @@
 {
-  "release": "2026-11-02-team-center-responsive",
-  "clientSource": "f0674dfc0178d8ab045a91f302d115657d34ee20",
-  "backendSource": "f0674dfc0178d8ab045a91f302d115657d34ee20",
+  "release": "2026-11-02-team-horizontal",
+  "clientSource": "902a9507a8968ad4c02e6b9f2149ce3d56a90c19",
+  "backendSource": "902a9507a8968ad4c02e6b9f2149ce3d56a90c19",
   "assistant": "indirect-intake-completeness-1",
   "voice": "gulf-male-voice-4",
   "tools": "legal-tools-1",
@@ -21,14 +21,14 @@
   "finalMemo": "clean-no-review-notes-1",
   "memoResultTools": "bottom-vector-actions-1",
   "memoPreview": "document-derived-clean-text-1",
-  "githubPagesAsset": "index-CpXjilRD.js",
+  "githubPagesAsset": "index-BGF4IsHc.js",
   "memoLanguage": "ar-KW",
   "memoDirection": "rtl",
   "memoAlignment": "right",
   "interfaceLocalization": "ar-en-ur-tools-guidance-1",
   "memoProseLanguage": "arabic-with-protected-names-and-identifiers-1",
   "builtAt": "2026-11-01",
-  "backendVersion": 181,
+  "backendVersion": 182,
   "pleadingLayout": "first-page-only-sidebar-and-frame-full-width-right-aligned-continuations",
   "citationCorrection": "one-bounded-server-retry-before-archive",
   "legalSourceDirectory": "6-catalogues-3-fetched-0-new-citable-pdfs",
@@ -100,8 +100,8 @@
   "citationAudit": "source-markers-reviewed-before-display;source-trace-retained-outside-court-document",
   "typecheck": "20-existing-Workers-CSS-query-diagnostics;no-new-journey-diagnostic",
   "ssrHarness": "pre-existing-cloudflare-esm-import-failure-reproduced-on-baseline",
-  "nativePublishedAt": "2026-11-01T22:29:51.758146+00:00",
-  "nativeDeployment": "appgdep_6ae7bd44e72c8191b990451321aeecd0",
+  "nativePublishedAt": "2026-11-02T03:43:02.119499+00:00",
+  "nativeDeployment": "appgdep_6ae806a7e5f881918a54b48c41ee262b",
   "publicationChecks": "9-scoped-release-tests-and-5-motion-tests-pass",
   "legislationArchive": "2026-04-01-separate-from-primary-2026-10-05",
   "legislationWorkbench": "manager-search-articles-originals-and-report",
@@ -119,8 +119,8 @@
   },
   "caseJourneyBrowserCheck": "three-stages;current-role-and-court-filled;memorandum-format;50000-fils;assistant-roundtrip-preserved",
   "liveMemoPaymentTested": false,
-  "teamCaptions": "three-columns-all-viewports-wrapped-mobile-captions",
-  "teamCaptionsValidation": "126-browser-measurements;ar-en-ur;320-390-721-768-1440px;191-release-checks;both-builds;privacy-check;physical-device-not-tested",
+  "teamCaptions": "horizontal-single-row-wrapped-mobile-captions",
+  "teamCaptionsValidation": "unchanged-ordered-names;responsive-portrait-frames;no-page-horizontal-overflow",
   "headerTypography": "navigation-language-400-header-actions-500",
   "headerTypographyValidation": "81-browser-label-checks;ar-en-ur;320-390-768-1440px;menu-navigation-and-memo-open;191-release-checks;both-builds;privacy-check;physical-device-not-tested",
   "controlCenterUsers": "administrator-only-user-crud-and-service-permissions",
@@ -161,8 +161,8 @@
   "assistantThemeFont": "ar-Al-Mohanad-local-exception-to-Pages-Cairo",
   "assistantApprovalNotice": "يجب اعتماد المذكرة من مجموعة سابق القانونية.",
   "assistantApprovalNoticeValidation": "23-interface-and-close-tests;both-builds;native-release-gates",
-  "teamGrid": "shouq-middle-second-row-after-abdulaziz",
-  "teamGridValidation": "browser-320-390-768-1440px;9-loaded-images;no-clipped-names-or-horizontal-overflow",
+  "teamGrid": "horizontal-single-row-preserved-order",
+  "teamGridValidation": "320-390-768-1440px preview;one-row;contained-overflow;visible-images-loaded;native-keyboard-and-pointer-scroll",
   "verificationEmailTransport": "workerd-compatible-manual-redirects;redirects-rejected;4-real-workerd-regressions-passed",
   "verificationEmailDiagnostics": "redacted-stage-status-reason-only;no-provider-response-or-recipient-or-OTP",
   "verificationEmailLiveCheck": {
@@ -201,32 +201,31 @@
     "liveGenerationOrPaymentPerformed": false
   },
   "teamPortraits": {
-    "revision": "2026-11-02-normalized-team-1",
+    "revision": "2026-11-02-horizontal-team-1",
     "count": 10,
     "portraitFrame": "4:5",
     "sourceImagesUnmodified": true,
     "abdulrahmanPortraitSha256": "ef12a0acc9870e51cbcc1109fb9051d1e3c79c5eb8d80f68a7016acea39fd700",
     "githubAssetExport": "derived-from-team-data;missing-image-fails-build",
-    "browserPreview": "10-loaded-images;3-columns;380x475px-frames;no-horizontal-overflow",
-    "publicationChecks": "9-scoped-release-tests;5-motion-tests;bundle-syntax;10-byte-identical-image-assets",
+    "browserPreview": "10-ordered-cards;one-horizontal-row;4:5-photos;320-390-768-1440px",
+    "publicationChecks": "261-native-release-checks;both-builds;bundle-syntax;responsive-preview",
     "physicalDeviceTested": false,
-    "nativeVersion": 181,
-    "desktopLastCard": {
-      "name": "حمد الشمري",
-      "minimumWidthPx": 721,
-      "row": 4,
-      "column": 2,
-      "previewWidthsPx": [
-        721,
-        980,
-        1363
-      ],
-      "maximumCenterDifferencePx": 0.0078125,
-      "mobileWidthsVerifiedUnchangedPx": [
-        390,
-        720
-      ],
-      "internalReleaseChecksPassed": 261
-    }
+    "nativeVersion": 182
+  },
+  "teamScroll": {
+    "revision": "native-horizontal-1",
+    "count": 10,
+    "orderPreserved": true,
+    "automaticAdvance": false,
+    "keyboardFocusable": true,
+    "previewWidthsPx": [
+      320,
+      390,
+      768,
+      1440
+    ],
+    "lastCardReachedInPreview": true,
+    "cardFrame": "4:5",
+    "nativeVersion": 182
   }
 }

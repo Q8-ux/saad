@@ -731,10 +731,23 @@ select {
 }
 
 .team-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: flex-start;
   gap: 20px;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 4px 2px 16px;
+  scroll-snap-type: x proximity;
+  scroll-padding-inline: 2px;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--teal) transparent;
 }
+
+.team-grid::-webkit-scrollbar { height: 8px; }
+.team-grid::-webkit-scrollbar-thumb { background: var(--teal); border-radius: 8px; }
 
 .team-card {
   position: relative;
@@ -3482,8 +3495,6 @@ html[data-theme="dark"] .instagram-frame iframe {
     padding: 0;
   }
   .header-cta span { display: none; }
-  .team-grid { grid-template-columns: repeat(3, 1fr); }
-  .team-card-lead { grid-column: span 1; }
   .services-grid,
   .packages-grid { grid-template-columns: repeat(2, 1fr); }
   .service-card p { min-height: 56px; }
@@ -3887,7 +3898,9 @@ html[data-theme="dark"] .memo-result-tools .danger { border-color: #7b3d48; colo
 
 /* Consistent photographic team framing at every viewport. */
 .team-grid .team-card {
-  grid-column: span 1;
+  flex: 0 0 clamp(240px, calc((100% - 40px) / 3), 380px);
+  min-width: 0;
+  scroll-snap-align: start;
   min-height: 0;
   aspect-ratio: 4 / 5;
   background: #113241;
@@ -3897,13 +3910,9 @@ html[data-theme="dark"] .memo-result-tools .danger { border-color: #7b3d48; colo
   object-position: center;
 }
 
-@media (min-width: 721px) {
-  .team-grid > .team-card:last-child:nth-child(3n + 1) { grid-column: 2; }
-}
-
 @media (max-width: 720px) {
-  .team-grid { gap: 12px 8px; }
-  .team-grid .team-card { display: flex; flex-direction: column; aspect-ratio: auto; border-radius: 12px; }
+  .team-grid { gap: 14px; }
+  .team-grid .team-card { display: flex; flex-direction: column; flex-basis: min(86%, 340px); aspect-ratio: auto; border-radius: 12px; }
   .team-grid .team-photo { position: relative; aspect-ratio: 4 / 5; flex-shrink: 0; }
   .team-grid .team-photo::after { background: none; }
   .team-grid .team-info { position: static; padding: 8px 6px 12px; gap: 4px; }
