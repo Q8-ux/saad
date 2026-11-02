@@ -10,7 +10,7 @@ import { getAuditFile } from "@/lib/legislation-audit";
 import { legislationWorkbench, archiveArticles, archiveAsset } from "@/lib/legislation-workbench";
 import { getD1 } from "@/db";
 import { assertManagementOrigin, assertManagerAction, exchangeManagerCode, managementJson, managerLogin, managerProfile, passwordManagerLogin, requireManager } from "@/lib/management-auth";
-import { bridgeKeys, managerInbox, managerMemos, managerSnapshot, managerUpdates } from "@/lib/management-data";
+import { bridgeKeys, managerInbox, managerMemos, managerMemoRecovery, managerSnapshot, managerUpdates } from "@/lib/management-data";
 import { mailAction, operationEvent, whatsappAction } from "@/lib/management-integrations";
 import { verificationEmailAction } from "@/lib/verification-email-settings";
 import { sendTestEmail } from "@/lib/email";
@@ -48,6 +48,7 @@ export async function GET(request: Request) {
     if (action === "session") return managementJson({ manager: managerProfile(manager) });
     if (action === "snapshot") return managementJson(await managerSnapshot(manager.email));
     if (action === "memos") return managementJson(await managerMemos(url));
+    if (action === "memo-recovery") return managementJson(await managerMemoRecovery(url));
     if (action === "inbox") return managementJson(await managerInbox(url));
     if (action === "updates") return managementJson(await managerUpdates());
     if (action === "whatsapp") return managementJson(await whatsappAction(null, manager.email));
