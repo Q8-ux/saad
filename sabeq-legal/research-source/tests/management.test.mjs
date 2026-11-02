@@ -513,6 +513,58 @@ test('verification sender inspection distinguishes missing settings, auth, scope
 const publicAuthRequest=(action,body)=>new Request('https://sabeq-legal-public.centrino.chatgpt.site/api/auth/'+action,{method:'POST',headers:{Origin:'https://q8-ux.github.io','Content-Type':'application/json'},body:JSON.stringify(body)});
 const syntheticApplicant={name:'مستخدم اصطناعي',phone:'00000000',email:'applicant@example.test',language:'ar'};
 
+test('admin-created visitors receive an explicit registration invitation but remain unverified until OTP is entered',async()=>{const h=harness();try{
+ const manager=await login(h),routes=h.load('app/api/management/[...path]/route.ts');
+ await h.load('lib/verification-email-settings.ts').verificationEmailAction(verificationConfig,'test');
+ let invitations=0,otp='';
+ h.setTransport(async(url,init)=>{
+   assert.equal(String(url),'https://api.resend.com/emails');
+   assert.equal(init.redirect,'manual');assert.equal(init.headers.Authorization,'Bearer '+verificationConfig.apiKey);
+   const body=JSON.parse(init.body);assert.equal(body.from,'noreplay@sabeq.legal');
+   assert.deepEqual(body.to,['visitor-invite@example.test']);
+   if(body.subject.includes('إكمال تسجيل')) {
+     invitations++;assert.ok(body.text.includes('https://www.sabeq.legal/'));
+     assert.ok(!body.text.includes('رمز التحقق: 123456'));
+   } else {
+     assert.match(body.subject,/رمز التحقق/);
+     otp=body.text.match(/\\n\\n(\\d{6})\\n\\n/)?.[1]||'';
+   }
+   return Response.json({id:'synthetic-invitation-accepted-12345'});
+ });
+ const response=await routes.POST(request('users',manager.token,{action:'create',name:'زائر اصطناعي',phone:'00000000',email:'visitor-invite@example.test'}));
+ assert.equal(response.status,200);
+ const created=await response.json();assert.equal(created.invitation.accepted,true);assert.equal(created.invitation.delivered,false);
+ assert.equal(invitations,1);
+ const row=h.sqlite.prepare('SELECT email_verified_at FROM public_users WHERE id=?').get(created.id);
+ assert.equal(row.email_verified_at,'');
+ assert.equal(h.sqlite.prepare('SELECT count(*) n FROM email_verification_challenges').get().n,0);
+ const resent=await routes.POST(request('users',manager.token,{action:'send-invitation',id:created.id}));
+ assert.equal(resent.status,200);assert.equal((await resent.json()).accepted,true);assert.equal(invitations,2);
+ const publicRoute=h.load('app/api/auth/request-code/route.ts'),verifyRoute=h.load('app/api/auth/verify-code/route.ts');
+ const issued=await publicRoute.POST(publicAuthRequest('request-code',{name:'زائر اصطناعي',phone:'00000000',email:'visitor-invite@example.test',language:'ar'}));
+ assert.equal(issued.status,200);const challenge=await issued.json();assert.match(otp,/^\\d{6}$/);
+ const verified=await verifyRoute.POST(publicAuthRequest('verify-code',{challengeId:challenge.challengeId,email:'visitor-invite@example.test',code:otp}));
+ assert.equal(verified.status,200);
+ assert.ok(h.sqlite.prepare('SELECT email_verified_at FROM public_users WHERE id=?').get(created.id).email_verified_at);
+ assert.equal((await routes.POST(request('users',manager.token,{action:'send-invitation',id:created.id}))).status,409);
+}finally{h.close();}});
+
+test('failed Resend delivery does not activate or discard an admin-created visitor; resend reports the domain reason',async()=>{const h=harness();try{
+ const manager=await login(h),routes=h.load('app/api/management/[...path]/route.ts');
+ await h.load('lib/verification-email-settings.ts').verificationEmailAction(verificationConfig,'test');
+ h.setTransport(async()=>Response.json({message:'The sabeq.legal domain is not verified'},{status:403}));
+ const created=await routes.POST(request('users',manager.token,{action:'create',name:'زائر تجريبي',email:'invite-fails@example.test'}));
+ assert.equal(created.status,200);const data=await created.json();
+ assert.equal(data.invitation.accepted,false);assert.equal(data.invitation.reason,'sender_domain_unverified');
+ assert.equal(h.sqlite.prepare('SELECT email_verified_at FROM public_users WHERE id=?').get(data.id).email_verified_at,'');
+ const resend=await routes.POST(request('users',manager.token,{action:'send-invitation',id:data.id}));
+ assert.equal(resend.status,502);
+ assert.match((await resend.json()).error,/نطاق sabeq\\.legal غير موثق/);
+ const untrusted=await routes.POST(request('users',null,{action:'send-invitation',id:data.id}));
+ assert.equal(untrusted.status,401);
+ assert.equal(h.sqlite.prepare('SELECT count(*) n FROM email_verification_challenges').get().n,0);
+}finally{h.close();}});
+
 test('the admin mail screen saves the outgoing key through the protected route, clears it and never stores it in browser storage',async()=>{const h=harness();try{
  const session=await login(h),routes=h.load('app/api/management/[...path]/route.ts'),storage=new Map([['sabeq-management-session',session.token],['sabeq-admin-section','mail']]),nodes=new Map(),listeners=new Map();
  const node=id=>{if(!nodes.has(id))nodes.set(id,{innerHTML:'',textContent:'',addEventListener(){},replaceChildren(){}});return nodes.get(id);};
