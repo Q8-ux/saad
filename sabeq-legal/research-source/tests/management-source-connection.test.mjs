@@ -63,6 +63,8 @@ test('generated memo view follows saved output for guests and users, not a statu
  const generated=await data.managerMemos(new URL('https://test.invalid/api/management/memos?view=generated'));
  assert.deepEqual(new Set(generated.memos.map(r=>r.id)),new Set([guest,user]));
  assert.ok(generated.memos.every(r=>Number(r.has_output)===1));
+ assert.equal(generated.memos.find(r=>r.id===guest).origin,'https://q8-ux.github.io');
+ assert.equal(generated.memos.find(r=>r.id===user).origin,'https://q8-ux.github.io');
  assert.ok(generated.memos.every(r=>!Object.hasOwn(r,'output_text')));
  assert.equal((await data.managerMemos(new URL('https://test.invalid/api/management/memos'))).memos.length,4);
  assert.equal((await data.managerMemos(new URL('https://test.invalid/api/management/memos?view=generated&q='+encodeURIComponent('ضيف اصطناعي')))).memos.length,1);
