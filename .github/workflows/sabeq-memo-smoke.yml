@@ -1,0 +1,42 @@
+name: Sabeq memo pipeline smoke test
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/sabeq-memo-smoke.yml'
+      - 'sabeq-legal/research-source/tests/management-source-connection.test.mjs'
+      - 'sabeq-legal/research-source/lib/management-data.ts'
+      - 'sabeq-legal/research-source/lib/memo-requests.ts'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  memo-ledger:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: sabeq-legal/research-source/package-lock.json
+      - name: Install isolated test dependencies
+        working-directory: sabeq-legal/research-source
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Exercise memo creation, generated/all views and official archive bridge
+        working-directory: sabeq-legal/research-source
+        run: node --test tests/management-source-connection.test.mjs
+      - name: Read-only public website and legacy gateway checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --silent --show-error --retry 2 --max-time 40 https://www.sabeq.legal/ > official.html
+          grep -F 'q8-ux.github.io' official.html
+          curl --fail --location --silent --show-error --retry 2 --max-time 40 https://q8-ux.github.io/saad/sabeq-legal/ > frontend.html
+          grep -F 'index-Cc5Z_iVY.js' frontend.html
+          curl --fail --location --silent --show-error --retry 2 --max-time 80 https://sabeq-legal-research-api.onrender.com/api/operations-health > gateway.json
+          grep -F '"operations-monitor-1"' gateway.json
