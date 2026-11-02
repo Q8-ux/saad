@@ -70,7 +70,7 @@
       if(section==='overview'||section==='notifications'){snapshot=await api('snapshot');renderSnapshot();}
       else if(section==='memos'){const d=await api('memos?'+memoParams());rows=d.memos;hasMore=d.hasMore;renderMemos(d.officialAvailable);}
       else if(section==='inbox'){const d=await api('inbox?'+new URLSearchParams({offset:String(offset),q:query}));rows=d.messages;hasMore=d.hasMore;renderInbox(d.officialAvailable);}
-      else if(['users','site','services','bookings'].includes(section)){await globalThis.SabeqControl.mount(content(),section,api,toast,()=>{token='';manager=null;sessionStorage.removeItem(SESSION);loginScreen('حُفظت بيانات دخولك. سجّل الدخول بالاسم وكلمة المرور المعتمدين الآن.');});}
+      else if(['users','site','services','bookings'].includes(section)){await globalThis.SabeqControl.mount(content(),section,api,toast,()=>{token='';manager=null;sessionStorage.removeItem(SESSION);loginScreen('حُفظت بيانات دخولك. سجّل الدخول بالاسم وكلمة المرور المعتمدين الآن.');},manager.role);}
       else if(section==='legislation'){await globalThis.SabeqLegislation.mount(content(),api,managementFile,toast);}
       else if(section==='programmer'){const settings=await api('programmer');globalThis.SabeqProgrammer.mount(content(),settings,api,toast);}
       else if(section==='paths'){const d=await api('paths');renderPaths(d);}
