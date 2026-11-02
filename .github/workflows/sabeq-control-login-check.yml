@@ -1,0 +1,39 @@
+name: Sabeq control login diagnostics
+
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/sabeq-control-login-check.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  public-auth-probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Verify management service and account configuration without real passwords
+        shell: bash
+        run: |
+          set -euo pipefail
+          origin='https://sabeq-legal-public.centrino.chatgpt.site'
+          admin='https://q8-ux.github.io'
+          key_status=$(curl --silent --show-error --max-time 30 -o /dev/null -w '%{http_code}' "$origin/api/management/jwks")
+          echo "Public management key endpoint: HTTP $key_status"
+          test "$key_status" = 200
+          login_status=$(curl --silent --show-error --max-time 60 -o /dev/null -w '%{http_code}' \
+            -H "Origin: $admin" -H 'Content-Type: application/json' \
+            -d '{"username":"synthetic_not_configured","password":"Synthetic-Invalid-Login-Only-2026!"}' \
+            "$origin/api/management/password-login")
+          echo "Unknown account login (401 expected if configured): HTTP $login_status"
+          if [ "$login_status" = 401 ]; then
+            echo 'PASS: service processed the login and rejected a nonexistent account'
+          elif [ "$login_status" = 503 ]; then
+            echo 'BLOCKER: live password login cannot read a usable account configuration'
+            exit 1
+          else
+            echo "BLOCKER: unexpected login status $login_status"
+            exit 1
+          fi
