@@ -19,19 +19,41 @@ export async function bridgeKeys(): Promise<SigningKeys> {
 }
 export async function officialOperations(params = new URLSearchParams()) {
   const path = `/api/admin/operations${params.size ? `?${params}` : ""}`;
+  const unavailable = (error: string) => ({ available: false, error, memos: [], inbox: [], totals: null });
   try {
     const keys = await bridgeKeys();
-    const payload = base64url(new TextEncoder().encode(JSON.stringify({ iss: SERVICE_ORIGIN, aud: "sabeq-official-operations", exp: Math.floor(Date.now() / 1000) + 45, path, nonce: crypto.randomUUID() })));
     const key = await crypto.subtle.importKey("jwk", keys.privateKey, { name: "ECDSA", namedCurve: "P-256" }, false, ["sign"]);
-    const signature = base64url(new Uint8Array(await crypto.subtle.sign({ name: "ECDSA", hash: "SHA-256" }, key, new TextEncoder().encode(payload))));
-    const response = await fetch(`${OFFICIAL_BACKEND}${path}`, { headers: { "X-Sabeq-Operations": `${payload}.${signature}`, Accept: "application/json" }, cache: "no-store", redirect: "manual", signal: AbortSignal.timeout(12_000) });
-    if (!response.ok) return { available: false, error: `HTTP ${response.status}`, memos: [], inbox: [], totals: null };
-    const body = await response.text();
-    if (body.length > 1_000_000) throw Error("oversize");
-    const data = JSON.parse(body);
-    if (data.revision !== "operations-monitor-1") throw Error("unsupported");
-    return { ...data, available: true };
-  } catch { return { available: false, error: "connection_unavailable", memos: [], inbox: [], totals: null }; }
+    // The legacy Render gateway can be temporarily unavailable during a deploy
+    // or cold start. Retry only transient failures; never retry authentication
+    // errors or invalid responses, and never expose private records or tokens.
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        // Every attempt needs a fresh nonce to avoid replay rejection.
+        const payload = base64url(new TextEncoder().encode(JSON.stringify({
+          iss: SERVICE_ORIGIN, aud: "sabeq-official-operations",
+          exp: Math.floor(Date.now() / 1000) + 45, path, nonce: crypto.randomUUID(),
+        })));
+        const signature = base64url(new Uint8Array(await crypto.subtle.sign({ name: "ECDSA", hash: "SHA-256" }, key, new TextEncoder().encode(payload))));
+        const response = await fetch(`${OFFICIAL_BACKEND}${path}`, {
+          headers: { "X-Sabeq-Operations": `${payload}.${signature}`, Accept: "application/json" },
+          cache: "no-store", redirect: "manual", signal: AbortSignal.timeout(11_000),
+        });
+        if (!response.ok) {
+          if (attempt === 0 && [429, 502, 503, 504].includes(response.status)) continue;
+          return unavailable(`HTTP ${response.status}`);
+        }
+        if (Number(response.headers.get("content-length") || 0) > 1_000_000) return unavailable("invalid_response");
+        const body = await response.text();
+        if (body.length > 1_000_000) return unavailable("invalid_response");
+        const data = JSON.parse(body);
+        if (data.revision !== "operations-monitor-1") return unavailable("invalid_response");
+        return { ...data, available: true };
+      } catch {
+        if (attempt === 1) return unavailable("connection_unavailable");
+      }
+    }
+  } catch { /* Signing key or connection setup failed; current D1 remains readable. */ }
+  return unavailable("connection_unavailable");
 }
 function pagination(url: URL) {
   const offset = Number(url.searchParams.get("offset") || 0);
@@ -64,7 +86,7 @@ export async function managerMemos(url: URL) {
   const official = await officialOperations(new URLSearchParams({ kind: "memos", q: query, status, offset: String(offset), limit: String(limit) }));
   // Historical sources without output-presence metadata remain in All requests.
   const archived = (official.memos || []).filter((row: Record<string, unknown>) => !generatedOnly || row.has_output === true || row.has_output === 1);
-  return { memos: [...rows.results.map((row: Record<string, unknown>) => ({ ...row, source: "hosted" })), ...archived.map((row: Record<string, unknown>) => ({ ...row, id: `official:${row.id}`, source: "official" }))].sort((a, b) => String(b.created_at).localeCompare(String(a.created_at))), hasMore: rows.results.length === limit || (official.hasMore === true && (!generatedOnly || archived.length > 0)), officialAvailable: official.available, offset };
+  return { memos: [...rows.results.map((row: Record<string, unknown>) => ({ ...row, source: "hosted" })), ...archived.map((row: Record<string, unknown>) => ({ ...row, id: `official:${row.id}`, source: "official" }))].sort((a, b) => String(b.created_at).localeCompare(String(a.created_at))), hasMore: rows.results.length === limit || (official.hasMore === true && (!generatedOnly || archived.length > 0)), officialAvailable: official.available, officialError: official.error || null, offset };
 }
 export async function managerInbox(url: URL) {
   const { offset, limit, query } = pagination(url);
