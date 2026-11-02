@@ -542,7 +542,7 @@ test('admin-created visitors receive an explicit registration invitation but rem
  assert.equal(resent.status,200);assert.equal((await resent.json()).accepted,true);assert.equal(invitations,2);
  const publicRoute=h.load('app/api/auth/request-code/route.ts'),verifyRoute=h.load('app/api/auth/verify-code/route.ts');
  const issued=await publicRoute.POST(publicAuthRequest('request-code',{name:'زائر اصطناعي',phone:'00000000',email:'visitor-invite@example.test',language:'ar'}));
- assert.equal(issued.status,200);const challenge=await issued.json();assert.match(otp,/^\\d{6}$/);
+ assert.equal(issued.status,200);const challenge=await issued.json();assert.match(otp,/^\d{6}$/);
  const verified=await verifyRoute.POST(publicAuthRequest('verify-code',{challengeId:challenge.challengeId,email:'visitor-invite@example.test',code:otp}));
  assert.equal(verified.status,200);
  assert.ok(h.sqlite.prepare('SELECT email_verified_at FROM public_users WHERE id=?').get(created.id).email_verified_at);
