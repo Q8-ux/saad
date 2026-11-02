@@ -39,12 +39,20 @@ export async function listManagedUsers(url: URL, limit = 100) {
     ORDER BY u.created_at DESC, u.id LIMIT ? OFFSET ?`).bind(q, pattern, pattern, pattern, status, status, status, limit + 1, offset).all();
   return { users: result.results.slice(0, limit).map(row => { const { permissions_json, ...safe } = row; return { ...safe, permissions: userPermissions(permissions_json) }; }), hasMore: result.results.length > limit, offset, source: "hosted" };
 }
-export async function updateManagedUser(data: Record<string, unknown>, actor = "administrator") {
+export async function updateManagedUser(data: Record<string, unknown>, actor = "administrator", managerRole: "administrator" | "operator" = "administrator") {
+  // Staff may manage ordinary visitors only. Never allow a staff account
+  // to create, change, suspend, or delete an administrative identity.
+  if (managerRole === "operator" && (data.role !== undefined && data.role !== "user" || data.confirmAdmin === true)) {
+    throw new RequestError("صلاحية إدارة الحسابات الإدارية للمشرف فقط.", 403);
+  }
   const db = getD1(), action = data.action || "update";
   if (!["create", "update", "delete", "restore"].includes(String(action))) throw new RequestError("عملية المستخدم غير صحيحة.");
   const id = action === "create" ? crypto.randomUUID() : cleanString(data.id, "المستخدم", { min: 20, max: 80 });
   const existing = action === "create" ? null : await db.prepare("SELECT u.*, COALESCE(p.role, 'user') AS role, COALESCE(p.permissions_json, '{}') AS permissions_json FROM public_users u LEFT JOIN user_access_policies p ON p.user_id = u.id WHERE u.id = ?").bind(id).first<{ name: string; phone: string; email: string; status: string; role: string; permissions_json: string; memo_limit: number; assistant_limit: number }>();
   if (action !== "create" && !existing) throw new RequestError("المستخدم غير موجود.", 404);
+  if (managerRole === "operator" && existing?.role !== undefined && existing.role !== "user") {
+    throw new RequestError("لا يمكن لموظف التشغيل تعديل حساب إداري.", 403);
+  }
   if (action === "delete" && data.confirm !== true) throw new RequestError("أكد حذف المستخدم. يمكن استعادته لاحقاً.");
   const status = action === "delete" ? "deleted" : action === "restore" ? "active" : data.status ?? existing?.status ?? "active";
   if (!["active", "suspended", "deleted"].includes(String(status)) || (action === "create" && status === "deleted")) throw new RequestError("حالة المستخدم غير صحيحة.");
