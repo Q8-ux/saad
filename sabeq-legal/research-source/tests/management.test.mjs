@@ -110,13 +110,54 @@ test('corrupt saved control credentials fail closed without falling back to old 
  const response=await h.load('app/api/management/[...path]/route.ts').POST(request('password-login',null,{username:'saad',password:adminPassword}));assert.equal(response.status,503);assert.ok(!(await response.json()).token);
 }finally{h.close();}});
 
-test('password verifier preserves the independent PBKDF2 vector while staff no longer enter the administration',async()=>{const h=harness();try{configureStaff(h);const result=await h.load('lib/management-password.ts').authenticateManagementPassword({username:' USER1 ',password:staffPasswords.user1});assert.equal(result.username,'user1');assert.match(result.sessionPrincipal,/^staff:user1:[a-f0-9]{32}$/);assert.equal((await h.load('app/api/management/[...path]/route.ts').POST(request('password-login',null,{username:'user1',password:staffPasswords.user1,role:'administrator'}))).status,403);}finally{h.close();}});
+test('password verifier preserves the PBKDF2 vector and returns only scoped operator privileges',async()=>{const h=harness();try{
+ configureStaff(h);
+ const result=await h.load('lib/management-password.ts').authenticateManagementPassword({username:' USER1 ',password:staffPasswords.user1});
+ assert.equal(result.username,'user1');assert.equal(result.role,'operator');assert.match(result.sessionPrincipal,/^staff:user1:[a-f0-9]{32}$/);
+ const routes=h.load('app/api/management/[...path]/route.ts');
+ const login=await routes.POST(request('password-login',null,{username:'user1',password:staffPasswords.user1,role:'administrator'}));
+ assert.equal(login.status,200);const signed=await login.json();
+ assert.equal(signed.manager.role,'operator');assert.ok(signed.manager.sections.includes('memos'));
+ assert.ok(!signed.manager.sections.includes('payments'));assert.ok(!signed.manager.sections.includes('mail'));
+ assert.equal((await routes.GET(request('session',signed.token))).status,200);
+}finally{h.close();}});
 
-test('five legacy staff accounts cannot create administrator sessions even with correct distinct passwords',async()=>{const h=harness();try{configureStaff(h);const routes=h.load('app/api/management/[...path]/route.ts');for(const username of staffNames){const response=await routes.POST(request('password-login',null,{username,password:staffPasswords[username],role:'administrator'}));assert.equal(response.status,403);assert.ok(!(await response.json()).token);}assert.equal(h.sqlite.prepare('SELECT count(*) n FROM management_sessions').get().n,0);}finally{h.close();}});
+test('five staff accounts receive separate operator sessions and cannot access privileged settings',async()=>{const h=harness();try{
+ configureStaff(h);const routes=h.load('app/api/management/[...path]/route.ts');const sessions=new Set();
+ for(const username of staffNames){
+   const response=await routes.POST(request('password-login',null,{username,password:staffPasswords[username],role:'administrator'}));
+   assert.equal(response.status,200);const data=await response.json();
+   assert.equal(data.manager.username,username);assert.equal(data.manager.role,'operator');
+   assert.equal((await routes.GET(request('session',data.token))).status,200);
+   assert.equal((await routes.GET(request('payments',data.token))).status,403);
+   assert.equal((await routes.GET(request('control-accounts',data.token))).status,403);
+   sessions.add(data.token);
+ }
+ assert.equal(sessions.size,staffNames.length);
+ assert.equal(h.sqlite.prepare('SELECT count(*) n FROM management_sessions').get().n,5);
+}finally{h.close();}});
 
 test('Saad uses the server configured administrator role and no credential appears in responses or sessions',async()=>{const h=harness();try{configureStaff(h);configureAdministrator(h);const session=await adminLogin(h);assert.equal(session.manager.username,'saad');assert.equal(session.manager.role,'administrator');for(const key of ['users','site','services','bookings','programmer','payments'])assert.ok(session.manager.sections.includes(key));const stored=JSON.stringify(h.sqlite.prepare('SELECT * FROM management_sessions').all());const response=JSON.stringify(session);for(const secret of [adminPassword,adminPepper,adminAccount.hash,session.token])assert.ok(!stored.includes(secret));for(const secret of [adminPassword,adminPepper,adminAccount.hash])assert.ok(!response.includes(secret));assert.match(stored,/staff-admin:saad:/);const routes=h.load('app/api/management/[...path]/route.ts');assert.equal((await routes.GET(request('session',session.token))).status,200);assert.equal((await routes.GET(request('programmer',session.token))).status,200);}finally{h.close();}});
 
-test('legacy operator sessions are rejected on every protected control-center action',async()=>{const h=harness();try{configureStaff(h);const auth=h.load('lib/management-auth.ts'),account=await h.load('lib/management-password.ts').authenticateManagementPassword({username:'user1',password:staffPasswords.user1});const token=auth.randomToken(),now=Math.floor(Date.now()/1000);h.sqlite.prepare('INSERT INTO management_sessions VALUES(?,?,?,?,?)').run(await auth.digest(token),account.sessionPrincipal,'user1',now+3600,now);const routes=h.load('app/api/management/[...path]/route.ts');for(const path of ['session','snapshot','users','site','services','bookings','programmer','payments']){assert.equal((await routes.GET(request(path,token))).status,403);assert.equal((await routes.POST(request(path,token,{action:'save',role:'administrator'}))).status,403);}assert.equal(h.network.length,0);}finally{h.close();}});
+test('operator sessions allow scoped work and reject administrator operations including role escalation',async()=>{const h=harness();try{
+ configureStaff(h);const auth=h.load('lib/management-auth.ts');
+ const account=await h.load('lib/management-password.ts').authenticateManagementPassword({username:'user1',password:staffPasswords.user1});
+ const token=auth.randomToken(),now=Math.floor(Date.now()/1000);
+ h.sqlite.prepare('INSERT INTO management_sessions VALUES(?,?,?,?,?)').run(await auth.digest(token),account.sessionPrincipal,'user1',now+3600,now);
+ const routes=h.load('app/api/management/[...path]/route.ts');
+ for(const path of ['session','snapshot','users','memos','inbox','commands','updates']){
+   assert.equal((await routes.GET(request(path,token))).status,200,path);
+ }
+ assert.equal((await routes.POST(request('users',token,{action:'create',name:'اختبار مستخدم',email:'new-operator@example.test',role:'administrator',confirmAdmin:true}))).status,403);
+ assert.equal((await routes.POST(request('users',token,{action:'create',name:'اختبار مستخدم',email:'new-operator@example.test',role:'user'}))).status,200);
+ assert.equal((await routes.POST(request('commands',token,{title:'تكليف اختبار تشغيل'}))).status,200);
+ for(const path of ['control-accounts','site','services','bookings','programmer','payments','mailboxes','verification-email','whatsapp','mail','paths']){
+   assert.equal((await routes.GET(request(path,token))).status,403,path);
+   assert.equal((await routes.POST(request(path,token,{action:'save',role:'administrator'}))).status,403,path);
+ }
+ assert.equal((await routes.POST(request('logout',token,{}))).status,200);
+ assert.equal((await routes.GET(request('session',token))).status,401);
+}finally{h.close();}});
 
 test('administrator disable, credential rotation, idle expiry and logout revoke access',async()=>{const h=harness();try{configureAdministrator(h);const routes=h.load('app/api/management/[...path]/route.ts');let session=await adminLogin(h);await routes.POST(request('logout',session.token,{}));assert.equal((await routes.GET(request('session',session.token))).status,401);session=await adminLogin(h);h.runtime.MANAGEMENT_ADMIN_PASSWORD_USERS=JSON.stringify({version:1,accounts:[{...adminAccount,enabled:false}]});assert.equal((await routes.GET(request('session',session.token))).status,401);configureAdministrator(h);session=await adminLogin(h);h.runtime.MANAGEMENT_ADMIN_PASSWORD_USERS=JSON.stringify({version:1,accounts:[{...adminAccount,hash:'0'.repeat(64)}]});assert.equal((await routes.GET(request('session',session.token))).status,401);configureAdministrator(h);session=await adminLogin(h);h.sqlite.prepare('UPDATE management_sessions SET last_seen_at=0').run();assert.equal((await routes.GET(request('session',session.token))).status,401);}finally{h.close();}});
 
