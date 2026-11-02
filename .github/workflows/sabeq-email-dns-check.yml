@@ -60,14 +60,16 @@ jobs:
         shell: bash
         env:
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_API_TOKEN: ${{ secrets.NETLIFY_API_TOKEN }}
         run: |
           set -euo pipefail
-          if [ -n "${{ secrets.NETLIFY_AUTH_TOKEN }}" ]; then
+          if [ -n "${NETLIFY_AUTH_TOKEN:-}" ]; then
             echo 'Netlify API authentication secret: available'
           else
             echo 'Netlify API authentication secret: unavailable'
           fi
-          if [ -n "${{ secrets.NETLIFY_API_TOKEN }}" ]; then
+          if [ -n "${NETLIFY_API_TOKEN:-}" ]; then
             echo 'Netlify alternative API secret: available'
           else
             echo 'Netlify alternative API secret: unavailable'
