@@ -527,7 +527,7 @@ test('admin-created visitors receive an explicit registration invitation but rem
      assert.ok(!body.text.includes('رمز التحقق: 123456'));
    } else {
      assert.match(body.subject,/رمز التحقق/);
-     otp=body.text.match(/\\n\\n(\\d{6})\\n\\n/)?.[1]||'';
+     otp=body.text.match(/\n\n(\d{6})\n\n/)?.[1]||'';
    }
    return Response.json({id:'synthetic-invitation-accepted-12345'});
  });
@@ -559,7 +559,7 @@ test('failed Resend delivery does not activate or discard an admin-created visit
  assert.equal(h.sqlite.prepare('SELECT email_verified_at FROM public_users WHERE id=?').get(data.id).email_verified_at,'');
  const resend=await routes.POST(request('users',manager.token,{action:'send-invitation',id:data.id}));
  assert.equal(resend.status,502);
- assert.match((await resend.json()).error,/نطاق sabeq\\.legal غير موثق/);
+ assert.match((await resend.json()).error,/نطاق sabeq\.legal غير موثق/);
  const untrusted=await routes.POST(request('users',null,{action:'send-invitation',id:data.id}));
  assert.equal(untrusted.status,401);
  assert.equal(h.sqlite.prepare('SELECT count(*) n FROM email_verification_challenges').get().n,0);
