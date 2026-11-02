@@ -118,6 +118,65 @@ export async function managerSnapshot(email: string) {
   return { memo, historical, contacts, mail, commands, appointments, notifications, connection: { available: true, source: "sabeq-public-service", mode: "shared-database", checkedAt: updatedAt }, official: { available: official.available, totals: official.totals, revision: official.revision || null, trackingSince: official.trackingSince || null, error: official.error || null }, updatedAt, revision: "independent-admin-2" };
 }
 
+// Read-only, administrator-scoped recovery inventory. Never copies or rewrites
+// legal submissions; an absent record cannot be reconstructed from a request log.
+export async function managerMemoRecovery(url: URL) {
+  const start = url.searchParams.get("start") || "";
+  const end = url.searchParams.get("end") || "";
+  const valid = (value: string) => {
+    if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(value)) return false;
+    const d = new Date(value + "T00:00:00.000Z");
+    return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === value;
+  };
+  if ((start && !valid(start)) || (end && !valid(end)) || (start && end && start > end)) {
+    throw new RequestError("حدد تاريخ بداية ونهاية صحيحين لجرد المذكرات.");
+  }
+  const lower = start ? start + " 00:00:00" : "0000-01-01 00:00:00";
+  const upper = end ? end + " 23:59:59" : "9999-12-31 23:59:59";
+  const db = getD1();
+  const [current, archived, origin, official] = await Promise.all([
+    db.prepare(`SELECT COUNT(*) AS total,
+      SUM(CASE WHEN LENGTH(TRIM(COALESCE(output_text,''))) > 0 THEN 1 ELSE 0 END) AS with_text,
+      SUM(CASE WHEN LENGTH(TRIM(COALESCE(output_text,''))) = 0 THEN 1 ELSE 0 END) AS without_text,
+      SUM(CASE WHEN status = 'running' THEN 1 ELSE 0 END) AS running,
+      SUM(CASE WHEN status IN ('failed','cancelled','needs_information') THEN 1 ELSE 0 END) AS incomplete,
+      MIN(created_at) AS earliest, MAX(created_at) AS latest
+      FROM management_memo_requests WHERE created_at >= ? AND created_at <= ?`).bind(lower, upper).first(),
+    db.prepare(`SELECT COUNT(*) AS total,
+      SUM(CASE WHEN LENGTH(TRIM(COALESCE(output_text,''))) > 0 THEN 1 ELSE 0 END) AS with_text,
+      SUM(CASE WHEN LENGTH(TRIM(COALESCE(output_text,''))) = 0 THEN 1 ELSE 0 END) AS without_text,
+      MIN(created_at) AS earliest, MAX(created_at) AS latest
+      FROM service_records WHERE service_type IN ('memo','memo_archive')
+        AND COALESCE(metadata_json,'') NOT LIKE '%"managementRequestId"%'
+        AND created_at >= ? AND created_at <= ?`).bind(lower, upper).first(),
+    db.prepare(`SELECT
+      SUM(CASE WHEN origin LIKE 'https://q8-ux.github.io%' THEN 1 ELSE 0 END) AS github_site,
+      SUM(CASE WHEN origin LIKE 'https://sabeq.legal%' OR origin LIKE 'https://www.sabeq.legal%' THEN 1 ELSE 0 END) AS official_site,
+      SUM(CASE WHEN origin NOT LIKE 'https://q8-ux.github.io%' AND origin NOT LIKE 'https://sabeq.legal%' AND origin NOT LIKE 'https://www.sabeq.legal%' THEN 1 ELSE 0 END) AS other
+      FROM management_memo_requests WHERE created_at >= ? AND created_at <= ?`).bind(lower, upper).first(),
+    officialOperations(new URLSearchParams({ kind: "summary" })),
+  ]);
+  const safe = (value: unknown) => Math.max(0, Number(value || 0));
+  const compact = (row: Record<string, unknown> | null, running = false) => ({
+    total: safe(row?.total), withText: safe(row?.with_text), withoutText: safe(row?.without_text),
+    ...(running ? { running: safe(row?.running), incomplete: safe(row?.incomplete) } : {}),
+    earliest: row?.earliest || null, latest: row?.latest || null,
+  });
+  return {
+    checkedAt: new Date().toISOString(), range: { start: start || null, end: end || null },
+    current: compact(current as Record<string, unknown> | null, true),
+    savedHistory: compact(archived as Record<string, unknown> | null),
+    currentOrigins: { github: safe(origin?.github_site), official: safe(origin?.official_site), other: safe(origin?.other) },
+    olderRender: {
+      available: official.available, totalAllTime: official.available ? safe(official.totals?.memos) : null,
+      historyAvailable: official.historyAvailable === true,
+      trackingSince: official.trackingSince || null, error: official.error || null,
+      dateFiltered: false,
+    },
+    note: "هذا جرد للسجلات الموجودة، وليس استعادة للسجلات المفقودة. إحصاء Render يخص جميع التواريخ ولا يشمل نصوص المذكرات التي لم تُحفظ.",
+  };
+}
+
 export async function managerUpdates() {
   try {
     const areas = [["sabeq-legal", "الموقع"], ["legal-memo-platform", "الخلفية الرسمية"], ["sabeq-admin-preview", "مركز الإدارة"]];
