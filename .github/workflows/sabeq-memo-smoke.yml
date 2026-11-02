@@ -40,3 +40,14 @@ jobs:
           grep -F 'index-Cc5Z_iVY.js' frontend.html
           curl --fail --location --silent --show-error --retry 2 --max-time 80 https://sabeq-legal-research-api.onrender.com/api/operations-health > gateway.json
           grep -F '"operations-monitor-1"' gateway.json
+      - name: Check read-only public signing-key route and protected archive endpoint
+        shell: bash
+        run: |
+          set -euo pipefail
+          code="$(curl --silent --show-error --max-time 20 -o jwks.json -w '%{http_code}' https://sabeq-legal-public.centrino.chatgpt.site/api/management/jwks)"
+          echo "Sabeq JWKS HTTP status: $code"
+          test "$code" = 200
+          node -e 'const fs=require("fs");const x=JSON.parse(fs.readFileSync("jwks.json","utf8"));if(!Array.isArray(x.keys)||x.keys[0]?.kty!=="EC"||x.keys[0]?.crv!=="P-256"||x.keys[0]?.d)process.exit(1);console.log("Public verification key shape: valid")'
+          code="$(curl --silent --show-error --max-time 30 -o archive-denied.json -w '%{http_code}' https://sabeq-legal-research-api.onrender.com/api/admin/operations)"
+          echo "Legacy archive without token HTTP status: $code"
+          test "$code" = 401
