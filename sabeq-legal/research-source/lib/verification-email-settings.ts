@@ -7,12 +7,18 @@ type DeliveryEnvironment = { RESEND_API_KEY?: string; AUTH_FROM_EMAIL?: string }
 const INTEGRATION = "verification-email";
 const DEFAULT_SENDER = "noreplay@sabeq.legal";
 
+// Existing deployments used noreply@sabeq.legal. Keep the administrator's
+// stored provider key and settings intact while honoring the requested sender.
+function canonicalSender(value: string) {
+  return value.trim().replace(/(^|<)noreply@sabeq\.legal(?=>|$)/i, `$1${DEFAULT_SENDER}`);
+}
+
 export async function verificationEmailDelivery() {
   const saved = await integrationConfig<DeliveryConfig>(INTEGRATION);
-  if (saved) return { ...saved, source: "management" as const };
+  if (saved) return { ...saved, fromEmail: canonicalSender(saved.fromEmail), source: "management" as const };
   const runtime = env as unknown as DeliveryEnvironment;
   return {
-    fromEmail: runtime.AUTH_FROM_EMAIL?.trim() || "",
+    fromEmail: canonicalSender(runtime.AUTH_FROM_EMAIL || ""),
     apiKey: runtime.RESEND_API_KEY?.trim() || "",
     source: "environment" as const,
   };
