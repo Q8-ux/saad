@@ -14,13 +14,30 @@
 | M06 — Graphiti | تتبع تغير حالة الطلب/التحصين زمنياً | بديل محلي فعّال داخل المتصفح عبر سجل Timeline |
 | M09 — Langfuse | مراقبة الوكلاء والذكاء الاصطناعي | Hook جاهز، يحتاج Backend ومفاتيح آمنة |
 | MarkItDown | تحويل مستندات وتقارير وقاية إلى Markdown للفهرسة | GitHub Actions جاهز |
+| Canva Route | تحويل طلبات التصميم إلى Brief منظم للبوسترات والستوري والكاروسيل | Queue مفعلة داخل المتصفح، الربط المباشر مع Canva عبر Connector |
+| Compositor | معالجة الصور قبل التصميم: قص، تنظيف خلفية، تحسين، وتوحيد المقاسات | Adapter جاهز، التنفيذ يحتاج Worker للصور |
+| مساعد وقاية | مساعد داخل الموقع للتنقل والاستعلام وتجهيز طلبات التصميم | يعمل محلياً الآن |
+| VoiceStudio / Realtime | إدخال صوتي ورد صوتي وربط المساعد بالمسار الصوتي | يعمل Browser Voice الآن، والRealtime الكامل يحتاج Backend |
 
 ### ملفات المسارات
-- `routes/manifest.json` — تعريف المسارات وحالة كل مسار.
-- `routes/schemas.json` — مخططات بيانات الطلب والتحصين.
-- `assets/waqaya-route-runtime.js` — سجل تغيّر محلي + تحقق من البيانات.
-- `.github/workflows/waqaya-markitdown.yml` — تحويل المستندات عبر MarkItDown.
+- `routes/manifest.json`
+- `routes/schemas.json`
+- `routes/design-pipeline.json`
+- `routes/voice-assistant.json`
+- `assets/waqaya-route-runtime.js`
+- `assets/waqaya-assistant.js`
+- `assets/waqaya-assistant.css`
+- `.github/workflows/waqaya-markitdown.yml`
 
-> ملاحظة تشغيلية: GitHub Pages استضافة ثابتة. لذلك المسارات التي تحتاج أسراراً أو قاعدة بيانات أو Node/Python Backend لا يتم تشغيلها داخل المتصفح بشكل وهمي؛ تم تجهيز نقاط الربط فقط إلى أن يتم اعتماد Backend إنتاجي.
+### المساعد الصوتي
+داخل واجهة وقاية يظهر زر **مساعد وقاية**. يدعم:
+- الكتابة.
+- التحدث بالعربية `ar-KW` عند دعم المتصفح لـ Web Speech.
+- رد صوتي عبر Speech Synthesis.
+- فتح أقسام المواعيد والطلبات والقطعان والفرق والتحصينات والتقارير.
+- تجهيز طلب تصميم لمسار Canva.
+- تمرير طلبات معالجة الصور لمسار Compositor.
+
+> GitHub Pages استضافة ثابتة. الذكاء التوليدي الكامل، Voice Realtime الحقيقي، ومعالجة الصور الثقيلة تحتاج Backend آمن ولا يتم ادعاء تشغيلها داخل المتصفح بدون خادم.
 
 البيانات الظاهرة في النسخة المنشورة تجريبية. تحفظ إضافات نسخة GitHub داخل المتصفح للعرض فقط، ولا تمثل قاعدة بيانات مركزية أو نظام صلاحيات إنتاجياً.
