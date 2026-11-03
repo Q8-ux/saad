@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#083746">
+  <meta name="description" content="وقاية V2 — نظام إدارة تحصين الثروة الحيوانية">
+  <title>وقاية V2 | تحصين الثروة الحيوانية</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark">🛡</div>
+      <div><strong>وقاية</strong><small>النظام التشغيلي V2</small></div>
+    </div>
+    <div class="top-actions">
+      <button id="themeBtn" class="icon-btn" aria-label="المظهر">☀︎</button>
+      <button id="adminBtn" class="admin-btn">⚙ الإدارة</button>
+    </div>
+  </header>
+
+  <main class="page">
+    <section class="notice">
+      <b>نسخة تشغيلية جديدة</b>
+      <span>البيانات الحالية تجريبية حتى ربط قاعدة البيانات المركزية.</span>
+    </section>
+
+    <section class="hero">
+      <div>
+        <p class="eyebrow">الثلاثاء، 3 نوفمبر 2026</p>
+        <h1>متابعة حملات التحصين</h1>
+        <p>إدارة المربين، المواعيد، الفرق، المواقع، التحصينات، والتنبيهات من مكان واحد.</p>
+        <div class="hero-actions">
+          <button id="newRequestBtn" class="primary">＋ طلب تحصين جديد</button>
+          <button id="todayRouteBtn" class="secondary">🗺 مسار فرق اليوم</button>
+        </div>
+      </div>
+      <div class="hero-card">
+        <span>تغطية اليوم</span>
+        <b id="coverageValue">94.6%</b>
+        <small>18 موعد • 4 فرق</small>
+      </div>
+    </section>
+
+    <nav class="tabs" id="tabs">
+      <button class="active" data-view="overview">نظرة</button>
+      <button data-view="requests">طلبات</button>
+      <button data-view="herds">القطعان</button>
+      <button data-view="teams">الفرق</button>
+      <button data-view="vaccinations">السجل</button>
+    </nav>
+
+    <section id="overviewView" class="view active">
+      <div class="stats">
+        <article><span>المربين</span><b>968</b><small>87% موثّقون</small></article>
+        <article><span>القطعان</span><b>1,284</b><small>نشطة</small></article>
+        <article><span>طلبات اليوم</span><b>18</b><small>14 مؤكدة</small></article>
+        <article><span>جرعات اليوم</span><b>1,128</b><small>+246 آخر ساعة</small></article>
+      </div>
+
+      <section class="panel">
+        <div class="panel-head">
+          <div><h2>مواعيد اليوم</h2><p>ترتيب زيارات الفرق البيطرية حسب الوقت</p></div>
+          <input id="appointmentSearch" class="search" placeholder="ابحث عن مربي أو منطقة">
+        </div>
+        <div id="appointmentsList" class="appointments"></div>
+      </section>
+    </section>
+
+    <section id="requestsView" class="view">
+      <section class="panel">
+        <div class="panel-head"><div><h2>طلبات التحصين</h2><p>الإسناد والجدولة والتواصل</p></div><button id="newRequestBtn2" class="primary small">＋ جديد</button></div>
+        <div id="requestsList" class="cards-list"></div>
+      </section>
+    </section>
+
+    <section id="herdsView" class="view">
+      <section class="panel">
+        <div class="panel-head"><div><h2>القطعان والمربين</h2><p>الموقع والتعداد والحالة الصحية</p></div></div>
+        <div id="herdsList" class="cards-list"></div>
+      </section>
+    </section>
+
+    <section id="teamsView" class="view">
+      <section class="panel">
+        <div class="panel-head"><div><h2>الفرق الميدانية</h2><p>المناطق والمسارات والحالة</p></div></div>
+        <div id="teamsList" class="team-grid"></div>
+      </section>
+    </section>
+
+    <section id="vaccinationsView" class="view">
+      <section class="panel">
+        <div class="panel-head"><div><h2>سجل التحصينات</h2><p>اللقاح والجرعة والتشغيلة والموعد التالي</p></div></div>
+        <div id="vaccinationsList" class="cards-list"></div>
+      </section>
+    </section>
+  </main>
+
+  <button id="assistantLauncher" class="assistant-launcher">🎙️ <b>مساعد وقاية</b></button>
+
+  <section id="assistantPanel" class="assistant-panel" aria-hidden="true">
+    <header>
+      <div><strong>مساعد وقاية</strong><small>صوت • خرائط • تقويم • واتساب • تصميم</small></div>
+      <button id="assistantClose">×</button>
+    </header>
+    <div id="assistantMessages" class="assistant-messages">
+      <div class="msg bot">مرحباً. أستطيع فتح المواعيد، تحديد موقع مربي، تجهيز حجز، ربط مربي بفريق، أو تجهيز طلب تصميم.</div>
+    </div>
+    <div class="quick">
+      <button data-q="اعرض المواعيد">المواعيد</button>
+      <button data-q="اعرض مسار الفريق 1">مسار فريق</button>
+      <button data-q="اربط عبدالله سالم بالفريق">واتساب</button>
+      <button data-q="صمم بوستر تحصين">تصميم</button>
+    </div>
+    <div class="assistant-input">
+      <button id="voiceBtn">🎤</button>
+      <input id="assistantInput" placeholder="اكتب أو تحدث...">
+      <button id="assistantSend">إرسال</button>
+    </div>
+  </section>
+
+  <dialog id="requestDialog" class="dialog">
+    <form method="dialog" id="requestForm">
+      <div class="dialog-head"><h2>طلب تحصين جديد</h2><button value="cancel">×</button></div>
+      <div class="form-grid">
+        <label>اسم المربي<input name="ownerName" required></label>
+        <label>الهاتف<input name="phone" inputmode="tel" required></label>
+        <label>نوع الحلال<select name="animalType"><option>أغنام</option><option>ماعز</option><option>أبقار</option><option>إبل</option></select></label>
+        <label>عدد الرؤوس<input name="headCount" type="number" min="1" required></label>
+        <label>المنطقة<select name="area"><option>كبد</option><option>الوفرة</option><option>العبدلي</option><option>الجهراء</option></select></label>
+        <label>الموعد<input name="preferredDate" type="datetime-local" required></label>
+        <label class="full">وصف الموقع<input name="locationNote" placeholder="قطعة / مزرعة / علامة مميزة"></label>
+        <label class="full">التحصين<input name="vaccineName" placeholder="مثال: التسمم المعوي" required></label>
+      </div>
+      <div class="dialog-actions"><button value="cancel" class="secondary">إلغاء</button><button id="saveRequestBtn" value="default" class="primary">حفظ الطلب</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="adminDialog" class="dialog admin-dialog">
+    <form method="dialog">
+      <div class="dialog-head"><h2>إدارة وقاية</h2><button value="cancel">×</button></div>
+      <div class="admin-sections">
+        <section>
+          <h3>قواعد إسناد الفرق</h3>
+          <div id="routingSettings" class="settings-grid"></div>
+        </section>
+        <section>
+          <h3>أرقام WhatsApp للفرق</h3>
+          <div id="teamPhoneSettings" class="settings-grid"></div>
+        </section>
+        <section>
+          <h3>المسارات</h3>
+          <div class="route-status">
+            <span>Google Calendar <b>جاهز للربط</b></span>
+            <span>Google Maps <b>نشط</b></span>
+            <span>WhatsApp <b>نشط بالروابط</b></span>
+            <span>المساعد الصوتي <b>نشط</b></span>
+            <span>Canva / Compositor <b>Queue جاهزة</b></span>
+          </div>
+        </section>
+      </div>
+      <div class="dialog-actions"><button id="saveAdminBtn" value="default" class="primary">حفظ الإعدادات</button></div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast"></div>
+
+  <script src="./app.js"></script>
+</body>
+</html>
