@@ -112,7 +112,7 @@ export async function managementAccounts(data: Record<string, unknown> | null, m
     if (!saltPepper) throw new RequestError("إعداد حماية حسابات المتابعة غير مكتمل.", 503);
     if (!USERNAME.test(username)) throw new RequestError("اسم المستخدم غير صحيح.");
     if (roster.accounts.some(a => a.username === username)) throw new RequestError("اسم المستخدم مستخدم بالفعل.", 409);
-    const passwordValid = role === "reviewer" ? reviewerPasswordValid(password) : typeof password === "string" && password.length >= 16 && password.length <= 256 && /\S/.test(password);
+    const passwordValid = typeof password === "string" && (role === "reviewer" ? reviewerPasswordValid(password) : password.length >= 16 && password.length <= 256 && /\S/.test(password));
     if (!passwordValid) throw new RequestError("كلمة المرور غير كافية الأمان لهذا الحساب.");
     if (password !== confirmation) throw new RequestError("تأكيد كلمة المرور غير مطابق.");
     const salt = toHex(crypto.getRandomValues(new Uint8Array(16)));
