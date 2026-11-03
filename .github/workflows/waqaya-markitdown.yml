@@ -1,0 +1,39 @@
+name: Waqaya MarkItDown
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'livestock-vax-kw/docs/**'
+      - 'livestock-vax-kw/documents/**'
+      - 'livestock-vax-kw/uploads/**'
+      - '.github/workflows/waqaya-markitdown.yml'
+
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install MarkItDown
+        run: pip install 'markitdown[all]'
+      - name: Convert Waqaya documents
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p livestock-vax-kw/markitdown-output
+          find livestock-vax-kw/docs livestock-vax-kw/documents livestock-vax-kw/uploads -type f 2>/dev/null | while read -r f; do
+            rel="${f#livestock-vax-kw/}"
+            out="livestock-vax-kw/markitdown-output/${rel//\//__}.md"
+            python -m markitdown "$f" > "$out" || true
+          done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: waqaya-markitdown
+          path: livestock-vax-kw/markitdown-output
+          if-no-files-found: ignore
+          retention-days: 7
