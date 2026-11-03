@@ -22,15 +22,7 @@
     return false;
   }
   function createDesignBrief(text){
-    const req={
-      id:"DES-"+Date.now(),
-      createdAt:new Date().toISOString(),
-      source:"assistant",
-      brief:text,
-      route:"canva",
-      preProcess:"compositor",
-      status:"queued"
-    };
+    const req={id:"DES-"+Date.now(),createdAt:new Date().toISOString(),source:"assistant",brief:text,route:"canva",preProcess:"compositor",status:"queued"};
     const list=readJson(storeKey,[]);
     list.unshift(req); writeJson(storeKey,list.slice(0,100));
     return req;
@@ -61,7 +53,6 @@
     }
     return "أستطيع مساعدتك في المواعيد، الطلبات، القطعان، الفرق، التحصينات، التقارير، أو تجهيز طلب تصميم وصوت. الذكاء الكامل يحتاج ربط الـ Backend المعتمد.";
   }
-
   function addMsg(role,text){
     const box=document.querySelector(".wq-assistant-messages");
     if(!box) return;
@@ -86,28 +77,33 @@
     r.start();
   }
   function mount(){
-    if(document.querySelector(".wq-assistant-launcher")) return;
-    const launcher=document.createElement("button");
-    launcher.className="wq-assistant-launcher";
-    launcher.innerHTML='<span>🎙</span><b>مساعد وقاية</b>';
-    document.body.appendChild(launcher);
+    let launcher=document.querySelector(".wq-assistant-launcher");
+    if(!launcher){
+      launcher=document.createElement("button");
+      launcher.className="wq-assistant-launcher";
+      launcher.innerHTML='<span>🎙</span><b>مساعد وقاية</b>';
+      document.body.appendChild(launcher);
+    }
 
-    const panel=document.createElement("section");
-    panel.className="wq-assistant-panel";
-    panel.innerHTML=`
-      <header><div><strong>مساعد وقاية</strong><small>نص + صوت + تصميم</small></div><button class="wq-close" aria-label="إغلاق">×</button></header>
-      <div class="wq-assistant-messages"><div class="wq-msg assistant">مرحباً. اسألني عن المواعيد والطلبات والقطعان والفرق والتحصينات، أو اطلب تصميماً.</div></div>
-      <div class="wq-quick">
-        <button data-q="افتح المواعيد">المواعيد</button>
-        <button data-q="افتح الطلبات">الطلبات</button>
-        <button data-q="صمم بوستر توعوي عن التحصين">تصميم</button>
-      </div>
-      <div class="wq-input-row">
-        <button class="wq-mic" aria-label="تحدث">🎤</button>
-        <input class="wq-assistant-input" placeholder="اكتب أو تحدث..." />
-        <button class="wq-send">إرسال</button>
-      </div>`;
-    document.body.appendChild(panel);
+    let panel=document.querySelector(".wq-assistant-panel");
+    if(!panel){
+      panel=document.createElement("section");
+      panel.className="wq-assistant-panel";
+      panel.innerHTML=`
+        <header><div><strong>مساعد وقاية</strong><small>نص + صوت + تصميم</small></div><button class="wq-close" aria-label="إغلاق">×</button></header>
+        <div class="wq-assistant-messages"><div class="wq-msg assistant">مرحباً. اسألني عن المواعيد والطلبات والقطعان والفرق والتحصينات، أو اطلب تصميماً.</div></div>
+        <div class="wq-quick">
+          <button data-q="افتح المواعيد">المواعيد</button>
+          <button data-q="افتح الطلبات">الطلبات</button>
+          <button data-q="صمم بوستر توعوي عن التحصين">تصميم</button>
+        </div>
+        <div class="wq-input-row">
+          <button class="wq-mic" aria-label="تحدث">🎤</button>
+          <input class="wq-assistant-input" placeholder="اكتب أو تحدث..." />
+          <button class="wq-send">إرسال</button>
+        </div>`;
+      document.body.appendChild(panel);
+    }
 
     launcher.onclick=()=>panel.classList.add("open");
     panel.querySelector(".wq-close").onclick=()=>panel.classList.remove("open");
@@ -117,5 +113,5 @@
     panel.querySelectorAll(".wq-quick button").forEach(b=>b.onclick=()=>handle(b.dataset.q));
   }
   if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",mount); else mount();
-  window.WaqayaAssistant={handle,startVoice,createDesignBrief};
+  window.WaqayaAssistant={handle,startVoice,createDesignBrief,mount};
 })();
