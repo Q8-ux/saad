@@ -1,0 +1,548 @@
+{
+  "schema_version": 1,
+  "currency": "KWD",
+  "minor_unit": "fils",
+  "products": [
+    {
+      "id": "oman-001",
+      "name_ar": "البامية الحساوية",
+      "origin": "الكويت",
+      "variants": [
+        {
+          "unit": "كيلو",
+          "price_kd": 3500,
+          "confirmed": true,
+          "active": true
+        },
+        {
+          "unit": "3 كيلو",
+          "price_kd": 10000,
+          "confirmed": true,
+          "active": true
+        },
+        {
+          "unit": "سحارة 10 كيلو",
+          "price_kd": null,
+          "confirmed": false,
+          "active": false
+        }
+      ],
+      "review_note": "تعارض سعر السحارة بين 10 و30 د.ك",
+      "image_status": "needs_original_upload"
+    },
+    {
+      "id": "oman-002",
+      "name_ar": "الشمام الحساوي",
+      "origin": "الكويت",
+      "variants": [
+        {
+          "unit": "حبة",
+          "price_kd": 2000,
+          "confirmed": true,
+          "active": true
+        }
+      ],
+      "image_status": "needs_original_upload"
+    },
+    {
+      "id": "oman-003",
+      "name_ar": "اللوز القطيفي",
+      "origin": "السعودية",
+      "variants": [
+        {
+          "unit": "كيلو",
+          "price_kd": 6000,
+          "confirmed": true,
+          "active": true
+        }
+      ],
+      "image_status": "needs_original_upload"
+    },
+    {
+      "id": "oman-004",
+      "name_ar": "عنب لبناني عسلي بدون بذر",
+      "origin": "لبنان",
+      "variants": [
+        {
+          "unit": "كيلو",
+          "price_kd": 1750,
+          "confirmed": true,
+          "active": true
+        }
+      ],
+      "image_status": "needs_original_upload"
+    },
+    {
+      "id": "oman-005",
+      "name_ar": "عنب أذربيجاني عسلي",
+      "origin": "أذربيجان",
+      "variants": [
+        {
+          "unit": "غير مؤكدة",
+          "price_kd": 1500,
+          "confirmed": false,
+          "active": false
+        }
+      ],
+      "image_status": "needs_original_upload"
+    },
+    {
+      "id": "oman-006",
+      "name_ar": "أفوكادو كيني",
+      "origin": "كينيا",
+      "variants": [
+        {
+          "unit": "كيلو",
+          "price_kd": 2000,
+          "confirmed": true,
+          "active": true
+        }
+      ],
+      "image_status": "needs_original_upload"
+    },
+    {
+      "id": "oman-007",
+      "name_ar": "تين سوري عسلي",
+      "origin": "سوريا",
+      "variants": [
+        {
+          "unit": "سلة",
+          "price_kd": 2000,
+          "confirmed": true,
+          "active": true
+        }
+      ],
+      "image_status": "needs_original_upload"
+    },
+    {
+      "id": "oman-008",
+      "name_ar": "تين شوكي أردني",
+      "origin": "الأردن",
+      "variants": [
+        {
+          "unit": "غير مؤكدة",
+          "price_kd": 2000,
+          "confirmed": false,
+          "active": false
+        }
+      ],
+      "image_status": "needs_original_upload"
+    },
+    {
+      "id": "oman-009",
+      "name_ar": "أفندي بدون بذر",
+      "origin": "جنوب أفريقيا",
+      "variants": [
+        {
+          "unit": "كيلو",
+          "price_kd": 1000,
+          "confirmed": true,
+          "active": true
+        }
+      ],
+      "image_status": "needs_original_upload"
+    },
+    {
+      "id": "oman-010",
+      "name_ar": "برتقال أبو سرة",
+      "origin": "جنوب أفريقيا",
+      "variants": [
+        {
+          "unit": "كيلو",
+          "price_kd": 1250,
+          "confirmed": true,
+          "active": true
+        }
+      ],
+      "image_status": "needs_original_upload"
+    },
+    {
+      "id": "oman-011",
+      "name_ar": "كيوي فراولة",
+      "origin": "أذربيجان",
+      "variants": [
+        {
+          "unit": "علبة",
+          "price_kd": 1500,
+          "confirmed": true,
+          "active": true
+        }
+      ],
+      "image_status": "needs_original_upload"
+    },
+    {
+      "id": "oman-012",
+      "name_ar": "بوملي",
+      "origin": "جنوب أفريقيا",
+      "variants": [
+        {
+          "unit": "حبة",
+          "price_kd": 1000,
+          "confirmed": true,
+          "active": true
+        }
+      ],
+      "image_status": "needs_original_upload"
+    },
+    {
+      "id": "oman-013",
+      "name_ar": "برتقال أخضر",
+      "origin": "سوريا",
+      "variants": [
+        {
+          "unit": "كيلو",
+          "price_kd": 1000,
+          "confirmed": true,
+          "active": true
+        }
+      ],
+      "image_status": "needs_original_upload"
+    },
+    {
+      "id": "oman-014",
+      "name_ar": "فستق حلبي",
+      "origin": "سوريا",
+      "variants": [
+        {
+          "unit": "علبة",
+          "price_kd": 1500,
+          "confirmed": true,
+          "active": true
+        },
+        {
+          "unit": "سلة",
+          "price_kd": 3000,
+          "confirmed": true,
+          "active": true
+        }
+      ],
+      "image_status": "needs_original_upload"
+    },
+    {
+      "id": "oman-015",
+      "name_ar": "مانجوستين",
+      "origin": "إندونيسيا",
+      "variants": [
+        {
+          "unit": "علبة",
+          "price_kd": 2500,
+          "confirmed": true,
+          "active": true
+        }
+      ],
+      "image_status": "needs_original_upload"
+    },
+    {
+      "id": "oman-016",
+      "name_ar": "بلو بيري",
+      "origin": null,
+      "variants": [
+        {
+          "unit": "غير مؤكدة",
+          "price_kd": 1250,
+          "confirmed": false,
+          "active": false
+        }
+      ],
+      "image_status": "needs_original_upload"
+    },
+    {
+      "id": "oman-017",
+      "name_ar": "رازبيري",
+      "origin": null,
+      "variants": [
+        {
+          "unit": "غير مؤكدة",
+          "price_kd": 1250,
+          "confirmed": false,
+          "active": false
+        }
+      ],
+      "image_status": "needs_original_upload"
+    },
+    {
+      "id": "oman-018",
+      "name_ar": "تفاح بالفراولة (كاندي أبل)",
+      "origin": null,
+      "variants": [
+        {
+          "unit": "علبة 500 غ",
+          "price_kd": 1250,
+          "confirmed": true,
+          "active": true
+        }
+      ],
+      "image_status": "needs_original_upload"
+    },
+    {
+      "id": "oman-019",
+      "name_ar": "كاكا سوري",
+      "origin": "سوريا",
+      "variants": [
+        {
+          "unit": "غير مؤكدة",
+          "price_kd": 1750,
+          "confirmed": false,
+          "active": false
+        }
+      ],
+      "image_status": "needs_original_upload"
+    },
+    {
+      "id": "oman-020",
+      "name_ar": "تفاح لبناني",
+      "origin": "لبنان",
+      "variants": [
+        {
+          "unit": "كيلو",
+          "price_kd": 1250,
+          "confirmed": true,
+          "active": true
+        },
+        {
+          "unit": "سلة",
+          "price_kd": 3000,
+          "confirmed": true,
+          "active": true
+        }
+      ],
+      "image_status": "needs_original_upload"
+    },
+    {
+      "id": "oman-021",
+      "name_ar": "خوخ",
+      "origin": "جنوب أفريقيا",
+      "variants": [
+        {
+          "unit": "علبة",
+          "price_kd": 1250,
+          "confirmed": true,
+          "active": true
+        }
+      ],
+      "image_status": "needs_original_upload"
+    },
+    {
+      "id": "oman-022",
+      "name_ar": "موز فلبيني",
+      "origin": "الفلبين",
+      "variants": [
+        {
+          "unit": "غير مؤكدة",
+          "price_kd": 1500,
+          "confirmed": false,
+          "active": false
+        }
+      ],
+      "image_status": "needs_original_upload"
+    },
+    {
+      "id": "oman-023",
+      "name_ar": "أفوكادو لبناني",
+      "origin": "لبنان",
+      "variants": [
+        {
+          "unit": "كرتون",
+          "price_kd": 2000,
+          "confirmed": true,
+          "active": true
+        }
+      ],
+      "image_status": "needs_original_upload"
+    },
+    {
+      "id": "oman-024",
+      "name_ar": "مشمش",
+      "origin": "جنوب أفريقيا",
+      "variants": [
+        {
+          "unit": "علبة",
+          "price_kd": 2250,
+          "confirmed": true,
+          "active": true
+        }
+      ],
+      "image_status": "needs_original_upload"
+    },
+    {
+      "id": "oman-025",
+      "name_ar": "نكترين",
+      "origin": "جنوب أفريقيا",
+      "variants": [
+        {
+          "unit": "علبة",
+          "price_kd": 1250,
+          "confirmed": true,
+          "active": true
+        }
+      ],
+      "image_status": "needs_original_upload"
+    },
+    {
+      "id": "oman-026",
+      "name_ar": "بابايا كويتي",
+      "origin": "الكويت",
+      "variants": [
+        {
+          "unit": "فلين (حبتان)",
+          "price_kd": 2000,
+          "confirmed": true,
+          "active": true
+        }
+      ],
+      "image_status": "needs_original_upload"
+    },
+    {
+      "id": "oman-027",
+      "name_ar": "مانجا كيت",
+      "origin": null,
+      "variants": [
+        {
+          "unit": "كرتون",
+          "price_kd": 3000,
+          "confirmed": true,
+          "active": true
+        }
+      ],
+      "image_status": "needs_original_upload"
+    },
+    {
+      "id": "oman-028",
+      "name_ar": "رمان سوري",
+      "origin": "سوريا",
+      "variants": [
+        {
+          "unit": "سلة",
+          "price_kd": 2000,
+          "confirmed": true,
+          "active": true
+        }
+      ],
+      "image_status": "needs_original_upload"
+    },
+    {
+      "id": "oman-029",
+      "name_ar": "رطب سكري",
+      "origin": null,
+      "variants": [
+        {
+          "unit": "غير مؤكدة",
+          "price_kd": 1500,
+          "confirmed": false,
+          "active": false
+        }
+      ],
+      "image_status": "needs_original_upload"
+    },
+    {
+      "id": "oman-030",
+      "name_ar": "قشطة لبناني طيران",
+      "origin": "لبنان",
+      "variants": [
+        {
+          "unit": "كرتون",
+          "price_kd": 3500,
+          "confirmed": true,
+          "active": true
+        }
+      ],
+      "image_status": "needs_original_upload"
+    },
+    {
+      "id": "oman-031",
+      "name_ar": "ذرة كويتي",
+      "origin": "الكويت",
+      "variants": [
+        {
+          "unit": "فلين (حبتان)",
+          "price_kd": 1500,
+          "confirmed": true,
+          "active": true
+        }
+      ],
+      "image_status": "needs_original_upload"
+    },
+    {
+      "id": "oman-032",
+      "name_ar": "جنارك أسترالي",
+      "origin": "أستراليا",
+      "variants": [
+        {
+          "unit": "علبة",
+          "price_kd": 2000,
+          "confirmed": true,
+          "active": true
+        }
+      ],
+      "image_status": "needs_original_upload"
+    },
+    {
+      "id": "oman-033",
+      "name_ar": "بلاك بيري",
+      "origin": "جنوب أفريقيا",
+      "variants": [
+        {
+          "unit": "علبة",
+          "price_kd": 1500,
+          "confirmed": true,
+          "active": true
+        }
+      ],
+      "image_status": "needs_original_upload"
+    },
+    {
+      "id": "oman-034",
+      "name_ar": "بطاطا حلوة مصري",
+      "origin": "مصر",
+      "variants": [
+        {
+          "unit": "كرتون",
+          "price_kd": 1250,
+          "confirmed": true,
+          "active": true
+        }
+      ],
+      "image_status": "needs_original_upload"
+    },
+    {
+      "id": "oman-035",
+      "name_ar": "الرقي السعودي العسلي",
+      "origin": "السعودية",
+      "variants": [
+        {
+          "unit": "حبة كبيرة",
+          "price_kd": 5000,
+          "confirmed": true,
+          "active": true
+        },
+        {
+          "unit": "حبة متوسطة",
+          "price_kd": 4000,
+          "confirmed": true,
+          "active": true
+        },
+        {
+          "unit": "حبة صغيرة",
+          "price_kd": 3000,
+          "confirmed": true,
+          "active": true
+        }
+      ],
+      "image_status": "needs_original_upload"
+    },
+    {
+      "id": "oman-036",
+      "name_ar": "الحلوى العمانية",
+      "origin": "عُمان",
+      "variants": [
+        {
+          "unit": "علبة",
+          "price_kd": 2000,
+          "confirmed": true,
+          "active": true
+        }
+      ],
+      "image_status": "needs_original_upload"
+    }
+  ]
+}
