@@ -1,6 +1,6 @@
 {
   "project": "waqaya",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "routes": [
     {
       "id": "M02",
@@ -78,6 +78,13 @@
       "purpose": "مواقع المربين والحظائر، الاتجاهات، ومسارات الفرق الميدانية",
       "status": "url-routing-active+advanced-api-ready",
       "runtime": "browser+google-maps"
+    },
+    {
+      "id": "WA",
+      "name": "WhatsApp Routing",
+      "purpose": "ربط المربين بالفرق وفق قواعد إسناد تحددها الإدارة مع قوالب رسائل للمربي والفريق",
+      "status": "browser-routing-active+business-api-ready",
+      "runtime": "wa.me+local-rules+server-ready"
     }
   ]
 }
