@@ -103,7 +103,7 @@ export async function getPublicUser(request: Request): Promise<PublicUser | null
 
 export async function requirePublicUser(request: Request) {
   const user = await getPublicUser(request);
-  if (!user) throw new RequestError("يلزم تسجيل الدخول والتحقق من البريد الإلكتروني للمتابعة.", 401);
+  if (!user) throw new RequestError("يلزم تسجيل الدخول باسم المستخدم وكلمة المرور للمتابعة.", 401);
   if (user.status !== "active") throw new RequestError("هذا الحساب موقوف مؤقتاً. تواصل مع إدارة مجموعة سابق القانونية.", 403);
   return user;
 }
@@ -112,7 +112,7 @@ export async function requirePublicUser(request: Request) {
  * Temporary pilot switch for the memo workflow.  Guest requests are deliberately
  * not attached to a user account or written to the service archive.  Set this
  * variable to "false" (or remove it) before the public launch to restore the
- * mandatory email-verified sign-in flow.
+ * mandatory authenticated sign-in flow.
  */
 export function guestMemoEnabled() {
   return (env as unknown as AuthEnvironment).ALLOW_GUEST_MEMO?.trim().toLowerCase() === "true";
@@ -125,7 +125,7 @@ export async function requireMemoUserOrGuest(request: Request): Promise<PublicUs
     return user;
   }
   if (guestMemoEnabled()) return null;
-  throw new RequestError("يلزم تسجيل الدخول والتحقق من البريد الإلكتروني للمتابعة.", 401);
+  throw new RequestError("يلزم تسجيل الدخول باسم المستخدم وكلمة المرور للمتابعة.", 401);
 }
 
 export async function createPublicSession(userId: string) {
