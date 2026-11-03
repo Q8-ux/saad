@@ -1,0 +1,47 @@
+{
+  "route": "design-pipeline",
+  "project": "waqaya",
+  "flow": [
+    "assistant-brief",
+    "compositor-preprocess",
+    "canva-layout",
+    "export",
+    "publish"
+  ],
+  "compositor": {
+    "purpose": [
+      "crop",
+      "background-cleanup",
+      "resize",
+      "contrast",
+      "social-safe-area"
+    ],
+    "input": [
+      "image/jpeg",
+      "image/png",
+      "image/webp"
+    ],
+    "status": "adapter-ready"
+  },
+  "canva": {
+    "purpose": [
+      "poster",
+      "story",
+      "carousel",
+      "awareness-card",
+      "campaign-template"
+    ],
+    "brand": {
+      "direction": "rtl",
+      "font": "AL-Mohanad",
+      "palette": [
+        "#082c3b",
+        "#0d877e",
+        "#e9f6f3",
+        "#ffffff"
+      ]
+    },
+    "status": "brief-queue-ready"
+  },
+  "queueStorage": "waqaya.design.requests"
+}
