@@ -608,109 +608,41 @@ function ModalShell({ children, language, onClose, large = false, media = false,
 }
 
 function AuthGate({ language, service, onAuthenticated }: { language: Language; service: ServiceModal | null; onAuthenticated: (session: { token: string; user: PublicUser }) => void }) {
-  const [stage, setStage] = useState<"details" | "code">("details");
-  const [details, setDetails] = useState({ name: "", phone: "", email: "" });
-  const [challengeId, setChallengeId] = useState("");
   const [status, setStatus] = useState<"idle" | "loading">("idle");
   const [notice, setNotice] = useState("");
   const t = copy[language];
   const serviceName = service ? ({ booking: t.book, assistant: t.assistant, library: t.library, memo: t.memo } satisfies Record<ServiceModal, string>)[service] : "";
   const ui = {
     ar: {
-      title: "تسجيل الدخول الآمن",
-      intro: serviceName ? `يلزم التحقق من حسابك قبل استخدام خدمة «${serviceName}».` : "يلزم التحقق من حسابك قبل طلب الخدمة.",
-      name: "الاسم الكامل",
-      phone: "رقم الهاتف",
-      email: "البريد الإلكتروني",
-      send: "إرسال رمز التحقق",
-      sending: "جارٍ إرسال الرمز...",
-      privacy: "جميع الحقول إلزامية. سنرسل رمزاً من ستة أرقام إلى بريدك، ولن نطلب كلمة مرور.",
-      verifyTitle: "تحقق من بريدك الإلكتروني",
-      verifyText: `أدخل الرمز المرسل إلى ${details.email}`,
-      code: "رمز التحقق",
-      verify: "تحقق وتابع",
-      verifying: "جارٍ التحقق...",
-      edit: "تعديل البيانات",
-      sent: "تم إرسال الرمز. تحقق من صندوق الوارد والبريد غير المرغوب فيه.",
-      error: "تعذر إكمال التحقق حالياً.",
+      title: "تسجيل الدخول", intro: serviceName ? `أدخل اسم المستخدم وكلمة المرور لاستخدام «${serviceName}».` : "أدخل بيانات حسابك المعتمدة لدى المكتب.",
+      username: "اسم المستخدم", password: "كلمة المرور", submit: "دخول", loading: "جارٍ تسجيل الدخول...",
+      guidance: "ينشئ المكتب الحساب ويحدد كلمة المرور. لا يُرسل رمز تحقق إلى البريد.",
+      error: "تعذر تسجيل الدخول. تحقق من اسم المستخدم وكلمة المرور.",
     },
     en: {
-      title: "Secure sign-in",
-      intro: serviceName ? `Verify your account before using “${serviceName}”.` : "Verify your account before requesting a service.",
-      name: "Full name",
-      phone: "Phone number",
-      email: "Email address",
-      send: "Send verification code",
-      sending: "Sending code...",
-      privacy: "All fields are required. We will email a six-digit code; no password is needed.",
-      verifyTitle: "Verify your email",
-      verifyText: `Enter the code sent to ${details.email}`,
-      code: "Verification code",
-      verify: "Verify and continue",
-      verifying: "Verifying...",
-      edit: "Edit details",
-      sent: "Code sent. Check your inbox and spam folder.",
-      error: "Verification could not be completed right now.",
+      title: "Sign in", intro: serviceName ? `Enter your username and password to use “${serviceName}”.` : "Enter the credentials provided by the office.",
+      username: "Username", password: "Password", submit: "Sign in", loading: "Signing in...",
+      guidance: "The office creates your account. No email verification code is required.",
+      error: "Sign-in failed. Check your username and password.",
     },
     ur: {
-      title: "محفوظ سائن اِن",
-      intro: serviceName ? `«${serviceName}» استعمال کرنے سے پہلے اپنے اکاؤنٹ کی تصدیق کریں۔` : "خدمت کی درخواست سے پہلے اپنے اکاؤنٹ کی تصدیق کریں۔",
-      name: "پورا نام",
-      phone: "فون نمبر",
-      email: "ای میل",
-      send: "تصدیقی کوڈ بھیجیں",
-      sending: "کوڈ بھیجا جا رہا ہے...",
-      privacy: "تمام خانے لازمی ہیں۔ چھ ہندسوں کا کوڈ ای میل کیا جائے گا؛ پاس ورڈ درکار نہیں۔",
-      verifyTitle: "ای میل کی تصدیق کریں",
-      verifyText: `${details.email} پر بھیجا گیا کوڈ درج کریں۔`,
-      code: "تصدیقی کوڈ",
-      verify: "تصدیق کرکے جاری رکھیں",
-      verifying: "تصدیق جاری ہے...",
-      edit: "معلومات تبدیل کریں",
-      sent: "کوڈ بھیج دیا گیا۔ اِن باکس اور اسپیم فولڈر دیکھیں۔",
-      error: "اس وقت تصدیق مکمل نہیں ہو سکی۔",
+      title: "سائن اِن", intro: serviceName ? `«${serviceName}» استعمال کرنے کے لیے صارف نام اور پاس ورڈ درج کریں۔` : "دفتر کی فراہم کردہ اکاؤنٹ تفصیلات درج کریں۔",
+      username: "صارف نام", password: "پاس ورڈ", submit: "داخل ہوں", loading: "داخل ہو رہے ہیں...",
+      guidance: "دفتر اکاؤنٹ بناتا ہے، ای میل تصدیقی کوڈ درکار نہیں۔",
+      error: "سائن اِن ناکام ہوا۔ صارف نام اور پاس ورڈ چیک کریں۔",
     },
   }[language];
-
-  async function requestCode(event: FormEvent<HTMLFormElement>) {
+  async function signIn(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setStatus("loading");
-    setNotice("");
+    setStatus("loading"); setNotice("");
     try {
       const form = new FormData(event.currentTarget);
-      const nextDetails = {
-        name: String(form.get("name") || "").trim(),
-        phone: String(form.get("phone") || "").trim(),
-        email: String(form.get("email") || "").trim().toLowerCase(),
-      };
-      const response = await fetch(apiUrl("/api/auth/request-code"), {
+      const username = String(form.get("username") || "").trim();
+      const password = String(form.get("password") || "");
+      const response = await fetch(apiUrl("/api/auth/password-login"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...nextDetails, language }),
-      });
-      const data = await response.json() as { challengeId?: string; error?: string };
-      if (!response.ok || !data.challengeId) throw new Error(data.error || ui.error);
-      setDetails(nextDetails);
-      setChallengeId(data.challengeId);
-      setStage("code");
-      setNotice(ui.sent);
-    } catch (error) {
-      setNotice(interfaceError(error, language, ui.error));
-    } finally {
-      setStatus("idle");
-    }
-  }
-
-  async function verifyCode(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setStatus("loading");
-    setNotice("");
-    try {
-      const code = String(new FormData(event.currentTarget).get("code") || "").trim();
-      const response = await fetch(apiUrl("/api/auth/verify-code"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ challengeId, email: details.email, code }),
+        body: JSON.stringify({ username, password }),
       });
       const data = await response.json() as { token?: string; user?: PublicUser; error?: string };
       if (!response.ok || !data.token || !data.user) throw new Error(data.error || ui.error);
@@ -721,26 +653,18 @@ function AuthGate({ language, service, onAuthenticated }: { language: Language; 
       setStatus("idle");
     }
   }
-
   return <div className="modal-content auth-gate">
     <div className="modal-icon"><KeyRound /></div>
-    <h2>{stage === "details" ? ui.title : ui.verifyTitle}</h2>
-    <p>{stage === "details" ? ui.intro : ui.verifyText}</p>
-
-    {stage === "details" ? <form onSubmit={requestCode}>
+    <h2>{ui.title}</h2><p>{ui.intro}</p>
+    <form onSubmit={signIn}>
       <div className="form-grid">
-        <Field label={ui.name}><input name="name" required minLength={2} autoComplete="name" /></Field>
-        <Field label={ui.phone}><input name="phone" required minLength={6} inputMode="tel" autoComplete="tel" dir="ltr" /></Field>
-        <Field label={ui.email} wide><input name="email" required type="email" autoComplete="email" dir="ltr" /></Field>
+        <Field label={ui.username} wide><input name="username" required minLength={3} maxLength={32} pattern="[A-Za-z][A-Za-z0-9_]{2,31}" autoComplete="username" autoCapitalize="none" spellCheck={false} dir="ltr" /></Field>
+        <Field label={ui.password} wide><input name="password" required type="password" autoComplete="current-password" dir="ltr" /></Field>
       </div>
-      <p className="auth-privacy"><ShieldCheck size={17} />{ui.privacy}</p>
-      <button className="button button-primary button-block" disabled={status === "loading"}>{status === "loading" ? ui.sending : ui.send}</button>
-    </form> : <form onSubmit={verifyCode}>
-      <Field label={ui.code}><input className="verification-code" name="code" required inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" minLength={6} maxLength={6} dir="ltr" /></Field>
-      <button className="button button-primary button-block" disabled={status === "loading"}>{status === "loading" ? ui.verifying : ui.verify}</button>
-      <button className="text-button auth-edit" type="button" onClick={() => { setStage("details"); setNotice(""); }}>{ui.edit}</button>
-    </form>}
-    {notice && <p className={`auth-notice${stage === "code" && notice === ui.sent ? " success" : ""}`} aria-live="polite">{notice}</p>}
+      <p className="auth-privacy"><ShieldCheck size={17} />{ui.guidance}</p>
+      <button className="button button-primary button-block" disabled={status === "loading"}>{status === "loading" ? ui.loading : ui.submit}</button>
+    </form>
+    {notice && <p className="auth-notice" aria-live="polite">{notice}</p>}
   </div>;
 }
 
