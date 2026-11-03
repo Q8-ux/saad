@@ -1,0 +1,39 @@
+{
+  "route": "google-maps",
+  "project": "waqaya",
+  "purpose": "مواقع المربين والحظائر، الاتجاهات، ومسارات الفرق الميدانية",
+  "capabilities": [
+    "open-location",
+    "driving-directions",
+    "multi-stop-route",
+    "use-current-location",
+    "share-location-link",
+    "team-route",
+    "breeder-location"
+  ],
+  "urlMode": {
+    "enabled": true,
+    "apiKeyRequired": false,
+    "provider": "Google Maps"
+  },
+  "advancedMode": {
+    "capabilities": [
+      "route-optimization",
+      "live-eta",
+      "distance-matrix",
+      "geocoding",
+      "places"
+    ],
+    "status": "requires-google-maps-platform-api-key"
+  },
+  "dataSources": [
+    "waqaya.requests",
+    "request.latitude",
+    "request.longitude",
+    "request.area",
+    "request.locationNote"
+  ],
+  "privacy": {
+    "note": "لا تُرسل الإحداثيات إلا عند فتح رابط خرائط أو طلب الاتجاهات من المستخدم."
+  }
+}
