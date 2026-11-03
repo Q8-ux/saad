@@ -10,21 +10,21 @@
       "variants": [
         {
           "unit": "كيلو",
-          "price_kd": 3500,
           "confirmed": true,
-          "active": true
+          "active": true,
+          "price_fils": 3500
         },
         {
           "unit": "3 كيلو",
-          "price_kd": 10000,
           "confirmed": true,
-          "active": true
+          "active": true,
+          "price_fils": 10000
         },
         {
           "unit": "سحارة 10 كيلو",
-          "price_kd": null,
           "confirmed": false,
-          "active": false
+          "active": false,
+          "price_fils": null
         }
       ],
       "review_note": "تعارض سعر السحارة بين 10 و30 د.ك",
@@ -37,9 +37,9 @@
       "variants": [
         {
           "unit": "حبة",
-          "price_kd": 2000,
           "confirmed": true,
-          "active": true
+          "active": true,
+          "price_fils": 2000
         }
       ],
       "image_status": "needs_original_upload"
@@ -51,9 +51,9 @@
       "variants": [
         {
           "unit": "كيلو",
-          "price_kd": 6000,
           "confirmed": true,
-          "active": true
+          "active": true,
+          "price_fils": 6000
         }
       ],
       "image_status": "needs_original_upload"
@@ -65,9 +65,9 @@
       "variants": [
         {
           "unit": "كيلو",
-          "price_kd": 1750,
           "confirmed": true,
-          "active": true
+          "active": true,
+          "price_fils": 1750
         }
       ],
       "image_status": "needs_original_upload"
@@ -79,9 +79,9 @@
       "variants": [
         {
           "unit": "غير مؤكدة",
-          "price_kd": 1500,
           "confirmed": false,
-          "active": false
+          "active": false,
+          "price_fils": 1500
         }
       ],
       "image_status": "needs_original_upload"
@@ -93,9 +93,9 @@
       "variants": [
         {
           "unit": "كيلو",
-          "price_kd": 2000,
           "confirmed": true,
-          "active": true
+          "active": true,
+          "price_fils": 2000
         }
       ],
       "image_status": "needs_original_upload"
@@ -107,9 +107,9 @@
       "variants": [
         {
           "unit": "سلة",
-          "price_kd": 2000,
           "confirmed": true,
-          "active": true
+          "active": true,
+          "price_fils": 2000
         }
       ],
       "image_status": "needs_original_upload"
@@ -121,9 +121,9 @@
       "variants": [
         {
           "unit": "غير مؤكدة",
-          "price_kd": 2000,
           "confirmed": false,
-          "active": false
+          "active": false,
+          "price_fils": 2000
         }
       ],
       "image_status": "needs_original_upload"
@@ -135,9 +135,9 @@
       "variants": [
         {
           "unit": "كيلو",
-          "price_kd": 1000,
           "confirmed": true,
-          "active": true
+          "active": true,
+          "price_fils": 1000
         }
       ],
       "image_status": "needs_original_upload"
@@ -149,9 +149,9 @@
       "variants": [
         {
           "unit": "كيلو",
-          "price_kd": 1250,
           "confirmed": true,
-          "active": true
+          "active": true,
+          "price_fils": 1250
         }
       ],
       "image_status": "needs_original_upload"
@@ -163,9 +163,9 @@
       "variants": [
         {
           "unit": "علبة",
-          "price_kd": 1500,
           "confirmed": true,
-          "active": true
+          "active": true,
+          "price_fils": 1500
         }
       ],
       "image_status": "needs_original_upload"
@@ -177,9 +177,9 @@
       "variants": [
         {
           "unit": "حبة",
-          "price_kd": 1000,
           "confirmed": true,
-          "active": true
+          "active": true,
+          "price_fils": 1000
         }
       ],
       "image_status": "needs_original_upload"
@@ -191,9 +191,9 @@
       "variants": [
         {
           "unit": "كيلو",
-          "price_kd": 1000,
           "confirmed": true,
-          "active": true
+          "active": true,
+          "price_fils": 1000
         }
       ],
       "image_status": "needs_original_upload"
@@ -205,15 +205,15 @@
       "variants": [
         {
           "unit": "علبة",
-          "price_kd": 1500,
           "confirmed": true,
-          "active": true
+          "active": true,
+          "price_fils": 1500
         },
         {
           "unit": "سلة",
-          "price_kd": 3000,
           "confirmed": true,
-          "active": true
+          "active": true,
+          "price_fils": 3000
         }
       ],
       "image_status": "needs_original_upload"
@@ -225,9 +225,9 @@
       "variants": [
         {
           "unit": "علبة",
-          "price_kd": 2500,
           "confirmed": true,
-          "active": true
+          "active": true,
+          "price_fils": 2500
         }
       ],
       "image_status": "needs_original_upload"
@@ -239,9 +239,9 @@
       "variants": [
         {
           "unit": "غير مؤكدة",
-          "price_kd": 1250,
           "confirmed": false,
-          "active": false
+          "active": false,
+          "price_fils": 1250
         }
       ],
       "image_status": "needs_original_upload"
@@ -253,9 +253,9 @@
       "variants": [
         {
           "unit": "غير مؤكدة",
-          "price_kd": 1250,
           "confirmed": false,
-          "active": false
+          "active": false,
+          "price_fils": 1250
         }
       ],
       "image_status": "needs_original_upload"
@@ -267,9 +267,9 @@
       "variants": [
         {
           "unit": "علبة 500 غ",
-          "price_kd": 1250,
           "confirmed": true,
-          "active": true
+          "active": true,
+          "price_fils": 1250
         }
       ],
       "image_status": "needs_original_upload"
@@ -281,9 +281,9 @@
       "variants": [
         {
           "unit": "غير مؤكدة",
-          "price_kd": 1750,
           "confirmed": false,
-          "active": false
+          "active": false,
+          "price_fils": 1750
         }
       ],
       "image_status": "needs_original_upload"
@@ -295,15 +295,15 @@
       "variants": [
         {
           "unit": "كيلو",
-          "price_kd": 1250,
           "confirmed": true,
-          "active": true
+          "active": true,
+          "price_fils": 1250
         },
         {
           "unit": "سلة",
-          "price_kd": 3000,
           "confirmed": true,
-          "active": true
+          "active": true,
+          "price_fils": 3000
         }
       ],
       "image_status": "needs_original_upload"
@@ -315,9 +315,9 @@
       "variants": [
         {
           "unit": "علبة",
-          "price_kd": 1250,
           "confirmed": true,
-          "active": true
+          "active": true,
+          "price_fils": 1250
         }
       ],
       "image_status": "needs_original_upload"
@@ -329,9 +329,9 @@
       "variants": [
         {
           "unit": "غير مؤكدة",
-          "price_kd": 1500,
           "confirmed": false,
-          "active": false
+          "active": false,
+          "price_fils": 1500
         }
       ],
       "image_status": "needs_original_upload"
@@ -343,9 +343,9 @@
       "variants": [
         {
           "unit": "كرتون",
-          "price_kd": 2000,
           "confirmed": true,
-          "active": true
+          "active": true,
+          "price_fils": 2000
         }
       ],
       "image_status": "needs_original_upload"
@@ -357,9 +357,9 @@
       "variants": [
         {
           "unit": "علبة",
-          "price_kd": 2250,
           "confirmed": true,
-          "active": true
+          "active": true,
+          "price_fils": 2250
         }
       ],
       "image_status": "needs_original_upload"
@@ -371,9 +371,9 @@
       "variants": [
         {
           "unit": "علبة",
-          "price_kd": 1250,
           "confirmed": true,
-          "active": true
+          "active": true,
+          "price_fils": 1250
         }
       ],
       "image_status": "needs_original_upload"
@@ -385,9 +385,9 @@
       "variants": [
         {
           "unit": "فلين (حبتان)",
-          "price_kd": 2000,
           "confirmed": true,
-          "active": true
+          "active": true,
+          "price_fils": 2000
         }
       ],
       "image_status": "needs_original_upload"
@@ -399,9 +399,9 @@
       "variants": [
         {
           "unit": "كرتون",
-          "price_kd": 3000,
           "confirmed": true,
-          "active": true
+          "active": true,
+          "price_fils": 3000
         }
       ],
       "image_status": "needs_original_upload"
@@ -413,9 +413,9 @@
       "variants": [
         {
           "unit": "سلة",
-          "price_kd": 2000,
           "confirmed": true,
-          "active": true
+          "active": true,
+          "price_fils": 2000
         }
       ],
       "image_status": "needs_original_upload"
@@ -427,9 +427,9 @@
       "variants": [
         {
           "unit": "غير مؤكدة",
-          "price_kd": 1500,
           "confirmed": false,
-          "active": false
+          "active": false,
+          "price_fils": 1500
         }
       ],
       "image_status": "needs_original_upload"
@@ -441,9 +441,9 @@
       "variants": [
         {
           "unit": "كرتون",
-          "price_kd": 3500,
           "confirmed": true,
-          "active": true
+          "active": true,
+          "price_fils": 3500
         }
       ],
       "image_status": "needs_original_upload"
@@ -455,9 +455,9 @@
       "variants": [
         {
           "unit": "فلين (حبتان)",
-          "price_kd": 1500,
           "confirmed": true,
-          "active": true
+          "active": true,
+          "price_fils": 1500
         }
       ],
       "image_status": "needs_original_upload"
@@ -469,9 +469,9 @@
       "variants": [
         {
           "unit": "علبة",
-          "price_kd": 2000,
           "confirmed": true,
-          "active": true
+          "active": true,
+          "price_fils": 2000
         }
       ],
       "image_status": "needs_original_upload"
@@ -483,9 +483,9 @@
       "variants": [
         {
           "unit": "علبة",
-          "price_kd": 1500,
           "confirmed": true,
-          "active": true
+          "active": true,
+          "price_fils": 1500
         }
       ],
       "image_status": "needs_original_upload"
@@ -497,9 +497,9 @@
       "variants": [
         {
           "unit": "كرتون",
-          "price_kd": 1250,
           "confirmed": true,
-          "active": true
+          "active": true,
+          "price_fils": 1250
         }
       ],
       "image_status": "needs_original_upload"
@@ -511,21 +511,21 @@
       "variants": [
         {
           "unit": "حبة كبيرة",
-          "price_kd": 5000,
           "confirmed": true,
-          "active": true
+          "active": true,
+          "price_fils": 5000
         },
         {
           "unit": "حبة متوسطة",
-          "price_kd": 4000,
           "confirmed": true,
-          "active": true
+          "active": true,
+          "price_fils": 4000
         },
         {
           "unit": "حبة صغيرة",
-          "price_kd": 3000,
           "confirmed": true,
-          "active": true
+          "active": true,
+          "price_fils": 3000
         }
       ],
       "image_status": "needs_original_upload"
@@ -537,9 +537,9 @@
       "variants": [
         {
           "unit": "علبة",
-          "price_kd": 2000,
           "confirmed": true,
-          "active": true
+          "active": true,
+          "price_fils": 2000
         }
       ],
       "image_status": "needs_original_upload"
