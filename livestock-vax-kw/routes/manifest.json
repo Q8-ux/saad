@@ -1,6 +1,6 @@
 {
   "project": "waqaya",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "routes": [
     {
       "id": "M02",
@@ -71,6 +71,13 @@
       "purpose": "الحجوزات، إعادة الجدولة، الإلغاء، وتذكيرات المربين والفرق والجرعات التالية",
       "status": "connector-required+ics-fallback-ready",
       "runtime": "connector+browser-fallback"
+    },
+    {
+      "id": "MAP-GOOGLE",
+      "name": "Google Maps",
+      "purpose": "مواقع المربين والحظائر، الاتجاهات، ومسارات الفرق الميدانية",
+      "status": "url-routing-active+advanced-api-ready",
+      "runtime": "browser+google-maps"
     }
   ]
 }
