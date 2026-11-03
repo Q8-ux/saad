@@ -224,6 +224,16 @@ export const publicUsers = sqliteTable(
   (table) => [uniqueIndex("public_users_email_uidx").on(table.email)],
 );
 
+// Username-based access for ordinary visitors; never reuses management credentials.
+export const publicUserCredentials = sqliteTable("public_user_credentials", {
+  userId: text("user_id").primaryKey().references(() => publicUsers.id, { onDelete: "cascade" }),
+  username: text("username").notNull(),
+  salt: text("salt").notNull(),
+  passwordHash: text("password_hash").notNull(),
+  iterations: integer("iterations").notNull(),
+  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+}, table => [uniqueIndex("public_user_credentials_username_idx").on(table.username)]);
+
 export const userAccessPolicies = sqliteTable("user_access_policies", {
   userId: text("user_id").primaryKey().references(() => publicUsers.id, { onDelete: "cascade" }),
   role: text("role").notNull().default("user"), permissionsJson: text("permissions_json").notNull().default("{}"),

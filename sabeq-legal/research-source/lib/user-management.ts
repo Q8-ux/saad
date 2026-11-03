@@ -1,5 +1,6 @@
 import { getD1 } from "@/db";
 import { cleanEmail, cleanString, RequestError } from "@/lib/request-security";
+import { hashPublicPassword, internalContactEmail, normalizeUsername } from "@/lib/public-password";
 
 export const USER_SERVICE_KEYS = ["memo", "assistant", "consultation", "library"] as const;
 export function userPermissions(raw?: unknown): Record<string, boolean> {
@@ -29,14 +30,15 @@ export async function listManagedUsers(url: URL, limit = 100) {
   const offset = Number(url.searchParams.get("offset") || 0);
   if (!Number.isSafeInteger(offset) || offset < 0 || offset > 100_000) throw new RequestError("رقم الصفحة غير صحيح.");
   const pattern = `%${q.replace(/[\\%_]/g, "\\$&")}%`;
-  const result = await getD1().prepare(`SELECT u.id, u.name, u.phone, u.email, u.status, u.memo_limit, u.assistant_limit, u.email_verified_at, u.created_at,
+  const result = await getD1().prepare(`SELECT u.id, u.name, u.phone, u.email, u.status, u.memo_limit, u.assistant_limit, u.email_verified_at, u.created_at, c.username, CASE WHEN c.user_id IS NULL THEN 0 ELSE 1 END AS password_configured,
     COALESCE(p.role, 'user') AS role, COALESCE(p.permissions_json, '{}') AS permissions_json,
     (SELECT COUNT(*) FROM service_records r WHERE r.user_id = u.id AND r.service_type = 'memo' AND r.created_at >= datetime('now','start of month')) AS memo_used,
     (SELECT COUNT(*) FROM service_records r WHERE r.user_id = u.id AND r.service_type = 'assistant' AND r.created_at >= datetime('now','start of month')) AS assistant_used
     FROM public_users u LEFT JOIN user_access_policies p ON p.user_id = u.id
-    WHERE (? = '' OR u.name LIKE ? ESCAPE '\\' OR u.email LIKE ? ESCAPE '\\' OR u.phone LIKE ? ESCAPE '\\')
+    LEFT JOIN public_user_credentials c ON c.user_id = u.id
+    WHERE (? = '' OR u.name LIKE ? ESCAPE '\\' OR u.email LIKE ? ESCAPE '\\' OR u.phone LIKE ? ESCAPE '\\' OR c.username LIKE ? ESCAPE '\\')
       AND ((? = '' AND u.status <> 'deleted') OR (? <> '' AND u.status = ?))
-    ORDER BY u.created_at DESC, u.id LIMIT ? OFFSET ?`).bind(q, pattern, pattern, pattern, status, status, status, limit + 1, offset).all();
+    ORDER BY u.created_at DESC, u.id LIMIT ? OFFSET ?`).bind(q, pattern, pattern, pattern, pattern, status, status, status, limit + 1, offset).all();
   return { users: result.results.slice(0, limit).map(row => { const { permissions_json, ...safe } = row; return { ...safe, permissions: userPermissions(permissions_json) }; }), hasMore: result.results.length > limit, offset, source: "hosted" };
 }
 export async function updateManagedUser(data: Record<string, unknown>, actor = "administrator", managerRole: "administrator" | "operator" = "administrator") {
@@ -56,9 +58,20 @@ export async function updateManagedUser(data: Record<string, unknown>, actor = "
   if (action === "delete" && data.confirm !== true) throw new RequestError("أكد حذف المستخدم. يمكن استعادته لاحقاً.");
   const status = action === "delete" ? "deleted" : action === "restore" ? "active" : data.status ?? existing?.status ?? "active";
   if (!["active", "suspended", "deleted"].includes(String(status)) || (action === "create" && status === "deleted")) throw new RequestError("حالة المستخدم غير صحيحة.");
-  const name = data.name === undefined && existing ? existing.name : cleanString(data.name, "الاسم", { min: 2, max: 120 });
+  const existingCredential = action === "create" ? null : await db.prepare("SELECT username FROM public_user_credentials WHERE user_id = ?").bind(id).first<{ username: string }>();
+  const username = data.username !== undefined ? normalizeUsername(data.username) : existingCredential?.username;
+  if (action === "create" && !username) throw new RequestError("أدخل اسم مستخدم للحساب الجديد.");
+  const newPassword = data.newPassword;
+  const hasNewPassword = typeof newPassword === "string" && newPassword.length > 0;
+  if (action === "create" && !hasNewPassword) throw new RequestError("أدخل كلمة مرور للحساب الجديد.");
+  if (newPassword !== undefined && typeof newPassword !== "string") throw new RequestError("كلمة المرور غير صحيحة.");
+  if (username && !existingCredential && !hasNewPassword) throw new RequestError("عين كلمة مرور لتمكين الحساب من الدخول.");
+  const passwordHash = hasNewPassword ? await hashPublicPassword(newPassword) : null;
+  const name = data.name === undefined && existing ? existing.name : cleanString(data.name || username, "الاسم", { min: 2, max: 120 });
   const phone = data.phone === undefined ? existing?.phone || "" : cleanString(data.phone, "الهاتف", { max: 40, required: false });
-  const email = data.email === undefined && existing ? existing.email : cleanEmail(data.email).toLowerCase();
+  // Legacy email column stays unique and NOT NULL; no address is required for new accounts.
+  const suppliedEmail = data.email === undefined && existing ? existing.email : cleanEmail(data.email, false).toLowerCase();
+  const email = suppliedEmail || internalContactEmail(id);
   const memoLimit = usageLimit(data.memoLimit, 500, existing?.memo_limit ?? 3), assistantLimit = usageLimit(data.assistantLimit, 5000, existing?.assistant_limit ?? 20);
   const permissions = data.permissions === undefined ? userPermissions(existing?.permissions_json) : validatePermissions(data.permissions);
   const role = data.role ?? existing?.role ?? "user";
@@ -72,12 +85,23 @@ export async function updateManagedUser(data: Record<string, unknown>, actor = "
     ? [db.prepare("INSERT INTO public_users (id, name, phone, email, status, memo_limit, assistant_limit, email_verified_at) VALUES (?, ?, ?, ?, ?, ?, ?, '')").bind(id, name, phone, email, status, memoLimit, assistantLimit)]
     : [db.prepare("UPDATE public_users SET name = ?, phone = ?, email = ?, status = ?, memo_limit = ?, assistant_limit = ?, email_verified_at = CASE WHEN email <> ? THEN '' ELSE email_verified_at END, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(name, phone, email, status, memoLimit, assistantLimit, email, id)];
   statements.push(db.prepare("INSERT INTO user_access_policies (user_id, role, permissions_json, updated_by) VALUES (?, ?, ?, ?) ON CONFLICT(user_id) DO UPDATE SET role = excluded.role, permissions_json = excluded.permissions_json, updated_by = excluded.updated_by, updated_at = CURRENT_TIMESTAMP").bind(id, role, JSON.stringify(permissions), actor));
+  if (username && (passwordHash || username !== existingCredential?.username)) {
+    const old = existingCredential;
+    // Preserve a hash when the administrator changes only the username.
+    if (passwordHash) {
+      statements.push(db.prepare("INSERT INTO public_user_credentials (user_id, username, salt, password_hash, iterations) VALUES (?, ?, ?, ?, ?) ON CONFLICT(user_id) DO UPDATE SET username = excluded.username, salt = excluded.salt, password_hash = excluded.password_hash, iterations = excluded.iterations, updated_at = CURRENT_TIMESTAMP")
+        .bind(id, username, passwordHash.salt, passwordHash.password_hash, passwordHash.iterations));
+    } else if (old) {
+      statements.push(db.prepare("UPDATE public_user_credentials SET username = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ?").bind(username, id));
+    }
+  }
+  const credentialsChanged = !!existing && (hasNewPassword || username !== existingCredential?.username);
   const permissionsChanged = !!existing && JSON.stringify(permissions) !== JSON.stringify(userPermissions(existing.permissions_json));
-  if (existing && (status !== "active" || changedEmail || permissionsChanged || role !== existing.role)) {
+  if (existing && (status !== "active" || changedEmail || credentialsChanged || permissionsChanged || role !== existing.role)) {
     statements.push(db.prepare("DELETE FROM public_user_sessions WHERE user_id = ?").bind(id));
     statements.push(db.prepare("DELETE FROM management_sessions WHERE email = ?").bind(existing.email));
   }
   if (existing && (status !== "active" || changedEmail)) statements.push(db.prepare("DELETE FROM email_verification_challenges WHERE email = ?").bind(existing.email));
   await db.batch(statements);
-  return { ok: true, id, action, reversible: action === "delete", emailVerificationRequired: action === "create" || changedEmail };
+  return { ok: true, id, action, username: username || null, passwordConfigured: !!username, reversible: action === "delete" };
 }
