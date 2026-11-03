@@ -1,0 +1,47 @@
+{
+  "route": "whatsapp-routing",
+  "project": "waqaya",
+  "purpose": "ربط المربين بالفرق الميدانية وفق سياسة إسناد تحددها الإدارة",
+  "assignmentPolicy": {
+    "mode": "admin-configurable",
+    "dimensions": [
+      "area",
+      "animalType",
+      "priority",
+      "requestStatus",
+      "teamAvailability"
+    ],
+    "precedence": [
+      "manualOverride",
+      "areaRule",
+      "animalTypeRule",
+      "fallbackTeam"
+    ],
+    "defaultRules": {
+      "كبد": "الفريق 1",
+      "الوفرة": "الفريق 3",
+      "العبدلي": "الفريق 2",
+      "الجهراء": "الفريق 4"
+    }
+  },
+  "messaging": {
+    "channels": [
+      "breeder",
+      "field-team"
+    ],
+    "templates": {
+      "breederAssigned": "مرحباً {ownerName}، تم إسناد طلب التحصين {reference} إلى {assignedTeam}. الموعد: {preferredDate}. الموقع: {area} {locationNote}.",
+      "teamAssigned": "مهمة جديدة: {reference} — المربي {ownerName} — {animalType} / {headCount} رأس — {area} {locationNote} — الموعد {preferredDate}.",
+      "reminder": "تذكير بموعد وقاية للطلب {reference} بتاريخ {preferredDate}.",
+      "rescheduled": "تم تحديث موعد الطلب {reference} إلى {preferredDate}."
+    }
+  },
+  "privacy": {
+    "publicUi": "لا تعرض أرقام الفرق أو المربين كاملة في الواجهة العامة",
+    "note": "الفتح المباشر لمحادثة WhatsApp يعمل في المتصفح؛ الإرسال التلقائي يحتاج WhatsApp Business API أو مزود معتمد."
+  },
+  "runtime": {
+    "browser": "wa.me links + local assignment rules",
+    "server": "required for automatic messaging, delivery status and templates"
+  }
+}
