@@ -1,6 +1,6 @@
 {
   "project": "waqaya",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "routes": [
     {
       "id": "M02",
@@ -12,7 +12,7 @@
     {
       "id": "M03",
       "name": "Mastra",
-      "purpose": "تنسيق الوكلاء وجدولة الزيارات الميدانية والمساعد الذكي",
+      "purpose": "تنسيق الوكلاء وجدولة الزيارات والمساعد الذكي",
       "status": "hook-ready",
       "runtime": "requires-node-backend"
     },
@@ -33,9 +33,37 @@
     {
       "id": "DOC",
       "name": "MarkItDown",
-      "purpose": "تحويل مستندات وتقارير وقاية المرفوعة في المستودع إلى Markdown قابل للفهرسة",
+      "purpose": "تحويل مستندات وتقارير وقاية إلى Markdown قابل للفهرسة",
       "status": "github-actions-ready",
       "runtime": "ci"
+    },
+    {
+      "id": "DES-CANVA",
+      "name": "Canva Route",
+      "purpose": "تحويل طلبات التصميم من مساعد وقاية إلى Brief منظم للقوالب والمنشورات والستوري",
+      "status": "brief-queue-active",
+      "runtime": "browser+connector"
+    },
+    {
+      "id": "DES-COMP",
+      "name": "Compositor",
+      "purpose": "معالجة الصور قبل التصميم: قص وتنظيف خلفية وتحسين وتهيئة المقاسات",
+      "status": "adapter-ready",
+      "runtime": "requires-image-worker"
+    },
+    {
+      "id": "AI-ASST",
+      "name": "Waqaya Assistant",
+      "purpose": "مساعد داخل الموقع للتنقل والاستعلام وتجهيز طلبات التصميم",
+      "status": "local-assistant-active",
+      "runtime": "browser-fallback"
+    },
+    {
+      "id": "VOICE",
+      "name": "VoiceStudio/Realtime",
+      "purpose": "إدخال صوتي ورد صوتي وربط المساعد بمسار الصوت",
+      "status": "browser-voice-active",
+      "runtime": "browser-fallback+backend-ready"
     }
   ]
 }
