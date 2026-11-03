@@ -47,14 +47,6 @@
     globalThis.SabeqControl?.leave();globalThis.SabeqProgrammer?.clear();globalThis.SabeqLegislation?.leave();
     app.innerHTML=`<main class="login"><img src="./sabeq-logo.png" width="100" height="100" alt="مجموعة سابق القانونية"><h1>مجموعة سابق القانونية</h1><p>تسجيل الدخول</p><form data-form="password-login">${input('username','اسم المستخدم','','required autocomplete="username" autocapitalize="none" spellcheck="false" dir="ltr" maxlength="32"')}${input('password','كلمة المرور','','required type="password" autocomplete="current-password" dir="ltr" minlength="1" maxlength="256"')}<button class="primary" type="submit">دخول</button></form><p class="muted" role="status">${esc(message||'أدخل اسم المستخدم وكلمة المرور.')}</p></main>`;
   }
-  async function signIn(switchAccount=false) {
-    const random=()=>btoa(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(32)))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
-    const verifier=random(),state=random(),hash=new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(verifier)));
-    const challenge=btoa(String.fromCharCode(...hash)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
-    sessionStorage.setItem('sabeq-admin-section',section);sessionStorage.setItem('sabeq-admin-proof',verifier);sessionStorage.setItem('sabeq-admin-state',state);
-    const path='/api/management/login?'+new URLSearchParams({challenge,state});
-    location.assign(switchAccount?SERVICE+'/signout-with-chatgpt?'+new URLSearchParams({return_to:path}):SERVICE+path);
-  }
   function canSection(id){return Object.hasOwn(labels,id)&&(!manager?.sections||manager.sections.includes(id));}
   function shell() {
     if(!canSection(section)){section=manager?.sections?.[0]||'overview';sessionStorage.setItem('sabeq-admin-section',section);history.replaceState(null,'',location.pathname+'#'+section);}
