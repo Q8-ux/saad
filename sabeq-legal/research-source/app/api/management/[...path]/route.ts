@@ -13,7 +13,7 @@ import { assertManagementOrigin, assertManagerAction, exchangeManagerCode, manag
 import { bridgeKeys, managerInbox, managerMemos, managerMemoRecovery, managerSnapshot, managerUpdates } from "@/lib/management-data";
 import { mailAction, operationEvent, whatsappAction } from "@/lib/management-integrations";
 import { verificationEmailAction } from "@/lib/verification-email-settings";
-import { EmailDeliveryError, sendRegistrationInvitation, sendTestEmail } from "@/lib/email";
+import { sendTestEmail } from "@/lib/email";
 import { cleanMultiline, cleanString, enforceRateLimit, readJsonObject, RequestError } from "@/lib/request-security";
 
 export const dynamic = "force-dynamic";
@@ -76,41 +76,10 @@ export async function POST(request: Request) {
     }
     if (action === "logout") { await getD1().prepare("DELETE FROM management_sessions WHERE token_hash = ?").bind(manager.hash).run(); return managementJson({ ok: true }); }
     if (action === "users") {
-      if (data.action === "send-invitation") {
-        if (manager.role !== "administrator") throw new RequestError("إرسال دعوات التسجيل متاح للمشرف فقط.", 403);
-        if (Object.keys(data).some(key => !["action", "id"].includes(key))) throw new RequestError("بيانات طلب الدعوة غير صحيحة.");
-        const id = cleanString(data.id, "المستخدم", { min: 20, max: 80 });
-        const account = await getD1().prepare("SELECT id, name, email, status, email_verified_at FROM public_users WHERE id = ?").bind(id).first<{ id: string; name: string; email: string; status: string; email_verified_at: string }>();
-        if (!account) throw new RequestError("الحساب غير موجود.", 404);
-        if (account.status !== "active" || account.email_verified_at) throw new RequestError("لا يمكن إرسال دعوة لحساب موقوف أو بريده متحقق بالفعل.", 409);
-        await enforceRateLimit(request, "management-registration-invite", 5);
-        try {
-          const messageId = await sendRegistrationInvitation(account.email, account.name);
-          return managementJson({ ok: true, accepted: true, messageId, email: account.email, delivered: false, verificationPending: true });
-        } catch (error) {
-          const reason = error instanceof EmailDeliveryError ? error.reason : "unknown";
-          throw new RequestError(
-            reason === "sender_domain_unverified" ? "رفض Resend الإرسال: نطاق sabeq.legal غير موثق للإرسال. أصلح سجلات النطاق في Resend." :
-            reason === "api_key_rejected" ? "رفض Resend مفتاح إرسال البريد المحفوظ." :
-            reason === "missing_settings" ? "إعدادات إرسال بريد التحقق غير مكتملة. افتح إعدادات البريد في لوحة المشرف." :
-            "تعذر قبول رسالة الدعوة لدى مزود البريد. افتح إعدادات البريد واختبر الإرسال.", 502);
-        }
-      }
+      if (data.action === "send-invitation") throw new RequestError("دعوات التحقق بالبريد متوقفة. أنشئ اسم المستخدم وكلمة المرور من إدارة المستخدمين.", 410);
       const result = await updateManagedUser(data, manager.email, manager.role);
       await operationEvent("admin", "user-updated", "تم تحديث حساب مستخدم وخدماته");
-      if (manager.role !== "administrator" || !result.emailVerificationRequired) return managementJson(result);
-      const account = await getD1().prepare("SELECT name, email, status FROM public_users WHERE id = ?").bind(result.id).first<{ name: string; email: string; status: string }>();
-      if (!account || account.status !== "active") return managementJson({ ...result, invitation: { accepted: false, reason: "not_active" } });
-      try {
-        await enforceRateLimit(request, "management-registration-invite", 5);
-        const messageId = await sendRegistrationInvitation(account.email, account.name);
-        return managementJson({ ...result, invitation: { accepted: true, delivered: false, messageId } });
-      } catch (error) {
-        // User creation/edit succeeded and stays unverified. Never claim a message
-        // was sent on provider failure, and do not roll back or duplicate the user.
-        const reason = error instanceof EmailDeliveryError ? error.reason : error instanceof RequestError && error.status === 429 ? "rate_limited" : "delivery_unavailable";
-        return managementJson({ ...result, invitation: { accepted: false, reason } });
-      }
+      return managementJson(result);
     }
     if (action === "payments") return managementJson(await sadadManagement(data, manager.email));
     if (action === "mailboxes") return managementJson(await mailboxAction(data, manager.email));
