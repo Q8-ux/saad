@@ -1,0 +1,22 @@
+{
+  "route": "voice-assistant",
+  "language": "ar-KW",
+  "browserFallback": {
+    "speechRecognition": true,
+    "speechSynthesis": true
+  },
+  "backendTarget": {
+    "realtime": true,
+    "assistant": "Waqaya Assistant",
+    "status": "requires-secure-backend"
+  },
+  "intents": [
+    "appointments",
+    "requests",
+    "herds",
+    "teams",
+    "vaccinations",
+    "reports",
+    "design"
+  ]
+}
