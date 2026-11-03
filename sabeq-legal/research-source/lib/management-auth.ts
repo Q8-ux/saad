@@ -28,7 +28,12 @@ type Runtime = { AUTH_SECRET?: string; MANAGEMENT_ALLOWED_EMAILS?: string; MANAG
 const RESTRICTED_LOGIN_MODE = "password_only_two_users";
 // Passwords and peppered hashes remain server-side. This opt-in switch must be
 // activated only after both credentials have been installed and tested.
-function passwordOnlyMode() { return managementRuntime().MANAGEMENT_LOGIN_MODE === RESTRICTED_LOGIN_MODE; }
+function passwordOnlyMode() {
+  const mode = managementRuntime().MANAGEMENT_LOGIN_MODE || "";
+  // A typo in a security-critical switch must not silently restore SSO.
+  if (mode && mode !== RESTRICTED_LOGIN_MODE) throw new RequestError("إعداد سياسة الدخول غير صحيح.", 503);
+  return mode === RESTRICTED_LOGIN_MODE;
+}
 function permittedStaff(username: string, role: Manager["role"]) {
   return (username === "saad" && role === "administrator") || (username === "ahmad" && role === "operator");
 }
