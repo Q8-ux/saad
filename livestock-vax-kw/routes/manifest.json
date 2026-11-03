@@ -1,6 +1,6 @@
 {
   "project": "waqaya",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "routes": [
     {
       "id": "M02",
@@ -64,6 +64,13 @@
       "purpose": "إدخال صوتي ورد صوتي وربط المساعد بمسار الصوت",
       "status": "browser-voice-active",
       "runtime": "browser-fallback+backend-ready"
+    },
+    {
+      "id": "CAL-GOOGLE",
+      "name": "Google Calendar",
+      "purpose": "الحجوزات، إعادة الجدولة، الإلغاء، وتذكيرات المربين والفرق والجرعات التالية",
+      "status": "connector-required+ics-fallback-ready",
+      "runtime": "connector+browser-fallback"
     }
   ]
 }
