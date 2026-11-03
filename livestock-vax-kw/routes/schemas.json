@@ -1,0 +1,109 @@
+{
+  "request": {
+    "required": [
+      "ownerName",
+      "phone",
+      "animalType",
+      "headCount",
+      "area",
+      "preferredDate",
+      "vaccineName"
+    ],
+    "properties": {
+      "ownerName": {
+        "type": "string",
+        "minLength": 2
+      },
+      "phone": {
+        "type": "string",
+        "minLength": 8
+      },
+      "animalType": {
+        "enum": [
+          "أغنام",
+          "ماعز",
+          "أبقار",
+          "إبل"
+        ]
+      },
+      "headCount": {
+        "type": "number",
+        "minimum": 1,
+        "maximum": 100000
+      },
+      "area": {
+        "type": "string",
+        "minLength": 2
+      },
+      "preferredDate": {
+        "type": "string"
+      },
+      "vaccineName": {
+        "type": "string",
+        "minLength": 2
+      },
+      "latitude": {
+        "type": "string"
+      },
+      "longitude": {
+        "type": "string"
+      }
+    }
+  },
+  "vaccination": {
+    "required": [
+      "ownerName",
+      "animalType",
+      "headCount",
+      "vaccineName",
+      "doseNumber",
+      "batchNumber",
+      "expiryDate",
+      "administeredAt",
+      "veterinarian"
+    ],
+    "properties": {
+      "ownerName": {
+        "type": "string",
+        "minLength": 2
+      },
+      "animalType": {
+        "enum": [
+          "أغنام",
+          "ماعز",
+          "أبقار",
+          "إبل"
+        ]
+      },
+      "headCount": {
+        "type": "number",
+        "minimum": 1
+      },
+      "vaccineName": {
+        "type": "string",
+        "minLength": 2
+      },
+      "doseNumber": {
+        "type": "string",
+        "minLength": 2
+      },
+      "batchNumber": {
+        "type": "string",
+        "minLength": 2
+      },
+      "expiryDate": {
+        "type": "string"
+      },
+      "administeredAt": {
+        "type": "string"
+      },
+      "veterinarian": {
+        "type": "string",
+        "minLength": 2
+      },
+      "nextDoseDate": {
+        "type": "string"
+      }
+    }
+  }
+}
