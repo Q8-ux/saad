@@ -19,7 +19,8 @@ const source = {
   corpus: { scope:'bound_file_only', sourceId:'user-legislation-source',
     sourceSha256:'8ffeac9838d7101a6776ca689b06ad08401d69850c27969b3b9959a1c40660bd',
     articleIdentityUnique:true, articleNumber:'270',
-    completeArticleVerified:false, lawIdentity:{number:98765,year:2000} },
+    completeArticleVerified:false, lawIdentity:{number:98765,year:2000},
+    previousText:'مخسة سياق مشوه من الصفحة السابقة',ocr:{raw:'جتاوز نفس النص المشوه'} },
 };
 
 test('damaged Arabic OCR is quarantined and not quoted as authoritative law', () => {
