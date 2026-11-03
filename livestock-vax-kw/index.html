@@ -11,24 +11,181 @@
     <link rel="canonical" href="https://q8-ux.github.io/saad/livestock-vax-kw/" />
     <link rel="icon" href="/saad/livestock-vax-kw/favicon.svg" />
     <title>نظام وقاية لتحصين الثروة الحيوانية</title>
+
     <style>
-      .wq-assistant-launcher{position:fixed;right:10px;bottom:96px;z-index:2147483647;border:0;border-radius:20px;padding:13px 16px;background:linear-gradient(135deg,#0f8f84,#0b6d75);color:#fff;box-shadow:0 16px 40px #082c3b55;display:flex;align-items:center;gap:10px;font-family:AL-Mohanad,Tahoma,sans-serif;font-size:18px;font-weight:800;min-height:52px}
-      .wq-assistant-launcher b{color:#fff;font-size:18px}.wq-assistant-launcher span{font-size:22px}
+      #wq-ai-launcher{
+        position:fixed!important;
+        top:190px!important;
+        right:12px!important;
+        left:auto!important;
+        bottom:auto!important;
+        z-index:2147483647!important;
+        display:flex!important;
+        align-items:center!important;
+        gap:9px!important;
+        min-height:56px!important;
+        padding:13px 18px!important;
+        border:2px solid #fff!important;
+        border-radius:18px!important;
+        background:linear-gradient(135deg,#0fa394,#08747a)!important;
+        color:#fff!important;
+        box-shadow:0 12px 30px rgba(8,44,59,.34)!important;
+        font-family:AL-Mohanad,Tahoma,Arial,sans-serif!important;
+        font-size:19px!important;
+        font-weight:800!important;
+        opacity:1!important;
+        visibility:visible!important;
+        transform:none!important;
+        pointer-events:auto!important;
+      }
+      #wq-ai-launcher span,#wq-ai-launcher b{color:#fff!important;font-size:19px!important}
+      #wq-ai-panel{
+        position:fixed!important;
+        top:255px!important;
+        right:10px!important;
+        left:auto!important;
+        z-index:2147483647!important;
+        width:min(410px,calc(100vw - 20px))!important;
+        max-height:62vh!important;
+        display:none;
+        flex-direction:column;
+        overflow:hidden;
+        background:#fff;
+        border:1px solid #cfe0dd;
+        border-radius:20px;
+        box-shadow:0 22px 60px rgba(8,44,59,.3);
+        font-family:AL-Mohanad,Tahoma,Arial,sans-serif!important;
+        direction:rtl;
+      }
+      #wq-ai-panel.open{display:flex!important}
+      #wq-ai-panel header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:#edf8f5;border-bottom:1px solid #dbe9e6}
+      #wq-ai-panel header strong{font-size:22px!important;color:#082c3b}
+      #wq-ai-panel header small{display:block;font-size:15px!important;color:#527078}
+      #wq-ai-close{border:0;background:#dfeeea;width:38px;height:38px;border-radius:10px;font-size:26px!important;color:#173d49}
+      #wq-ai-messages{min-height:190px;max-height:310px;overflow:auto;padding:13px;background:#fbfdfd}
+      .wq-ai-msg{max-width:86%;padding:10px 12px;margin:7px 0;border-radius:13px;font-size:18px!important;line-height:1.65}
+      .wq-ai-msg.assistant{background:#e8f5f2;color:#183a45;margin-left:auto}
+      .wq-ai-msg.user{background:#0b8178;color:#fff;margin-right:auto}
+      #wq-ai-quick{display:flex;gap:7px;overflow:auto;padding:0 12px 10px}
+      #wq-ai-quick button{white-space:nowrap;border:1px solid #cddfdb;background:#fff;border-radius:10px;padding:8px 10px;font-size:15px!important;color:#284b55}
+      #wq-ai-inputrow{display:grid;grid-template-columns:48px 1fr auto;gap:7px;padding:11px;border-top:1px solid #e0ece9}
+      #wq-ai-input{min-width:0;border:1px solid #cbdcda;border-radius:11px;padding:0 10px;font-size:17px!important;min-height:48px}
+      #wq-ai-mic,#wq-ai-send{border:0;border-radius:11px}
+      #wq-ai-mic{background:#e6f5f2;font-size:21px!important}
+      #wq-ai-send{background:#0c857c;color:#fff;padding:0 14px;font-size:16px!important;font-weight:700}
+      @media(max-width:768px){
+        #wq-ai-launcher{top:188px!important;right:8px!important;font-size:18px!important;padding:12px 15px!important}
+        #wq-ai-launcher span,#wq-ai-launcher b{font-size:18px!important}
+        #wq-ai-panel{top:250px!important;right:6px!important;width:calc(100vw - 12px)!important}
+      }
     </style>
-    <script src="/saad/livestock-vax-kw/assets/waqaya-route-runtime.js"></script>
+
+    <script src="/saad/livestock-vax-kw/assets/waqaya-route-runtime.js?v=20261103-1"></script>
     <script type="module" crossorigin src="/saad/livestock-vax-kw/assets/main-DkTxH59D.js"></script>
-    <script defer src="/saad/livestock-vax-kw/assets/waqaya-assistant.js"></script>
     <link rel="modulepreload" crossorigin href="/saad/livestock-vax-kw/assets/globals-DvBdZCzx.js">
     <link rel="stylesheet" crossorigin href="/saad/livestock-vax-kw/assets/globals-DqTSrS9Z.css">
-    <link rel="stylesheet" href="/saad/livestock-vax-kw/assets/legibility-overrides.css">
-    <link rel="stylesheet" href="/saad/livestock-vax-kw/assets/mobile-typography.css">
-    <link rel="stylesheet" href="/saad/livestock-vax-kw/assets/mobile-card-text-boost.css">
-    <link rel="stylesheet" href="/saad/livestock-vax-kw/assets/waqaya-assistant.css">
+    <link rel="stylesheet" href="/saad/livestock-vax-kw/assets/legibility-overrides.css?v=20261103-1">
+    <link rel="stylesheet" href="/saad/livestock-vax-kw/assets/mobile-typography.css?v=20261103-1">
+    <link rel="stylesheet" href="/saad/livestock-vax-kw/assets/mobile-card-text-boost.css?v=20261103-1">
   </head>
   <body>
     <div id="root"></div>
-    <button class="wq-assistant-launcher" type="button" aria-label="فتح مساعد وقاية">
-      <span>🎙️</span><b>مساعد وقاية</b>
+
+    <button id="wq-ai-launcher" type="button" aria-label="فتح المساعد الذكي">
+      <span>🎙️</span><b>المساعد الذكي</b>
     </button>
+
+    <section id="wq-ai-panel" aria-label="مساعد وقاية الذكي">
+      <header>
+        <div><strong>مساعد وقاية</strong><small>نص + صوت + تصميم</small></div>
+        <button id="wq-ai-close" type="button" aria-label="إغلاق">×</button>
+      </header>
+      <div id="wq-ai-messages">
+        <div class="wq-ai-msg assistant">مرحباً. اسألني عن المواعيد والطلبات والقطعان والفرق والتحصينات، أو اطلب تصميماً.</div>
+      </div>
+      <div id="wq-ai-quick">
+        <button type="button" data-q="افتح المواعيد">المواعيد</button>
+        <button type="button" data-q="افتح الطلبات">الطلبات</button>
+        <button type="button" data-q="صمم بوستر توعوي عن التحصين">تصميم</button>
+      </div>
+      <div id="wq-ai-inputrow">
+        <button id="wq-ai-mic" type="button" aria-label="تحدث">🎤</button>
+        <input id="wq-ai-input" placeholder="اكتب أو تحدث..." />
+        <button id="wq-ai-send" type="button">إرسال</button>
+      </div>
+    </section>
+
+    <script>
+      (function(){
+        var launcher=document.getElementById('wq-ai-launcher');
+        var panel=document.getElementById('wq-ai-panel');
+        var closeBtn=document.getElementById('wq-ai-close');
+        var sendBtn=document.getElementById('wq-ai-send');
+        var micBtn=document.getElementById('wq-ai-mic');
+        var input=document.getElementById('wq-ai-input');
+        var messages=document.getElementById('wq-ai-messages');
+
+        function add(role,text){
+          var d=document.createElement('div');
+          d.className='wq-ai-msg '+role;
+          d.textContent=text;
+          messages.appendChild(d);
+          messages.scrollTop=messages.scrollHeight;
+        }
+        function say(text){
+          if(!('speechSynthesis' in window)) return;
+          try{
+            speechSynthesis.cancel();
+            var u=new SpeechSynthesisUtterance(text);
+            u.lang='ar-KW'; u.rate=.95;
+            speechSynthesis.speak(u);
+          }catch(e){}
+        }
+        function nav(label){
+          var buttons=[].slice.call(document.querySelectorAll('button'));
+          var b=buttons.find(function(x){return x.textContent.trim().indexOf(label)>-1;});
+          if(b){b.click();return true;}
+          return false;
+        }
+        function answer(q){
+          var t=(q||'').trim();
+          if(/مواعيد|موعد/.test(t)){nav('نظرة');return 'فتحت لك المواعيد الحالية.';}
+          if(/طلب|طلبات/.test(t)){nav('طلبات');return 'فتحت قسم طلبات التحصين.';}
+          if(/قطيع|قطعان|مربي/.test(t)){nav('القطعان');return 'فتحت قسم القطعان والمربين.';}
+          if(/فريق|الفرق/.test(t)){nav('الفرق');return 'فتحت قسم الفرق الميدانية.';}
+          if(/تحصين|جرعة|سجل/.test(t)){nav('سجل');return 'فتحت سجل التحصينات.';}
+          if(/تقرير|تقارير|مؤشر/.test(t)){nav('التقارير');return 'فتحت التقارير والمؤشرات.';}
+          if(/صمم|تصميم|بوستر|منشور|ستوري/.test(t)){
+            try{
+              var arr=JSON.parse(localStorage.getItem('waqaya.design.requests')||'[]');
+              arr.unshift({id:'DES-'+Date.now(),createdAt:new Date().toISOString(),brief:t,route:'canva',preProcess:'compositor',status:'queued'});
+              localStorage.setItem('waqaya.design.requests',JSON.stringify(arr.slice(0,100)));
+            }catch(e){}
+            return 'تم تجهيز طلب التصميم لمسار كانفا ومعالجة الصور عبر Compositor.';
+          }
+          return 'أستطيع مساعدتك في المواعيد والطلبات والقطعان والفرق والتحصينات والتقارير والتصميم.';
+        }
+        function run(q){
+          if(!q.trim()) return;
+          add('user',q);
+          var a=answer(q);
+          setTimeout(function(){add('assistant',a);say(a);},100);
+        }
+
+        launcher.onclick=function(){panel.classList.add('open');};
+        closeBtn.onclick=function(){panel.classList.remove('open');};
+        sendBtn.onclick=function(){var q=input.value;input.value='';run(q);};
+        input.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();sendBtn.click();}});
+        document.querySelectorAll('#wq-ai-quick button').forEach(function(b){b.onclick=function(){run(b.getAttribute('data-q'));};});
+        micBtn.onclick=function(){
+          var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+          if(!SR){add('assistant','التعرف الصوتي غير مدعوم في هذا المتصفح.');return;}
+          var r=new SR();r.lang='ar-KW';r.interimResults=false;r.maxAlternatives=1;
+          r.onresult=function(e){var q=e.results[0][0].transcript;input.value=q;run(q);};
+          r.onerror=function(){add('assistant','تعذر التقاط الصوت. حاول مرة أخرى.');};
+          r.start();
+        };
+      })();
+    </script>
   </body>
 </html>
