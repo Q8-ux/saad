@@ -1,0 +1,39 @@
+{
+  "route": "google-calendar",
+  "project": "waqaya",
+  "purpose": "إدارة حجوزات التحصين والتذكيرات ومواعيد الفرق والمربين",
+  "timezone": "Asia/Kuwait",
+  "capabilities": [
+    "create-appointment",
+    "reschedule-appointment",
+    "cancel-appointment",
+    "remind-breeder",
+    "remind-field-team",
+    "next-dose-reminder",
+    "daily-field-schedule"
+  ],
+  "eventTemplate": {
+    "title": "وقاية — تحصين {animalType} — {ownerName}",
+    "location": "{area} — {locationNote}",
+    "description": "رقم الطلب: {reference}\\nنوع الحلال: {animalType}\\nعدد الرؤوس: {headCount}\\nالتحصين: {vaccineName}\\nالفريق: {assignedTeam}",
+    "reminders": [
+      {
+        "method": "popup",
+        "minutes": 1440
+      },
+      {
+        "method": "popup",
+        "minutes": 120
+      }
+    ]
+  },
+  "connector": {
+    "provider": "Google Calendar",
+    "status": "connection-required",
+    "note": "يتم تنفيذ إنشاء/تعديل/إلغاء الأحداث فقط بعد ربط Google Calendar بحساب المستخدم."
+  },
+  "fallback": {
+    "icsExport": true,
+    "browserLocalQueue": "waqaya.calendar.queue"
+  }
+}
