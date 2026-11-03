@@ -21,6 +21,13 @@ function reviewerPepper() {
   if (secret.length < 32) throw new RequestError("مفتاح حماية حساب المراجع غير مهيأ.", 503);
   return "sabeq-memo-reviewer-v1:" + secret;
 }
+function operatorPepper() {
+  const configured = configuration("operator");
+  if (configured) return configured.pepper;
+  const secret = (env as unknown as { AUTH_SECRET?: string }).AUTH_SECRET || "";
+  if (secret.length < 32) throw new RequestError("مفتاح حماية حساب المتابعة غير مهيأ.", 503);
+  return "sabeq-operator-v1:" + secret;
+}
 function reviewerPasswordValid(value: string) {
   return value.length >= 9 && value.length <= 256 && /[a-z]/.test(value) && /[A-Z]/.test(value) && /[0-9]/.test(value) && /[^A-Za-z0-9]/.test(value);
 }
@@ -82,7 +89,7 @@ async function accountRoster() {
     if (account) Object.assign(account, { username: override.username, salt: override.salt, hash: override.hash, sessionVersion: override.sessionVersion });
     else if (override.id.startsWith("reviewer:") || override.id.startsWith("operator:")) {
       const role = override.id.startsWith("reviewer:") ? "reviewer" : "operator";
-      const pepper = role === "reviewer" ? reviewerPepper() : configuration("operator")?.pepper;
+      const pepper = role === "reviewer" ? reviewerPepper() : operatorPepper();
       if (!pepper) invalid();
       accounts.push({ username: override.username, seedUsername: override.id.slice(role.length + 1), role,
         id: override.id, salt: override.salt, hash: override.hash, sessionVersion: override.sessionVersion,
@@ -108,7 +115,7 @@ export async function managementAccounts(data: Record<string, unknown> | null, m
     const username = normalizeManagementUsername(data.username);
     const password = data.newPassword, confirmation = data.confirmPassword;
     const role = data.action === "create-operator" ? "operator" : "reviewer";
-    const saltPepper = role === "operator" ? configuration("operator")?.pepper : reviewerPepper();
+    const saltPepper = role === "operator" ? operatorPepper() : reviewerPepper();
     if (!saltPepper) throw new RequestError("إعداد حماية حسابات المتابعة غير مكتمل.", 503);
     if (!USERNAME.test(username)) throw new RequestError("اسم المستخدم غير صحيح.");
     if (roster.accounts.some(a => a.username === username)) throw new RequestError("اسم المستخدم مستخدم بالفعل.", 409);
