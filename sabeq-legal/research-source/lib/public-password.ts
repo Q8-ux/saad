@@ -1,4 +1,6 @@
 import { RequestError } from "@/lib/request-security";
+import { pbkdf2Async } from "@noble/hashes/pbkdf2.js";
+import { sha256 } from "@noble/hashes/sha2.js";
 
 export const PASSWORD_ITERATIONS = 310_000;
 export type PasswordCredential = { username: string; salt: string; password_hash: string; iterations: number };
@@ -24,8 +26,9 @@ function fromHex(value: string) {
   return new Uint8Array(value.match(/.{2}/g)!.map(pair => parseInt(pair, 16)));
 }
 async function derive(password: string, salt: Uint8Array, iterations: number) {
-  const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveBits"]);
-  return new Uint8Array(await crypto.subtle.deriveBits({ name: "PBKDF2", salt, iterations, hash: "SHA-256" }, key, 256));
+  // Cloudflare Workers caps native PBKDF2 iteration counts; use the reviewed
+  // server-side implementation already used by management authentication.
+  return pbkdf2Async(sha256, new TextEncoder().encode(password), salt, { c: iterations, dkLen: 32, asyncTick: 10 });
 }
 export async function hashPublicPassword(value: unknown) {
   const password = validatePassword(value);
