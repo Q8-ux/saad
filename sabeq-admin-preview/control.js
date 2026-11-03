@@ -48,7 +48,7 @@
       <td>${states[u.status]||esc(u.status)}<small>${u.role==='administrator'?'إداري خدمات':'مستخدم الموقع'}</small></td>
       <td>${Object.entries(services).map(([key,label])=>`<small>${u.permissions?.[key]===false?'○':'✓'} ${label}</small>`).join('')}</td>
       <td>${managerRole==='operator'&&u.role==='administrator'?'للمشرف فقط':u.status==='deleted'?`<button data-control="restore" data-id="${esc(u.id)}">استعادة</button>`:`<button data-control="edit-user" data-id="${esc(u.id)}">تعديل الحساب</button><button data-control="delete-user" data-id="${esc(u.id)}">حذف</button>`}</td>
-      </tr>`).join('')}</tbody></table></div>`:'<p>لا توجد حسابات مطابقة.</p>')+(data.hasMore?'<p class="service-status">توجد نتائج أخرى. استخدم البحث لتضييق القائمة.</p>':''));
+      </tr>`).join('')}</tbody></table></div>`:'<p>لا توجد حسابات مطابقة.</p>')+(data.hasMore?'<p class="service-status">توجد نتائج أخرى. استخدم البحث لتضييق القائمة.</p>':'');
   }
 
   function leaves(value,path=''){if(value&&typeof value==='object')return Object.entries(value).flatMap(([key,v])=>leaves(v,path?path+'.'+key:key));return [[path,value]];}
