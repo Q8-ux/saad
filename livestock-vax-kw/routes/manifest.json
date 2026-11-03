@@ -1,0 +1,41 @@
+{
+  "project": "waqaya",
+  "version": "1.0.0",
+  "routes": [
+    {
+      "id": "M02",
+      "name": "PydanticAI",
+      "purpose": "ضبط بنية بيانات طلبات التحصين وسجلات الجرعات",
+      "status": "schema-ready",
+      "runtime": "requires-backend"
+    },
+    {
+      "id": "M03",
+      "name": "Mastra",
+      "purpose": "تنسيق الوكلاء وجدولة الزيارات الميدانية والمساعد الذكي",
+      "status": "hook-ready",
+      "runtime": "requires-node-backend"
+    },
+    {
+      "id": "M06",
+      "name": "Graphiti",
+      "purpose": "تتبع تغير حالة الطلب والزيارة والجرعة زمنياً",
+      "status": "local-timeline-active",
+      "runtime": "browser-fallback"
+    },
+    {
+      "id": "M09",
+      "name": "Langfuse",
+      "purpose": "مراقبة عمليات الوكلاء والـAI عند تفعيل Backend",
+      "status": "hook-ready",
+      "runtime": "requires-backend"
+    },
+    {
+      "id": "DOC",
+      "name": "MarkItDown",
+      "purpose": "تحويل مستندات وتقارير وقاية المرفوعة في المستودع إلى Markdown قابل للفهرسة",
+      "status": "github-actions-ready",
+      "runtime": "ci"
+    }
+  ]
+}
