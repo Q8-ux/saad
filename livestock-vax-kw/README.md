@@ -18,12 +18,15 @@
 | Compositor | معالجة الصور قبل التصميم: قص، تنظيف خلفية، تحسين، وتوحيد المقاسات | Adapter جاهز، التنفيذ يحتاج Worker للصور |
 | مساعد وقاية | مساعد داخل الموقع للتنقل والاستعلام وتجهيز طلبات التصميم | يعمل محلياً الآن |
 | VoiceStudio / Realtime | إدخال صوتي ورد صوتي وربط المساعد بالمسار الصوتي | يعمل Browser Voice الآن، والRealtime الكامل يحتاج Backend |\n| Google Calendar | حجوزات التحصين، إعادة الجدولة، الإلغاء، تذكير المربي والفريق والجرعة التالية | يحتاج ربط Google Calendar؛ تم تجهيز Queue وICS fallback |
+| Google Maps | مواقع المربين والحظائر، الاتجاهات ومسارات الفرق | فتح المواقع والاتجاهات يعمل الآن؛ التحسين المتقدم يحتاج Maps API |
 
 ### ملفات المسارات
 - `routes/manifest.json`
 - `routes/schemas.json`
 - `routes/design-pipeline.json`
 - `routes/voice-assistant.json`\n- `routes/google-calendar.json`\n- `assets/waqaya-calendar.js`
+- `routes/google-maps.json`
+- `assets/waqaya-maps.js`
 - `assets/waqaya-route-runtime.js`
 - `assets/waqaya-assistant.js`
 - `assets/waqaya-assistant.css`
@@ -50,3 +53,13 @@
 - تذكير منفصل للجرعة التالية.
 - يمكن ربط المساعد الذكي بأوامر مثل: «احجز موعد عبدالله سالم غداً الساعة 9» أو «ذكّر الفريق 1 بموعد كبد».
 - إلى أن يتم ربط Google Calendar، يمكن استخدام ملف ICS كخيار احتياطي.
+
+
+### مسار Google Maps
+- فتح موقع المربي/الحظيرة من الإحداثيات أو وصف الموقع.
+- فتح اتجاهات القيادة إلى الزيارة.
+- إنشاء مسار يومي متعدد الوقفات للفريق.
+- استخدام موقع الجهاز كنقطة انطلاق عند السماح بالموقع.
+- مشاركة رابط موقع Google Maps.
+- يمكن للمساعد تنفيذ أوامر مثل: «افتح موقع عبدالله سالم» و«اعرض مسار الفريق 1».
+- تحسين ترتيب الوقفات تلقائياً، ETA الحي، Distance Matrix وPlaces تحتاج Google Maps Platform API ومفتاحاً آمناً.
