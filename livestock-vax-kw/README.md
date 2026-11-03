@@ -19,6 +19,7 @@
 | مساعد وقاية | مساعد داخل الموقع للتنقل والاستعلام وتجهيز طلبات التصميم | يعمل محلياً الآن |
 | VoiceStudio / Realtime | إدخال صوتي ورد صوتي وربط المساعد بالمسار الصوتي | يعمل Browser Voice الآن، والRealtime الكامل يحتاج Backend |\n| Google Calendar | حجوزات التحصين، إعادة الجدولة، الإلغاء، تذكير المربي والفريق والجرعة التالية | يحتاج ربط Google Calendar؛ تم تجهيز Queue وICS fallback |
 | Google Maps | مواقع المربين والحظائر، الاتجاهات ومسارات الفرق | فتح المواقع والاتجاهات يعمل الآن؛ التحسين المتقدم يحتاج Maps API |
+| WhatsApp | ربط المربين بالفرق وفق قواعد الإدارة وإرسال رسائل الإسناد والتذكير | فتح المحادثة يعمل الآن؛ الإرسال الآلي يحتاج WhatsApp Business API |
 
 ### ملفات المسارات
 - `routes/manifest.json`
@@ -27,6 +28,8 @@
 - `routes/voice-assistant.json`\n- `routes/google-calendar.json`\n- `assets/waqaya-calendar.js`
 - `routes/google-maps.json`
 - `assets/waqaya-maps.js`
+- `routes/whatsapp-routing.json`
+- `assets/waqaya-whatsapp.js`
 - `assets/waqaya-route-runtime.js`
 - `assets/waqaya-assistant.js`
 - `assets/waqaya-assistant.css`
@@ -63,3 +66,13 @@
 - مشاركة رابط موقع Google Maps.
 - يمكن للمساعد تنفيذ أوامر مثل: «افتح موقع عبدالله سالم» و«اعرض مسار الفريق 1».
 - تحسين ترتيب الوقفات تلقائياً، ETA الحي، Distance Matrix وPlaces تحتاج Google Maps Platform API ومفتاحاً آمناً.
+
+
+### مسار WhatsApp
+- الإدارة تحدد قواعد الإسناد حسب المنطقة ونوع الحيوان والأولوية، مع Override يدوي.
+- الافتراضي الحالي: كبد → الفريق 1، الوفرة → الفريق 3، العبدلي → الفريق 2، الجهراء → الفريق 4.
+- بعد الإسناد تُجهز رسالتان: رسالة للمربي ورسالة للفريق.
+- يمكن فتح محادثة WhatsApp مباشرة للمربي أو للفريق من رابط `wa.me`.
+- أرقام الفرق تحفظ في إعدادات محلية داخل نسخة العرض ولا تظهر للعامة.
+- يدعم قوالب: تم الإسناد، تذكير، إعادة جدولة.
+- الإرسال التلقائي، حالة التسليم، والقوالب المعتمدة تحتاج WhatsApp Business Cloud API أو مزوداً معتمداً.
