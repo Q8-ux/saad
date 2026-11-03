@@ -17,13 +17,13 @@
 | Canva Route | تحويل طلبات التصميم إلى Brief منظم للبوسترات والستوري والكاروسيل | Queue مفعلة داخل المتصفح، الربط المباشر مع Canva عبر Connector |
 | Compositor | معالجة الصور قبل التصميم: قص، تنظيف خلفية، تحسين، وتوحيد المقاسات | Adapter جاهز، التنفيذ يحتاج Worker للصور |
 | مساعد وقاية | مساعد داخل الموقع للتنقل والاستعلام وتجهيز طلبات التصميم | يعمل محلياً الآن |
-| VoiceStudio / Realtime | إدخال صوتي ورد صوتي وربط المساعد بالمسار الصوتي | يعمل Browser Voice الآن، والRealtime الكامل يحتاج Backend |
+| VoiceStudio / Realtime | إدخال صوتي ورد صوتي وربط المساعد بالمسار الصوتي | يعمل Browser Voice الآن، والRealtime الكامل يحتاج Backend |\n| Google Calendar | حجوزات التحصين، إعادة الجدولة، الإلغاء، تذكير المربي والفريق والجرعة التالية | يحتاج ربط Google Calendar؛ تم تجهيز Queue وICS fallback |
 
 ### ملفات المسارات
 - `routes/manifest.json`
 - `routes/schemas.json`
 - `routes/design-pipeline.json`
-- `routes/voice-assistant.json`
+- `routes/voice-assistant.json`\n- `routes/google-calendar.json`\n- `assets/waqaya-calendar.js`
 - `assets/waqaya-route-runtime.js`
 - `assets/waqaya-assistant.js`
 - `assets/waqaya-assistant.css`
@@ -41,3 +41,12 @@
 > GitHub Pages استضافة ثابتة. الذكاء التوليدي الكامل، Voice Realtime الحقيقي، ومعالجة الصور الثقيلة تحتاج Backend آمن ولا يتم ادعاء تشغيلها داخل المتصفح بدون خادم.
 
 البيانات الظاهرة في النسخة المنشورة تجريبية. تحفظ إضافات نسخة GitHub داخل المتصفح للعرض فقط، ولا تمثل قاعدة بيانات مركزية أو نظام صلاحيات إنتاجياً.
+
+
+### مسار Google Calendar
+- ينشئ حجزاً لموعد التحصين بعد اعتماد الطلب.
+- يدعم إعادة الجدولة والإلغاء.
+- تذكير قبل الموعد بـ 24 ساعة وساعتين.
+- تذكير منفصل للجرعة التالية.
+- يمكن ربط المساعد الذكي بأوامر مثل: «احجز موعد عبدالله سالم غداً الساعة 9» أو «ذكّر الفريق 1 بموعد كبد».
+- إلى أن يتم ربط Google Calendar، يمكن استخدام ملف ICS كخيار احتياطي.
