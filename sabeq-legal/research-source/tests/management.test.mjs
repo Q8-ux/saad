@@ -655,3 +655,32 @@ test('global service switches preserve billing configuration and consultation ad
 
 
 test('revoked service sessions and corrupt stored permission values fail closed',async()=>{const h=harness();try{const users=h.load('lib/user-management.ts'),helper=h.load('lib/service-settings.ts');for(const value of ['bad-json','null','[]','{"memo":"false"}'])assert.ok(Object.values(users.userPermissions(value)).every(allowed=>allowed===false));assert.ok(Object.values(users.userPermissions()).every(Boolean));const created=await users.updateManagedUser({action:'create',name:'عميل اختبار الإلغاء',email:'revoked@example.test'});const session=await h.load('lib/public-auth.ts').createPublicSession(created.id);await users.updateManagedUser({id:created.id,permissions:{memo:false,assistant:true,consultation:true,library:true}});await assert.rejects(helper.requireServiceEnabled('assistant',request('session',session.token)),error=>error.status===401);await helper.requireServiceEnabled('assistant');}finally{h.close();}});
+
+test('two-user policy rejects legacy access and all other staff accounts, while allowing only saad and ahmad',async()=>{const h=harness();try{
+ configureStaff(h);configureAdministrator(h);
+ const routes=h.load('app/api/management/[...path]/route.ts');
+ const owner=await adminLogin(h),oldStaff=await staffLogin(h);
+ const accounts=await (await routes.GET(request('control-accounts',owner.token))).json();
+ const operatorPassword='Synthetic-Ahmad-Operator-2026!';
+ const created=await routes.POST(request('control-accounts',owner.token,{action:'create-operator',username:'ahmad',newPassword:operatorPassword,confirmPassword:operatorPassword,revision:accounts.revision}));
+ assert.equal(created.status,200);assert.equal((await created.json()).role,'operator');
+ h.runtime.MANAGEMENT_LOGIN_MODE='password_only_two_users';
+ assert.equal((await routes.GET(request('session',owner.token))).status,200);
+ assert.equal((await routes.GET(request('session',oldStaff.token))).status,401);
+ assert.equal((await routes.POST(request('password-login',null,{username:'user1',password:staffPasswords.user1}))).status,401);
+ assert.equal((await routes.GET(request('login'))).status,410);
+ assert.equal((await routes.POST(request('exchange',null,{code:'invalid',verifier:'invalid'}))).status,410);
+ const ahmad=await routes.POST(request('password-login',null,{username:'ahmad',password:operatorPassword}));
+ assert.equal(ahmad.status,200);
+ const operator=await ahmad.json();
+ assert.equal(operator.manager.role,'operator');
+ assert.ok(operator.manager.sections.includes('memos'));
+ assert.ok(!operator.manager.sections.includes('payments'));
+ assert.equal((await routes.GET(request('session',operator.token))).status,200);
+ assert.equal((await routes.GET(request('payments',operator.token))).status,403);
+ const saad=await routes.POST(request('password-login',null,{username:'saad',password:adminPassword}));
+ assert.equal(saad.status,200);
+ assert.equal((await (await saad.json()).manager.role),'administrator');
+ h.runtime.MANAGEMENT_LOGIN_MODE='typo-in-policy';
+ assert.equal((await routes.GET(request('session',operator.token))).status,503);
+}finally{h.close();}});
