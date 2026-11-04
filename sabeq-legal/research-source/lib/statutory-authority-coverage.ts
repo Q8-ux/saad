@@ -36,7 +36,7 @@ export function missingPlannedStatutoryCitations(
     // The article wording must be next to the actual citation in the same
     // defense paragraph; a detached list elsewhere is not sufficient.
     const citation = new RegExp(`[【\\[]\\s*${marker}\\s*[】\\]]`, "u");
-    const adjacent = !!article && grounds.split(/\\n+/u)
+    const adjacent = !!article && grounds.split(/\n+/u)
       .some(paragraph => citation.test(paragraph) && paragraph.includes(article.quote));
     return !adjacent;
   });
