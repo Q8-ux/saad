@@ -5,6 +5,7 @@ import { reserveMemoPayment, completeMemoPayment, releaseMemoPayment, type Payme
 import {assessMatterFacts} from "@/lib/matter-facts";
 import {preserveLegalQuotes} from '@/lib/statutory-text';
 import { missingPlannedStatutoryCitations } from "@/lib/statutory-authority-coverage";
+import { reviewMissingLegalIssues } from "@/lib/meta-secondary-review";
 import {scopeEvidenceToFacts,prepareBoundDraft,pleadingAuthorityInstructions} from "@/lib/bound-draft";
 import { applyCheckedJudgmentMatches, caseReasoningInstructions, caseResearchQueries, approvedCaseFacts, buildCheckedCasePlan, CasePlanValidationError, casePlanFailureMessage, caseAuditSchema, parseCaseAudit, caseQualitySummary } from "@/lib/case-reasoning";
 import { legalSourceCoverage, formatSourceCoverage } from "@/lib/legal-source-coverage";
@@ -148,8 +149,37 @@ export async function POST(request: Request) {
         reviewIssues: [...new Set(reasonCodes)],
       });
     }
+    let secondaryReviewAttempted = false;
     async function finish(content: PleadingContent, qualityRetried = false): Promise<Response> {
       content=prepareBoundDraft(content,memoInput,evidence);
+      // The optional Llama pass checks omissions only. OpenAI remains the
+      // writer, and every amended citation must pass the same source checks.
+      if (!secondaryReviewAttempted && evidence.length && content.grounds.trim()) {
+        secondaryReviewAttempted = true;
+        try {
+          const second = await reviewMissingLegalIssues(checkedPlan.issues, content.grounds, signal);
+          if (second?.missingIssueIndexes.length) {
+            const refined = await generateText({
+              instructions: `${caseReasoningInstructions}\n${legalResearchInstructions}\nمراجعة تكميلية لدفوع قضائية: عالج فقط المسائل المحددة في المراجعة الثانية باستخدام الوقائع والمصادر المعتمدة. أعد grounds وحده؛ أبقِ الدفوع القائمة ما لم تتعارض مع المصادر؛ لا تضف مواد أو أحكاماً دون علامة المصدر المطابق ولا تخترع واقعة أو طلباً.`,
+              input: JSON.stringify({
+                originalGrounds: content.grounds,
+                missingPlanIssues: second.missingIssueIndexes.map(i => checkedPlan.issues[i]),
+                reviewedSources: formatEvidence(evidence),
+                sourceCoverage: formatSourceCoverage(evidence),
+              }),
+              schema: { type: "object", additionalProperties: false, required: ["grounds"], properties: { grounds: { type: "string" } } },
+              maxOutputTokens: 8500,
+            });
+            const parsed = JSON.parse(refined) as { grounds?: unknown };
+            if (typeof parsed.grounds === "string" && parsed.grounds.trim() && parsed.grounds.length <= 50000) {
+              content = prepareBoundDraft({...content, grounds: parsed.grounds}, memoInput, evidence);
+            }
+          }
+        } catch {
+          // Secondary provider outages never block the primary legal workflow.
+          console.warn("Optional secondary legal review unavailable");
+        }
+      }
       let citationReview=reviewLegalCitations(`${content.grounds}\n${content.requests}`,evidence,{requireJudgmentAnalogy:true,courtDocument:true,requireArticleText:true});
       let missingStatutes=missingPlannedStatutoryCitations(checkedPlan,evidence,content.grounds);
       if ((!citationReview.ok || missingStatutes.length) && evidence.length) {
