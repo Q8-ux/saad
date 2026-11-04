@@ -22,6 +22,13 @@ export function statutoryOCRReview(text: string) {
   return { requiresReview: distinct.length >= 2, reason: distinct.length >= 2 ? "arabic_pdf_character_order" : null };
 }
 
+/** Never send a corrupted OCR snippet to the drafting model. */
+export function statutoryPromptExcerpt(text: string) {
+  return statutoryOCRReview(text).requiresReview
+    ? "[نص مستخرج مشوه، محجوب عن التوليد لحين مطابقة مادة القانون مع الأصل الرسمي؛ لا يجوز الاستشهاد به.]"
+    : text;
+}
+
 /** Only the retrieved article's own wording, never neighbouring pages or OCR.
  * A source match does not establish completeness, amendments or currency. */
 export function draftStatutoryText(source: LegalEvidence) {
