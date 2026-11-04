@@ -265,6 +265,21 @@ jobs:
           done
           echo "::error::Tamweenat GitHub Pages still serves an older release"
           exit 1
+      - name: Verify Ahmad public preview is live
+        if: steps.scope.outputs.sabeq_only == 'true' && steps.tamweenat.outputs.only != 'true' && steps.waqaya.outputs.only != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          page='https://q8-ux.github.io/saad/sabeq-ahmad/'
+          for attempt in 1 2 3 4 5; do
+            if curl --fail --location --silent --show-error --max-time 20 "$page?version=$GITHUB_SHA" -o /tmp/sabeq-ahmad-live.html && grep -F 'واجهة معاينة عامة وليست جلسة إدارية' /tmp/sabeq-ahmad-live.html >/dev/null; then
+              echo 'Independent public Ahmad supervisor preview is online.' >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "::error::Ahmad preview not confirmed live"
+          exit 1
       - name: Record Sabeq deployment
         if: steps.scope.outputs.sabeq_only == 'true' && steps.tamweenat.outputs.only != 'true' && steps.waqaya.outputs.only != 'true'
         run: |
