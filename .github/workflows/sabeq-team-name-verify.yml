@@ -1,0 +1,41 @@
+name: Verify Sabeq attorney name on live website
+
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/sabeq-team-name-verify.yml]
+  workflow_dispatch:
+
+permissions: {contents: read}
+
+jobs:
+  visible-team-name:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Read real published Sabeq site and render full browser DOM
+        shell: bash
+        run: |
+          set -euo pipefail
+          site='https://q8-ux.github.io/saad/sabeq-legal/'
+          curl --fail --location --silent --show-error --max-time 30 "$site" -o page.html
+          test -s page.html
+          chrome="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          "$chrome" --headless --no-sandbox --disable-dev-shm-usage --disable-gpu \
+            --virtual-time-budget=12000 --window-size=1440,900 --dump-dom "$site" > rendered.html 2> chrome.log
+          if ! grep -F 'حمد أحمد الشمري' rendered.html >/dev/null; then
+            echo 'FAIL: corrected attorney name not present after live browser rendering.'
+            exit 1
+          fi
+          if grep -F 'المحامي حمد الشمري' rendered.html >/dev/null; then
+            echo 'FAIL: stale attorney name still appears in live DOM.'
+            exit 1
+          fi
+          echo 'PASS: public team renders the corrected attorney name.'
+      - name: Preserve browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sabeq-attorney-name-verify
+          path: chrome.log
+          retention-days: 3
