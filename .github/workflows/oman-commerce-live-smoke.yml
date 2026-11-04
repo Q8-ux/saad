@@ -1,0 +1,43 @@
+name: Oman Fruits Live Smoke
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/oman-commerce-live-smoke.yml']
+  workflow_dispatch:
+permissions: { contents: read }
+jobs:
+  public-endpoints:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test live GitHub Pages routes and database public API
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE='https://q8-ux.github.io/saad/oman-fruits-commerce'
+          for path in '/' '/checkout/' '/login/' '/sales/' '/manager/' '/order/' '/app.js' '/config.js' '/styles.css'; do
+            code='000'
+            for n in 1 2 3 4 5 6 7 8; do
+              code=$(curl --location --silent --max-time 18 --output /tmp/oman.html --write-out '%{http_code}' "$BASE$path?smoke=$GITHUB_RUN_ID" || true)
+              if [[ "$code" == '200' ]]; then break; fi
+              sleep 10
+            done
+            echo "PAGE $path -> $code"
+            [[ "$code" == '200' ]] || exit 1
+          done
+          API_URL=$(node -e "global.window={};require('./oman-fruits-commerce/config.js');process.stdout.write(window.OMAN_CONFIG.supabaseUrl)")
+          API_KEY=$(node -e "global.window={};require('./oman-fruits-commerce/config.js');process.stdout.write(window.OMAN_CONFIG.publishableKey)")
+          CODE=$(curl --silent --show-error --max-time 24 --output /tmp/oman-api.json --dump-header /tmp/oman-headers --write-out '%{http_code}' \
+            -H "Origin: https://q8-ux.github.io" -H "apikey: $API_KEY" \
+            "$API_URL/rest/v1/products?select=id,name_ar&limit=1")
+          echo "PUBLIC API response -> HTTP $CODE"
+          [[ "$CODE" == '200' ]] || { head -c 700 /tmp/oman-api.json; exit 1; }
+          grep -qiE '^access-control-allow-origin: (\*|https://q8-ux.github.io)' /tmp/oman-headers || { echo 'CORS origin not allowed'; sed -n '1,30p' /tmp/oman-headers | grep -vi apikey; exit 1; }
+          python3 - <<'PY'
+          import json
+          data=json.load(open('/tmp/oman-api.json'))
+          assert isinstance(data,list) and len(data)==1 and 'name_ar' in data[0], 'No live product data'
+          print('Public database product read is live and CORS is accepted')
+          PY
+          echo 'Live store pages, public catalog endpoint and CORS checks passed' >> "$GITHUB_STEP_SUMMARY"
