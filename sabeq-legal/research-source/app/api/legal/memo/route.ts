@@ -115,6 +115,39 @@ export async function POST(request: Request) {
     const checkedPlan = casePlan;
     evidence=applyCheckedJudgmentMatches(evidence,checkedPlan);
     let agentAudit: unknown;
+    // Never publish fabricated legal citations; preserve an unpaid factual
+    // draft for counsel instead of sending the visitor back to the beginning.
+    // Paid orders must not be silently downgraded.
+    async function factualReviewDraft(reasonCodes: string[]): Promise<Response> {
+      const safeContent: PleadingContent = {
+        facts: memoInput.facts,
+        requests: memoInput.requests,
+        grounds: "",
+        fields: extraFields,
+        factualNotes: factualRequirements([...preparationNotes, ...matter.missing.map(g => g.ar)]),
+        legalResearchNotes: "",
+      };
+      const document = buildPleadingDocument(template.info, template.definition, kind, memoInput, safeContent);
+      const finalMemo = pleadingText(document);
+      const baseQuality = caseQualitySummary(checkedPlan, null, safeContent, 0);
+      const caseQuality = {
+        ...baseQuality,
+        status: "incomplete" as const,
+        notices: [...new Set([...baseQuality.notices, "تعذّر توثيق الاستشهادات القانونية آلياً. هذه مسودة وقائع وطلبات فقط، وليست مذكرة دفاع مكتملة؛ يتولى المحامي مراجعة الأسانيد قبل تقديمها للمحكمة."])],
+      };
+      signal.throwIfAborted();
+      await finishMemoRequest(managementRequestId, "needs_review", finalMemo, "draft_source_review_pending");
+      if (user) await recordServiceActivity({userId:user.id, serviceType:"memo",title:`${document.title} — ${clientName}`,inputText:JSON.stringify({...memoInput,legalIssues}),outputText:finalMemo,metadata:{managementRequestId,caseNumber,documentKind:document.kind,sourceReviewPending:true}});
+      return privateJson({
+        requestId: managementRequestId, caseQuality, memo: finalMemo, document,
+        template: template.info, sourceCoverage: legalSourceCoverage([]),
+        sourceVerification: officialVerificationSummary(), memoControlRevision,
+        engineRevision: "source-review-factual-draft-1",
+        analysis: {sourceCount:0, lawCount:0, cassationCount:0, sources:[],missingSources:true,researchNotice:caseQuality.notices.join(" ")},
+        stage: "draft_source_review_pending",
+        reviewIssues: [...new Set(reasonCodes)],
+      });
+    }
     async function finish(content: PleadingContent, qualityRetried = false): Promise<Response> {
       content=prepareBoundDraft(content,memoInput,evidence);
       let citationReview=reviewLegalCitations(`${content.grounds}\n${content.requests}`,evidence,{requireJudgmentAnalogy:true,courtDocument:true,requireArticleText:true});
@@ -135,6 +168,7 @@ export async function POST(request: Request) {
         missingStatutes=missingPlannedStatutoryCitations(checkedPlan,evidence,content.grounds);
       }
       if(!citationReview.ok || missingStatutes.length) {
+        if (!paymentLease) return factualReviewDraft([...citationReview.issues.map(i=>i.code), ...(missingStatutes.length ? ["missing_planned_article_text"] : [])]);
         await finishMemoRequest(managementRequestId, "needs_review", "", "source_review");
         return privateJson({requestId:managementRequestId,error:citationFailureMessage,stage:"source_review",sourceScope:"bound_file_and_reviewed_judgments",issues:[...new Set([...citationReview.issues.map(i=>i.code),...(missingStatutes.length?["missing_planned_article_text"]:[])])]},422);
       }
@@ -145,6 +179,7 @@ export async function POST(request: Request) {
       // Cleanup must not remove a quoted article or sever its source identity.
       const finalCitations=reviewLegalCitations(`${content.grounds}\n${content.requests}`,evidence,{requireJudgmentAnalogy:true,courtDocument:true,requireArticleText:true});
       if(!finalCitations.ok || missingPlannedStatutoryCitations(checkedPlan,evidence,content.grounds).length) {
+        if (!paymentLease) return factualReviewDraft([...finalCitations.issues.map(i=>i.code), "post_cleanup_source_review"]);
         await finishMemoRequest(managementRequestId, "needs_review", "", "source_review");
         return privateJson({requestId:managementRequestId,error:citationFailureMessage,stage:"source_review",issues:[...new Set([...finalCitations.issues.map(i=>i.code),...(missingPlannedStatutoryCitations(checkedPlan,evidence,content.grounds).length?["missing_planned_article_text"]:[])])]},422);
       }
