@@ -1,0 +1,56 @@
+name: Sabeq live login visual and safe auth check
+
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/sabeq-login-live-visual.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  screenshot-and-health:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Open the real published login and capture screenshot
+        shell: bash
+        run: |
+          set -euo pipefail
+          site='https://q8-ux.github.io/saad/sabeq-admin-preview/'
+          mkdir -p evidence
+          curl --fail --location --silent --show-error --max-time 30 "$site" > evidence/live-index.html
+          chrome="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
+          if [ -z "$chrome" ]; then
+            echo 'A headless browser is unavailable on this runner.'
+            exit 1
+          fi
+          "$chrome" --headless --no-sandbox --disable-gpu --hide-scrollbars \
+            --disable-dev-shm-usage --window-size=430,940 --force-device-scale-factor=1 \
+            --virtual-time-budget=4000 --screenshot=evidence/sabeq-live-login.png "$site" > /dev/null 2> evidence/browser-errors.txt
+          test -s evidence/sabeq-live-login.png
+          echo "Captured public login screenshot from $site"
+      - name: Safely check deployed login without exposing a real password
+        shell: bash
+        run: |
+          set -euo pipefail
+          endpoint='https://sabeq-legal-public.centrino.chatgpt.site'
+          key_status=$(curl --silent --show-error --max-time 30 -o /dev/null -w '%{http_code}' "$endpoint/api/management/jwks")
+          echo "Management key endpoint: HTTP $key_status"
+          test "$key_status" = 200
+          status=$(curl --silent --show-error --max-time 60 -o /dev/null -w '%{http_code}' \
+            -H 'Origin: https://q8-ux.github.io' -H 'Content-Type: application/json' \
+            --data '{"username":"synthetic_not_configured","password":"Synthetic-Invalid-Login-Only-2026!"}' \
+            "$endpoint/api/management/password-login")
+          echo "Synthetic unregistered user login HTTP $status (401 expected)"
+          test "$status" = 401
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sabeq-live-login-visual
+          path: |
+            evidence/sabeq-live-login.png
+            evidence/browser-errors.txt
+          if-no-files-found: warn
+          retention-days: 7
