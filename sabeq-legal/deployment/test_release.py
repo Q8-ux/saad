@@ -23,6 +23,8 @@ class PublicationTests(unittest.TestCase):
             try:
                 root = Path("_site")
                 (root / "sabeq-legal/assets").mkdir(parents=True)
+                (root / "sabeq-ahmad").mkdir(parents=True)
+                (root / "sabeq-ahmad/index.html").write_text("Public supervisor preview fixture")
                 (root / "sabeq-legal/index.html").write_text('<script src="/saad/sabeq-legal/assets/client.js"></script>')
                 (root / "sabeq-legal/assets/client.js").write_text("synthetic")
                 (root / "sabeq-legal/release.json").write_text(json.dumps({"clientSource":"a"*40,"backendSource":"b"*40}))
@@ -52,6 +54,8 @@ class PublicationTests(unittest.TestCase):
             try:
                 root = Path("_site")
                 (root / "sabeq-legal/assets").mkdir(parents=True)
+                (root / "sabeq-ahmad").mkdir(parents=True)
+                (root / "sabeq-ahmad/index.html").write_text("Public supervisor preview fixture")
                 (root / "sabeq-legal/index.html").write_text('<script src="/saad/sabeq-legal/assets/client.js"></script>')
                 (root / "sabeq-legal/assets/client.js").write_text("synthetic")
                 (root / "sabeq-legal/release.json").write_text(json.dumps({"clientSource": "a"*40, "backendSource": "b"*40}))
@@ -84,6 +88,8 @@ class PublicationTests(unittest.TestCase):
             try:
                 root = Path("_site")
                 (root / "sabeq-legal/assets").mkdir(parents=True)
+                (root / "sabeq-ahmad").mkdir(parents=True)
+                (root / "sabeq-ahmad/index.html").write_text("Public supervisor preview fixture")
                 (root / "sabeq-legal/index.html").write_text('<script src="/saad/sabeq-legal/assets/client.js"></script>')
                 (root / "sabeq-legal/assets/client.js").write_text("synthetic")
                 (root / "sabeq-legal/release.json").write_text(json.dumps({"clientSource":"a"*40,"backendSource":"b"*40}))
@@ -135,6 +141,8 @@ class PublicationTests(unittest.TestCase):
                 (root / "other-project").mkdir(parents=True)
                 (root / "other-project/index.html").write_text("previously published")
                 (root / "sabeq-legal/assets").mkdir(parents=True)
+                (root / "sabeq-ahmad").mkdir(parents=True)
+                (root / "sabeq-ahmad/index.html").write_text("Public supervisor preview fixture")
                 (root / "sabeq-legal/index.html").write_text('<script src="/saad/sabeq-legal/assets/client.js"></script>')
                 (root / "sabeq-legal/assets/client.js").write_text("const ok = true;")
                 (root / "sabeq-legal/release.json").write_text(json.dumps({"clientSource": "a"*40,"backendSource":"b"*40}))
@@ -192,6 +200,8 @@ class PublicationTests(unittest.TestCase):
             try:
                 root = Path("_site")
                 (root / "sabeq-legal/assets").mkdir(parents=True)
+                (root / "sabeq-ahmad").mkdir(parents=True)
+                (root / "sabeq-ahmad/index.html").write_text("Public supervisor preview fixture")
                 (root / "sabeq-legal/index.html").write_text('<script src="/saad/sabeq-legal/assets/client.js"></script>')
                 (root / "sabeq-legal/assets/client.js").write_text("safe")
                 (root / "sabeq-legal/release.json").write_text(json.dumps({"clientSource":"a"*40,"backendSource":"b"*40}))
