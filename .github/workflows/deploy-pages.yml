@@ -12,6 +12,7 @@ on:
       - sabeq.html
       - 'sabeq-legal/**'
       - 'sabeq-admin-preview/**'
+      - 'sabeq-ahmad/**'
       - 'sabeq-legal-system/**'
       - 'sabeq-legal-pro/**'
       - '!sabeq-legal-pro/demo/index.html'
@@ -181,7 +182,7 @@ jobs:
         run: |
           rm -rf _site && mkdir -p _site
           cp index.html 404.html cyber-archive.css cyber-archive.js cyber-data.js sabeq.html _site/
-          for p in sabeq-legal sabeq-admin-preview sabeq-legal-system sabeq-legal-pro hessa-alobaid shalayhna zad-restaurants tamweenat tamweenat-admin rattil etf-academy kuwait-digital-sales-plan kuwait-fund-modern livestock-vax-kw waqaya-v2 english-kuwait oman-fruits-pos oman-fruits-commerce project-command-center my-sites reddit-business-agent grok-trading ant-alshaer ai-chess-kuwait elanak-saleem alsaqaf-school youtube-studio-ai remote-ai-hub noura-alattal ai-video-studio muhami-next barcode frame-studio dr-hamad-instagram-demo tiktok-growth longcat-video sinad-kuwait; do cp -R "$p" "_site/$p"; done
+          for p in sabeq-legal sabeq-admin-preview sabeq-ahmad sabeq-legal-system sabeq-legal-pro hessa-alobaid shalayhna zad-restaurants tamweenat tamweenat-admin rattil etf-academy kuwait-digital-sales-plan kuwait-fund-modern livestock-vax-kw waqaya-v2 english-kuwait oman-fruits-pos oman-fruits-commerce project-command-center my-sites reddit-business-agent grok-trading ant-alshaer ai-chess-kuwait elanak-saleem alsaqaf-school youtube-studio-ai remote-ai-hub noura-alattal ai-video-studio muhami-next barcode frame-studio dr-hamad-instagram-demo tiktok-growth longcat-video sinad-kuwait; do cp -R "$p" "_site/$p"; done
           if [ -d dr-hamad ]; then cp -R dr-hamad _site/dr-hamad; fi
           mkdir -p _site/saad-studio
           cp -R saad-studio/public/. _site/saad-studio/
@@ -200,6 +201,7 @@ jobs:
           test -s _site/oman-fruits-commerce/manager/index.html
           test -s _site/oman-fruits-commerce/sales/index.html
           node --check _site/oman-fruits-commerce/app.js
+          test -s _site/sabeq-ahmad/index.html
           test -s _site/etf-academy/index.html
           node --check _site/etf-academy/app.js
           node --check _site/etf-academy/content.js
