@@ -28,6 +28,7 @@ const content={facts:input.facts,requests:input.requests,
 test('a reviewed planned statutory article must be quoted in its legal defense, not omitted',()=>{
   assert.deepEqual([...coverage.missingPlannedStatutoryCitations(plan,[source],'يتمسك الدفاع بعدم الإثبات.')],['م1']);
   assert.deepEqual([...coverage.missingPlannedStatutoryCitations(plan,[source],'تطبيق القاعدة 【م1】')],['م1']);
+  assert.deepEqual([...coverage.missingPlannedStatutoryCitations(plan,[source],`تطبيق القاعدة 【م1】\n«${articleText}»`)],['م1']);
   const prepared=bound.prepareBoundDraft(content,input,[source]);
   assert.deepEqual([...coverage.missingPlannedStatutoryCitations(plan,[source],prepared.grounds)],[]);
   assert.equal(citations.reviewLegalCitations(prepared.grounds,[source],
