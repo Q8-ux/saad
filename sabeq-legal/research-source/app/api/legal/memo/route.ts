@@ -138,7 +138,7 @@ export async function POST(request: Request) {
       content.facts = correctLegalProse(stripInternalMemoLanguage(removeDelegatedResearch(content.facts)),[clientName,otherParty,allParties]);
       content.requests = preserveLegalQuotes(content.requests,prose=>correctLegalProse(stripInternalMemoLanguage(removeDelegatedResearch(prose)),[clientName,otherParty,allParties]));
       content.factualNotes = factualRequirements(content.factualNotes);
-      content.grounds = preserveLegalQuotes(content.grounds,prose=>stripInternalMemoLanguage(removeDelegatedResearch(prose)));
+      content.grounds = preserveLegalQuotes(content.grounds,prose=>correctLegalProse(stripInternalMemoLanguage(removeDelegatedResearch(prose)),[clientName,otherParty,allParties]));
       // Cleanup must not remove a quoted article or sever its source identity.
       const finalCitations=reviewLegalCitations(`${content.grounds}\n${content.requests}`,evidence,{requireJudgmentAnalogy:true,courtDocument:true,requireArticleText:true});
       if(!finalCitations.ok) {

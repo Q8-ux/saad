@@ -1,5 +1,6 @@
 import { getD1 } from "@/db";
 import { attachOfficialVerification, reviewedChunkIds, type SourceVerification } from "./official-legislation";
+import { statutoryOCRReview, statutoryPromptExcerpt } from "./statutory-text";
 import {judgmentContext,type JudgmentReference} from './judgment-evidence';
 
 export type LegalEvidence = {
@@ -254,7 +255,10 @@ async function searchLegacyLegalDocuments(query: string, limit = 12) {
 export function formatEvidence(evidence: LegalEvidence[]) {
   return evidence.map((item, index) => {
     const number = item.lawNumber && item.lawYear ? `رقم ${item.lawNumber} لسنة ${item.lawYear}` : "";
-    return `[م${index + 1}]\nالعنوان: ${item.title}${number ? ` (${number})` : ""}\nنوع المصدر: ${isJudgmentEvidence(item) && isCassationEvidence(item) ? "مبدأ/حكم تمييز" : item.documentType || "تشريع"}\nالتصنيف: ${item.category}\nالمرجع الداخلي: ${item.reference || "غير محدد"}\nالجهة/المصدر: ${item.officialSource}\nرابط الأصل: ${item.sourceUrl || "ملف مفهرس من المكتبة المرفوعة؛ لا يتوفر رابط عام للأصل"}\nتاريخ تحديث الفهرسة (ليس إثبات السريان): ${item.libraryUpdatedAt || "غير متاح"}\n${corpusContext(item)}${item.verification ? `المادة المعتمدة: ${item.verification.articleNumber}. القانون صاحب المادة: ${item.lawNumber}/${item.lawYear}. النص المنشور في: ${item.verification.sourceLawNumber}/${item.verification.sourceLawYear}. صفحة المصدر: ${item.verification.page}. تاريخ مطابقة النص: ${item.verification.checkedAt}. الحالة: مطابقة المصدر المنشور؛ اكتمال التعديلات والانطباق الزمني يحتاجان مراجعة.\n` : ""}درجة الجودة: ${item.qualityScore}/100\nالنص المسترجع (حالة الاعتماد في بيانات المصدر):\n${item.text}`;
+    const damagedOCR = !item.judgment && statutoryOCRReview(item.text).requiresReview;
+    const quotedText = statutoryPromptExcerpt(item.text);
+    const safeContext = damagedOCR ? "بيانات OCR وسياق الصفحات محجوبة لحين مراجعة المصدر الرسمي؛ لا تعتمد المادة." : corpusContext(item);
+    return `[م${index + 1}]\nالعنوان: ${item.title}${number ? ` (${number})` : ""}\nنوع المصدر: ${isJudgmentEvidence(item) && isCassationEvidence(item) ? "مبدأ/حكم تمييز" : item.documentType || "تشريع"}\nالتصنيف: ${item.category}\nالمرجع الداخلي: ${item.reference || "غير محدد"}\nالجهة/المصدر: ${item.officialSource}\nرابط الأصل: ${item.sourceUrl || "ملف مفهرس من المكتبة المرفوعة؛ لا يتوفر رابط عام للأصل"}\nتاريخ تحديث الفهرسة (ليس إثبات السريان): ${item.libraryUpdatedAt || "غير متاح"}\n${safeContext}${item.verification ? `المادة المعتمدة: ${item.verification.articleNumber}. القانون صاحب المادة: ${item.lawNumber}/${item.lawYear}. النص المنشور في: ${item.verification.sourceLawNumber}/${item.verification.sourceLawYear}. صفحة المصدر: ${item.verification.page}. تاريخ مطابقة النص: ${item.verification.checkedAt}. الحالة: مطابقة المصدر المنشور؛ اكتمال التعديلات والانطباق الزمني يحتاجان مراجعة.\n` : ""}درجة الجودة: ${item.qualityScore}/100\nالنص المسترجع (حالة الاعتماد في بيانات المصدر):\n${quotedText}`;
   }).join("\n\n---\n\n");
 }
 

@@ -1,6 +1,6 @@
 import type { LegalEvidence } from "./legal-search";
 import {hasReviewedJudgment,matchesReviewedAppeal,matchesReviewedSession} from './judgment-evidence';
-import {draftStatutoryText} from './statutory-text';
+import {draftStatutoryText,statutoryOCRReview} from './statutory-text';
 const digits=(s:string)=>s.normalize("NFKC").replace(/[٠-٩۰-۹]/g,c=>String("٠١٢٣٤٥٦٧٨٩۰۱۲۳۴۵۶۷۸۹".indexOf(c)%10));
 const boundArticle=(s:LegalEvidence,number:string)=>s.corpus?.scope==="bound_file_only"&&s.corpus?.sourceId==="user-legislation-source"&&s.corpus?.sourceSha256==="8ffeac9838d7101a6776ca689b06ad08401d69850c27969b3b9959a1c40660bd"&&s.corpus.articleIdentityUnique&&articleKey(s.corpus.articleNumber||"")===number;
 const boundLaw=(s:LegalEvidence,n:number,y:number)=>s.corpus?.scope==="bound_file_only"&&s.corpus.sourceSha256==="8ffeac9838d7101a6776ca689b06ad08401d69850c27969b3b9959a1c40660bd"&&s.corpus.lawIdentity?.number===n&&s.corpus.lawIdentity?.year===y;
@@ -15,12 +15,13 @@ const ordinal=/(?:المادة|مادة)\s+(الأولى|الاولى|أولى|�
 const statutoryQuote=/(?:تنص|نصت)\s+(?:المادة|الماده)\s+[^«“"\n]{0,350}?(?:على|بأن|بأنه|بانه)\s*[:：]?\s*[«“"]([^»”"\n]+)[»”"]/gu;
 const judgment=/(?:الطعن|طعن|حكم|judgment|appeal)\s*(?:رقم|no\.?|number)?\s*[（(]?([\d٠-٩۰-۹]+)(?:\s*(?:[/،]|لسنة|لسنه)\s*([\d٠-٩۰-۹]+))?/giu;
 export const memoControlRevision="memo-generation-control-1";
-export type CitationIssue={code:"unknown_source"|"missing_source"|"missing_article_text"|"unverified_article"|"wrong_law"|"unverified_quote"|"unverified_judgment"|"judgment_not_analogous"|"wrong_judgment_date"|"repealed_article"|"research_reference_in_pleading";marker?:string};
+export type CitationIssue={code:"unknown_source"|"missing_source"|"missing_article_text"|"unverified_article"|"wrong_law"|"unverified_quote"|"unverified_judgment"|"judgment_not_analogous"|"wrong_judgment_date"|"repealed_article"|"research_reference_in_pleading"|"corrupted_statutory_ocr";marker?:string};
 /** Each claim is paired with its own adjacent source markers. No cross-law
  * matching of numbers, trust in case text, or reliance on OCR quality. */
 export function reviewLegalCitations(text:string,evidence:LegalEvidence[],options:{requireJudgmentAnalogy?:boolean;courtDocument?:boolean;requireArticleText?:boolean}={}) {
  const issues:CitationIssue[]=[];const sources=new Map(evidence.map((s,i)=>[`م${i+1}`,s]));
  for(const paragraph of text.replace(/«[^»]*»|“[^”]*”|"[^"\n]*"/gu,quote=>quote.replace(/\n/g,' ')).split(/\n+/).filter(Boolean)) {
+  if(options.courtDocument&&statutoryOCRReview(paragraph).requiresReview)issues.push({code:"corrupted_statutory_ocr"});
   if(options.courtDocument&&(/^\s*(?:[-#*]+\s*)?(?:المرجع|المصدر|الحاشية|الهامش|المراجع(?: القانونية)?|المصادر(?: القانونية)?)\s*[:：]/u.test(paragraph)||/^\s*(?:قائمة\s+)?(?:المراجع|المصادر)(?:\s+القانونية)?\s*$/u.test(paragraph)||/(?:المصدر|المرجع)\s*[:：]\s*(?:منشورات\s+)?(?:وزارة\s+العدل|موقع\s+وزارة|بوابة\s+وزارة|https?:\/\/)|(?:راجع|انظر)\s+(?:موقع|بوابة|منشورات)\s+وزارة\s+العدل|صفح(?:ة|ات)\s+PDF\s*[\d٠-٩۰-۹]/iu.test(paragraph)))issues.push({code:'research_reference_in_pleading'});
   const pieces=paragraph.split(/((?:[【\[]\s*م\d+\s*[】\]]\s*)+)/g);
   for(let i=0;i<pieces.length;i+=2) {

@@ -194,8 +194,17 @@
     if (!text) return '<p class="record-empty">لم ينتج هذا الطلب مذكرة محفوظة بعد.</p>';
     return /^[\[{]/.test(text) ? '<p class="record-empty">تعذرت قراءة صيغة المذكرة المحفوظة.</p>' : recordProse(text);
   }
+  // The original legal record is immutable: show a reviewer warning instead
+  // of silently rewriting statutory language or a historic penalty.
+  function memoOCRNotice(value) {
+    const raw = typeof value === 'string' ? value : JSON.stringify(value || '');
+    const words = (raw.normalize('NFKC').replace(/[\u064b-\u065f\u0670]/gu,'').match(/[\p{Script=Arabic}]+/gu)||[]);
+    const suspicious = new Set(['املادة','املتعامل','املسكوكات','املسكوك','املحكمة','اهنا','أهنا','هبا','عىل','جتاوز','مخسة','مخسني','سبعامئة','املذكورة','املتهم']);
+    const hits = new Set(words.filter(word=>suspicious.has(word)));
+    return hits.size>=2 ? '<p class="banner error" role="note">تنبيه تدقيق: تحتوي المذكرة المحفوظة على نص تشريعي مشوّه من استخراج PDF. لا يُعتمد الاقتباس كما هو؛ يجب مطابقة أصل المادة وسريان تعديلاتها، ثم مراجعة نسخة مصححة منفصلة قبل تقديمها للمحكمة. لم يُعدّل السجل الأصلي.</p>' : '';
+  }
   function memoRecord(memo) {
-    return `<header class="record-heading"><h2 id="memo-detail-title" class="detail-title">${esc(memo.client_name || 'طلب مذكرة')}</h2><p class="detail-meta">${date(memo.created_at)}${memo.case_type?` · ${esc(memo.case_type)}`:''}</p>${badge(memo.status)}</header><div class="record-scroll" tabindex="0" role="region" aria-label="تفاصيل الطلب والمذكرة"><section class="record-section" aria-labelledby="record-input-title"><h3 id="record-input-title">بيانات الطلب</h3>${requestDetails(memo.input_json)}</section><section class="record-section" aria-labelledby="record-output-title"><h3 id="record-output-title">المذكرة المحفوظة</h3><article class="record-document record-prose" dir="rtl" lang="ar">${memoContent(memo.output_text)}</article></section></div>`;
+    return `<header class="record-heading"><h2 id="memo-detail-title" class="detail-title">${esc(memo.client_name || 'طلب مذكرة')}</h2><p class="detail-meta">${date(memo.created_at)}${memo.case_type?` · ${esc(memo.case_type)}`:''}</p>${badge(memo.status)}</header><div class="record-scroll" tabindex="0" role="region" aria-label="تفاصيل الطلب والمذكرة"><section class="record-section" aria-labelledby="record-input-title"><h3 id="record-input-title">بيانات الطلب</h3>${requestDetails(memo.input_json)}</section><section class="record-section" aria-labelledby="record-output-title"><h3 id="record-output-title">المذكرة المحفوظة</h3><article class="record-document record-prose" dir="rtl" lang="ar">${memoOCRNotice(memo.output_text)}${memoContent(memo.output_text)}</article></section></div>`;
   }
   const memoReference=value=>typeof value==='string'&&/^[A-Za-z0-9:_-]{1,100}$/.test(value)?value:'';
   async function openMemo(id){const data=await api('memos?id='+encodeURIComponent(id));openDetail(memoRecord(data.memo),true);}
