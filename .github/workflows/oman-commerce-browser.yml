@@ -1,0 +1,69 @@
+name: Oman Fruits Browser QA
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/oman-commerce-browser.yml']
+  workflow_dispatch:
+permissions: { contents: read }
+jobs:
+  browser-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - name: Install isolated Playwright
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.64.1
+          npx playwright install --with-deps chromium
+      - name: Exercise public shopper flow and protected routes
+        shell: bash
+        run: |
+          mkdir -p test-artifacts
+          node --input-type=module <<'JS'
+          import { chromium } from 'playwright';
+          import assert from 'node:assert/strict';
+          const base='https://q8-ux.github.io/saad/oman-fruits-commerce/';
+          const browser=await chromium.launch({headless:true});
+          const page=await browser.newPage({viewport:{width:1280,height:850}});
+          const errors=[];
+          page.on('pageerror',e=>errors.push(e.message));
+          try{
+            await page.goto(base,{waitUntil:'domcontentloaded',timeout:45000});
+            await page.locator('#catalog-grid .product-card').first().waitFor({timeout:45000});
+            const cards=await page.locator('#catalog-grid .product-card').count();
+            console.log('Visible product cards:',cards);
+            assert(cards>=20,'Expected at least 20 live products');
+            assert((await page.locator('body').innerText()).includes('منتجاتنا الطازجة'),'Catalog heading missing');
+            await page.locator('#catalog-search').fill('البامية');
+            const matches=await page.locator('#catalog-grid .product-card').count();
+            assert(matches>=1,'Search failed to locate okra');
+            await page.locator('#catalog-search').fill('');
+            await page.locator('[data-add-variant]').first().click();
+            const num=await page.locator('[data-cart-count]').first().innerText();
+            console.log('Cart count after add:',num);
+            assert(Number(num)>=1,'Cart did not update');
+            await page.screenshot({path:'test-artifacts/storefront.png',fullPage:true});
+            await page.goto(base+'checkout/',{waitUntil:'domcontentloaded'});
+            await page.locator('#checkout-form').waitFor({timeout:30000});
+            assert(await page.locator('input[name="phone"]').count()===1,'Checkout missing phone input');
+            await page.screenshot({path:'test-artifacts/checkout.png',fullPage:true});
+            await page.goto(base+'manager/',{waitUntil:'domcontentloaded'});
+            await page.waitForURL(url=>url.pathname.includes('/login/'),{timeout:30000});
+            await page.locator('#auth-form').waitFor({timeout:30000});
+            console.log('Manager route enforces login.');
+            await page.goto(base+'sales/',{waitUntil:'domcontentloaded'});
+            await page.waitForURL(url=>url.pathname.includes('/login/'),{timeout:30000});
+            console.log('Sales route enforces login.');
+            assert(errors.length===0,'Runtime errors: '+errors.join(' | '));
+            console.log('PASS: live public catalog, search, cart, checkout fields, protected sales and manager routes.');
+          }finally{await browser.close()}
+          JS
+      - name: Upload QA screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: oman-commerce-browser-captures
+          path: test-artifacts/
+          if-no-files-found: ignore
