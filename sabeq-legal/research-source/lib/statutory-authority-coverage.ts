@@ -33,7 +33,11 @@ export function missingPlannedStatutoryCitations(
   return [...required].filter(marker => {
     const source = evidence[Number(marker.slice(1)) - 1];
     const article = source && draftStatutoryText(source);
-    const hasMarker = new RegExp(`[【\\[]\\s*${marker}\\s*[】\\]]`, "u").test(grounds);
-    return !article || !hasMarker || !grounds.includes(article.quote);
+    // The article wording must be next to the actual citation in the same
+    // defense paragraph; a detached list elsewhere is not sufficient.
+    const citation = new RegExp(`[【\\[]\\s*${marker}\\s*[】\\]]`, "u");
+    const adjacent = !!article && grounds.split(/\\n+/u)
+      .some(paragraph => citation.test(paragraph) && paragraph.includes(article.quote));
+    return !adjacent;
   });
 }
