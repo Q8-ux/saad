@@ -44,7 +44,7 @@ jobs:
       # The GitHub source mirror excludes corpus seed databases. Full SADAD
       # transaction/recovery tests run against the complete native source.
       - name: Validate optional free Meta Llama adapter without real credentials
-        run: node --test tests/llama-openrouter.test.mjs
+        run: node --test tests/llama-openrouter.test.mjs tests/meta-secondary-review.test.mjs
       - name: Validate memo citation controls without private corpus data
         run: node --test tests/memo-generation-control.test.mjs
       - name: Reject corrupted statutory OCR and validate protected legal proofreading
