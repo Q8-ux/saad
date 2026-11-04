@@ -10,7 +10,7 @@ export const team = [
   { prefix: { ar: "المحامي", en: "Attorney", ur: "Attorney" }, name: { ar: "محمد ساحب الشمري", en: "Mohammed Saheb Al Shammari", ur: "Mohammed Saheb Al Shammari" }, image: "/images/team/mohammed-saheb-navy.png" },
   { prefix: { ar: "المحامي", en: "Attorney", ur: "Attorney" }, name: { ar: "حمد ناصر الماضي", en: "Hamad Nasser Al Madi", ur: "Hamad Nasser Al Madi" }, image: "/images/team/hamad-almadi-navy.png" },
   { prefix: { ar: "المحامي", en: "Attorney", ur: "Attorney" }, name: { ar: "خالد مشعل الظفيري", en: "Khalid Mishal Al Dhafiri", ur: "Khalid Mishal Al Dhafiri" }, image: "/images/team/khalid-aldhafiri-navy.png" },
-  { prefix: { ar: "المحامي", en: "Attorney", ur: "Attorney" }, name: { ar: "حمد الشمري", en: "Hamad Al Shammari", ur: "Hamad Al Shammari" }, image: "/images/team/hamad-alshammari-navy.png" },
+  { prefix: { ar: "المحامي", en: "Attorney", ur: "Attorney" }, name: { ar: "حمد أحمد الشمري", en: "Hamad Ahmed Al Shammari", ur: "Hamad Ahmed Al Shammari" }, image: "/images/team/hamad-alshammari-navy.png" },
 ] as const;
 
 export const mediaVideos = [
