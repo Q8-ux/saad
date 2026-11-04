@@ -23,7 +23,7 @@ const prod=id=>catalog.find(p=>p.id===id);
 const variant=id=>{for(const p of catalog){const v=(p.product_variants||[]).find(v=>v.id===id);if(v)return {...v,product:p}}return null};
 // 36 real market photographs, cleaned/cropped from the supplied promotional story screenshots.
 const atlasPhoto=p=>{
- const n=Number((String(p.slug||"").match(/^oman-(\\d+)$/)||[])[1]);
+ const n=Number((String(p.slug||"").match(/^oman-(\d+)$/)||[])[1]);
  if(!Number.isInteger(n)||n<1||n>36)return null;
  const i=n-1,x=((i%6)*20).toFixed(0),y=(Math.floor(i/6)*20).toFixed(0);
  return `<div class="photo-atlas" role="img" aria-label="${esc(p.name_ar)}" style="background-position:${x}% ${y}%"></div>`;
