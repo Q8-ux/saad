@@ -7,7 +7,6 @@ const bound = load('../lib/bound-draft.ts');
 const cite = load('../lib/legal-citation-review.ts');
 const language = load('../lib/legal-language.ts');
 const caseReasoning = load('../lib/case-reasoning.ts');
-const search = load('../lib/legal-search.ts', { '@/db': {} });
 
 // The observed faulty OCR is test input, not a reviewed statute or a source
 // to cite. The case, article number and legacy amounts must not be guessed.
@@ -26,7 +25,7 @@ const source = {
 test('damaged Arabic OCR is quarantined and not quoted as authoritative law', () => {
   assert.equal(ocr.statutoryOCRReview(damaged).requiresReview, true);
   assert.equal(ocr.draftStatutoryText(source), null);
-  const displayed = search.formatEvidence([source]);
+  const displayed = ocr.statutoryPromptExcerpt(source.text);
   assert.match(displayed,/محجوب عن التوليد/);
   assert.doesNotMatch(displayed,/سبعامئة|مخسة|عىل/);
   const input={facts:'واقعة اختبارية فقط',requests:'طلب اختباري فقط'};
@@ -54,6 +53,7 @@ test('ordinary legal spelling is corrected outside literal statutory quotes only
   assert.match(result,/ورفعت المذكرة/);
   assert.ok(result.includes(quote));
   assert.equal(ocr.statutoryOCRReview('نص اختبار سليم فيه أرقام وبنود').requiresReview,false);
+  assert.equal(ocr.statutoryPromptExcerpt('نص اختبار سليم'), 'نص اختبار سليم');
 });
 
 test('civil procedural research is relevant-only, not attached to penal defenses', () => {
