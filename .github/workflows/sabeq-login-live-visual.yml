@@ -21,7 +21,7 @@ jobs:
           site='https://q8-ux.github.io/saad/sabeq-ahmad/'
           mkdir -p evidence
           curl --fail --location --silent --show-error --max-time 30 "$site" > evidence/live-index.html
-          grep -F 'واجهة معاينة عامة وليست جلسة إدارية' evidence/live-index.html >/dev/null
+          grep -F 'لوحة متابعة أحمد' evidence/live-index.html >/dev/null
           chrome="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
           if [ -z "$chrome" ]; then
             echo 'A headless browser is unavailable on this runner.'
