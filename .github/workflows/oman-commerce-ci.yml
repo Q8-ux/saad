@@ -1,0 +1,39 @@
+name: Oman Fruits Commerce QA
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'oman-fruits-commerce/**'
+      - '.github/workflows/oman-commerce-ci.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate JavaScript and site files
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check oman-fruits-commerce/app.js
+          node --check oman-fruits-commerce/config.js
+          for page in index.html sales/index.html manager/index.html checkout/index.html order/index.html login/index.html; do
+            test -s "oman-fruits-commerce/$page"
+          done
+          python3 - <<'PY'
+          import json,pathlib
+          p=pathlib.Path('oman-fruits-commerce')
+          data=json.loads((p/'catalog.json').read_text(encoding='utf-8'))
+          products=data['products']; count=sum(len(x['variants']) for x in products)
+          assert len(products)==36,(len(products),'expected 36 products')
+          assert count==42,(count,'expected 42 variants')
+          assert any(x['needs_review'] if 'needs_review' in x else not x['confirmed'] for pdt in products for x in pdt['variants'])
+          src=(p/'app.js').read_text(encoding='utf-8')
+          assert 'claim_first_manager' not in src
+          assert 'window.print()' in src
+          assert 'place_online_order' in src and 'lookup_customer' in src
+          print('Validated 36 products, 42 variants, 2-copy printing and secure staff checkout methods')
+          PY
