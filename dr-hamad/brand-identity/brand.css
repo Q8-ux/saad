@@ -1,0 +1,40 @@
+:root {
+  /* Dr Hamad print/social brand identity tokens. Not imported by production site. */
+  --hamad-brand-navy: #17324D;
+  --hamad-brand-slate: #657883;
+  --hamad-brand-silver: #A9BAC3;
+  --hamad-brand-ice: #F1F8FA;
+  --hamad-brand-white: #FFFFFF;
+  --hamad-heading-font: "Noto Kufi Arabic", "Noto Sans Arabic", sans-serif;
+  --hamad-body-font: "Noto Sans Arabic", sans-serif;
+  --hamad-english-formal-font: "Liberation Serif", Georgia, serif;
+  --hamad-heading-weight: 700;
+  --hamad-subheading-weight: 600;
+  --hamad-body-weight: 400;
+}
+.hamad-brand-scope {
+  color: var(--hamad-brand-navy);
+  background: var(--hamad-brand-ice);
+  font-family: var(--hamad-body-font);
+  direction: rtl;
+}
+.hamad-brand-scope .brand-title {
+  font-family: var(--hamad-heading-font);
+  font-weight: var(--hamad-heading-weight);
+}
+.hamad-brand-scope .brand-subtitle {
+  font-family: var(--hamad-heading-font);
+  font-weight: var(--hamad-subheading-weight);
+}
+.hamad-brand-scope .brand-copy {
+  font-family: var(--hamad-body-font);
+  font-weight: var(--hamad-body-weight);
+}
+.hamad-brand-scope .brand-en-formal {
+  font-family: var(--hamad-english-formal-font);
+  font-weight: 700;
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+.hamad-brand-scope .brand-muted { color: var(--hamad-brand-slate); }
+.hamad-brand-scope .brand-rule { border-color: var(--hamad-brand-silver); }
