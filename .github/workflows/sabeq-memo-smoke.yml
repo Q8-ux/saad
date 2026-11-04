@@ -8,6 +8,11 @@ on:
       - 'sabeq-legal/research-source/tests/management-source-connection.test.mjs'
       - 'sabeq-legal/research-source/lib/management-data.ts'
       - 'sabeq-legal/research-source/lib/memo-requests.ts'
+      - 'sabeq-legal/research-source/lib/pleading-document.ts'
+      - 'sabeq-legal/research-source/lib/bound-draft.ts'
+      - 'sabeq-legal/research-source/app/api/legal/memo/route.ts'
+      - 'sabeq-legal/research-source/tests/reference-memo-sequence.test.mjs'
+      - 'sabeq-legal/research-source/specs/080-reference-memo-layout/**'
   workflow_dispatch:
 
 permissions:
@@ -29,7 +34,7 @@ jobs:
         run: npm ci --ignore-scripts --no-audit --no-fund
       - name: Exercise memo creation, generated/all views and official archive bridge
         working-directory: sabeq-legal/research-source
-        run: node --test tests/management-source-connection.test.mjs
+        run: node --test tests/management-source-connection.test.mjs tests/reference-memo-sequence.test.mjs tests/article-text-in-memos.test.mjs tests/verified-article-narrative.test.mjs
       - name: Read-only public website and legacy gateway checks
         shell: bash
         run: |
