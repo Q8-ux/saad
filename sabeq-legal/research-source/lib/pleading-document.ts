@@ -109,6 +109,7 @@ export function splitMemoGrounds(grounds: string) {
   let active: "defenses"|"replies"|"documents" = "defenses";
   for (const line of String(grounds || "").split(/\n+/u)) {
     const heading = line.trim()
+      .replace(/[\u064b-\u065f\u0670]/gu, "")
       .replace(/^(?:(?:أولاً|أولا|ثانياً|ثانيا|ثالثاً|ثالثا|رابعاً|رابعا|خامساً|خامسا)\s*[:：.،-]?\s*)/u, "")
       .replace(/^[\d٠-٩۰-۹]+\s*[.)-]\s*/u, "").trim();
     if (heading.length <= 90 && /^(?:الرد(?:ود)?\s+على|مناقشة)\s+(?:حجج|دفوع|أقوال|ادعاءات|مزاعم|اعتراضات)(?:\s|$)/u.test(heading)) { active="replies"; continue; }
