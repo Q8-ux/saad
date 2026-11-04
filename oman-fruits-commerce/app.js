@@ -21,7 +21,18 @@ const company=()=>settings.company_name||"شركة عمان للفواكه وا�
 const cartKey="oman_cart_v1";
 const prod=id=>catalog.find(p=>p.id===id);
 const variant=id=>{for(const p of catalog){const v=(p.product_variants||[]).find(v=>v.id===id);if(v)return {...v,product:p}}return null};
-const photo=p=>p.image_url?`<img loading="lazy" alt="${esc(p.name_ar)}" src="${esc(p.image_url)}" onerror="this.style.display='none';this.nextElementSibling.style.display='grid'"><div class="photo-fallback" style="display:none"><span>${esc(p.emoji||"🍎")}</span><small class="photo-tag">صورة توضيحية</small></div>`:`<div class="photo-fallback"><span>${esc(p.emoji||"🍎")}</span><small class="photo-tag">صورة توضيحية</small></div>`;
+// 36 real market photographs, cleaned/cropped from the supplied promotional story screenshots.
+const atlasPhoto=p=>{
+ const n=Number((String(p.slug||"").match(/^oman-(\\d+)$/)||[])[1]);
+ if(!Number.isInteger(n)||n<1||n>36)return null;
+ const i=n-1,x=((i%6)*20).toFixed(0),y=(Math.floor(i/6)*20).toFixed(0);
+ return `<div class="photo-atlas" role="img" aria-label="${esc(p.name_ar)}" style="background-position:${x}% ${y}%"></div>`;
+};
+const photo=p=>{
+ const fallback=atlasPhoto(p)||`<div class="photo-fallback"><span>${esc(p.emoji||"🍎")}</span><small class="photo-tag">صورة توضيحية</small></div>`;
+ if(!p.image_url)return fallback;
+ return `<img loading="lazy" alt="${esc(p.name_ar)}" src="${esc(p.image_url)}" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"><div class="photo-backup" style="display:none">${fallback}</div>`;
+};
 const catName=p=>categories.find(c=>c.id===p.category_id)?.name_ar||"فواكه";
 const activeVariants=p=>(p.product_variants||[]).filter(v=>v.published&&(!v.track_stock||num(v.stock_qty)>0));
 const cartCount=()=>cart.reduce((s,c)=>s+num(c.qty),0);
