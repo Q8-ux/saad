@@ -14,7 +14,7 @@ const input = {court:'المحكمة الكلية',courtCircuit:'الدائرة 
   requests:'أصلياً: رفض المطالبة فقط.',allParties:''};
 
 test('reference format keeps facts, defenses, rebuttal, relief and actual exhibits in court order', () => {
-  const grounds='1. دفع افتراضي مؤسس على واقعة الاختبار.\nالرد على حجج الخصم\n1. جواب افتراضي على الاعتراض.\nحافظة المستندات\nالمستند 1: شهادة اصطناعية مقدمة في الاختبار.';
+  const grounds='1. دفع افتراضي مؤسس على واقعة الاختبار.\nثالثًا: الرد على حجج الخصم\n1. جواب افتراضي على الاعتراض.\nحافظة المستندات\nالمستند 1: شهادة اصطناعية مقدمة في الاختبار.';
   const sections=document.splitMemoGrounds(grounds);
   assert.match(sections.defenses,/دفع افتراضي/);
   assert.match(sections.replies,/جواب افتراضي/);
