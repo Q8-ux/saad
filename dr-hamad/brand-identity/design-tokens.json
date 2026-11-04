@@ -1,0 +1,96 @@
+{
+  "name": "مسار الهوية البصرية للدكتور حمد",
+  "name_en": "Dr Hamad Brand Identity Path",
+  "version": "1.0.0",
+  "date": "2026-11-04",
+  "source": "user-supplied reference images",
+  "palette": {
+    "navy": {
+      "hex": "#17324D",
+      "role": "primary headlines and high-contrast text",
+      "status": "verified-from-reference-label"
+    },
+    "slate": {
+      "hex": "#657883",
+      "role": "secondary typography",
+      "status": "verified-from-reference-label"
+    },
+    "silver": {
+      "hex": "#A9BAC3",
+      "role": "borders and supporting elements",
+      "status": "verified-from-reference-label"
+    },
+    "ice": {
+      "hex": "#F1F8FA",
+      "role": "light backgrounds",
+      "status": "verified-from-reference-label"
+    }
+  },
+  "accentColors": {
+    "skyBlue": {
+      "hex": null,
+      "status": "visual-only-not-finalized"
+    },
+    "warmBeige": {
+      "hex": null,
+      "status": "visual-only-not-finalized"
+    }
+  },
+  "type": {
+    "arabicHeadline": {
+      "family": "Noto Kufi Arabic",
+      "recommendedWeights": [
+        600,
+        700
+      ]
+    },
+    "arabicBody": {
+      "family": "Noto Sans Arabic",
+      "recommendedWeights": [
+        400,
+        500,
+        600
+      ]
+    },
+    "englishFormal": {
+      "family": "Liberation Serif",
+      "recommendedWeights": [
+        400,
+        700
+      ]
+    },
+    "exactSourceWeights": "not specified in reference imagery"
+  },
+  "signature": {
+    "arName": "د. حمد ساكت العنزي",
+    "enName": "Hamad S. AlEnezi, MD",
+    "arSpecialty": "اختصاصي جراحة العظام وجراحة المفاصل الصناعية",
+    "enSpecialty": "Hip & Knee Reconstruction Surgeon",
+    "arSlogan": "حركة أفضل .. حياة أفضل",
+    "enSlogan": "Better Movement, Better Life"
+  },
+  "logo": {
+    "motif": "metallic H with orthopedic joint",
+    "variants": [
+      "metallic H",
+      "round H seal"
+    ],
+    "officialVectorAvailable": false,
+    "rebuildWithoutSourceProhibited": true
+  },
+  "sizes": {
+    "instagramPortrait": [
+      1080,
+      1350
+    ],
+    "instagramSquare": [
+      1080,
+      1080
+    ],
+    "story": [
+      1080,
+      1920
+    ],
+    "print": "A4"
+  }
+}
