@@ -1,4 +1,3 @@
-import { openRouterAsResponses } from "./llama-openrouter";
 import { intakeMemoFieldNames, type IntakeMemoFields } from "./memo-handoff";
 import { inferProceduralPosition, proceduralPositionInstructions, type ProceduralPosition } from "./procedural-position";
 import {matterFactInstructions} from "./matter-facts";
@@ -12,7 +11,7 @@ import { cleanIntakeContext, cleanCaseOrientation, proceduralFacts, isLegalChoic
 import { env } from "cloudflare:workers";
 import { prepareCaseContext, projectContextInstructions } from "./project-context";
 
-type OpenAIEnvironment = { OPENAI_API_KEY?: string; OPENAI_MODEL?: string; OPENAI_INTAKE_MODEL?: string; SABEQ_LLM_PROVIDER?: string; OPENROUTER_API_KEY?: string; OPENROUTER_FREE_MODEL?: string };
+type OpenAIEnvironment = { OPENAI_API_KEY?: string; OPENAI_MODEL?: string; OPENAI_INTAKE_MODEL?: string };
 type OpenAIOperation = "responses" | "transcription" | "speech" | "file_upload" | "file_delete";
 type OpenAIErrorKind =
   | "configuration"
@@ -110,16 +109,6 @@ export class OpenAIServiceError extends Error {
     this.kind = kind;
     this.status = status;
   }
-}
-
-// Explicit server-side opt-in. Existing provider remains the default until
-// the operator configures a key and enables Llama in the deployed Worker.
-function freeLlamaEnvironment() {
-  const runtime = env as unknown as OpenAIEnvironment;
-  if (runtime.SABEQ_LLM_PROVIDER?.trim() !== "openrouter_llama") return null;
-  const apiKey = runtime.OPENROUTER_API_KEY?.trim();
-  if (!apiKey) throw new OpenAIServiceError("configuration");
-  return { apiKey, model: runtime.OPENROUTER_FREE_MODEL?.trim() || "meta-llama/llama-3.3-70b-instruct:free" };
 }
 
 function getOpenAIEnvironment() {
@@ -225,20 +214,13 @@ export function openAIErrorResponse(error: unknown, fallback: string) {
 }
 
 export async function generateText(options: { instructions: string; input: string; maxOutputTokens?: number; schema?: Record<string,unknown>; signal?: AbortSignal }) {
-  const llama = freeLlamaEnvironment();
-  const openai = llama ? null : getOpenAIEnvironment();
-  const apiKey = llama?.apiKey || openai!.apiKey;
-  const model = llama?.model || openai!.model;
+  const { apiKey, model } = getOpenAIEnvironment();
   // max_output_tokens includes hidden reasoning tokens. A small cap can exhaust the
   // entire budget before any user-visible text is produced, so legal drafting gets
   // a generous ceiling while low reasoning keeps latency and cost controlled.
   const maxOutputTokens = Math.max(4_000, Math.min(options.maxOutputTokens || 10_000, 30_000));
 
-  const response = llama ? await openRouterAsResponses({
-    instructions: options.instructions, input: options.input,
-    ...(options.schema ? { text: { format: { type: "json_schema", name: "approved_pleading_content", strict: true, schema: options.schema } } } : {}),
-    max_output_tokens: maxOutputTokens,
-  }, apiKey, model, options.signal) : await openAIFetch("responses", "https://api.openai.com/v1/responses", {
+  const response = await openAIFetch("responses", "https://api.openai.com/v1/responses", {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
     body: JSON.stringify({
@@ -610,14 +592,13 @@ export async function conductLegalIntake(input: IntakeInput): Promise<LegalIntak
 }
 
 async function requestLegalIntake(input: IntakeInput, memory: QuestionMemory): Promise<LegalIntakeState> {
-  const llama = freeLlamaEnvironment();
-  const apiKey = llama?.apiKey || getOpenAIEnvironment().apiKey;
-  const model = llama?.model || (env as unknown as OpenAIEnvironment).OPENAI_INTAKE_MODEL?.trim() || "gpt-4.1-mini";
+  const { apiKey } = getOpenAIEnvironment();
+  const model = (env as unknown as OpenAIEnvironment).OPENAI_INTAKE_MODEL?.trim() || "gpt-4.1-mini";
   const cleaned = cleanIntakeContext(input.currentState);
   const statedProcedure = proceduralFacts([...(cleaned?.facts || []), ...input.messages.filter(m => m.role === "user").map(m => m.content)].join("\n"));
   const currentState = cleaned ? Object.fromEntries(Object.entries(cleaned).filter(([key]) => key !== "questionMemory")) : null;
   const preparedContext = prepareCaseContext(input.messages, cleaned);
-  const intakeRequest = {
+  const response = await openAIFetch("responses", "https://api.openai.com/v1/responses", {
     method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
     body: JSON.stringify({
       model, stream: Boolean(input.onText),
@@ -641,10 +622,7 @@ caseType لطبيعة الحق (مدني، تجاري، عمالي، أسرة، 
       input: JSON.stringify({ explicitProceduralFacts: statedProcedure, language: input.language, ...preparedContext, currentState, questionMemory: memory, verifiedLegalSources: input.evidence || "لا توجد نصوص قانونية مطابقة متاحة؛ لا تنشئ أسانيد من الذاكرة." }),
       ...responseModelOptions(model), text: { format: { type: "json_schema", name: "legal_case_intake", description: "Progressive Kuwait legal case intake and memo handoff state.", strict: true, schema: { ...compactIntakeSchema, properties: { ...compactIntakeSchema.properties, legalBasis: { ...legalIntakeSchema.properties.legalBasis, items: { ...legalIntakeSchema.properties.legalBasis.items, properties: { ...legalIntakeSchema.properties.legalBasis.items.properties, passageId: { type: "string", enum: input.passageIds?.length ? input.passageIds : ["unavailable"] } } } } } } } }, max_output_tokens: 4_500, store: false,
     }), signal: input.signal ? AbortSignal.any([input.signal, AbortSignal.timeout(45_000)]) : AbortSignal.timeout(45_000),
-  };
-  const response = llama
-    ? await openRouterAsResponses(JSON.parse(String(intakeRequest.body)), apiKey, model, input.signal)
-    : await openAIFetch("responses", "https://api.openai.com/v1/responses", intakeRequest, 1);
+  }, 1);
   if (!response.ok) await throwHttpError(response, "responses");
   let payload: OpenAIResponsePayload;
   if (input.onText) {
