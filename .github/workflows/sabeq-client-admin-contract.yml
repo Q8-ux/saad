@@ -47,6 +47,8 @@ jobs:
         run: node --test tests/memo-generation-control.test.mjs
       - name: Reject corrupted statutory OCR and validate protected legal proofreading
         run: node --test tests/ocr-statutory-gate.test.mjs tests/article-text-in-memos.test.mjs
+      - name: Preserve memo narrative and insert planned verified article quotations
+        run: node --test tests/verified-article-narrative.test.mjs
       - name: Validate memo import, checkout presentation and document layout
         run: node --test tests/assistant-memo-action.test.mjs tests/memo-import-render.test.mjs tests/payment-dialog.test.mjs tests/pleading-layout.test.mjs
       - run: node --test tests/admin-bridge-contract.test.mjs tests/memo-preparation.test.mjs tests/prepare-memo-route.test.mjs tests/memo-journey.test.mjs tests/admin-memo-display.test.mjs tests/admin-source-status.test.mjs
