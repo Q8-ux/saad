@@ -250,7 +250,7 @@ export default function SabeqSite() {
     fetch(apiUrl("/api/site-settings"), {cache:"no-store",signal:controller.signal}).then(async response => {
       if (!response.ok) return;
       const settings = await response.json() as SitePublicSettings;
-      if (settings.copy?.ar && Array.isArray(settings.team) && Array.isArray(settings.mediaVideos) && Array.isArray(settings.posts) && settings.contact && settings.branding) setSiteSettings(settings);
+      if (settings.copy?.ar && Array.isArray(settings.team) && Array.isArray(settings.mediaVideos) && Array.isArray(settings.posts) && settings.contact && settings.branding) setSiteSettings({ ...settings, team: settings.team.map(member => member.image?.includes("hamad-alshammari-navy.png") ? { ...member, name: { ...member.name, ar: "حمد أحمد الشمري", en: "Hamad Ahmed Al Shammari", ur: "Hamad Ahmed Al Shammari" } } : member) });
     }).catch(()=>{});
     return () => controller.abort();
   }, []);
