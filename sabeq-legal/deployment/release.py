@@ -10,7 +10,7 @@ import sys
 import tarfile
 
 WORKFLOW = ".github/workflows/deploy-pages.yml"
-SABEQ_DIRECTORIES = ("sabeq-legal", "sabeq-admin-preview")
+SABEQ_DIRECTORIES = ("sabeq-legal", "sabeq-admin-preview", "sabeq-ahmad")
 SABEQ_TOOL_PREFIXES = ("legal-memo-platform/tools/rea/", "legal-memo-platform/tools/spec-kit/", "legal-memo-platform/.agents/", "legal-memo-platform/.specify/", "legal-memo-platform/specs/001-spec-kit-adoption/", "legal-memo-platform/tools/internal-verification/", "legal-memo-platform/specs/006-internal-verification/", "legal-memo-platform/specs/007-indirect-intake/", "legal-memo-platform/specs/008-one-dinar-test/", "legal-memo-platform/specs/063-continuous-memo-admin/", "legal-memo-platform/native-admin-console/")
 SABEQ_TOOL_FILES = {"legal-memo-platform/AGENTS.md", "legal-memo-platform/package.json", "legal-memo-platform/.gitignore", ".github/workflows/sabeq-internal-verification.yml", ".github/workflows/sabeq-client-admin-contract.yml"}
 
@@ -101,6 +101,10 @@ def prepare():
     if admin.is_dir():
         shutil.rmtree(target / "sabeq-admin-preview", ignore_errors=True)
         shutil.copytree(admin, target / "sabeq-admin-preview")
+    ahmad = Path("sabeq-ahmad")
+    if ahmad.is_dir():
+        shutil.rmtree(target / "sabeq-ahmad", ignore_errors=True)
+        shutil.copytree(ahmad, target / "sabeq-ahmad")
     release = json.loads((source / "release.json").read_text())
     proof = {"commit": os.environ["GITHUB_SHA"], "source": release["clientSource"], "baseRun": previous["id"],
              "protectedFiles": len(protected), "protectedManifestSha256": hashlib.sha256(json.dumps(protected, sort_keys=True).encode()).hexdigest()}
@@ -125,6 +129,9 @@ def verify():
     release = json.loads((root / "sabeq-legal/release.json").read_text())
     if not all(re.fullmatch(r"[a-f0-9]{40}", release.get(k, "")) for k in ("clientSource", "backendSource")):
         raise RuntimeError("Source provenance missing")
+    supervisor = root / "sabeq-ahmad" / "index.html"
+    if not supervisor.is_file() or not supervisor.stat().st_size:
+        raise RuntimeError("Standalone Ahmad preview missing")
     admin = root / "sabeq-admin-preview"
     if (admin / "admin-release.json").is_file():
         metadata = json.loads((admin / "admin-release.json").read_text())
