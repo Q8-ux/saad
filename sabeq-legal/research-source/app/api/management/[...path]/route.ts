@@ -9,7 +9,7 @@ import { searchImportedEdition } from "@/lib/legislation-edition-import";
 import { getAuditFile } from "@/lib/legislation-audit";
 import { legislationWorkbench, archiveArticles, archiveAsset } from "@/lib/legislation-workbench";
 import { getD1 } from "@/db";
-import { assertManagementOrigin, assertManagerAction, exchangeManagerCode, managementJson, managerLogin, managerProfile, passwordManagerLogin, requireManager } from "@/lib/management-auth";
+import { assertManagementOrigin, assertManagerAction, exchangeManagerCode, managementJson, managerLogin, managerProfile, passwordManagerLogin, requireManager , managementCorsOrigin, withManagementCors } from "@/lib/management-auth";
 import { bridgeKeys, managerInbox, managerMemos, managerMemoRecovery, managerSnapshot, managerUpdates } from "@/lib/management-data";
 import { mailAction, operationEvent, whatsappAction } from "@/lib/management-integrations";
 import { verificationEmailAction } from "@/lib/verification-email-settings";
@@ -20,10 +20,11 @@ export const dynamic = "force-dynamic";
 function actionPath(request: Request) { return new URL(request.url).pathname.replace(/^\/api\/management\//, ""); }
 function failure(error: unknown) { return managementJson({ error: error instanceof RequestError ? error.message : "تعذر إكمال طلب الإدارة. أعد المحاولة.", code: error instanceof RequestError ? "request_rejected" : "service_unavailable" }, error instanceof RequestError ? error.status : 503); }
 export async function OPTIONS(request: Request) {
-  try { assertManagementOrigin(request); return new Response(null, { status: 204, headers: { "Access-Control-Allow-Origin": "https://q8-ux.github.io", "Access-Control-Allow-Methods": "GET, POST, OPTIONS", "Access-Control-Allow-Headers": "Content-Type, Authorization", "Access-Control-Max-Age": "600", Vary: "Origin" } }); }
+  try { assertManagementOrigin(request); return new Response(null, { status: 204, headers: { "Access-Control-Allow-Origin": managementCorsOrigin(request), "Access-Control-Allow-Methods": "GET, POST, OPTIONS", "Access-Control-Allow-Headers": "Content-Type, Authorization", "Access-Control-Max-Age": "600", Vary: "Origin" } }); }
   catch (error) { return failure(error); }
 }
-export async function GET(request: Request) {
+export async function GET(request: Request) { return withManagementCors(request, await handleGet(request)); }
+async function handleGet(request: Request) {
   try {
     const action = actionPath(request);
     if (action === "login") { await enforceRateLimit(request, "management-login", 20); return await managerLogin(request); }
@@ -57,7 +58,8 @@ export async function GET(request: Request) {
     throw new RequestError("القسم غير موجود.", 404);
   } catch (error) { return failure(error); }
 }
-export async function POST(request: Request) {
+export async function POST(request: Request) { return withManagementCors(request, await handlePost(request)); }
+async function handlePost(request: Request) {
   try {
     assertManagementOrigin(request);
     const action = actionPath(request), data = await readJsonObject(request, action === "password-login" ? 4_096 : action === "site" ? 200_000 : 20_000);

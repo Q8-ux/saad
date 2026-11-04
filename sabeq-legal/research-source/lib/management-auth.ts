@@ -7,6 +7,16 @@ export { sealConfig, openConfig } from "@/lib/management-vault";
 
 export const MANAGEMENT_HOME = "https://q8-ux.github.io/saad/sabeq-admin-preview/";
 export const MANAGEMENT_ORIGIN = new URL(MANAGEMENT_HOME).origin;
+// Trusted control-panel origins: legacy GitHub preview plus the official domain (/admin/, /supervisor/).
+export const MANAGEMENT_ALLOWED_ORIGINS = [MANAGEMENT_ORIGIN, "https://www.sabeq.legal", "https://sabeq.legal"];
+export function managementCorsOrigin(request: Request) {
+  const origin = request.headers.get("origin");
+  return origin && MANAGEMENT_ALLOWED_ORIGINS.includes(origin) ? origin : MANAGEMENT_ORIGIN;
+}
+export function withManagementCors(request: Request, response: Response) {
+  try { response.headers.set("Access-Control-Allow-Origin", managementCorsOrigin(request)); response.headers.set("Vary", "Origin"); return response; }
+  catch { return response; }
+}
 type Manager = { email: string; name: string; username?: string; role: "operator" | "administrator" | "reviewer" };
 const OPERATOR_SECTIONS = ["overview", "memos", "inbox", "notifications", "users", "legislation", "commands", "updates"];
 // Only expressly scoped operations are available to staff. Unknown actions fail closed.
@@ -37,7 +47,7 @@ export function managementJson(data: unknown, status = 200) {
 }
 export function assertManagementOrigin(request: Request) {
   const origin = request.headers.get("origin");
-  if (origin && origin !== MANAGEMENT_ORIGIN && origin !== new URL(request.url).origin) throw new RequestError("مصدر الطلب غير مسموح.", 403);
+  if (origin && !MANAGEMENT_ALLOWED_ORIGINS.includes(origin) && origin !== new URL(request.url).origin) throw new RequestError("مصدر الطلب غير مسموح.", 403);
 }
 export async function digest(value: string) {
   const data = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
