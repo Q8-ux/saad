@@ -1,0 +1,2 @@
+// Public client configuration only. No secrets, database passwords, or service_role tokens.
+window.OMAN_CONFIG=Object.freeze({supabaseUrl:"https://c--bd9ae430-2847-495f-9e07-72dd6eb16982-prod.lovable.cloud",publishableKey:"sb_publishable_7YMWzRMSsnTQk37H23SCAg_cLnx05Vy",base:"/saad/oman-fruits-commerce/"});
