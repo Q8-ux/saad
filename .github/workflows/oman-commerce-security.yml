@@ -1,0 +1,34 @@
+name: Oman Fruits RLS Security Checks
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/oman-commerce-security.yml']
+  workflow_dispatch:
+permissions: { contents: read }
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - name: Check anonymous access is denied to all private tables and privileged RPC
+        shell: bash
+        run: |
+          set -euo pipefail
+          API_URL=$(node -e "global.window={};require('./oman-fruits-commerce/config.js');process.stdout.write(window.OMAN_CONFIG.supabaseUrl)")
+          API_KEY=$(node -e "global.window={};require('./oman-fruits-commerce/config.js');process.stdout.write(window.OMAN_CONFIG.publishableKey)")
+          for private in customers customer_phones customer_addresses orders payments journal_entries journal_lines audit_logs user_roles; do
+            status=$(curl --silent --max-time 20 --output /tmp/deny.json --write-out '%{http_code}' -H "apikey: $API_KEY" "$API_URL/rest/v1/$private?select=*&limit=1")
+            echo "$private anonymous HTTP status: $status"
+            [[ "$status" == 401 || "$status" == 403 ]] || { echo "FAIL: $private unexpectedly readable anonymously"; head -c 400 /tmp/deny.json; exit 1; }
+          done
+          for op in lookup_customer claim_first_manager; do
+            status=$(curl --silent --max-time 20 --output /tmp/rpc.json --write-out '%{http_code}' \
+              -X POST -H "apikey: $API_KEY" -H 'Content-Type: application/json' \
+              --data '{"_phone":"50000000"}' "$API_URL/rest/v1/rpc/$op")
+            echo "$op anonymous HTTP status: $status"
+            [[ "$status" == 401 || "$status" == 403 || "$status" == 404 ]] || { echo "FAIL: privileged RPC unexpectedly callable"; head -c 400 /tmp/rpc.json; exit 1; }
+          done
+          echo 'PASS: Anonymous RLS and privileged RPC probes blocked.' >> "$GITHUB_STEP_SUMMARY"
