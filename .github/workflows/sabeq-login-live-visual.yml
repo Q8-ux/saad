@@ -18,9 +18,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          site='https://q8-ux.github.io/saad/sabeq-admin-preview/'
+          site='https://q8-ux.github.io/saad/sabeq-ahmad/'
           mkdir -p evidence
           curl --fail --location --silent --show-error --max-time 30 "$site" > evidence/live-index.html
+          grep -F 'واجهة معاينة عامة وليست جلسة إدارية' evidence/live-index.html >/dev/null
           chrome="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
           if [ -z "$chrome" ]; then
             echo 'A headless browser is unavailable on this runner.'
@@ -28,9 +29,9 @@ jobs:
           fi
           "$chrome" --headless --no-sandbox --disable-gpu --hide-scrollbars \
             --disable-dev-shm-usage --window-size=430,940 --force-device-scale-factor=1 \
-            --virtual-time-budget=4000 --screenshot=evidence/sabeq-live-login.png "$site" > /dev/null 2> evidence/browser-errors.txt
-          test -s evidence/sabeq-live-login.png
-          echo "Captured public login screenshot from $site"
+            --virtual-time-budget=4000 --screenshot=evidence/sabeq-ahmad-live-preview.png "$site" > /dev/null 2> evidence/browser-errors.txt
+          test -s evidence/sabeq-ahmad-live-preview.png
+          echo "Captured independent Ahmad public preview screenshot from $site"
       - name: Safely check deployed login without exposing a real password
         shell: bash
         run: |
@@ -48,9 +49,9 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: sabeq-live-login-visual
+          name: sabeq-ahmad-live-visual
           path: |
-            evidence/sabeq-live-login.png
+            evidence/sabeq-ahmad-live-preview.png
             evidence/browser-errors.txt
           if-no-files-found: warn
           retention-days: 7
