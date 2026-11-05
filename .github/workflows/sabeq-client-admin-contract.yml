@@ -45,6 +45,8 @@ jobs:
       # transaction/recovery tests run against the complete native source.
       - name: Validate optional free Meta Llama adapter without real credentials
         run: node --test tests/llama-openrouter.test.mjs tests/meta-secondary-review.test.mjs
+      - name: Syntax-check administration login JavaScript
+        run: node --check ../../sabeq-admin-preview/admin.js
       - name: Check management password recovery safeguards
         run: node --test tests/management-password-recovery.test.mjs
       - name: Validate memo citation controls without private corpus data
