@@ -38,6 +38,23 @@ with sync_playwright() as p:
         assert page.locator('#radarCards a[href^="https://investoman.om/"]').count()>=min(expected,1)
         if expected>0:
             assert page.locator("#radarUpdated").inner_text()!="—", "Missing source timestamp"
+            # Council is available only for current, official-source records.
+            buttons=page.locator("#radarCards button.council-review-button")
+            assert buttons.count()==expected, f"Expected {expected} Council actions, got {buttons.count()}"
+            official=page.locator("#radarCards article.radar-card").first.locator("a[href^='https://']").first.get_attribute("href")
+            buttons.first.click()
+            panel=page.locator("#councilPanel")
+            assert panel.is_visible(), "Council review panel did not open"
+            assert page.locator("#councilVision li").count()>=2, "Opportunity analysis missing"
+            assert page.locator("#councilRisk li").count()>=2, "Skeptic analysis missing"
+            assert page.locator("#councilVerify li").count()>=2, "Evidence analysis missing"
+            assert page.locator("#councilVerdict").inner_text().strip(), "Council conclusion missing"
+            assert page.locator("#councilOfficialLink").get_attribute("href")==official, "Council source differs from official listing"
+            page.locator("#councilClose").click()
+            assert not panel.is_visible(), "Council panel did not close"
+            page.locator("#language").select_option("en")
+            assert "Council" in page.locator("#radarCards button.council-review-button").first.inner_text(), "Council translation missing"
+            print("Council verified: current record, official link, three reviews, conclusion, close and locale switch")
         with open(__import__("os").environ["GITHUB_STEP_SUMMARY"],"a") as fp:
             fp.write(f"Live radar browser smoke passed: {displayed} official-source cards, {counter} in counter.\n")
     finally:
