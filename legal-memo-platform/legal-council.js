@@ -49,32 +49,102 @@ function verifiedSourceIndex(sources = []) {
     }));
 }
 
-function unverifiedLawQuotes(memo, indexed) {
-  // Only quoted passages explicitly introduced as statutory article text.
-  const rx = /(?:المادة\s*(?:رقم\s*)?[0-9٠-٩۰-۹]{1,4})[^\n«”]{0,100}[«“"]([^»”"]{15,2500})[»”"]/g;
-  const compact = text => String(text || '').replace(/\s+/g, ' ').trim();
-  const invalid = [];
-  for (const match of String(memo || '').matchAll(rx)) {
-    if (!indexed.some(source => compact(source.excerpt).includes(compact(match[1])))) {
-      invalid.push(compact(match[1]).slice(0, 140));
+// A bare article number is not an identity: article 12 can exist in many laws.
+// Tie the number to the same named law/year and the same returned official excerpt.
+const LAW_ID_RE = /(?:المرسوم\s+بقانون|القانون|قانون)\s*(?:رقم\s*)?([0-9٠-٩۰-۹]{1,5})\s*(?:لسنة|لسنه|لعام|\/)\s*([0-9٠-٩۰-۹]{4})/g;
+const ARTICLE_MATCH_RE = /(?:المادة|المادتان|المادتين)\s*(?:رقم\s*)?[\[(（]?\s*([0-9٠-٩۰-۹]{1,4})/g;
+function lawIdentity(source) {
+  const number = Number(digitNormalize(source.lawNumber));
+  const year = Number(digitNormalize(source.lawYear));
+  return Number.isInteger(number) && number > 0 && Number.isInteger(year) && year >= 1900
+    ? number + '/' + year : null;
+}
+function normalizeQuote(value) {
+  return String(value || '').normalize('NFKC').replace(/\s+/g, ' ').trim();
+}
+function citationContexts(memo) {
+  const paragraphs = String(memo || '').split(/[\n]+/);
+  const results = [];
+  for (const paragraph of paragraphs) {
+    const normalized = digitNormalize(paragraph);
+    const laws = [...normalized.matchAll(new RegExp(LAW_ID_RE.source, LAW_ID_RE.flags))].map(m => ({
+      index: m.index, end: m.index + m[0].length, identity: Number(m[1]) + '/' + Number(m[2]),
+    }));
+    const articles = [...normalized.matchAll(new RegExp(ARTICLE_MATCH_RE.source, ARTICLE_MATCH_RE.flags))];
+    for (let i = 0; i < articles.length; i++) {
+      const match = articles[i];
+      const number = Number(match[1]);
+      const next = articles[i + 1]?.index ?? paragraph.length;
+      const after = laws.find(l => l.index >= match.index + match[0].length && l.index < Math.min(next, match.index + 170));
+      const before = [...laws].reverse().find(l => l.end <= match.index && match.index - l.end < 100);
+      const linked = after || before || null;
+      results.push({ number, lawIdentity: linked?.identity || null, fragment: paragraph.slice(match.index, next).slice(0, 1000) });
     }
   }
-  return invalid;
+  return results.filter(item => Number.isInteger(item.number) && item.number > 0);
+}
+function unverifiedLawQuotes(contexts, indexed) {
+  const invalid = [];
+  const rx = /[«“"]([^»”"]{12,2500})[»”"]/g;
+  for (const context of contexts) {
+    const candidates = indexed.filter(source =>
+      source.articleNumbers.includes(context.number) &&
+      (!context.lawIdentity || lawIdentity(source) === context.lawIdentity));
+    for (const match of context.fragment.matchAll(new RegExp(rx.source, rx.flags))) {
+      const quote = normalizeQuote(match[1]);
+      if (!candidates.some(source => normalizeQuote(source.excerpt).includes(quote))) {
+        invalid.push(quote.slice(0, 140));
+      }
+    }
+  }
+  return [...new Set(invalid)];
 }
 
 function auditArticleReferences(memo, sources) {
   const indexed = verifiedSourceIndex(sources);
-  const mentioned = articleNumbers(memo);
-  const grounded = [...new Set(indexed.flatMap(source => source.articleNumbers))];
-  return {
+  const contexts = citationContexts(memo);
+  const mentioned = [...new Set(contexts.map(item => item.number))];
+  const unsupported = [], ambiguous = [], wrongLaw = [], unverifiableLaw = [];
+  const matchedToOfficialExcerpt = new Set();
+  for (const claim of contexts) {
+    const candidates = indexed.filter(item => item.articleNumbers.includes(claim.number));
+    if (!candidates.length) { unsupported.push(claim.number); continue; }
+    if (claim.lawIdentity) {
+      const correct = candidates.filter(item => lawIdentity(item) === claim.lawIdentity);
+      if (!correct.length) { wrongLaw.push(claim.number + ' / ' + claim.lawIdentity); continue; }
+      matchedToOfficialExcerpt.add(claim.number);
+    } else {
+      const identities = [...new Set(candidates.map(lawIdentity))];
+      if (identities.includes(null)) unverifiableLaw.push(claim.number);
+      else if (identities.length > 1) ambiguous.push(claim.number);
+      else matchedToOfficialExcerpt.add(claim.number);
+    }
+  }
+  const unverifiedLawQuotes = unverifiedLawQuotesForAudit(contexts, indexed);
+  const unique = values => [...new Set(values)];
+  const audit = {
     mentioned,
-    matchedToOfficialExcerpt: mentioned.filter(n => grounded.includes(n)),
-    unsupported: mentioned.filter(n => !grounded.includes(n)),
+    matchedToOfficialExcerpt: [...matchedToOfficialExcerpt],
+    unsupported: unique(unsupported),
+    ambiguous: unique(ambiguous),
+    wrongLaw: unique(wrongLaw),
+    unverifiableLaw: unique(unverifiableLaw),
     sourceCount: indexed.length,
-    unverifiedLawQuotes: unverifiedLawQuotes(memo, indexed),
-    // Match is NOT proof of the full law's text, attribution or current applicability.
+    unverifiedLawQuotes,
     requiresEffectiveDateCheck: true,
   };
+  audit.publicationBlocked = Boolean(audit.unsupported.length || audit.ambiguous.length ||
+    audit.wrongLaw.length || audit.unverifiableLaw.length || audit.unverifiedLawQuotes.length);
+  return audit;
+}
+const unverifiedLawQuotesForAudit = unverifiedLawQuotes;
+
+function importantFieldsChanged(original, revised, caseData = {}) {
+  const fields = ['clientName', 'otherParty', 'caseNumber', 'requests'];
+  return fields.filter(field => {
+    const value = String(caseData[field] || '').trim();
+    return value.length >= 3 && original.includes(value) && !revised.includes(value);
+  });
 }
 
 async function runLegalCouncil({ client, model, memo, caseData, sources = [] }) {
@@ -86,8 +156,9 @@ async function runLegalCouncil({ client, model, memo, caseData, sources = [] }) 
     ({ title, sourceUrl, reference, excerpt, lawNumber, lawYear }));
   if (!indexed.length) {
     return {
-      memo: original,
+      memo: '',
       reviewStatus: 'needs_review',
+      publicationBlocked: true,
       review: 'تعذر التحقق من أرقام المواد ونصوصها لغياب مقتطفات رسمية قابلة للاستشهاد.',
       articleAudit: auditArticleReferences(original, []),
       warnings: ['لا مصادر تشريعية رسمية متاحة؛ لا يجوز اعتماد أي إحالة إلى مادة بوصفها موثقة.'],
@@ -128,6 +199,7 @@ async function runLegalCouncil({ client, model, memo, caseData, sources = [] }) 
   const revisedMemo = String(revision?.output_text || '').trim();
   if (!revisedMemo) throw new Error('Reviser returned no text');
   const articleAudit = auditArticleReferences(revisedMemo, indexed);
+  const changedFields = importantFieldsChanged(original, revisedMemo, caseData);
   const warnings = [
     'المراجعة الآلية لا تثبت صحة النص الكامل للمادة أو آخر تعديل؛ يتطلب الاعتماد مراجعة قانونية بشرية.',
   ];
@@ -137,7 +209,19 @@ async function runLegalCouncil({ client, model, memo, caseData, sources = [] }) 
   if (articleAudit.unsupported.length) {
     warnings.push('إحالات غير متحققة إلى المواد: ' + articleAudit.unsupported.join('، ') + '. لا تعتمد النص قبل تصحيحها.');
   }
-  return { memo: revisedMemo, reviewStatus: 'needs_review', review, articleAudit, warnings };
+  if (articleAudit.wrongLaw.length) warnings.push('هوية القانون لا تطابق المصدر: ' + articleAudit.wrongLaw.join('، '));
+  if (articleAudit.ambiguous.length) warnings.push('أرقام مواد مشتركة بين قوانين متعددة: ' + articleAudit.ambiguous.join('، '));
+  if (articleAudit.unverifiableLaw.length) warnings.push('تعذر تحديد القانون المالك للمادة: ' + articleAudit.unverifiableLaw.join('، '));
+  if (changedFields.length) warnings.push('تم تغيير بيانات جوهرية في الصياغة: ' + changedFields.join('، '));
+  const publicationBlocked = articleAudit.publicationBlocked || changedFields.length > 0;
+  return {
+    memo: publicationBlocked ? '' : revisedMemo,
+    reviewStatus: 'needs_review',
+    publicationBlocked,
+    review,
+    articleAudit,
+    warnings,
+  };
 }
 
-module.exports = { articleNumbers, isOfficialSource, verifiedSourceIndex, auditArticleReferences, runLegalCouncil };
+module.exports = { articleNumbers, isOfficialSource, verifiedSourceIndex, auditArticleReferences, runLegalCouncil, citationContexts, importantFieldsChanged };
