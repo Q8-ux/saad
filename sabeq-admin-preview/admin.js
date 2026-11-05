@@ -31,7 +31,7 @@
   async function api(path,body,method,signal) {
     const response=await fetch(API+path,{method:method || (body?'POST':'GET'),headers:{...(token?{Authorization:'Bearer '+token}:{}),...(body?{'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{}),credentials:'omit',cache:'no-store',referrerPolicy:'no-referrer',signal:signal?AbortSignal.any([signal,AbortSignal.timeout(35_000)]):AbortSignal.timeout(30_000)});
     const data=await response.json().catch(()=>({error:'لم تصل استجابة قابلة للقراءة.'}));
-    if(response.status===401 && !['exchange','password-login'].includes(path)) {token='';manager=null;sessionStorage.removeItem(SESSION);loginScreen('انتهت الجلسة. سجّل الدخول للمتابعة.');}
+    if(response.status===401 && !['exchange','password-login','password-recovery-request','password-recovery-confirm'].includes(path)) {token='';manager=null;sessionStorage.removeItem(SESSION);loginScreen('انتهت الجلسة. سجّل الدخول للمتابعة.');}
     if(!response.ok)throw Error(data.error||'تعذر الاتصال بخدمة الإدارة.');
     return data;
   }
@@ -45,7 +45,15 @@
   function toast(message) { const node=document.getElementById('notice');node.textContent=message;node.hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>node.hidden=true,5500); }
   function loginScreen(message='') {
     globalThis.SabeqControl?.leave();globalThis.SabeqProgrammer?.clear();globalThis.SabeqLegislation?.leave();
-    app.innerHTML=`<main class="login"><img src="./sabeq-logo.png" width="100" height="100" alt="مجموعة سابق القانونية"><h1>مجموعة سابق القانونية</h1><p>تسجيل الدخول</p><form data-form="password-login">${input('username','اسم المستخدم','','required autocomplete="username" autocapitalize="none" spellcheck="false" dir="ltr" maxlength="32"')}${input('password','كلمة المرور','','required type="password" autocomplete="current-password" dir="ltr" minlength="1" maxlength="256"')}<button class="primary" type="submit">دخول</button></form><p class="muted" role="status">${esc(message||'أدخل اسم المستخدم وكلمة المرور.')}</p></main>`;
+    app.innerHTML=`<main class="login"><img src="./sabeq-logo.png" width="100" height="100" alt="مجموعة سابق القانونية"><h1>مجموعة سابق القانونية</h1><p>تسجيل الدخول</p><form data-form="password-login">${input('username','اسم المستخدم','','required autocomplete="username" autocapitalize="none" spellcheck="false" dir="ltr" maxlength="32"')}${input('password','كلمة المرور','','required type="password" autocomplete="current-password" dir="ltr" minlength="1" maxlength="256"')}<button class="primary" type="submit">دخول</button></form><p class="muted"><button type="button" data-action="forgot-password" class="secondary">نسيت كلمة المرور؟</button></p><p class="muted" role="status">${esc(message||'أدخل اسم المستخدم وكلمة المرور.')}</p></main>`;
+  }
+  function recoveryRequestScreen(message='') {
+    app.innerHTML=`<main class="login"><img src="./sabeq-logo.png" width="100" height="100" alt="مجموعة سابق القانونية"><h1>استعادة كلمة المرور</h1><p>أدخل اسم المستخدم. إذا كان له بريد استرداد معتمد فستصلك رسالة برابط مؤقت.</p><form data-form="password-recovery-request">${input('username','اسم المستخدم','','required autocomplete="username" autocapitalize="none" dir="ltr" maxlength="32"')}<button class="primary" type="submit">إرسال رابط الاستعادة</button></form><button type="button" class="secondary" data-action="back-login">العودة لتسجيل الدخول</button><p class="muted" role="status">${esc(message)}</p></main>`;
+  }
+  function recoveryConfirmScreen(recoveryToken) {
+    if(!/^[A-Za-z0-9_-]{43}$/.test(recoveryToken)){loginScreen('رابط الاستعادة غير صحيح.');return;}
+    history.replaceState(null,'',location.pathname);
+    app.innerHTML=`<main class="login"><img src="./sabeq-logo.png" width="100" height="100" alt="مجموعة سابق القانونية"><h1>تعيين كلمة مرور جديدة</h1><p>16 محرفاً على الأقل مع حرف كبير وصغير ورقم ورمز.</p><form data-form="password-recovery-confirm"><input type="hidden" name="token" value="${esc(recoveryToken)}">${input('newPassword','كلمة المرور الجديدة','','required type="password" autocomplete="new-password" minlength="16" maxlength="256"')}${input('confirmPassword','تأكيد كلمة المرور','','required type="password" autocomplete="new-password" minlength="16" maxlength="256"')}<button class="primary" type="submit">حفظ كلمة المرور الجديدة</button></form><button type="button" class="secondary" data-action="back-login">إلغاء والعودة للدخول</button></main>`;
   }
   function canSection(id){return Object.hasOwn(labels,id)&&(!manager?.sections||manager.sections.includes(id));}
   function shell() {
@@ -223,7 +231,9 @@
     button.disabled=true;
     try{
       if(button.hasAttribute('data-verification-check')){verificationMail=await api('verification-email',{action:'check'});if(section==='mail'&&manager)renderMail();return;}
-      if(button.dataset.action==='logout'){globalThis.SabeqControl?.leave();globalThis.SabeqProgrammer?.clear();globalThis.SabeqLegislation?.leave();await api('logout',{});token='';manager=null;sessionStorage.removeItem(SESSION);sessionStorage.removeItem(RECORD);pendingMemoId='';snapshot=null;rows=[];detail.replaceChildren();if(dialog.open)dialog.close();loginScreen('تم تسجيل الخروج.');}
+      if(button.dataset.action==='forgot-password'){recoveryRequestScreen();return;}
+       if(button.dataset.action==='back-login'){loginScreen();return;}
+       if(button.dataset.action==='logout'){globalThis.SabeqControl?.leave();globalThis.SabeqProgrammer?.clear();globalThis.SabeqLegislation?.leave();await api('logout',{});token='';manager=null;sessionStorage.removeItem(SESSION);sessionStorage.removeItem(RECORD);pendingMemoId='';snapshot=null;rows=[];detail.replaceChildren();if(dialog.open)dialog.close();loginScreen('تم تسجيل الخروج.');}
       if(button.dataset.userEdit){const u=rows.find(row=>row.id===button.dataset.userEdit);if(!u)throw Error('لم يعد الحساب في الصفحة الحالية.');openDetail(`<h2 class="detail-title">إدارة حساب المستخدم</h2><p class="detail-meta"><bdi>${esc(u.email)}</bdi></p><form data-form="user-edit"><input type="hidden" name="id" value="${esc(u.id)}">${input('name','الاسم',u.name,'required minlength="2" maxlength="120"')}${input('phone','الهاتف',u.phone,'dir="ltr" maxlength="40"')}<label class="field"><span>حالة الحساب</span><select name="status"><option value="active" ${u.status==='active'?'selected':''}>نشط</option><option value="suspended" ${u.status==='suspended'?'selected':''}>موقوف</option></select></label><div class="form-grid">${input('memoLimit','حد المذكرات الشهري',u.memo_limit,'required type="number" min="-1" max="500" step="1"')}${input('assistantLimit','حد استخدام المساعد الشهري',u.assistant_limit,'required type="number" min="-1" max="5000" step="1"')}</div><p class="service-status">القيمة 0 تمنع الاستخدام، و−1 تعني غير محدود. إيقاف الحساب ينهي جلساته دون حذف سجلاته.</p><button class="primary" type="submit">حفظ بيانات الحساب</button></form>`);}
       if(button.dataset.sadadReconcile){openDetail(`<h2 class="detail-title">مطابقة فاتورة سداد</h2><p>أدخل معرف الفاتورة من حساب سداد. يتحقق الخادم من مرجع الطلب والمبلغ والعملة قبل ربطها. هذه العملية لا تنشئ فاتورة أو تسحب رسوماً.</p><form data-form="sadad-reconcile"><input type="hidden" name="paymentId" value="${esc(button.dataset.sadadReconcile)}">${input('invoiceId','معرف فاتورة سداد','','required inputmode="numeric" pattern="[0-9]+" dir="ltr"')}<button class="primary" type="submit">تحقق وطابق الفاتورة</button></form>`);}
       if(button.hasAttribute('data-sadad-test')){paymentsData=await api('payments',{action:'test'});renderPayments();toast('نجحت مصادقة سداد. لم تنشأ فاتورة ولم تُسحب رسوم.');}
@@ -241,7 +251,9 @@
   document.addEventListener('click',event=>void handleClick(event));
   document.addEventListener('submit',async event=>{const form=event.target;if(!form.matches('[data-form]'))return;event.preventDefault();const kind=form.dataset.form,values=Object.fromEntries(new FormData(form));const button=form.querySelector('[type="submit"]');button.disabled=true;
     try{
-      if(kind==='password-login'){const data=await api('password-login',values);token=data.token;sessionStorage.setItem(SESSION,token);manager=data.manager;form.reset();shell();await load();await openPendingMemo();return;}
+      if(kind==='password-recovery-request'){const result=await api('password-recovery-request',values);recoveryRequestScreen(result.message||'إذا كان الحساب مهيأً فستصل رسالة إلى بريد الاسترداد.');return;}
+       if(kind==='password-recovery-confirm'){const result=await api('password-recovery-confirm',values);loginScreen(result.message||'تم تحديث كلمة المرور.');return;}
+       if(kind==='password-login'){const data=await api('password-login',values);token=data.token;sessionStorage.setItem(SESSION,token);manager=data.manager;form.reset();shell();await load();await openPendingMemo();return;}
       if(kind==='sadad-reconcile'){paymentsData=await api('payments',{...values,action:'reconcile'});dialog.close();renderPayments();toast('تمت مطابقة الفاتورة والتحقق من بياناتها.');}
       if(kind==='sadad'){paymentsData=await api('payments',{...values,action:'save',publicCheckoutEnabled:form.elements.publicCheckoutEnabled.checked,required:form.elements.required.checked,accountConfirmed:form.elements.accountConfirmed.checked,callbacksConfirmed:form.elements.callbacksConfirmed.checked});renderPayments();toast('حُفظت إعدادات سداد في الخادم.');}
       if(kind==='user-search'){query=String(values.q||'');memoStatus=String(values.status||'');offset=0;await load();}
@@ -269,7 +281,8 @@
   async function boot(){
     try{
       const url=new URL(location.href),code=url.searchParams.get('code'),state=url.searchParams.get('state'),loginError=url.searchParams.get('login_error');
-      const [hashSection,recordQuery='']=url.hash.slice(1).split('?');
+      if(url.hash.startsWith('#reset=')){token='';try{sessionStorage.removeItem(SESSION);}catch{}recoveryConfirmScreen(url.hash.slice(7));return;}
+       const [hashSection,recordQuery='']=url.hash.slice(1).split('?');
       const requestedSection=hashSection||sessionStorage.getItem('sabeq-admin-section');if(Object.hasOwn(labels,requestedSection)){section=requestedSection;sessionStorage.setItem('sabeq-admin-section',section);}
       pendingMemoId=section==='memos'?memoReference(new URLSearchParams(recordQuery).get('record')||sessionStorage.getItem(RECORD)):'';
       if(pendingMemoId)sessionStorage.setItem(RECORD,pendingMemoId);else sessionStorage.removeItem(RECORD);
