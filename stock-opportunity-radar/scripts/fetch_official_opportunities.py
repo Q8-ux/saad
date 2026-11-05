@@ -20,7 +20,7 @@ from bs4 import BeautifulSoup
 OUT = Path(__file__).resolve().parents[1] / "data" / "live.json"
 USER_AGENT = "GulfOpportunityRadar/1.0 (public-information index; source links; respectful rate limits)"
 SOURCES = [
-    {"id":"bh-tenders","country":"bh","type":"government_tender","name":"Bahrain Tender Board","url":"https://www.tenderboard.gov.bh/Tenders/PublicTenders/","fallback":"https://www.tenderboard.gov.bh/tenders/publictenders/","parser":"bahrain"},
+    {"id":"bh-tenders","country":"bh","type":"government_tender","name":"Bahrain Tender Board","url":"https://www.tenderboard.gov.bh/Tenders/PublicTenders","fallback":"https://www.tenderboard.gov.bh/tenders","parser":"bahrain"},
     {"id":"om-invest","country":"om","type":"investment_project","name":"Invest Oman","url":"https://investoman.om/investment-opportunities","fallback":"https://www.investoman.om/investment-opportunities","parser":"oman"},
 ]
 # Explicitly not ingested: Etimad's anti-automation challenge, access-controlled
@@ -57,74 +57,74 @@ def valid_url(link: str, allowed_hosts: set[str]) -> str | None:
         return None
 
 def bahrain(soup: BeautifulSoup, root: str, now: datetime) -> list[dict]:
-    found = []
-    # The public notice table has columns: ordinal, subject, tender type, authority,
-    # publication date, purchase-before, closing date.
+    found = {}
+    # Data must be present in the public HTML: request > table > real dated row.
+    # Never infer project names from page titles, search snippets or advertisements.
     for table in soup.select("table"):
-        head = compact(" ".join(x.get_text(" ",strip=True) for x in table.select("thead th, tr th"))).lower()
-        if not ("published date" in head and "closing date" in head) and not ("tender" in head and "purchas" in head):
+        headings=[compact(x.get_text(" ",strip=True)).lower() for x in table.select("thead th, tr th")]
+        header=" ".join(headings)
+        header_is_tender="published date" in header and "closing date" in header
+        if not header_is_tender:
             continue
         for tr in table.select("tr"):
-            cells = tr.find_all("td",recursive=False)
-            if len(cells) < 7:
+            cells=tr.find_all("td",recursive=False)
+            if len(cells)<7:
                 continue
-            ordinal, subject, tender_type, authority, published, purchase_before, closing = [compact(x.get_text(" ",strip=True)) for x in cells[:7]]
-            if not re.fullmatch(r"\d{1,3}",ordinal):
-                continue
+            fields=[compact(x.get_text(" ",strip=True)) for x in cells[:7]]
+            ordinal, subject, tender_type, authority, published, purchase_before, closing=fields
             posted=parse_date(published)
             closes=parse_date(closing)
-            title=compact(subject)
-            if not (posted and closes and len(title)>=15 and len(title)<=280 and len(authority)>=3):
+            if not (re.fullmatch(r"\d{1,3}",ordinal) and posted and closes and len(subject)>=15 and len(authority)>=3):
                 continue
-            if closes < (now.date()-timedelta(days=1)).isoformat() or posted > (now.date()+timedelta(days=2)).isoformat():
+            # Allow only open/current tenders at the time of retrieval.
+            if closes<now.date().isoformat() or posted>now.date().isoformat() or posted<(now.date()-timedelta(days=100)).isoformat():
                 continue
-            # Limit to near-current published tenders. Never reuse archived results.
-            if posted < (now.date()-timedelta(days=100)).isoformat():
+            if len(subject)>320:
                 continue
-            href = None
+            href=None
             for a in cells[1].select("a[href]"):
-                candidate = urljoin(root,a.get("href",""))
-                href=valid_url(candidate,{"www.tenderboard.gov.bh","tenderboard.gov.bh"})
-                if href:
-                    break
-            found.append({
-                "id":make_id("bh-tenders",title,authority),
-                "country":"bh","kind":"tender","title":title,
+                href=valid_url(urljoin(root,a.get("href","")),{"www.tenderboard.gov.bh","tenderboard.gov.bh"})
+                if href:break
+            entry={
+                "id":make_id("bh-tenders",subject,authority),
+                "country":"bh","kind":"tender","title":subject,
                 "agency":authority,"tender_type":tender_type,
                 "posted_at":posted,"closes_at":closes,"value":None,
                 "source_id":"bh-tenders","source_name":"Bahrain Tender Board",
                 "source_url":href or root,"link_scope":"detail" if href else "official_listing",
-                "basis":"Official published tender notice — eligibility and documents require verification",
+                "basis":"Official published tender notice; check eligibility and documents at source",
                 "observed_at":now.isoformat().replace("+00:00","Z")
-            })
-    # Dedup because some government templates render the same table twice.
-    return list({x["id"]:x for x in found}.values())[:50]
+            }
+            found[entry["id"]]=entry
+    return list(found.values())[:60]
 
 def oman(soup: BeautifulSoup, root: str, now: datetime) -> list[dict]:
-    found = {}
-    # Only accept an actual published project with explicit OMR capital.
-    # Public site sometimes renders projects via JS; if so, fail closed instead of guessing.
-    for node in soup.select("article, .card, .opportunity-card, [class*='opportunity-item'], [class*='opportunity-card']"):
+    found={}
+    # Invest Oman displays project cards (possibly rendered client side).
+    # Do not pass generic sector articles as currently available projects.
+    candidates=soup.select("article, .card, .opportunity-card, [class*='opportunity-item'], [class*='opportunity-card']")
+    for node in candidates:
         body=compact(node.get_text(" ",strip=True))
-        if len(body)<35 or len(body)>1600 or "OMR" not in body:
+        if not (35<=len(body)<=1700 and "OMR" in body):
             continue
-        value=re.search(r"\b([\d,]{5,})\s*OMR\b",body,re.I)
-        if not value: continue
+        amount=re.search(r"(?<!\w)([\d,]{5,})\s*OMR\b",body,re.I)
+        if not amount:continue
         h=node.find(["h2","h3","h4","h5"])
         title=compact(h.get_text(" ",strip=True)) if h else ""
         if not (12<=len(title)<=160):continue
-        anchor=node.find("a",href=True)
-        url=valid_url(urljoin(root,anchor["href"]),{"investoman.om","www.investoman.om"}) if anchor else None
-        if not url: url=root
+        link=None
+        for anchor in node.select("a[href]"):
+            link=valid_url(urljoin(root,anchor.get("href","")),{"investoman.om","www.investoman.om"})
+            if link and "/investment-opportunities" in link:break
+        if not link:link=root
         ident=make_id("om-invest",title)
         found[ident]={
             "id":ident,"country":"om","kind":"investment_project",
             "title":title,"agency":"Invest Oman",
-            "posted_at":None,"closes_at":None,
-            "value":value.group(1)+" OMR",
+            "posted_at":None,"closes_at":None,"value":amount.group(1)+" OMR",
             "source_id":"om-invest","source_name":"Invest Oman",
-            "source_url":url,"link_scope":"detail" if url!=root else "official_listing",
-            "basis":"Project in official investment explorer; availability and capital require confirmation",
+            "source_url":link,"link_scope":"detail" if link!=root else "official_listing",
+            "basis":"Project in the government investment explorer; verify availability and stated capital",
             "observed_at":now.isoformat().replace("+00:00","Z")
         }
     return list(found.values())[:40]
