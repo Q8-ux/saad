@@ -1,4 +1,4 @@
-"""Safely add Stock Opportunity Radar to the current multi-site Pages artifact.
+"""Safely add Gulf Investment Compass and preserved Stocks screener to Pages.
 
 This intentionally does NOT rebuild or overwrite unrelated sites.
 """
@@ -50,12 +50,18 @@ def prepare():
     if actual != expected:
         raise RuntimeError("Checkout does not match the triggering commit")
     source = Path(PROJECT)
-    if not (source / "index.html").is_file() or not (source / "README.md").is_file():
-        raise RuntimeError("Missing Stock Radar source")
+    required = ("index.html", "guide.css", "guide.js", "guide-data.js", "assets/talking-path.js", "stocks/index.html", "README.md")
+    for name in required:
+        if not (source / name).is_file() or not (source / name).stat().st_size:
+            raise RuntimeError("Missing Gulf Guide source: " + name)
     page = (source / "index.html").read_text(encoding="utf-8")
-    for marker in ("STOCK OPPORTUNITY RADAR", "DEMO", 'id="csvFile"', "SMA20", "SMA50"):
+    for marker in ("Gulf Investment Compass", 'id="chatForm"', 'id="language"', 'id="lawCards"'):
         if marker not in page:
-            raise RuntimeError("Stock Radar HTML is incomplete: " + marker)
+            raise RuntimeError("Gulf Guide HTML is incomplete: " + marker)
+    stock_page = (source / "stocks/index.html").read_text(encoding="utf-8")
+    for marker in ("STOCK OPPORTUNITY RADAR", 'id="csvFile"'):
+        if marker not in stock_page:
+            raise RuntimeError("Preserved stocks screener is incomplete: " + marker)
 
     def api(path):
         result = subprocess.check_output(["gh", "api", f"repos/{repo}/{path}"], text=True)
@@ -102,7 +108,7 @@ def prepare():
             dest = root / item.relative_to(source.parent)
             if sha256(dest) != sha256(item):
                 raise RuntimeError(f"Copy mismatch: {item}")
-    print(f"Stock Radar staged with {len(protected)} unrelated files unchanged. Baseline run {run_id}")
+    print(f"Gulf Investment Compass staged with {len(protected)} unrelated files unchanged. Baseline run {run_id}")
 
 
 if __name__ == "__main__":
