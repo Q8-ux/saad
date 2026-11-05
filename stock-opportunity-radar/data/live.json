@@ -1,8 +1,105 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-05T07:01:12.301025Z",
+  "generated_at": "2026-11-05T07:05:04.689049Z",
   "refresh_interval_minutes": 30,
-  "records": [],
+  "records": [
+    {
+      "id": "afe35ccd11bc2f407ec9",
+      "country": "om",
+      "kind": "investment_project",
+      "title": "Smart Agricultural Cluster",
+      "agency": "Invest Oman",
+      "posted_at": null,
+      "closes_at": null,
+      "value": "17,000,000 OMR",
+      "source_id": "om-invest",
+      "source_name": "Invest Oman",
+      "source_url": "https://investoman.om/investment-opportunities/1850",
+      "link_scope": "detail",
+      "basis": "Official individual investment project page; availability and capital require re-verification",
+      "observed_at": "2026-11-05T07:05:04.689049Z"
+    },
+    {
+      "id": "be4ddb2ec4c9c469f4fe",
+      "country": "om",
+      "kind": "investment_project",
+      "title": "Marine Docks Equipment Factory",
+      "agency": "Invest Oman",
+      "posted_at": null,
+      "closes_at": null,
+      "value": "6,200,000 OMR",
+      "source_id": "om-invest",
+      "source_name": "Invest Oman",
+      "source_url": "https://investoman.om/investment-opportunities/1849",
+      "link_scope": "detail",
+      "basis": "Official individual investment project page; availability and capital require re-verification",
+      "observed_at": "2026-11-05T07:05:04.689049Z"
+    },
+    {
+      "id": "f1b7d7d06c8e0a367194",
+      "country": "om",
+      "kind": "investment_project",
+      "title": "Luxury Yacht Marina Development – Quriyat",
+      "agency": "Invest Oman",
+      "posted_at": null,
+      "closes_at": null,
+      "value": "37,000,000 OMR",
+      "source_id": "om-invest",
+      "source_name": "Invest Oman",
+      "source_url": "https://investoman.om/investment-opportunities/1842",
+      "link_scope": "detail",
+      "basis": "Official individual investment project page; availability and capital require re-verification",
+      "observed_at": "2026-11-05T07:05:04.689049Z"
+    },
+    {
+      "id": "dc7d597802a2d2f13aaf",
+      "country": "om",
+      "kind": "investment_project",
+      "title": "Livestock Fattening and Dairy Farm in Al Najd Agricultural Zone",
+      "agency": "Invest Oman",
+      "posted_at": null,
+      "closes_at": null,
+      "value": "4,448,963 OMR",
+      "source_id": "om-invest",
+      "source_name": "Invest Oman",
+      "source_url": "https://investoman.om/investment-opportunities/1862",
+      "link_scope": "detail",
+      "basis": "Official individual investment project page; availability and capital require re-verification",
+      "observed_at": "2026-11-05T07:05:04.689049Z"
+    },
+    {
+      "id": "862d3feb44cb2807c054",
+      "country": "om",
+      "kind": "investment_project",
+      "title": "Integrated Mobility and Logistics Center- Al Suwaiq",
+      "agency": "Invest Oman",
+      "posted_at": null,
+      "closes_at": null,
+      "value": "5,000,000 OMR",
+      "source_id": "om-invest",
+      "source_name": "Invest Oman",
+      "source_url": "https://investoman.om/investment-opportunities/1841",
+      "link_scope": "detail",
+      "basis": "Official individual investment project page; availability and capital require re-verification",
+      "observed_at": "2026-11-05T07:05:04.689049Z"
+    },
+    {
+      "id": "111f723392b84b959da9",
+      "country": "om",
+      "kind": "investment_project",
+      "title": "Develop Neighbourhood 7: A Mixed-Use Destination in A’Thuraya City",
+      "agency": "Invest Oman",
+      "posted_at": null,
+      "closes_at": null,
+      "value": "160,000,000 OMR",
+      "source_id": "om-invest",
+      "source_name": "Invest Oman",
+      "source_url": "https://investoman.om/investment-opportunities/1881",
+      "link_scope": "detail",
+      "basis": "Official individual investment project page; availability and capital require re-verification",
+      "observed_at": "2026-11-05T07:05:04.689049Z"
+    }
+  ],
   "sources": [
     {
       "id": "bh-tenders",
@@ -12,7 +109,7 @@
       "status": "unavailable",
       "records": 0,
       "last_success_at": null,
-      "last_checked_at": "2026-11-05T07:01:12.301025Z",
+      "last_checked_at": "2026-11-05T07:05:04.689049Z",
       "details": "No verified current records; source may require JavaScript, authorized API or a markup update",
       "attempts": [
         {
@@ -32,23 +129,11 @@
       "country": "om",
       "name": "Invest Oman",
       "url": "https://investoman.om/investment-opportunities",
-      "status": "unavailable",
-      "records": 0,
-      "last_success_at": null,
-      "last_checked_at": "2026-11-05T07:01:12.301025Z",
-      "details": "No verified current records; source may require JavaScript, authorized API or a markup update",
-      "attempts": [
-        {
-          "url": "https://investoman.om/investment-opportunities",
-          "http": 200,
-          "error": "no_verified_records"
-        },
-        {
-          "url": "https://www.investoman.om/investment-opportunities",
-          "http": 200,
-          "error": "no_verified_records"
-        }
-      ]
+      "status": "ok",
+      "records": 6,
+      "last_success_at": "2026-11-05T07:05:04.689049Z",
+      "last_checked_at": "2026-11-05T07:05:04.689049Z",
+      "details": "Verified from rendered official public webpage"
     },
     {
       "id": "sa-etimad",
@@ -83,6 +168,6 @@
       "reason": "Official investment gateway without validated live listing feed"
     }
   ],
-  "count": 0,
+  "count": 6,
   "mode": "official-source snapshots; not a streaming market feed"
 }
