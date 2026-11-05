@@ -308,6 +308,12 @@ export const managementLoginCodes = sqliteTable("management_login_codes", {
   codeHash: text("code_hash").primaryKey(), email: text("email").notNull(), name: text("name").notNull(),
   challenge: text("challenge").notNull(), expiresAt: integer("expires_at").notNull(),
 });
+export const managementPasswordResets = sqliteTable("management_password_resets", {
+  tokenHash: text("token_hash").primaryKey(),
+  accountId: text("account_id").notNull(),
+  expiresAt: integer("expires_at").notNull(),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+}, t => [index("management_password_resets_account_idx").on(t.accountId)]);
 export const managementSessions = sqliteTable("management_sessions", {
   tokenHash: text("token_hash").primaryKey(), email: text("email").notNull(), name: text("name").notNull(),
   expiresAt: integer("expires_at").notNull(), lastSeenAt: integer("last_seen_at").notNull(),
