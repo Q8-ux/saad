@@ -47,14 +47,15 @@ export async function POST(request: Request) {
     if (payload.action === "list") {
       const offset = payload.offset;
       if (offset !== undefined && (!Number.isSafeInteger(offset) || Number(offset) < 0 || Number(offset) > 100_000)) return json({ error: "Invalid pagination" }, 400);
-      const params = new URLSearchParams({ view: "generated", offset: String(offset || 0) });
+      // Include running, failed and review-pending requests as well as completed memos.
+      const params = new URLSearchParams({ offset: String(offset || 0) });
       const url = new URL("https://sabeq.legal/api/management/memos?" + params);
       const result = await managerMemos(url);
       // Do not transfer form inputs or draft content as part of the list.
       const records = (result.memos || []).slice(0, 50).map((row: Record<string, unknown>) => ({
         id: row.id, client_name: row.client_name || "", case_type: row.case_type || "",
         case_number: row.case_number || "", status: row.status || "", created_at: row.created_at || "",
-        updated_at: row.updated_at || "", has_output: Boolean(row.has_output), source: row.source || "hosted",
+        updated_at: row.updated_at || "", has_output: row.has_output === true || row.has_output === 1, source: row.source || "hosted",
       }));
       return json({ success: true, memos: records, hasMore: result.hasMore === true, offset: result.offset || 0, source: "sabeq-site" });
     }
@@ -67,6 +68,7 @@ export async function POST(request: Request) {
       return json({ success: true, memo: {
         id: memo.id, client_name: memo.client_name || memo.title || "", case_type: memo.case_type || memo.service_type || "",
         case_number: memo.case_number || "", status: memo.status || "", created_at: memo.created_at || "",
+        has_output: typeof memo.output_text === "string" && memo.output_text.trim().length > 0,
         output_text: typeof memo.output_text === "string" ? memo.output_text.slice(0, 140_000) : "",
         source: memo.source || "hosted",
       } });
