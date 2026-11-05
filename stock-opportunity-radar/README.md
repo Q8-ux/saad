@@ -89,3 +89,19 @@ The homepage contains a **source-backed opportunity monitor** that never shows d
 - Source timestamps prove collection time, not the time an issuer last edited a tender.
 - Every issuer's official tender/procurement document and project contract overrides the portal summary.
 - If any source stops returning verifiable records, the source status goes to **unavailable** and previous records from that source are not reused.
+
+
+## Council opportunity review — 2026-11-05
+
+This site includes a source-grounded **Council review adapter** for each current, verified radar record.
+
+- Tap **🏛️ مراجعة مجلس الفرص / Council review** on a current opportunity to open separate opportunity-analyst, skeptic, and evidence-auditor sections, plus a guarded conclusion.
+- This on-page review is **deterministic and rule-based**. It does **not** impersonate ChatGPT, Claude, Gemini or claim that multiple AI models were called. It does not calculate an investment recommendation or invent expected returns.
+- The panel is available only when the same official-source snapshot passes the existing 195-minute freshness check, the record's source is marked \`ok\`, the link uses a recognized HTTPS official host, and (for tender records) the stated closing date has not passed.
+- The **Copy evidence brief for AI Council** button exports the *real selected record* and timestamps (without appending fabricated records) for manual paste into the independent **Council Firefox extension**. The original Council extension is a browser add-on using separately opened AI sites, not an API or an embeddable server.
+- Users must install that add-on separately (desktop Firefox according to the upstream instructions). Do not assume it can be activated from the hosted radar, particularly on mobile. This site never silently forwards investment records to AI providers.
+- This adapter is inspired by the Council interaction concept from [rOOtsystem2010/council](https://github.com/rOOtsystem2010/council) (MIT licence); no upstream extension scripts are embedded or copied into the published site.
+- The site has no multi-model backend, provider API keys, or secure LLM gateway. Adding fully automatic AI model debate **requires** a separate secure backend with provider credentials, cost controls, consent/retention policy and audit trails. Never put keys in public GitHub Pages files.
+- The Council summary is **initial research only**. A verified official link does not demonstrate that an opportunity remains open, an investor is eligible, a capital estimate is audited, or a return is probable. A formal regulatory, legal and financial check remains necessary.
+
+UI files: \`council-radar.js\`, \`radar.js\`, \`radar.css\` and \`index.html\`. The existing verified-snapshot fetch/refresh scheduler and record source URLs are unchanged.

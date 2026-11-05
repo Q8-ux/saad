@@ -30,6 +30,7 @@ function freshness(x){if(!x||!x.generated_at)return false;const age=Date.now()-D
 function validate(x){if(!x||x.schema_version!==1||!Array.isArray(x.records)||!Array.isArray(x.sources)||!x.generated_at)return false;if(x.records.length>300||x.sources.length>30)return false;return x.records.every(r=>r&&typeof r.id==="string"&&typeof r.title==="string"&&typeof r.source_url==="string"&&["bh","om","sa","ae","qa","kw"].includes(r.country)&&["tender","investment_project"].includes(r.kind));}
 function render(){
  staticLabels();const x=d(),fresh=freshness(dataset),records=fresh?dataset.records:[],sources=dataset?.sources||[];
+ window.GULF_COUNCIL?.sync(dataset,fresh);
  const connected=sources.filter(s=>s.status==="ok").length;const state=fresh?(records.length?x.ready:x.none):(dataset?x.stale:(error?x.failure:x.loading));
  text("radarStatus",state);$("radarStatus").className=fresh?"success":dataset||error?"failure":"pending";
  text("radarCount",fresh?String(records.length):"—");text("radarUpdated",dataset?.generated_at?formatTime(dataset.generated_at):"—");text("radarConnected",dataset?connected+" / "+sources.length:"—");
@@ -43,7 +44,7 @@ function render(){
    const h=document.createElement("h3");h.textContent=r.title;card.append(h);
    const issuer=document.createElement("p");issuer.textContent=x.issuer+": "+String(r.agency||r.source_name||"—");card.append(issuer);
    const meta=document.createElement("div");meta.className="meta";meta.textContent=(r.posted_at?x.posted+": "+r.posted_at+" · ":"")+(r.closes_at?x.closing+": "+r.closes_at:"")+(r.value?" · "+x.value+": "+r.value:"");card.append(meta);
-   const foot=document.createElement("div");foot.className="sourcefoot";const link=sourceAnchor(r.source_url);if(link)foot.append(link);const observed=document.createElement("p");observed.textContent=x.observed+": "+formatTime(r.observed_at)+" · "+x.verify;foot.append(observed);card.append(foot);$("radarCards").append(card);
+   const foot=document.createElement("div");foot.className="sourcefoot";const link=sourceAnchor(r.source_url);if(link)foot.append(link);const observed=document.createElement("p");observed.textContent=x.observed+": "+formatTime(r.observed_at)+" · "+x.verify;foot.append(observed);card.append(foot);const review=window.GULF_COUNCIL?.makeButton(r);if(review)card.append(review);$("radarCards").append(card);
   }
   if(!matches.length){const no=document.createElement("div");no.className="radar-empty";no.textContent=x.filtered;$("radarCards").append(no);}
  }
