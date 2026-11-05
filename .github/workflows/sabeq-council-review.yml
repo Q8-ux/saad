@@ -1,0 +1,60 @@
+name: Sabeq Council legal review checks
+
+on:
+  push:
+    branches:
+      - feature/sabeq-legal-council-review
+    paths:
+      - 'legal-memo-platform/legal-council.js'
+      - 'legal-memo-platform/gateway.js'
+      - 'legal-memo-platform/test/legal-council.test.js'
+      - 'sabeq-legal/research-source/app/api/legal/memo/route.ts'
+      - 'sabeq-legal/research-source/lib/council-defense-review.ts'
+      - '.github/workflows/sabeq-council-review.yml'
+  pull_request:
+    paths:
+      - 'legal-memo-platform/**'
+      - 'sabeq-legal/research-source/app/api/legal/memo/route.ts'
+      - 'sabeq-legal/research-source/lib/council-defense-review.ts'
+      - '.github/workflows/sabeq-council-review.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  legacy-gateway:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Static JS verification
+        working-directory: legal-memo-platform
+        run: |
+          node --check legal-council.js
+          node --check gateway.js
+          node --check test/legal-council.test.js
+      - name: Verify article-to-law citations and fail-closed revision
+        working-directory: legal-memo-platform
+        run: node --test test/legal-council.test.js
+  active-sabeq-engine:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: sabeq-legal/research-source/package-lock.json
+      - name: Install dependencies
+        working-directory: sabeq-legal/research-source
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Check active engine types and regressions
+        working-directory: sabeq-legal/research-source
+        run: |
+          npx tsc --noEmit
+          node --test tests/article-text-in-memos.test.mjs tests/verified-article-narrative.test.mjs tests/memo-generation-control.test.mjs tests/case-reasoning.test.mjs
