@@ -1,4 +1,4 @@
-name: Publish Stock Opportunity Radar
+name: Publish Gulf Investment Compass
 
 on:
   push:
@@ -33,20 +33,28 @@ jobs:
           ref: ${{ github.sha }}
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
-      - name: Validate Stock Radar assets and JavaScript
+      - name: Validate Gulf Guide, voice, and preserved stock screener
         shell: bash
         run: |
           set -euo pipefail
           test -s stock-opportunity-radar/index.html
+          test -s stock-opportunity-radar/guide-data.js
+          test -s stock-opportunity-radar/guide.js
+          test -s stock-opportunity-radar/guide.css
+          test -s stock-opportunity-radar/assets/talking-path.js
+          test -s stock-opportunity-radar/stocks/index.html
           test -s stock-opportunity-radar/README.md
           python -m py_compile .github/scripts/publish-stock-opportunity-radar.py
+          node --check stock-opportunity-radar/guide.js
+          node --check stock-opportunity-radar/guide-data.js
+          node --check stock-opportunity-radar/assets/talking-path.js
           python - <<'PY'
           import re
           from pathlib import Path
-          page = Path("stock-opportunity-radar/index.html").read_text()
+          page = Path("stock-opportunity-radar/stocks/index.html").read_text()
           match = re.search(r"<script>(.*?)</script>", page, flags=re.S)
           if not match:
-              raise SystemExit("Missing inline JavaScript")
+              raise SystemExit("Missing preserved stock screener JS")
           Path("/tmp/stock-opportunity-radar.js").write_text(match.group(1))
           PY
           node --check /tmp/stock-opportunity-radar.js
@@ -62,19 +70,19 @@ jobs:
       - name: Publish website
         id: deploy
         uses: actions/deploy-pages@v4
-      - name: Verify Stock Radar is publicly reachable
+      - name: Verify Gulf Guide is publicly reachable
         shell: bash
         run: |
           set -euo pipefail
           url="https://q8-ux.github.io/saad/stock-opportunity-radar/?run=${GITHUB_RUN_ID}"
           for attempt in 1 2 3 4 5 6; do
             if curl --fail --location --silent --show-error --max-time 20 "$url" -o /tmp/stock-radar-live.html &&
-               grep -F 'STOCK OPPORTUNITY RADAR' /tmp/stock-radar-live.html >/dev/null &&
-               grep -F 'id="csvFile"' /tmp/stock-radar-live.html >/dev/null; then
-              echo "Stock Opportunity Radar public page verified." >> "$GITHUB_STEP_SUMMARY"
+               grep -F 'Gulf Investment Compass' /tmp/stock-radar-live.html >/dev/null &&
+               grep -F 'id="chatForm"' /tmp/stock-radar-live.html >/dev/null; then
+              echo "Gulf Investment Compass public page verified." >> "$GITHUB_STEP_SUMMARY"
               exit 0
             fi
             sleep 8
           done
-          echo "::error::Stock Radar public website could not be verified"
+          echo "::error::Gulf Investment Compass public website could not be verified"
           exit 1
