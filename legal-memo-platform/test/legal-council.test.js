@@ -46,3 +46,59 @@ test('flags unverified quotations presented as full law text', () => {
   const result = auditArticleReferences(m, sources);
   assert.equal(result.unverifiedLawQuotes.length, 1);
 });
+
+test('does not confuse the same article number in two different statutes', () => {
+  const another = {...sources[0], title:'قانون آخر', lawNumber: 5, lawYear: 2015, excerpt:'المادة ١٢\nنص مادة من قانون مختلف'};
+  const result = auditArticleReferences('وفق المادة ١٢ من القانون رقم 99 لسنة 2026.', [sources[0], another]);
+  assert.deepEqual(result.matchedToOfficialExcerpt, []);
+  assert.deepEqual(result.wrongLaw, ['12 / 99/2026']);
+  assert.equal(result.publicationBlocked, true);
+});
+
+test('same numbered article without a law identity requires disambiguation', () => {
+  const another = {...sources[0], title:'قانون آخر', lawNumber: 5, lawYear: 2015};
+  const result = auditArticleReferences('المادة ١٢', [sources[0], another]);
+  assert.deepEqual(result.ambiguous, [12]);
+  assert.equal(result.publicationBlocked, true);
+});
+
+test('explicit statute identity resolves collision only for the cited law', () => {
+  const another = {...sources[0], title:'قانون آخر', lawNumber: 5, lawYear: 2015};
+  const result = auditArticleReferences('المادة ١٢ من القانون رقم 1 لسنة 2026', [sources[0], another]);
+  assert.deepEqual(result.wrongLaw, []);
+  assert.deepEqual(result.matchedToOfficialExcerpt, [12]);
+  assert.equal(result.publicationBlocked, false);
+});
+
+test('missing law metadata does not give false certification', () => {
+  const result = auditArticleReferences('المادة ١٢', [{...sources[0], lawNumber: null}]);
+  assert.deepEqual(result.unverifiableLaw, [12]);
+  assert.equal(result.publicationBlocked, true);
+});
+
+test('quotes must belong to the very statute cited, not another same-numbered statute', () => {
+  const another = {...sources[0], title:'قانون مختلف', lawNumber: 7, lawYear: 2020,
+    excerpt:'المادة ١٢\nالنص المختلف الذي لا ينطبق على المادة المعنية'};
+  const result = auditArticleReferences(
+    'المادة ١٢ من القانون رقم 1 لسنة 2026: «النص المختلف الذي لا ينطبق على المادة المعنية»',
+    [sources[0], another],
+  );
+  assert.equal(result.unverifiedLawQuotes.length, 1);
+  assert.equal(result.publicationBlocked, true);
+});
+
+test('council withholds unsafe revised memo and preserves case identity', async () => {
+  let n = 0;
+  const client = { responses: { create: async () => {
+    n++;
+    return {output_text: n === 1 ? 'تأكد من الطلب' : 'عميل آخر\nالمادة ١٢ من القانون رقم 99 لسنة 2026'};
+  } } };
+  const result = await runLegalCouncil({
+    client, model: 'test', memo: 'اسم الموكل: عميل حقيقي\nالطلبات: رفض الدعوى',
+    caseData: {clientName:'عميل حقيقي', requests:'رفض الدعوى'}, sources,
+  });
+  assert.equal(result.memo, '');
+  assert.equal(result.publicationBlocked, true);
+  assert.equal(result.reviewStatus, 'needs_review');
+  assert.equal(n, 2);
+});
