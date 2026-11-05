@@ -54,6 +54,24 @@
    <button class="button" id="radarRefresh" type="button">↻ <span id="radarRefreshLabel">تحديث من آخر ملف رصد</span></button>
   </div>
   <div id="radarCards" class="opportunity-grid" aria-live="polite"><p class="notice">جارٍ تحميل ملف رصد المصادر الرسمية...</p></div>
+  <section class="radar-council" id="councilPanel" aria-labelledby="councilTitle" hidden>
+    <div class="council-header">
+      <div><span class="council-eyebrow">COUNCIL / VERIFIED EVIDENCE</span><h3 id="councilTitle">مجلس تقييم الفرصة</h3><p id="councilIntro">مراجعة منهجية من بيانات المصادر الرسمية وليست نقاشًا حيًا بين نماذج الذكاء الاصطناعي.</p></div>
+      <button type="button" id="councilClose" class="council-close">إغلاق</button>
+    </div>
+    <div class="council-grid">
+      <article><h4 id="councilVisionTitle">محلل الفرصة</h4><ul id="councilVision"></ul></article>
+      <article><h4 id="councilRiskTitle">المعترض والمخاطر</h4><ul id="councilRisk"></ul></article>
+      <article><h4 id="councilVerifyTitle">مدقق الأدلة</h4><ul id="councilVerify"></ul></article>
+    </div>
+    <div class="council-verdict"><h4 id="councilVerdictTitle">خلاصة المجلس</h4><p id="councilVerdict"></p></div>
+    <div class="council-actions">
+      <button type="button" class="button primary" id="councilCopy">نسخ ملف الفرصة لمجلس الذكاء الاصطناعي</button>
+      <a id="councilOfficialLink" href="#" target="_blank" rel="noopener noreferrer">المصدر الرسمي</a>
+      <a id="councilExtension" href="https://github.com/rOOtsystem2010/council" target="_blank" rel="noopener noreferrer">إضافة Council الأصلية</a>
+    </div>
+    <p id="councilMessage" class="council-message" role="status" aria-live="polite"></p>
+  </section>
   <div class="radar-sources"><h3 id="radarSourceTitle">اتصال المصادر الرسمية</h3><div id="radarSources" class="radar-source-grid"></div></div>
   <p class="notice" id="radarDisclaimer">التحديث مجدول كل ساعتين تقريبًا وليس بثًا لحظيًا. عدم وصول البيانات أو انتهاء تاريخ العطاء يعني عدم عرض فرصة كأنها مفتوحة. راجع شروط الأهلية وآخر حالة في موقع الجهة قبل التقديم.</p>
  </section>
@@ -80,5 +98,6 @@
 <script src="./assets/talking-path.js" defer></script>
 <script src="./guide.js" defer></script>
 <script src="./radar.js" defer></script>
+<script src="./council-radar.js" defer></script>
 </body>
 </html>
