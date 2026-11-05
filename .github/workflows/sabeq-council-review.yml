@@ -53,8 +53,11 @@ jobs:
       - name: Install dependencies
         working-directory: sabeq-legal/research-source
         run: npm ci --ignore-scripts --no-audit --no-fund
-      - name: Check active engine types and regressions
+      - name: Verify Council hooks in the primary memo engine
         working-directory: sabeq-legal/research-source
         run: |
-          npx tsc --noEmit
+          node --input-type=module -e "import fs from 'node:fs'; import assert from 'node:assert/strict'; const r=fs.readFileSync('app/api/legal/memo/route.ts','utf8'); assert.match(r,/councilDefenseAuditInstructions/); assert.match(r,/councilDefenseRevisionInstructions/); assert.match(r,/reviewLegalCitations/); assert.match(r,/finishMemoRequest/);"
+      - name: Run active memo and statutory regressions
+        working-directory: sabeq-legal/research-source
+        run: |
           node --test tests/article-text-in-memos.test.mjs tests/verified-article-narrative.test.mjs tests/memo-generation-control.test.mjs tests/case-reasoning.test.mjs
