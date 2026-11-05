@@ -14,12 +14,22 @@ const OCR_INVERSION_TOKENS = new Set([
   "اهنا", "أهنا", "هبا", "عىل", "جتاوز", "مخسة",
   "مخسني", "سبعامئة", "جتاوز", "املذكورة", "املتهم",
 ]);
+// A single distinctive impossible PDF-inversion token is sufficient to
+// quarantine the quote. These are not words to auto-correct in a statute.
+const HIGH_CONFIDENCE_INVERSION_TOKENS = new Set([
+  "املادة", "املحكمة", "املتعامل", "املسكوكات", "املسكوك",
+  "جتاوز", "مخسة", "مخسني", "سبعامئة", "عىل",
+]);
 export function statutoryOCRReview(text: string) {
   const words = String(text || "").normalize("NFKC")
     .replace(/[\u064b-\u065f\u0670]/gu, "")
     .match(/[\p{Script=Arabic}]+/gu) || [];
   const distinct = [...new Set(words.filter(word => OCR_INVERSION_TOKENS.has(word)))];
-  return { requiresReview: distinct.length >= 2, reason: distinct.length >= 2 ? "arabic_pdf_character_order" : null };
+  const highConfidence = distinct.some(word => HIGH_CONFIDENCE_INVERSION_TOKENS.has(word));
+  return {
+    requiresReview: highConfidence || distinct.length >= 2,
+    reason: highConfidence || distinct.length >= 2 ? "arabic_pdf_character_order" : null,
+  };
 }
 
 /** Never send a corrupted OCR snippet to the drafting model. */
