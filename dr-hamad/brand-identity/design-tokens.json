@@ -1,8 +1,8 @@
 {
   "name": "مسار الهوية البصرية للدكتور حمد",
   "name_en": "Dr Hamad Brand Identity Path",
-  "version": "1.0.0",
-  "date": "2026-11-04",
+  "version": "1.1.0",
+  "date": "2026-11-06",
   "source": "user-supplied reference images",
   "palette": {
     "navy": {
@@ -42,7 +42,9 @@
       "recommendedWeights": [
         600,
         700
-      ]
+      ],
+      "status": "approved-by-owner-2026-11-06",
+      "usage": "Arabic titles and high-priority headings"
     },
     "arabicBody": {
       "family": "Noto Sans Arabic",
@@ -50,16 +52,28 @@
         400,
         500,
         600
-      ]
+      ],
+      "status": "approved-by-owner-2026-11-06",
+      "usage": "Arabic descriptions, captions, educational copy"
     },
     "englishFormal": {
       "family": "Liberation Serif",
       "recommendedWeights": [
         400,
         700
-      ]
+      ],
+      "status": "approved-by-owner-2026-11-06",
+      "usage": "English physician name, signature, formal bilingual identity"
     },
-    "exactSourceWeights": "not specified in reference imagery"
+    "exactSourceWeights": "not specified in reference imagery",
+    "policy": {
+      "status": "approved-by-owner-2026-11-06",
+      "scope": "all new social posts, carousels, stories, highlights, print and branding designs",
+      "arabicDirection": "rtl",
+      "englishDirection": "ltr",
+      "exactFontWeightVerified": false,
+      "note": "Font FAMILY selections approved based on owner-provided identity preview. Weights are recommendations; do not substitute Montserrat or other fonts without documented exception. No change to live site without separate approval."
+    }
   },
   "signature": {
     "arName": "د. حمد ساكت العنزي",
