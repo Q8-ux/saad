@@ -1,0 +1,89 @@
+name: Refresh Gulf Opportunity Radar — verified official sources
+
+on:
+  schedule:
+    - cron: '17 */2 * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'stock-opportunity-radar/scripts/fetch_official_opportunities.py'
+      - '.github/workflows/refresh-gulf-opportunities.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-gulf-opportunities
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: true
+          fetch-depth: 2
+      - name: Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install bounded source parser dependencies
+        run: python -m pip install --disable-pip-version-check 'requests==2.32.5' 'beautifulsoup4==4.14.2'
+      - name: Download and validate official publicly accessible sources
+        run: |
+          set -euo pipefail
+          python stock-opportunity-radar/scripts/fetch_official_opportunities.py
+          python - <<'PY'
+          import json
+          from datetime import datetime, timezone
+          from pathlib import Path
+          f = Path("stock-opportunity-radar/data/live.json")
+          data = json.loads(f.read_text(encoding="utf-8"))
+          assert data["schema_version"] == 1
+          assert isinstance(data["records"], list)
+          assert isinstance(data["sources"], list)
+          assert data["count"] == len(data["records"])
+          for r in data["records"]:
+              assert r["source_url"].startswith("https://")
+              assert r["source_id"] in {s["id"] for s in data["sources"] if s["status"] == "ok"}
+              if r["kind"] == "tender":
+                  assert r["closes_at"] >= datetime.now(timezone.utc).date().isoformat()
+          print("Verified records:", data["count"])
+          PY
+      - name: Update published source snapshot in GitHub
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add stock-opportunity-radar/data/live.json
+          if git diff --cached --quiet; then
+            echo "No data changes" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          git commit -m "data(gulf-radar): refresh government-source opportunity snapshot [skip ci]"
+          git push origin HEAD:main
+          echo "Official source data updated in GitHub. This is a periodic snapshot, not a streaming feed." >> "$GITHUB_STEP_SUMMARY"
+      - name: Summarize source health
+        if: always()
+        run: |
+          if [ -s stock-opportunity-radar/data/live.json ]; then
+            python - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path("stock-opportunity-radar/data/live.json").read_text())
+          with open(__import__("os").environ["GITHUB_STEP_SUMMARY"],"a") as out:
+              out.write("## Gulf opportunity source status\n")
+              out.write(f"- Records: **{d.get('count',0)}**\n")
+              out.write(f"- Checked: {d.get('generated_at')}\n")
+              for s in d.get("sources",[]):
+                  out.write(f"- {s['name']}: **{s['status']}**, {s.get('records',0)} records\n")
+          PY
+          fi
