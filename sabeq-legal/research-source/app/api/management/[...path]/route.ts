@@ -2,6 +2,7 @@ import { engineeringPathStatus } from "@/lib/engineering-paths";
 import { siteAction, servicesAction, bookingsAction } from "@/lib/site-controls";
 import { listManagedUsers, updateManagedUser } from "@/lib/user-management";
 import { managementAccounts } from "@/lib/management-password";
+import { requestManagementRecovery, finishManagementRecovery } from "@/lib/management-password-recovery";
 import { mailboxAction } from "@/lib/management-mailboxes";
 import { sadadManagement } from "@/lib/sadad-payments";
 import { programmerAction } from "@/lib/management-programmer";
@@ -63,6 +64,14 @@ export async function POST(request: Request) {
     const action = actionPath(request), data = await readJsonObject(request, action === "password-login" ? 4_096 : action === "site" ? 200_000 : 20_000);
     if (action === "exchange") { await enforceRateLimit(request, "management-exchange", 30); return managementJson(await exchangeManagerCode(data)); }
     if (action === "password-login") return managementJson(await passwordManagerLogin(request, data));
+    if (action === "password-recovery-request") {
+      await enforceRateLimit(request, "management-recovery-request", 6);
+      return managementJson(await requestManagementRecovery(data));
+    }
+    if (action === "password-recovery-confirm") {
+      await enforceRateLimit(request, "management-recovery-confirm", 10);
+      return managementJson(await finishManagementRecovery(data));
+    }
     const manager = await requireManager(request);
     assertManagerAction(manager, action, "POST");
     await enforceRateLimit(request, "management-write", 150);
