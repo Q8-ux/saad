@@ -1,6 +1,8 @@
 import { getD1 } from "@/db";
 import { adminJson, requireAdminService } from "@/lib/admin-service-auth";
 
+// Guest memo requests are saved in management_memo_requests, not service_records.
+// Deduplicate registered-user activity when it was also mirrored to the request ledger.
 export async function GET(request: Request) {
   const denied = await requireAdminService(request);
   if (denied) return denied;
@@ -18,13 +20,31 @@ export async function GET(request: Request) {
       SUM(CASE WHEN service_type = 'memo' THEN 1 ELSE 0 END) AS memos,
       SUM(CASE WHEN service_type = 'assistant' THEN 1 ELSE 0 END) AS questions,
       SUM(CASE WHEN service_type = 'document_analysis' THEN 1 ELSE 0 END) AS analyses
-      FROM service_records
-      WHERE created_at >= datetime('now', 'start of month')`).first(),
+      FROM (
+        SELECT CASE WHEN service_type IN ('memo','memo_archive') THEN 'memo' ELSE service_type END AS service_type, created_at
+        FROM service_records
+        WHERE service_type NOT IN ('memo','memo_archive')
+          OR COALESCE(metadata_json,'') NOT LIKE '%"managementRequestId"%'
+        UNION ALL
+        SELECT 'memo', created_at FROM management_memo_requests
+      ) WHERE created_at >= datetime('now', 'start of month')`).first(),
     db.prepare(`SELECT id, name, email, phone, case_type, preferred_contact, status, created_at
       FROM consultation_requests ORDER BY created_at DESC LIMIT 6`).all(),
-    db.prepare(`SELECT r.id, r.service_type, r.title, r.status, r.created_at, u.name AS user_name, u.email AS user_email
-      FROM service_records r INNER JOIN public_users u ON u.id = r.user_id
-      ORDER BY r.created_at DESC LIMIT 8`).all(),
+    db.prepare(`SELECT id, service_type, title, status, created_at, user_name, user_email
+      FROM (
+        SELECT 'memo:' || m.id AS id, 'memo' AS service_type,
+          COALESCE(NULLIF(m.client_name,''),'طلب مذكرة') AS title,
+          m.status, m.created_at,
+          COALESCE(NULLIF(u.name,''), NULLIF(m.client_name,''), 'ضيف') AS user_name,
+          COALESCE(NULLIF(m.email,''), u.email, '') AS user_email
+        FROM management_memo_requests m LEFT JOIN public_users u ON u.id = m.user_id
+        UNION ALL
+        SELECT 'legacy:' || r.id, r.service_type, r.title, r.status, r.created_at,
+          COALESCE(u.name,'ضيف'), COALESCE(u.email,'')
+        FROM service_records r LEFT JOIN public_users u ON u.id = r.user_id
+        WHERE r.service_type NOT IN ('memo','memo_archive')
+          OR COALESCE(r.metadata_json,'') NOT LIKE '%"managementRequestId"%'
+      ) ORDER BY created_at DESC LIMIT 8`).all(),
     db.prepare(`SELECT service_key, enabled, payment_required, price_fils, currency, updated_at
       FROM service_settings ORDER BY service_key`).all(),
   ]);
