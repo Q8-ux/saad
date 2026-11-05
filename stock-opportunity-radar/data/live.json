@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-05T06:55:18.173652Z",
+  "generated_at": "2026-11-05T06:58:56.441141Z",
   "refresh_interval_minutes": 30,
   "records": [],
   "sources": [
@@ -12,7 +12,7 @@
       "status": "unavailable",
       "records": 0,
       "last_success_at": null,
-      "last_checked_at": "2026-11-05T06:55:18.173652Z",
+      "last_checked_at": "2026-11-05T06:58:56.441141Z",
       "details": "No verified current records; source may require JavaScript, authorized API or a markup update",
       "attempts": [
         {
@@ -35,7 +35,7 @@
       "status": "unavailable",
       "records": 0,
       "last_success_at": null,
-      "last_checked_at": "2026-11-05T06:55:18.173652Z",
+      "last_checked_at": "2026-11-05T06:58:56.441141Z",
       "details": "No verified current records; source may require JavaScript, authorized API or a markup update",
       "attempts": [
         {
