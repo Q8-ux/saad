@@ -47,6 +47,12 @@ jobs:
           grep -F 'admin.js?v=password-recovery-20261105' admin-index.html >/dev/null
           grep -F 'control.js?v=control-login-20261102-v2' admin-index.html >/dev/null
           echo 'PASS: deployed dashboard loads current username/password login asset'
+          curl --fail --location --silent --show-error --max-time 30 'https://q8-ux.github.io/saad/sabeq-admin-preview/admin.js?v=password-recovery-20261105' > deployed-admin.js
+          grep -F 'نسيت كلمة المرور؟' deployed-admin.js >/dev/null
+          echo 'PASS: password recovery button is present in the published JavaScript'
+          recovery_status=$(curl --silent --show-error --max-time 30 -o /dev/null -w '%{http_code}' -H 'Origin: https://q8-ux.github.io' -H 'Content-Type: application/json' -d '{"username":"!"}' "$origin/api/management/password-recovery-request")
+          echo "Deployed recovery endpoint (synthetic invalid username, no email sent): HTTP $recovery_status"
+          if [ "$recovery_status" = 200 ]; then echo 'PASS: deployed reset request endpoint is available'; else echo 'BLOCKER: backend reset route not deployed or not available yet'; fi
           session_status=$(curl --silent --show-error --max-time 30 -o /dev/null -w '%{http_code}' -H 'Origin: https://q8-ux.github.io' "$origin/api/management/session")
           echo "Anonymous management session HTTP status: $session_status"
           test "$session_status" = 401
