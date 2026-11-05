@@ -100,35 +100,47 @@ def bahrain(soup: BeautifulSoup, root: str, now: datetime) -> list[dict]:
 
 def oman(soup: BeautifulSoup, root: str, now: datetime) -> list[dict]:
     found={}
-    # Invest Oman displays project cards (possibly rendered client side).
-    # Do not pass generic sector articles as currently available projects.
-    candidates=soup.select("article, .card, .opportunity-card, [class*='opportunity-item'], [class*='opportunity-card']")
-    for node in candidates:
-        body=compact(node.get_text(" ",strip=True))
-        if not (35<=len(body)<=1700 and "OMR" in body):
+    # Actual official website renders public project links /investment-opportunities/<id>
+    # beneath an h2. Each nearby project card visibly displays OMR capital.
+    # Require BOTH an official detail URL and the capital next to that title.
+    for anchor in soup.select("a[href]"):
+        href=anchor.get("href","")
+        if not re.fullmatch(r"/(?:ar/)?investment-opportunities/\d{2,8}/?",href):
             continue
-        amount=re.search(r"(?<!\w)([\d,]{5,})\s*OMR\b",body,re.I)
-        if not amount:continue
-        h=node.find(["h2","h3","h4","h5"])
-        title=compact(h.get_text(" ",strip=True)) if h else ""
-        if not (12<=len(title)<=160):continue
-        link=None
-        for anchor in node.select("a[href]"):
-            link=valid_url(urljoin(root,anchor.get("href","")),{"investoman.om","www.investoman.om"})
-            if link and "/investment-opportunities" in link:break
-        if not link:link=root
-        ident=make_id("om-invest",title)
+        h=anchor.find(["h2","h3"])
+        if h is None:
+            continue
+        title=compact(h.get_text(" ",strip=True))
+        if not (12<=len(title)<=170):
+            continue
+        amount=None
+        node=anchor
+        for _ in range(7):
+            node=node.parent
+            if node is None:break
+            body=compact(node.get_text(" ",strip=True))
+            if not (35<=len(body)<=1700):
+                continue
+            if "Capital" not in body or "OMR" not in body:
+                continue
+            match=re.search(r"(?<!\w)([\d,]{5,})\s*OMR\b",body,re.I)
+            if match:
+                amount=match.group(1)
+                break
+        if amount is None:continue
+        url=valid_url(urljoin(root,href),{"investoman.om","www.investoman.om"})
+        if not url:continue
+        ident=make_id("om-invest",url)
         found[ident]={
             "id":ident,"country":"om","kind":"investment_project",
             "title":title,"agency":"Invest Oman",
-            "posted_at":None,"closes_at":None,"value":amount.group(1)+" OMR",
+            "posted_at":None,"closes_at":None,"value":amount+" OMR",
             "source_id":"om-invest","source_name":"Invest Oman",
-            "source_url":link,"link_scope":"detail" if link!=root else "official_listing",
-            "basis":"Project in the government investment explorer; verify availability and stated capital",
+            "source_url":url,"link_scope":"detail",
+            "basis":"Official individual investment project page; availability and capital require re-verification",
             "observed_at":now.isoformat().replace("+00:00","Z")
         }
-    return list(found.values())[:40]
-
+    return list(found.values())[:50]
 
 def render_public_browser_page(url: str, source: dict, now: datetime) -> list[dict]:
     """Render a public JS page like a normal visitor; never solve/bypass a challenge."""
