@@ -17,6 +17,7 @@ const { corsPolicy } = require('./cors-policy');
 const { openAiError, openAiErrorDetails } = require('./openai-errors');
 const { createOperationsMonitor } = require('./operations-monitor');
 const { memoPaymentGate } = require('./memo-payment-gate');
+const { runLegalCouncil, auditArticleReferences } = require('./legal-council');
 
 const publicPort = Number(process.env.PORT || 3000);
 const appPort = Number(process.env.INTERNAL_APP_PORT || 3001);
@@ -289,7 +290,32 @@ app.post('/api/legal/memo', jsonBody, memoPaymentGate(), async (req, res) => {
     });
     const memo = outputText(response);
     if (!memo) throw new Error('Empty OpenAI response');
-    return res.json({ memo, sources });
+    let council = {
+      memo,
+      reviewStatus: 'needs_review',
+      review: 'المذكرة بحاجة إلى مراجعة قانونية بشرية قبل الاعتماد.',
+      articleAudit: auditArticleReferences(memo, sources),
+      warnings: ['المراجعة القانونية البشرية مطلوبة قبل الاعتماد.'],
+    };
+    if (process.env.LEGAL_COUNCIL_ENABLED !== 'false') {
+      try {
+        council = await runLegalCouncil({ client, model: AI_MODEL, memo, caseData, sources });
+      } catch (reviewError) {
+        // Never silently label an unreviewed draft as verified or approved.
+        console.error('Legal council review failed:', openAiErrorDetails(reviewError));
+        council.warnings.push('تعذرت مراجعة مجلس الدفوع الآلية؛ بقيت المسودة بحاجة إلى تدقيق بشري.');
+      }
+    }
+    return res.json({
+      memo: council.memo,
+      sources,
+      legalCouncil: {
+        status: council.reviewStatus,
+        critique: council.review,
+        articleAudit: council.articleAudit,
+        warnings: council.warnings,
+      },
+    });
   } catch (error) {
     console.error('Public memo generation failed:', openAiErrorDetails(error));
     const mapped = openAiError(error);
