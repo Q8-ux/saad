@@ -71,7 +71,22 @@ jobs:
             exit 0
           fi
           git commit -m "data(gulf-radar): refresh government-source opportunity snapshot [skip ci]"
-          git push origin HEAD:main
+          # Other sites share main; use a non-force fast-forward with bounded rebase
+          # so an unrelated concurrent push does not discard the verified snapshot.
+          published=false
+          for attempt in 1 2 3 4; do
+            git fetch --no-tags origin main
+            git rebase origin/main
+            if git push origin HEAD:main; then
+              published=true
+              break
+            fi
+            sleep 3
+          done
+          if [ "$published" != true ]; then
+            echo "::error::Could not safely fast-forward official radar data after four attempts."
+            exit 1
+          fi
           echo "Official source data updated in GitHub. This is a periodic snapshot, not a streaming feed." >> "$GITHUB_STEP_SUMMARY"
       - name: Summarize source health
         if: always()
