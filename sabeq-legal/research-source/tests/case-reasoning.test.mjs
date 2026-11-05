@@ -25,6 +25,10 @@ test('criminal case asks about elements, delivery, intent and evidence instead o
 test('omitted settlement, reversed roles, harmful relief or unsupported assertions fail independent audit',()=>{
  for(const a of [audit({checks:[{issueIndex:0,status:'omitted',reason:'تجاهل السداد'}]}),audit({roleConsistent:false}),audit({reliefConsistent:false}),audit({factsPreserved:false}),audit({unsupportedAssertions:['نسبة خصم مختلقة']})]) assert.equal(api.parseCaseAudit(JSON.stringify(a),plan()).ok,false);
  assert.throws(()=>api.parseCaseAudit(JSON.stringify(audit({checks:[]})),plan()));
+ assert.throws(()=>api.parseCaseAudit(JSON.stringify(audit({checks:[{issueIndex:0,status:'blocked',reason:'غير محسوم بعد مراجعة النقص'}]})),plan()));
+ const incompletePlan=plan({issues:[issue({missing:'يلزم الاطلاع على مستند الصلح'})]});
+ const blocked=api.parseCaseAudit(JSON.stringify(audit({checks:[{issueIndex:0,status:'blocked',reason:'المستند غير مرفق'}]})),incompletePlan);
+ assert.equal(blocked.ok,false);assert.equal(blocked.complete,false);
  assert.throws(()=>api.parseCaseAudit(JSON.stringify(audit({checks:[{issueIndex:0,status:'blocked',reason:'غير مبرر'}]})),plan()));
 });
 test('missing sources stay incomplete even if model claims every issue addressed',()=>{
