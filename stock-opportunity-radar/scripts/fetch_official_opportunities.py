@@ -147,6 +147,22 @@ def render_public_browser_page(url: str, source: dict, now: datetime) -> list[di
                 raise RuntimeError("Access challenge presented; not attempting bypass")
             html=page.content()
             soup=BeautifulSoup(html,"html.parser")
+            diagnostics=[]
+            for needle in ("Develop Neighbourhood", "Livestock Fattening", "Smart Agricultural Cluster",
+                           "Nuwab Public", "TRA/INTERNAL", "BTEA/051", "No./Tender Subject"):
+                match=soup.find(string=lambda value: bool(value) and needle.casefold() in str(value).casefold())
+                if not match: continue
+                element=match.parent
+                parents=[]
+                for _ in range(5):
+                    if not element: break
+                    parents.append({"tag":element.name,"class":element.get("class",[]),
+                                    "id":element.get("id",""),
+                                    "text":compact(element.get_text(" ",strip=True))[:180]})
+                    element=element.parent
+                diagnostics.append({"needle":needle,"parents":parents,"html":str(match.parent.parent)[:1100]})
+            print(json.dumps({"official_dom_diagnostics":source["id"],
+                              "matches":diagnostics,"body_tail":compact(text)[-450:]},ensure_ascii=False),flush=True)
             print(json.dumps({
                 "browser_diagnostics":source["id"],
                 "html_bytes":len(html),
