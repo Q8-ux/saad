@@ -8,20 +8,21 @@
 <meta name="robots" content="index,follow">
 <title>بوصلة الاستثمار الخليجي | Gulf Investment Compass</title>
 <link rel="stylesheet" href="./guide.css">
+<link rel="stylesheet" href="./radar.css">
 <link rel="canonical" href="https://q8-ux.github.io/saad/stock-opportunity-radar/">
 </head>
 <body>
 <header class="nav">
  <div class="shell nav-inner">
    <a href="#top" class="brand"><span class="brand-icon" aria-hidden="true">◈</span><span data-t="brand">بوصلة الاستثمار الخليجي</span></a>
-   <nav class="menu" aria-label="Sections"><a href="#countries" data-t="countries">الدول</a><a href="#opportunities" data-t="opportunities">الفرص والقطاعات</a><a href="#laws" data-t="laws">القوانين</a><a href="#assistant" data-t="assistant">المساعد</a><a href="./stocks/" data-t="stocks">أداة الأسهم</a></nav>
+   <nav class="menu" aria-label="Sections"><a href="#countries" data-t="countries">الدول</a><a href="#radar">📡 <span id="radar-nav-text">الرادار الحي</span></a><a href="#opportunities" data-t="opportunities">الفرص والقطاعات</a><a href="#laws" data-t="laws">القوانين</a><a href="#assistant" data-t="assistant">المساعد</a><a href="./stocks/" data-t="stocks">أداة الأسهم</a></nav>
    <label><span class="sr-only">Language</span><select class="lang" id="language" aria-label="Language / اللغة"><option value="ar">العربية</option><option value="en">English</option><option value="id">Bahasa Indonesia</option><option value="vi">Tiếng Việt</option><option value="hi">हिन्दी</option><option value="zh-TW">繁體中文</option></select></label>
  </div>
 </header>
 <div class="top-banner"><div class="shell"><span aria-hidden="true">●</span><span data-t="lastReview">آخر مراجعة تحريرية: ٥ نوفمبر ٢٠٢٦</span></div></div>
 <main id="top">
 <section class="hero"><div class="shell hero-inner">
- <div><div class="eyebrow" data-t="eyebrow">دليل استثماري موثّق بالمصادر الرسمية</div><h1 data-t="headline">استكشف فرص الأعمال والاستثمار في الخليج</h1><p data-t="subline">ست دول، ست لغات، روابط حكومية، صور موثّقة المصدر، ومساعد صوتي. افهم السوق أولًا، وتحقق من القوانين قبل أن تستثمر.</p><div class="hero-actions"><a href="#countries" class="button primary" data-t="cta">استكشف الدول</a><a href="#assistant" class="button outline" data-t="assistant">المساعد</a></div></div>
+ <div><div class="eyebrow" data-t="eyebrow">دليل استثماري موثّق بالمصادر الرسمية</div><h1 data-t="headline">استكشف فرص الأعمال والاستثمار في الخليج</h1><p data-t="subline">ست دول، ست لغات، روابط حكومية، صور موثّقة المصدر، ومساعد صوتي. افهم السوق أولًا، وتحقق من القوانين قبل أن تستثمر.</p><div class="hero-actions"><a href="#radar" class="button primary"><span id="radar-hero-text">📡 افتح رادار الفرص المتجدد</span></a><a href="#countries" class="button outline" data-t="cta">استكشف الدول</a><a href="#assistant" class="button outline" data-t="assistant">المساعد</a></div></div>
  <div class="hero-art" aria-label="Photograph of Muscat, Oman with attribution">
   <div class="art-top"><span>GULF INVESTMENT COMPASS</span><span>GCC · 6</span></div>
   <div class="art-image"><img src="https://commons.wikimedia.org/wiki/Special:FilePath/Aerial_view_of_Muscat%2C_Oman_%2853698188165%29.jpg?width=900" alt="Actual geographic photograph of Muscat; illustrative, not an investment project" loading="eager" decoding="async"><div class="art-overlay"><b>Gulf Region · Verified Sources</b><small>Photo: dronepicr, CC BY 2.0 — Wikimedia Commons</small></div></div>
@@ -34,6 +35,27 @@
   <div class="filterbar"><label class="sr-only" for="country">Country</label><select id="country"><option value="all">كل الدول</option></select><label class="sr-only" for="sector">Sector</label><select id="sector"><option value="all">كل القطاعات</option></select><label class="sr-only" for="search">Search</label><input type="search" id="search" autocomplete="off" placeholder="ابحث عن دولة أو قطاع أو مشروع" maxlength="100"></div>
   <div id="cards" class="country-grid" aria-live="polite"></div>
   <p class="notice" data-t="photoNote">الصورة مشهد جغرافي توضيحي؛ ليست صورة للمشروع، ولا دليلًا على عرضه أو اعتماده.</p>
+ </section>
+
+ <section class="section" id="radar">
+  <div class="heading"><div><span class="eyebrow radar-eyebrow">OFFICIAL-SOURCE OPPORTUNITY MONITOR</span><h2 id="radarTitle">📡 رادار الفرص الفعلية</h2><p id="radarSub">بيانات من صفحات رسمية تُفحص دوريًا. تُعرض المناقصات الحكومية والمشاريع الاستثمارية في فئتين منفصلتين، مع توقيت الجلب وحالة الاتصال بكل مصدر.</p></div></div>
+  <div class="radar-status-wrap">
+   <div class="radar-stat"><span id="radarStatusLabel">حالة الرادار</span><strong id="radarStatus" role="status" aria-live="polite">جارٍ الاتصال بالمصدر...</strong></div>
+   <div class="radar-stat"><span id="radarCountLabel">النتائج المتحقَّق منها</span><strong id="radarCount">—</strong></div>
+   <div class="radar-stat"><span id="radarUpdateLabel">آخر تحديث موثّق</span><strong id="radarUpdated">—</strong></div>
+   <div class="radar-stat"><span id="radarConnectedLabel">المصادر المتصلة</span><strong id="radarConnected">—</strong></div>
+  </div>
+  <div class="filterbar radar-filters">
+   <label class="radar-label" for="radarCountry" id="radarCountryLabel">الدولة</label>
+   <select id="radarCountry"><option value="all">جميع الدول</option><option value="sa">السعودية</option><option value="ae">الإمارات</option><option value="qa">قطر</option><option value="om">عُمان</option><option value="bh">البحرين</option><option value="kw">الكويت</option></select>
+   <label class="radar-label" for="radarKind" id="radarKindLabel">نوع الفرصة</label>
+   <select id="radarKind"><option value="all">الكل</option><option value="tender">مناقصات</option><option value="investment_project">مشاريع استثمارية</option></select>
+   <input id="radarQuery" type="search" maxlength="110" placeholder="بحث في العطاءات والمشاريع" aria-label="Search verified opportunities">
+   <button class="button" id="radarRefresh" type="button">↻ <span id="radarRefreshLabel">تحديث من آخر ملف رصد</span></button>
+  </div>
+  <div id="radarCards" class="opportunity-grid" aria-live="polite"><p class="notice">جارٍ تحميل ملف رصد المصادر الرسمية...</p></div>
+  <div class="radar-sources"><h3 id="radarSourceTitle">اتصال المصادر الرسمية</h3><div id="radarSources" class="radar-source-grid"></div></div>
+  <p class="notice" id="radarDisclaimer">التحديث مجدول كل ساعتين تقريبًا وليس بثًا لحظيًا. عدم وصول البيانات أو انتهاء تاريخ العطاء يعني عدم عرض فرصة كأنها مفتوحة. راجع شروط الأهلية وآخر حالة في موقع الجهة قبل التقديم.</p>
  </section>
  <section class="section" id="opportunities"><div class="heading"><div><h2 data-t="sectorTitle">فرص وروابط استثمار رسمية</h2><p data-t="sectorSub">تظهر المشاريع المحددة بتمييز منفصل عن بوابات القطاعات؛ لا يُعرض أي منها كفرصة مضمونة أو متاحة للحجز.</p></div><span class="badge"><b id="offerCount">8</b> &nbsp; <span data-t="opportunities">الفرص والقطاعات</span></span></div>
   <div id="opportunitiesCards" class="opportunity-grid" aria-live="polite"></div><p class="notice" data-t="review">راجع الحالة في المصدر</p>
@@ -57,5 +79,6 @@
 <script src="./guide-data.js" defer></script>
 <script src="./assets/talking-path.js" defer></script>
 <script src="./guide.js" defer></script>
+<script src="./radar.js" defer></script>
 </body>
 </html>
