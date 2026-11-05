@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "generated_at": "1970-01-01T00:00:00Z",
-  "refresh_interval_minutes": 120,
+  "generated_at": "2026-11-05T06:55:18.173652Z",
+  "refresh_interval_minutes": 30,
   "records": [],
   "sources": [
     {
@@ -9,20 +9,80 @@
       "country": "bh",
       "name": "Bahrain Tender Board",
       "url": "https://www.tenderboard.gov.bh/Tenders/PublicTenders",
-      "status": "pending",
+      "status": "unavailable",
       "records": 0,
-      "last_checked_at": null
+      "last_success_at": null,
+      "last_checked_at": "2026-11-05T06:55:18.173652Z",
+      "details": "No verified current records; source may require JavaScript, authorized API or a markup update",
+      "attempts": [
+        {
+          "url": "https://www.tenderboard.gov.bh/Tenders/PublicTenders",
+          "http": 200,
+          "error": "no_verified_records"
+        },
+        {
+          "url": "https://www.tenderboard.gov.bh/tenders",
+          "http": 200,
+          "error": "no_verified_records"
+        }
+      ]
     },
     {
       "id": "om-invest",
       "country": "om",
       "name": "Invest Oman",
       "url": "https://investoman.om/investment-opportunities",
-      "status": "pending",
+      "status": "unavailable",
       "records": 0,
-      "last_checked_at": null
+      "last_success_at": null,
+      "last_checked_at": "2026-11-05T06:55:18.173652Z",
+      "details": "No verified current records; source may require JavaScript, authorized API or a markup update",
+      "attempts": [
+        {
+          "url": "https://investoman.om/investment-opportunities",
+          "http": 200,
+          "error": "no_verified_records"
+        },
+        {
+          "url": "https://www.investoman.om/investment-opportunities",
+          "http": 200,
+          "error": "no_verified_records"
+        }
+      ]
+    },
+    {
+      "id": "sa-etimad",
+      "country": "sa",
+      "name": "Saudi Etimad",
+      "url": "https://tenders.etimad.sa/",
+      "status": "portal_only",
+      "reason": "Automated access is challenged; do not bypass anti-bot checks"
+    },
+    {
+      "id": "ae-esupply",
+      "country": "ae",
+      "name": "Dubai eSupply",
+      "url": "https://esupply.dubai.gov.ae/esupply/web/index.html",
+      "status": "portal_only",
+      "reason": "Supplier portal; public listing access is not yet validated"
+    },
+    {
+      "id": "qa-monaqasat",
+      "country": "qa",
+      "name": "Qatar government procurement",
+      "url": "https://hukoomi.gov.qa/en/services/search-for-bids-on-monaqasat-portal-of-mof",
+      "status": "portal_only",
+      "reason": "Government landing page, no verified public feed"
+    },
+    {
+      "id": "kw-kdipa",
+      "country": "kw",
+      "name": "Kuwait KDIPA",
+      "url": "https://kdipa.gov.kw/",
+      "status": "portal_only",
+      "reason": "Official investment gateway without validated live listing feed"
     }
   ],
   "count": 0,
-  "mode": "pending first official-source collection; no demo data"
+  "mode": "official-source snapshots; not a streaming market feed"
 }
