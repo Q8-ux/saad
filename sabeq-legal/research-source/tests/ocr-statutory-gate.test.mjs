@@ -68,3 +68,16 @@ test('civil procedural research is relevant-only, not attached to penal defenses
   });
   assert.ok(!penal.some(q=>q.includes('المرافعات المدنية')));
 });
+
+test('a single unequivocal reversed Arabic PDF token blocks a purported statute', () => {
+  for (const corrupted of [
+    'املادة 1 نص تجريبي غير موثق.',
+    'تنص المادة 1 على ما جتاوز الحد.',
+    'أورد التشريع في عبارته عىل خلاف الصواب.',
+  ]) {
+    assert.equal(ocr.statutoryOCRReview(corrupted).requiresReview,true,corrupted);
+    const item={...source,text:corrupted};
+    assert.equal(ocr.draftStatutoryText(item),null);
+  }
+  assert.equal(ocr.statutoryOCRReview('المادة 1 من القانون — اقتباس اختباري سليم').requiresReview,false);
+});
