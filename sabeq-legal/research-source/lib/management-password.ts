@@ -144,6 +144,47 @@ export async function managementAccounts(data: Record<string, unknown> | null, m
   return { ok: true, reauthenticate: self };
 }
 
+/**
+ * Recovery writes only through the same encrypted vault as administrator edits.
+ * The account ID is the immutable role:seedUsername, never a user-supplied role.
+ */
+export async function managementRecoveryAccount(username: string) {
+  const roster = await accountRoster();
+  const account = roster.accounts.find(row => row.username === normalizeManagementUsername(username) && row.enabled);
+  return account ? { id: account.id, username: account.username, role: account.role } : null;
+}
+
+export async function resetManagementPasswordWithProof(accountId: string, password: string) {
+  const roster = await accountRoster();
+  const account = roster.accounts.find(row => row.id === accountId && row.enabled);
+  if (!account) throw new RequestError("رابط الاستعادة غير صالح أو انتهت صلاحيته.", 401);
+  if (typeof password !== "string" || password.length > 256 ||
+      (account.role === "reviewer" ? !reviewerPasswordValid(password) :
+       password.length < 16 || !/[a-z]/.test(password) || !/[A-Z]/.test(password) ||
+       !/[0-9]/.test(password) || !/[^A-Za-z0-9]/.test(password))) {
+    throw new RequestError(account.role === "reviewer"
+      ? "كلمة المرور الجديدة يجب أن تتضمن 9 أحرف على الأقل وحرفاً كبيراً وصغيراً ورقماً ورمزاً."
+      : "كلمة المرور الجديدة يجب أن تتضمن 16 محرفاً على الأقل وحرفاً كبيراً وصغيراً ورقماً ورمزاً.");
+  }
+  const salt = toHex(crypto.getRandomValues(new Uint8Array(16)));
+  const hash = toHex(await pbkdf2Async(sha256, await peppered(password, account.pepper), fromHex(salt), { c: ITERATIONS, dkLen: 32, asyncTick: 10 }));
+  const updated: AccountOverride = {
+    id: account.id, username: account.username, salt, hash,
+    sessionVersion: toHex(crypto.getRandomValues(new Uint8Array(16))),
+  };
+  const next: AccountStore = {
+    version: 1, revision: toHex(crypto.getRandomValues(new Uint8Array(16))),
+    accounts: [...roster.saved.accounts.filter(row => row.id !== account.id), updated],
+  };
+  const sealed = await sealConfig(next);
+  const result = await getD1().prepare("INSERT INTO management_vault (integration, sealed, updated_by) VALUES (?, ?, ?) ON CONFLICT(integration) DO UPDATE SET sealed = excluded.sealed, updated_by = excluded.updated_by, updated_at = CURRENT_TIMESTAMP WHERE management_vault.sealed = ?")
+    .bind(VAULT_KEY, sealed, "management-password-recovery", roster.sealed).run();
+  if (result.meta.changes !== 1) throw new RequestError("تغيرت إعدادات الحساب أثناء الاستعادة. أعد طلب رابط جديد.", 409);
+  // Every existing password-derived session becomes invalid because its
+  // credential tag includes the newly rotated hash and sessionVersion.
+  return { ok: true };
+}
+
 export async function authenticateManagementPassword(data: Record<string, unknown>) {
   const username = normalizeManagementUsername(data.username), password = data.password;
   if (!USERNAME.test(username) || typeof password !== "string" || password.length < 9 || password.length > 256) throw new RequestError(INVALID, 401);
