@@ -1,0 +1,23 @@
+name: Sabeq Bolt memo bridge contract
+on:
+  push:
+    paths:
+      - sabeq-legal/research-source/app/api/integrations/bolt-memos/**
+      - sabeq-legal/research-source/tests/bolt-memo-bridge.test.mjs
+      - .github/workflows/sabeq-bolt-memo-bridge.yml
+  pull_request:
+    paths:
+      - sabeq-legal/research-source/app/api/integrations/bolt-memos/**
+      - sabeq-legal/research-source/tests/bolt-memo-bridge.test.mjs
+      - .github/workflows/sabeq-bolt-memo-bridge.yml
+permissions:
+  contents: read
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: node --test sabeq-legal/research-source/tests/bolt-memo-bridge.test.mjs
