@@ -147,7 +147,7 @@ export function parseCaseAudit(raw:string,plan:CasePlan) {
     indices.add(check.issueIndex);
     if(check.status==="blocked"&&plan.issues[check.issueIndex].sourceMarkers.length&&!plan.issues[check.issueIndex].missing&&!plan.researchGaps.length&&!plan.missingFacts.length) throw Error("unexplained blocked issue");
   }
-  return { ...a, ok:a.roleConsistent&&a.factsPreserved&&a.reliefConsistent&&!a.unsupportedAssertions.length&&a.checks.every(c=>c.status!=="omitted"), complete:a.checks.every(c=>c.status==="addressed")&&!plan.missingFacts.length&&!plan.researchGaps.length&&plan.issues.every(i=>i.sourceMarkers.length>0&&!i.missing) };
+  return { ...a, ok:a.roleConsistent&&a.factsPreserved&&a.reliefConsistent&&!a.unsupportedAssertions.length&&a.checks.every(c=>c.status==="addressed"), complete:a.checks.every(c=>c.status==="addressed")&&!plan.missingFacts.length&&!plan.researchGaps.length&&plan.issues.every(i=>i.sourceMarkers.length>0&&!i.missing) };
 }
 export function caseQualitySummary(plan:CasePlan,audit:ReturnType<typeof parseCaseAudit>|null,content:PleadingContent,sourceCount:number) {
   const notices=[...plan.missingFacts,...plan.researchGaps,...plan.issues.map(i=>i.missing).filter(Boolean),...content.factualNotes];
