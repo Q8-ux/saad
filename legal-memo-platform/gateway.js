@@ -17,6 +17,7 @@ const { corsPolicy } = require('./cors-policy');
 const { openAiError, openAiErrorDetails } = require('./openai-errors');
 const { createOperationsMonitor } = require('./operations-monitor');
 const { memoPaymentGate } = require('./memo-payment-gate');
+const { runLegalCouncil, auditArticleReferences } = require('./legal-council');
 
 const publicPort = Number(process.env.PORT || 3000);
 const appPort = Number(process.env.INTERNAL_APP_PORT || 3001);
@@ -289,7 +290,51 @@ app.post('/api/legal/memo', jsonBody, memoPaymentGate(), async (req, res) => {
     });
     const memo = outputText(response);
     if (!memo) throw new Error('Empty OpenAI response');
-    return res.json({ memo, sources });
+    const councilEnabled = process.env.LEGAL_COUNCIL_ENABLED === 'true';
+    let council = {
+      memo,
+      reviewStatus: 'not_run',
+      publicationBlocked: false,
+      review: 'لم يتم تفعيل المراجعة الإضافية على هذه البوابة؛ تبقى المراجعة البشرية إلزامية.',
+      articleAudit: auditArticleReferences(memo, sources),
+      warnings: ['المراجعة البشرية مطلوبة قبل اعتماد أي مذكرة.'],
+    };
+    if (councilEnabled) {
+      try {
+        council = await runLegalCouncil({ client, model: AI_MODEL, memo, caseData, sources });
+      } catch (reviewError) {
+        console.error('Legal council review failed:', openAiErrorDetails(reviewError));
+        council = {
+          ...council,
+          memo: '',
+          publicationBlocked: true,
+          reviewStatus: 'needs_review',
+          warnings: [...council.warnings, 'تعذرت مراجعة مجلس الدفوع؛ حجبت المسودة حتى مراجعتها يدوياً.'],
+        };
+      }
+      if (council.publicationBlocked) {
+        return res.status(422).json({
+          error: 'لم تجتز المذكرة تدقيق المواد وأرقام القوانين أو المحافظة على بيانات القضية. احتُفظ بمدخلات الطلب، ولا تعرض المسودة غير المتحققة.',
+          legalCouncil: {
+            status: 'needs_review',
+            publicationBlocked: true,
+            articleAudit: council.articleAudit,
+            warnings: council.warnings,
+          },
+        });
+      }
+    }
+    return res.json({
+      memo: council.memo,
+      sources,
+      legalCouncil: {
+        status: council.reviewStatus,
+        publicationBlocked: false,
+        critique: council.review,
+        articleAudit: council.articleAudit,
+        warnings: council.warnings,
+      },
+    });
   } catch (error) {
     console.error('Public memo generation failed:', openAiErrorDetails(error));
     const mapped = openAiError(error);
