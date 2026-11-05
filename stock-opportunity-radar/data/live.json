@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "generated_at": "1970-01-01T00:00:00Z",
+  "refresh_interval_minutes": 120,
+  "records": [],
+  "sources": [
+    {
+      "id": "bh-tenders",
+      "country": "bh",
+      "name": "Bahrain Tender Board",
+      "url": "https://www.tenderboard.gov.bh/Tenders/PublicTenders",
+      "status": "pending",
+      "records": 0,
+      "last_checked_at": null
+    },
+    {
+      "id": "om-invest",
+      "country": "om",
+      "name": "Invest Oman",
+      "url": "https://investoman.om/investment-opportunities",
+      "status": "pending",
+      "records": 0,
+      "last_checked_at": null
+    }
+  ],
+  "count": 0,
+  "mode": "pending first official-source collection; no demo data"
+}
