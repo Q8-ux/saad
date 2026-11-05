@@ -7,7 +7,7 @@ import { RequestError } from "@/lib/request-security";
 const generic = { ok: true, message: "إذا كان للحساب بريد استرداد معتمد، فستصلك رسالة تحتوي رابطاً مؤقتاً." };
 const user = /^[a-z][a-z0-9_]{2,31}$/;
 const tokenFormat = /^[A-Za-z0-9_-]{43}$/;
-type RecoveryEnvironment = { MANAGEMENT_RECOVERY_EMAILS?: string };
+type RecoveryEnvironment = { MANAGEMENT_RECOVERY_EMAILS?: string; MANAGEMENT_OWNER_EMAIL?: string };
 
 export function mappedRecoveryEmail(accountId: string, raw: string | undefined) {
   // Only a server secret may designate a recovery address; no arbitrary
@@ -27,7 +27,17 @@ export async function requestManagementRecovery(data: Record<string, unknown>) {
   const username = normalizeManagementUsername(data.username);
   if (!user.test(username)) return generic;
   const account = await managementRecoveryAccount(username);
-  const email = account && mappedRecoveryEmail(account.id, (env as unknown as RecoveryEnvironment).MANAGEMENT_RECOVERY_EMAILS);
+  const runtime = env as unknown as RecoveryEnvironment;
+  // The existing site owner email is already a privileged administrator
+  // identity. It may recover administrator accounts if a per-account recovery
+  // email has not been explicitly configured. Never apply it to operators.
+  const email = account && (
+    mappedRecoveryEmail(account.id, runtime.MANAGEMENT_RECOVERY_EMAILS) ||
+    (account.role === "administrator" &&
+      typeof runtime.MANAGEMENT_OWNER_EMAIL === "string" &&
+      /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(runtime.MANAGEMENT_OWNER_EMAIL.trim())
+      ? runtime.MANAGEMENT_OWNER_EMAIL.trim().toLowerCase() : "")
+  );
   if (!account || !email) return generic;
   const token = btoa(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(32)))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
   const now = Math.floor(Date.now()/1000);
