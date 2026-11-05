@@ -62,3 +62,30 @@ See `guide-data.js` for the six Wikimedia Commons source page URLs, authors and 
 6. Never hold investor deposits or promise returns without appropriate licences and professional advice.
 
 This directory is independent of and not endorsed by the Gulf governments. It is intended for research, not legally binding advice.
+
+
+## Radar of verified government opportunities (November 2026)
+
+The homepage contains a **source-backed opportunity monitor** that never shows demo listings. It is distinct from the manually curated investment-sector cards and from the historic stock screener.
+
+### Operational model
+
+- Frontend: \`radar.js\` reads the current validated JSON snapshot from GitHub's raw main-branch data file; it uses the published Pages JSON only as a fallback.
+- Pipeline: \`.github/workflows/refresh-gulf-opportunities.yml\` checks official public sources **every 2 hours** (subject to GitHub scheduling delays) and commits \`data/live.json\` to \`main\`.
+- Collector: \`scripts/fetch_official_opportunities.py\` uses ordinary GET plus an official public-page browser render where needed. No credentials or CAPTCHA bypass.
+- Initial sources:
+  - Bahrain Tender Board's publicly published tenders. If a public listing cannot be extracted reliably, it is explicitly marked **unavailable** instead of silently fabricating records.
+  - Invest Oman's investment opportunity explorer: individual project page, title, published OMR capital and observation time, derived from the official rendered page.
+  - Saudi Arabia, UAE, Qatar and Kuwait are **official portal links only** pending tested accessible public feeds. They are **not** falsely marked connected.
+- The official record URL is mandatory. Government tenders with an expired closing date are excluded. Project availability is never assumed from being listed.
+- The UI hides all radar results when the newest snapshot is over 195 minutes old or schema validation fails. That is a reliability safeguard: the user sees an explicit outdated/unavailable message.
+- **Live** means periodic official-source refresh; this is NOT a streaming subscription, immediate change notification, guaranteed open project, or investment advice.
+
+### Trust controls
+
+- Never place scraping credentials in GitHub. Respect government portal access controls; only access openly published material.
+- Verify source terms and redistribution permissions before commercializing a high-volume feed.
+- Project photos must be supplied/licensed separately; generic skyline country photography is not evidence of a particular opportunity.
+- Source timestamps prove collection time, not the time an issuer last edited a tender.
+- Every issuer's official tender/procurement document and project contract overrides the portal summary.
+- If any source stops returning verifiable records, the source status goes to **unavailable** and previous records from that source are not reused.
