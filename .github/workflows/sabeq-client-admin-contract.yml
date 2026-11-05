@@ -58,7 +58,7 @@ jobs:
       - name: Validate memo import, checkout presentation and document layout
         run: node --test tests/assistant-memo-action.test.mjs tests/memo-import-render.test.mjs tests/payment-dialog.test.mjs tests/pleading-layout.test.mjs
       - run: node --test tests/admin-bridge-contract.test.mjs tests/memo-preparation.test.mjs tests/prepare-memo-route.test.mjs tests/memo-journey.test.mjs tests/admin-memo-display.test.mjs tests/admin-source-status.test.mjs
-      - run: node --test tests/management-source-connection.test.mjs
+      - run: node --test tests/management-source-connection.test.mjs tests/admin-memo-unification.test.mjs
       - run: python -m unittest discover -s tools/spec-kit -p 'test_*.py' -v
   admin-contract:
     runs-on: ubuntu-latest
