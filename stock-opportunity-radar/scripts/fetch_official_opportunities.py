@@ -129,6 +129,36 @@ def oman(soup: BeautifulSoup, root: str, now: datetime) -> list[dict]:
         }
     return list(found.values())[:40]
 
+
+def render_public_browser_page(url: str, source: dict, now: datetime) -> list[dict]:
+    """Render a public JS page like a normal visitor; never solve/bypass a challenge."""
+    from playwright.sync_api import sync_playwright, Error as PlaywrightError
+    with sync_playwright() as p:
+        browser=p.chromium.launch(headless=True)
+        try:
+            page=browser.new_page(locale="en-US",viewport={"width":1300,"height":1000})
+            page.goto(url,wait_until="domcontentloaded",timeout=30000)
+            page.wait_for_timeout(5000)
+            actual=page.url
+            if not valid_url(actual,{"www.tenderboard.gov.bh","tenderboard.gov.bh","investoman.om","www.investoman.om"}):
+                raise RuntimeError("Unexpected browser redirect host")
+            text=page.locator("body").inner_text(timeout=10000)
+            if any(flag in text.lower() for flag in ["verify you are human","captcha","support id:"]):
+                raise RuntimeError("Access challenge presented; not attempting bypass")
+            html=page.content()
+            soup=BeautifulSoup(html,"html.parser")
+            print(json.dumps({
+                "browser_diagnostics":source["id"],
+                "html_bytes":len(html),
+                "table_count":len(soup.select("table")),
+                "table_headers":[compact(t.get_text(" ",strip=True))[:200] for t in soup.select("table thead")[:2]],
+                "candidate_cards":len(soup.select("article, .card, .opportunity-card, [class*='opportunity-item'], [class*='opportunity-card']")),
+                "body_snippet":compact(text)[:430],
+            },ensure_ascii=False),flush=True)
+            return bahrain(soup,actual,now) if source["parser"]=="bahrain" else oman(soup,actual,now)
+        finally:
+            browser.close()
+
 def fetch(session: requests.Session, src: dict, now: datetime) -> tuple[list[dict],dict]:
     attempts = []
     for url in (src["url"],src["fallback"]):
@@ -151,8 +181,20 @@ def fetch(session: requests.Session, src: dict, now: datetime) -> tuple[list[dic
             if records:
                 return records,{"id":src["id"],"country":src["country"],"name":src["name"],"url":src["url"],"status":"ok","records":len(records),"last_success_at":now.isoformat().replace("+00:00","Z"),"last_checked_at":now.isoformat().replace("+00:00","Z"),"details":"Freshly extracted from official public webpage"}
             attempts[-1]["error"]="no_verified_records"
+            print(json.dumps({"html_diagnostics":src["id"],"url":r.url,"size":len(html),
+                              "tables":len(soup.select("table")),"cards":len(soup.select("article, .card, .opportunity-card")),
+                              "header_excerpt":compact(soup.get_text(" ",strip=True))[:360]},ensure_ascii=False),flush=True)
         except (requests.RequestException,ValueError) as exc:
             attempts.append({"url":url,"error":type(exc).__name__})
+    # Official pages may render records only after their own JavaScript executes.
+    # Normal public page rendering is used; protected pages are not bypassed.
+    try:
+        records=render_public_browser_page(src["url"],src,now)
+        if records:
+            return records,{"id":src["id"],"country":src["country"],"name":src["name"],"url":src["url"],"status":"ok","records":len(records),"last_success_at":now.isoformat().replace("+00:00","Z"),"last_checked_at":now.isoformat().replace("+00:00","Z"),"details":"Verified from rendered official public webpage"}
+    except Exception as exc:
+        print(json.dumps({"browser_error":src["id"],"reason":type(exc).__name__+":"+str(exc)[:150]}),flush=True)
+        attempts.append({"url":src["url"],"error":"browser_"+type(exc).__name__})
     return [],{"id":src["id"],"country":src["country"],"name":src["name"],"url":src["url"],"status":"unavailable","records":0,"last_success_at":None,"last_checked_at":now.isoformat().replace("+00:00","Z"),"details":"No verified current records; source may require JavaScript, authorized API or a markup update","attempts":attempts}
 
 def create_snapshot(session: requests.Session | None = None, now: datetime | None = None) -> dict:
