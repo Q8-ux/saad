@@ -18,6 +18,8 @@ on:
       - 'legal-memo-platform/**'
       - 'sabeq-legal/research-source/app/api/legal/memo/route.ts'
       - 'sabeq-legal/research-source/lib/council-defense-review.ts'
+      - 'sabeq-legal/research-source/lib/case-reasoning.ts'
+      - 'sabeq-legal/research-source/tests/case-reasoning.test.mjs'
       - '.github/workflows/sabeq-council-review.yml'
   workflow_dispatch:
 
