@@ -290,20 +290,38 @@ app.post('/api/legal/memo', jsonBody, memoPaymentGate(), async (req, res) => {
     });
     const memo = outputText(response);
     if (!memo) throw new Error('Empty OpenAI response');
+    const councilEnabled = process.env.LEGAL_COUNCIL_ENABLED === 'true';
     let council = {
       memo,
-      reviewStatus: 'needs_review',
-      review: 'المذكرة بحاجة إلى مراجعة قانونية بشرية قبل الاعتماد.',
+      reviewStatus: 'not_run',
+      publicationBlocked: false,
+      review: 'لم يتم تفعيل المراجعة الإضافية على هذه البوابة؛ تبقى المراجعة البشرية إلزامية.',
       articleAudit: auditArticleReferences(memo, sources),
-      warnings: ['المراجعة القانونية البشرية مطلوبة قبل الاعتماد.'],
+      warnings: ['المراجعة البشرية مطلوبة قبل اعتماد أي مذكرة.'],
     };
-    if (process.env.LEGAL_COUNCIL_ENABLED !== 'false') {
+    if (councilEnabled) {
       try {
         council = await runLegalCouncil({ client, model: AI_MODEL, memo, caseData, sources });
       } catch (reviewError) {
-        // Never silently label an unreviewed draft as verified or approved.
         console.error('Legal council review failed:', openAiErrorDetails(reviewError));
-        council.warnings.push('تعذرت مراجعة مجلس الدفوع الآلية؛ بقيت المسودة بحاجة إلى تدقيق بشري.');
+        council = {
+          ...council,
+          memo: '',
+          publicationBlocked: true,
+          reviewStatus: 'needs_review',
+          warnings: [...council.warnings, 'تعذرت مراجعة مجلس الدفوع؛ حجبت المسودة حتى مراجعتها يدوياً.'],
+        };
+      }
+      if (council.publicationBlocked) {
+        return res.status(422).json({
+          error: 'لم تجتز المذكرة تدقيق المواد وأرقام القوانين أو المحافظة على بيانات القضية. احتُفظ بمدخلات الطلب، ولا تعرض المسودة غير المتحققة.',
+          legalCouncil: {
+            status: 'needs_review',
+            publicationBlocked: true,
+            articleAudit: council.articleAudit,
+            warnings: council.warnings,
+          },
+        });
       }
     }
     return res.json({
@@ -311,6 +329,7 @@ app.post('/api/legal/memo', jsonBody, memoPaymentGate(), async (req, res) => {
       sources,
       legalCouncil: {
         status: council.reviewStatus,
+        publicationBlocked: false,
         critique: council.review,
         articleAudit: council.articleAudit,
         warnings: council.warnings,
