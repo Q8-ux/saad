@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'stock-opportunity-radar/**'
+      - '!stock-opportunity-radar/data/**'
       - '.github/scripts/publish-stock-opportunity-radar.py'
       - '.github/workflows/deploy-stock-opportunity-radar.yml'
   workflow_dispatch:
@@ -41,11 +42,15 @@ jobs:
           test -s stock-opportunity-radar/guide-data.js
           test -s stock-opportunity-radar/guide.js
           test -s stock-opportunity-radar/guide.css
+          test -s stock-opportunity-radar/radar.js
+          test -s stock-opportunity-radar/radar.css
+          test -s stock-opportunity-radar/data/live.json
           test -s stock-opportunity-radar/assets/talking-path.js
           test -s stock-opportunity-radar/stocks/index.html
           test -s stock-opportunity-radar/README.md
           python -m py_compile .github/scripts/publish-stock-opportunity-radar.py
           node --check stock-opportunity-radar/guide.js
+          node --check stock-opportunity-radar/radar.js
           node --check stock-opportunity-radar/guide-data.js
           node --check stock-opportunity-radar/assets/talking-path.js
           python - <<'PY'
