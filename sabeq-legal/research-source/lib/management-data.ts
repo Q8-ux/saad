@@ -80,7 +80,7 @@ export async function managerMemos(url: URL) {
   const rows = await getD1().prepare(`SELECT * FROM (
     SELECT id, client_name, email, case_type, case_number, status, error_code, created_at, updated_at, CASE WHEN user_id IS NULL THEN 'guest' ELSE 'user' END AS visitor_type, CASE WHEN length(trim(COALESCE(output_text,''), char(9)||char(10)||char(13)||' ')) > 0 THEN 1 ELSE 0 END AS has_output, origin FROM management_memo_requests
     UNION ALL
-    SELECT 'legacy:' || r.id, r.title, COALESCE(u.email,''), 'مذكرة محفوظة سابقاً', '', r.status, '', r.created_at, r.created_at, 'user', CASE WHEN length(trim(COALESCE(r.output_text,''), char(9)||char(10)||char(13)||' ')) > 0 THEN 1 ELSE 0 END, '' AS origin FROM service_records r LEFT JOIN public_users u ON r.user_id = u.id WHERE r.service_type IN ('memo','memo_archive') AND r.metadata_json NOT LIKE '%"managementRequestId"%'
+    SELECT 'legacy:' || r.id, r.title, COALESCE(u.email,''), 'مذكرة محفوظة سابقاً', '', r.status, '', r.created_at, r.created_at, 'user', CASE WHEN length(trim(COALESCE(r.output_text,''), char(9)||char(10)||char(13)||' ')) > 0 THEN 1 ELSE 0 END, '' AS origin FROM service_records r LEFT JOIN public_users u ON r.user_id = u.id WHERE r.service_type IN ('memo','memo_archive') AND COALESCE(r.metadata_json,'') NOT LIKE '%"managementRequestId"%'
     ) WHERE (? = '' OR client_name LIKE ? OR email LIKE ? OR case_number LIKE ?) AND (? = '' OR status = ?) AND (? = 0 OR has_output = 1) ORDER BY created_at DESC, id LIMIT ? OFFSET ?`)
     .bind(query, `%${query}%`, `%${query}%`, `%${query}%`, status, status, generatedOnly ? 1 : 0, limit, offset).all();
   const official = await officialOperations(new URLSearchParams({ kind: "memos", q: query, status, offset: String(offset), limit: String(limit) }));
@@ -99,7 +99,7 @@ export async function managerSnapshot(email: string) {
   const db = getD1();
   const [memo, historical, contacts, mail, commands, appointments, events, reads, official] = await Promise.all([
     db.prepare("SELECT COUNT(*) total, SUM(status = 'running') running, SUM(status IN ('failed','cancelled')) failed, SUM(status IN ('needs_review','needs_information')) review FROM management_memo_requests").first(),
-    db.prepare("SELECT COUNT(*) total FROM service_records WHERE service_type IN ('memo','memo_archive') AND metadata_json NOT LIKE '%\"managementRequestId\"%'").first(),
+    db.prepare("SELECT COUNT(*) total FROM service_records WHERE service_type IN ('memo','memo_archive') AND COALESCE(metadata_json,'') NOT LIKE '%\"managementRequestId\"%'").first(),
     db.prepare("SELECT COUNT(*) total, SUM(status = 'new') unread FROM contact_messages").first(),
     db.prepare("SELECT COUNT(*) total, SUM(status = 'new') unread FROM management_emails").first(),
     db.prepare("SELECT COUNT(*) total, SUM(status != 'completed') pending FROM management_commands").first(),
