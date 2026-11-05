@@ -165,3 +165,22 @@ export async function sendTestEmail(recipient: unknown, expectedSender: unknown)
     throw new RequestError(message, 502);
   }
 }
+
+/** Password recovery links are only sent to a server-side pre-approved address. */
+export async function sendManagementRecoveryEmail(to: string, username: string, token: string) {
+  const config = await verificationEmailDelivery();
+  if (!config.apiKey?.trim() || !config.fromEmail?.trim()) throw new EmailDeliveryError("configuration", "missing_settings");
+  const destination = cleanEmail(to).trim().toLowerCase();
+  const url = "https://q8-ux.github.io/saad/sabeq-admin-preview/#reset=" + encodeURIComponent(token);
+  return deliverEmail(config.apiKey, {
+    from: config.fromEmail,
+    to: [destination],
+    subject: "استعادة كلمة مرور إدارة سابق القانونية",
+    text: "تم طلب استعادة كلمة مرور لوحة الإدارة للحساب " + username +
+      ".\nافتح الرابط خلال عشر دقائق ثم اختر كلمة مرور جديدة:\n" + url +
+      "\nإذا لم تطلب استعادة كلمة المرور فتجاهل هذه الرسالة.",
+    html: '<div dir="rtl" style="font:17px/1.9 Tahoma,Arial,sans-serif;padding:25px"><h2>استعادة كلمة مرور إدارة سابق</h2><p>تم طلب استعادة دخول الحساب ' +
+      escapeHtml(username) + '.</p><p><a href="' + escapeHtml(url) +
+      '">فتح رابط الاستعادة المؤقت</a></p><p>صالح لمدة عشر دقائق ولمرة واحدة فقط. إذا لم تطلبه فتجاهل الرسالة.</p></div>',
+  });
+}
