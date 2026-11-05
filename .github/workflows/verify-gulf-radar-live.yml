@@ -1,0 +1,28 @@
+name: Verify Gulf Opportunity Radar — live browser smoke test
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/verify-gulf-radar-live.yml'
+      - 'stock-opportunity-radar/scripts/verify_live_radar.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  browser-smoke:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install --disable-pip-version-check 'playwright==1.55.0'
+      - run: python -m playwright install --with-deps chromium
+      - name: Validate published radar has source-linked data
+        run: python stock-opportunity-radar/scripts/verify_live_radar.py
