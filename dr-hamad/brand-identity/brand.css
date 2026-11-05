@@ -1,10 +1,11 @@
 :root {
-  /* Dr Hamad print/social brand identity tokens. Not imported by production site. */
+  /* Dr Hamad print/social brand identity tokens. Type families approved 2026-11-06. Not imported by production site. */
   --hamad-brand-navy: #17324D;
   --hamad-brand-slate: #657883;
   --hamad-brand-silver: #A9BAC3;
   --hamad-brand-ice: #F1F8FA;
   --hamad-brand-white: #FFFFFF;
+  /* Approved: Noto Kufi Arabic (headlines), Noto Sans Arabic (body), Liberation Serif (formal English). */
   --hamad-heading-font: "Noto Kufi Arabic", "Noto Sans Arabic", sans-serif;
   --hamad-body-font: "Noto Sans Arabic", sans-serif;
   --hamad-english-formal-font: "Liberation Serif", Georgia, serif;
