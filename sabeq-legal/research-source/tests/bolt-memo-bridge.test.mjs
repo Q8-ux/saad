@@ -13,7 +13,9 @@ test("generated memo bridge is private and does not allow anonymous list",()=>{
   assert.doesNotMatch(source,/Access-Control-Allow-Origin/);
 });
 test("generated list omits submissions and returns sanitized metadata",()=>{
-  assert.match(source,/view: "generated"/);
+  assert.doesNotMatch(source,/view: "generated"/);
+  assert.match(source,/Include running, failed and review-pending/);
+  assert.match(source,/row.has_output === true \|\| row.has_output === 1/);
   assert.match(source,/has_output:/);
   assert.match(source,/managerMemos\(url\)/);
   assert.doesNotMatch(source,/input_json:/);
@@ -22,6 +24,7 @@ test("generated list omits submissions and returns sanitized metadata",()=>{
 test("detail is read-only and retains generated legal grounds",()=>{
   assert.match(source,/payload.action === "get"/);
   assert.match(source,/output_text: typeof memo.output_text/);
+  assert.match(source,/has_output: typeof memo.output_text/);
   assert.doesNotMatch(source,/export async function PUT/);
   assert.doesNotMatch(source,/UPDATE management_memo_requests/);
 });
