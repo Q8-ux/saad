@@ -1,62 +1,64 @@
-# Stock Opportunity Radar — Technical Stock Screener
+# بوصلة الاستثمار الخليجي — Gulf Investment Compass
 
-**Status: static interactive prototype committed to GitHub.** No live stock exchange data, brokerage trading, real-money subscriptions, or financial recommendations.
+**Status:** A multilingual informational directory with an official-source country and sector guide, photo attribution, and a browser-supported voice interface. Last manual source check: **2026-11-05**.
 
-## App
+**Current production URL (requires deployed Pages workflow):**
+https://q8-ux.github.io/saad/stock-opportunity-radar/
 
-- Browser dashboard: `index.html`.
-- Languages: Arabic (RTL), English, Bahasa Indonesia.
-- Demo: synthetic OHLCV histories labeled `DEMO-*` and `SYNTHETIC` — **never real market quotes**.
-- Import: client-side CSV file with daily bars.
-- Features: market filter (ID, IN, VN, US), setup filters, search, minimum setup-match score, close-price charts, explanation of conditions, report CSV export.
-- Calculations: SMA20, SMA50, RSI14, ATR14, 20-day prior high, ratio of latest volume to preceding 20-bar average.
-- Patterns: breakout, pullback near SMA20, bullish momentum, weak conditions, neutral.
-- No data leaves browser via this app; it has no network API calls and no account system.
+**GitHub:** https://github.com/Q8-ux/saad/tree/main/stock-opportunity-radar
 
-## CSV import specification
+## What is included
+- 6 countries: Saudi Arabia, UAE, Qatar, Oman, Bahrain, Kuwait.
+- 6 interface and reference-summary languages: Arabic, English, Bahasa Indonesia, Vietnamese, Hindi, Traditional Chinese.
+- Country-specific summaries of foreign-ownership/licensing frameworks and links to official primary sources.
+- An investment directory that distinguishes **officially listed individual projects** (currently 3 from the official Invest Oman project explorer) from **sector portals** (not investable securities or confirmed listings).
+- Actual geographic photographs from Wikimedia Commons, with attributed authors and license/source links in each country card. **These photos illustrate the country, not the investment project or its availability.** Further rights review, including freedom-of-panorama issues, is required for commercial redistribution in some jurisdictions.
+- Browser-side typed reference assistant grounded only in the verified curated country descriptions and official links. It is *not* a generative AI model, does not have autonomous access to law updates, and does not give financial/legal advice.
+- Browser voice recognition and text-to-speech using the existing `talking-path` adapter copied **unchanged** to `assets/talking-path.js`. Browser support varies; live voice AI and VoiceStudio server integration remain unconnected.
+- Fast local search and filters (country, sector).
+- Original technical Stock Opportunity Radar CSV screener preserved at `stocks/index.html`:
+  https://q8-ux.github.io/saad/stock-opportunity-radar/stocks/
 
-UTF-8 comma-separated values with header:
+## Source authority and maintenance
+- Saudi MISA investment law and official registration FAQ: https://misa.gov.sa/activities/laws-regulations-copy/ / https://misa.gov.sa/ar/frequently-asked-questions/
+- Saudi Invest Saudi sectors: https://investsaudi.sa/sectors
+- UAE Ministry of Economy and Tourism incentives/ownership: https://www.moet.gov.ae/en/investment-incentives
+- Qatar Invest Qatar ownership and law 1/2019: https://www.invest.qa/en/resources/laws-and-regulations/foreign-ownership
+- Qatar Invest Qatar opportunity sectors: https://www.invest.qa/en/sectors-and-opportunities/opportunities
+- Oman Invest Oman project explorer and FAQs: https://www.investoman.om/investment-opportunities / https://www.investoman.om/resources/faqs
+- Bahrain Ministry of Industry and Commerce regulations: https://moic.bh/en/regulations
+- Bahrain EDB sectors and opportunity hub: https://www.bahrainedb.com/ar/opportunities/investable-projects/
+- Kuwait KDIPA investment law 116/2013 and decisions: https://kdipa.gov.kw/ar/about-kdipa/law-decisions/
+- Kuwait KDIPA official portal: https://kdipa.gov.kw/
 
-```csv
-date,symbol,market,open,high,low,close,volume
-2026-01-05,EXAMPLE-ID,ID,101,105,99,103,480000
-2026-01-06,EXAMPLE-ID,ID,103,106,101,104,520000
-```
+Sources are linked per country/project directly in the interface. Financial data, capital and project listing statuses are *not* independently audited by this platform. Each jurisdiction can amend rules without advance notice. Laws may be different by nationality, sector, residency, entity type and location.
 
-Required: `date` (YYYY-MM-DD), `symbol`, `open`, `high`, `low`, `close`, `volume`.
-Optional `market`: `ID` (Indonesia), `IN` (India), `VN` (Vietnam), `US`; omitted market defaults to ID.
+## Photography
+See `guide-data.js` for the six Wikimedia Commons source page URLs, authors and specific Creative Commons licenses. The app loads images via Wikimedia's Special:FilePath endpoint and displays attribution inline. Do not claim that a skyline/nature image documents a specific listed investment. Confirm both the photographer's license and applicable architectural or personality rights before paid marketing reuse.
 
-At least **55 daily trading records per symbol** are required for screening. Up to **8 MB** and **120,000 input lines**. Data is sorted by date and duplicate dates per symbol take the last occurrence. It is the user's responsibility to verify adjusted/unadjusted prices, splits, trading calendar, corporate actions, data freshness, and data-source licensing.
+## Source directory structure
+- `index.html`: Gulf Investment Compass landing and assistant UI.
+- `guide.css`: responsive multilingual styles.
+- `guide-data.js`: cited countries, regulations, sector gateways, published project links, translations and photo attribution.
+- `guide.js`: interface filtering, source-grounded reference assistant, voice interactions.
+- `assets/talking-path.js`: existing reusable Talking Path voice adapter.
+- `stocks/index.html`: unchanged stock technical screener with CSV importer and synthetic demo data; *not* the investment guide.
+- `.github/workflows/deploy-stock-opportunity-radar.yml`: Pages publishing and smoke verification, preserving other published apps.
 
-Download the **synthetic example CSV** using the button in the app: 90 rows for one demo symbol. The example is not appropriate for investment decisions.
+## What is NOT ready
+- Real-time regulatory tracking or automatic verification of project status.
+- Legal representation, migration/visa determinations or individualized investment advice.
+- Live AI conversational backend, externally hosted VoiceStudio, live voice agent or user accounts.
+- Project submissions, investor lead capture, verified photo sets per investment asset, subscriptions or payment.
+- Licensed data feeds, live stock prices, or execution of share orders.
+- Native-speaker legal/editorial approval of all four additional Asian language variants.
 
-## Definitions (education only)
+## Next release prerequisites
+1. Editorial approval by jurisdiction specialists and native speakers, and a source-refresh schedule.
+2. Obtain a proper licensed official project image library and verify individual project status by contacting issuing authorities.
+3. Implement a secure server-side AI assistant with retrieval limited to approved source documents, date awareness and source citations. Do **not** publish API keys in GitHub Pages.
+4. Integrate authorized speech backend if needed; browser Talking Path is only the no-key fallback.
+5. Investor enquiries only through a protected opt-in contact workflow, with privacy and retention policies.
+6. Never hold investor deposits or promise returns without appropriate licences and professional advice.
 
-- Breakout: last close higher than maximum high of preceding 20 bars, latest volume >= 1.5× mean preceding 20 bars, SMA20 > SMA50.
-- Pullback: SMA20 > SMA50, last close within ±2% of SMA20, RSI14 between 40 and 65, volume ratio >= 0.7.
-- Momentum: SMA20 > SMA50, RSI14 55–75, volume ratio > 1.
-- Weakness: last close < SMA50 and RSI14 < 45.
-- Neutral: other patterns.
-- Setup-match score 0–100 is a **deterministic condition-matching score**, not a forecast, recommendation or estimated probability of profit.
-- RSI14 is calculated from the final 14 price changes using a simple average of gains/losses (not Wilder smoothing). ATR14 is a simple average of the last 14 true ranges.
-- A minimum of 55 sessions ensures indicators and lagged volume averages can be calculated.
-
-## What is NOT implemented
-
-- Market data provider or exchanges' licensing/redistribution agreements.
-- Streaming quotes, alerts, broker integrations, order placement.
-- Secure user accounts, subscriptions, billing, automatic reports.
-- Fundamental analysis, backtesting or validation of expected strategy profitability.
-- Exchange-specific rules, taxes or suitability checks.
-
-## Deployment
-
-Project is located at: https://github.com/Q8-ux/saad/tree/main/stock-opportunity-radar
-
-If GitHub Pages is configured to publish repository root from `main`, its expected path is `https://q8-ux.github.io/saad/stock-opportunity-radar/`. **This path is not proof of a successful deployment**. Verify through repository Settings → Pages and the public URL before declaring it live.
-
-Keep this independent directory. **Do not change GitHub Pages publication source** without assessing the impact on other projects using this repository.
-
-## Risk controls
-
-This app is for educational filtering. It does not tell users to buy or sell specific securities. Do not promote its results as personalized recommendations or guaranteed winning trades. Research local licensing, marketing restrictions and data distribution rights before adding paid signals or subscriptions.
+This directory is independent of and not endorsed by the Gulf governments. It is intended for research, not legally binding advice.
