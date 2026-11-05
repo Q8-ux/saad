@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="id" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#071525">
+<meta name="description" content="Agency Studio is a pre-launch White Label creative workflow concept for growing marketing agencies.">
+<title>Agency Studio — Creative operations for agencies</title>
+<style>
+:root{color-scheme:dark;--bg:#071525;--panel:#0d2136;--card:#102940;--line:#28516d;--text:#eef7ff;--muted:#b3c9d8;--cyan:#67e3e6;--mint:#83f1c0;--orange:#ffd197;--shadow:0 18px 52px #0005}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:Inter,"Segoe UI",Tahoma,Arial,sans-serif;color:var(--text);background:radial-gradient(ellipse at 80% -10%,#154b68 0%,transparent 40%),radial-gradient(ellipse at 0 40%,#16354b 0%,transparent 38%),var(--bg);line-height:1.65}a{text-decoration:none;color:inherit}button,select{font:inherit}button{cursor:pointer}
+.container{width:min(1140px,calc(100% - 36px));margin:auto}.top{border-bottom:1px solid #3c617b66;position:sticky;top:0;z-index:10;background:#071525ed;backdrop-filter:blur(16px)}.nav{display:flex;align-items:center;justify-content:space-between;gap:14px;min-height:76px}.logo{display:flex;gap:10px;align-items:center;font-size:1.15rem;font-weight:800;white-space:nowrap}.mark{width:38px;height:38px;display:grid;place-items:center;border-radius:11px;background:linear-gradient(135deg,var(--cyan),#4491ff);color:#06243a;font-weight:900}.navlinks{display:flex;align-items:center;gap:20px}.navlinks a{font-size:.9rem;color:var(--muted)}.navlinks a:hover{color:var(--cyan)}select{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:10px;padding:8px 12px}.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid #6fe7e7;background:linear-gradient(120deg,var(--cyan),var(--mint));color:#072339;font-weight:800;padding:12px 22px;border-radius:12px;min-height:46px;box-shadow:0 3px 23px #64e6d71d}.btn.secondary{background:#15364b;color:#eef7ff;border:1px solid #4a768f;box-shadow:none}.btn:hover{transform:translateY(-1px)}.btn:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid var(--orange);outline-offset:3px}
+.hero{display:grid;grid-template-columns:1.03fr .97fr;gap:48px;align-items:center;padding-top:90px;padding-bottom:90px}.kicker{display:inline-flex;align-items:center;border:1px solid #366e79;border-radius:50px;background:#17405199;color:var(--mint);padding:5px 13px;font-size:.83rem;font-weight:700}.hero h1{font-size:clamp(2.5rem,5.4vw,4.8rem);line-height:1.12;letter-spacing:-.045em;margin:24px 0}.hero h1 span{color:var(--cyan)}.lead{font-size:1.1rem;color:#c8dce8;max-width:610px}.actions{display:flex;gap:12px;flex-wrap:wrap;margin:28px 0}.notice{color:var(--muted);font-size:.82rem;max-width:590px}.mock{background:linear-gradient(160deg,#183b54,#0a1c30);border:1px solid #46738e;border-radius:23px;padding:18px;box-shadow:var(--shadow);transform:rotate(1deg)}.mock-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:5px 5px 18px}.dots{display:flex;gap:6px}.dots i{width:9px;height:9px;display:block;border-radius:50%;background:#68acbd}.dots i:first-child{background:#ffac89}.dots i:nth-child(2){background:#f9d184}.mini-tag{color:#c5dfef;font-size:.76rem}.mock-row{display:grid;grid-template-columns:90px 1fr;gap:12px}.mock-side{border:1px solid var(--line);background:#091c2d;border-radius:12px;padding:12px}.mock-side span{display:block;background:#376078;height:8px;border-radius:4px;margin:10px 0}.mock-side span:nth-child(2){width:68%}.mock-side span:nth-child(3){width:82%}.mock-main{display:grid;gap:11px}.mock-card{background:#0c263b;border:1px solid #315570;border-radius:11px;padding:13px}.mock-card strong{display:block;font-size:.83rem}.mock-card small{color:var(--muted);font-size:.73rem}.status{display:inline-block;padding:2px 9px;margin-top:7px;background:#245c4b;border-radius:22px;color:#bdf5d4;font-size:.7rem}.mock-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.swatch{aspect-ratio:4/3;border-radius:9px;background:linear-gradient(135deg,#417c9d,#1b3b5d)}.swatch:nth-child(2){background:linear-gradient(135deg,#dca36b,#7e4d4e)}.swatch:nth-child(3){background:linear-gradient(135deg,#4cafaa,#253f66)}.mock-label{color:var(--muted);font-size:.73rem;margin-top:12px;text-align:center}
+section.content{padding:76px 0}section.content h2{font-size:clamp(1.8rem,3.5vw,2.75rem);letter-spacing:-.03em;line-height:1.2;margin:0 0 12px}.sub{color:var(--muted);max-width:760px;margin:0 0 30px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.feature,.step,.plan,.faq{background:linear-gradient(145deg,#102b43,#0c2033);border:1px solid #31546f;border-radius:17px;padding:24px}.feature .emoji{font-size:1.5rem}.feature h3,.step h3{margin:10px 0 8px;font-size:1.07rem}.feature p,.step p,.faq p{color:var(--muted);font-size:.93rem;margin:0}.step-num{color:var(--cyan);font-size:.83rem;font-weight:800}.steps{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}.step{padding:18px}.prices{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;align-items:stretch}.plan{display:flex;flex-direction:column;gap:12px}.plan.featured{border-color:var(--cyan);box-shadow:0 0 0 1px #66e0e6 inset}.plan h3{margin:0}.money{font-size:2.15rem;font-weight:850;letter-spacing:-.04em}.money small{font-size:.85rem;color:var(--muted);font-weight:400}.plan ul{padding-inline-start:20px;margin:0 0 8px;flex:1}.plan li{color:#d0e2ef;padding:3px 0;font-size:.91rem}.plan .btn{width:100%}.addon{border:1px dashed #569fa8;border-radius:16px;padding:23px;margin-top:20px;display:flex;justify-content:space-between;gap:16px;align-items:center;background:#0e334177}.addon strong{font-size:1.08rem}.addon p{margin:3px 0;color:var(--muted);font-size:.9rem}.addon .price{font-size:1.6rem;font-weight:800;color:var(--mint);white-space:nowrap}.faqs{display:grid;grid-template-columns:repeat(2,1fr);gap:15px}.faq h3{font-size:1rem;margin:0 0 8px}.closing{text-align:center;border:1px solid #3e8191;border-radius:20px;background:linear-gradient(120deg,#153c51,#10283b);padding:42px;margin-top:40px}.closing h2{margin:0 0 12px}.closing p{color:var(--muted);margin:0 auto 24px;max-width:650px}.bottom{padding:35px 0 45px;color:var(--muted);border-top:1px solid #31536c;font-size:.85rem}.bottom a{text-decoration:underline;text-underline-offset:3px}.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#103d42;color:#f0fffd;border:1px solid var(--cyan);border-radius:10px;padding:12px 20px;max-width:90vw;z-index:50;box-shadow:var(--shadow)}
+html[dir="rtl"] .hero h1{letter-spacing:0}html[dir="rtl"] .mock{transform:rotate(-1deg)}
+@media(max-width:900px){.hero{grid-template-columns:1fr;gap:22px;padding:60px 0}.steps{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:repeat(2,1fr)}.navlinks a{display:none}}
+@media(max-width:650px){.nav{min-height:65px}.hero h1{font-size:2.55rem}.grid,.prices,.faqs,.steps{grid-template-columns:1fr}.addon{flex-direction:column;align-items:flex-start}.mock{transform:none}.mock-row{grid-template-columns:63px 1fr}.actions .btn{width:100%}section.content{padding:54px 0}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.btn:hover{transform:none}}
+</style>
+</head>
+<body>
+<header class="top"><nav class="container nav" aria-label="Main navigation">
+  <a class="logo" href="#top"><span class="mark" aria-hidden="true">A</span>Agency Studio</a>
+  <div class="navlinks"><a href="#workflow" data-t="navWorkflow">Workflow</a><a href="#features" data-t="navFeatures">Features</a><a href="#pricing" data-t="navPricing">Pricing</a></div>
+  <div><label for="language" class="sr">Language</label><select id="language" aria-label="Language"><option value="id">Bahasa Indonesia</option><option value="en">English</option><option value="ar">العربية</option></select></div>
+</nav></header>
+<main id="top">
+<section class="container hero">
+  <div><span class="kicker" data-t="eyebrow">PILOT — COMING SOON</span>
+    <h1 data-t-html="hero">Lebih banyak brand. <span>Satu ruang kreatif.</span></h1>
+    <p class="lead" data-t="lead">Kelola brief, draf iklan, review, dan hasil akhir untuk banyak klien dalam satu alur kerja — dengan identitas agensi Anda.</p>
+    <div class="actions"><a class="btn" href="#pricing" data-t="viewPlans">Lihat paket pilot</a><a class="btn secondary" href="#workflow" data-t="viewWorkflow">Cara kerjanya</a></div>
+    <p class="notice" data-t="prelaunch">Ini adalah pratinjau konsep pra-peluncuran. Akun pelanggan, produksi otomatis, dan pembayaran belum aktif.</p>
+  </div>
+  <div class="mock" aria-label="Concept-only dashboard illustration">
+    <div class="mock-head"><span class="dots"><i></i><i></i><i></i></span><span class="mini-tag" data-t="mockTitle">Contoh alur kerja · bukan aplikasi aktif</span></div>
+    <div class="mock-row"><div class="mock-side"><span></span><span></span><span></span><span></span></div>
+      <div class="mock-main">
+        <div class="mock-card"><strong data-t="mockBrand">Brand: Kopi Sore</strong><small data-t="mockCampaign">Kampanye konten bulanan</small><br><span class="status" data-t="mockStatus">Menunggu review</span></div>
+        <div class="mock-grid"><div class="swatch"></div><div class="swatch"></div><div class="swatch"></div></div>
+        <div class="mock-card"><strong data-t="mockStage">Brief → Draf → Review → Ekspor</strong><small data-t="mockCheck">Pemeriksaan brand dan hak penggunaan</small></div>
+      </div>
+    </div>
+    <div class="mock-label" data-t="mockNote">Visualisasi konsep — tanpa data pelanggan asli</div>
+  </div>
+</section>
+<section class="container content" id="workflow"><h2 data-t="workflowTitle">Dari brief hingga siap dikirim</h2><p class="sub" data-t="workflowSub">Proses yang dirancang untuk tim kecil yang mengelola banyak klien.</p><div class="steps" id="steps"></div></section>
+<section class="container content" id="features"><h2 data-t="featuresTitle">Apa yang direncanakan?</h2><p class="sub" data-t="featuresSub">Fokus pada produksi kreatif dan proses persetujuan, bukan mengelola seluruh anggaran iklan.</p><div class="grid" id="featuresGrid"></div></section>
+<section class="container content" id="pricing"><h2 data-t="pricingTitle">Paket uji coba</h2><p class="sub" data-t="pricingSub">Harga rencana dalam USD, belum tersedia untuk pembayaran. Kuota dapat berubah setelah pengujian biaya dan kapasitas.</p><div class="prices" id="plans"></div><div class="addon"><div><strong data-t="addonTitle">Tambahan produksi terkelola</strong><p data-t="addonBody">8 desain final + 2 edit video pendek dari aset klien, satu revisi per hasil. Tidak termasuk video generatif penuh.</p></div><span class="price">+$199<small data-t="perMonth">/bln</small></span></div><p class="notice" data-t="pricingNote">Kredit draf bersifat terbatas. Revisi besar, stok premium, pajak, dan biaya transaksi belum termasuk.</p></section>
+<section class="container content" id="faq"><h2 data-t="faqTitle">Pertanyaan umum</h2><p class="sub" data-t="faqSub">Informasi sebelum program pilot dibuka.</p><div class="faqs" id="faqs"></div><div class="closing"><h2 data-t="closingTitle">Jelajahi ide, sebelum meluncur.</h2><p data-t="closingBody">Unduh ringkasan paket untuk ditinjau bersama tim Anda. Pendaftaran dan pembayaran akan dibuka hanya setelah sistem diverifikasi.</p><button class="btn" id="downloadBrief" type="button" data-t="download">Unduh ringkasan pilot</button></div></section>
+</main>
+<footer class="bottom"><div class="container"><strong>Agency Studio</strong> · <span data-t="footer">Konsep pra-peluncuran. Tanpa klaim hasil atau layanan aktif.</span> · <a href="https://github.com/Q8-ux/saad/tree/main/agency-studio">GitHub</a></div></footer>
+<div id="toast" role="status" aria-live="polite" class="sr"></div>
+<script>
+const I={
+id:{
+ navWorkflow:"Alur kerja",navFeatures:"Fitur",navPricing:"Harga",eyebrow:"PILOT — SEGERA HADIR",
+ hero:"Lebih banyak brand. <span>Satu ruang kreatif.</span>",
+ lead:"Kelola brief, draf iklan, review, dan hasil akhir untuk banyak klien dalam satu alur kerja — dengan identitas agensi Anda.",
+ viewPlans:"Lihat paket pilot",viewWorkflow:"Cara kerjanya",prelaunch:"Ini adalah pratinjau konsep pra-peluncuran. Akun pelanggan, produksi otomatis, dan pembayaran belum aktif.",
+ mockTitle:"Contoh alur kerja · bukan aplikasi aktif",mockBrand:"Brand: Kopi Sore",mockCampaign:"Kampanye konten bulanan",mockStatus:"Menunggu review",mockStage:"Brief → Draf → Review → Ekspor",mockCheck:"Pemeriksaan brand dan hak penggunaan",mockNote:"Visualisasi konsep — tanpa data pelanggan asli",
+ workflowTitle:"Dari brief hingga siap dikirim",workflowSub:"Proses yang dirancang untuk tim kecil yang mengelola banyak klien.",
+ steps:[["Setup brand","Simpan panduan, warna, dan aset setiap klien."],["Tulis brief","Tentukan kanal, tujuan, penawaran, dan materi sumber."],["Buat draf","Siapkan konsep copy dan visual berbasis templat."],["Review","Tinjau fakta, hak pakai, dan kecocokan brand."],["Ekspor","Simpan persetujuan dan siapkan file final."]],
+ featuresTitle:"Apa yang direncanakan?",featuresSub:"Fokus pada produksi kreatif dan persetujuan, bukan mengelola seluruh anggaran iklan.",
+ features:[["◫","Multi-brand","Ruang terpisah untuk panduan dan aset tiap klien."],["✎","Draf copy","Hook, headline, caption, dan CTA untuk kampanye."],["◎","White Label","Identitas agensi pada presentasi dan ekspor."],["◇","Dua bahasa","Bahasa Indonesia dan Inggris, setelah pemeriksaan mutu."],["✓","Review","Alur persetujuan dan catatan revisi yang jelas."],["▣","Produksi tambahan","Desain final dan video edit pendek dari aset klien."]],
+ pricingTitle:"Paket uji coba",pricingSub:"Harga rencana dalam USD, belum tersedia untuk pembayaran. Kuota dapat berubah setelah pengujian biaya dan kapasitas.",
+ plans:[["Starter","3 brand","20 draf desain statis","30 draf copy"],["Agency","10 brand","60 draf desain statis","50 draf copy"],["Scale","30 brand","150 draf desain statis","100 draf copy"]],
+ planAction:"Unduh info paket",perMonth:"/bulan",addonTitle:"Tambahan produksi terkelola",addonBody:"8 desain final + 2 edit video pendek dari aset klien, satu revisi per hasil. Tidak termasuk video generatif penuh.",pricingNote:"Kredit draf bersifat terbatas. Revisi besar, stok premium, pajak, dan biaya transaksi belum termasuk.",
+ faqTitle:"Pertanyaan umum",faqSub:"Informasi sebelum program pilot dibuka.",
+ faqs:[["Sudah bisa berlangganan?","Belum. Ini adalah konsep pra-peluncuran dan belum menerima pembayaran."],["Apakah bisa memakai logo agensi?","Dukungan White Label direncanakan untuk hasil dan layar review."],["Bisa langsung posting ke TikTok?","Tidak dalam lingkup pilot awal. Posting langsung belum termasuk."],["Apakah hasil iklan dijamin?","Tidak. Hasil kampanye tergantung banyak faktor di luar platform."],["Apakah paket mencakup video?","Dua video edit pendek hanya pada tambahan produksi, dari aset klien."],["Bagaimana data klien dilindungi?","Sistem operasional kelak memerlukan akses terpisah, penyimpanan aman, dan kebijakan privasi."]],
+ closingTitle:"Jelajahi ide, sebelum meluncur.",closingBody:"Unduh ringkasan paket untuk ditinjau bersama tim Anda. Pendaftaran dan pembayaran akan dibuka hanya setelah sistem diverifikasi.",download:"Unduh ringkasan pilot",footer:"Konsep pra-peluncuran. Tanpa klaim hasil atau layanan aktif.",saved:"Ringkasan pilot telah diunduh."
+},
+en:{
+ navWorkflow:"Workflow",navFeatures:"Features",navPricing:"Pricing",eyebrow:"PILOT — COMING SOON",
+ hero:"More client brands. <span>One creative workspace.</span>",
+ lead:"Organize briefs, draft ads, reviews and final deliverables across client brands — with your agency's identity.",
+ viewPlans:"Explore pilot plans",viewWorkflow:"How it works",prelaunch:"This is a pre-launch concept preview. Customer accounts, automated production and payments are not live.",
+ mockTitle:"Workflow illustration · not a live app",mockBrand:"Brand: Kopi Sore",mockCampaign:"Monthly content campaign",mockStatus:"Awaiting review",mockStage:"Brief → Draft → Review → Export",mockCheck:"Brand fit and asset rights checks",mockNote:"Illustrative concept — no real customer data",
+ workflowTitle:"From brief to final export",workflowSub:"A proposed workflow for small teams serving multiple clients.",
+ steps:[["Set up the brand","Keep each client's guidelines, palette and assets separate."],["Create the brief","Specify channel, objective, offer and source materials."],["Draft","Prepare copy options and template-based graphic drafts."],["Review","Check factual claims, licenses and brand fit."],["Export","Keep approval history and prepare final deliverables."]],
+ featuresTitle:"What is planned?",featuresSub:"Built around creative production and approvals — not ad spend management.",
+ features:[["◫","Multi-brand spaces","Separate client guidelines and approved assets."],["✎","Ad copy drafts","Hooks, headlines, captions and CTAs."],["◎","White Label","Agency identity on previews and exports."],["◇","Localization","Indonesian and English first, with language QA."],["✓","Review workflow","Clear approvals and revision notes."],["▣","Managed production","Final static ads and short edits from client assets."]],
+ pricingTitle:"Pilot plan concepts",pricingSub:"Proposed USD pricing, not yet available for purchase. Allowances may change after cost and capacity testing.",
+ plans:[["Starter","3 brands","20 static design drafts","30 copy drafts"],["Agency","10 brands","60 static design drafts","50 copy drafts"],["Scale","30 brands","150 static design drafts","100 copy drafts"]],
+ planAction:"Download plan brief",perMonth:"/month",addonTitle:"Managed production add-on",addonBody:"8 final static designs + 2 short edits from client-provided assets, one revision per deliverable. Generative video is excluded.",pricingNote:"Draft credits are limited. Major revisions, premium stock, taxes and transaction fees are excluded.",
+ faqTitle:"Frequently asked questions",faqSub:"Details to know before the pilot opens.",
+ faqs:[["Can I subscribe now?","Not yet. This is a pre-launch concept, and no payments are being accepted."],["Will it display my agency logo?","The planned White Label workflow will support agency-branded exports and review screens."],["Will it publish to TikTok?","No. Direct publishing is outside the initial pilot scope."],["Do you guarantee campaign results?","No. Campaign outcomes depend on factors outside the platform."],["Are videos included?","Two short edits are included only in the managed-production add-on, from supplied assets."],["How is client data protected?","A live product will require isolated access, secure storage and privacy terms."]],
+ closingTitle:"Explore the concept before launch.",closingBody:"Download the pilot brief to review with your team. Accounts and payments will open only after the system is verified.",download:"Download pilot brief",footer:"Pre-launch concept. No claims of results or active production service.",saved:"Pilot brief downloaded."
+},
+ar:{
+ navWorkflow:"طريقة العمل",navFeatures:"المزايا",navPricing:"الباقات",eyebrow:"المرحلة التجريبية — قريبًا",
+ hero:"علامات أكثر لعملائك. <span>مساحة إنتاج واحدة.</span>",
+ lead:"نظّم موجزات الحملات، ومسودات الإعلانات، ومراجعات العملاء، وتسليم المواد النهائية لعدة علامات تجارية، بهوية وكالتك.",
+ viewPlans:"استعرض الباقات التجريبية",viewWorkflow:"آلية العمل",prelaunch:"هذه معاينة تسويقية لفكرة قبل الإطلاق. حسابات العملاء والإنتاج الآلي والدفع غير مفعّلة.",
+ mockTitle:"تصوّر لسير العمل · ليس تطبيقًا نشطًا",mockBrand:"العلامة: Kopi Sore",mockCampaign:"حملة محتوى شهرية",mockStatus:"بانتظار المراجعة",mockStage:"الموجز ← المسودة ← المراجعة ← التصدير",mockCheck:"تدقيق الهوية وحقوق الأصول",mockNote:"تصوّر افتراضي — دون بيانات عملاء حقيقية",
+ workflowTitle:"من موجز الحملة إلى التسليم",workflowSub:"مسار عمل مقترح لفرق الوكالات الصغيرة التي تدير عدة عملاء.",
+ steps:[["تعريف العلامة","فصل هوية كل عميل وأصوله وتعليماته."],["إعداد الموجز","تحديد القناة والهدف والعرض والمواد المصدرية."],["إنتاج المسودة","إنشاء خيارات للنصوص والتصاميم المعتمدة على القوالب."],["المراجعة","فحص الدقة والحقوق والتوافق مع الهوية."],["التصدير","توثيق الاعتماد وتجهيز الملفات النهائية."]],
+ featuresTitle:"ما الذي ستقدمه المنصة؟",featuresSub:"التركيز على إنتاج المحتوى ومراجعته، لا إدارة ميزانيات الإعلانات.",
+ features:[["◫","مساحات متعددة","هوية وأصول مستقلة لكل علامة."],["✎","مسودات إعلانات","عناوين وخطافات ونصوص ودعوات إجراء."],["◎","العلامة البيضاء","هوية الوكالة على العروض والمخرجات."],["◇","تعدد اللغات","الإندونيسية والإنجليزية مبدئيًا مع تدقيق."],["✓","مسار مراجعة","موافقات وتعليقات وتعديلات واضحة."],["▣","إنتاج مُدار","تصاميم نهائية وفيديوهات محررة من أصول العميل."]],
+ pricingTitle:"باقات الاشتراك التجريبية",pricingSub:"أسعار مقترحة بالدولار وغير مفعلة للبيع. تُراجع الحصص بعد اختبار التكاليف والطاقة الإنتاجية.",
+ plans:[["Starter","3 علامات","20 مسودة تصميم ثابت","30 مسودة نص"],["Agency","10 علامات","60 مسودة تصميم ثابت","50 مسودة نص"],["Scale","30 علامة","150 مسودة تصميم ثابت","100 مسودة نص"]],
+ planAction:"تحميل تفاصيل الباقة",perMonth:"/شهر",addonTitle:"إضافة الإنتاج المُدار",addonBody:"8 تصاميم ثابتة نهائية ومقطعا فيديو قصير من أصول يرسلها العميل، تعديل واحد لكل مادة. لا يشمل توليد فيديو كاملًا.",pricingNote:"حصص المسودات محدودة. لا تشمل التعديلات الكبيرة والصور المدفوعة والضرائب ورسوم المعاملات.",
+ faqTitle:"أسئلة متكررة",faqSub:"تفاصيل مهمة قبل فتح الاشتراك.",
+ faqs:[["هل يمكن الاشتراك الآن؟","لا؛ هذا تصور ما قبل الإطلاق ولا يجري تحصيل مدفوعات."],["هل تظهر هوية وكالتي؟","المخطط دعم العلامة البيضاء في العروض ومخرجات العملاء."],["هل ينشر مباشرة إلى TikTok؟","لا؛ النشر المباشر خارج نطاق المرحلة الأولى."],["هل تضمن المنصة نتائج الحملات؟","لا؛ أداء الإعلان يتأثر بعوامل لا تتحكم فيها المنصة."],["هل تشمل الاشتراكات فيديوهات؟","مقطعا فيديو محرران فقط ضمن إضافة الإنتاج المُدار، باستخدام أصول يقدمها العميل."],["كيف تحمى بيانات العملاء؟","يتطلب التشغيل الفعلي نظام صلاحيات منفصلة وتخزينًا آمنًا وسياسة خصوصية."]],
+ closingTitle:"استعرض الفكرة قبل إطلاقها.",closingBody:"حمّل موجز الباقات لمراجعته مع فريقك. لن يُفتح الاشتراك والدفع قبل اختبار النظام والتحقق منه.",download:"حمّل موجز التجربة",footer:"تصور ما قبل الإطلاق؛ لا ادعاءات بنتائج أو خدمات إنتاج نشطة.",saved:"تم تنزيل موجز التجربة."
+}
+};
+const pricing=[79,149,299],labels=["Starter","Agency","Scale"];
+const $=(s)=>document.querySelector(s);
+const escapeHtml=(s)=>String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");
+let active="id";
+function render(lang){
+ active=I[lang]?lang:"id";const d=I[active];document.documentElement.lang=active;document.documentElement.dir=active==="ar"?"rtl":"ltr";
+ for(const el of document.querySelectorAll("[data-t]")) el.textContent=d[el.dataset.t]||"";
+ for(const el of document.querySelectorAll("[data-t-html]"))el.innerHTML=d[el.dataset.tHtml]||"";
+ $("#steps").innerHTML=d.steps.map((s,i)=>'<article class="step"><span class="step-num">'+String(i+1).padStart(2,"0")+'</span><h3>'+escapeHtml(s[0])+'</h3><p>'+escapeHtml(s[1])+'</p></article>').join("");
+ $("#featuresGrid").innerHTML=d.features.map(s=>'<article class="feature"><span class="emoji" aria-hidden="true">'+escapeHtml(s[0])+'</span><h3>'+escapeHtml(s[1])+'</h3><p>'+escapeHtml(s[2])+'</p></article>').join("");
+ $("#plans").innerHTML=d.plans.map((p,i)=>'<article class="plan '+(i===1?"featured":"")+'"><h3>'+escapeHtml(p[0])+'</h3><div class="money">$'+pricing[i]+' <small>'+escapeHtml(d.perMonth)+'</small></div><ul>'+p.slice(1).map(x=>'<li>'+escapeHtml(x)+'</li>').join("")+'</ul><button type="button" class="btn '+(i===1?"":"secondary")+'" data-download="'+i+'">'+escapeHtml(d.planAction)+'</button></article>').join("");
+ $("#faqs").innerHTML=d.faqs.map(f=>'<article class="faq"><h3>'+escapeHtml(f[0])+'</h3><p>'+escapeHtml(f[1])+'</p></article>').join("");
+ document.title="Agency Studio — "+(active==="ar"?"استوديو وكالات التسويق":active==="id"?"Platform kreatif untuk agensi":"Creative operations for agencies");
+ $("#language").value=active;
+}
+function downloadText(planIndex){
+ const d=I[active];const plans=Number.isInteger(planIndex)?[planIndex]:[0,1,2];
+ const lines=["Agency Studio — PILOT CONCEPT / PRE-LAUNCH","",d.lead,"",d.pricingSub,""];
+ for (const i of plans){lines.push(labels[i]+" — USD "+pricing[i]+"/month",...d.plans[i].slice(1).map(x=>"- "+x),"");}
+ lines.push("Managed production add-on: USD 199/month",d.addonBody,"",d.prelaunch,d.pricingNote,"","GitHub: https://github.com/Q8-ux/saad/tree/main/agency-studio");
+ const blob=new Blob([lines.join("\n")],{type:"text/plain;charset=utf-8"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="agency-studio-pilot-"+active+(planIndex===null?"":("-"+labels[planIndex].toLowerCase()))+".txt";document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+ const toast=$("#toast");toast.textContent=d.saved;toast.className="toast";setTimeout(()=>{toast.className="sr";},2700);
+}
+$("#language").addEventListener("change",e=>render(e.target.value));
+$("#plans").addEventListener("click",e=>{const btn=e.target.closest("[data-download]");if(btn)downloadText(Number(btn.dataset.download));});
+$("#downloadBrief").addEventListener("click",()=>downloadText(null));
+render("id");
+</script>
+</body>
+</html>
