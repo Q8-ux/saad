@@ -1,0 +1,61 @@
+name: Multi-platform Video Hub Frontend QA
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'video-downloader/index.html'
+      - '.github/workflows/video-downloader-frontend-ci.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser-source-validation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: 22}
+      - name: Validate JavaScript and supported platform routing without mocks of external APIs
+        run: |
+          node <<'JS'
+          const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+          const html=fs.readFileSync('video-downloader/index.html','utf8');
+          const script=html.split('<script>')[1]?.split('</script>')[0];
+          assert(script,'Inline source missing');
+          new vm.Script(script);
+          const dom={};
+          function node(id){
+            if(!dom[id])dom[id]={value:'',textContent:'',hidden:false,style:{},classList:{toggle(){},add(){},remove(){}},addEventListener(){},removeAttribute(){},scrollIntoView(){}};
+            return dom[id];
+          }
+          const sandbox={document:{getElementById:node},URL,URLSearchParams,Blob,console,
+            localStorage:{getItem(){return null},setItem(){},removeItem(){}},
+            sessionStorage:{getItem(){return null},setItem(){},removeItem(){}},
+            setTimeout,clearTimeout,fetch(){throw Error('not permitted during static validation')}};
+          vm.createContext(sandbox);
+          vm.runInContext(script,sandbox);
+          for(const [url,platform] of [
+            ['https://vt.tiktok.com/ZSp6Vv81S/','TikTok'],
+            ['https://youtu.be/jNQXAC9IVRw','YouTube'],
+            ['https://instagram.com/reel/Abcd12/','Instagram'],
+            ['https://www.facebook.com/reel/123','Facebook'],
+            ['https://x.com/user/status/123','X'],
+            ['https://www.snapchat.com/spotlight/123','Snapchat'],
+            ['https://pin.it/abc','Pinterest'],
+            ['https://vimeo.com/12345','Vimeo'],
+            ['https://www.reddit.com/r/test/comments/123','Reddit'],
+            ['https://www.youtube.com.evil.org/watch?v=a',null],
+            ['http://www.youtube.com/watch?v=x',null],
+            ['https://localhost/admin',null],
+            ['https://youtu.be/',null]
+          ]){
+            const got=vm.runInContext('platformFromUrl('+JSON.stringify(url)+')',sandbox);
+            assert.equal(got,platform,url+' should resolve as '+platform);
+          }
+          assert.match(html,/يتطلب خادم/);
+          assert.match(html,/id="backendUrl"/);
+          assert.match(html,/id="mp4"/);
+          assert.match(html,/id="mp3"/);
+          console.log('PASS: frontend JS parsed; platform routing, malicious-host rejection, backend settings and download controls verified.');
+          JS
