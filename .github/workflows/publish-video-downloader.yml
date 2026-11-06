@@ -1,0 +1,77 @@
+name: Publish Video Downloader Preview
+on:
+  push:
+    branches: [main]
+    paths: ['video-downloader/**', '.github/workflows/publish-video-downloader.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages-v2
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: 22}
+      - name: Static checks
+        run: |
+          python -m py_compile video-downloader/app.py
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('video-downloader/index.html')
+          text=p.read_text()
+          assert '<script>' in text
+          Path('/tmp/video-downloader.js').write_text(text.split('<script>')[-1].split('</script>')[0])
+          PY
+          node --check /tmp/video-downloader.js
+      - uses: actions/configure-pages@v5
+      - name: Preserve published sites and add preview (no backend on Pages)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python - <<'PY'
+          import io,json,os,pathlib,subprocess,tarfile,urllib.request,zipfile
+          root=pathlib.Path('_site');root.mkdir(exist_ok=True)
+          base='https://api.github.com/repos/'+os.environ['GITHUB_REPOSITORY']
+          headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'}
+          def fetch(url):
+              with urllib.request.urlopen(urllib.request.Request(url,headers=headers),timeout=60) as r:return r.read()
+          artifacts=json.loads(fetch(base+'/actions/artifacts?name=github-pages&per_page=100'))['artifacts']
+          chosen=None
+          for a in sorted(artifacts,key=lambda a:a['created_at'],reverse=True):
+              if a['expired']:continue
+              run=json.loads(fetch(base+'/actions/runs/'+str(a['workflow_run']['id'])))
+              if run['conclusion']!='success':continue
+              jobs=json.loads(fetch(base+'/actions/runs/'+str(run['id'])+'/jobs?per_page=100'))['jobs']
+              if any(s.get('conclusion')=='success' and (s.get('name')=='Deploy' or 'actions/deploy-pages@' in s.get('name','')) for j in jobs for s in j.get('steps',[])):
+                  chosen=a;break
+          if chosen is None:raise SystemExit('No known good Pages artifact: refusing destructive deployment')
+          archive_bytes=subprocess.check_output(['gh','api','repos/'+os.environ['GITHUB_REPOSITORY']+'/actions/artifacts/'+str(chosen['id'])+'/zip'])
+          with zipfile.ZipFile(io.BytesIO(archive_bytes)) as archive:
+              with tarfile.open(fileobj=io.BytesIO(archive.read('artifact.tar'))) as tar:tar.extractall(root,filter='data')
+          assert (root/'index.html').is_file()
+          dest=root/'video-downloader';dest.mkdir(exist_ok=True)
+          html=pathlib.Path('video-downloader/index.html').read_text()
+          blocker="if(key)$('login').classList.add('hidden');"
+          assert blocker in html
+          html=html.replace(blocker, "$('login').classList.remove('hidden');$('login').querySelector('.login-box').innerHTML='<div class=\"logo\">▶</div><h2>واجهة المشروع جاهزة</h2><p>الخادم الخاص بتنزيل الفيديو لم يتم نشره بعد بسبب اكتمال الحد المسموح لخدمات Render. هذه معاينة وليست خدمة تحميل فعالة.</p><p><a href=\"https://github.com/Q8-ux/saad/tree/main/video-downloader\">ملفات GitHub</a></p>';",1)
+          (dest/'index.html').write_text(html)
+          (root/'.nojekyll').touch()
+          print('Preview only. Existing sites preserved.')
+          PY
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+          retention-days: 30
+      - name: Deploy
+        id: deploy
+        uses: actions/deploy-pages@v4
