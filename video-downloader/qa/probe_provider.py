@@ -35,6 +35,26 @@ for title, url, method in [
                           'has_hdplay', bool(data.get('hdplay')),
                           'has_music', bool(data.get('music')),
                           'has_title', bool(data.get('title')))
+                    for field in ('play','hdplay','music'):
+                        raw = data.get(field)
+                        if not raw or not isinstance(raw,str): continue
+                        safe = urllib.parse.urlsplit(urllib.parse.urljoin('https://www.tikwm.com/',raw))
+                        if safe.scheme != 'https': continue
+                        print(field, 'media host', safe.hostname, 'url_path_extension', safe.path[-5:])
+                        media_req = urllib.request.Request(safe.geturl(), method='HEAD', headers={
+                            'Origin': ORIGIN, 'User-Agent':'Mozilla/5.0',
+                            'Range':'bytes=0-4095',
+                        })
+                        try:
+                            with urllib.request.urlopen(media_req,timeout=12) as media:
+                                print(field, 'HTTP', media.status,'CORS',
+                                      media.headers.get('Access-Control-Allow-Origin'),
+                                      'mime', media.headers.get('Content-Type'),
+                                      'disposition', bool(media.headers.get('Content-Disposition')))
+                        except urllib.error.HTTPError as err:
+                            print(field, 'HTTP', err.code, 'CORS',err.headers.get('Access-Control-Allow-Origin'))
+                        except Exception as err:
+                            print(field, type(err).__name__,str(err)[:90])
                 except Exception:
                     print('non-json response; starts', snippet[:80].replace('\n', ' '))
     except urllib.error.HTTPError as exc:
