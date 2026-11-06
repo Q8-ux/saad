@@ -66,7 +66,7 @@ def check_url(value: str) -> tuple[str, str]:
         u = urlsplit(value.strip())
         host = (u.hostname or "").lower().rstrip(".")
         if (u.scheme != "https" or host not in ALLOWED_HOSTS or u.port is not None
-                or u.username or u.password or not u.path):
+                or u.username or u.password or not u.path or u.path == '/'):
             raise ValueError()
     except (ValueError, TypeError):
         raise HTTPException(400, "استخدم رابط HTTPS عامًا من منصة مدعومة") from None
