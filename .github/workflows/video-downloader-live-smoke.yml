@@ -21,12 +21,12 @@ jobs:
               try:
                   with urllib.request.urlopen(urllib.request.Request(url,headers={'User-Agent':'Mozilla/5.0'}),timeout=20) as r:
                       text=r.read().decode('utf8','replace')
-                      has_engine="https://www.tikwm.com/api/" in text
+                      has_engine="https://www.tikwm.com/api/" in text and "yt-dlp" in text and "platformFromUrl" in text
                       no_fake_gate='id="login"' not in text
-                      has_download='id="mp4"' in text and 'id="directLink"' in text
+                      has_download='id="mp4"' in text and 'id="mp3"' in text and 'id="backendUrl"' in text and 'id="directLink"' in text
                       print('HTTP',r.status,'live_engine',has_engine,'login_gate_removed',no_fake_gate,'buttons',has_download)
                       if r.status == 200 and has_engine and no_fake_gate and has_download:
-                          print('PASS: live browser-powered downloader HTML')
+                          print('PASS: multi-platform frontend published, backend connectable, TikTok fallback retained')
                           break
                       last='stale or incorrect site'
               except Exception as e:
