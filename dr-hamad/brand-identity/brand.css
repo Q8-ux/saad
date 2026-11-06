@@ -39,3 +39,17 @@
 }
 .hamad-brand-scope .brand-muted { color: var(--hamad-brand-slate); }
 .hamad-brand-scope .brand-rule { border-color: var(--hamad-brand-silver); }
+
+/* 2026-11-06: Approved social carousel palette from the supplied identity card. */
+.hamad-social-carousel {
+  --hamad-social-beige: #F2E7B8;
+  --hamad-social-sage: #C7DCCB;
+  --hamad-social-forest: #2D4238;
+  --hamad-social-ivory: #FCFBF8;
+  color: var(--hamad-social-forest);
+  background: var(--hamad-social-ivory);
+  font-family: "Cairo", sans-serif; /* requires real loaded Cairo font to be guaranteed */
+  direction: rtl;
+}
+.hamad-social-carousel .card-soft {background: var(--hamad-social-sage);}
+.hamad-social-carousel .highlight-soft {background: var(--hamad-social-beige);}
