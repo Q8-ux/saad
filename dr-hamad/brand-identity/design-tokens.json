@@ -1,7 +1,7 @@
 {
   "name": "مسار الهوية البصرية للدكتور حمد",
   "name_en": "Dr Hamad Brand Identity Path",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "date": "2026-11-06",
   "source": "user-supplied reference images",
   "palette": {
@@ -149,5 +149,40 @@
     "forest": "#2D4238",
     "ivory": "#FCFBF8",
     "instructions": "No vivid yellow, purple or copper. Existing core identity palette remains documented but do not apply it to new graphics where this approved social palette is requested."
+  },
+  "socialPaletteVariants": {
+    "sage-beige": {
+      "label": "اللوحة الخضراء والبيج — مرجع سابق معتمد",
+      "source": "user supplied palette 2026-11-06",
+      "colorStatus": "explicit HEX labels in user reference",
+      "colors": {
+        "beige": "#F2E7B8",
+        "sage": "#C7DCCB",
+        "forest": "#2D4238",
+        "ivory": "#FCFBF8"
+      },
+      "role": "green medical carousel variant"
+    },
+    "sky-blue-beige": {
+      "label": "اللوحة السماوية والكحلية والبيج — مرجع ثانٍ معتمد بصريًا",
+      "source": "user supplied blue/beige medical carousel image 2026-11-06",
+      "colorStatus": "blue/beige approximate sampled pixels from supplied composite; not official approved HEX values",
+      "colors": {
+        "navy": "#17324D",
+        "skyLight": "#B5DAED",
+        "skyAccent": "#9AD6F2",
+        "beigeSoft": "#E6D8CB",
+        "offWhite": "#FAF9F7",
+        "silverBorder": "#A9BAC3"
+      },
+      "role": "blue medical carousel variant",
+      "notes": "Navy and silverBorder are existing official identity tokens; other cool-palette samples are provisional. Do not claim all HEX codes approved by user."
+    }
+  },
+  "socialPalettePolicy": {
+    "mode": "parallel-approved-visual-variants",
+    "selection": "use reference specific to each carousel; do not mix palettes within a carousel; green remains valid",
+    "typography": "Cairo requested for new carousels",
+    "content": "Arabic-only, except Dr.hamads; omit doctor signature and credentials from educational slides; compact and uncluttered."
   }
 }
