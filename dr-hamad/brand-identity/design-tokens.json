@@ -1,7 +1,7 @@
 {
   "name": "مسار الهوية البصرية للدكتور حمد",
   "name_en": "Dr Hamad Brand Identity Path",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "date": "2026-11-06",
   "source": "user-supplied reference images",
   "palette": {
@@ -67,12 +67,29 @@
     },
     "exactSourceWeights": "not specified in reference imagery",
     "policy": {
-      "status": "approved-by-owner-2026-11-06",
+      "status": "historical-with-current-override-see-latestSocialTypographyDecision",
       "scope": "all new social posts, carousels, stories, highlights, print and branding designs",
       "arabicDirection": "rtl",
       "englishDirection": "ltr",
       "exactFontWeightVerified": false,
-      "note": "Font FAMILY selections approved based on owner-provided identity preview. Weights are recommendations; do not substitute Montserrat or other fonts without documented exception. No change to live site without separate approval."
+      "note": "Historical Noto family selection. Superseded for new Arabic carousel typography by later Noor request, pending original file. Existing live site is unchanged."
+    },
+    "latestSocialTypographyDecision": {
+      "requestedFamily": "Noor",
+      "fontBinaryAvailable": false,
+      "updated": "2026-11-06",
+      "candidateLibraries": [
+        "(AH) Manal",
+        "29LT Azer",
+        "Al-Mohanad"
+      ],
+      "legacyFonts": [
+        "Noto Kufi Arabic",
+        "Noto Sans Arabic",
+        "Liberation Serif"
+      ],
+      "policy": "Noor requested but original font missing; do not claim exact Noor typesetting; test received alternatives without auto approving",
+      "fontPath": "./font-path/README.md"
     }
   },
   "signature": {
@@ -106,5 +123,18 @@
       1920
     ],
     "print": "A4"
+  },
+  "socialCarouselRules": {
+    "arabicOnly": true,
+    "exceptEnglish": "Dr.hamads",
+    "omitPhysicianNameAndSpecialty": true,
+    "omitPersonalSignature": true,
+    "logoSpacingRequired": true,
+    "avoidLargeEmptySpace": true,
+    "portraitSize": [
+      1080,
+      1350
+    ],
+    "keepArabicSlogan": "حركة أفضل .. حياة أفضل"
   }
 }
