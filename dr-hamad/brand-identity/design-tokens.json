@@ -89,7 +89,10 @@
         "Liberation Serif"
       ],
       "policy": "Noor requested but original font missing; do not claim exact Noor typesetting; test received alternatives without auto approving",
-      "fontPath": "./font-path/README.md"
+      "fontPath": "./font-path/README.md",
+      "latestRequest": "Cairo for new carousel designs",
+      "latestRequestDate": "2026-11-06",
+      "priorTrial": "Manal"
     }
   },
   "signature": {
@@ -136,5 +139,15 @@
       1350
     ],
     "keepArabicSlogan": "حركة أفضل .. حياة أفضل"
+  },
+  "socialPalette": {
+    "name": "ألوان الكاروسيل الطبي — المرجع المعتمد الأحدث",
+    "approvedFrom": "user supplied palette image 2026-11-06",
+    "priority": "latest approved palette for new social graphics",
+    "beige": "#F2E7B8",
+    "sage": "#C7DCCB",
+    "forest": "#2D4238",
+    "ivory": "#FCFBF8",
+    "instructions": "No vivid yellow, purple or copper. Existing core identity palette remains documented but do not apply it to new graphics where this approved social palette is requested."
   }
 }
