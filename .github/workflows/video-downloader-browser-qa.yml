@@ -1,0 +1,58 @@
+name: Video Downloader Browser QA
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/video-downloader-browser-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: 22}
+      - name: Install browser testing dependencies
+        run: |
+          mkdir -p /tmp/video-qa
+          npm install --prefix /tmp/video-qa --no-audit --no-fund playwright@1.64.1
+          node /tmp/video-qa/node_modules/playwright/cli.js install --with-deps chromium
+      - name: Check actual browser interaction with sample TikTok URL
+        run: |
+          node <<'JS'
+          const { chromium } = require('/tmp/video-qa/node_modules/playwright');
+          (async () => {
+            const browser = await chromium.launch({headless:true,args:['--no-sandbox']});
+            const page = await browser.newPage({viewport:{width:390,height:844},deviceScaleFactor:1});
+            const errors = [];
+            page.on('pageerror',e=>errors.push(e.message));
+            try {
+              await page.goto('https://q8-ux.github.io/saad/video-downloader/',{waitUntil:'domcontentloaded',timeout:45000});
+              await page.locator('#url').fill('https://vt.tiktok.com/ZSp6Vv81S/');
+              await page.locator('#inspect').click();
+              await page.waitForFunction(() =>
+                document.querySelector('#result.show') ||
+                document.querySelector('#feedback.error'),
+                null,{timeout:45000});
+              const result = await page.locator('#result').evaluate(e=>e.classList.contains('show'));
+              const feedback = await page.locator('#feedback').innerText();
+              const href = await page.locator('#directLink').getAttribute('href');
+              console.log('RESULT_VISIBLE:',result,'MEDIA_LINK:',Boolean(href),'FEEDBACK:',feedback.slice(0,200));
+              console.log('JS_ERRORS:',JSON.stringify(errors));
+              await page.screenshot({path:'video-downloader-browser.png',fullPage:true});
+              if(errors.length) throw Error('Browser runtime errors: '+errors.join('; '));
+              if(!result || !href) throw Error('Live provider did not yield downloadable media.');
+              console.log('PASS: browser resolved TikTok short link on published site.');
+            } finally { await browser.close(); }
+          })().catch(err=>{console.error('BROWSER_QA_FAILURE:',err.message);process.exitCode=1});
+          JS
+      - name: Attach screenshot
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: video-downloader-browser
+          path: video-downloader-browser.png
+          if-no-files-found: ignore
