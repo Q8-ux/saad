@@ -53,7 +53,7 @@ jobs:
             const got=vm.runInContext('platformFromUrl('+JSON.stringify(url)+')',sandbox);
             assert.equal(got,platform,url+' should resolve as '+platform);
           }
-          assert.match(html,/يتطلب خادم/);
+          assert.match(html,/خادم yt-dlp/);
           assert.match(html,/id="backendUrl"/);
           assert.match(html,/id="mp4"/);
           assert.match(html,/id="mp3"/);
