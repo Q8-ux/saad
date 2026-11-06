@@ -278,9 +278,8 @@ async function download(kind){
     }else{
       const url=kind==='audio'?record.audio:record.video;
       if(!url)throw Error('هذا النوع من الملف غير متاح للمقطع.');
-      const c=new AbortController(),t=setTimeout(()=>c.abort(),80000);
-      try{response=await fetch(url,{mode:'cors',credentials:'omit',signal:c.signal});if(!response.ok)throw Error('تعذر جلب الملف من المزود.');}
-      finally{clearTimeout(t);}
+      response=await fetch(url,{mode:'cors',credentials:'omit'});
+      if(!response.ok)throw Error('تعذر جلب الملف من المزود.');
       filename='tiktok-'+(record.id||'clip')+(kind==='audio'?'.mp3':'.mp4');
     }
     await saveBlob(response,filename);

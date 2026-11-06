@@ -89,7 +89,7 @@ def validate(url: str) -> tuple[str, str]:
             parsed.username or parsed.password or
             parsed.port not in (None, 443) or
             not platform or
-            not parsed.path.startswith("/") or
+            parsed.path in ("", "/") or
             any(char in raw for char in "\r\n\x00")
         ):
             raise ValueError("invalid")
