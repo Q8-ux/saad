@@ -1,7 +1,7 @@
 {
   "name": "مسار الهوية البصرية للدكتور حمد",
   "name_en": "Dr Hamad Brand Identity Path",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "date": "2026-11-06",
   "source": "user-supplied reference images",
   "palette": {
@@ -177,12 +177,31 @@
       },
       "role": "blue medical carousel variant",
       "notes": "Navy and silverBorder are existing official identity tokens; other cool-palette samples are provisional. Do not claim all HEX codes approved by user."
+    },
+    "maroon-warm": {
+      "label": "العنابي الدافئ - الثيم الثالث",
+      "source": "user reference maroon medical post / 2026-11-06",
+      "colorStatus": "approximate-sampled-from-image-not-official-HEX",
+      "colors": {
+        "maroon": "#522E42",
+        "clay": "#B97867",
+        "roseBeige": "#E7CCC1",
+        "warmWhite": "#FBF5F1"
+      },
+      "role": "medical carousel variant with silver H logo unchanged",
+      "notes": "Do not recolor H. These hex values are provisional samples, not a replacement for source design tokens."
     }
   },
   "socialPalettePolicy": {
     "mode": "parallel-approved-visual-variants",
-    "selection": "use reference specific to each carousel; do not mix palettes within a carousel; green remains valid",
+    "selection": "one palette per series, no uncontrolled mixing",
     "typography": "Cairo requested for new carousels",
-    "content": "Arabic-only, except Dr.hamads; omit doctor signature and credentials from educational slides; compact and uncluttered."
+    "content": "Arabic-only, except Dr.hamads; omit doctor signature and credentials from educational slides; compact and uncluttered.",
+    "approvedVisualVariants": [
+      "sage-beige",
+      "sky-blue-beige",
+      "maroon-warm"
+    ],
+    "logo": "same original metallic silver H across all themes"
   }
 }
