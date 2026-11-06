@@ -1,0 +1,36 @@
+name: Video Hub checks
+on:
+  push:
+    paths:
+      - 'video-hub/**'
+      - '.github/workflows/video-hub-ci.yml'
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install backend dependencies
+        run: python -m pip install -r video-hub/api/requirements.txt
+      - name: Validate Python files and offline unit tests
+        run: |
+          python -m compileall -q video-hub/api video-hub/tests
+          python -m unittest discover -s video-hub/tests -v
+      - name: Validate embedded browser JavaScript
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          html = Path("video-hub/index.html").read_text(encoding="utf-8")
+          blocks = re.findall(r"<script>([\\s\\S]*?)</script>", html)
+          assert blocks, "No embedded JavaScript block found"
+          Path("/tmp/video-hub.js").write_text("\\n".join(blocks), encoding="utf-8")
+          PY
+          node --check /tmp/video-hub.js
