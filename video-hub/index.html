@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0b1025">
+<meta name="description" content="Video Hub: منصة عربية مستقلة لتحليل روابط الفيديو العامة وتنزيل النسخ المتاحة بجودة عالية.">
+<title>Video Hub | مركز تحميل الفيديوهات</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f5f7ff;--ink:#101936;--muted:#64718d;--line:#e2e8f5;--white:#fff;--a:#4b55ef;--b:#8559df;--shadow:0 24px 64px rgba(25,36,81,.13)}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);font-family:Cairo,Tahoma,sans-serif;color:var(--ink)}button,input{font:inherit}button{cursor:pointer}button:disabled{cursor:wait;opacity:.65}.container{max-width:1120px;margin:auto;padding:0 24px}
+.header{position:relative;z-index:2;border-bottom:1px solid #e9edfa;background:#fff}.header .container{display:flex;align-items:center;justify-content:space-between;min-height:76px;gap:18px}
+.logo{display:flex;align-items:center;gap:11px;text-decoration:none;color:#101936;font-size:22px;font-weight:800;letter-spacing:-.5px}.logo-mark{display:grid;place-items:center;background:linear-gradient(135deg,#5663fb,#9b65ed);border-radius:16px;color:white;width:46px;height:46px;box-shadow:0 9px 18px #5263f73b}.logo small{display:block;font-size:10px;letter-spacing:1.7px;color:#8190b0;direction:ltr;line-height:1}
+.nav{display:flex;align-items:center;gap:27px}.nav a{text-decoration:none;color:#58647d;font-size:13px;font-weight:700}.nav a:hover{color:var(--a)}.settings-button{border:1px solid #dfe6f8;border-radius:12px;background:white;padding:8px 13px;color:#596684;font-size:12px;font-weight:700}
+.hero{background:radial-gradient(circle at 20% 1%,#6575ff44,transparent 39%),radial-gradient(circle at 80% 80%,#b56cf63b,transparent 38%),linear-gradient(135deg,#0c163c,#202b67 57%,#2d2761);color:#fff;padding:79px 0 104px;overflow:hidden;position:relative}
+.hero:before,.hero:after{content:"";position:absolute;border:1px solid #ffffff17;border-radius:50%;width:490px;height:490px;top:-310px;right:-100px}.hero:after{width:340px;height:340px;top:auto;right:auto;left:-180px;bottom:-200px}
+.hero-content{position:relative;z-index:1;max-width:845px;text-align:center;margin:auto}.eyebrow{display:inline-flex;align-items:center;gap:8px;background:#ffffff19;border:1px solid #ffffff28;border-radius:100px;padding:7px 16px;font-weight:700;font-size:12px;color:#e1e5ff}
+.hero h1{margin:23px 0 15px;font-size:clamp(31px,5.3vw,56px);font-weight:800;line-height:1.5;letter-spacing:-1.7px}.hero h1 span{color:#aebaff}.subtitle{margin:0 auto 28px;max-width:670px;color:#d3dbf9;font-size:16px;line-height:2}
+.form-card{background:white;border-radius:23px;padding:16px;box-shadow:var(--shadow);text-align:right;border:1px solid #e7eaff;color:var(--ink)}
+.form-row{display:flex;align-items:center;gap:10px}.url-input{display:flex;gap:12px;align-items:center;flex:1;min-width:0;border:1px solid #e2e7f5;background:#f8faff;border-radius:15px;padding:0 15px;height:62px}.url-input svg{flex:none;color:#7784ac}.url-input input{width:100%;min-width:0;outline:none;border:0;background:transparent;color:#1e2850;direction:ltr;text-align:left;font-size:13px}.url-input input::placeholder{color:#a4aec7}.paste{border:0;background:#ecedff;color:#4d58e5;font-size:12px;font-weight:800;border-radius:10px;padding:9px 14px;white-space:nowrap}
+.primary{background:linear-gradient(125deg,#555aef,#825ee7);color:white;border:0;border-radius:15px;padding:0 27px;min-height:62px;font-weight:800;white-space:nowrap;box-shadow:0 8px 24px #6264de35}.primary:hover{filter:brightness(1.05)}
+.form-help{font-size:12px;color:#71809a;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;margin:13px 4px 1px}.detect{color:#5561d9;font-weight:800}
+.platforms{display:flex;align-items:center;justify-content:center;gap:11px;flex-wrap:wrap;margin-top:22px;color:#d1dafa;font-size:13px}.platforms b{border:1px solid #ffffff31;border-radius:100px;padding:7px 13px;font-size:12px;font-weight:700;color:#eff1ff}
+.main{max-width:1000px;margin:-62px auto 0;padding:0 24px;position:relative;z-index:1}.message{display:none;background:#fff3ef;color:#9e4a2e;border:1px solid #ffd9c8;padding:13px 17px;border-radius:13px;margin-bottom:15px;font-size:13px}.message.show{display:block}.message.info{background:#eef1ff;color:#4350a3;border-color:#dce1ff}
+.result{display:none;background:white;border:1px solid var(--line);border-radius:24px;box-shadow:0 19px 55px #24327118;padding:22px;margin-bottom:20px}.result.show{display:block}
+.result-layout{display:flex;align-items:center;gap:24px}.thumb{width:166px;height:208px;object-fit:cover;border-radius:16px;background:#f0f1fa;flex:none}.thumb-placeholder{width:166px;height:208px;border-radius:16px;display:grid;place-items:center;background:linear-gradient(140deg,#e9ebff,#ddd9ff);font-size:42px;flex:none}
+.result-content{min-width:0;flex:1}.section-kicker{font-size:12px;color:#6672d5;font-weight:800}.result h2{margin:8px 0;font-size:20px;line-height:1.7;overflow-wrap:anywhere}.author{color:#7b85a0;font-size:13px;margin:0 0 17px}.result-buttons{display:flex;flex-wrap:wrap;gap:10px}.action{display:inline-flex;align-items:center;justify-content:center;gap:7px;background:#f4f5ff;color:#4752b7;border:1px solid #dfe2ff;border-radius:12px;padding:11px 17px;font-weight:800;font-size:13px}.action.mp4{background:#4e58ea;border-color:#4e58ea;color:white}.disclaimer{font-size:11px;color:#8b93ab;margin:14px 0 0;line-height:1.9}
+.content{margin:41px auto 80px;max-width:1100px;padding:0 24px}.section-head{text-align:center;margin-bottom:25px}.section-head h2{font-size:27px;margin:0 0 6px}.section-head p{margin:0;color:#75819a;font-size:14px}
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.feature{background:#fff;border:1px solid var(--line);border-radius:21px;padding:26px;box-shadow:0 9px 28px #30416f08}.feature-icon{width:49px;height:49px;display:grid;place-items:center;background:#eeefff;color:#5964e8;border-radius:16px;font-size:23px}.feature h3{font-size:17px;margin:19px 0 8px}.feature p{font-size:13px;line-height:2;color:#7c87a0;margin:0}
+.how{margin:60px 0 40px}.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.step{border:1px solid var(--line);border-radius:18px;background:#fff;padding:23px}.step-num{width:38px;height:38px;border-radius:12px;background:#dfe2ff;color:#4a56d6;font-weight:800;display:grid;place-items:center}.step h3{font-size:16px}.step p{font-size:13px;line-height:2;color:#7a859e;margin-bottom:0}
+.faq{max-width:840px;margin:48px auto}.faq details{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 20px;margin-bottom:9px}.faq summary{cursor:pointer;font-size:14px;font-weight:800}.faq details p{font-size:13px;color:#727d93;line-height:2}.footer{border-top:1px solid #e4e8f2;padding:27px 24px;text-align:center;color:#7c88a3;font-size:12px;line-height:2}
+.overlay{position:fixed;inset:0;background:#1016349c;z-index:9;display:none;align-items:center;justify-content:center;padding:20px}.overlay.open{display:flex}.modal{background:#fff;width:min(100%,480px);padding:26px;border-radius:21px;box-shadow:var(--shadow)}.modal h2{margin:0 0 8px;font-size:22px}.modal p{color:#79859d;font-size:13px;line-height:2}.modal input{width:100%;border:1px solid #dfe5f4;border-radius:11px;padding:12px 14px;direction:ltr;text-align:left;outline:none}.modal .buttons{display:flex;gap:9px;margin-top:16px}.modal .buttons button{flex:1}.close{border:1px solid #dae0ef;background:white;border-radius:13px;padding:12px 16px}.status{text-align:right;margin-top:10px;font-size:12px;color:#657093}
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid #fff9;border-top-color:transparent;border-radius:50%;animation:spin .8s linear infinite;vertical-align:middle;margin-left:6px}@keyframes spin{to{transform:rotate(360deg)}}
+@media(max-width:760px){.nav a{display:none}.hero{padding:63px 0 91px}.hero h1{font-size:32px}.subtitle{font-size:13px}.form-row{flex-direction:column}.url-input,.primary{width:100%}.primary{min-height:51px}.main{margin-top:-53px}.features,.steps{grid-template-columns:1fr}.result-layout{align-items:flex-start}.thumb,.thumb-placeholder{width:108px;height:137px}.result h2{font-size:16px}.result-buttons{flex-direction:column}.action{width:100%}.content{margin-top:40px}.platforms{gap:6px}}
+@media(max-width:420px){.header .container{padding:0 13px}.logo{font-size:17px}.logo-mark{width:39px;height:39px}.hero h1{font-size:28px}.result-layout{gap:13px}.thumb,.thumb-placeholder{width:84px;height:115px}.form-card{padding:11px}.container{padding:0 18px}}
+</style>
+</head>
+<body>
+<header class="header"><div class="container">
+<a class="logo" href="./" aria-label="Video Hub"><span class="logo-mark" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="m8 5 11 7-11 7V5Z" fill="currentColor"/><path d="M4 7v10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span><span>مركز الفيديو<small>VIDEO HUB</small></span></a>
+<nav class="nav"><a href="#features">المميزات</a><a href="#how">طريقة الاستخدام</a><a href="#faq">الأسئلة الشائعة</a><button class="settings-button" id="settingsBtn" type="button">⚙ إعداد الخادم</button></nav>
+</div></header>
+<section class="hero"><div class="container hero-content">
+<div class="eyebrow">✦ منصة تنزيل الفيديوهات</div>
+<h1>رابط واحد. <span>فيديوك جاهز.</span></h1>
+<p class="subtitle">الصق رابط الفيديو العام، استعرض التفاصيل، وحمّل نسخة MP4 أو استخرج الصوت بصيغة MP3. بدون تطبيقات إضافية.</p>
+<div class="form-card">
+<form id="form"><div class="form-row">
+<div class="url-input"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg><input type="url" id="url" aria-label="رابط الفيديو" placeholder="https://vt.tiktok.com/..." autocomplete="off" required maxlength="2048"><button class="paste" type="button" id="paste">لصق</button></div>
+<button class="primary" type="submit" id="analyze">تحليل الفيديو ←</button>
+</div></form>
+<div class="form-help"><span>🔒 روابط عامة فقط • لا تُحفظ الفيديوهات على الخادم بعد التنزيل</span><span class="detect" id="detect">التعرف على المنصة تلقائيًا</span></div>
+</div>
+<div class="platforms"><span>المنصات:</span><b>TikTok</b><b>Instagram</b><b>YouTube</b><b>X / Twitter</b><b>Facebook</b></div>
+</div></section>
+<main class="main">
+<div id="message" class="message" role="alert"></div>
+<section class="result" id="result" aria-live="polite"><div class="result-layout"><div id="imageSlot" class="thumb-placeholder">🎬</div><div class="result-content">
+<div class="section-kicker" id="resultPlatform">تم العثور على الفيديو</div><h2 id="resultTitle">عنوان الفيديو</h2><p class="author" id="resultAuthor"></p>
+<div class="result-buttons"><button class="action mp4" type="button" id="downloadMp4">↓ تحميل MP4</button><button class="action" type="button" id="downloadMp3">♫ تحميل MP3</button><button class="action" type="button" id="copyLink">نسخ الرابط</button></div>
+<p class="disclaimer">الجودة والنسخة الخالية من الشعار تتوقفان على الملفات التي توفرها المنصة. لا نزيل العلامات المدمجة داخل الصورة أو توقيعات أصحاب المحتوى.</p>
+</div></div></section>
+</main>
+<section class="content" id="features">
+<div class="section-head"><h2>كل ما تحتاجه في مكان واحد</h2><p>بسيط، سريع، ويحترم خصوصيتك</p></div>
+<div class="features">
+<article class="feature"><span class="feature-icon">🎥</span><h3>حفظ الفيديو بصيغة MP4</h3><p>تنزيل الملف العام بأفضل صيغة وجودة متاحتين دون إعادة ضغط متعمدة.</p></article>
+<article class="feature"><span class="feature-icon">🎧</span><h3>استخراج الصوت MP3</h3><p>تحويل الصوت باستخدام FFmpeg عند تشغيل محرك التحميل الخلفي.</p></article>
+<article class="feature"><span class="feature-icon">🛡️</span><h3>خصوصية وشفافية</h3><p>لا حسابات أو كلمات مرور للمنصات، وتُحذف الملفات المؤقتة بعد إرسالها.</p></article>
+</div>
+<div id="how" class="how"><div class="section-head"><h2>كيف يعمل الموقع؟</h2><p>ثلاث خطوات فقط</p></div><div class="steps">
+<article class="step"><span class="step-num">١</span><h3>انسخ الرابط</h3><p>افتح الفيديو العام على المنصة واضغط مشاركة ثم نسخ الرابط.</p></article>
+<article class="step"><span class="step-num">٢</span><h3>اعرض التفاصيل</h3><p>الصق الرابط في الحقل واضغط تحليل الفيديو لعرض العنوان والصورة.</p></article>
+<article class="step"><span class="step-num">٣</span><h3>احفظ الملف</h3><p>اختر فيديو MP4 أو صوت MP3 وسيبدأ تنزيل الملف المتاح.</p></article>
+</div></div>
+<div class="faq" id="faq"><div class="section-head"><h2>أسئلة شائعة</h2></div>
+<details><summary>هل كل الفيديوهات تأتي دون علامة مائية؟</summary><p>لا. عندما توفر المنصة ملفًا أصليًا بلا علامة مائية يمكن اختيار الملف المناسب، لكننا لا نضمن ذلك لكل فيديو، ولا نطمس العلامات المدمجة داخل المحتوى.</p></details>
+<details><summary>هل أستطيع تنزيل الفيديوهات الخاصة؟</summary><p>لا. الموقع مخصص للمحتوى العام المتاح دون تجاوز تسجيل الدخول أو أنظمة الحماية أو قيود الاشتراكات.</p></details>
+<details><summary>هل الموقع مستقل عن الخدمات الأخرى؟</summary><p>نعم. الواجهة ومحرك التحميل مفتوحا المصدر ضمن مشروعك، ولا يعتمد التشغيل على خدمة SSSTik أو نسخ أكوادها.</p></details>
+<details><summary>لماذا يظهر خطأ اتصال بالخادم؟</summary><p>تحتاج عملية استخراج الفيديو إلى خادم يشغّل yt-dlp. عند فتح نسخة GitHub Pages اضغط إعداد الخادم وأدخل عنوان خدمة API المنشورة.</p></details>
+</div></section>
+<footer class="footer">Video Hub • مشروع مستقل • حمّل فقط المحتوى الذي تملك حق حفظه، والتزم بشروط المنصة وحقوق المبدعين. <span id="year"></span></footer>
+<div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="settingsTitle"><div class="modal"><h2 id="settingsTitle">⚙ إعداد محرك التحميل</h2><p>لتشغيل نسخة GitHub Pages، أدخل رابط خادم API الخاص بك (مثل خدمة Render). عند تشغيل الموقع من الخادم نفسه، اترك الحقل فارغًا.</p><label for="apiBase">عنوان خادم API</label><input id="apiBase" type="url" placeholder="https://your-service.onrender.com" dir="ltr"><div class="status" id="apiStatus">لم يُختبر الاتصال بعد</div><div class="buttons"><button class="primary" type="button" id="saveApi">حفظ واختبار</button><button class="close" type="button" id="closeSettings">إغلاق</button></div></div></div>
+<script>
+(function(){
+'use strict';
+var byId=function(id){return document.getElementById(id)};
+var form=byId('form'), input=byId('url'), result=byId('result'), msg=byId('message'), analyze=byId('analyze');
+var info=null;
+var apiBase=(localStorage.getItem('videoHubApiBase')||'').replace(/\/$/,'');
+function origin(){return apiBase||window.location.origin}
+function alertMsg(txt,type){msg.textContent=txt;msg.className='message show'+(type==='info'?' info':'');}
+function hideMsg(){msg.className='message';msg.textContent=''}
+function urlOK(s){try{var u=new URL(s);return u.protocol==='https:'&&!!u.hostname&&!u.username&&!u.password}catch(e){return false}}
+function platform(s){try{var h=new URL(s).hostname.toLowerCase();if(h.endsWith('tiktok.com'))return 'TikTok';if(h.endsWith('instagram.com'))return 'Instagram';if(h==='youtu.be'||h.endsWith('youtube.com'))return 'YouTube';if(h==='x.com'||h==='twitter.com'||h.endsWith('.twitter.com'))return 'X / Twitter';if(h.endsWith('facebook.com')||h==='fb.watch')return 'Facebook'}catch(e){}return ''}
+function refreshPlatform(){var p=platform(input.value.trim());byId('detect').textContent=p?'المنصة: '+p:'التعرف على المنصة تلقائيًا'}
+input.addEventListener('input',refreshPlatform);
+byId('paste').addEventListener('click',async function(){try{input.value=await navigator.clipboard.readText();refreshPlatform();input.focus()}catch(e){alertMsg('تعذر الوصول للحافظة؛ الصق الرابط يدويًا.','info')}});
+form.addEventListener('submit',async function(e){e.preventDefault();hideMsg();result.classList.remove('show');info=null;var url=input.value.trim();if(!urlOK(url)||!platform(url)){alertMsg('أدخل رابط HTTPS صحيحًا من إحدى المنصات المدعومة.');return}
+analyze.disabled=true;analyze.innerHTML='<span class="spinner"></span>جارِ تحليل الرابط...';
+try{
+var controller=new AbortController();var t=setTimeout(function(){controller.abort()},45000);
+var resp;try{resp=await fetch(origin()+'/api/info',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:url}),signal:controller.signal})}finally{clearTimeout(t)}
+if(!resp.ok){var error={};try{error=await resp.json()}catch(e){}throw new Error(error.detail||'تعذر تحليل الرابط. تحقق من أنه عام وأن الخادم يعمل.')}
+var data=await resp.json();info={url:url, data:data};render(data);hideMsg();
+}catch(e){var detail=e.name==='AbortError'?'انتهت مهلة الاتصال. حاول مجددًا.':e.message;if(!apiBase&&window.location.hostname.endsWith('github.io'))detail='الموقع جاهز، لكن محرك التحميل لم يُربط بعد. اضغط «إعداد الخادم» وأدخل عنوان خدمة API.';alertMsg(detail)}
+finally{analyze.disabled=false;analyze.textContent='تحليل الفيديو ←'}
+});
+function render(data){byId('resultTitle').textContent=data.title||'فيديو بدون عنوان';byId('resultAuthor').textContent=data.uploader?'الناشر: '+data.uploader:'';byId('resultPlatform').textContent=data.platform||platform(info.url);var slot=byId('imageSlot');slot.replaceChildren();if(data.thumbnail&&/^https:\/\//.test(data.thumbnail)){var img=document.createElement('img');img.src=data.thumbnail;img.alt='صورة معاينة الفيديو';img.className='thumb';img.referrerPolicy='no-referrer';img.onerror=function(){slot.textContent='🎬';slot.className='thumb-placeholder'};slot.className='';slot.appendChild(img)}else{slot.className='thumb-placeholder';slot.textContent='🎬'}result.classList.add('show');result.scrollIntoView({behavior:'smooth',block:'nearest'})}
+function download(kind){if(!info){alertMsg('حلّل الفيديو أولًا');return}var link=origin()+'/api/download?kind='+encodeURIComponent(kind)+'&url='+encodeURIComponent(info.url);window.location.href=link;alertMsg('تم إرسال طلب التنزيل. قد يستغرق تجهيز الملف قليلًا حسب حجم الفيديو.','info')}
+byId('downloadMp4').addEventListener('click',function(){download('mp4')});byId('downloadMp3').addEventListener('click',function(){download('mp3')});
+byId('copyLink').addEventListener('click',async function(){if(info){try{await navigator.clipboard.writeText(info.url);alertMsg('تم نسخ الرابط.','info')}catch(e){alertMsg('تعذر نسخ الرابط.')}}});
+byId('settingsBtn').addEventListener('click',function(){byId('apiBase').value=apiBase;byId('overlay').classList.add('open')});
+byId('closeSettings').addEventListener('click',function(){byId('overlay').classList.remove('open')});
+byId('overlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('open')});
+byId('saveApi').addEventListener('click',async function(){var v=byId('apiBase').value.trim().replace(/\/$/,'');if(v&&!urlOK(v)){byId('apiStatus').textContent='رابط غير صحيح: استخدم HTTPS';return}apiBase=v;localStorage.setItem('videoHubApiBase',v);byId('apiStatus').textContent='جارِ فحص الخادم...';try{var r=await fetch(origin()+'/api/health',{signal:AbortSignal.timeout(10000)});if(!r.ok)throw new Error('HTTP '+r.status);var d=await r.json();byId('apiStatus').textContent=d.status==='ok'?'✓ تم الاتصال بالخادم بنجاح':'استجابة غير متوقعة'}catch(e){byId('apiStatus').textContent='تعذر الاتصال. تحقق من نشر الخادم وإعداد CORS.'}});
+byId('year').textContent=new Date().getFullYear();
+refreshPlatform();
+})();
+</script>
+</body></html>
