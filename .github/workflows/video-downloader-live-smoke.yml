@@ -1,0 +1,38 @@
+name: Verify Live Video Downloader Site
+on:
+  workflow_run:
+    workflows: ["Publish Live Video Downloader"]
+    types: [completed]
+permissions:
+  contents: read
+jobs:
+  live-site-smoke:
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check actual published site (no mocked response)
+        run: |
+          python - <<'PY'
+          import time,urllib.request
+          url='https://q8-ux.github.io/saad/video-downloader/'
+          last=''
+          for i in range(5):
+              try:
+                  with urllib.request.urlopen(urllib.request.Request(url,headers={'User-Agent':'Mozilla/5.0'}),timeout=20) as r:
+                      text=r.read().decode('utf8','replace')
+                      has_engine="https://www.tikwm.com/api/" in text
+                      no_fake_gate='id="login"' not in text
+                      has_download='id="mp4"' in text and 'id="directLink"' in text
+                      print('HTTP',r.status,'live_engine',has_engine,'login_gate_removed',no_fake_gate,'buttons',has_download)
+                      if r.status == 200 and has_engine and no_fake_gate and has_download:
+                          print('PASS: live browser-powered downloader HTML')
+                          break
+                      last='stale or incorrect site'
+              except Exception as e:
+                  last=type(e).__name__+': '+str(e)[:150]
+                  print('Attempt',i+1,last)
+              time.sleep(8)
+          else:
+              raise SystemExit('Published site verification failed: '+last)
+          PY
