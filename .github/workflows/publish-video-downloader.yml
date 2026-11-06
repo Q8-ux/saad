@@ -1,4 +1,4 @@
-name: Publish Video Downloader Preview
+name: Publish Live Video Downloader
 on:
   push:
     branches: [main]
@@ -34,7 +34,7 @@ jobs:
           PY
           node --check /tmp/video-downloader.js
       - uses: actions/configure-pages@v5
-      - name: Preserve published sites and add preview (no backend on Pages)
+      - name: Preserve other sites and publish live video downloader
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -61,12 +61,10 @@ jobs:
           assert (root/'index.html').is_file()
           dest=root/'video-downloader';dest.mkdir(exist_ok=True)
           html=pathlib.Path('video-downloader/index.html').read_text()
-          blocker="if(key)$('login').classList.add('hidden');"
-          assert blocker in html
-          html=html.replace(blocker, "$('login').classList.remove('hidden');$('login').querySelector('.login-box').innerHTML='<div class=\"logo\">▶</div><h2>واجهة المشروع جاهزة</h2><p>الخادم الخاص بتنزيل الفيديو لم يتم نشره بعد بسبب اكتمال الحد المسموح لخدمات Render. هذه معاينة وليست خدمة تحميل فعالة.</p><p><a href=\"https://github.com/Q8-ux/saad/tree/main/video-downloader\">ملفات GitHub</a></p>';",1)
+          assert "https://www.tikwm.com/api/" in html
           (dest/'index.html').write_text(html)
           (root/'.nojekyll').touch()
-          print('Preview only. Existing sites preserved.')
+          print('Live browser-powered downloader published; other Pages sites preserved.')
           PY
       - uses: actions/upload-pages-artifact@v3
         with:

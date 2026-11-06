@@ -35,3 +35,8 @@ Only download videos you own or have permission to save. Private videos, access-
 4. Short TikTok URLs are accepted for analysis; test with a *public permitted* post.
 5. Run an MP4 and an MP3 extraction and verify the actual downloaded file. An HTTP 200 alone is not proof of correct media.
 6. Re-test after each yt-dlp upgrade as TikTok APIs may change.
+
+## GitHub Pages live fallback (6 November 2026)
+GitHub Pages now serves a **working browser-based public TikTok video resolver** via TikWM's public API. The public GitHub Actions check verified the supplied sample short link with HTTP 200, CORS `*`, and available HD, normal video and music fields. Media byte downloads from an actual Android browser are not independently verified; a direct-link fallback is provided.
+
+This browser mode is **not access-protected**. The earlier password-protected FastAPI/yt-dlp backend remains in the repository for a future private server, but is **not deployed** due to Render Hobby's 25-service quota. Browser mode sends the entered public link to the third-party TikWM service, which may rate-limit or change its API; avoid confidential links. The TikWM music link represents the soundtrack and may **not include spoken audio** from the full video. No automatic watermark removal from an existing MP4 is performed. Only source media links are returned.
