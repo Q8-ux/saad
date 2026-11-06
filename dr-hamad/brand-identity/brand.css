@@ -53,3 +53,17 @@
 }
 .hamad-social-carousel .card-soft {background: var(--hamad-social-sage);}
 .hamad-social-carousel .highlight-soft {background: var(--hamad-social-beige);}
+
+/* Optional second palette: blue + beige from owner-supplied medical carousel.
+   Only navy/silver are existing official color tokens; sky and beige samples are approximate. */
+.hamad-social-carousel[data-palette="sky-blue-beige"] {
+  --hamad-social-beige: #E6D8CB;
+  --hamad-social-sage: #B5DAED;
+  --hamad-social-forest: #17324D;
+  --hamad-social-ivory: #FAF9F7;
+  --hamad-social-sky-accent: #9AD6F2;
+  --hamad-social-silver: #A9BAC3;
+}
+.hamad-social-carousel[data-palette="sky-blue-beige"] .accent-line {
+  border-color: var(--hamad-social-sky-accent);
+}
