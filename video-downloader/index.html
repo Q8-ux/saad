@@ -102,7 +102,7 @@ Bilibili:['bilibili.com','b23.tv'],Rumble:['rumble.com'],Streamable:['streamable
 LinkedIn:['linkedin.com'],Threads:['threads.net'],Telegram:['t.me','telegram.me'],Kwai:['kwai.com','kuaishou.com']};
 const TIKWM = 'https://www.tikwm.com/api/';
 const MAX_BYTES = 140*1024*1024;
-let backend = localStorage.getItem('videohub_backend') || '';
+let backend = localStorage.getItem('videohub_backend') || 'https://video-hub-api-production.up.railway.app';
 let password = sessionStorage.getItem('videohub_password') || '';
 let record = null, busy = false, engineOnline = false;
 function report(text,error=false){$('feedback').textContent=text;$('feedback').classList.toggle('error',error);}
@@ -180,8 +180,14 @@ $('testBackend').addEventListener('click',async()=>{
   try{
     const url=cleanBackendUrl(target);
     const status=await healthCheck(url);
-    backend=url;password=readPassword();
-    if(!password)throw Error('أدخل كلمة مرور الخادم قبل حفظ الاتصال.');
+    const candidate=readPassword();
+    if(!candidate)throw Error('أدخل كلمة مرور الخادم قبل حفظ الاتصال.');
+    const challenge=await fetch(url+'/api/info',{method:'POST',mode:'cors',credentials:'omit',
+      headers:{'Content-Type':'application/json','X-Download-Key':candidate},
+      body:JSON.stringify({url:'https://example.invalid/verify'})});
+    if(challenge.status===401)throw Error('كلمة المرور غير صحيحة.');
+    if(challenge.status!==400)throw Error('تعذر التحقق من صلاحية كلمة المرور على الخادم.');
+    backend=url;password=candidate;
     localStorage.setItem('videohub_backend',backend);
     sessionStorage.setItem('videohub_password',password);
     $('backendFeedback').textContent='تم الاتصال بـ '+status.engine+' · يدعم '+status.supported_platforms.length+' منصة مدرجة.';
@@ -297,5 +303,5 @@ $('mp3').addEventListener('click',()=>download('audio'));
 $('backendUrl').value=backend;
 if(password)$('backendPass').value=password;
 labelEngine(false);
-if(backend)healthCheck(backend).then(()=>labelEngine(Boolean(password))).catch(()=>labelEngine(false));
+if(backend)healthCheck(backend).then(()=>{labelEngine(Boolean(password));if(!password)$('engineStatus').textContent='🟡 الخادم متصل · أدخل كلمة المرور';}).catch(()=>labelEngine(false));
 </script></body></html>
