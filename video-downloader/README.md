@@ -7,7 +7,9 @@ An independent Arabic RTL multi-platform video downloader frontend, with an opti
 - Source: https://github.com/Q8-ux/saad/tree/main/video-downloader
 - Public web interface: https://q8-ux.github.io/saad/video-downloader/
 
-**Current limitation:** GitHub Pages cannot execute Python/FFmpeg. The frontend accepts links from multiple platforms and supports a separate API connection, but actual YouTube/Instagram/Facebook/X/etc. downloads require a running backend. A browser TikTok fallback uses the public TikWM endpoint when reachable; it sometimes returns HTTP 403, so uptime is not guaranteed. An HTTP 200 response alone is not proof a video saved successfully.
+**Live backend:** https://video-hub-api-production.up.railway.app/api/health — Railway production with FastAPI, yt-dlp and a bundled FFmpeg binary. `/api/health` returned HTTP 200, `configured=true`, and 21 allowlisted platform groups. Both YouTube and TikTok public URL metadata extraction returned HTTP 200 in protected end-to-end tests; a real YouTube MP4 downloaded successfully and its MP4 header was verified (533,931 bytes). This does **not** guarantee all individual video URLs or platforms will work. 
+
+The GitHub Pages frontend now preconfigures the Railway HTTPS origin. In **⚙ إعداد محرك التحميل**, enter the private backend password (not stored in this public repository), select **اختبار الاتصال وحفظ**, then paste the video URL. TikTok also has a public TikWM fallback; it may intermittently return HTTP 403.
 
 ## Backend support
 
@@ -40,9 +42,21 @@ The protected JSON endpoints require an `X-Download-Key` header containing the s
 
 After the backend is deployed, open the site's **إعداد محرك التحميل** section, paste the HTTPS API origin and password, and test the connection. Password is held in browser sessionStorage only; backend URL is stored in localStorage. The service limits file sizes, durations and concurrency, deletes temp media after response, and does not support arbitrary user URLs.
 
-## Hosting blocker
+## Railway deployment and operational notes
 
-Creating a fresh Render web service failed because the connected Hobby workspace hit its 25-service limit. No other service was overwritten or deleted. The project can be deployed to another suitable Docker host, or an unused Render service can be retired *only with explicit authorization*. Until then non-TikTok sites remain configured but not live.
+**Status as of 2026-11-06:** Railway service `video-hub-api` in project `video-hub-multiplatform` is Online with one healthy replica. It uses the official public `python:3.12-slim` image, and a startup command that downloads a pinned immutable revision of `app.py`, `index.html`, and `requirements.txt` from this public repository, then installs Python dependencies and `imageio-ffmpeg`. This workaround is necessary because the Railway GitHub integration currently lacks access to `Q8-ux/saad`; it will **not** automatically deploy future GitHub changes. For long-term reliability, grant Railway's GitHub integration access to this exact repository and use the included Dockerfile instead. This avoids dependency installation on every restart.
+
+Render creation was blocked by the Hobby workspace's 25-service limit, so Railway was used without modifying other projects.
+
+### Verification
+- Railway: `GET /api/health` responded 200 and passed its healthcheck
+- GitHub Actions: `.github/workflows/video-hub-railway-smoke.yml` verified 200, valid CORS preflight and expected platform list
+- Temporary Railway canary: YouTube and TikTok metadata returned 200; YouTube MP4 response passed real byte and file-signature checks
+- The temporary canary service was deleted after verification; only the protected API service is retained.
+- The owner should rotate `APP_PASSWORD` via Railway's Variables after sharing it.
+
+### Secrets
+Do not place `APP_PASSWORD` into any GitHub source, GitHub Pages JavaScript, GitHub Action logs or public issue. The site expects the owner to enter it through the settings field, held only in sessionStorage.
 
 ## TikTok fallback
 
