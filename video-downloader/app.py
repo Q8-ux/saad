@@ -1,9 +1,11 @@
-"""Personal TikTok clip downloader; no private/unpermitted media or watermark stripping."""
+"""Personal multi-platform downloader. Public media, allowlisted domains only."""
 from __future__ import annotations
 
 import asyncio
 import hmac
+import json
 import os
+import re
 import shutil
 import tempfile
 import time
@@ -12,102 +14,161 @@ from pathlib import Path
 from urllib.parse import urlsplit
 
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse, HTMLResponse
 from pydantic import BaseModel, Field
 from starlette.background import BackgroundTask
-import yt_dlp
-from yt_dlp.utils import DownloadError
 
+ROOT = Path(__file__).resolve().parent
 APP_PASSWORD = os.getenv("APP_PASSWORD", "")
 MAX_MB = int(os.getenv("MAX_DOWNLOAD_MB", "150"))
 MAX_DURATION = int(os.getenv("MAX_DURATION_SECONDS", "1200"))
 MAX_BYTES = MAX_MB * 1024 * 1024
-ROOT = Path(__file__).resolve().parent
+ORIGINS = [
+    s.strip().rstrip("/") for s in os.getenv(
+        "CORS_ORIGINS", "https://q8-ux.github.io"
+    ).split(",") if s.strip()
+]
+# Explicit allowlist, not an arbitrary public URL fetcher.
+PLATFORMS = {
+    "TikTok": ("tiktok.com",),
+    "YouTube": ("youtube.com", "youtu.be", "youtube-nocookie.com"),
+    "Instagram": ("instagram.com",),
+    "Facebook": ("facebook.com", "fb.watch"),
+    "X": ("x.com", "twitter.com"),
+    "Snapchat": ("snapchat.com",),
+    "Pinterest": ("pinterest.com", "pin.it"),
+    "Reddit": ("reddit.com", "redd.it"),
+    "Vimeo": ("vimeo.com",),
+    "Twitch": ("twitch.tv",),
+    "Dailymotion": ("dailymotion.com", "dai.ly"),
+    "SoundCloud": ("soundcloud.com", "on.soundcloud.com"),
+    "Bluesky": ("bsky.app",),
+    "Bilibili": ("bilibili.com", "b23.tv"),
+    "Rumble": ("rumble.com",),
+    "Streamable": ("streamable.com",),
+    "VK": ("vk.com", "vkvideo.ru"),
+    "LinkedIn": ("linkedin.com",),
+    "Threads": ("threads.net",),
+    "Telegram": ("t.me", "telegram.me"),
+    "Kwai": ("kwai.com", "kuaishou.com"),
+}
+QUALITY = {"best", "1080", "720", "480", "360"}
 app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
+app.add_middleware(
+    CORSMiddleware, allow_origins=ORIGINS, allow_credentials=False,
+    allow_methods=["GET", "POST"],
+    allow_headers=["Content-Type", "X-Download-Key"],
+)
 slots = asyncio.Semaphore(2)
 rate = defaultdict(deque)
 
-class Clip(BaseModel):
-    url: str = Field(min_length=12, max_length=500)
-    kind: str = "video"
 
-def validate(url: str) -> str:
+class Clip(BaseModel):
+    url: str = Field(min_length=12, max_length=800)
+    kind: str = "video"
+    quality: str = "best"
+
+
+def platform_of(host: str) -> str | None:
+    host = host.lower().rstrip(".")
+    for platform, roots in PLATFORMS.items():
+        if any(host == root or host.endswith("." + root) for root in roots):
+            return platform
+    return None
+
+
+def validate(url: str) -> tuple[str, str]:
     raw = url.strip()
     try:
         parsed = urlsplit(raw)
         host = (parsed.hostname or "").lower().rstrip(".")
-        if (parsed.scheme != "https" or parsed.username or parsed.password or
-                parsed.port not in (None, 443) or
-                host not in {"tiktok.com", "www.tiktok.com", "m.tiktok.com",
-                             "vm.tiktok.com", "vt.tiktok.com"} or
-                not parsed.path.startswith("/") or
-                any(c in raw for c in "\r\n\x00")):
+        platform = platform_of(host)
+        if (
+            parsed.scheme != "https" or
+            parsed.username or parsed.password or
+            parsed.port not in (None, 443) or
+            not platform or
+            not parsed.path.startswith("/") or
+            any(char in raw for char in "\r\n\x00")
+        ):
             raise ValueError("invalid")
     except ValueError:
-        raise HTTPException(400, "استخدم رابط فيديو TikTok عامًا يبدأ بـ https://")
-    return raw
+        raise HTTPException(
+            400, "الرابط غير مدعوم. استخدم رابط HTTPS عامًا من إحدى المنصات المدرجة."
+        ) from None
+    return raw, platform
+
 
 def authorize(request: Request):
     if not APP_PASSWORD:
-        raise HTTPException(503, "لم تُضبط كلمة مرور الخدمة في إعدادات الخادم.")
+        raise HTTPException(503, "لم تُضبط كلمة مرور الخادم.")
     supplied = request.headers.get("x-download-key", "")
     if not hmac.compare_digest(supplied.encode(), APP_PASSWORD.encode()):
-        raise HTTPException(401, "كلمة المرور غير صحيحة.")
+        raise HTTPException(401, "كلمة مرور الخادم غير صحيحة.")
+
 
 def throttle(request: Request):
-    # Conservative in-memory limit; per-process and reset at restart.
-    address = request.client.host if request.client else "unknown"
+    client = request.client.host if request.client else "unknown"
     now = time.monotonic()
-    bucket = rate[address]
-    while bucket and now - bucket[0] > 900:
-        bucket.popleft()
-    if len(bucket) >= 24:
-        raise HTTPException(429, "تم تجاوز عدد المحاولات مؤقتًا. حاول لاحقًا.")
-    bucket.append(now)
+    history = rate[client]
+    while history and now - history[0] > 900:
+        history.popleft()
+    if len(history) >= 20:
+        raise HTTPException(429, "تم تجاوز الحد المؤقت للطلبات. حاول لاحقًا.")
+    history.append(now)
 
-def ytdlp_options(directory=None, audio=False):
-    opts = {
-        "quiet": True, "no_warnings": True, "noplaylist": True,
-        "skip_download": directory is None,
-        "socket_timeout": 15,
-        "retries": 1, "fragment_retries": 1,
-        "max_filesize": MAX_BYTES,
-        "cachedir": False,
-        "ignoreerrors": False,
-        "extractor_retries": 1,
-    }
-    if directory:
-        opts["paths"] = {"home": str(directory)}
-        opts["outtmpl"] = "clip-%(id)s.%(ext)s"
-        if audio:
-            opts["format"] = "bestaudio/best"
-            opts["postprocessors"] = [{
-                "key": "FFmpegExtractAudio", "preferredcodec": "mp3",
-                "preferredquality": "192"}]
-        else:
-            opts["format"] = "best[ext=mp4]/best"
-            opts["merge_output_format"] = "mp4"
-    return opts
 
-def extract(url, directory=None, audio=False):
-    with yt_dlp.YoutubeDL(ytdlp_options(directory, audio)) as dl:
-        data = dl.extract_info(url, download=directory is not None)
-    if not data or data.get("_type") == "playlist":
-        raise ValueError("هذا الرابط لا يشير إلى مقطع فيديو منفرد.")
-    duration = data.get("duration")
-    if duration and duration > MAX_DURATION:
-        raise ValueError("مدة الفيديو تتجاوز الحد المسموح.")
+async def command(args: list[str], timeout: int) -> tuple[int, bytes, bytes]:
+    process = await asyncio.create_subprocess_exec(
+        "yt-dlp", "--ignore-config", "--no-cache-dir",
+        "--no-playlist", "--no-warnings", "--socket-timeout", "15",
+        "--retries", "1", "--fragment-retries", "1",
+        *args, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE,
+    )
+    try:
+        stdout, stderr = await asyncio.wait_for(process.communicate(), timeout)
+        return process.returncode, stdout[:3_000_000], stderr[:500]
+    except asyncio.TimeoutError:
+        process.kill()
+        await process.communicate()
+        raise HTTPException(504, "انتهت مهلة استخلاص الفيديو.") from None
+
+
+async def read_info(url: str) -> dict:
+    code, stdout, _ = await command(
+        ["--dump-single-json", "--skip-download", "--", url], 55
+    )
+    if code:
+        raise HTTPException(
+            422, "تعذّر تحليل المقطع. ربما يتطلب تسجيل دخول أو أن المنصة تمنع الوصول إليه."
+        )
+    try:
+        data = json.loads(stdout)
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        raise HTTPException(502, "لم يعُد محرك التحميل ببيانات فيديو صالحة.") from None
+    if not isinstance(data, dict) or data.get("_type") in ("playlist", "multi_video"):
+        raise HTTPException(422, "أدخل رابط فيديو مفرد، وليس قائمة تشغيل أو حسابًا.")
+    if (data.get("duration") or 0) > MAX_DURATION:
+        raise HTTPException(413, "مدة الفيديو تتجاوز الحد المسموح.")
     return data
 
-def safe_error(exc: Exception) -> str:
-    if isinstance(exc, DownloadError):
-        return "تعذّر الحصول على الفيديو من TikTok. قد يكون محذوفًا أو خاصًا أو غير متاح للخادم."
-    if isinstance(exc, ValueError):
-        return str(exc)
-    return "حدث خطأ أثناء معالجة الفيديو. حاول مرة أخرى."
+
+def selected_format(quality: str) -> str:
+    if quality not in QUALITY:
+        raise HTTPException(400, "خيار جودة غير معروف.")
+    if quality == "best":
+        return "bv[ext=mp4]+ba[ext=m4a]/b[ext=mp4]/bv+ba/b"
+    limit = int(quality)
+    return (
+        f"bv[height<={limit}][ext=mp4]+ba[ext=m4a]/"
+        f"b[height<={limit}][ext=mp4]/"
+        f"bv[height<={limit}]+ba/b[height<={limit}]/b"
+    )
+
 
 @app.middleware("http")
-async def headers(request: Request, call_next):
+async def security_headers(request: Request, call_next):
     response = await call_next(request)
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["Referrer-Policy"] = "no-referrer"
@@ -115,71 +176,97 @@ async def headers(request: Request, call_next):
     response.headers["X-Frame-Options"] = "DENY"
     return response
 
+
 @app.get("/", response_class=HTMLResponse)
 def index():
     return HTMLResponse(ROOT.joinpath("index.html").read_text(encoding="utf-8"))
 
+
 @app.get("/api/health")
 def health():
-    return {"status": "ok", "engine": "yt-dlp", "configured": bool(APP_PASSWORD)}
+    return {
+        "status": "ok", "engine": "yt-dlp", "configured": bool(APP_PASSWORD),
+        "supported_platforms": list(PLATFORMS),
+    }
+
 
 @app.post("/api/info")
 async def info(clip: Clip, request: Request):
     authorize(request)
     throttle(request)
-    url = validate(clip.url)
+    url, platform = validate(clip.url)
     async with slots:
-        try:
-            data = await asyncio.wait_for(asyncio.to_thread(extract, url), timeout=50)
-            duration = data.get("duration") or 0
-            if duration > MAX_DURATION:
-                raise HTTPException(413, "مدة الفيديو طويلة جدًا.")
-            return {
-                "title": str(data.get("title") or "TikTok Video")[:140],
-                "uploader": str(data.get("uploader") or data.get("creator") or "")[:80],
-                "duration": duration,
-                "thumbnail": data.get("thumbnail") or "",
-                "id": str(data.get("id") or "")[:60],
-                "watermark": "not_guaranteed",
-            }
-        except HTTPException:
-            raise
-        except Exception as exc:
-            raise HTTPException(422, safe_error(exc)) from None
+        data = await read_info(url)
+    heights = sorted(
+        {
+            f["height"] for f in data.get("formats", [])
+            if isinstance(f, dict) and isinstance(f.get("height"), int)
+        },
+        reverse=True,
+    )[:15]
+    return {
+        "title": str(data.get("title") or "Video")[:160],
+        "uploader": str(data.get("uploader") or data.get("creator") or "")[:80],
+        "duration": data.get("duration") or 0,
+        "thumbnail": str(data.get("thumbnail") or "")[:1500],
+        "id": str(data.get("id") or "")[:60],
+        "platform": platform,
+        "available_heights": heights,
+        "watermark": "not_guaranteed",
+    }
+
 
 @app.post("/api/download")
 async def download(clip: Clip, request: Request):
     authorize(request)
     throttle(request)
-    url = validate(clip.url)
+    url, platform = validate(clip.url)
     if clip.kind not in ("video", "audio"):
         raise HTTPException(400, "صيغة غير مدعومة.")
-    temp = Path(tempfile.mkdtemp(prefix="privateclip-"))
+    chosen = selected_format(clip.quality)
+    folder = Path(tempfile.mkdtemp(prefix="video-hub-"))
     try:
         async with slots:
-            data = await asyncio.wait_for(
-                asyncio.to_thread(extract, url, temp, clip.kind == "audio"), timeout=115)
-        if (data.get("duration") or 0) > MAX_DURATION:
-            raise HTTPException(413, "مدة الفيديو طويلة جدًا.")
-        suffix = ".mp3" if clip.kind == "audio" else ".mp4"
-        candidates = [p for p in temp.iterdir() if p.is_file() and p.suffix.lower() == suffix]
+            data = await read_info(url)
+            video_id = re.sub(
+                r"[^a-zA-Z0-9_-]", "", str(data.get("id") or "")
+            )[:40] or "video"
+            args = [
+                "--max-filesize", f"{MAX_MB}M",
+                "--restrict-filenames", "--no-write-thumbnail",
+                "-o", str(folder / "clip-%(id)s.%(ext)s"),
+            ]
+            if clip.kind == "audio":
+                args += [
+                    "-f", "bestaudio/best", "-x", "--audio-format", "mp3",
+                    "--audio-quality", "192K"
+                ]
+            else:
+                args += [
+                    "-f", chosen, "--merge-output-format", "mp4",
+                    "--recode-video", "mp4"
+                ]
+            code, _, _ = await command(args + ["--", url], 160)
+            if code:
+                raise HTTPException(
+                    422, "تعذر تنزيل الفيديو بهذه الجودة. جرّب جودة أخرى أو مقطعًا عامًا."
+                )
+        extension = ".mp3" if clip.kind == "audio" else ".mp4"
+        candidates = [
+            p for p in folder.iterdir()
+            if p.is_file() and not p.is_symlink() and p.suffix.lower() == extension
+        ]
         if not candidates:
-            raise ValueError("الصيغة المطلوبة غير متاحة لهذا الفيديو.")
+            raise HTTPException(422, "لم ينتج المحرك ملفًا بالصيغة المطلوبة.")
         media = max(candidates, key=lambda p: p.stat().st_size)
-        if media.stat().st_size > MAX_BYTES:
-            raise HTTPException(413, "حجم الفيديو يتجاوز الحد المسموح.")
-        video_id = str(data.get("id") or "tiktok")
-        safe_id = "".join(c for c in video_id if c.isascii() and c.isalnum())[:35] or "tiktok"
+        if not 0 < media.stat().st_size <= MAX_BYTES:
+            raise HTTPException(413, "حجم الملف أكبر من الحد المسموح.")
         return FileResponse(
-            media, media_type="audio/mpeg" if clip.kind == "audio" else "video/mp4",
-            filename=f"clip-{safe_id}{suffix}",
-            background=BackgroundTask(shutil.rmtree, temp, ignore_errors=True))
-    except HTTPException:
-        shutil.rmtree(temp, ignore_errors=True)
+            media,
+            media_type="audio/mpeg" if clip.kind == "audio" else "video/mp4",
+            filename=f"{platform.lower()}-{video_id}{extension}",
+            background=BackgroundTask(shutil.rmtree, folder, ignore_errors=True),
+        )
+    except Exception:
+        shutil.rmtree(folder, ignore_errors=True)
         raise
-    except asyncio.TimeoutError:
-        shutil.rmtree(temp, ignore_errors=True)
-        raise HTTPException(504, "انتهت مهلة التحميل من TikTok.") from None
-    except Exception as exc:
-        shutil.rmtree(temp, ignore_errors=True)
-        raise HTTPException(422, safe_error(exc)) from None

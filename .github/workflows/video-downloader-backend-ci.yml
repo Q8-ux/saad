@@ -1,0 +1,27 @@
+name: Multi-platform Downloader API QA
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'video-downloader/app.py'
+      - 'video-downloader/tests/**'
+      - 'video-downloader/requirements.txt'
+      - '.github/workflows/video-downloader-backend-ci.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  api-validation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Install backend dependencies
+        run: python -m pip install -r video-downloader/requirements.txt
+      - name: Compile and test allowed platforms / SSRF guard
+        working-directory: video-downloader
+        run: |
+          python -m py_compile app.py
+          python -m unittest discover -s tests -p 'test_*.py' -v
