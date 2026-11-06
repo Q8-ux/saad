@@ -67,3 +67,13 @@
 .hamad-social-carousel[data-palette="sky-blue-beige"] .accent-line {
   border-color: var(--hamad-social-sky-accent);
 }
+
+/* Third optional social palette: burgundy/maroon sample, approximate image-derived values.
+ * Silver H logo asset is never recolored. No automatic import to production site. */
+.hamad-social-carousel[data-palette="maroon-warm"] {
+  --hamad-social-beige: #E7CCC1;
+  --hamad-social-sage: #B97867;
+  --hamad-social-forest: #522E42;
+  --hamad-social-ivory: #FBF5F1;
+  --hamad-social-clay: #B97867;
+}
