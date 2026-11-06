@@ -1,0 +1,47 @@
+name: Video Hub Railway Live API Smoke
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/video-hub-railway-smoke.yml']
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - name: Verify actual API and browser preflight without secrets
+        run: |
+          python - <<'PY'
+          import json
+          import time
+          import urllib.request
+          base='https://video-hub-api-production.up.railway.app'
+          def req(path, method='GET', headers=None):
+              request=urllib.request.Request(base+path,method=method,headers=headers or {})
+              with urllib.request.urlopen(request,timeout=20) as response:
+                  return response.status, response.headers, response.read(250000)
+          for attempt in range(6):
+              try:
+                  status, headers, body = req('/api/health',headers={'Origin':'https://q8-ux.github.io'})
+                  data=json.loads(body)
+                  print('HEALTH',status,'ENGINE',data.get('engine'),'CONFIGURED',data.get('configured'),
+                        'PLATFORMS',len(data.get('supported_platforms',[])),'CORS',headers.get('Access-Control-Allow-Origin'))
+                  assert status==200 and data.get('engine')=='yt-dlp' and data.get('configured') is True
+                  assert 'YouTube' in data.get('supported_platforms',[]) and 'Instagram' in data.get('supported_platforms',[])
+                  assert headers.get('Access-Control-Allow-Origin')=='https://q8-ux.github.io'
+                  break
+              except Exception as error:
+                  print('TRY',attempt+1,type(error).__name__,str(error)[:100])
+                  time.sleep(8)
+          else:
+              raise SystemExit('Live multi-platform backend is unavailable')
+          status,headers,_ = req('/api/info',method='OPTIONS',headers={
+              'Origin':'https://q8-ux.github.io',
+              'Access-Control-Request-Method':'POST',
+              'Access-Control-Request-Headers':'content-type,x-download-key'
+          })
+          print('CORS PREFLIGHT',status,headers.get('Access-Control-Allow-Origin'))
+          assert status == 200 and headers.get('Access-Control-Allow-Origin')=='https://q8-ux.github.io'
+          print('PASS: Live Railway backend is reachable, configured and browser-accessible')
+          PY
