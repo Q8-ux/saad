@@ -1,0 +1,26 @@
+/* Hamad font-path — Local specimen ONLY. No binary fonts or production auto-imports. */
+/* Noor is REQUESTED but unavailable: never claim a true Noor render without the real font file. */
+.hamad-font-preview {
+  direction: rtl;
+  color: #17324D;
+  background: #F1F8FA;
+  --font-title: "Noor", "Noto Kufi Arabic", sans-serif; /* fallback != Noor */
+  --font-body: "Noor", "Noto Sans Arabic", sans-serif;
+}
+.hamad-font-preview[data-candidate="manal"] {
+  --font-title: "(AH) Manal Black", sans-serif;
+  --font-body: "(AH) Manal Medium", sans-serif;
+}
+.hamad-font-preview[data-candidate="azer"] {
+  --font-title: "29LT Azer", sans-serif;
+  --font-body: "29LT Azer", sans-serif;
+}
+.hamad-font-preview[data-candidate="mohanad"] {
+  --font-title: "Al-Mohanad Bold", sans-serif;
+  --font-body: "Al-Mohanad", sans-serif;
+}
+.hamad-font-preview .heading {font-family:var(--font-title);font-weight:700;line-height:1.25;}
+.hamad-font-preview .body {font-family:var(--font-body);font-weight:400;line-height:1.65;}
+.hamad-font-preview .slogan {font-family:var(--font-title);font-weight:700;}
+.hamad-font-preview .handle {direction:ltr;unicode-bidi:isolate;}
+/* Local fonts must be installed/licensed; absent fonts will fall back. No web font served here. */
