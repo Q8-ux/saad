@@ -61,3 +61,11 @@ Do not place `APP_PASSWORD` into any GitHub source, GitHub Pages JavaScript, Git
 ## TikTok fallback
 
 TikWM is a third-party public service and receives URLs processed by that fallback. It can rate-limit and return HTTP 403. The downloaded music link can differ from full audio including speech. The UI provides a direct MP4 link on failure when one is available.
+
+## Android without password (version 1.1.0, 7 Nov 2026)
+
+The Android app no longer prompts for a server password. It uses `/api/public/info` and `/api/public/download` on Railway, with `PUBLIC_APP_MODE=1`. The older private endpoints stay password-protected for the web UI. Public mode has per-client and global hourly rate limits (in memory), a 10-minute video duration limit, and a 60 MB file limit. Abuse may still create infrastructure costs; apply persistent shared rate limits and Railway usage alerts before broad distribution.
+
+Android v1.1.0 GitHub release: https://github.com/Q8-ux/saad/releases/tag/video-hub-android-v1.1.0
+
+The Android app ID differs from the older debug build, so it can be installed without a signature conflict. Uninstall the old app after verifying the new installation. Actual passwordless API video extraction and a TikTok MP4 download were verified from GitHub Actions on 7 Nov 2026. A YouTube sample extractor returned HTTP 422 in that test, so not every platform is confirmed working.
