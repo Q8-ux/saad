@@ -13,7 +13,7 @@ export async function GET() {
     ]);
     const runtime = env as unknown as { LEGAL_AI_PROVIDER?: string; GEMINI_MODEL?: string; OPENAI_MODEL?: string };
     const textProvider = runtime.LEGAL_AI_PROVIDER?.trim() || "openai";
-    return privateJson({ ok: true, legalDocuments: Number(documents?.count || 0), verifiedLegalChunks: Number(chunks?.count || 0),sourceVerification:officialVerificationSummary(),memoControlRevision,pleadingLayoutRevision:"plain-header-wide-pages-1",textProvider,textModel:textProvider === "gemini" ? runtime.GEMINI_MODEL || "gemini-3.8-flash" : runtime.OPENAI_MODEL || "gpt-5.6",textProviderRevision:"gemini-structured-1" });
+    return privateJson({ ok: true, legalDocuments: Number(documents?.count || 0), verifiedLegalChunks: Number(chunks?.count || 0),sourceVerification:officialVerificationSummary(),memoControlRevision,pleadingLayoutRevision:"plain-header-wide-pages-1",textProvider,textModel:textProvider === "gemini" ? runtime.GEMINI_MODEL || "gemini-3.8-flash" : runtime.OPENAI_MODEL || "gpt-5.6",textProviderRevision:"gemini-structured-2" });
   } catch {
     return privateJson({ ok: false }, 503);
   }

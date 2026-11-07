@@ -117,3 +117,27 @@ test('Gemini serves drafting, legal research, intake, dictation and tools with t
   assert.deepEqual(requests[0].generationConfig.responseSchema.required, schema.required);
   assert.ok(requests.every(body => body.generationConfig.responseMimeType === 'application/json'));
 });
+
+test('Gemini can clear an obsolete court while null still leaves it unchanged', async () => {
+  for (const [court, expected] of [['__SABEQ_EMPTY__', ''], [null, 'محكمة الأسرة']]) {
+    const { api } = client('gpt-4.1-mini', async (_url, init) => {
+      const body=JSON.parse(init.body);
+      function fixture(schema) {
+        if(schema.anyOf)return fixture(schema.anyOf[0]);
+        if(schema.enum)return schema.enum[0];
+        if(schema.type==='OBJECT')return Object.fromEntries(Object.entries(schema.properties||{}).map(([key,child])=>[key,fixture(child)]));
+        if(schema.type==='ARRAY')return [];
+        if(schema.type==='BOOLEAN')return false;
+        if(['INTEGER','NUMBER'].includes(schema.type))return schema.minimum||0;
+        return 'اختبار اصطناعي';
+      }
+      const output=fixture(body.generationConfig.responseSchema);
+      Object.assign(output,{court,courtCircuit:null,parties:null,facts:null,requests:null});
+      return Response.json({candidates:[{finishReason:'STOP',content:{parts:[{text:JSON.stringify(output)}]}}]});
+    },{LEGAL_AI_PROVIDER:'gemini',GEMINI_API_KEY:'synthetic-gemini-key'});
+    const result=await api.conductLegalIntake({language:'ar',messages:[{role:'user',content:'تصحيح وقائع اصطناعية للاختبار فقط.'}],currentState:{court:'محكمة الأسرة',facts:['واقعة اصطناعية محفوظة'],requests:['طلب اصطناعي محفوظ']},evidence:''});
+    assert.equal(result.court,expected);
+    assert.equal(result.memoPrefill.court,expected);
+    assert.doesNotMatch(result.assistantMessage,/__SABEQ_EMPTY__/);
+  }
+});

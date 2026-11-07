@@ -1,13 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { load } from './template-harness.mjs';
-const { geminiTextResponse, geminiSchema, matchesJsonSchema } = load('../lib/gemini.ts');
+const { geminiTextResponse, geminiSchema, matchesJsonSchema, decodeGeminiValue, geminiEmptyValue } = load('../lib/gemini.ts');
 const config = { apiKey: 'synthetic-private-key', model: 'gemini-3.8-flash' };
 const init = (extra = {}) => ({ body: JSON.stringify({ instructions: 'لا تختلق قانوناً؛ بيّن نقص المصادر.', input: 'وقائع اصطناعية.', ...extra }) });
 const good = { candidates: [{ finishReason: 'STOP', content: { parts: [{ text: 'مسودة تحتاج مراجعة.' }] } }] };
 test('key stays in the vendor header; completed output retains the Responses contract', async () => {
   const response = await geminiTextResponse(init(), config, async (url, request) => {
-    assert.equal(request.redirect, 'error');
+    assert.equal(request.redirect, 'manual');
     assert.equal(request.headers['x-goog-api-key'], config.apiKey);
     assert.doesNotMatch(url + request.body, /synthetic-private-key/);
     const body = JSON.parse(request.body);
@@ -53,10 +53,12 @@ test('original JSON schema still rejects omitted, extra, mistyped and out-of-ran
   const converted=geminiSchema(schema);
   assert.equal(converted.type,'OBJECT');assert.equal(converted.properties.notes.type,'ARRAY');assert.equal(converted.properties.notes.nullable,true);
   const unknownCourt={anyOf:[{type:'string',enum:['','محكمة اصطناعية للاختبار']},{type:'null'}]};
-  assert.deepEqual(Array.from(geminiSchema(unknownCourt).enum),['محكمة اصطناعية للاختبار']);
+  assert.deepEqual(Array.from(geminiSchema(unknownCourt).enum),[geminiEmptyValue,'محكمة اصطناعية للاختبار']);
   assert.equal(geminiSchema(unknownCourt).nullable,true);
   assert.equal(matchesJsonSchema('',unknownCourt),true);
   assert.equal(matchesJsonSchema(null,unknownCourt),true);
+  assert.equal(decodeGeminiValue(geminiEmptyValue,unknownCourt),'');
+  assert.equal(decodeGeminiValue(null,unknownCourt),null);
 });
 test('a schema-violating Gemini completion is withheld before returning text or SSE', async () => {
   const schema={type:'object',additionalProperties:false,required:['facts'],properties:{facts:{type:'string'}}};

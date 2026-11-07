@@ -8,6 +8,7 @@ export class GeminiServiceError extends Error {
 }
 
 type JsonSchema = Record<string, any>;
+export const geminiEmptyValue = "__SABEQ_EMPTY__";
 // The deployed GenerateContent API accepts Schema, while JSON Schema also
 // contains additionalProperties. Enforce the original schema locally as well.
 export function geminiSchema(schema: JsonSchema): JsonSchema {
@@ -18,10 +19,10 @@ export function geminiSchema(schema: JsonSchema): JsonSchema {
   for (const key of ["title", "description", "enum", "minimum", "maximum", "minItems", "maxItems", "minLength", "maxLength", "pattern", "format", "required"]) {
     if (schema[key] !== undefined) result[key] = schema[key];
   }
-  // Gemini rejects empty enum members; nullable intake fields retain null for unknown values.
+  // Keep "clear the previous value" distinct from null (leave it unchanged).
   if (result.enum?.includes("")) {
-    result.enum = result.enum.filter((value: unknown) => value !== "");
-    if (!result.enum.length) { delete result.enum; result.maxLength = 0; }
+    result.enum = result.enum.map((value: unknown) => value === "" ? geminiEmptyValue : value);
+    if (typeof result.maxLength === "number") result.maxLength = Math.max(result.maxLength, geminiEmptyValue.length);
   }
   if (typeof schema.type === "string") result.type = schema.type.toUpperCase();
   if (schema.properties) result.properties = Object.fromEntries(Object.entries(schema.properties).map(([key, value]) => [key, geminiSchema(value as JsonSchema)]));
@@ -29,6 +30,20 @@ export function geminiSchema(schema: JsonSchema): JsonSchema {
   if (alternatives?.length) result.anyOf = alternatives.map(geminiSchema);
   if (nullable) result.nullable = true;
   return result;
+}
+
+export function decodeGeminiValue(value: unknown, schema: JsonSchema): unknown {
+  if (value === geminiEmptyValue && schema.enum?.includes("")) return "";
+  if (schema.anyOf) {
+    for (const branch of schema.anyOf) {
+      const decoded = decodeGeminiValue(value, branch);
+      if (matchesJsonSchema(decoded, branch)) return decoded;
+    }
+    return value;
+  }
+  if (Array.isArray(value) && schema.items) return value.map(item => decodeGeminiValue(item, schema.items));
+  if (value && typeof value === "object" && schema.properties) return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, Object.hasOwn(schema.properties, key) ? decodeGeminiValue(item, schema.properties[key]) : item]));
+  return value;
 }
 
 export function matchesJsonSchema(value: unknown, schema: JsonSchema): boolean {
@@ -69,13 +84,16 @@ export async function geminiTextResponse(init: RequestInit, config: GeminiConfig
   if (typeof body.input !== "string" || typeof body.instructions !== "string") throw new GeminiServiceError("configuration");
   const generationConfig: Record<string, unknown> = { maxOutputTokens: body.max_output_tokens || 16000 };
   const schema = body.text?.format?.schema;
-  if (schema) Object.assign(generationConfig, { responseMimeType: "application/json", responseSchema: geminiSchema(schema) });
+  const convertedSchema = schema ? geminiSchema(schema) : undefined;
+  if (schema) Object.assign(generationConfig, { responseMimeType: "application/json", responseSchema: convertedSchema });
+  const usesEmptyValue = convertedSchema && JSON.stringify(convertedSchema).includes(JSON.stringify(geminiEmptyValue));
+  const instructions = body.instructions + (usesEmptyValue ? `\nIn schema options, ${geminiEmptyValue} represents an empty string: use it to clear a previous selection or leave a selection unspecified. null means keep the previous value unchanged. Never make up a selection.` : "");
   let response: Response;
   try {
     response = await transport(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(config.model)}:generateContent`, {
-      method: "POST", redirect: "error",
+      method: "POST", redirect: "manual",
       headers: { "Content-Type": "application/json", "x-goog-api-key": config.apiKey },
-      body: JSON.stringify({ systemInstruction: { parts: [{ text: body.instructions }] }, contents: [{ role: "user", parts: [{ text: body.input }] }], generationConfig }),
+      body: JSON.stringify({ systemInstruction: { parts: [{ text: instructions }] }, contents: [{ role: "user", parts: [{ text: body.input }] }], generationConfig }),
       signal: init.signal,
     });
   } catch (error) {
@@ -90,12 +108,13 @@ export async function geminiTextResponse(init: RequestInit, config: GeminiConfig
   try { payload = await response.json(); } catch { throw new GeminiServiceError("upstream"); }
   const candidate = payload.candidates?.[0];
   if (payload.promptFeedback?.blockReason || candidate?.finishReason !== "STOP") throw new GeminiServiceError("incomplete");
-  const text = (candidate.content?.parts || []).filter((part: { thought?: boolean; text?: unknown }) => !part.thought && typeof part.text === "string").map((part: { text: string }) => part.text).join("\n").trim();
+  let text = (candidate.content?.parts || []).filter((part: { thought?: boolean; text?: unknown }) => !part.thought && typeof part.text === "string").map((part: { text: string }) => part.text).join("\n").trim();
   if (!text) throw new GeminiServiceError("empty_response");
   if (schema) {
     let parsed;
-    try { parsed = JSON.parse(text); } catch { throw new GeminiServiceError("incomplete"); }
+    try { parsed = decodeGeminiValue(JSON.parse(text), schema); } catch { throw new GeminiServiceError("incomplete"); }
     if (!matchesJsonSchema(parsed, schema)) throw new GeminiServiceError("incomplete");
+    text = JSON.stringify(parsed);
   }
   const result = { status: "completed", output_text: text };
   if (!body.stream) return Response.json(result);
