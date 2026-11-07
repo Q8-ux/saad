@@ -1,0 +1,38 @@
+name: Video Downloader v1.3 Real MP4 Check
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/video-downloader-v13-live.yml']
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Download permitted TikTok sample directly without pre-inspection
+        run: |
+          python - <<'PY'
+          import json,urllib.request,urllib.error
+          root="https://video-hub-api-production.up.railway.app"
+          with urllib.request.urlopen(root+"/api/health",timeout=25) as r:
+              h=json.load(r)
+              print("HEALTH",h.get("status"),"PUBLIC",h.get("public_app_mode"))
+              assert h.get("status")=="ok" and h.get("public_app_mode") is True
+          body={"url":"https://vt.tiktok.com/ZSp6Vv81S/","quality":"360","kind":"video"}
+          request=urllib.request.Request(
+              root+"/api/public/download",method="POST",
+              data=json.dumps(body).encode(),
+              headers={"Content-Type":"application/json"}
+          )
+          try:
+              with urllib.request.urlopen(request,timeout=170) as r:
+                  sample=r.read(65_000_000)
+                  print("DOWNLOAD",r.status,"MIME",r.headers.get("Content-Type"),"BYTES",len(sample))
+                  assert r.status==200 and r.headers.get("Content-Type","").startswith("video/mp4")
+                  assert len(sample)>50000 and sample[4:8]==b"ftyp"
+          except urllib.error.HTTPError as err:
+              print("DOWNLOAD_ERROR",err.code,err.read(600).decode("utf-8","replace"))
+              raise
+          print("PASS direct MP4 downloaded without metadata request or password")
+          PY
