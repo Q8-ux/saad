@@ -74,9 +74,10 @@ test('missing sources, unknown markers and drafting-ineligible records remain re
 });
 
 test('health reports the same control revision used by the memo validator', async () => {
+  const runtime = { LEGAL_AI_PROVIDER: 'gemini', GEMINI_MODEL: 'gemini-3.5-flash' };
   const api = load('../app/api/health/route.ts', {
     '@/lib/official-legislation': { officialVerificationSummary: () => ({ status: 'synthetic-health-fixture' }) },
-    'cloudflare:workers': { env: { LEGAL_AI_PROVIDER: 'gemini', GEMINI_MODEL: 'gemini-3.5-flash' } },
+    'cloudflare:workers': { env: runtime },
     '@/db': { getD1: () => ({ prepare: () => ({ first: async () => ({ count: 0 }) }) }) },
     '@/lib/request-security': { privateJson: Response.json.bind(Response) },
   });
@@ -84,5 +85,13 @@ test('health reports the same control revision used by the memo validator', asyn
   assert.equal(value.memoControlRevision, 'memo-generation-control-1');
   assert.equal(value.textProvider, 'gemini');
   assert.equal(value.textModel, 'gemini-3.5-flash');
-  assert.equal(value.textProviderRevision, 'gemini-structured-3');
+  assert.equal(value.textProviderRevision, 'gemini-structured-4');
+  assert.equal(value.textFallbackProvider, null);
+  runtime.LEGAL_AI_FALLBACK_PROVIDER = 'openai';
+  assert.equal((await (await api.GET()).json()).textFallbackProvider, null);
+  runtime.OPENAI_API_KEY = 'synthetic-health-key';
+  const enabled = await (await api.GET()).json();
+  assert.equal(enabled.textFallbackProvider, 'openai');
+  assert.equal(enabled.textFallbackPolicy, 'explicit-rejection-once');
+  assert.doesNotMatch(JSON.stringify(enabled), /synthetic-health-key/);
 });
