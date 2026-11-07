@@ -1,0 +1,28 @@
+name: Verify Public GitHub Android APK Mirror
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/video-hub-github-apk-qa.yml']
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Download both public APK URLs without token and compare bytes
+        run: |
+          set -euo pipefail
+          curl --fail --location --silent --show-error --connect-timeout 15 --max-time 50 \
+            "https://raw.githubusercontent.com/Q8-ux/saad/main/video-downloader/android/releases/Video-Hub-Android.apk" \
+            -o /tmp/github-raw.apk
+          curl --fail --location --silent --show-error --connect-timeout 15 --max-time 50 \
+            "https://github.com/Q8-ux/saad/releases/download/video-hub-android-v1.0.0/Video-Hub-Android-v1.0.0.apk" \
+            -o /tmp/github-release.apk
+          cmp -s /tmp/github-raw.apk /tmp/github-release.apk
+          unzip -t /tmp/github-raw.apk >/dev/null
+          unzip -Z1 /tmp/github-raw.apk | grep -q '^AndroidManifest.xml$'
+          unzip -Z1 /tmp/github-raw.apk | grep -q '^classes.dex$'
+          echo "GITHUB_RAW_APK_BYTES=$(wc -c < /tmp/github-raw.apk)"
+          sha256sum /tmp/github-raw.apk
+          echo "PASS: No-login GitHub mirror and release yield identical valid APK."
