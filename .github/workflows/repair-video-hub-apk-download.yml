@@ -32,7 +32,8 @@ jobs:
           curl --fail --location --retry 2 --connect-timeout 15 --max-time 100 -sS \
             "$base/SHA256SUMS.txt" -o /tmp/video-apk/SHA256SUMS.txt
           cd /tmp/video-apk
-          cp Video-Hub-Android.apk Video-Hub-Android-v1.0.0.apk
+          mkdir -p dist
+          cp Video-Hub-Android.apk dist/Video-Hub-Android-v1.0.0.apk
           sha256sum -c SHA256SUMS.txt
           unzip -t Video-Hub-Android.apk > /tmp/video-apk/zip-check.txt
           unzip -Z1 Video-Hub-Android.apk | grep -q '^AndroidManifest.xml$'
