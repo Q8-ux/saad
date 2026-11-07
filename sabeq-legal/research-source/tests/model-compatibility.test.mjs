@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 import ts from 'typescript';
+import {load as loadCaseModule} from './template-harness.mjs';
 
 function client(model, transport, environment = {}) {
   const cache = new Map();
@@ -244,4 +245,22 @@ test('cancellation prevents configured fallback after the primary rejection', as
   const { api } = client('gpt-4.1-mini', async () => { calls++; controller.abort(); return Response.json({}, { status: 429 }); }, recoveryEnvironment);
   await assert.rejects(api.generateText({ instructions: 'synthetic', input: 'synthetic', signal: controller.signal }), error => error.kind === 'timeout');
   assert.equal(calls, 1);
+});
+
+test('active planning schema avoids unsupported string-length keywords while retaining source enums',async()=>{
+ const reasoning=loadCaseModule('../lib/case-reasoning.ts');let activeSchema;
+ const plan={clientRole:'مدعى عليه',opponentRole:'مدعٍ',characterization:'اختبار',issues:[{issue:'واقعة الاختبار',factQuote:'واقعة اصطناعية للاختبار فقط.',document:'',sourceMarkers:['م1'],application:'فحص',counterargument:'احتمال',response:'مراجعة',proposedRelief:'رفض المطالبة',missing:''}],missingFacts:[],researchGaps:[],precedentMatches:[]};
+ await reasoning.buildCheckedCasePlan({facts:plan.issues[0].factQuote,partyRole:plan.clientRole,requests:'رفض المطالبة'},[{documentId:1,text:'مرجع اصطناعي'}],'',async options=>{activeSchema=options.schema;return JSON.stringify(plan);});
+ const forbidden=s=>s&&typeof s==='object'&&(Object.hasOwn(s,'minLength')||Object.hasOwn(s,'maxLength')||Object.values(s).some(forbidden));
+ assert.equal(forbidden(activeSchema),false);
+ const {api}=client('gpt-4.1-mini',async(_url,init)=>{
+  const body=JSON.parse(init.body);assert.equal(forbidden(body.text.format.schema),false);assert.equal(body.text.format.schema.properties.precedentMatches.maxItems,0);assert.deepEqual(body.text.format.schema.properties.issues.items.properties.sourceMarkers.items.enum,['م1']);
+  return Response.json({status:'completed',output_text:JSON.stringify(plan)});
+ });
+ assert.equal(await api.generateText({instructions:'synthetic',input:'synthetic',schema:activeSchema}),JSON.stringify(plan));
+});
+test('schema rejection preserves upstream HTTP status and logs only an allowlisted keyword',async()=>{
+ const {api,logs}=client('gpt-4.1-mini',async()=>Response.json({error:{code:'invalid_json_schema',type:'invalid_request_error',param:'text.format.schema',message:"'minLength' is not permitted: PRIVATE_CASE_TEXT synthetic-test-key"}},{status:400}));
+ await assert.rejects(api.generateText({instructions:'synthetic',input:'synthetic'}),error=>error.kind==='upstream'&&error.upstreamStatus===400);
+ assert.equal(logs[0][1].schemaKeyword,'minLength');assert.doesNotMatch(JSON.stringify(logs),/PRIVATE_CASE_TEXT|synthetic-test-key|is not permitted/);
 });

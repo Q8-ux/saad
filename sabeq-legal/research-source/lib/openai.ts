@@ -31,6 +31,7 @@ type OpenAIErrorPayload = {
     code?: string | null;
     type?: string | null;
     param?: string | null;
+    message?: string | null;
   };
 };
 
@@ -200,8 +201,10 @@ async function throwHttpError(response: Response, operation: OpenAIOperation): P
   const param = safeErrorToken(payload.error?.param);
   const requestId = safeErrorToken(response.headers.get("x-request-id"));
   const kind = classifyHttpError(response.status, code, type);
-  console.error("OpenAI request failed", { operation, status: response.status, code, type, param, requestId, kind });
-  throw new OpenAIServiceError(kind, kind === "rate_limit" ? 429 : 503);
+  const schemaKeywords=["minLength","maxLength","minItems","maxItems","minimum","maximum","enum","required","additionalProperties","anyOf"];
+  const schemaKeyword=code==="invalid_json_schema"&&typeof payload.error?.message==="string"?schemaKeywords.find(keyword=>payload.error!.message!.includes(`'${keyword}'`))||"unknown":undefined;
+  console.error("OpenAI request failed", { operation, status: response.status, code, type, param, requestId, kind, ...(schemaKeyword?{schemaKeyword}:{}) });
+  throw new OpenAIServiceError(kind, kind === "rate_limit" ? 429 : 503, response.status);
 }
 
 async function openAIFetch(operation: OpenAIOperation, input: RequestInfo | URL, init: RequestInit, attempts = 3) {
