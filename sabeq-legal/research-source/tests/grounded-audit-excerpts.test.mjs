@@ -36,3 +36,29 @@ test('quotation pools and excerpt sizes are bounded without mutating the shared 
  assert.ok(s.applicationQuote.enum.length<=49);assert.ok(s.applicationQuote.enum.every(q=>q.length<=600));assert.ok(s.factQuote.enum.length<=4);
  assert.equal(api.caseAuditSchema.properties.checks.items.properties.substance.properties.factQuote.enum,undefined);
 });
+test('planning source markers are constrained to the server dictionary and cannot invent a precedent',async()=>{
+ const input={facts:fact,partyRole:'مدعى عليه',requests:'رفض المطالبة'};let calls=0;
+ const p=await api.buildCheckedCasePlan(input,[{documentId:1,text:'مرجع اصطناعي بلا حكم'}],'مصدر اختبار',async options=>{
+  calls++;const schema=options.schema;
+  assert.deepEqual(Array.from(schema.properties.issues.items.properties.sourceMarkers.items.enum),['م1']);
+  assert.equal(schema.properties.precedentMatches.maxItems,0);assert.equal(schema.properties.precedentMatches.items.properties.reason.minLength,20);assert.equal(schema.properties.precedentMatches.items.properties.issueIndex.minimum,0);
+  return JSON.stringify({...plan,issues:[{...plan.issues[0],factQuote:fact,sourceMarkers:['م1']}],precedentMatches:[]});
+ });
+ assert.equal(calls,1);assert.equal(p.issues[0].sourceMarkers[0],'م1');
+});
+test('no retrieved source forces empty marker arrays while audit markers use only planned sources',async()=>{
+ await api.buildCheckedCasePlan({facts:fact,partyRole:'مدعى عليه',requests:'رفض المطالبة'},[],'',async options=>{
+  assert.equal(options.schema.properties.issues.items.properties.sourceMarkers.maxItems,0);assert.equal(options.schema.properties.precedentMatches.maxItems,0);
+  return JSON.stringify({...plan,issues:[{...plan.issues[0],factQuote:fact,sourceMarkers:[]}],precedentMatches:[]});
+ });
+ const p={...plan,issues:[{...plan.issues[0],sourceMarkers:['م2']}]};
+ assert.deepEqual(Array.from(fields(api.caseAuditSchemaForContent(p,content)).sourceMarkers.items.enum),['م2']);
+});
+test('precedent marker enum excludes unreviewed judicial metadata',async()=>{
+ const quote='مبدأ اصطناعي طويل لتجربة ربط مصدر قضائي وهمي فقط ولا يمثل حكماً حقيقياً.';
+ const reviewed={text:quote,documentId:2,judgment:{scope:'uploaded_judgments_only',sourceKind:'judicial_digest',reviewStatus:'source_page_matched',court:'محكمة التمييز',currentAuthorityVerified:false,appealNumber:98765,appealYear:2000,pdfPage:1,chamber:'اختبار',recordId:'synthetic',sourceBook:'كتاب اختبار',sourceSha256:'a'.repeat(64),quoteSha256:'b'.repeat(64),decisionDate:'2000-01-01',reviewedAt:'2026-11-07',quote}};
+ await api.buildCheckedCasePlan({facts:fact,partyRole:'مدعى عليه',requests:'رفض المطالبة'},[{documentId:1,text:'مرجع اصطناعي'},reviewed,{...reviewed,judgment:{...reviewed.judgment,reviewStatus:'unreviewed'}}],'',async options=>{
+  assert.deepEqual(Array.from(options.schema.properties.precedentMatches.items.properties.sourceMarker.enum),['م2']);
+  return JSON.stringify({...plan,issues:[{...plan.issues[0],factQuote:fact,sourceMarkers:['م1']}],precedentMatches:[]});
+ });
+});
