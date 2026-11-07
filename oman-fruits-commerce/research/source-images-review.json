@@ -7,8 +7,8 @@
   "validation_note": "The original sites returned product names and in several cases image_1920 endpoints, but full image pixels or visual text-free status could not be independently verified in this session.",
   "counts": {
     "products": 36,
-    "products_with_source": 6,
-    "individual_image_urls": 4,
+    "products_with_source": 7,
+    "individual_image_urls": 5,
     "production_changes": 0
   },
   "records": [
@@ -560,8 +560,21 @@
           "active": true
         }
       ],
-      "candidates": [],
-      "next_action": "retain_current_oman_photo"
+      "candidates": [
+        {
+          "provider": "فرضتك (furdtk.com)",
+          "product": "Sweet Corn – Kuwait",
+          "match": "نوع الذرة وبلد المنشأ متطابقان، لكن كمية/طريقة تعبئة الفلين تختلف",
+          "confidence": "high_product_match",
+          "product_url": "https://furdtk.com/en/shop/sweet-corn-kuwait-214783?category=3129",
+          "image_url": "https://furdtk.com/web/image/product.template/214783/image_1920?unique=86b37ff",
+          "visual_text_free_verified": false,
+          "actual_resolution_verified": false,
+          "license_to_republish": "not_verified",
+          "production_approved": false
+        }
+      ],
+      "next_action": "compare_image_and_check_rights"
     },
     {
       "product_id": "oman-032",
