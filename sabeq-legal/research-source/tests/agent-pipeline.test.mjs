@@ -78,10 +78,10 @@ test('auth failure cannot reach agents; enabled worker failure is not silently b
  assert.equal((await denied.POST(request())).status,401);assert.equal(calls,0);
  const failed=await memoRoute(h,{pipeline}).POST(request());assert.equal(failed.status,503);assert.equal(calls,1);assert.doesNotMatch(await failed.text(),/secret/);
 });
-test('missing-source notice remains outside exported memo on existing path',async t=>{
+test('missing legal sources keep the request pending instead of exporting an incomplete memo',async t=>{
  const h=templateHarness();t.after(h.cleanup);
  const route=memoRoute(h,{sources:[],pipeline:{agentPipelineEnabled:()=>false}});
- const r=await route.POST(request());assert.equal(r.status,200);const value=await r.json();assert.equal(value.analysis.missingSources,true);assert.match(value.analysis.researchNotice,/لا توجد مصادر/);assert.doesNotMatch(value.memo,/لا توجد مصادر/);
+ const r=await route.POST(request());assert.equal(r.status,422);const value=await r.json();assert.equal(value.stage,'source_review');assert.ok(value.issues.includes('incomplete_defense_coverage'));assert.equal(value.memo,undefined);
 });
 test('knowledge export denies unauthorized users without reading any corpus or template',async()=>{
  let reads=0;const auth=load('../lib/admin-service-auth.ts',{'cloudflare:workers':{env:{ADMIN_SERVICE_TOKEN:'a'.repeat(48)}},'@/db':{getD1:()=>{reads++;throw Error();}}});
@@ -177,15 +177,12 @@ test('health reports the same control revision used by the memo validator', asyn
   assert.equal(value.defenseRevision, 'grounded-defenses-2');
 });
 
-test('an unpaid source failure preserves only facts and requests as visibly incomplete, without a fabricated defense',async t=>{
+test('an unpaid source failure remains pending and never archives a facts-only substitute',async t=>{
  const h=templateHarness();t.after(h.cleanup);const archived=[];
  const wrong='المادة (12) مكرر من القانون رقم 98765 لسنة 2000 【م1】';
  const route=memoRoute(h,{sources:[controlSource],auth:async()=>({id:'synthetic-unpaid-case'}),record:async row=>archived.push(row),pipeline:{agentPipelineEnabled:()=>true,generateAgentPleading:async()=>({content:{...content,grounds:wrong},audit:{}})},model:controlledMemoModel(wrong)});
- const response=await route.POST(request());assert.equal(response.status,200);const value=await response.json();
- assert.equal(value.caseQuality.status,'incomplete');assert.equal(value.stage,'draft_source_review_pending');assert.equal(value.analysis.sourceCount,0);assert.equal(value.defenseRevision,'grounded-defenses-2');
- assert.ok(value.memo.includes(caseData.facts));assert.ok(value.memo.includes(caseData.requests));
- assert.doesNotMatch(value.memo,/المادة|98765|يتمسك مقدم المذكرة|الدفوع وأوجه الدفاع/);
- assert.equal(archived.length,1);assert.equal(archived[0].metadata.sourceReviewPending,true);
+ const response=await route.POST(request());const value=await response.json();
+ assert.equal(response.status,422);assert.equal(value.stage,'source_review');assert.equal(value.memo,undefined);assert.equal(value.document,undefined);assert.ok(value.issues.includes('unverified_article'));assert.equal(archived.length,0);
 });
 test('an audit provider outage remains a service failure, not a claim that the legal facts failed review',async t=>{
  const h=templateHarness();t.after(h.cleanup);const baseline=controlledMemoModel('');
@@ -196,7 +193,7 @@ test('an audit provider outage remains a service failure, not a claim that the l
  const response=await route.POST(request());assert.equal(response.status,503);assert.doesNotMatch(await response.text(),/لم تكتمل مراجعة اتساق|synthetic provider/);
 });
 
-test('unquotable corpus passages are excluded before planning without erasing a supported factual dispute',async t=>{
+test('unquotable corpus passages are excluded before planning and cannot become a complete memo',async t=>{
  const h=templateHarness();t.after(h.cleanup);let plans=0;
  const corrupted={...controlSource,text:'املادة مخسة جتاوز سبعامئة مخسني عىل هبا'};
  const route=memoRoute(h,{sources:[corrupted],pipeline:{agentPipelineEnabled:()=>false},model:async options=>{
@@ -209,8 +206,20 @@ test('unquotable corpus passages are excluded before planning without erasing a 
   throw Error('unexpected source-filter test call');
  }});
  const response=await route.POST(request());const value=await response.json();
- assert.equal(response.status,200,JSON.stringify(value));assert.equal(plans,1);
- assert.equal(value.caseQuality.status,'incomplete');assert.equal(value.analysis.sourceCount,0);
- assert.ok(value.memo.includes(reasoning.applicationQuote));assert.ok(value.memo.includes(reasoning.responseQuote));
- assert.doesNotMatch(value.memo,/املادة|مخسة|98765/);assert.notEqual(value.stage,'draft_source_review_pending');
+ assert.equal(response.status,422,JSON.stringify(value));assert.equal(plans,1);assert.equal(value.stage,'source_review');assert.equal(value.memo,undefined);assert.ok(value.issues.includes('incomplete_defense_coverage'));
+});
+test('one blocked issue prevents partial delivery for both paid and unpaid memoranda',async t=>{
+ for(const paid of [false,true]){
+  const h=templateHarness();t.after(h.cleanup);let audits=0,revisions=0;
+  const baseline=controlledMemoModel('');
+  const route=memoRoute(h,{paid,sources:[controlSource],pipeline:{agentPipelineEnabled:()=>false},model:async options=>{
+   if(options.schema?.properties?.clientRole){const p=JSON.parse(await baseline(options));p.issues.push({...p.issues[0],issue:'مسألة المستند غير المرفق',sourceMarkers:[],missing:'المستند غير مرفق'});p.missingFacts=['المستند غير مرفق'];return JSON.stringify(p);}
+   if(options.schema?.properties?.checks){audits++;return JSON.stringify({checks:[auditCheck([controlSource]),{issueIndex:1,status:'blocked',reason:'المستند غير مرفق',substance:{factQuote:'',applicationQuote:'',opposingQuote:'',responseQuote:'',sourceMarkers:[]}}],roleConsistent:true,factsPreserved:true,reliefConsistent:true,unsupportedAssertions:[]});}
+   if(options.schema?.properties?.facts){revisions++;return JSON.stringify(content);}
+   throw Error('unexpected partial test call');
+  }});
+  const response=await route.POST(request());const value=await response.json();assert.equal(audits,2);assert.equal(revisions,2);
+  assert.equal(response.status,422,JSON.stringify(value));assert.equal(value.memo,undefined);
+  assert.equal(value.stage,'defense_review');assert.equal(value.review.blockedIssueIndexes[0],1);assert.equal(value.review.unsupportedAssertionCount,0);assert.doesNotMatch(JSON.stringify(value.review),/مبلغ لم يتم سداده|المستند غير مرفق/);
+ }
 });
