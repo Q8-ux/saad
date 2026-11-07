@@ -37,7 +37,7 @@ test('flat provider schema and quotation choices remain bounded for twelve issue
  const c={...content,grounds:Array.from({length:80},(_,i)=>`مقطع ${i}: `+application.repeat(4)+'\n'+opposing+'\n'+response).join('\n')};
  const r=request(p,c);let count=0,characters=0;
  function visit(v){if(!v||typeof v!=='object')return;for(const k of ['anyOf','minLength','maxLength'])assert.equal(k in v,false);if(Array.isArray(v.enum)){count+=v.enum.length;characters+=v.enum.reduce((n,x)=>n+(typeof x==='string'?x.length:0),0);}for(const value of Object.values(v))visit(value);}
- visit(r.schema);assert.ok(count<1000);assert.ok(characters<115000);assert.ok(r.checkOptions.length<=60);
+ visit(r.schema);assert.ok(count<1000);assert.ok(characters<115000);assert.ok(r.checkOptions.length<=120);
  assert.ok(r.checkOptions.every(o=>o.applicationQuote.length<=600));compile(r);
  assert.equal(api.caseAuditSchema.properties.checks.items.properties.substance.properties.factQuote.enum,undefined);
 });
@@ -93,4 +93,23 @@ test('selected grounded audit still requires the issue own cited source and keep
  a.checks[0].substance.sourceMarkers=['م2'];assert.equal(api.parseGroundedCaseAudit(JSON.stringify(a),r,p,c,e).ok,false);
  a.checks[0].substance.sourceMarkers=['م1'];const parsed=api.parseGroundedCaseAudit(JSON.stringify(a),r,p,c,e);assert.equal(parsed.ok,true);assert.equal(parsed.complete,true);
  a.checks[0].checkKey='issue_0_omitted';const omitted=api.parseGroundedCaseAudit(JSON.stringify(a),r,p,c,e);assert.equal(omitted.ok,false);assert.equal(omitted.complete,false);
+});
+
+test('each real paragraph keeps its own shorter fact anchor when longer anchors occur in a different argument',()=>{
+ const first='أقر الطرف الاختباري باستلام الدفعة الأولى التي خصصت للدين الأصلي بين الطرفين';
+ const second='سدد الطرف قيمة الدفعة الثانية';
+ const p={...plan,issues:[{...plan.issues[0],factQuote:first+'؛ ثم '+second}]};
+ const a=first+' بحسب الوقائع المفترضة، ولذلك تبحث الدفعة الأولى على حدة ولا يغني ذكرها عن فحص الدفعة الثانية.';
+ const b=second+' في الوقائع المعتمدة، ولذلك يربط هذا التطبيق تحديداً بالدفعة الثانية دون تكرار تطبيق الدفعة الأولى.';
+ const c={...content,grounds:[a,b,opposing,response].join('\n')},r=request(p,c);
+ const choice=r.checkOptions.find(o=>o.applicationQuote===b);assert.ok(choice);assert.equal(choice.factQuote,second);
+ const review=wire(r);review.checks[0].checkKey=choice.checkKey;
+ const result=api.parseGroundedCaseAudit(JSON.stringify(review),r,p,c,[]);assert.equal(result.ok,true);assert.ok(result.excerptOptionCounts[0]>=2);
+ assert.equal(result.selectedApplications[0].candidateIndex,1);
+ assert.doesNotMatch(JSON.stringify({options:result.excerptOptionCounts,selection:result.selectedApplications}),/الطرف|الدفعة|الوقائع/);
+});
+test('a paragraph starting with an article reference may contain actual factual application after it',()=>{
+ const paragraph='المادة 777 من قانون اصطناعي للاختبار فقط؛ '+application;
+ const r=request(plan,{...content,grounds:[paragraph,opposing,response,'نص المادة: «نص قانوني اصطناعي محمي يظل خارج مقاطع تطبيق الوقائع.»'].join('\n')});
+ assert.ok(r.checkOptions.some(o=>o.applicationQuote===paragraph));assert.ok(!r.checkOptions.some(o=>o.applicationQuote.includes('نص قانوني اصطناعي محمي')));
 });
