@@ -178,10 +178,23 @@ export function caseAuditSchemaForContent(plan:CasePlan,content:PleadingContent)
  });
  // Reserve a matching application per issue before filling the bounded pool.
  const selected=[...new Set([...anchors.flatMap(a=>{const q=candidates.find(q=>a.some(f=>q.includes(f)));return q?[q]:[];}),...candidates])].slice(0,48);
- const prose={type:'string',enum:['',...selected]};
- const reasoningProse={type:'string',enum:['',...selected.filter(q=>q.length>=40)]};
- const constrained={...substanceSchema,properties:{...substanceSchema.properties,factQuote:{type:'string',enum:['',...[...new Set(anchors.flat())]]},applicationQuote:reasoningProse,opposingQuote:prose,responseQuote:reasoningProse,sourceMarkers:sourceMarkerArraySchema([...new Set(plan.issues.flatMap(i=>i.sourceMarkers))])}};
- return {...caseAuditSchema,properties:{...caseAuditSchema.properties,checks:{...caseAuditSchema.properties.checks,items:{...caseAuditSchema.properties.checks.items,properties:{...caseAuditSchema.properties.checks.items.properties,substance:constrained}}}}};
+ // Addressed checks must use their OWN issue's nonempty fact/application
+ // pair. A shared enum allowed the model to select an empty or another
+ // issue's quote even while claiming that the issue was addressed.
+ // Shared definitions avoid repeating the full response pool per issue.
+ const prose={type:'string',enum:selected.length?selected:['__no_prose__']};
+ const reasoning=selected.filter(q=>q.length>=40);
+ const reasoningProse={type:'string',enum:reasoning.length?reasoning:['__no_reasoning__']};
+ const empty={type:'string',enum:['']};
+ const checks=plan.issues.flatMap((issue,index):Record<string,unknown>[]=>{
+  const base=caseAuditSchema.properties.checks.items;
+  const applications=selected.filter(q=>q.length>=40&&anchors[index].some(f=>q.includes(f))).slice(0,3);
+  const unavailable={...base,properties:{...base.properties,issueIndex:{type:'integer',enum:[index]},status:{type:'string',enum:['blocked','omitted']},substance:{...substanceSchema,properties:{factQuote:empty,applicationQuote:empty,opposingQuote:empty,responseQuote:empty,sourceMarkers:sourceMarkerArraySchema([])}}}};
+  if(!applications.length||reasoning.length<2||selected.length<3)return [unavailable];
+  const addressed={...base,properties:{...base.properties,issueIndex:{type:'integer',enum:[index]},status:{type:'string',enum:['addressed']},substance:{anyOf:applications.map(application=>({...substanceSchema,properties:{...substanceSchema.properties,factQuote:{type:'string',enum:anchors[index].filter(f=>application.includes(f))},applicationQuote:{type:'string',enum:[application]},opposingQuote:{$ref:'#/$defs/auditProse'},responseQuote:{$ref:'#/$defs/auditReasoning'},sourceMarkers:sourceMarkerArraySchema(issue.sourceMarkers)}}))}}};
+  return [addressed,unavailable];
+ });
+ return {...caseAuditSchema,$defs:{auditProse:prose,auditReasoning:reasoningProse},properties:{...caseAuditSchema.properties,checks:{...caseAuditSchema.properties.checks,items:{anyOf:checks}}}};
 }
 export const defenseAuditInstructions=`لكل check أعد substance باقتباسات حرفية قصيرة من grounds النهائي فقط، وليست من الخطة أو الوقائع المنفصلة: factQuote عبارة من واقعة المسألة المعتمدة، applicationQuote جملة تطبيق تشتمل على هذه العبارة، opposingQuote الاعتراض المحتمل، responseQuote الرد المسبب عليه، وsourceMarkers المصادر المستشهد بها فعلاً لهذه المسألة من خطتها فقط. لا تختلق اقتباساً لتبرير addressed. اجعل التطبيق والرد جملتين مختلفتين لا يقل كل منهما عن 40 حرفاً، والاعتراض عن 20 حرفاً، دون إطالة مصطنعة. لا تكرر اقتباس التطبيق لمسألتين. عند عدم وجود هذه المعالجة اختر omitted؛ وعند نقص المصدر أو الواقعة الذي يمنع حتى المعالجة المشروطة اختر blocked مع سبب محدد واجعل حقول الاقتباسات فارغة. addressed يصف جودة معالجة المسألة ولا يعني ثبوت الادعاء أو قبول المحكمة له: غياب صورة التحويل مثلاً لا يمنع معالجة صلة الدفعة بالدين بشروطها واعتراضها والرد عليها، بشرط ألا يجزم النص بثبوت المستند أو السداد. يبقى نقص الإثبات في الخطة وحالة الاكتمال ولا يخفى. لا تعتبر العبارات التحفظية أو تكرار الوقائع وحده معالجة. في غياب المصادر يجوز addressed لحجة واقعية مرتبطة بالمدخلات فقط دون تقرير قانوني بلا سند؛ لا تتحول إلى مذكرة مكتملة قانونياً. افحص كل تقرير عن قاعدة قانونية أو مستند مقروء أو واقعة أو طلب غير مأذون، حتى إذا لم يتضمن رقم مادة، وضع غير المدعوم في unsupportedAssertions.`;
 
