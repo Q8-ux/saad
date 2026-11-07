@@ -9,9 +9,10 @@ const reasoning={factQuote:'مبلغ لم يتم سداده',applicationQuote:'�
 const reasoningText=Object.values(reasoning).slice(1).join('\n');
 const content = {facts:caseData.facts,requests:caseData.requests,grounds:reasoningText+' 【م1】',fields:{},factualNotes:[],legalResearchNotes:''};
 const auditCheck=(options,sources,issueIndex=0,status='addressed',reason='فحص المطالبة والتطبيق والاعتراض والرد')=>{
- const selected=JSON.parse(options.input).checkOptions.find(o=>o.issueIndex===issueIndex&&o.status===status&&(status!=='addressed'||o.applicationQuote.includes(reasoning.applicationQuote)));
+ const dictionary=JSON.parse(options.input),selected=dictionary.checkOptions.find(o=>o.issueIndex===issueIndex&&o.status===status&&(status!=='addressed'||o.applicationQuote.includes(reasoning.applicationQuote)));
  assert.ok(selected,'synthetic audit must choose a known option from the actual request');
- return {checkKey:selected.checkKey,reason,substance:{opposingQuote:status==='addressed'?reasoning.opposingQuote:'',responseQuote:status==='addressed'?reasoning.responseQuote:'',sourceMarkers:status==='addressed'&&sources.length?['م1']:[]}};
+ const key=q=>{const match=dictionary.quoteOptions.find(o=>o.quote.includes(q));assert.ok(match);return match.quoteKey;};
+ return {checkKey:selected.checkKey,reason,substance:{opposingQuoteKey:status==='addressed'?key(reasoning.opposingQuote):'none',responseQuoteKey:status==='addressed'?key(reasoning.responseQuote):'none',sourceMarkers:status==='addressed'&&sources.length?['م1']:[]}};
 };
 const { pleadingAuthorityInstructions } = load('../lib/bound-draft.ts');
 function bridge(runtime) {
