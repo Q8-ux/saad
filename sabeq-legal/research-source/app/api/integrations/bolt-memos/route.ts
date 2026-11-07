@@ -1,4 +1,3 @@
-import { env } from "cloudflare:workers";
 import { managerMemos } from "@/lib/management-data";
 
 // Read-only bridge: validate the current admin session before reading private memo data.
