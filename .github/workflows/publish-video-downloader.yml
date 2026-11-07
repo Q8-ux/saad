@@ -63,6 +63,12 @@ jobs:
           html=pathlib.Path('video-downloader/index.html').read_text()
           assert "https://www.tikwm.com/api/" in html
           (dest/'index.html').write_text(html)
+          apk=pathlib.Path('video-downloader/android/releases/Video-Hub-Android.apk')
+          if not apk.is_file():
+              raise SystemExit('Validated Android APK mirror missing: refusing incomplete publication')
+          assert apk.stat().st_size > 25000 and apk.read_bytes()[:2] == b'PK'
+          shutil.copyfile(apk,dest/'Video-Hub-Android.apk')
+          assert (dest/'Video-Hub-Android.apk').stat().st_size == apk.stat().st_size
           (root/'.nojekyll').touch()
           print('Live browser-powered downloader published; other Pages sites preserved.')
           PY
