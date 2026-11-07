@@ -5,6 +5,7 @@ import { managerMemos } from "@/lib/management-data";
 export const dynamic = "force-dynamic";
 
 const adminVerifyUrl = "https://tuhxdirrffnxtosqaoiq.supabase.co/functions/v1/admin-verify";
+const adminOrigin = "https://q8-ux-sabeq-admin-co-u4ma.bolt.host";
 const maxBodyBytes = 2048;
 const json = (value: unknown, status = 200) => Response.json(value, {
   status,
@@ -12,6 +13,8 @@ const json = (value: unknown, status = 200) => Response.json(value, {
     "Cache-Control": "private, no-store",
     "X-Content-Type-Options": "nosniff",
     "Referrer-Policy": "no-referrer",
+    "Access-Control-Allow-Origin": adminOrigin,
+    "Vary": "Origin",
   },
 });
 
@@ -30,13 +33,15 @@ async function hasAdminSession(request: Request) {
     const raw = await response.text();
     if (raw.length > 4096) return false;
     const session = JSON.parse(raw);
-    return session?.valid === true && ["super_admin", "admin", "operations_supervisor"].includes(session.role);
+    return session?.valid === true && session.must_change_password !== true && ["super_admin", "admin", "operations_supervisor"].includes(session.role);
   } catch {
     return false;
   }
 }
 
 export async function POST(request: Request) {
+  const origin = request.headers.get("origin");
+  if (origin && origin !== adminOrigin && origin !== new URL(request.url).origin) return json({ error: "Origin not authorized" }, 403);
   const declaredLength = Number(request.headers.get("content-length") || 0);
   if (declaredLength > maxBodyBytes) return json({ error: "Payload too large" }, 413);
   const raw = await request.text();
@@ -56,7 +61,7 @@ export async function POST(request: Request) {
     if (payload.action === "list") {
       const offset = payload.offset ?? 0;
       if (!Number.isSafeInteger(offset) || Number(offset) < 0 || Number(offset) > 100_000) return json({ error: "Invalid pagination" }, 400);
-      const result = await managerMemos(new URL(`https://sabeq-legal-public.centrino.chatgpt.site/api/management/memos?offset=${offset}`));
+      const result = await managerMemos(new URL(`/api/management/memos?source=current&offset=${offset}`, request.url));
       const records = (result.memos || []).slice(0, 50).map((row: Record<string, unknown>) => ({
         id: row.id,
         client_name: row.client_name || "",
@@ -98,4 +103,16 @@ export async function POST(request: Request) {
 
 export async function GET() {
   return json({ error: "Method not allowed" }, 405);
+}
+
+export async function OPTIONS(request: Request) {
+  if (request.headers.get("origin") !== adminOrigin) return json({ error: "Origin not authorized" }, 403);
+  return new Response(null, { status: 204, headers: {
+    "Access-Control-Allow-Origin": adminOrigin,
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    "Access-Control-Max-Age": "600",
+    "Vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers",
+    "Cache-Control": "private, no-store",
+  } });
 }

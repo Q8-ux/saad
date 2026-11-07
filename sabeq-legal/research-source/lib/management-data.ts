@@ -19,41 +19,19 @@ export async function bridgeKeys(): Promise<SigningKeys> {
 }
 export async function officialOperations(params = new URLSearchParams()) {
   const path = `/api/admin/operations${params.size ? `?${params}` : ""}`;
-  const unavailable = (error: string) => ({ available: false, error, memos: [], inbox: [], totals: null });
   try {
     const keys = await bridgeKeys();
+    const payload = base64url(new TextEncoder().encode(JSON.stringify({ iss: SERVICE_ORIGIN, aud: "sabeq-official-operations", exp: Math.floor(Date.now() / 1000) + 45, path, nonce: crypto.randomUUID() })));
     const key = await crypto.subtle.importKey("jwk", keys.privateKey, { name: "ECDSA", namedCurve: "P-256" }, false, ["sign"]);
-    // The legacy Render gateway can be temporarily unavailable during a deploy
-    // or cold start. Retry only transient failures; never retry authentication
-    // errors or invalid responses, and never expose private records or tokens.
-    for (let attempt = 0; attempt < 2; attempt++) {
-      try {
-        // Every attempt needs a fresh nonce to avoid replay rejection.
-        const payload = base64url(new TextEncoder().encode(JSON.stringify({
-          iss: SERVICE_ORIGIN, aud: "sabeq-official-operations",
-          exp: Math.floor(Date.now() / 1000) + 45, path, nonce: crypto.randomUUID(),
-        })));
-        const signature = base64url(new Uint8Array(await crypto.subtle.sign({ name: "ECDSA", hash: "SHA-256" }, key, new TextEncoder().encode(payload))));
-        const response = await fetch(`${OFFICIAL_BACKEND}${path}`, {
-          headers: { "X-Sabeq-Operations": `${payload}.${signature}`, Accept: "application/json" },
-          cache: "no-store", redirect: "manual", signal: AbortSignal.timeout(11_000),
-        });
-        if (!response.ok) {
-          if (attempt === 0 && [429, 502, 503, 504].includes(response.status)) continue;
-          return unavailable(`HTTP ${response.status}`);
-        }
-        if (Number(response.headers.get("content-length") || 0) > 1_000_000) return unavailable("invalid_response");
-        const body = await response.text();
-        if (body.length > 1_000_000) return unavailable("invalid_response");
-        const data = JSON.parse(body);
-        if (data.revision !== "operations-monitor-1") return unavailable("invalid_response");
-        return { ...data, available: true };
-      } catch {
-        if (attempt === 1) return unavailable("connection_unavailable");
-      }
-    }
-  } catch { /* Signing key or connection setup failed; current D1 remains readable. */ }
-  return unavailable("connection_unavailable");
+    const signature = base64url(new Uint8Array(await crypto.subtle.sign({ name: "ECDSA", hash: "SHA-256" }, key, new TextEncoder().encode(payload))));
+    const response = await fetch(`${OFFICIAL_BACKEND}${path}`, { headers: { "X-Sabeq-Operations": `${payload}.${signature}`, Accept: "application/json" }, cache: "no-store", redirect: "error", signal: AbortSignal.timeout(12_000) });
+    if (!response.ok) return { available: false, error: `HTTP ${response.status}`, memos: [], inbox: [], totals: null };
+    const body = await response.text();
+    if (body.length > 1_000_000) throw Error("oversize");
+    const data = JSON.parse(body);
+    if (data.revision !== "operations-monitor-1") throw Error("unsupported");
+    return { ...data, available: true };
+  } catch { return { available: false, error: "connection_unavailable", memos: [], inbox: [], totals: null }; }
 }
 function pagination(url: URL) {
   const offset = Number(url.searchParams.get("offset") || 0);
@@ -78,15 +56,17 @@ export async function managerMemos(url: URL) {
   const { offset, limit, query, status } = pagination(url);
   const generatedOnly = url.searchParams.get("view") === "generated";
   const rows = await getD1().prepare(`SELECT * FROM (
-    SELECT id, client_name, email, case_type, case_number, status, error_code, created_at, updated_at, CASE WHEN user_id IS NULL THEN 'guest' ELSE 'user' END AS visitor_type, CASE WHEN length(trim(COALESCE(output_text,''), char(9)||char(10)||char(13)||' ')) > 0 THEN 1 ELSE 0 END AS has_output, origin FROM management_memo_requests
+    SELECT id, client_name, email, case_type, case_number, status, error_code, created_at, updated_at, CASE WHEN user_id IS NULL THEN 'guest' ELSE 'user' END AS visitor_type, CASE WHEN length(trim(COALESCE(output_text,''), char(9)||char(10)||char(13)||' ')) > 0 THEN 1 ELSE 0 END AS has_output FROM management_memo_requests
     UNION ALL
-    SELECT 'legacy:' || r.id, r.title, COALESCE(u.email,''), 'مذكرة محفوظة سابقاً', '', r.status, '', r.created_at, r.created_at, 'user', CASE WHEN length(trim(COALESCE(r.output_text,''), char(9)||char(10)||char(13)||' ')) > 0 THEN 1 ELSE 0 END, '' AS origin FROM service_records r LEFT JOIN public_users u ON r.user_id = u.id WHERE r.service_type IN ('memo','memo_archive') AND COALESCE(r.metadata_json,'') NOT LIKE '%"managementRequestId"%'
+    SELECT 'legacy:' || r.id, r.title, COALESCE(u.email,''), 'مذكرة محفوظة سابقاً', '', r.status, '', r.created_at, r.created_at, 'user', CASE WHEN length(trim(COALESCE(r.output_text,''), char(9)||char(10)||char(13)||' ')) > 0 THEN 1 ELSE 0 END FROM service_records r LEFT JOIN public_users u ON r.user_id = u.id WHERE r.service_type IN ('memo','memo_archive') AND r.metadata_json NOT LIKE '%"managementRequestId"%'
     ) WHERE (? = '' OR client_name LIKE ? OR email LIKE ? OR case_number LIKE ?) AND (? = '' OR status = ?) AND (? = 0 OR has_output = 1) ORDER BY created_at DESC, id LIMIT ? OFFSET ?`)
     .bind(query, `%${query}%`, `%${query}%`, `%${query}%`, status, status, generatedOnly ? 1 : 0, limit, offset).all();
-  const official = await officialOperations(new URLSearchParams({ kind: "memos", q: query, status, offset: String(offset), limit: String(limit) }));
+  const official = url.searchParams.get("source") === "current"
+    ? { available: false, memos: [], hasMore: false }
+    : await officialOperations(new URLSearchParams({ kind: "memos", q: query, status, offset: String(offset), limit: String(limit) }));
   // Historical sources without output-presence metadata remain in All requests.
   const archived = (official.memos || []).filter((row: Record<string, unknown>) => !generatedOnly || row.has_output === true || row.has_output === 1);
-  return { memos: [...rows.results.map((row: Record<string, unknown>) => ({ ...row, source: "hosted" })), ...archived.map((row: Record<string, unknown>) => ({ ...row, id: `official:${row.id}`, source: "official" }))].sort((a, b) => String(b.created_at).localeCompare(String(a.created_at))), hasMore: rows.results.length === limit || (official.hasMore === true && (!generatedOnly || archived.length > 0)), officialAvailable: official.available, officialError: official.error || null, offset };
+  return { memos: [...rows.results.map((row: Record<string, unknown>) => ({ ...row, source: "hosted" })), ...archived.map((row: Record<string, unknown>) => ({ ...row, id: `official:${row.id}`, source: "official" }))].sort((a, b) => String(b.created_at).localeCompare(String(a.created_at))), hasMore: rows.results.length === limit || (official.hasMore === true && (!generatedOnly || archived.length > 0)), officialAvailable: official.available, offset };
 }
 export async function managerInbox(url: URL) {
   const { offset, limit, query } = pagination(url);
@@ -99,7 +79,7 @@ export async function managerSnapshot(email: string) {
   const db = getD1();
   const [memo, historical, contacts, mail, commands, appointments, events, reads, official] = await Promise.all([
     db.prepare("SELECT COUNT(*) total, SUM(status = 'running') running, SUM(status IN ('failed','cancelled')) failed, SUM(status IN ('needs_review','needs_information')) review FROM management_memo_requests").first(),
-    db.prepare("SELECT COUNT(*) total FROM service_records WHERE service_type IN ('memo','memo_archive') AND COALESCE(metadata_json,'') NOT LIKE '%\"managementRequestId\"%'").first(),
+    db.prepare("SELECT COUNT(*) total FROM service_records WHERE service_type IN ('memo','memo_archive') AND metadata_json NOT LIKE '%\"managementRequestId\"%'").first(),
     db.prepare("SELECT COUNT(*) total, SUM(status = 'new') unread FROM contact_messages").first(),
     db.prepare("SELECT COUNT(*) total, SUM(status = 'new') unread FROM management_emails").first(),
     db.prepare("SELECT COUNT(*) total, SUM(status != 'completed') pending FROM management_commands").first(),
@@ -116,65 +96,6 @@ export async function managerSnapshot(email: string) {
   const updatedAt = new Date().toISOString();
   // The current GitHub site and management routes share this D1 store; Render is the previous archive.
   return { memo, historical, contacts, mail, commands, appointments, notifications, connection: { available: true, source: "sabeq-public-service", mode: "shared-database", checkedAt: updatedAt }, official: { available: official.available, totals: official.totals, revision: official.revision || null, trackingSince: official.trackingSince || null, error: official.error || null }, updatedAt, revision: "independent-admin-2" };
-}
-
-// Read-only, administrator-scoped recovery inventory. Never copies or rewrites
-// legal submissions; an absent record cannot be reconstructed from a request log.
-export async function managerMemoRecovery(url: URL) {
-  const start = url.searchParams.get("start") || "";
-  const end = url.searchParams.get("end") || "";
-  const valid = (value: string) => {
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
-    const d = new Date(value + "T00:00:00.000Z");
-    return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === value;
-  };
-  if ((start && !valid(start)) || (end && !valid(end)) || (start && end && start > end)) {
-    throw new RequestError("حدد تاريخ بداية ونهاية صحيحين لجرد المذكرات.");
-  }
-  const lower = start ? start + " 00:00:00" : "0000-01-01 00:00:00";
-  const upper = end ? end + " 23:59:59" : "9999-12-31 23:59:59";
-  const db = getD1();
-  const [current, archived, origin, official] = await Promise.all([
-    db.prepare(`SELECT COUNT(*) AS total,
-      SUM(CASE WHEN LENGTH(TRIM(COALESCE(output_text,''))) > 0 THEN 1 ELSE 0 END) AS with_text,
-      SUM(CASE WHEN LENGTH(TRIM(COALESCE(output_text,''))) = 0 THEN 1 ELSE 0 END) AS without_text,
-      SUM(CASE WHEN status = 'running' THEN 1 ELSE 0 END) AS running,
-      SUM(CASE WHEN status IN ('failed','cancelled','needs_information') THEN 1 ELSE 0 END) AS incomplete,
-      MIN(created_at) AS earliest, MAX(created_at) AS latest
-      FROM management_memo_requests WHERE created_at >= ? AND created_at <= ?`).bind(lower, upper).first(),
-    db.prepare(`SELECT COUNT(*) AS total,
-      SUM(CASE WHEN LENGTH(TRIM(COALESCE(output_text,''))) > 0 THEN 1 ELSE 0 END) AS with_text,
-      SUM(CASE WHEN LENGTH(TRIM(COALESCE(output_text,''))) = 0 THEN 1 ELSE 0 END) AS without_text,
-      MIN(created_at) AS earliest, MAX(created_at) AS latest
-      FROM service_records WHERE service_type IN ('memo','memo_archive')
-        AND COALESCE(metadata_json,'') NOT LIKE '%"managementRequestId"%'
-        AND created_at >= ? AND created_at <= ?`).bind(lower, upper).first(),
-    db.prepare(`SELECT
-      SUM(CASE WHEN origin LIKE 'https://q8-ux.github.io%' THEN 1 ELSE 0 END) AS github_site,
-      SUM(CASE WHEN origin LIKE 'https://sabeq.legal%' OR origin LIKE 'https://www.sabeq.legal%' THEN 1 ELSE 0 END) AS official_site,
-      SUM(CASE WHEN origin NOT LIKE 'https://q8-ux.github.io%' AND origin NOT LIKE 'https://sabeq.legal%' AND origin NOT LIKE 'https://www.sabeq.legal%' THEN 1 ELSE 0 END) AS other
-      FROM management_memo_requests WHERE created_at >= ? AND created_at <= ?`).bind(lower, upper).first(),
-    officialOperations(new URLSearchParams({ kind: "summary" })),
-  ]);
-  const safe = (value: unknown) => Math.max(0, Number(value || 0));
-  const compact = (row: Record<string, unknown> | null, running = false) => ({
-    total: safe(row?.total), withText: safe(row?.with_text), withoutText: safe(row?.without_text),
-    ...(running ? { running: safe(row?.running), incomplete: safe(row?.incomplete) } : {}),
-    earliest: row?.earliest || null, latest: row?.latest || null,
-  });
-  return {
-    checkedAt: new Date().toISOString(), range: { start: start || null, end: end || null },
-    current: compact(current as Record<string, unknown> | null, true),
-    savedHistory: compact(archived as Record<string, unknown> | null),
-    currentOrigins: { github: safe(origin?.github_site), official: safe(origin?.official_site), other: safe(origin?.other) },
-    olderRender: {
-      available: official.available, totalAllTime: official.available ? safe(official.totals?.memos) : null,
-      historyAvailable: official.historyAvailable === true,
-      trackingSince: official.trackingSince || null, error: official.error || null,
-      dateFiltered: false,
-    },
-    note: "هذا جرد للسجلات الموجودة، وليس استعادة للسجلات المفقودة. إحصاء Render يخص جميع التواريخ ولا يشمل نصوص المذكرات التي لم تُحفظ.",
-  };
 }
 
 export async function managerUpdates() {

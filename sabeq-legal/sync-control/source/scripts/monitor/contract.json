@@ -1,9 +1,0 @@
-{
-  "schema_version": 1,
-  "source_list": null,
-  "target_list": null,
-  "target_get": null,
-  "test_send": null,
-  "resync": null,
-  "note": "معلّق: أضف فقط مسارات إنتاج HTTPS مُراجعة في النطاقين المعتمدين. المصادقة من GitHub Secret باسم SABEQ_MONITOR_TOKEN. لا تستخدم خدمة مؤقتة."
-}
