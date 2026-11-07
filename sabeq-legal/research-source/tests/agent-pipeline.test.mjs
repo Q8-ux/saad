@@ -187,3 +187,30 @@ test('an unpaid source failure preserves only facts and requests as visibly inco
  assert.doesNotMatch(value.memo,/المادة|98765|يتمسك مقدم المذكرة|الدفوع وأوجه الدفاع/);
  assert.equal(archived.length,1);assert.equal(archived[0].metadata.sourceReviewPending,true);
 });
+test('an audit provider outage remains a service failure, not a claim that the legal facts failed review',async t=>{
+ const h=templateHarness();t.after(h.cleanup);const baseline=controlledMemoModel('');
+ const route=memoRoute(h,{sources:[controlSource],pipeline:{agentPipelineEnabled:()=>true,generateAgentPleading:async()=>({content:{...content},audit:{}})},model:async options=>{
+  if(options.schema?.properties?.checks)throw Error('synthetic provider outage');
+  return baseline(options);
+ }});
+ const response=await route.POST(request());assert.equal(response.status,503);assert.doesNotMatch(await response.text(),/لم تكتمل مراجعة اتساق|synthetic provider/);
+});
+
+test('unquotable corpus passages are excluded before planning without erasing a supported factual dispute',async t=>{
+ const h=templateHarness();t.after(h.cleanup);let plans=0;
+ const corrupted={...controlSource,text:'املادة مخسة جتاوز سبعامئة مخسني عىل هبا'};
+ const route=memoRoute(h,{sources:[corrupted],pipeline:{agentPipelineEnabled:()=>false},model:async options=>{
+  if(options.schema?.properties?.clientRole){
+   plans++;assert.doesNotMatch(options.input,/املادة|مخسة|98765/);
+   return JSON.stringify({clientRole:caseData.partyRole,opponentRole:'مدعى عليه',characterization:'مطالبة',issues:[{issue:'المبلغ',factQuote:reasoning.factQuote,document:'المدخلات',sourceMarkers:[],application:'فحص أصل المطالبة',counterargument:'منازعة السداد',response:'فحص المستند',proposedRelief:caseData.requests,missing:''}],missingFacts:[],researchGaps:['السند القانوني يحتاج مراجعة']});
+  }
+  if(options.schema?.properties?.facts)return JSON.stringify({...content,grounds:reasoningText});
+  if(options.schema?.properties?.checks)return JSON.stringify({checks:[auditCheck([])],roleConsistent:true,factsPreserved:true,reliefConsistent:true,unsupportedAssertions:[]});
+  throw Error('unexpected source-filter test call');
+ }});
+ const response=await route.POST(request());const value=await response.json();
+ assert.equal(response.status,200,JSON.stringify(value));assert.equal(plans,1);
+ assert.equal(value.caseQuality.status,'incomplete');assert.equal(value.analysis.sourceCount,0);
+ assert.ok(value.memo.includes(reasoning.applicationQuote));assert.ok(value.memo.includes(reasoning.responseQuote));
+ assert.doesNotMatch(value.memo,/املادة|مخسة|98765/);assert.notEqual(value.stage,'draft_source_review_pending');
+});

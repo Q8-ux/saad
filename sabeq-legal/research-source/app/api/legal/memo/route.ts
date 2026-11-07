@@ -3,7 +3,7 @@ import { availableEvidenceMode } from "@/lib/memo-preparation";
 import { validateMemoInput } from "@/lib/memo-input";
 import { reserveMemoPayment, completeMemoPayment, releaseMemoPayment, type PaymentLease } from "@/lib/sadad-payments";
 import {assessMatterFacts} from "@/lib/matter-facts";
-import {preserveLegalQuotes} from '@/lib/statutory-text';
+import {preserveLegalQuotes,draftStatutoryText} from '@/lib/statutory-text';
 import { missingPlannedStatutoryCitations } from "@/lib/statutory-authority-coverage";
 import { reviewMissingLegalIssues } from "@/lib/meta-secondary-review";
 import { councilDefenseAuditInstructions, councilDefenseRevisionInstructions } from "@/lib/council-defense-review";
@@ -100,7 +100,7 @@ export async function POST(request: Request) {
       readHandoffEvidence(raw.assistantSourceIds),
     ]);
     let evidence = scopeEvidenceToFacts(Array.from(new Map(
-      [...handoffEvidence, ...cassationEvidence, ...generalEvidence].filter(item=>item.corpus?.draftingEligible!==false).map((item) => [`${item.documentId}:${item.reference || item.text.slice(0, 80)}`, item]),
+      [...handoffEvidence, ...cassationEvidence, ...generalEvidence].filter(item=>item.corpus?.draftingEligible!==false&&(!item.corpus||item.judgment||Boolean(draftStatutoryText(item)))).map((item) => [`${item.documentId}:${item.reference || item.text.slice(0, 80)}`, item]),
     ).values()).slice(0, 16),facts+" "+caseType+" "+requests);
     let casePlan;
     try { casePlan = await buildCheckedCasePlan(memoInput,evidence,formatEvidence(evidence),generateText); }
@@ -218,11 +218,12 @@ export async function POST(request: Request) {
       content.factualNotes = factualRequirements([...new Set([...content.factualNotes,...preparationNotes,...matter.missing.map(g=>g.ar),...checkedPlan.missingFacts,...checkedPlan.issues.map(i=>i.missing).filter(Boolean)])]);
       let caseAudit = null;
       {
-        try {
-          caseAudit = parseCaseAudit(await generateText({
+          const auditText = await generateText({
             instructions: `${caseReasoningInstructions}\n${councilDefenseAuditInstructions}\n${defenseAuditInstructions}\nأنت مراجع مستقل لا الكاتب. قارن الناتج بالوقائع المعتمدة وخطة المسائل والمصادر. افحص كل مسألة مرة واحدة بفهرسها بدءاً من صفر. addressed فقط إذا عالجها المتن بواقعة وسند مناسب أو منازعة واقعية مبررة؛ مجرد ذكر الكلمة ليس معالجة. blocked فقط لنقص واقعي أو سند موثق مع بيان السبب خارج المتن. omitted عند إغفال مسألة مؤثرة. تحقق من عدم قلب صفات الأطراف أو إنشاء إقرار أو مبلغ أو واقعة أو طلب ضار أو غير مأذون. افحص البدائل وتوقيت السداد وأثره المشروط وعدم افتراض الخصم والتضامن. ضع الادعاءات بلا مصدر أو بوجه صلة غير صحيح في unsupportedAssertions. لا تستمد القانون من الذاكرة.`,
             input: JSON.stringify({approvedFacts:approvedCaseFacts(memoInput),plan:checkedPlan,content,sources:formatEvidence(evidence)}),schema:caseAuditSchema,maxOutputTokens:12000,
-          }),checkedPlan,content,evidence);
+          });
+        try {
+          caseAudit = parseCaseAudit(auditText,checkedPlan,content,evidence);
         } catch { throw new RequestError("لم تكتمل مراجعة اتساق الدفوع والوقائع. احتفظ ببياناتك وأعد المحاولة.",422); }
         if(!caseAudit.ok) {
           if(qualityRetried&&!paymentLease&&!content.grounds.trim()&&caseAudit.roleConsistent&&caseAudit.factsPreserved&&caseAudit.reliefConsistent&&!caseAudit.unsupportedAssertions.length&&caseAudit.checks.every(check=>check.status==="blocked"))return factualReviewDraft(["defense_research_pending"]);
