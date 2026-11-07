@@ -1,0 +1,40 @@
+name: Verify Video Hub Android APK Public Download
+on:
+  workflow_run:
+    workflows: ['Publish Live Video Downloader']
+    types: [completed]
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  verify:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - name: Check Pages and GitHub URLs as a public user
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="https://q8-ux.github.io/saad/video-downloader/Video-Hub-Android.apk"
+          raw="https://raw.githubusercontent.com/Q8-ux/saad/main/video-downloader/android/releases/Video-Hub-Android.apk"
+          release="https://github.com/Q8-ux/saad/releases/download/video-hub-android-v1.0.0/Video-Hub-Android-v1.0.0.apk"
+          for attempt in 1 2 3 4 5; do
+            if curl --location --fail --silent --show-error --connect-timeout 12 --max-time 45 "$base" -o /tmp/pages.apk &&
+               test "$(wc -c < /tmp/pages.apk)" -gt 25000 &&
+               unzip -t /tmp/pages.apk >/dev/null 2>&1; then
+              break
+            fi
+            if test "$attempt" = 5; then echo "Pages APK not available" >&2; exit 1; fi
+            sleep 8
+          done
+          curl --location --fail --silent --show-error --connect-timeout 12 --max-time 45 "$raw" -o /tmp/raw.apk
+          curl --location --fail --silent --show-error --connect-timeout 12 --max-time 45 "$release" -o /tmp/release.apk
+          for f in /tmp/pages.apk /tmp/raw.apk /tmp/release.apk; do
+            test "$(wc -c < "$f")" -gt 25000
+            unzip -t "$f" >/dev/null
+            unzip -Z1 "$f" | grep -q '^classes.dex$'
+            sha256sum "$f"
+          done
+          cmp -s /tmp/pages.apk /tmp/raw.apk
+          cmp -s /tmp/raw.apk /tmp/release.apk
+          echo "PASS: All three public links return identical installable APK bytes."
