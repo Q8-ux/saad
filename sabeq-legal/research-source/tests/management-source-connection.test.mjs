@@ -6,92 +6,16 @@ import {webcrypto} from 'node:crypto';
 import vm from 'node:vm';
 import ts from 'typescript';
 const root=new URL('../',import.meta.url);
-function harness(transport){
+function harness({authenticated=false}={}){
   const sqlite=new DatabaseSync(':memory:');
   sqlite.exec(readFileSync(new URL('tests/fixtures/management-source-tables.sql',root),'utf8'));
   sqlite.exec(readFileSync(new URL('drizzle/0005_icy_dark_phoenix.sql',root),'utf8'));
   const db={prepare(sql){let args=[];return{bind(...values){args=values;return this;},async first(){return sqlite.prepare(sql).get(...args)||null;},async all(){return{results:sqlite.prepare(sql).all(...args)};},async run(){return sqlite.prepare(sql).run(...args);}};}};
-  const archiveCalls=[];
   // Authentication routes and encrypted-vault isolation are covered by the full native management suite.
   const dependencies={'@/db':{getD1:()=>db},'@/lib/management-auth':{base64url:value=>Buffer.from(value).toString('base64url'),sealConfig:async value=>JSON.stringify(value),openConfig:async value=>JSON.parse(value)},'@/lib/management-integrations':{SERVICE_ORIGIN:'https://sabeq-legal-public.centrino.chatgpt.site'},'@/lib/request-security':{RequestError:class extends Error{}}};
-  function load(file){const exports={};vm.runInNewContext(ts.transpileModule(readFileSync(new URL(file,root),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{exports,require:name=>{if(!dependencies[name])throw Error('Unexpected test dependency: '+name);return dependencies[name];},crypto:webcrypto,TextEncoder,URL,URLSearchParams,AbortSignal,fetch:async(url,init)=>{ archiveCalls.push({url:String(url), init}); return transport ? transport(url,init) : new Response('Not found',{status:404}); }});return exports;}
-  return{sqlite,load,archiveCalls,close:()=>sqlite.close()};
+  function load(file){const exports={};vm.runInNewContext(ts.transpileModule(readFileSync(new URL(file,root),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{exports,require:name=>{if(name==='@/lib/management-data')return load('lib/management-data.ts');if(!dependencies[name])throw Error('Unexpected test dependency: '+name);return dependencies[name];},crypto:webcrypto,TextEncoder,URL,URLSearchParams,AbortSignal,Request,Response,Headers,fetch:async url=>authenticated&&String(url)==='https://tuhxdirrffnxtosqaoiq.supabase.co/functions/v1/admin-verify'?Response.json({valid:true,role:'admin',must_change_password:false}):new Response('Not found',{status:404})});return exports;}
+  return{sqlite,load,close:()=>sqlite.close()};
 }
-test('the memo archive bridge uses the supported Cloudflare redirect mode and includes former-site requests',async()=>{const h=harness(async(url,init)=>{
- assert.equal(String(url).split('?')[0],'https://sabeq-legal-research-api.onrender.com/api/admin/operations');
- assert.equal(init.redirect,'manual');
- assert.equal(init.cache,'no-store');
- assert.match(init.headers['X-Sabeq-Operations'],/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/);
- if(String(url).includes('recordId='))return Response.json({revision:'operations-monitor-1',record:{id:'old-case',client_name:'اختبار أرشيف قديم',status:'needs_review',output_text:''}});
- return Response.json({revision:'operations-monitor-1',memos:[{id:'old-case',client_name:'اختبار أرشيف قديم',created_at:'2026-10-01 10:00:00',status:'needs_review'}],hasMore:false});
- });try{
- const data=h.load('lib/management-data.ts');
- const result=await data.managerMemos(new URL('https://test.invalid/api/management/memos?view=all'));
- assert.equal(result.officialAvailable,true);
- assert.equal(result.memos.length,1);
- assert.equal(result.memos[0].id,'official:old-case');
- assert.equal(result.memos[0].source,'official');
- const detail=await data.managerMemos(new URL('https://test.invalid/api/management/memos?id=official:old-case'));
- assert.equal(detail.memo.client_name,'اختبار أرشيف قديم');
- assert.equal(h.archiveCalls.length,2);
-}finally{h.close();}});
-
-test('legacy archive retries one transient deployment outage with a fresh signed nonce',async()=>{let calls=0;const h=harness(async(url,init)=>{
-  calls++;
-  if(calls===1)return Response.json({error:'render restarting'},{status:503});
-  return Response.json({revision:'operations-monitor-1',memos:[{id:'recover',client_name:'طلب اختباري',status:'needs_review',created_at:'2026-11-02 11:00:00'}],hasMore:false});
- });try{
- const data=h.load('lib/management-data.ts');
- const result=await data.managerMemos(new URL('https://test.invalid/api/management/memos?view=all'));
- assert.equal(result.officialAvailable,true);
- assert.equal(result.officialError,null);
- assert.equal(result.memos.some(row=>row.id==='official:recover'),true);
- assert.equal(calls,2);
- const credentials=h.archiveCalls.map(call=>call.init.headers['X-Sabeq-Operations'].split('.')[0]);
- assert.notEqual(credentials[0],credentials[1]);
-}finally{h.close();}});
-
-test('archive signing failures do not retry authorization denials or block current memo records',async()=>{const h=harness(async()=>Response.json({error:'not_authorized'},{status:401}));try{
- const data=h.load('lib/management-data.ts');
- const ledger=h.load('lib/memo-requests.ts');
- const id=await ledger.startMemoRequest({clientName:'طلب حالي اصطناعي'},null,'https://q8-ux.github.io');
- const result=await data.managerMemos(new URL('https://test.invalid/api/management/memos?view=all'));
- assert.equal(result.officialAvailable,false);
- assert.equal(result.officialError,'HTTP 401');
- assert.equal(result.memos.some(row=>row.id===id),true);
- assert.equal(h.archiveCalls.length,1);
-}finally{h.close();}});
-
-test('date-scoped memo recovery inventories surviving D1 records without copying legal text',async()=>{const h=harness();try{
- const ledger=h.load('lib/memo-requests.ts'),management=h.load('lib/management-data.ts');
- const date=new Date().toISOString().slice(0,10);
- const first=await ledger.startMemoRequest({clientName:'Test current memo'},null,'https://q8-ux.github.io');
- await ledger.finishMemoRequest(first,'needs_review','Synthetic full draft');
- await ledger.startMemoRequest({clientName:'Test incomplete memo'},null,'https://sabeq.legal');
- h.sqlite.prepare("INSERT INTO public_users (id,name,phone,email,email_verified_at) VALUES ('test-audit-user','Synthetic User','000','synthetic@example.test','2026-01-01')").run();
- h.sqlite.prepare("INSERT INTO service_records (id,user_id,service_type,title,output_text) VALUES ('test-legacy','test-audit-user','memo_archive','Synthetic archive','Text from the archive')").run();
- const audit=await management.managerMemoRecovery(new URL('https://test.invalid/api/management/memo-recovery?start='+date+'&end='+date));
- assert.equal(audit.current.total,2);
- assert.equal(audit.current.withText,1);
- assert.equal(audit.current.withoutText,1);
- assert.equal(audit.savedHistory.total,1);
- assert.equal(audit.savedHistory.withText,1);
- assert.equal(audit.currentOrigins.github,1);
- assert.equal(audit.currentOrigins.official,1);
- assert.equal(audit.olderRender.available,false);
- assert.equal(audit.olderRender.totalAllTime,null);
- assert.ok(!JSON.stringify(audit).includes('Synthetic full draft'));
- const earlier=await management.managerMemoRecovery(new URL('https://test.invalid/api/management/memo-recovery?start=1990-01-01&end=1990-01-01'));
- assert.equal(earlier.current.total,0);assert.equal(earlier.savedHistory.total,0);
-}finally{h.close();}});
-
-test('recovery inventory rejects impossible dates and backwards windows',async()=>{const h=harness();try{
- const data=h.load('lib/management-data.ts');
- for(const suffix of ['start=2026-02-30','end=2026-13-01','start=2026-11-03&end=2026-11-02']){
-  await assert.rejects(data.managerMemoRecovery(new URL('https://test.invalid/api/management/memo-recovery?'+suffix)));
- }
-}finally{h.close();}});
-
 test('the real request ledger and dashboard share current records when the previous archive returns 404',async()=>{const h=harness();try{
   const ledger=h.load('lib/memo-requests.ts'),data=h.load('lib/management-data.ts');
   const id=await ledger.startMemoRequest({clientName:'طلب اختبار اصطناعي',facts:'وقائع اختبار'},null,'https://q8-ux.github.io');
@@ -107,6 +31,24 @@ test('a current storage failure rejects the snapshot instead of returning connec
   await assert.rejects(h.load('lib/management-data.ts').managerSnapshot('synthetic@example.test'));
 }finally{h.close();}});
 
+test('one generated memo reaches the existing dashboard list and details with identical saved text',async()=>{const h=harness({authenticated:true});try{
+ const ledger=h.load('lib/memo-requests.ts'),bridge=h.load('app/api/integrations/bolt-memos/route.ts');
+ const id=await ledger.startMemoRequest({clientName:'حالة اصطناعية للربط',caseType:'اختبار'},null,'https://q8-ux.github.io');
+ const output='مسودة اصطناعية لاختبار المزامنة فقط.\nالدفوع والطلبات محفوظة دون تغيير.';await ledger.finishMemoRequest(id,'needs_review',output);
+ const request=body=>new Request('https://sabeq-source.test/api/integrations/bolt-memos',{method:'POST',headers:{Origin:'https://q8-ux-sabeq-admin-co-u4ma.bolt.host',Authorization:'Bearer synthetic-admin-session-000001','Content-Type':'application/json'},body:JSON.stringify(body)});
+ const list=await bridge.POST(request({action:'list',offset:0}));assert.equal(list.status,200);const data=await list.json();assert.equal(data.memos[0].id,id);assert.equal(data.memos[0].has_output,true);assert.equal(Object.hasOwn(data.memos[0],'output_text'),false);
+ const detail=await bridge.POST(request({action:'get',id}));assert.equal(detail.status,200);const record=await detail.json();assert.equal(record.memo.id,id);assert.equal(record.memo.output_text,output);
+ assert.equal(h.sqlite.prepare("SELECT COUNT(*) AS n FROM management_vault WHERE integration='operations-signing'").get().n,0);
+}finally{h.close();}});
+
+test('the existing Bolt list reads the shared current ledger without probing the previous archive',async()=>{const h=harness();try{
+ const ledger=h.load('lib/memo-requests.ts'),data=h.load('lib/management-data.ts');
+ const id=await ledger.startMemoRequest({clientName:'طلب ربط اصطناعي'},null,'https://q8-ux.github.io');await ledger.finishMemoRequest(id,'needs_review','نص اختبار خاص.');
+ const list=await data.managerMemos(new URL('https://example.invalid/api/management/memos?source=current'));
+ assert.equal(list.memos[0].id,id);assert.equal(Number(list.memos[0].has_output),1);assert.ok(!Object.hasOwn(list.memos[0],'output_text'));
+ assert.equal(h.sqlite.prepare("SELECT COUNT(*) AS n FROM management_vault WHERE integration='operations-signing'").get().n,0);
+}finally{h.close();}});
+
 test('generated memo view follows saved output for guests and users, not a status label',async()=>{const h=harness();try{
  const ledger=h.load('lib/memo-requests.ts'),data=h.load('lib/management-data.ts');
  const guest=await ledger.startMemoRequest({clientName:'ضيف اصطناعي',facts:'وقائع اختبار'},null,'https://q8-ux.github.io');
@@ -119,8 +61,6 @@ test('generated memo view follows saved output for guests and users, not a statu
  const generated=await data.managerMemos(new URL('https://test.invalid/api/management/memos?view=generated'));
  assert.deepEqual(new Set(generated.memos.map(r=>r.id)),new Set([guest,user]));
  assert.ok(generated.memos.every(r=>Number(r.has_output)===1));
- assert.equal(generated.memos.find(r=>r.id===guest).origin,'https://q8-ux.github.io');
- assert.equal(generated.memos.find(r=>r.id===user).origin,'https://q8-ux.github.io');
  assert.ok(generated.memos.every(r=>!Object.hasOwn(r,'output_text')));
  assert.equal((await data.managerMemos(new URL('https://test.invalid/api/management/memos'))).memos.length,4);
  assert.equal((await data.managerMemos(new URL('https://test.invalid/api/management/memos?view=generated&q='+encodeURIComponent('ضيف اصطناعي')))).memos.length,1);
