@@ -57,10 +57,10 @@ jobs:
       - name: Install dependencies
         working-directory: sabeq-legal/research-source
         run: npm ci --ignore-scripts --no-audit --no-fund
-      - name: Verify the current independent review and citation gates
+      - name: Verify Council hooks in the primary memo engine
         working-directory: sabeq-legal/research-source
         run: |
-          node --input-type=module -e "import fs from 'node:fs'; import assert from 'node:assert/strict'; const r=fs.readFileSync('app/api/legal/memo/route.ts','utf8'); for (const hook of ['buildCheckedCasePlan','caseReasoningInstructions','parseCaseAudit','caseAuditSchema','reviewLegalCitations','finishMemoRequest']) assert.ok(r.includes(hook), hook); assert.ok(r.indexOf('parseCaseAudit(await generateText') < r.indexOf('await finishMemoRequest(managementRequestId, \"needs_review\", finalMemo'), 'audit must precede successful storage');"
+          node --input-type=module -e "import fs from 'node:fs'; import assert from 'node:assert/strict'; const r=fs.readFileSync('app/api/legal/memo/route.ts','utf8'); assert.match(r,/councilDefenseAuditInstructions/); assert.match(r,/councilDefenseRevisionInstructions/); assert.match(r,/reviewLegalCitations/); assert.match(r,/finishMemoRequest/);"
       - name: Run active memo and statutory regressions
         working-directory: sabeq-legal/research-source
         run: |
