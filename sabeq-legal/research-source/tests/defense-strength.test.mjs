@@ -59,6 +59,17 @@ test('blocked research remains incomplete and does not require fabricated reason
  assert.equal(result.ok,false);assert.equal(result.defenseReview.blocked,1);assert.equal(result.complete,false);
  assert.equal(api.parseCaseAudit(JSON.stringify(blocked),plan,content,[]).ok,false);
 });
+test('a reviewed partial defense stays incomplete and never accepts omissions or unsupported assertions',()=>{
+ const partialPlan={...plan,issues:[issue,{...issue,issue:'مسألة معلقة',sourceMarkers:[],missing:'مستند غير مرفق'}]};
+ const blocked={issueIndex:1,status:'blocked',reason:'يتوقف على المستند غير المرفق',substance:{factQuote:'',applicationQuote:'',opposingQuote:'',responseQuote:'',sourceMarkers:[]}};
+ const partial={...strongAudit,checks:[strongAudit.checks[0],blocked]};
+ const result=api.parseCaseAudit(JSON.stringify(partial),partialPlan,strong,[]);
+ assert.equal(result.ok,false);assert.equal(result.complete,false);assert.equal(result.partialDraftSafe,true);
+ assert.equal(api.caseQualitySummary(partialPlan,result,strong,0).status,'incomplete');
+ for(const change of [{checks:[strongAudit.checks[0],{...blocked,status:'omitted'}]},{roleConsistent:false},{factsPreserved:false},{reliefConsistent:false},{unsupportedAssertions:['إقرار غير مأذون']},{checks:[{...strongAudit.checks[0],substance:{...strongAudit.checks[0].substance,responseQuote:'رد مختلق'}},blocked]}])assert.equal(api.parseCaseAudit(JSON.stringify({...partial,...change}),partialPlan,strong,[]).partialDraftSafe,false);
+ const allBlocked={...partial,checks:[{...blocked,issueIndex:0},blocked]};
+ assert.equal(api.parseCaseAudit(JSON.stringify(allBlocked),partialPlan,strong,[]).partialDraftSafe,false);
+});
 test('retrieval preserves candidates for later issues instead of filling the budget from the first query',()=>{
  const search=load('../lib/legal-search.ts',{'@/db':{}});
  const s=(id)=>({documentId:id,reference:'سجل '+id,text:'مصدر بحث اصطناعي'});

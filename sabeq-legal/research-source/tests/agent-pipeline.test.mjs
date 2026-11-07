@@ -214,3 +214,19 @@ test('unquotable corpus passages are excluded before planning without erasing a 
  assert.ok(value.memo.includes(reasoning.applicationQuote));assert.ok(value.memo.includes(reasoning.responseQuote));
  assert.doesNotMatch(value.memo,/املادة|مخسة|98765/);assert.notEqual(value.stage,'draft_source_review_pending');
 });
+test('after one correction only an unpaid verified partial draft can return with pending defense review',async t=>{
+ for(const paid of [false,true]){
+  const h=templateHarness();t.after(h.cleanup);let audits=0,revisions=0;
+  const baseline=controlledMemoModel('');
+  const route=memoRoute(h,{paid,sources:[controlSource],pipeline:{agentPipelineEnabled:()=>false},model:async options=>{
+   if(options.schema?.properties?.clientRole){const p=JSON.parse(await baseline(options));p.issues.push({...p.issues[0],issue:'مسألة المستند غير المرفق',sourceMarkers:[],missing:'المستند غير مرفق'});p.missingFacts=['المستند غير مرفق'];return JSON.stringify(p);}
+   if(options.schema?.properties?.checks){audits++;return JSON.stringify({checks:[auditCheck([controlSource]),{issueIndex:1,status:'blocked',reason:'المستند غير مرفق',substance:{factQuote:'',applicationQuote:'',opposingQuote:'',responseQuote:'',sourceMarkers:[]}}],roleConsistent:true,factsPreserved:true,reliefConsistent:true,unsupportedAssertions:[]});}
+   if(options.schema?.properties?.facts){revisions++;return JSON.stringify(content);}
+   throw Error('unexpected partial test call');
+  }});
+  const response=await route.POST(request());const value=await response.json();assert.equal(audits,2);assert.equal(revisions,2);
+  assert.equal(response.status,paid?422:200,JSON.stringify(value));
+  if(!paid){assert.equal(value.stage,'draft_defense_review_pending');assert.equal(value.caseQuality.status,'incomplete');assert.equal(value.caseQuality.audit.ok,false);assert.ok(value.memo.includes(reasoning.applicationQuote));}
+  else{assert.equal(value.stage,'defense_review');assert.equal(value.review.blockedIssueIndexes[0],1);assert.equal(value.review.unsupportedAssertionCount,0);assert.doesNotMatch(JSON.stringify(value.review),/مبلغ لم يتم سداده|المستند غير مرفق/);}
+ }
+});
