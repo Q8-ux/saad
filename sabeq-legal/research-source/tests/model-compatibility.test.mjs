@@ -22,7 +22,7 @@ function client(model, transport, environment = {}) {
         } };
         return load(new URL(`${name}.ts`, url));
       },
-      console: { error: (...values) => logs.push(values) },
+      console: { error: (...values) => logs.push(values), warn: (...values) => logs.push(values) },
       fetch: transport, URL, Request, Response, Headers, FormData, File, Blob,
       ReadableStream, TextEncoder, TextDecoder, AbortSignal, AbortController, setTimeout,
     });
@@ -163,4 +163,85 @@ test('cancellation prevents a retry after an explicit temporary rejection', asyn
   const {api}=client('unused',async()=>{calls++;controller.abort();return Response.json({},{status:503});},{LEGAL_AI_PROVIDER:'gemini',GEMINI_API_KEY:'synthetic-gemini-key'});
   await assert.rejects(api.generateText({instructions:'synthetic',input:'synthetic',signal:controller.signal}),error=>error.kind==='timeout');
   assert.equal(calls,1);
+});
+
+const recoveryEnvironment = { LEGAL_AI_PROVIDER: 'gemini', GEMINI_API_KEY: 'synthetic-gemini-key', LEGAL_AI_FALLBACK_PROVIDER: 'openai' };
+test('configured OpenAI recovers rejected Gemini drafting with identical facts and schema', async () => {
+  for (const [status, primaryAttempts] of [[503, 3], [429, 1]]) {
+    const calls = [];
+    const schema = { type: 'object', additionalProperties: false, required: ['facts'], properties: { facts: { type: 'string' } } };
+    const controller = new AbortController();
+    const { api, logs } = client('gpt-4.1-mini', async (url, init) => {
+      calls.push({ url, init, body: JSON.parse(init.body) });
+      if (url.includes('googleapis.com')) return Response.json({}, { status });
+      assert.equal(url, 'https://api.openai.com/v1/responses');
+      assert.equal(init.headers.Authorization, 'Bearer synthetic-test-key');
+      assert.equal(init.headers['x-goog-api-key'], undefined);
+      assert.equal(init.redirect, 'manual');
+      assert.equal(init.signal, calls[0].init.signal);
+      return Response.json({ status: 'completed', output_text: '{"facts":"وقائع اصطناعية محفوظة"}' });
+    }, recoveryEnvironment);
+    assert.equal(await api.generateText({ instructions: 'لا تختلق وقائع أو مصادر.', input: 'وقائع اصطناعية محفوظة', schema, signal: controller.signal }), '{"facts":"وقائع اصطناعية محفوظة"}');
+    assert.equal(calls.length, primaryAttempts + 1);
+    const fallback = calls.at(-1).body;
+    assert.equal(fallback.model, 'gpt-4.1-mini');
+    assert.equal(fallback.instructions, 'لا تختلق وقائع أو مصادر.');
+    assert.equal(fallback.input, 'وقائع اصطناعية محفوظة');
+    assert.deepEqual(fallback.text.format.schema, schema);
+    assert.equal(fallback.text.format.strict, true);
+    assert.equal(fallback.store, false);
+    assert.equal(Object.hasOwn(fallback, 'reasoning'), false);
+    assert.doesNotMatch(JSON.stringify(logs), /وقائع اصطناعية محفوظة|synthetic-test-key|synthetic-gemini-key/);
+  }
+});
+
+test('fallback stays disabled without its explicit setting or configured key', async () => {
+  for (const environment of [{ LEGAL_AI_FALLBACK_PROVIDER: '' }, { OPENAI_API_KEY: '' }]) {
+    const urls = [];
+    const { api } = client('gpt-4.1-mini', async url => { urls.push(url); return Response.json({}, { status: 503 }); }, { ...recoveryEnvironment, ...environment });
+    await assert.rejects(api.generateText({ instructions: 'synthetic', input: 'synthetic' }), error => error.upstreamStatus === 503);
+    assert.equal(urls.length, 3);
+    assert.ok(urls.every(url => url.includes('googleapis.com')));
+  }
+});
+
+test('fallback never follows input, auth, redirects, incomplete output, or ambiguous transport failure', async () => {
+  for (const status of [302, 400, 401, 403, 404, 200, 'network']) {
+    const urls = [];
+    const { api } = client('gpt-4.1-mini', async url => {
+      urls.push(url);
+      if (status === 'network') throw Error('synthetic transport failure');
+      return Response.json(status === 200 ? { candidates: [{ finishReason: 'MAX_TOKENS' }] } : {}, { status });
+    }, recoveryEnvironment);
+    await assert.rejects(api.generateText({ instructions: 'synthetic', input: 'synthetic' }));
+    assert.equal(urls.length, 1);
+    assert.ok(urls[0].includes('googleapis.com'));
+  }
+});
+
+test('one-attempt text callers retain their total budget even when fallback is configured', async () => {
+  const urls = [];
+  const { api } = client('gpt-4.1-mini', async url => { urls.push(url); return Response.json({}, { status: 503 }); }, recoveryEnvironment);
+  await assert.rejects(api.runLegalTool({ action: 'summary', text: 'synthetic', language: 'ar', evidence: '', passageIds: [] }));
+  assert.equal(urls.length, 1);
+});
+
+test('fallback failure or incomplete output never triggers another provider or retry', async () => {
+  for (const status of [401, 503, 200]) {
+    const urls = [];
+    const { api } = client('gpt-4.1-mini', async url => {
+      urls.push(url);
+      if (url.includes('googleapis.com')) return Response.json({}, { status: 429 });
+      return Response.json(status === 200 ? { status: 'incomplete', output_text: 'partial' } : {}, { status });
+    }, recoveryEnvironment);
+    await assert.rejects(api.generateText({ instructions: 'synthetic', input: 'synthetic' }));
+    assert.equal(urls.length, 2);
+  }
+});
+
+test('cancellation prevents configured fallback after the primary rejection', async () => {
+  const controller = new AbortController(); let calls = 0;
+  const { api } = client('gpt-4.1-mini', async () => { calls++; controller.abort(); return Response.json({}, { status: 429 }); }, recoveryEnvironment);
+  await assert.rejects(api.generateText({ instructions: 'synthetic', input: 'synthetic', signal: controller.signal }), error => error.kind === 'timeout');
+  assert.equal(calls, 1);
 });
