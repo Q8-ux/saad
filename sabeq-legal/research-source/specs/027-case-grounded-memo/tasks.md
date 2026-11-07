@@ -4,3 +4,13 @@
 - [x] Incomplete source/quality status in UI
 - [x] Synthetic regression checks and existing safety checks
 - [ ] Build and publication report
+
+## Defense strength repair — 2026-11-07
+- [x] D-T01 Document observed bypass, stock fallback and audit gap before changing behavior (D1–D6).
+- [ ] D-T02 Add and run regression cases that fail on the original behavior (D3, D4).
+- [ ] D-T03 Implement grounded defense-excerpt checks and audit all output paths with one revision (D2, D3).
+- [ ] D-T04 Improve issue-specific retrieval coverage and preserve sourced reasoning during correction (D1, D2).
+- [ ] D-T05 Remove generic empty-ground output and expose revision/coverage outside the memo (D4, D5).
+- [ ] D-T08 Repair the demonstrated language-cleanup false positive and test source-decorated reasoning/quote preservation (D7).
+- [ ] D-T06 Run source, citation, memo, admin-link and release checks; record limits (D5, D6).
+- [ ] D-T07 Mirror reviewed changes to GitHub, publish the existing backend and verify the live revision (D6).

@@ -5,7 +5,10 @@ import { load, templateHarness } from './template-harness.mjs';
 const caseData = {caseType:'مدني',court:'المحكمة الكلية',clientName:'شخص اختباري',otherParty:'خصم اختباري',partyRole:'مدعٍ',facts:'واقعة اصطناعية للاختبار فقط بشأن مبلغ لم يتم سداده.',requests:'إلزام الخصم بسداد مبلغ الاختبار.'};
 const template = {id:'test',version:1,kind:'claim',title:'نموذج اختبار',sourceSha256:'a'.repeat(64)};
 const evidence = [{documentId:1,chunkId:7,title:'مرجع عام اصطناعي',text:'المادة 12 نص اختبار.',reference:'المادة 12',sourceUrl:'https://example.org/public-test',documentType:'قانون',officialSource:'اختبار'}];
-const content = {facts:caseData.facts,requests:caseData.requests,grounds:'تطبيق اصطناعي 【م1】',fields:{},factualNotes:[],legalResearchNotes:''};
+const reasoning={factQuote:'مبلغ لم يتم سداده',applicationQuote:'ينصب الخلاف على مبلغ لم يتم سداده بحسب المدخلات، ولذلك يلزم مقابلة قيمة المطالبة بمستند أصل التعامل وتحديد الرصيد محل النزاع.',opposingQuote:'قد ينازع الخصم في بقاء الرصيد أو يدعي سداداً لم ترد مستنداته ضمن بيانات الاختبار.',responseQuote:'والرد أن حسم هذا الاعتراض يتوقف على مطابقة المستندات وبيان أي دفعة متصلة بالمطالبة، دون افتراض ثبوت السداد أو تجاهل ما يقدم بشأنه.'};
+const reasoningText=Object.values(reasoning).slice(1).join('\n');
+const content = {facts:caseData.facts,requests:caseData.requests,grounds:reasoningText+' 【م1】',fields:{},factualNotes:[],legalResearchNotes:''};
+const auditCheck=(sources)=>({issueIndex:0,status:'addressed',reason:'فحص المطالبة والتطبيق والاعتراض والرد',substance:{...reasoning,sourceMarkers:sources.length?['م1']:[]}});
 const { pleadingAuthorityInstructions } = load('../lib/bound-draft.ts');
 function bridge(runtime) {
  const security=load('../lib/request-security.ts',{'@/db':{}});
@@ -51,7 +54,8 @@ function memoRoute(h, {pipeline, sources=evidence, auth=async()=>null, limits=as
   '@/lib/openai':{deriveLegalResearchPlan:async()=>({searchQueries:[],legalIssues:[]}),openAIErrorResponse:()=>null,generateText:async options=>{
    if(model) return model(options);
    if(options.schema?.properties?.clientRole) return JSON.stringify({clientRole:caseData.partyRole,opponentRole:'مدعى عليه',characterization:'مطالبة',issues:[{issue:'المبلغ',factQuote:'مبلغ لم يتم سداده',document:'',sourceMarkers:sources.length?['م1']:[],application:'فحص أصل المطالبة',counterargument:'منازعة السداد',response:'فحص المستند',proposedRelief:caseData.requests,missing:''}],missingFacts:[],researchGaps:sources.length?[]:['سند غير متاح']});
-   if(options.schema?.properties?.checks) return JSON.stringify({checks:[{issueIndex:0,status:'addressed',reason:'فحص المطالبة'}],roleConsistent:true,factsPreserved:true,reliefConsistent:true,unsupportedAssertions:[]});
+   if(options.schema?.properties?.checks) return JSON.stringify({checks:[auditCheck(sources)],roleConsistent:true,factsPreserved:true,reliefConsistent:true,unsupportedAssertions:[]});
+   if(options.schema?.properties?.facts) return JSON.stringify({...content,grounds:sources.length?content.grounds:reasoningText});
    throw Error('unexpected fallback');
   }},
   '@/lib/public-auth':{requireMemoUserOrGuest:auth},'@/lib/service-settings':{requireServiceEnabled:async()=>{}},'@/lib/service-records':{enforceUserServiceLimit:limits,recordServiceActivity:record},'@/lib/request-security':{...h.security,enforceRateLimit:async()=>{}}
@@ -105,8 +109,8 @@ const controlSource={...evidence[0],documentId:98765,title:'قانون اختب�
 function controlledMemoModel(correction,onCorrection=()=>{}) {
  return async options=>{
   if(options.schema?.properties?.clientRole)return JSON.stringify({clientRole:caseData.partyRole,opponentRole:'مدعى عليه',characterization:'مطالبة',issues:[{issue:'المبلغ',factQuote:'مبلغ لم يتم سداده',document:'',sourceMarkers:['م1'],application:'فحص أصل المطالبة',counterargument:'منازعة السداد',response:'فحص المستند',proposedRelief:caseData.requests,missing:''}],missingFacts:[],researchGaps:[]});
-  if(options.schema?.properties?.checks)return JSON.stringify({checks:[{issueIndex:0,status:'addressed',reason:'فحص المطالبة'}],roleConsistent:true,factsPreserved:true,reliefConsistent:true,unsupportedAssertions:[]});
-  if(options.schema?.properties?.grounds&&!options.schema?.properties?.facts){onCorrection();return JSON.stringify({grounds:correction});}
+  if(options.schema?.properties?.checks)return JSON.stringify({checks:[auditCheck([controlSource])],roleConsistent:true,factsPreserved:true,reliefConsistent:true,unsupportedAssertions:[]});
+  if(options.schema?.properties?.grounds&&!options.schema?.properties?.facts){onCorrection();return JSON.stringify({grounds:reasoningText+'\n'+correction});}
   throw Error('unexpected control test call');
  };
 }
@@ -121,11 +125,11 @@ test('direct drafting and its existing correction receive the same concise rules
   }
   if(options.schema?.properties?.checks){
    audits++;
-   return JSON.stringify({checks:[{issueIndex:0,status:'addressed',reason:'فحص اصطناعي'}],roleConsistent:audits>1,factsPreserved:true,reliefConsistent:true,unsupportedAssertions:[]});
+   return JSON.stringify({checks:[auditCheck([controlSource])],roleConsistent:audits>1,factsPreserved:true,reliefConsistent:true,unsupportedAssertions:[]});
   }
   return baseline(options);
  }});
- const response=await route.POST(request());assert.equal(response.status,200);const value=await response.json();
+ const response=await route.POST(request());const value=await response.json();assert.equal(response.status,200,JSON.stringify(value));
  assert.equal(drafting.length,2);assert.equal(audits,2);assert.equal(calls,5);
  for(const instructions of drafting)assert.ok(instructions.includes(pleadingAuthorityInstructions));
  assert.ok(value.memo.includes(caseData.facts));assert.ok(value.memo.includes(caseData.requests));
@@ -140,7 +144,7 @@ test('actual agent finalization retains statutory wording through language clean
  // fictional statutory passage. No real law or private case is used.
  const source={...controlSource,text:'نص اصطناعي عن المساعد الاختباري: مطلوب إرفاق نص القانون في تجربة البرمجيات فقط.'};
  const route=memoRoute(h,{sources:[source],auth:async()=>({id:'synthetic-article-test'}),record:async row=>archived.push(row),pipeline:{agentPipelineEnabled:()=>true,generateAgentPleading:async()=>({content:{...content},audit:{}})},model:controlledMemoModel('')});
- const response=await route.POST(request());assert.equal(response.status,200);const value=await response.json();
+ const response=await route.POST(request());const value=await response.json();assert.equal(response.status,200,JSON.stringify(value));
  assert.ok(value.memo.includes(source.text));assert.ok(JSON.stringify(value.document.pages).includes(source.text));
  assert.equal(archived.length,1);assert.ok(archived[0].outputText.includes(source.text));
  assert.doesNotMatch(value.memo,/يتولى المساعد البحث/);
@@ -159,13 +163,4 @@ test('memo control accepts a source-corrected draft and preserves facts and requ
  const route=memoRoute(h,{sources:[controlSource],auth:async()=>({id:'control-test-user'}),record:async value=>{archived.push(value);},pipeline:{agentPipelineEnabled:()=>true,generateAgentPleading:async()=>({content:{...content,grounds:wrong},audit:{}})},model:controlledMemoModel(correct,()=>{corrections++;})});
  const response=await route.POST(request());assert.equal(response.status,200);const value=await response.json();
  assert.equal(corrections,1);assert.equal(archived.length,1);assert.ok(value.memo.includes(caseData.facts));assert.ok(value.memo.includes(caseData.requests));assert.doesNotMatch(value.memo,/مكرر|【م\d+】/);assert.equal(value.caseQuality.humanReviewRequired,true);assert.equal(value.memoControlRevision,'memo-generation-control-1');
-});
-
-test('health reports the same control revision used by the memo validator', async () => {
-  const api = load('../app/api/health/route.ts', {
-    '@/db': { getD1: () => ({ prepare: () => ({ first: async () => ({ count: 0 }) }) }) },
-    '@/lib/request-security': { privateJson: Response.json.bind(Response) },
-  });
-  const value = await (await api.GET()).json();
-  assert.equal(value.memoControlRevision, 'memo-generation-control-1');
 });

@@ -47,10 +47,15 @@ export function makeBoundIndex(data:BoundCorpus){
   const bestDoc=rankedDocs[0];const exactDoc=docFilter||(article&&bestDoc?.score>=Math.min(2,titleTokens.length)&&bestDoc.score>0&&rankedDocs[1]?.score<bestDoc.score?bestDoc.id:undefined);
   if(article){return data.fragments.filter(f=>(!exactDoc||f.document===exactDoc)&&boundNormalize(f.number)===boundNormalize(article)).slice(0,Math.max(1,Math.min(limit,12))).map(f=>resolve(f,pages.get(f.page)!,query)).filter(Boolean);}
   if(!ts.length)return [];
+  // Explicit section names are a search hint, never proof of applicability.
+  // Correct only the common PDF title ligature for matching; source text,
+  // article identities and hashes are left untouched.
+  const sectionKey=(s:string)=>boundNormalize(s).replace(/اال/g,'الا');
+  const queryKey=sectionKey(query),preferred=new Set(data.documents.filter(d=>queryKey.includes(sectionKey(d.title))).map(d=>d.id));
   const frequency=(text:string,t:string)=>Math.max(...(variants.get(t)||[t]).map(v=>Math.min(4,text.split(v).length-1)));
   const weights=new Map(ts.map(t=>[t,Math.log(1+data.pages.length/(1+normalized.filter(n=>matches(n,t)).length))]));
   const scoreText=(text:string)=>ts.reduce((n,t)=>n+(weights.get(t)||1)*Math.log(1+frequency(text,t)),0);
-  const scored=data.pages.map((p,i)=>{const d=documents.get(p.document||'');const hits=ts.reduce((n,t)=>n+Number(matches(normalized[i],t)),0);const title=ts.reduce((n,t)=>n+Number(Boolean(d?.titleKey.includes(t))),0);return {p,score:scoreText(normalized[i])+title*1.5,hits};}).filter(x=>x.hits>0&&['body','annex'].includes(x.p.role||'body')&&(!docFilter||x.p.document===docFilter)).sort((a,b)=>b.score-a.score||a.p.page-b.p.page);
+  const scored=data.pages.map((p,i)=>{const d=documents.get(p.document||'');const hits=ts.reduce((n,t)=>n+Number(matches(normalized[i],t)),0);const title=ts.reduce((n,t)=>n+Number(Boolean(d?.titleKey.includes(t))),0);return {p,score:scoreText(normalized[i])+title*1.5,hits,preferred:Number(preferred.has(p.document||''))};}).filter(x=>x.hits>0&&['body','annex'].includes(x.p.role||'body')&&(!docFilter||x.p.document===docFilter)).sort((a,b)=>b.preferred-a.preferred||b.score-a.score||a.p.page-b.p.page);
 
   const results=[];const perDoc=new Map<string,number>();
   for(const {p}of scored){if((perDoc.get(p.document||'')||0)>=2)continue;const fs=byPage.get(p.page)||[];const ranked=fs.map(f=>({f,score:scoreText(boundNormalize(fragmentText(f)))})).sort((a,b)=>b.score-a.score);const chosen=ranked[0]?.score?ranked[0].f:undefined;const item=resolve(chosen,p,query);if(item){Object.assign(item.corpus,{searchMatchMode:"normalized_with_pdf_glyph_variants",searchVariants:Object.fromEntries(variants)});results.push(item);perDoc.set(p.document||'',(perDoc.get(p.document||'')||0)+1);
