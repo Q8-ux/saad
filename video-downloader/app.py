@@ -21,6 +21,9 @@ from starlette.background import BackgroundTask
 
 ROOT = Path(__file__).resolve().parent
 APP_PASSWORD = os.getenv("APP_PASSWORD", "")
+PUBLIC_APP_MODE = os.getenv("PUBLIC_APP_MODE", "0") == "1"
+PUBLIC_MAX_MB = 60
+PUBLIC_MAX_DURATION = 600
 MAX_MB = int(os.getenv("MAX_DOWNLOAD_MB", "150"))
 MAX_DURATION = int(os.getenv("MAX_DURATION_SECONDS", "1200"))
 MAX_BYTES = MAX_MB * 1024 * 1024
@@ -62,6 +65,8 @@ app.add_middleware(
 )
 slots = asyncio.Semaphore(2)
 rate = defaultdict(deque)
+public_rate = defaultdict(deque)
+public_global_rate = defaultdict(deque)
 
 
 class Clip(BaseModel):
@@ -117,6 +122,31 @@ def throttle(request: Request):
     if len(history) >= 20:
         raise HTTPException(429, "تم تجاوز الحد المؤقت للطلبات. حاول لاحقًا.")
     history.append(now)
+
+
+def throttle_public(request: Request, action: str):
+    """Strict public endpoint budget in one API process, without exposing a secret in APK.
+
+    Railway runs a single service replica. For multiple replicas, replace this
+    in-memory limiter with Redis and add a managed-edge global rate limit.
+    """
+    if not PUBLIC_APP_MODE:
+        raise HTTPException(503, "التحميل من التطبيق بدون كلمة مرور غير مفعّل.")
+    if action not in ("info", "download"):
+        raise HTTPException(400, "طلب غير صالح.")
+    now = time.monotonic()
+    client = request.client.host if request.client else "unknown"
+    local = public_rate[(client, action)]
+    global_bucket = public_global_rate[action]
+    for bucket in (local, global_bucket):
+        while bucket and now - bucket[0] > 3600:
+            bucket.popleft()
+    local_cap = 10 if action == "info" else 3
+    global_cap = 80 if action == "info" else 15
+    if len(local) >= local_cap or len(global_bucket) >= global_cap:
+        raise HTTPException(429, "تجاوزت طلبات التطبيق الحد المؤقت. حاول بعد ساعة.")
+    local.append(now)
+    global_bucket.append(now)
 
 
 async def command(args: list[str], timeout: int) -> tuple[int, bytes, bytes]:
@@ -186,17 +216,25 @@ def index():
 def health():
     return {
         "status": "ok", "engine": "yt-dlp", "configured": bool(APP_PASSWORD),
+        "public_app_mode": PUBLIC_APP_MODE,
         "supported_platforms": list(PLATFORMS),
     }
 
 
 @app.post("/api/info")
+@app.post("/api/public/info")
 async def info(clip: Clip, request: Request):
-    authorize(request)
-    throttle(request)
+    public = request.url.path == "/api/public/info"
+    if public:
+        throttle_public(request, "info")
+    else:
+        authorize(request)
+        throttle(request)
     url, platform = validate(clip.url)
     async with slots:
         data = await read_info(url)
+    if public and (data.get("duration") or 0) > PUBLIC_MAX_DURATION:
+        raise HTTPException(413, "مدة الفيديو تتجاوز 10 دقائق للتنزيل المباشر.")
     heights = sorted(
         {
             f["height"] for f in data.get("formats", [])
@@ -217,9 +255,14 @@ async def info(clip: Clip, request: Request):
 
 
 @app.post("/api/download")
+@app.post("/api/public/download")
 async def download(clip: Clip, request: Request):
-    authorize(request)
-    throttle(request)
+    public = request.url.path == "/api/public/download"
+    if public:
+        throttle_public(request, "download")
+    else:
+        authorize(request)
+        throttle(request)
     url, platform = validate(clip.url)
     if clip.kind not in ("video", "audio"):
         raise HTTPException(400, "صيغة غير مدعومة.")
@@ -228,11 +271,13 @@ async def download(clip: Clip, request: Request):
     try:
         async with slots:
             data = await read_info(url)
+            if public and (data.get("duration") or 0) > PUBLIC_MAX_DURATION:
+                raise HTTPException(413, "مدة الفيديو تتجاوز 10 دقائق للتنزيل المباشر.")
             video_id = re.sub(
                 r"[^a-zA-Z0-9_-]", "", str(data.get("id") or "")
             )[:40] or "video"
             args = [
-                "--max-filesize", f"{MAX_MB}M",
+                "--max-filesize", f"{PUBLIC_MAX_MB if public else MAX_MB}M",
                 "--restrict-filenames", "--no-write-thumbnail",
                 "-o", str(folder / "clip-%(id)s.%(ext)s"),
             ]
@@ -259,7 +304,8 @@ async def download(clip: Clip, request: Request):
         if not candidates:
             raise HTTPException(422, "لم ينتج المحرك ملفًا بالصيغة المطلوبة.")
         media = max(candidates, key=lambda p: p.stat().st_size)
-        if not 0 < media.stat().st_size <= MAX_BYTES:
+        effective_max = min(MAX_BYTES, PUBLIC_MAX_MB * 1024 * 1024) if public else MAX_BYTES
+        if not 0 < media.stat().st_size <= effective_max:
             raise HTTPException(413, "حجم الملف أكبر من الحد المسموح.")
         return FileResponse(
             media,
