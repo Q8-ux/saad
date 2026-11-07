@@ -43,7 +43,7 @@ def overlay(root, source):
     protected = manifest(root)
     if (root / TARGET).exists():
         shutil.rmtree(root / TARGET)
-    shutil.copytree(source, root / TARGET, ignore=shutil.ignore_patterns("deployment"))
+    shutil.copytree(source, root / TARGET, ignore=shutil.ignore_patterns("deployment", "research-source", "SYNC.md", "sync-manifest.json"))
     if manifest(root) != protected:
         raise RuntimeError("An unrelated published file changed; refusing deployment")
     return len(protected)
