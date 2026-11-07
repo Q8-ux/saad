@@ -1,0 +1,37 @@
+{
+  "date": "2026-11-08",
+  "project": "ant-alshaer-original",
+  "github_pr": "https://github.com/Q8-ux/saad/pull/114",
+  "github_merge": "c4b6c605b424e0eb668ee58c68ffb048fe9fc818",
+  "source_commit": "4123ccf7df5e5d816f4ad8347f5dc22db42c3b05",
+  "version": 49,
+  "deployment_id": "appgdep_6aefaf6bbd0c81918a2de4dedcb3bc8a",
+  "deployment_status": "succeeded",
+  "tests": {
+    "app": 33,
+    "sync_helper": 4,
+    "typecheck": "passed",
+    "build": "passed"
+  },
+  "live_audio_fixture": {
+    "type": "synthetic English speech / WebM Opus",
+    "transcription_http": 200,
+    "analysis_http": 200,
+    "question_count": 3,
+    "ui": "transcript and analysis options observed after upload"
+  },
+  "physical_phone_microphone": "not_tested",
+  "free_provider_keys": "Groq/NVIDIA/OpenRouter not configured; existing provider preserved",
+  "sync": {
+    "enabled": true,
+    "cadence": "hourly, minute 30",
+    "timezone": "Asia/Kuwait",
+    "automation_id": "Automation_f3b0e49a9b1881919e444e9ed6d66866",
+    "first_scheduled_run": "not_yet_observed"
+  },
+  "preview": "temporary preview rejected by automatic approval review; no bypass; published site inspected instead",
+  "live_version": {
+    "http": 200,
+    "build_id": "2026-11-07T22:59:23.732Z"
+  }
+}
