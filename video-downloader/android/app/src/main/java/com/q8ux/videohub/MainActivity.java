@@ -196,14 +196,15 @@ public final class MainActivity extends Activity {
 
         LinearLayout titles = vertical();
         titles.setPadding(dp(11), 0, dp(10), 0);
-        titles.addView(text("مسار الفيديو", 20, TEXT, true));
+        titles.addView(text("مسار الفيديو الجديد", 20, TEXT, true));
+        titles.addView(text("الإصدار 1.2.0 · بدون كلمة مرور", 11, Color.rgb(114, 238, 209), true));
         headerStatus = text("● جاري فحص المحرك", 11, MUTED, false);
         titles.addView(headerStatus);
         header.addView(titles, new LinearLayout.LayoutParams(0,
             ViewGroup.LayoutParams.WRAP_CONTENT, 1));
         root.addView(header);
 
-        TextView eyebrow = text("VIDEO HUB  •  ANDROID", 12, Color.rgb(195, 167, 255), true);
+        TextView eyebrow = text("VIDEO HUB  •  v1.2.0  •  NO PASSWORD", 12, Color.rgb(114, 238, 209), true);
         eyebrow.setGravity(Gravity.CENTER);
         root.addView(eyebrow, width(36));
 
@@ -225,6 +226,12 @@ public final class MainActivity extends Activity {
         card.addView(text("رابط الفيديو", 14, TEXT, true));
         urlInput = input("https://www.youtube.com/watch?v=...");
         card.addView(urlInput, width(10));
+        Button sample = button("🎬 جرّب رابط TikTok", false);
+        sample.setOnClickListener(v -> {
+            urlInput.setText("https://vt.tiktok.com/ZSp6Vv81S/");
+            note("تم إدراج رابط الاختبار. اضغط «فحص الفيديو».", false);
+        });
+        card.addView(sample, width(9));
 
         LinearLayout actions = horizontal();
         Button pasteButton = button("📋 لصق الرابط", false);
@@ -294,7 +301,8 @@ public final class MainActivity extends Activity {
         root.addView(tips, width(27));
         tips.addView(text("✓ استقبال روابط «مشاركة» من تطبيقات الفيديو", 13, TEXT, true));
         tips.addView(text("✓ حفظ MP4 وMP3 في مجلد Downloads/VideoHub", 12, MUTED, false), width(8));
-        tips.addView(text("✓ الاستخدام دون كلمة مرور مع حدود لحماية الخدمة", 12, MUTED, false), width(8));
+        tips.addView(text("✓ الإصدار 1.2.0 يعمل بلا كلمة مرور أو حساب", 12, Color.rgb(114, 238, 209), true), width(8));
+        tips.addView(text("✓ يمكن تثبيته إلى جانب النسخة القديمة", 12, MUTED, false), width(8));
         tips.addView(text("ملاحظة: أبقِ التطبيق مفتوحًا حتى انتهاء تنزيل الملف. الجودة وعدم وجود علامة مائية يعتمدان على نسخة المصدر.", 11, MUTED, false), width(12));
 
         TextView footer = text("مسار الفيديو • خاص بالاستخدام المصرح به\nلا يتجاوز تسجيل الدخول أو حماية DRM", 11, MUTED, false);

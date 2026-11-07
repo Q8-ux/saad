@@ -72,21 +72,21 @@ jobs:
           test -s "$apk"
           "$sdk/build-tools/35.0.0/apksigner" verify --verbose "$apk"
           "$sdk/build-tools/35.0.0/aapt" dump badging "$apk" > build-badging.txt
-          grep -Fq "name='com.q8ux.videohub.open.beta'" build-badging.txt
+          grep -Fq "name='com.q8ux.videohub.simple.beta'" build-badging.txt
           grep -Fq "application-label" build-badging.txt
           grep -Fq "sdkVersion:'29'" build-badging.txt
           mkdir -p dist
-          cp "$apk" dist/Video-Hub-Android-v1.1.0.apk
-          sha256sum dist/Video-Hub-Android-v1.1.0.apk > dist/SHA256SUMS.txt
+          cp "$apk" dist/Video-Hub-Android-v1.2.0.apk
+          sha256sum dist/Video-Hub-Android-v1.2.0.apk > dist/SHA256SUMS.txt
           cp build-badging.txt dist/build-badging.txt
           echo "APK packaging, manifest and signature verified."
 
       - name: Upload installable APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: video-hub-android-v1.1.0
+          name: video-hub-android-v1.2.0
           path: |
-            video-downloader/android/dist/Video-Hub-Android-v1.1.0.apk
+            video-downloader/android/dist/Video-Hub-Android-v1.2.0.apk
             video-downloader/android/dist/SHA256SUMS.txt
             video-downloader/android/dist/build-badging.txt
           retention-days: 30
@@ -96,8 +96,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          tag="video-hub-android-v1.1.0"
-          apk="dist/Video-Hub-Android-v1.1.0.apk"
+          tag="video-hub-android-v1.2.0"
+          apk="dist/Video-Hub-Android-v1.2.0.apk"
           sha="dist/SHA256SUMS.txt"
           if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             gh release upload "$tag" "$apk" "$sha" --repo "$GITHUB_REPOSITORY" --clobber
@@ -105,7 +105,7 @@ jobs:
             gh release create "$tag" "$apk" "$sha" \
               --repo "$GITHUB_REPOSITORY" \
               --target "$GITHUB_SHA" \
-              --title "مسار الفيديو Android v1.1.0 — APK تجريبي" \
+              --title "مسار الفيديو الجديد Android v1.2.0 — بدون كلمة مرور" \
               --prerelease \
               --notes "تطبيق Android أصلي يعمل دون كلمة مرور. يقبل روابط مشاركة الفيديو ويحمّل MP4 وMP3 من واجهة API مقيّدة بعدد الطلبات والحجم. يعمل على Android 10 فأحدث. هذا إصدار تجريبي موقّع بمفتاح Debug. لتفادي تعارض مفاتيح توقيع الإصدار القديم، يحمل التطبيق حزمة جديدة مستقلة؛ يمكنك حذف الإصدار القديم بعد تثبيت هذا الإصدار."
           fi

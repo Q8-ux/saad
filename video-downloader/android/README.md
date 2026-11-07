@@ -1,21 +1,7 @@
-# مسار الفيديو للأندرويد — 1.1.0 بدون كلمة مرور
+# Video Hub Android v1.2.0 — no password
 
-تطبيق Android أصلي بواجهة عربية، وليس مجرد WebView.
+This release has a distinct app name and mint icon to prevent confusion with older password-protected builds. Android 10+ native app, no WebView.
 
-- **لا توجد كلمة مرور** أو شاشة تسجيل دخول.
-- مشاركة رابط فيديو من التطبيقات إلى «مسار الفيديو» مباشرة.
-- قراءة بيانات المقاطع العامة من 21 مجموعة من المنصات بحسب توافرها لدى yt-dlp.
-- تنزيل MP4 أو استخراج MP3 وحفظ الملفات في `Downloads/VideoHub` باستخدام MediaStore.
-- الخادم: `https://video-hub-api-production.up.railway.app`؛ يستخدم مسارات `/api/public/info` و`/api/public/download` التي لديها حدود للطلبات، مدة 10 دقائق وحجم 60 ميغابايت.
-- نظام Android 10 فأحدث. لا يطلب صلاحيات التخزين.
-- لا يحمل أسرار الخادم أو كلمات مرور داخل APK.
+Package: com.q8ux.videohub.simple.beta. Public API uses /api/public/info and /api/public/download; limits and per-platform restrictions still apply. Receives shared links, saves MP4/MP3 to Downloads/VideoHub. Includes a one-tap TikTok sample link. This is a test APK with debug signing. Do not use for DRM-protected or otherwise inaccessible media.
 
-## التحميل
-- GitHub Release: https://github.com/Q8-ux/saad/releases/tag/video-hub-android-v1.1.0
-- رابط APK: https://github.com/Q8-ux/saad/releases/download/video-hub-android-v1.1.0/Video-Hub-Android-v1.1.0.apk
-
-البناء من المصدر: `gradle -p video-downloader/android :app:assembleDebug` (JDK 17 وAndroid SDK 35).
-
-**هام:** لتجنب خطأ تعارض التوقيع بين نسخ Debug، حزمة التطبيق الجديدة `com.q8ux.videohub.open.beta` منفصلة عن الإصدار السابق. بعد تثبيت النسخة الجديدة يمكنك إزالة النسخة القديمة. التطبيق يستخدم خدمة عامة مقيّدة، لذلك قد يُرفض بعض المقاطع أو الطلبات المتكررة. لا يزيل علامات مائية مدمجة ولا يتجاوز قيود الوصول.
-
-للإنتاج المستقر: اعتماد مفتاح توقيع ثابت، وتحويل حدود الطلبات إلى مخزن مشترك وفرض حد للاستهلاك من طبقة الاستضافة، بدلاً من الاعتماد حصرياً على الذاكرة.
+GitHub: https://github.com/Q8-ux/saad/releases/tag/video-hub-android-v1.2.0

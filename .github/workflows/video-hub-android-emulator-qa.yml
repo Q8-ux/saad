@@ -35,9 +35,9 @@ jobs:
           script: |
             set -euo pipefail
             adb install -r video-downloader/android/app/build/outputs/apk/debug/app-debug.apk
-            adb shell am start -W -n com.q8ux.videohub.open.beta/com.q8ux.videohub.MainActivity
+            adb shell am start -W -n com.q8ux.videohub.simple.beta/com.q8ux.videohub.MainActivity
             sleep 8
-            adb shell pidof com.q8ux.videohub.open.beta
+            adb shell pidof com.q8ux.videohub.simple.beta
             mkdir -p video-downloader/android/test-results
             adb shell uiautomator dump /sdcard/video-hub-ui.xml
             adb pull /sdcard/video-hub-ui.xml video-downloader/android/test-results/screen.xml
@@ -55,7 +55,7 @@ jobs:
             print('PASS: real Android app launched and password screen absent')
             PY
             adb logcat -d -s AndroidRuntime:E > video-downloader/android/test-results/crashes.txt
-            if grep -E 'FATAL EXCEPTION|Process: com.q8ux.videohub.open.beta' video-downloader/android/test-results/crashes.txt; then
+            if grep -E 'FATAL EXCEPTION|Process: com.q8ux.videohub.simple.beta' video-downloader/android/test-results/crashes.txt; then
               echo 'Android application crashed' >&2
               exit 1
             fi
