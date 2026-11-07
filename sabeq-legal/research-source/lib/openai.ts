@@ -203,7 +203,11 @@ async function throwHttpError(response: Response, operation: OpenAIOperation): P
   const kind = classifyHttpError(response.status, code, type);
   const schemaKeywords=["minLength","maxLength","minItems","maxItems","minimum","maximum","enum","required","additionalProperties","anyOf"];
   const schemaKeyword=code==="invalid_json_schema"&&typeof payload.error?.message==="string"?schemaKeywords.find(keyword=>payload.error!.message!.includes(`'${keyword}'`))||"unknown":undefined;
-  console.error("OpenAI request failed", { operation, status: response.status, code, type, param, requestId, kind, ...(schemaKeyword?{schemaKeyword}:{}) });
+  const schemaMessage=code==="invalid_json_schema"&&typeof payload.error?.message==="string"?payload.error.message:"";
+  // Classify against fixed patterns only. Never log vendor prose, enum values
+  // or context strings, which can contain the customer's whole paragraph.
+  const schemaReason=schemaMessage?(/(?:identical|same).*first.*key/i.test(schemaMessage)?"ambiguous_object_union":/(?:duplicate|unique).*enum|enum.*(?:duplicate|unique)/i.test(schemaMessage)?"duplicate_enum":/(?:total|string).*length|characters|enum.*(?:large|limit|exceed)/i.test(schemaMessage)?"schema_string_budget":/not permitted|not supported|unsupported/i.test(schemaMessage)?"unsupported_keyword":/required|additionalProperties/i.test(schemaMessage)?"object_contract":"unknown"):undefined;
+  console.error("OpenAI request failed", { operation, status: response.status, code, type, param, requestId, kind, ...(schemaKeyword?{schemaKeyword,schemaReason}:{}) });
   throw new OpenAIServiceError(kind, kind === "rate_limit" ? 429 : 503, response.status);
 }
 

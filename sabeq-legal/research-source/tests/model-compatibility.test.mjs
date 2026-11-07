@@ -274,14 +274,21 @@ test('active audit sends a flat known-key schema and resolves only actual final 
  const plan={clientRole:'مدعى عليه',opponentRole:'مدعٍ',characterization:'اختبار',issues:[{issue:'السداد',factQuote:fact,document:'',sourceMarkers:[],application:'فحص',counterargument:'احتمال',response:'مراجعة',proposedRelief:'رفض المطالبة',missing:''}],missingFacts:[],researchGaps:['مصدر غير متاح في الاختبار']};
  const content={facts:fact,grounds:[application,opposing,response].join('\n'),requests:'رفض المطالبة',fields:{},factualNotes:[],legalResearchNotes:''};
  const request=reasoning.caseAuditRequestForContent(plan,content),selected=request.checkOptions.find(o=>o.status==='addressed');
- const wire={checks:[{checkKey:selected.checkKey,reason:'تطبيق واقعي',substance:{opposingQuote:opposing,responseQuote:response,sourceMarkers:[]}}],roleConsistent:true,factsPreserved:true,reliefConsistent:true,unsupportedAssertions:[]};
+ const wire={checks:[{checkKey:selected.checkKey,reason:'تطبيق واقعي',substance:{opposingQuoteKey:request.quoteOptions.find(o=>o.quote===opposing).quoteKey,responseQuoteKey:request.quoteOptions.find(o=>o.quote===response).quoteKey,sourceMarkers:[]}}],roleConsistent:true,factsPreserved:true,reliefConsistent:true,unsupportedAssertions:[]};
  const {api}=client('gpt-4.1-mini',async(_url,init)=>{
   const body=JSON.parse(init.body),schema=body.text.format.schema;
   assert.equal(body.text.format.strict,true);assert.ok(schema.properties.checks.items.properties.checkKey.enum.includes(selected.checkKey));
   assert.doesNotMatch(JSON.stringify(schema),/"(?:anyOf|minLength|maxLength|\$defs)"/);
-  assert.ok(JSON.parse(body.input).checkOptions.some(o=>o.checkKey===selected.checkKey&&o.applicationQuote===application));
+  assert.ok(JSON.parse(body.input).checkOptions.some(o=>o.checkKey===selected.checkKey&&o.applicationQuote===application));assert.ok(JSON.parse(body.input).quoteOptions.some(o=>o.quote===response));assert.ok(!JSON.stringify(schema).includes(response));
   return Response.json({status:'completed',output_text:JSON.stringify(wire)});
  });
- const raw=await api.generateText({instructions:'synthetic independent review',input:JSON.stringify({plan,content,checkOptions:request.checkOptions}),schema:request.schema});
+ const raw=await api.generateText({instructions:'synthetic independent review',input:JSON.stringify({plan,content,checkOptions:request.checkOptions,quoteOptions:request.quoteOptions}),schema:request.schema});
  const audit=reasoning.parseGroundedCaseAudit(raw,request,plan,content,[]);assert.equal(audit.ok,true);assert.equal(audit.complete,false);assert.equal(audit.checks[0].substance.applicationQuote,application);
+});
+
+test('schema diagnostics expose only fixed reason categories and never vendor prose or enum values',async()=>{
+ for(const [message,reason] of [["Objects share identical first keys. PRIVATE_CASE_TEXT",'ambiguous_object_union'],["The total string length exceeds a limit. PRIVATE_CASE_TEXT",'schema_string_budget'],["enum contains duplicate values: PRIVATE_CASE_TEXT",'duplicate_enum']]){
+  const {api,logs}=client('gpt-5.4',async()=>Response.json({error:{code:'invalid_json_schema',type:'invalid_request_error',param:'text.format.schema',message}},{status:400}));
+  await assert.rejects(api.generateText({instructions:'synthetic',input:'synthetic'}));assert.equal(logs[0][1].schemaReason,reason);assert.doesNotMatch(JSON.stringify(logs),/PRIVATE_CASE_TEXT|exceeds|contains|Objects/);
+ }
 });

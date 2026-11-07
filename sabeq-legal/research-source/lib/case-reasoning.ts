@@ -197,10 +197,11 @@ export function caseAuditRequestForContent(plan:CasePlan,content:PleadingContent
   });
   for(const status of ['blocked','omitted'] as const)checkOptions.push({checkKey:`issue_${index}_${status}`,issueIndex:index,status,factQuote:'',applicationQuote:'',candidateIndex:null});
  });
- const excerpt={type:'object',additionalProperties:false,required:['opposingQuote','responseQuote','sourceMarkers'],properties:{opposingQuote:{type:'string',enum:['',...selected]},responseQuote:{type:'string',enum:['',...selected.filter(q=>q.length>=40)]},sourceMarkers:sourceMarkerArraySchema([...new Set(plan.issues.flatMap(i=>i.sourceMarkers))])}};
+ const quoteOptions=selected.map((quote,index)=>({quoteKey:`quote_${index}`,quote,candidateIndex:candidates.indexOf(quote)}));
+ const excerpt={type:'object',additionalProperties:false,required:['opposingQuoteKey','responseQuoteKey','sourceMarkers'],properties:{opposingQuoteKey:{type:'string',enum:['none',...quoteOptions.map(o=>o.quoteKey)]},responseQuoteKey:{type:'string',enum:['none',...quoteOptions.filter(o=>o.quote.length>=40).map(o=>o.quoteKey)]},sourceMarkers:sourceMarkerArraySchema([...new Set(plan.issues.flatMap(i=>i.sourceMarkers))])}};
  const check={type:'object',additionalProperties:false,required:['checkKey','reason','substance'],properties:{checkKey:{type:'string',enum:checkOptions.map(o=>o.checkKey)},reason:{type:'string'},substance:excerpt}};
  const schema={...caseAuditSchema,properties:{...caseAuditSchema.properties,checks:{type:'array',items:check}}};
- return {schema,checkOptions,excerptOptionCounts:plan.issues.map((_,i)=>checkOptions.filter(o=>o.issueIndex===i&&o.status==='addressed').length)};
+ return {schema,checkOptions,quoteOptions,excerptOptionCounts:plan.issues.map((_,i)=>checkOptions.filter(o=>o.issueIndex===i&&o.status==='addressed').length)};
 }
 /** Resolve a reviewer-selected key from the exact request dictionary, then
  * run the original independent fact/source/reasoning/completeness checks. */
@@ -208,10 +209,12 @@ export function parseGroundedCaseAudit(raw:string,request:ReturnType<typeof case
  const wire=JSON.parse(raw);
  if(!wire||!Array.isArray(wire.checks))throw Error('invalid audit selection');
  const options=new Map(request.checkOptions.map(o=>[o.checkKey,o]));
+ const quotes=new Map(request.quoteOptions.map(o=>[o.quoteKey,o.quote]));
+ const readQuote=(key:unknown)=>{if(key==='none')return '';if(typeof key!=='string'||!quotes.has(key))throw Error('unknown audit quote');return quotes.get(key)!;};
  const checks=wire.checks.map((check:{checkKey?:unknown;reason?:unknown;substance?:Record<string,unknown>})=>{
   if(!check||typeof check.checkKey!=='string'||!options.has(check.checkKey))throw Error('unknown audit selection');
   const option=options.get(check.checkKey)!;
-  return {issueIndex:option.issueIndex,status:option.status,reason:check.reason,substance:{...check.substance,factQuote:option.factQuote,applicationQuote:option.applicationQuote}};
+  return {issueIndex:option.issueIndex,status:option.status,reason:check.reason,substance:{factQuote:option.factQuote,applicationQuote:option.applicationQuote,opposingQuote:readQuote(check.substance?.opposingQuoteKey),responseQuote:readQuote(check.substance?.responseQuoteKey),sourceMarkers:check.substance?.sourceMarkers}};
  });
  return {...parseCaseAudit(JSON.stringify({...wire,checks}),plan,content,evidence),excerptOptionCounts:request.excerptOptionCounts,selectedApplications:wire.checks.map((c:{checkKey:string})=>{const o=options.get(c.checkKey)!;return {issueIndex:o.issueIndex,candidateIndex:o.candidateIndex};})};
 }

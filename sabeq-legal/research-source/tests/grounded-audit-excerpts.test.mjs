@@ -11,7 +11,8 @@ const plan={clientRole:'مدعى عليه',opponentRole:'مدعٍ',characterizat
 const content={facts:fact,grounds:[application,opposing,response,'نص المادة: «هذه عبارة تشريعية اصطناعية وليست تطبيقاً على واقعة أو قانوناً حقيقياً.»'].join('\n'),requests:'رفض المطالبة',fields:{},factualNotes:[],legalResearchNotes:''};
 const request=(p=plan,c=content)=>api.caseAuditRequestForContent(p,c);
 const option=(r,i=0)=>r.checkOptions.find(o=>o.issueIndex===i&&o.status==='addressed');
-const wire=(r,indices=[0])=>({checks:indices.map(i=>({checkKey:option(r,i).checkKey,reason:'معالجة وقائعية مرتبطة',substance:{opposingQuote:opposing,responseQuote:response,sourceMarkers:[]}})),roleConsistent:true,factsPreserved:true,reliefConsistent:true,unsupportedAssertions:[]});
+const quoteKey=(r,q)=>r.quoteOptions.find(o=>o.quote===q)?.quoteKey;
+const wire=(r,indices=[0])=>({checks:indices.map(i=>({checkKey:option(r,i).checkKey,reason:'معالجة وقائعية مرتبطة',substance:{opposingQuoteKey:quoteKey(r,opposing),responseQuoteKey:quoteKey(r,response),sourceMarkers:[]}})),roleConsistent:true,factsPreserved:true,reliefConsistent:true,unsupportedAssertions:[]});
 const compile=r=>new Ajv({allErrors:true}).compile(JSON.parse(JSON.stringify(r.schema)));
 test('flat audit choices bind the actual final application to its own approved fact without statutory quote substitution',()=>{
  const r=request(),o=option(r),validate=compile(r),a=wire(r);
@@ -24,7 +25,7 @@ test('flat audit choices bind the actual final application to its own approved f
 test('generic defense exposes only explicit unaddressed choices and cannot manufacture a fact anchor',()=>{
  const c={...content,grounds:'يتمسك مقدم المذكرة بكافة الدفوع وبما يقدم من مستندات.'},r=request(plan,c);
  assert.ok(r.checkOptions.every(o=>o.status!=='addressed'&&o.factQuote===''&&o.applicationQuote===''));
- const a={...wire(request()),checks:[{checkKey:'issue_0_omitted',reason:'نص عام بلا تطبيق',substance:{opposingQuote:'',responseQuote:'',sourceMarkers:[]}}]};
+ const a={...wire(request()),checks:[{checkKey:'issue_0_omitted',reason:'نص عام بلا تطبيق',substance:{opposingQuoteKey:'none',responseQuoteKey:'none',sourceMarkers:[]}}]};
  assert.equal(compile(r)(a),true);assert.equal(api.parseGroundedCaseAudit(JSON.stringify(a),r,plan,c,[]).ok,false);
 });
 test('a literal quotation of case facts remains eligible while a labelled statutory text block does not',()=>{
@@ -37,7 +38,7 @@ test('flat provider schema and quotation choices remain bounded for twelve issue
  const c={...content,grounds:Array.from({length:80},(_,i)=>`مقطع ${i}: `+application.repeat(4)+'\n'+opposing+'\n'+response).join('\n')};
  const r=request(p,c);let count=0,characters=0;
  function visit(v){if(!v||typeof v!=='object')return;for(const k of ['anyOf','minLength','maxLength'])assert.equal(k in v,false);if(Array.isArray(v.enum)){count+=v.enum.length;characters+=v.enum.reduce((n,x)=>n+(typeof x==='string'?x.length:0),0);}for(const value of Object.values(v))visit(value);}
- visit(r.schema);assert.ok(count<1000);assert.ok(characters<115000);assert.ok(r.checkOptions.length<=120);
+ visit(r.schema);assert.ok(count<1000);assert.ok(characters<10000);assert.ok(r.checkOptions.length<=120);assert.ok(JSON.stringify(r.schema).length<20000);assert.ok(!JSON.stringify(r.schema).includes(fact));
  assert.ok(r.checkOptions.every(o=>o.applicationQuote.length<=600));compile(r);
  assert.equal(api.caseAuditSchema.properties.checks.items.properties.substance.properties.factQuote.enum,undefined);
 });
@@ -83,7 +84,8 @@ test('decoder derives issue and its nonempty fact/application pair from an exact
 });
 test('selected keys cannot bypass empty, invented or repeated rebuttals, unsupported claims, role or relief checks',()=>{
  const r=request(),a=wire(r);
- for(const changes of [{responseQuote:''},{responseQuote:application},{opposingQuote:'اقتباس مخترع'}, {responseQuote:'رد قصير'}]){const invalid=structuredClone(a);Object.assign(invalid.checks[0].substance,changes);assert.equal(api.parseGroundedCaseAudit(JSON.stringify(invalid),r,plan,content,[]).ok,false);}
+ for(const changes of [{responseQuoteKey:'none'},{responseQuoteKey:quoteKey(r,application)}]){const invalid=structuredClone(a);Object.assign(invalid.checks[0].substance,changes);assert.equal(api.parseGroundedCaseAudit(JSON.stringify(invalid),r,plan,content,[]).ok,false);}
+ for(const changes of [{opposingQuoteKey:'اقتباس مخترع'},{responseQuoteKey:'quote_999'}]){const invalid=structuredClone(a);Object.assign(invalid.checks[0].substance,changes);assert.equal(compile(r)(invalid),false);assert.throws(()=>api.parseGroundedCaseAudit(JSON.stringify(invalid),r,plan,content,[]));}
  for(const changes of [{roleConsistent:false},{factsPreserved:false},{reliefConsistent:false},{unsupportedAssertions:['ادعاء غير مسند']}])assert.equal(api.parseGroundedCaseAudit(JSON.stringify({...a,...changes}),r,plan,content,[]).ok,false);
 });
 test('selected grounded audit still requires the issue own cited source and keeps omitted issues incomplete',()=>{
