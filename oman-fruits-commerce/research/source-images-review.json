@@ -1,0 +1,711 @@
+{
+  "project": "شركة عمان للفواكه والخضروات",
+  "date": "2026-11-07",
+  "purpose": "مراجعة مرشحات صور المنتجات من الموقعين فقط مع الحفاظ على أسعار عمان الأصلية",
+  "pricing_policy": "Never use source retailer prices; price remains in Oman commerce database",
+  "copyright_note": "Candidate images remain on third-party sites. Obtain permission/license before copying or displaying them as the store's commercial product photos. Current original Oman photo remains in production until approval.",
+  "validation_note": "The original sites returned product names and in several cases image_1920 endpoints, but full image pixels or visual text-free status could not be independently verified in this session.",
+  "counts": {
+    "products": 36,
+    "products_with_source": 6,
+    "individual_image_urls": 4,
+    "production_changes": 0
+  },
+  "records": [
+    {
+      "product_id": "oman-001",
+      "name_ar": "البامية الحساوية",
+      "origin": "الكويت",
+      "original_prices": [
+        {
+          "unit": "كيلو",
+          "price_kd": "3.500",
+          "confirmed": true,
+          "active": true
+        },
+        {
+          "unit": "3 كيلو",
+          "price_kd": "10.000",
+          "confirmed": true,
+          "active": true
+        },
+        {
+          "unit": "سحارة 10 كيلو",
+          "price_kd": null,
+          "confirmed": false,
+          "active": false
+        }
+      ],
+      "candidates": [
+        {
+          "provider": "جمعية دوت كوم (jm3eia.com)",
+          "product": "بامية كويتي 750جم",
+          "match": "نوع المنتج متقارب، الصنف الحساوي غير مثبت",
+          "confidence": "partial",
+          "product_url": "https://jm3eia.com/ar/category/5d383a5d83545d0366ac42b7/5d383ae683545d0366ac42bb",
+          "image_url": "https://jm3eia.com/_next/image?q=75&url=https%3A%2F%2Fmedia.jm3eia.com%2F%2F2025%2F8%2F26%2F56b3d0efcc7628f81ebc5aec8b6a974b1756169933322.png&w=1920",
+          "visual_text_free_verified": false,
+          "actual_resolution_verified": false,
+          "license_to_republish": "not_verified",
+          "production_approved": false
+        }
+      ],
+      "next_action": "compare_image_and_check_rights"
+    },
+    {
+      "product_id": "oman-002",
+      "name_ar": "الشمام الحساوي",
+      "origin": "الكويت",
+      "original_prices": [
+        {
+          "unit": "حبة",
+          "price_kd": "2.000",
+          "confirmed": true,
+          "active": true
+        }
+      ],
+      "candidates": [],
+      "next_action": "retain_current_oman_photo"
+    },
+    {
+      "product_id": "oman-003",
+      "name_ar": "اللوز القطيفي",
+      "origin": "السعودية",
+      "original_prices": [
+        {
+          "unit": "كيلو",
+          "price_kd": "6.000",
+          "confirmed": true,
+          "active": true
+        }
+      ],
+      "candidates": [],
+      "next_action": "retain_current_oman_photo"
+    },
+    {
+      "product_id": "oman-004",
+      "name_ar": "عنب لبناني عسلي بدون بذر",
+      "origin": "لبنان",
+      "original_prices": [
+        {
+          "unit": "كيلو",
+          "price_kd": "1.750",
+          "confirmed": true,
+          "active": true
+        }
+      ],
+      "candidates": [
+        {
+          "provider": "جمعية دوت كوم (jm3eia.com)",
+          "product": "عنب أحمر لبناني فاخر",
+          "match": "المنشأ متطابق لكن العسلي وبدون بذر غير مثبتين",
+          "confidence": "partial",
+          "product_url": "https://jm3eia.com/ar/stores/6804b58f9a230bdf9b26dd4b/products/6809fc214e7fc3ef6bd04550",
+          "visual_text_free_verified": false,
+          "actual_resolution_verified": false,
+          "license_to_republish": "not_verified",
+          "production_approved": false
+        }
+      ],
+      "next_action": "retain_current_oman_photo"
+    },
+    {
+      "product_id": "oman-005",
+      "name_ar": "عنب أذربيجاني عسلي",
+      "origin": "أذربيجان",
+      "original_prices": [
+        {
+          "unit": "غير مؤكدة",
+          "price_kd": "1.500",
+          "confirmed": false,
+          "active": false
+        }
+      ],
+      "candidates": [],
+      "next_action": "retain_current_oman_photo"
+    },
+    {
+      "product_id": "oman-006",
+      "name_ar": "أفوكادو كيني",
+      "origin": "كينيا",
+      "original_prices": [
+        {
+          "unit": "كيلو",
+          "price_kd": "2.000",
+          "confirmed": true,
+          "active": true
+        }
+      ],
+      "candidates": [],
+      "next_action": "retain_current_oman_photo"
+    },
+    {
+      "product_id": "oman-007",
+      "name_ar": "تين سوري عسلي",
+      "origin": "سوريا",
+      "original_prices": [
+        {
+          "unit": "سلة",
+          "price_kd": "2.000",
+          "confirmed": true,
+          "active": true
+        }
+      ],
+      "candidates": [],
+      "next_action": "retain_current_oman_photo"
+    },
+    {
+      "product_id": "oman-008",
+      "name_ar": "تين شوكي أردني",
+      "origin": "الأردن",
+      "original_prices": [
+        {
+          "unit": "غير مؤكدة",
+          "price_kd": "2.000",
+          "confirmed": false,
+          "active": false
+        }
+      ],
+      "candidates": [],
+      "next_action": "retain_current_oman_photo"
+    },
+    {
+      "product_id": "oman-009",
+      "name_ar": "أفندي بدون بذر",
+      "origin": "جنوب أفريقيا",
+      "original_prices": [
+        {
+          "unit": "كيلو",
+          "price_kd": "1.000",
+          "confirmed": true,
+          "active": true
+        }
+      ],
+      "candidates": [
+        {
+          "provider": "فرضتك (furdtk.com)",
+          "product": "Mandarin – South Africa",
+          "match": "النوع والمنشأ متطابقان، لكن خلوه من البذر غير مثبت",
+          "confidence": "partial",
+          "product_url": "https://www.furdtk.com/en/shop/mandarin-south-africa-206672?category=3517",
+          "image_url": "https://furdtk.com/web/image/product.template/206672/image_1920?unique=793c26d",
+          "visual_text_free_verified": false,
+          "actual_resolution_verified": false,
+          "license_to_republish": "not_verified",
+          "production_approved": false
+        }
+      ],
+      "next_action": "compare_image_and_check_rights"
+    },
+    {
+      "product_id": "oman-010",
+      "name_ar": "برتقال أبو سرة",
+      "origin": "جنوب أفريقيا",
+      "original_prices": [
+        {
+          "unit": "كيلو",
+          "price_kd": "1.250",
+          "confirmed": true,
+          "active": true
+        }
+      ],
+      "candidates": [
+        {
+          "provider": "فرضتك (furdtk.com)",
+          "product": "Orange Navel – South Africa",
+          "match": "النوع والمنشأ متطابقان بحسب صفحة المتجر، لم يُستخرج رابط الصورة الفردية",
+          "confidence": "product_name_match",
+          "product_url": "https://furdtk.com/en",
+          "visual_text_free_verified": false,
+          "actual_resolution_verified": false,
+          "license_to_republish": "not_verified",
+          "production_approved": false
+        }
+      ],
+      "next_action": "retain_current_oman_photo"
+    },
+    {
+      "product_id": "oman-011",
+      "name_ar": "كيوي فراولة",
+      "origin": "أذربيجان",
+      "original_prices": [
+        {
+          "unit": "علبة",
+          "price_kd": "1.500",
+          "confirmed": true,
+          "active": true
+        }
+      ],
+      "candidates": [],
+      "next_action": "retain_current_oman_photo"
+    },
+    {
+      "product_id": "oman-012",
+      "name_ar": "بوملي",
+      "origin": "جنوب أفريقيا",
+      "original_prices": [
+        {
+          "unit": "حبة",
+          "price_kd": "1.000",
+          "confirmed": true,
+          "active": true
+        }
+      ],
+      "candidates": [],
+      "next_action": "retain_current_oman_photo"
+    },
+    {
+      "product_id": "oman-013",
+      "name_ar": "برتقال أخضر",
+      "origin": "سوريا",
+      "original_prices": [
+        {
+          "unit": "كيلو",
+          "price_kd": "1.000",
+          "confirmed": true,
+          "active": true
+        }
+      ],
+      "candidates": [],
+      "next_action": "retain_current_oman_photo"
+    },
+    {
+      "product_id": "oman-014",
+      "name_ar": "فستق حلبي",
+      "origin": "سوريا",
+      "original_prices": [
+        {
+          "unit": "علبة",
+          "price_kd": "1.500",
+          "confirmed": true,
+          "active": true
+        },
+        {
+          "unit": "سلة",
+          "price_kd": "3.000",
+          "confirmed": true,
+          "active": true
+        }
+      ],
+      "candidates": [],
+      "next_action": "retain_current_oman_photo"
+    },
+    {
+      "product_id": "oman-015",
+      "name_ar": "مانجوستين",
+      "origin": "إندونيسيا",
+      "original_prices": [
+        {
+          "unit": "علبة",
+          "price_kd": "2.500",
+          "confirmed": true,
+          "active": true
+        }
+      ],
+      "candidates": [],
+      "next_action": "retain_current_oman_photo"
+    },
+    {
+      "product_id": "oman-016",
+      "name_ar": "بلو بيري",
+      "origin": null,
+      "original_prices": [
+        {
+          "unit": "غير مؤكدة",
+          "price_kd": "1.250",
+          "confirmed": false,
+          "active": false
+        }
+      ],
+      "candidates": [],
+      "next_action": "retain_current_oman_photo"
+    },
+    {
+      "product_id": "oman-017",
+      "name_ar": "رازبيري",
+      "origin": null,
+      "original_prices": [
+        {
+          "unit": "غير مؤكدة",
+          "price_kd": "1.250",
+          "confirmed": false,
+          "active": false
+        }
+      ],
+      "candidates": [],
+      "next_action": "retain_current_oman_photo"
+    },
+    {
+      "product_id": "oman-018",
+      "name_ar": "تفاح بالفراولة (كاندي أبل)",
+      "origin": null,
+      "original_prices": [
+        {
+          "unit": "علبة 500 غ",
+          "price_kd": "1.250",
+          "confirmed": true,
+          "active": true
+        }
+      ],
+      "candidates": [],
+      "next_action": "retain_current_oman_photo"
+    },
+    {
+      "product_id": "oman-019",
+      "name_ar": "كاكا سوري",
+      "origin": "سوريا",
+      "original_prices": [
+        {
+          "unit": "غير مؤكدة",
+          "price_kd": "1.750",
+          "confirmed": false,
+          "active": false
+        }
+      ],
+      "candidates": [],
+      "next_action": "retain_current_oman_photo"
+    },
+    {
+      "product_id": "oman-020",
+      "name_ar": "تفاح لبناني",
+      "origin": "لبنان",
+      "original_prices": [
+        {
+          "unit": "كيلو",
+          "price_kd": "1.250",
+          "confirmed": true,
+          "active": true
+        },
+        {
+          "unit": "سلة",
+          "price_kd": "3.000",
+          "confirmed": true,
+          "active": true
+        }
+      ],
+      "candidates": [],
+      "next_action": "retain_current_oman_photo"
+    },
+    {
+      "product_id": "oman-021",
+      "name_ar": "خوخ",
+      "origin": "جنوب أفريقيا",
+      "original_prices": [
+        {
+          "unit": "علبة",
+          "price_kd": "1.250",
+          "confirmed": true,
+          "active": true
+        }
+      ],
+      "candidates": [],
+      "next_action": "retain_current_oman_photo"
+    },
+    {
+      "product_id": "oman-022",
+      "name_ar": "موز فلبيني",
+      "origin": "الفلبين",
+      "original_prices": [
+        {
+          "unit": "غير مؤكدة",
+          "price_kd": "1.500",
+          "confirmed": false,
+          "active": false
+        }
+      ],
+      "candidates": [],
+      "next_action": "retain_current_oman_photo"
+    },
+    {
+      "product_id": "oman-023",
+      "name_ar": "أفوكادو لبناني",
+      "origin": "لبنان",
+      "original_prices": [
+        {
+          "unit": "كرتون",
+          "price_kd": "2.000",
+          "confirmed": true,
+          "active": true
+        }
+      ],
+      "candidates": [],
+      "next_action": "retain_current_oman_photo"
+    },
+    {
+      "product_id": "oman-024",
+      "name_ar": "مشمش",
+      "origin": "جنوب أفريقيا",
+      "original_prices": [
+        {
+          "unit": "علبة",
+          "price_kd": "2.250",
+          "confirmed": true,
+          "active": true
+        }
+      ],
+      "candidates": [],
+      "next_action": "retain_current_oman_photo"
+    },
+    {
+      "product_id": "oman-025",
+      "name_ar": "نكترين",
+      "origin": "جنوب أفريقيا",
+      "original_prices": [
+        {
+          "unit": "علبة",
+          "price_kd": "1.250",
+          "confirmed": true,
+          "active": true
+        }
+      ],
+      "candidates": [],
+      "next_action": "retain_current_oman_photo"
+    },
+    {
+      "product_id": "oman-026",
+      "name_ar": "بابايا كويتي",
+      "origin": "الكويت",
+      "original_prices": [
+        {
+          "unit": "فلين (حبتان)",
+          "price_kd": "2.000",
+          "confirmed": true,
+          "active": true
+        }
+      ],
+      "candidates": [],
+      "next_action": "retain_current_oman_photo"
+    },
+    {
+      "product_id": "oman-027",
+      "name_ar": "مانجا كيت",
+      "origin": null,
+      "original_prices": [
+        {
+          "unit": "كرتون",
+          "price_kd": "3.000",
+          "confirmed": true,
+          "active": true
+        }
+      ],
+      "candidates": [
+        {
+          "provider": "جمعية دوت كوم (jm3eia.com)",
+          "product": "مانجو كيت مصري",
+          "match": "اسم الصنف متطابق، بلد المنشأ الأصلي لدى عمان غير محدد",
+          "confidence": "partial",
+          "product_url": "https://jm3eia.com/ar/stores/6804b58f9a230bdf9b26dd4b/products/6809fc214e7fc3ef6bd04550",
+          "visual_text_free_verified": false,
+          "actual_resolution_verified": false,
+          "license_to_republish": "not_verified",
+          "production_approved": false
+        }
+      ],
+      "next_action": "retain_current_oman_photo"
+    },
+    {
+      "product_id": "oman-028",
+      "name_ar": "رمان سوري",
+      "origin": "سوريا",
+      "original_prices": [
+        {
+          "unit": "سلة",
+          "price_kd": "2.000",
+          "confirmed": true,
+          "active": true
+        }
+      ],
+      "candidates": [],
+      "next_action": "retain_current_oman_photo"
+    },
+    {
+      "product_id": "oman-029",
+      "name_ar": "رطب سكري",
+      "origin": null,
+      "original_prices": [
+        {
+          "unit": "غير مؤكدة",
+          "price_kd": "1.500",
+          "confirmed": false,
+          "active": false
+        }
+      ],
+      "candidates": [],
+      "next_action": "retain_current_oman_photo"
+    },
+    {
+      "product_id": "oman-030",
+      "name_ar": "قشطة لبناني طيران",
+      "origin": "لبنان",
+      "original_prices": [
+        {
+          "unit": "كرتون",
+          "price_kd": "3.500",
+          "confirmed": true,
+          "active": true
+        }
+      ],
+      "candidates": [],
+      "next_action": "retain_current_oman_photo"
+    },
+    {
+      "product_id": "oman-031",
+      "name_ar": "ذرة كويتي",
+      "origin": "الكويت",
+      "original_prices": [
+        {
+          "unit": "فلين (حبتان)",
+          "price_kd": "1.500",
+          "confirmed": true,
+          "active": true
+        }
+      ],
+      "candidates": [],
+      "next_action": "retain_current_oman_photo"
+    },
+    {
+      "product_id": "oman-032",
+      "name_ar": "جنارك أسترالي",
+      "origin": "أستراليا",
+      "original_prices": [
+        {
+          "unit": "علبة",
+          "price_kd": "2.000",
+          "confirmed": true,
+          "active": true
+        }
+      ],
+      "candidates": [],
+      "next_action": "retain_current_oman_photo"
+    },
+    {
+      "product_id": "oman-033",
+      "name_ar": "بلاك بيري",
+      "origin": "جنوب أفريقيا",
+      "original_prices": [
+        {
+          "unit": "علبة",
+          "price_kd": "1.500",
+          "confirmed": true,
+          "active": true
+        }
+      ],
+      "candidates": [],
+      "next_action": "retain_current_oman_photo"
+    },
+    {
+      "product_id": "oman-034",
+      "name_ar": "بطاطا حلوة مصري",
+      "origin": "مصر",
+      "original_prices": [
+        {
+          "unit": "كرتون",
+          "price_kd": "1.250",
+          "confirmed": true,
+          "active": true
+        }
+      ],
+      "candidates": [],
+      "next_action": "retain_current_oman_photo"
+    },
+    {
+      "product_id": "oman-035",
+      "name_ar": "الرقي السعودي العسلي",
+      "origin": "السعودية",
+      "original_prices": [
+        {
+          "unit": "حبة كبيرة",
+          "price_kd": "5.000",
+          "confirmed": true,
+          "active": true
+        },
+        {
+          "unit": "حبة متوسطة",
+          "price_kd": "4.000",
+          "confirmed": true,
+          "active": true
+        },
+        {
+          "unit": "حبة صغيرة",
+          "price_kd": "3.000",
+          "confirmed": true,
+          "active": true
+        }
+      ],
+      "candidates": [
+        {
+          "provider": "جمعية دوت كوم (jm3eia.com)",
+          "product": "بطاطا حلوة مصرية طازجة صندوق 2.5كجم",
+          "match": "النوع والمنشأ متطابقان؛ حجم الكرتون مختلف أو غير مؤكد",
+          "confidence": "high_product_match",
+          "product_url": "https://jm3eia.com/ar/category/5d383a5d83545d0366ac42b7/5d383ae683545d0366ac42bb",
+          "image_url": "https://jm3eia.com/_next/image?q=75&url=https%3A%2F%2Fmedia.jm3eia.com%2F%2F2025%2F8%2F25%2F3b8a79245799b758cf7c5339d5b6fb751756158894383.png&w=1920",
+          "visual_text_free_verified": false,
+          "actual_resolution_verified": false,
+          "license_to_republish": "not_verified",
+          "production_approved": false
+        },
+        {
+          "provider": "فرضتك (furdtk.com)",
+          "product": "Sweet Potato – Egypt",
+          "match": "النوع والمنشأ متطابقان؛ سعر عمان للكرتون لا يُستبدل بوحدة فرضتك",
+          "confidence": "high_product_match",
+          "product_url": "https://furdtk.com/en/shop/sweet-potato-egypt-211304?category=3129",
+          "image_url": "https://furdtk.com/web/image/product.template/211304/image_1920?unique=b7cc28f",
+          "visual_text_free_verified": false,
+          "actual_resolution_verified": false,
+          "license_to_republish": "not_verified",
+          "production_approved": false
+        }
+      ],
+      "next_action": "compare_image_and_check_rights"
+    },
+    {
+      "product_id": "oman-036",
+      "name_ar": "الحلوى العمانية",
+      "origin": "عُمان",
+      "original_prices": [
+        {
+          "unit": "علبة",
+          "price_kd": "2.000",
+          "confirmed": true,
+          "active": true
+        }
+      ],
+      "candidates": [],
+      "next_action": "retain_current_oman_photo"
+    }
+  ],
+  "rejected_examples": [
+    {
+      "product_id": "oman-015",
+      "candidate": "https://furdtk.com/en/shop/mangosteen-500-gm-thailand-206685?category=3244",
+      "reason": "مانجوستين فرضتك من تايلاند، بينما صنف عمان من إندونيسيا"
+    },
+    {
+      "product_id": "oman-019",
+      "candidate": "https://furdtk.com/en/shop/kaka-south-africa-213772?category=3244",
+      "reason": "كاكا من جنوب أفريقيا وليس من سوريا"
+    },
+    {
+      "product_id": "oman-028",
+      "candidate": "https://furdtk.com/en/shop/pomegranate-india-207990?page=32",
+      "reason": "رمان من الهند وليس من سوريا"
+    },
+    {
+      "product_id": "oman-024",
+      "candidate": "https://furdtk.com/en/shop/apricot-ajami-iran-214057?category=3244",
+      "reason": "المشمش من إيران وليس من جنوب أفريقيا"
+    },
+    {
+      "product_id": "oman-031",
+      "candidate": "https://jm3eia.com/ar/category/5d383a5d83545d0366ac42b7/5d383ae683545d0366ac42bb",
+      "reason": "صور الذرة المجمدة المعبأة لا تمثل الذرة الكويتية الطازجة"
+    },
+    {
+      "product_id": "oman-035",
+      "candidate": "https://furdtk.com/en/shop/chopped-sweet-potato-213729?category=3346",
+      "reason": "هذه بطاطا حلوة مقطّعة ومعبأة، لا الكرتون الكامل"
+    }
+  ]
+}
