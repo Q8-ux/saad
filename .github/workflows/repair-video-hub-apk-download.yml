@@ -1,0 +1,62 @@
+name: Repair Video Hub Android APK Download
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/repair-video-hub-apk-download.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: video-hub-apk-distribution
+  cancel-in-progress: false
+
+jobs:
+  verify-and-publish:
+    name: Verify public APK URL and add repository mirror
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download without login and inspect actual APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/video-apk
+          base="https://github.com/Q8-ux/saad/releases/download/video-hub-android-v1.0.0"
+          curl --fail --location --retry 2 --connect-timeout 15 --max-time 100 -sS \
+            "$base/Video-Hub-Android-v1.0.0.apk" -o /tmp/video-apk/Video-Hub-Android.apk
+          curl --fail --location --retry 2 --connect-timeout 15 --max-time 100 -sS \
+            "$base/SHA256SUMS.txt" -o /tmp/video-apk/SHA256SUMS.txt
+          cd /tmp/video-apk
+          cp Video-Hub-Android.apk Video-Hub-Android-v1.0.0.apk
+          sha256sum -c SHA256SUMS.txt
+          unzip -t Video-Hub-Android.apk > /tmp/video-apk/zip-check.txt
+          unzip -Z1 Video-Hub-Android.apk | grep -q '^AndroidManifest.xml$'
+          unzip -Z1 Video-Hub-Android.apk | grep -q '^classes.dex$'
+          test "$(wc -c < Video-Hub-Android.apk)" -ge 25000
+          head -c 2 Video-Hub-Android.apk | grep -aq 'PK'
+          echo "PASS: Public unauthenticated download, SHA256, manifest, DEX, ZIP."
+
+      - name: Publish stable GitHub raw mirror
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          path="video-downloader/android/releases/Video-Hub-Android.apk"
+          content="$(base64 -w0 /tmp/video-apk/Video-Hub-Android.apk)"
+          sha="$(gh api "repos/$GITHUB_REPOSITORY/contents/$path" --jq .sha 2>/dev/null || true)"
+          if [ -n "$sha" ]; then
+            gh api --method PUT "repos/$GITHUB_REPOSITORY/contents/$path" \
+              -f message="release(android): mirror validated Video Hub APK [skip ci]" \
+              -f content="$content" -f sha="$sha" --jq '.content.path'
+          else
+            gh api --method PUT "repos/$GITHUB_REPOSITORY/contents/$path" \
+              -f message="release(android): mirror validated Video Hub APK [skip ci]" \
+              -f content="$content" --jq '.content.path'
+          fi
+          echo "Stable mirror: https://github.com/$GITHUB_REPOSITORY/raw/refs/heads/main/$path"
