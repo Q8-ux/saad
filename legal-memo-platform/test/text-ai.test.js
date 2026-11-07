@@ -19,6 +19,33 @@ test('provider choice is explicit and never silently falls back to another key',
   }
 });
 
+test('Groq text generation uses its own key and keeps legal instructions and facts', async () => {
+  const client = createTextAiClient({ env: { LEGAL_AI_PROVIDER: 'groq', GROQ_API_KEY: 'synthetic-groq' }, fetchImpl: async (url, init) => {
+    assert.equal(url, 'https://api.groq.com/openai/v1/chat/completions');
+    assert.equal(init.headers.Authorization, 'Bearer synthetic-groq');
+    assert.equal(init.redirect, 'error');
+    const body = JSON.parse(init.body);
+    assert.equal(body.messages[0].content, input.instructions);
+    assert.equal(body.messages[1].content, input.input);
+    return Response.json({ choices: [{ finish_reason: 'stop', message: { content: 'نقص المصادر؛ المسودة تحتاج مراجعة.' } }] });
+  } });
+  assert.ok(client);
+  assert.match((await client.responses.create(input)).output_text, /نقص المصادر/);
+});
+
+test('configured alternate is called once only after an explicit transient rejection', async () => {
+  const urls = [];
+  const client = createTextAiClient({ env: { LEGAL_AI_PROVIDER: 'groq', GROQ_API_KEY: 'synthetic-groq', LEGAL_AI_FALLBACK_PROVIDER: 'gemini', GEMINI_API_KEY: 'synthetic-gemini' }, fetchImpl: async url => {
+    urls.push(url);
+    if (url.includes('groq.com')) return Response.json({}, { status: 429 });
+    return Response.json(completed);
+  } });
+  assert.ok(client);
+  assert.match((await client.responses.create(input)).output_text, /نقص المصادر/);
+  assert.equal(urls.length, 2);
+  assert.match(urls[1], /^https:\/\/generativelanguage.googleapis.com\//);
+});
+
 test('Gemini preserves instructions, facts and missing-source warning; key is only in header', async () => {
   const client = gemini(completed, 200, (url, init) => {
     assert.equal(url, 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent');

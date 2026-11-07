@@ -167,6 +167,37 @@ test('cancellation prevents a retry after an explicit temporary rejection', asyn
 });
 
 const recoveryEnvironment = { LEGAL_AI_PROVIDER: 'gemini', GEMINI_API_KEY: 'synthetic-gemini-key', LEGAL_AI_FALLBACK_PROVIDER: 'openai' };
+test('Groq is an explicitly selected text provider with local schema enforcement', async () => {
+  const calls = [];
+  const schema = { type: 'object', additionalProperties: false, required: ['facts'], properties: { facts: { type: 'string' } } };
+  const { api } = client('unused', async (url, init) => {
+    calls.push({ url, init });
+    const body = JSON.parse(init.body);
+    assert.equal(url, 'https://api.groq.com/openai/v1/chat/completions');
+    assert.equal(init.headers.Authorization, 'Bearer synthetic-groq');
+    assert.equal(init.redirect, 'manual');
+    assert.equal(body.messages[1].content, 'وقائع اصطناعية محفوظة');
+    assert.match(body.messages[0].content, /لا تختلق/);
+    return Response.json({ choices: [{ finish_reason: 'stop', message: { content: '{"facts":"وقائع اصطناعية محفوظة"}' } }] });
+  }, { LEGAL_AI_PROVIDER: 'groq', GROQ_API_KEY: 'synthetic-groq' });
+  assert.equal(await api.generateText({ instructions: 'لا تختلق مصادر.', input: 'وقائع اصطناعية محفوظة', schema }), '{"facts":"وقائع اصطناعية محفوظة"}');
+  assert.equal(calls.length, 1);
+});
+
+test('explicit Gemini fallback recovers a rejected OpenAI request without mixing credentials', async () => {
+  const calls = [];
+  const { api } = client('gpt-4.1-mini', async (url, init) => {
+    calls.push({ url, init });
+    if (url.includes('api.openai.com')) return Response.json({}, { status: 429 });
+    assert.match(url, /^https:\/\/generativelanguage.googleapis.com\//);
+    assert.equal(init.headers.Authorization, undefined);
+    assert.equal(init.headers['x-goog-api-key'], 'synthetic-gemini');
+    return Response.json({ candidates: [{ finishReason: 'STOP', content: { parts: [{ text: 'مسودة اصطناعية تحتاج مراجعة المصادر.' }] } }] });
+  }, { LEGAL_AI_FALLBACK_PROVIDER: 'gemini', GEMINI_API_KEY: 'synthetic-gemini' });
+  assert.equal(await api.generateText({ instructions: 'لا تختلق مصادر.', input: 'اختبار مصطنع' }), 'مسودة اصطناعية تحتاج مراجعة المصادر.');
+  assert.equal(calls.length, 2);
+});
+
 test('configured OpenAI recovers rejected Gemini drafting with identical facts and schema', async () => {
   for (const [status, primaryAttempts] of [[503, 3], [429, 1]]) {
     const calls = [];
