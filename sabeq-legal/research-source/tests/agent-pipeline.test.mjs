@@ -8,7 +8,11 @@ const evidence = [{documentId:1,chunkId:7,title:'مرجع عام اصطناعي'
 const reasoning={factQuote:'مبلغ لم يتم سداده',applicationQuote:'ينصب الخلاف على مبلغ لم يتم سداده بحسب المدخلات، ولذلك يلزم مقابلة قيمة المطالبة بمستند أصل التعامل وتحديد الرصيد محل النزاع.',opposingQuote:'قد ينازع الخصم في بقاء الرصيد أو يدعي سداداً لم ترد مستنداته ضمن بيانات الاختبار.',responseQuote:'والرد أن حسم هذا الاعتراض يتوقف على مطابقة المستندات وبيان أي دفعة متصلة بالمطالبة، دون افتراض ثبوت السداد أو تجاهل ما يقدم بشأنه.'};
 const reasoningText=Object.values(reasoning).slice(1).join('\n');
 const content = {facts:caseData.facts,requests:caseData.requests,grounds:reasoningText+' 【م1】',fields:{},factualNotes:[],legalResearchNotes:''};
-const auditCheck=(sources)=>({issueIndex:0,status:'addressed',reason:'فحص المطالبة والتطبيق والاعتراض والرد',substance:{...reasoning,sourceMarkers:sources.length?['م1']:[]}});
+const auditCheck=(options,sources,issueIndex=0,status='addressed',reason='فحص المطالبة والتطبيق والاعتراض والرد')=>{
+ const selected=JSON.parse(options.input).checkOptions.find(o=>o.issueIndex===issueIndex&&o.status===status&&(status!=='addressed'||o.applicationQuote.includes(reasoning.applicationQuote)));
+ assert.ok(selected,'synthetic audit must choose a known option from the actual request');
+ return {checkKey:selected.checkKey,reason,substance:{opposingQuote:status==='addressed'?reasoning.opposingQuote:'',responseQuote:status==='addressed'?reasoning.responseQuote:'',sourceMarkers:status==='addressed'&&sources.length?['م1']:[]}};
+};
 const { pleadingAuthorityInstructions } = load('../lib/bound-draft.ts');
 function bridge(runtime) {
  const security=load('../lib/request-security.ts',{'@/db':{}});
@@ -55,7 +59,7 @@ function memoRoute(h, {pipeline, sources=evidence, auth=async()=>null, limits=as
   '@/lib/openai':{deriveLegalResearchPlan:async()=>({searchQueries:[],legalIssues:[]}),openAIErrorResponse:()=>null,generateText:async options=>{
    if(model) return model(options);
    if(options.schema?.properties?.clientRole) return JSON.stringify({clientRole:caseData.partyRole,opponentRole:'مدعى عليه',characterization:'مطالبة',issues:[{issue:'المبلغ',factQuote:'مبلغ لم يتم سداده',document:'',sourceMarkers:sources.length?['م1']:[],application:'فحص أصل المطالبة',counterargument:'منازعة السداد',response:'فحص المستند',proposedRelief:caseData.requests,missing:''}],missingFacts:[],researchGaps:sources.length?[]:['سند غير متاح']});
-   if(options.schema?.properties?.checks) return JSON.stringify({checks:[auditCheck(sources)],roleConsistent:true,factsPreserved:true,reliefConsistent:true,unsupportedAssertions:[]});
+   if(options.schema?.properties?.checks) return JSON.stringify({checks:[auditCheck(options,sources)],roleConsistent:true,factsPreserved:true,reliefConsistent:true,unsupportedAssertions:[]});
    if(options.schema?.properties?.facts) return JSON.stringify({...content,grounds:sources.length?content.grounds:reasoningText});
    throw Error('unexpected fallback');
   }},
@@ -99,7 +103,7 @@ test('independent audit rejects a reversed agent defense after one correction wi
  const h=templateHarness();t.after(h.cleanup);let audited=0,revised=0,archived=0;
  const route=memoRoute(h,{auth:async()=>({id:'test-user'}),record:async()=>{archived++;},pipeline:{agentPipelineEnabled:()=>true,generateAgentPleading:async()=>({content:{...content},audit:{}})},model:async options=>{
   if(options.schema?.properties?.clientRole)return JSON.stringify({clientRole:caseData.partyRole,opponentRole:'خصم',characterization:'مطالبة',issues:[{issue:'المطالبة',factQuote:'مبلغ لم يتم سداده',document:'',sourceMarkers:['م1'],application:'فحص',counterargument:'منازعة',response:'مراجعة',proposedRelief:'الطلب المدخل',missing:''}],missingFacts:[],researchGaps:[]});
-  if(options.schema?.properties?.checks){audited++;return JSON.stringify({checks:[{issueIndex:0,status:'omitted',reason:'مخالفة مركز الموكل'}],roleConsistent:false,factsPreserved:true,reliefConsistent:false,unsupportedAssertions:[]});}
+  if(options.schema?.properties?.checks){audited++;return JSON.stringify({checks:[auditCheck(options,[],0,'omitted','مخالفة مركز الموكل')],roleConsistent:false,factsPreserved:true,reliefConsistent:false,unsupportedAssertions:[]});}
   revised++;return JSON.stringify(content);
  }});
  const response=await route.POST(request());assert.equal(response.status,422);assert.equal(audited,2);assert.equal(revised,1);assert.equal(archived,0);assert.doesNotMatch(await response.text(),/secret/);
@@ -110,7 +114,7 @@ const controlSource={...evidence[0],documentId:98765,title:'قانون اختب�
 function controlledMemoModel(correction,onCorrection=()=>{}) {
  return async options=>{
   if(options.schema?.properties?.clientRole)return JSON.stringify({clientRole:caseData.partyRole,opponentRole:'مدعى عليه',characterization:'مطالبة',issues:[{issue:'المبلغ',factQuote:'مبلغ لم يتم سداده',document:'',sourceMarkers:['م1'],application:'فحص أصل المطالبة',counterargument:'منازعة السداد',response:'فحص المستند',proposedRelief:caseData.requests,missing:''}],missingFacts:[],researchGaps:[]});
-  if(options.schema?.properties?.checks)return JSON.stringify({checks:[auditCheck([controlSource])],roleConsistent:true,factsPreserved:true,reliefConsistent:true,unsupportedAssertions:[]});
+  if(options.schema?.properties?.checks)return JSON.stringify({checks:[auditCheck(options,[controlSource])],roleConsistent:true,factsPreserved:true,reliefConsistent:true,unsupportedAssertions:[]});
   if(options.schema?.properties?.grounds&&!options.schema?.properties?.facts){onCorrection();return JSON.stringify({grounds:reasoningText+'\n'+correction});}
   throw Error('unexpected control test call');
  };
@@ -126,7 +130,7 @@ test('direct drafting and its existing correction receive the same concise rules
   }
   if(options.schema?.properties?.checks){
    audits++;
-   return JSON.stringify({checks:[auditCheck([controlSource])],roleConsistent:audits>1,factsPreserved:true,reliefConsistent:true,unsupportedAssertions:[]});
+   return JSON.stringify({checks:[auditCheck(options,[controlSource])],roleConsistent:audits>1,factsPreserved:true,reliefConsistent:true,unsupportedAssertions:[]});
   }
   return baseline(options);
  }});
@@ -202,7 +206,7 @@ test('unquotable corpus passages are excluded before planning and cannot become 
    return JSON.stringify({clientRole:caseData.partyRole,opponentRole:'مدعى عليه',characterization:'مطالبة',issues:[{issue:'المبلغ',factQuote:reasoning.factQuote,document:'المدخلات',sourceMarkers:[],application:'فحص أصل المطالبة',counterargument:'منازعة السداد',response:'فحص المستند',proposedRelief:caseData.requests,missing:''}],missingFacts:[],researchGaps:['السند القانوني يحتاج مراجعة']});
   }
   if(options.schema?.properties?.facts)return JSON.stringify({...content,grounds:reasoningText});
-  if(options.schema?.properties?.checks)return JSON.stringify({checks:[auditCheck([])],roleConsistent:true,factsPreserved:true,reliefConsistent:true,unsupportedAssertions:[]});
+  if(options.schema?.properties?.checks)return JSON.stringify({checks:[auditCheck(options,[])],roleConsistent:true,factsPreserved:true,reliefConsistent:true,unsupportedAssertions:[]});
   throw Error('unexpected source-filter test call');
  }});
  const response=await route.POST(request());const value=await response.json();
@@ -214,7 +218,7 @@ test('one blocked issue prevents partial delivery for both paid and unpaid memor
   const baseline=controlledMemoModel('');
   const route=memoRoute(h,{paid,sources:[controlSource],pipeline:{agentPipelineEnabled:()=>false},model:async options=>{
    if(options.schema?.properties?.clientRole){const p=JSON.parse(await baseline(options));p.issues.push({...p.issues[0],issue:'مسألة المستند غير المرفق',sourceMarkers:[],missing:'المستند غير مرفق'});p.missingFacts=['المستند غير مرفق'];return JSON.stringify(p);}
-   if(options.schema?.properties?.checks){audits++;return JSON.stringify({checks:[auditCheck([controlSource]),{issueIndex:1,status:'blocked',reason:'المستند غير مرفق',substance:{factQuote:'',applicationQuote:'',opposingQuote:'',responseQuote:'',sourceMarkers:[]}}],roleConsistent:true,factsPreserved:true,reliefConsistent:true,unsupportedAssertions:[]});}
+   if(options.schema?.properties?.checks){audits++;return JSON.stringify({checks:[auditCheck(options,[controlSource]),auditCheck(options,[],1,'blocked','المستند غير مرفق')],roleConsistent:true,factsPreserved:true,reliefConsistent:true,unsupportedAssertions:[]});}
    if(options.schema?.properties?.facts){revisions++;return JSON.stringify(content);}
    throw Error('unexpected partial test call');
   }});

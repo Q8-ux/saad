@@ -264,3 +264,24 @@ test('schema rejection preserves upstream HTTP status and logs only an allowlist
  await assert.rejects(api.generateText({instructions:'synthetic',input:'synthetic'}),error=>error.kind==='upstream'&&error.upstreamStatus===400);
  assert.equal(logs[0][1].schemaKeyword,'minLength');assert.doesNotMatch(JSON.stringify(logs),/PRIVATE_CASE_TEXT|synthetic-test-key|is not permitted/);
 });
+
+test('active audit sends a flat known-key schema and resolves only actual final excerpts after transport',async()=>{
+ const reasoning=loadCaseModule('../lib/case-reasoning.ts');
+ const fact='تم الوفاء بالمبلغ على دفعتين';
+ const application=fact+' بحسب الوقائع المعتمدة في هذا الاختبار، ولذلك تقابل الدفعتان برصيد المطالبة ذاته.';
+ const opposing='قد يتعلق التحويل بتعامل آخر بين الطرفين، وهو اعتراض افتراضي يحتاج إلى بيان صلته بالواقعة.';
+ const response='والرد أن الوقائع المعتمدة تخصص الدفعتين للدين نفسه، فلا تنشأ واقعة دين آخر دون مستند أو إقرار.';
+ const plan={clientRole:'مدعى عليه',opponentRole:'مدعٍ',characterization:'اختبار',issues:[{issue:'السداد',factQuote:fact,document:'',sourceMarkers:[],application:'فحص',counterargument:'احتمال',response:'مراجعة',proposedRelief:'رفض المطالبة',missing:''}],missingFacts:[],researchGaps:['مصدر غير متاح في الاختبار']};
+ const content={facts:fact,grounds:[application,opposing,response].join('\n'),requests:'رفض المطالبة',fields:{},factualNotes:[],legalResearchNotes:''};
+ const request=reasoning.caseAuditRequestForContent(plan,content),selected=request.checkOptions.find(o=>o.status==='addressed');
+ const wire={checks:[{checkKey:selected.checkKey,reason:'تطبيق واقعي',substance:{opposingQuote:opposing,responseQuote:response,sourceMarkers:[]}}],roleConsistent:true,factsPreserved:true,reliefConsistent:true,unsupportedAssertions:[]};
+ const {api}=client('gpt-4.1-mini',async(_url,init)=>{
+  const body=JSON.parse(init.body),schema=body.text.format.schema;
+  assert.equal(body.text.format.strict,true);assert.ok(schema.properties.checks.items.properties.checkKey.enum.includes(selected.checkKey));
+  assert.doesNotMatch(JSON.stringify(schema),/"(?:anyOf|minLength|maxLength|\$defs)"/);
+  assert.ok(JSON.parse(body.input).checkOptions.some(o=>o.checkKey===selected.checkKey&&o.applicationQuote===application));
+  return Response.json({status:'completed',output_text:JSON.stringify(wire)});
+ });
+ const raw=await api.generateText({instructions:'synthetic independent review',input:JSON.stringify({plan,content,checkOptions:request.checkOptions}),schema:request.schema});
+ const audit=reasoning.parseGroundedCaseAudit(raw,request,plan,content,[]);assert.equal(audit.ok,true);assert.equal(audit.complete,false);assert.equal(audit.checks[0].substance.applicationQuote,application);
+});
