@@ -72,3 +72,4 @@ test('missing, irrelevant or OCR-corrupted laws never become invented grounds',(
   assert.equal(citations.reviewLegalCitations(draft.grounds,[corrupted],
     {courtDocument:true,requireArticleText:true}).ok,false);
 });
+

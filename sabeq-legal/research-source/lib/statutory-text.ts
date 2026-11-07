@@ -2,42 +2,17 @@ import type { LegalEvidence } from './legal-search';
 
 const boundSha = '8ffeac9838d7101a6776ca689b06ad08401d69850c27969b3b9959a1c40660bd';
 
-/**
- * Detect high-confidence character-order corruption common in Arabic PDF
- * extraction. This is a quarantine signal, NEVER a spelling autocorrector:
- * only a separately reviewed source may supply a verbatim legal quotation.
- * Two independent corrupt tokens are required to avoid suppressing legitimate
- * historical or dialectal spelling on a single ambiguous token.
- */
-const OCR_INVERSION_TOKENS = new Set([
-  "املادة", "املتعامل", "املسكوكات", "املسكوك", "املحكمة",
-  "اهنا", "أهنا", "هبا", "عىل", "جتاوز", "مخسة",
-  "مخسني", "سبعامئة", "جتاوز", "املذكورة", "املتهم",
-]);
-// A single distinctive impossible PDF-inversion token is sufficient to
-// quarantine the quote. These are not words to auto-correct in a statute.
-const HIGH_CONFIDENCE_INVERSION_TOKENS = new Set([
-  "املادة", "املحكمة", "املتعامل", "املسكوكات", "املسكوك",
-  "جتاوز", "مخسة", "مخسني", "سبعامئة", "عىل",
-]);
-export function statutoryOCRReview(text: string) {
-  const words = String(text || "").normalize("NFKC")
-    .replace(/[\u064b-\u065f\u0670]/gu, "")
-    .match(/[\p{Script=Arabic}]+/gu) || [];
-  const distinct = [...new Set(words.filter(word => OCR_INVERSION_TOKENS.has(word)))];
-  const highConfidence = distinct.some(word => HIGH_CONFIDENCE_INVERSION_TOKENS.has(word));
-  return {
-    requiresReview: highConfidence || distinct.length >= 2,
-    reason: highConfidence || distinct.length >= 2 ? "arabic_pdf_character_order" : null,
-  };
+// Quarantine recognizable PDF character-order corruption; never autocorrect a
+// legal quotation. Existing source review must supply any replacement text.
+const inversionTokens=new Set(['املادة','املتعامل','املسكوكات','املسكوك','املحكمة','اهنا','أهنا','هبا','عىل','جتاوز','مخسة','مخسني','سبعامئة','املذكورة','املتهم']);
+const distinctiveInversions=new Set(['املادة','املحكمة','املتعامل','املسكوكات','املسكوك','جتاوز','مخسة','مخسني','سبعامئة','عىل']);
+export function statutoryOCRReview(text:string){
+  const words=String(text||'').normalize('NFKC').replace(/[\u064b-\u065f\u0670]/gu,'').match(/[\p{Script=Arabic}]+/gu)||[];
+  const found=[...new Set(words.filter(word=>inversionTokens.has(word)))];
+  const requiresReview=found.some(word=>distinctiveInversions.has(word))||found.length>=2;
+  return {requiresReview,reason:requiresReview?'arabic_pdf_character_order':null};
 }
-
-/** Never send a corrupted OCR snippet to the drafting model. */
-export function statutoryPromptExcerpt(text: string) {
-  return statutoryOCRReview(text).requiresReview
-    ? "[نص مستخرج مشوه، محجوب عن التوليد لحين مطابقة مادة القانون مع الأصل الرسمي؛ لا يجوز الاستشهاد به.]"
-    : text;
-}
+export function statutoryPromptExcerpt(text:string){return statutoryOCRReview(text).requiresReview?'[نص مستخرج مشوه، محجوب عن التوليد لحين مطابقة مادة القانون مع الأصل الرسمي؛ لا يجوز الاستشهاد به.]':text;}
 
 /** Only the retrieved article's own wording, never neighbouring pages or OCR.
  * A source match does not establish completeness, amendments or currency. */
@@ -51,7 +26,6 @@ export function draftStatutoryText(source: LegalEvidence) {
   // have not been reviewed. Do not promote that context to statutory wording.
   const text = source.text.split(/\n\[استمرار موضع المادة؛ صفحة PDF [^\n]*\]\s*\n/u)[0].replace(/\s+/gu, ' ').trim();
   if (!text || !/\p{L}/u.test(text) || /【\s*م\d+\s*】|صفحة PDF/u.test(text)) return null;
-  // Never reproduce garbled statutory OCR as an official quotation.
   if (statutoryOCRReview(text).requiresReview) return null;
   const delimiters = [['«', '»'], ['“', '”'], ['"', '"']].find(pair => pair.every(char => !text.includes(char)));
   if (!delimiters) return null;

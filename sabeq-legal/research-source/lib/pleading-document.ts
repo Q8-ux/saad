@@ -148,6 +148,7 @@ export function buildPleadingDocument(template: TemplateInfo, definition: Templa
       blocks:[p(fill(C.date)),...parties,p(fill(C.processServer)),p(C.moved),...opponent,h(L.subject),p(C.whereas),p(facts),...(grounds ? [h(L.grounds),p(grounds)] : []),h(L.therefore),p(C.relief),p(requests)],after:[h(L.basedOn),p(fill(C.summons)),p(C.reservation)]});
   } else {
     const memo = splitMemoGrounds(grounds);
+    const hasDefenses = Boolean(memo.defenses);
     const hasReplies = Boolean(memo.replies);
     const hasDocuments = Boolean(memo.documents);
     const section = (index:number,label:string) => h(`${["أولًا","ثانيًا","ثالثًا","رابعًا","خامسًا"][index]}: ${label}`);
@@ -159,13 +160,12 @@ export function buildPleadingDocument(template: TemplateInfo, definition: Templa
         p(`ضد: ${input.otherParty}`),
         ...(input.allParties ? [p(input.allParties)] : []),
         section(0,"الوقائع"),p(facts),
-        section(1,"الدفوع وأوجه الدفاع"),
-        p(memo.defenses || "يتمسك مقدم المذكرة بما ثبت من وقائع ومستندات وأوجه دفاع في حدود ما يعرض على المحكمة."),
-        ...(hasReplies ? [section(2,"الرد على حجج الخصم"),p(memo.replies)] : []),
-        section(hasReplies ? 3 : 2,"الطلبات"),
+        ...(hasDefenses ? [section(1,"الدفوع وأوجه الدفاع"),p(memo.defenses)] : []),
+        ...(hasReplies ? [section(hasDefenses ? 2 : 1,"الرد على حجج الخصم"),p(memo.replies)] : []),
+        section(1+Number(hasDefenses)+Number(hasReplies),"الطلبات"),
         p(`${L.therefore || "لكل ما تقدم"}، ${C.relief || "يلتمس مقدم المذكرة الحكم بما يلي:"}`),
         p(requests),
-        ...(hasDocuments ? [section(hasReplies ? 4 : 3,"حافظة المستندات"),p(memo.documents)] : []),
+        ...(hasDocuments ? [section(2+Number(hasDefenses)+Number(hasReplies),"حافظة المستندات"),p(memo.documents)] : []),
       ]});
   }
   if (input.allParties && kind !== "memorandum") pages[0].blocks.push(h("بقية الأطراف والصفات"),p(input.allParties));

@@ -23,7 +23,11 @@ export function isDelegatedResearchRequest(value: string) {
   const text = normalized(value);
   if (!isLegalResearchRequirement(value)) return false;
   if (/لا (?:يلزم|تحتاج|يشترط)|لن (?:نطلب|تحتاج)|ليس (?:عليك|مطلوبا)|not required|do not need/.test(text)) return false;
-  return /[؟?]|(?:زو[دّ]|تزود|ارفق|ارفاق|توفير|تزوي[د]|يرجي|يرجى|تقديم|استخراج|استكمال|ناقص|نواقص|غير مرفق|غير متوفر|مطلوب|قدم|تبحث|ابحث|تحقق|راجع|عليك|لديك|عندك)|(?:provide|attach|upload|supply|find|check|verify|missing|required|need)|(?:فراہم|منسلک|ضروری)/.test(text);
+  // Match requests as words, not roots inside legitimate pleading prose:
+  // يقدم/يراجع/يتحقق must not erase an argument merely because its appended
+  // source identity contains "المادة". Nominals such as تقديم alone are not
+  // a request to the visitor; an explicit prompt still matches يرجى/مطلوب.
+  return /[؟?]|(?:^|[^\p{L}])(?:زود(?:ني|نا)?|تزود(?:ني|نا)?|ارفق|ارفاق|توفير|تزويد|يرجي|يرجى|استكمال|ناقص|نواقص|غير مرفق|غير متوفر|مطلوب|المطلوب(?:ه)?|قدم|تبحث|ابحث|تحقق|راجع|عليك|لديك|عندك)(?=$|[^\p{L}])|\b(?:provide|attach|upload|supply|find|check|verify|missing|required|need)\b|(?:فراہم|منسلک|ضروری)/u.test(text);
 }
 
 export const researchOwnershipCopy = {

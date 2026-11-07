@@ -5,7 +5,7 @@ import {judgmentContext,type JudgmentReference} from './judgment-evidence';
 
 export type LegalEvidence = {
   judgment?:JudgmentReference;
-  corpus?: {scope:string;sourceId:string;sourceSha256:string;databaseSha256:string;recordId:string;continuationPage?:number|null;textSha256:string;page:number;printedPage:string|null;documentId:string;documentTitle:string;articleNumber:string|null;detectedArticleNumber:string|null;articleIdentityUnique:boolean;completeArticleVerified:boolean;currentLawVerified:boolean;reviewStatus:string;editionClaim:string;lawIdentity?:{number:number;year:number;header:string;reviewStatus:string}|null;context:{previousPage:number|null;nextPage:number|null};previousText:string;nextText:string;ocr:unknown};
+  corpus?: {scope:string;sourceId:string;sourceSha256:string;databaseSha256:string;recordId:string;continuationPage?:number|null;textSha256:string;page:number;printedPage:string|null;documentId:string;documentTitle:string;articleNumber:string|null;detectedArticleNumber:string|null;articleIdentityUnique:boolean;completeArticleVerified:boolean;currentLawVerified:boolean;reviewStatus:string;editionClaim:string;lawIdentity?:{number:number;year:number;header:string;reviewStatus:string}|null;context:{previousPage:number|null;nextPage:number|null};previousText:string;nextText:string;ocr:unknown;draftingEligible?:boolean;fullImageTranscriptionVerified?:boolean;unresolvedFields?:unknown;sourceImageSha256?:string;hashScope?:string};
   chunkId?: number;
   documentId: number;
   title: string;
@@ -84,10 +84,13 @@ function safeUrl(value: string) {
   }
 }
 
-export async function searchLegalEvidence(query:string,limit=8,kind?:"legislation"|"judgment",_cassationOnly=false):Promise<LegalEvidence[]> {
- const legislation=kind==='judgment'?[]:await(await import('./bound-legislation')).searchBoundEvidence(query,limit,'legislation') as LegalEvidence[];
- const judgments=kind==='legislation'?[]:await(await import('./reviewed-judgments')).searchReviewedJudgments(query,limit);
- return [...judgments,...legislation].slice(0,Math.max(1,Math.min(limit,12)));
+export async function searchLegalEvidence(query:string,limit=8,kind?:"legislation"|"judgment",_cassationOnly=false,includeReviewedArchive=false):Promise<LegalEvidence[]> {
+ const [legislation,judgments,archive]=await Promise.all([
+  kind==='judgment'?[]:import('./bound-legislation').then(m=>m.searchBoundEvidence(query,limit,'legislation')),
+  kind==='legislation'?[]:import('./reviewed-judgments').then(m=>m.searchReviewedJudgments(query,limit)),
+  includeReviewedArchive&&kind!=='judgment'?import('./legislation-workbench').then(m=>m.searchArchiveForAssistant(query,2)):[]
+ ]);
+ return [...judgments,...archive,...legislation].slice(0,Math.max(1,Math.min(limit,12))) as LegalEvidence[];
 }
 
 async function searchLegacyLegalEvidence(query: string, limit = 8, kind?: "legislation" | "judgment", cassationOnly = false): Promise<LegalEvidence[]> {
@@ -179,7 +182,7 @@ export function isJudgmentEvidence(item: LegalEvidence) {
 export async function searchIntakeLibrary(queries: string[]) {
   const unique = [...new Set(queries)].slice(0, 3);
   const groups = await Promise.all((['legislation', 'judgment'] as const).map(async kind => {
-    const sets = await Promise.all(unique.map(query => searchLegalEvidence(query, 3, kind, kind === "judgment")));
+    const sets = await Promise.all(unique.map(query => searchLegalEvidence(query, 3, kind, kind === "judgment",kind==='legislation')));
     const seen = new Set<string>();
     const perDocument = new Map<number, number>();
     // Round-robin keeps both the classified topic and the visitor's specific
@@ -209,7 +212,7 @@ export async function searchCassationEvidenceAcross(queries: string[], limit = 6
 export async function readHandoffEvidence(value: unknown): Promise<LegalEvidence[]> {
   let raw: unknown = value;
   if (typeof value === "string") { try { raw = JSON.parse(value.slice(0, 1200)); } catch { return []; } }
-  const ids = Array.isArray(raw) ? [...new Set(raw.filter(id => Number.isSafeInteger(id) && id > 0))].slice(0, 6) : [];
+  const ids = Array.isArray(raw) ? [...new Set(raw.filter(id => Number.isSafeInteger(id) && id > 0 && !(id>=4_000_000_001&&id<=4_000_001_549)))].slice(0, 6) : [];
   if (!ids.length) return [];
   const [legislation,judgments]=await Promise.all([(await import('./bound-legislation')).readBoundEvidence(ids),(await import('./reviewed-judgments')).readReviewedJudgments(ids)]);
   return [...legislation,...judgments] as LegalEvidence[];
@@ -218,13 +221,20 @@ export async function readHandoffEvidence(value: unknown): Promise<LegalEvidence
 export async function searchLegalEvidenceAcross(queries: string[], limit = 10) {
   const uniqueQueries = Array.from(new Set(queries.map((query) => query.trim()).filter(Boolean))).slice(0, 16);
   const resultSets = await Promise.all(uniqueQueries.map((query) => searchLegalEvidence(query, Math.min(6, limit))));
-  const unique = new Map<string, LegalEvidence>();
-  for (const evidence of resultSets.flat()) {
-    const key = `${evidence.documentId}:${evidence.reference || evidence.text.slice(0, 80)}`;
-    if (!unique.has(key)) unique.set(key, evidence);
+  return mergeLegalEvidenceSets(resultSets,limit);
+}
+
+// Give each material issue a candidate before taking more results from an
+// earlier query. This selects research candidates, not legal applicability.
+export function mergeLegalEvidenceSets(resultSets:LegalEvidence[][],limit=10){
+  const found=new Map<string,LegalEvidence>(),bounded=Math.max(1,Math.min(limit,12));
+  for(let position=0;position<Math.max(0,...resultSets.map(set=>set.length));position++)for(const set of resultSets){
+    const evidence=set[position];if(!evidence)continue;
+    const key=`${evidence.documentId}:${evidence.reference||evidence.text.slice(0,80)}`;
+    if(!found.has(key))found.set(key,evidence);
+    if(found.size>=bounded)return [...found.values()];
   }
-  // Preserve query relevance; OCR quality is not topical relevance.
-  return Array.from(unique.values()).slice(0, Math.max(1, Math.min(limit, 12)));
+  return [...found.values()];
 }
 
 export async function searchLegalDocuments(query:string,limit=12) {
@@ -255,11 +265,11 @@ async function searchLegacyLegalDocuments(query: string, limit = 12) {
 export function formatEvidence(evidence: LegalEvidence[]) {
   return evidence.map((item, index) => {
     const number = item.lawNumber && item.lawYear ? `رقم ${item.lawNumber} لسنة ${item.lawYear}` : "";
-    const damagedOCR = !item.judgment && statutoryOCRReview(item.text).requiresReview;
-    const quotedText = statutoryPromptExcerpt(item.text);
-    const safeContext = damagedOCR ? "بيانات OCR وسياق الصفحات محجوبة لحين مراجعة المصدر الرسمي؛ لا تعتمد المادة." : corpusContext(item);
+    const damagedOCR=!item.judgment&&statutoryOCRReview(item.text).requiresReview;
+    const quotedText=item.judgment?item.text:statutoryPromptExcerpt(item.text);
+    const safeContext=damagedOCR?'بيانات OCR وسياق الصفحات محجوبة لحين مراجعة المصدر؛ لا تعتمد المادة.':corpusContext(item);
     return `[م${index + 1}]\nالعنوان: ${item.title}${number ? ` (${number})` : ""}\nنوع المصدر: ${isJudgmentEvidence(item) && isCassationEvidence(item) ? "مبدأ/حكم تمييز" : item.documentType || "تشريع"}\nالتصنيف: ${item.category}\nالمرجع الداخلي: ${item.reference || "غير محدد"}\nالجهة/المصدر: ${item.officialSource}\nرابط الأصل: ${item.sourceUrl || "ملف مفهرس من المكتبة المرفوعة؛ لا يتوفر رابط عام للأصل"}\nتاريخ تحديث الفهرسة (ليس إثبات السريان): ${item.libraryUpdatedAt || "غير متاح"}\n${safeContext}${item.verification ? `المادة المعتمدة: ${item.verification.articleNumber}. القانون صاحب المادة: ${item.lawNumber}/${item.lawYear}. النص المنشور في: ${item.verification.sourceLawNumber}/${item.verification.sourceLawYear}. صفحة المصدر: ${item.verification.page}. تاريخ مطابقة النص: ${item.verification.checkedAt}. الحالة: مطابقة المصدر المنشور؛ اكتمال التعديلات والانطباق الزمني يحتاجان مراجعة.\n` : ""}درجة الجودة: ${item.qualityScore}/100\nالنص المسترجع (حالة الاعتماد في بيانات المصدر):\n${quotedText}`;
   }).join("\n\n---\n\n");
 }
 
-export function corpusContext(item:{corpus?:unknown;judgment?:JudgmentReference;text?:string}){return item.judgment?judgmentContext(item as LegalEvidence):item.corpus?`\nبيانات مسار التشريعات (ليست اعتماداً رسمياً): ${JSON.stringify(item.corpus)}\nرقم المادة يحدد موضعاً في القسم فقط؛ لا تعيّن رقم القانون وسنته من الذاكرة؛ يجوز الرقم والسنة فقط عند وجود lawIdentity المستخرج من ترويسة الصفحة والمطابق لبيانات قسم المصدر. استمرار النص والهوامش يخضعان للمراجعة.\n`:"";}
+export function corpusContext(item:{corpus?:LegalEvidence['corpus'];judgment?:JudgmentReference;text?:string}){return item.judgment?judgmentContext(item as LegalEvidence):item.corpus?`\nبيانات مسار التشريعات (ليست اعتماداً رسمياً): ${JSON.stringify(item.corpus)}\n${item.corpus.draftingEligible===false?'هذه حقول جدول مصور من إصدار أبريل2026، مطابقة للصورة فقط. اشرح ما يورده الملف مع الصفحة وتاريخ الإصدار. لا تحولها إلى مادة قانونية أو دليل سريان أو استناد قضائي، ولا تطلب من المستخدم إكمال القانون. الحقول المستبعدة وOCR غير متاحة للاقتباس.':'رقم المادة يحدد موضعاً في القسم فقط؛ لا تعيّن رقم القانون وسنته من الذاكرة؛ يجوز الرقم والسنة فقط عند وجود lawIdentity المستخرج من ترويسة الصفحة والمطابق لبيانات قسم المصدر. استمرار النص والهوامش يخضعان للمراجعة.'}\n`:"";}
