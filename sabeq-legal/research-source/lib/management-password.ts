@@ -21,6 +21,13 @@ function reviewerPepper() {
   if (secret.length < 32) throw new RequestError("مفتاح حماية حساب المراجع غير مهيأ.", 503);
   return "sabeq-memo-reviewer-v1:" + secret;
 }
+function operatorPepper() {
+  const configured = configuration("operator");
+  if (configured) return configured.pepper;
+  const secret = (env as unknown as { AUTH_SECRET?: string }).AUTH_SECRET || "";
+  if (secret.length < 32) throw new RequestError("مفتاح حماية حساب المتابعة غير مهيأ.", 503);
+  return "sabeq-operator-v1:" + secret;
+}
 function reviewerPasswordValid(value: string) {
   return value.length >= 9 && value.length <= 256 && /[a-z]/.test(value) && /[A-Z]/.test(value) && /[0-9]/.test(value) && /[^A-Za-z0-9]/.test(value);
 }
@@ -80,10 +87,11 @@ async function accountRoster() {
     ids.add(override.id);
     const account = accounts.find(a => a.id === override.id);
     if (account) Object.assign(account, { username: override.username, salt: override.salt, hash: override.hash, sessionVersion: override.sessionVersion });
-    else if (override.id.startsWith("reviewer:")) {
-      accounts.push({ username: override.username, seedUsername: override.id.slice("reviewer:".length), role: "reviewer",
+    else if (override.id.startsWith("reviewer:") || override.id.startsWith("operator:")) {
+      const role = override.id.startsWith("reviewer:") ? "reviewer" : "operator";
+      accounts.push({ username: override.username, seedUsername: override.id.slice(role.length + 1), role,
         id: override.id, salt: override.salt, hash: override.hash, sessionVersion: override.sessionVersion,
-        enabled: true, pepper: reviewerPepper() });
+        enabled: true, pepper: role === "reviewer" ? reviewerPepper() : operatorPepper() });
     } else invalid();
   }
   if (new Set(accounts.map(a => a.username)).size !== accounts.length) invalid();
@@ -100,23 +108,26 @@ export async function managementAccounts(data: Record<string, unknown> | null, m
   if (!data) return safeAccounts(roster, manager);
   if (Object.keys(data).some(key => !["action", "id", "username", "newPassword", "confirmPassword", "revision"].includes(key))) throw new RequestError("يمكن تعديل اسم المستخدم وكلمة المرور فقط.");
   if (typeof data.revision !== "string" || data.revision !== roster.saved.revision) throw new RequestError("تغيرت حسابات اللوحة أثناء التعديل. حدّث القائمة ثم أعد المحاولة.", 409);
-  if (data.action === "create-reviewer") {
+  if (data.action === "create-reviewer" || data.action === "create-operator") {
     if (data.id !== undefined) throw new RequestError("طلب إنشاء الحساب غير صحيح.");
     const username = normalizeManagementUsername(data.username);
     const password = data.newPassword, confirmation = data.confirmPassword;
-    if (!USERNAME.test(username)) throw new RequestError("اسم المراجع غير صحيح.");
+    const role = data.action === "create-operator" ? "operator" : "reviewer";
+    const pepper = role === "operator" ? operatorPepper() : reviewerPepper();
+    if (!USERNAME.test(username)) throw new RequestError("اسم الحساب غير صحيح.");
     if (roster.accounts.some(a => a.username === username)) throw new RequestError("اسم المستخدم مستخدم بالفعل.", 409);
-    if (typeof password !== "string" || !reviewerPasswordValid(password)) throw new RequestError("كلمة مرور المراجع تتطلب 9 محارف على الأقل وحروفاً كبيرة وصغيرة وأرقاماً ورمزاً.");
+    const valid = typeof password === "string" && (role === "reviewer" ? reviewerPasswordValid(password) : password.length >= 16 && password.length <= 256 && /\S/.test(password));
+    if (!valid) throw new RequestError("كلمة المرور غير كافية الأمان لهذا الحساب.");
     if (password !== confirmation) throw new RequestError("تأكيد كلمة المرور غير مطابق.");
     const salt = toHex(crypto.getRandomValues(new Uint8Array(16)));
-    const hash = toHex(await pbkdf2Async(sha256, await peppered(password, reviewerPepper()), fromHex(salt), { c: ITERATIONS, dkLen: 32, asyncTick: 10 }));
-    const created: AccountOverride = { id: "reviewer:" + username, username, salt, hash, sessionVersion: toHex(crypto.getRandomValues(new Uint8Array(16))) };
+    const hash = toHex(await pbkdf2Async(sha256, await peppered(password, pepper), fromHex(salt), { c: ITERATIONS, dkLen: 32, asyncTick: 10 }));
+    const created: AccountOverride = { id: role + ":" + username, username, salt, hash, sessionVersion: toHex(crypto.getRandomValues(new Uint8Array(16))) };
     const next: AccountStore = { version: 1, revision: toHex(crypto.getRandomValues(new Uint8Array(16))), accounts: [...roster.saved.accounts, created] };
     const sealed = await sealConfig(next);
     const result = await getD1().prepare("INSERT INTO management_vault (integration, sealed, updated_by) VALUES (?, ?, ?) ON CONFLICT(integration) DO UPDATE SET sealed = excluded.sealed, updated_by = excluded.updated_by, updated_at = CURRENT_TIMESTAMP WHERE management_vault.sealed = ?")
       .bind(VAULT_KEY, sealed, manager.email, roster.sealed).run();
     if (result.meta.changes !== 1) throw new RequestError("حفظ مشرف آخر تعديلاً متزامناً. حدّث القائمة ثم أعد المحاولة.", 409);
-    return { ok: true, created: true, username, role: "reviewer" };
+    return { ok: true, created: true, username, role };
   }
   if (data.action !== undefined) throw new RequestError("العملية غير مدعومة.");
   const account = roster.accounts.find(a => a.id === data.id);

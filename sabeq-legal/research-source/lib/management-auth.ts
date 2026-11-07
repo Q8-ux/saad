@@ -24,9 +24,23 @@ export function assertManagerAction(manager: Manager, action: string, method: "G
     throw new RequestError("ليست لديك صلاحية لإجراء هذه العملية.", 403);
   }
 }
-type Runtime = { AUTH_SECRET?: string; MANAGEMENT_ALLOWED_EMAILS?: string; MANAGEMENT_OWNER_EMAIL?: string };
+type Runtime = { AUTH_SECRET?: string; MANAGEMENT_ALLOWED_EMAILS?: string; MANAGEMENT_OWNER_EMAIL?: string; MANAGEMENT_LOGIN_MODE?: string };
+const RESTRICTED_LOGIN_MODE = "password_only_two_users";
+// Passwords and peppered hashes remain server-side. This opt-in switch must be
+// activated only after both credentials have been installed and tested.
+function passwordOnlyMode() {
+  const mode = managementRuntime().MANAGEMENT_LOGIN_MODE || "";
+  // A typo in a security-critical switch must not silently restore SSO.
+  if (mode && mode !== RESTRICTED_LOGIN_MODE) throw new RequestError("إعداد سياسة الدخول غير صحيح.", 503);
+  return mode === RESTRICTED_LOGIN_MODE;
+}
+function permittedStaff(username: string, role: Manager["role"]) {
+  return (username === "saad" && role === "administrator") || (username === "ahmad" && role === "operator");
+}
 export const managementRuntime = () => env as unknown as Runtime;
 export async function managerAllowed(email: string) {
+  // Disable all email/SSO access when password-only access is activated.
+  if (passwordOnlyMode()) return false;
   const runtime = managementRuntime();
   if (`${runtime.MANAGEMENT_ALLOWED_EMAILS || ""},${runtime.MANAGEMENT_OWNER_EMAIL || ""}`.split(/[\s,;]+/).filter(Boolean).map(s => s.toLowerCase()).includes(email.trim().toLowerCase())) return true;
   const account = await getD1().prepare("SELECT u.id FROM public_users u JOIN user_access_policies p ON p.user_id = u.id WHERE u.email = ? AND u.status = 'active' AND p.role = 'administrator' LIMIT 1").bind(email.trim().toLowerCase()).first();
@@ -54,6 +68,7 @@ export async function signIntegration(value: string, secret?: string) {
   return Array.from(new Uint8Array(await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(value))), b => b.toString(16).padStart(2, "0")).join("");
 }
 export async function managerLogin(request: Request) {
+  if (passwordOnlyMode()) throw new RequestError("استخدم اسم المستخدم وكلمة المرور.", 410);
   const url = new URL(request.url), challenge = url.searchParams.get("challenge") || "", state = url.searchParams.get("state") || "";
   if (!/^[A-Za-z0-9_-]{43}$/.test(challenge) || !/^[A-Za-z0-9_-]{32,80}$/.test(state)) throw new RequestError("ابدأ الدخول من رابط لوحة التحكم.");
   const user = await getChatGPTUser(request);
@@ -75,6 +90,7 @@ export async function managerLogin(request: Request) {
   return new Response(null, { status: 302, headers: { Location: target.href, "Cache-Control": "no-store", "Referrer-Policy": "no-referrer" } });
 }
 export async function exchangeManagerCode(data: Record<string, unknown>) {
+  if (passwordOnlyMode()) throw new RequestError("تم إيقاف الدخول بالبريد. استخدم اسم المستخدم وكلمة المرور.", 410);
   const code = typeof data.code === "string" ? data.code : "", verifier = typeof data.verifier === "string" ? data.verifier : "";
   if (!/^[A-Za-z0-9_-]{43}$/.test(code) || !/^[A-Za-z0-9_-]{43,128}$/.test(verifier)) throw new RequestError("انتهى طلب الدخول. أعد المحاولة.", 401);
   const row = await getD1().prepare("DELETE FROM management_login_codes WHERE code_hash = ? AND challenge = ? AND expires_at > ? RETURNING email, name")
@@ -91,6 +107,9 @@ export async function passwordManagerLogin(request: Request, data: Record<string
   await enforceRateLimit(rateRequest, "management-password-login", 30);
   await enforceRateLimit(rateRequest, `management-password-account:${await digest(normalizeManagementUsername(data.username).slice(0, 64))}`, 8);
   const account = await authenticateManagementPassword(data);
+  if (passwordOnlyMode() && !permittedStaff(account.username, account.role)) {
+    throw new RequestError("اسم المستخدم أو كلمة المرور غير صحيحين.", 401);
+  }
    const now = Math.floor(Date.now() / 1000), token = randomToken(), expiresAt = now + 8 * 3600;
   await getD1().prepare("INSERT INTO management_sessions (token_hash, email, name, expires_at, last_seen_at) VALUES (?, ?, ?, ?, ?)")
     .bind(await digest(token), account.sessionPrincipal, account.username, expiresAt, now).run();
@@ -105,6 +124,11 @@ export async function requireManager(request: Request) {
   const passwordSession = !!row && /^(staff|staff-admin|staff-reviewer):/.test(row.email);
   const staff = passwordSession ? await managementPasswordSession(row!.email) : null;
    if (!row || (passwordSession ? !staff : !(await managerAllowed(row.email)))) throw new RequestError("انتهت الجلسة الإدارية. سجّل الدخول مجدداً.", 401);
+  // The public UI cannot grant privileges. Re-evaluate policy for every
+  // protected request, including sessions created before the switch.
+  if (passwordOnlyMode() && (!staff || !permittedStaff(staff.username, staff.role))) {
+    throw new RequestError("لم تعد هذه الجلسة مخوّلة للدخول.", 401);
+  }
   await getD1().prepare("UPDATE management_sessions SET last_seen_at = ? WHERE token_hash = ?").bind(now, hash).run();
   return { email: staff?.identity || row.email, name: staff?.username || row.name, ...(staff ? { username: staff.username } : {}), role: (staff?.role || "administrator") as "operator" | "administrator" | "reviewer", hash };
 }
