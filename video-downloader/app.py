@@ -270,14 +270,12 @@ async def download(clip: Clip, request: Request):
     folder = Path(tempfile.mkdtemp(prefix="video-hub-"))
     try:
         async with slots:
-            data = await read_info(url)
-            if public and (data.get("duration") or 0) > PUBLIC_MAX_DURATION:
-                raise HTTPException(413, "مدة الفيديو تتجاوز 10 دقائق للتنزيل المباشر.")
-            video_id = re.sub(
-                r"[^a-zA-Z0-9_-]", "", str(data.get("id") or "")
-            )[:40] or "video"
+            # Download once. Previously read_info() extracted metadata first,
+            # then yt-dlp extracted the same URL again. Transient extractor
+            # failures caused a usable preview but a failed download.
             args = [
                 "--max-filesize", f"{PUBLIC_MAX_MB if public else MAX_MB}M",
+                "--match-filter", f"duration <= {PUBLIC_MAX_DURATION if public else MAX_DURATION}",
                 "--restrict-filenames", "--no-write-thumbnail",
                 "-o", str(folder / "clip-%(id)s.%(ext)s"),
             ]
@@ -307,6 +305,9 @@ async def download(clip: Clip, request: Request):
         effective_max = min(MAX_BYTES, PUBLIC_MAX_MB * 1024 * 1024) if public else MAX_BYTES
         if not 0 < media.stat().st_size <= effective_max:
             raise HTTPException(413, "حجم الملف أكبر من الحد المسموح.")
+        video_id = re.sub(
+            r"[^a-zA-Z0-9_-]", "", media.stem.removeprefix("clip-")
+        )[:40] or "video"
         return FileResponse(
             media,
             media_type="audio/mpeg" if clip.kind == "audio" else "video/mp4",
