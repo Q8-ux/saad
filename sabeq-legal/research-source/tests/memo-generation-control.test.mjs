@@ -73,3 +73,16 @@ test('missing sources, unknown markers and drafting-ineligible records remain re
   assert.equal(review('المادة 12 【م1】', [{ ...base, corpus: { ...base.corpus, draftingEligible: false } }], options).ok, false);
 });
 
+test('health reports the same control revision used by the memo validator', async () => {
+  const api = load('../app/api/health/route.ts', {
+    '@/lib/official-legislation': { officialVerificationSummary: () => ({ status: 'synthetic-health-fixture' }) },
+    'cloudflare:workers': { env: { LEGAL_AI_PROVIDER: 'gemini', GEMINI_MODEL: 'gemini-3.5-flash' } },
+    '@/db': { getD1: () => ({ prepare: () => ({ first: async () => ({ count: 0 }) }) }) },
+    '@/lib/request-security': { privateJson: Response.json.bind(Response) },
+  });
+  const value = await (await api.GET()).json();
+  assert.equal(value.memoControlRevision, 'memo-generation-control-1');
+  assert.equal(value.textProvider, 'gemini');
+  assert.equal(value.textModel, 'gemini-3.5-flash');
+  assert.equal(value.textProviderRevision, 'gemini-structured-3');
+});

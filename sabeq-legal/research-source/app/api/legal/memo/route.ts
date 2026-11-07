@@ -284,7 +284,7 @@ export async function POST(request: Request) {
   } catch (error) {
     if (managementRequestId) await finishMemoRequest(managementRequestId, request.signal.aborted ? "cancelled" : "failed", "", error instanceof RequestError ? `request_${error.status}` : "generation_failed").catch(() => undefined);
     const openAIError = openAIErrorResponse(error, "تعذر توليد المذكرة حالياً. يرجى المحاولة لاحقاً.");
-    if (openAIError) return privateJson({ error: openAIError.message }, openAIError.status);
+    if (openAIError) return privateJson({ error: openAIError.message, ...(managementRequestId ? { requestId: managementRequestId } : {}), serviceCode: openAIError.code, upstreamStatus: openAIError.upstreamStatus }, openAIError.status);
     if (error instanceof RequestError && "stage" in error && "missingFacts" in error) return privateJson({ error: error.message, stage: error.stage, missingFacts: error.missingFacts }, error.status);
     if (error instanceof RequestError) return errorResponse(error);
     return privateJson({ error: "تعذر توليد المذكرة حالياً. يرجى المحاولة لاحقاً." }, 503);

@@ -1,0 +1,36 @@
+name: Sabeq Gemini provider contract
+on:
+  pull_request:
+    paths:
+      - 'sabeq-legal/research-source/lib/gemini.ts'
+      - 'sabeq-legal/research-source/lib/openai.ts'
+      - 'sabeq-legal/research-source/tests/gemini*'
+      - 'sabeq-legal/research-source/tests/model-compatibility.test.mjs'
+      - '.github/workflows/sabeq-gemini-provider.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'sabeq-legal/research-source/lib/gemini.ts'
+      - 'sabeq-legal/research-source/lib/openai.ts'
+      - 'sabeq-legal/research-source/tests/gemini*'
+      - 'sabeq-legal/research-source/tests/model-compatibility.test.mjs'
+      - '.github/workflows/sabeq-gemini-provider.yml'
+permissions:
+  contents: read
+jobs:
+  synthetic-provider-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: sabeq-legal/research-source
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: sabeq-legal/research-source/package-lock.json
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Test schemas, cancellation, transient failures and real Worker transport
+        run: node --test tests/gemini.test.mjs tests/model-compatibility.test.mjs tests/gemini-worker-transport.test.mjs
