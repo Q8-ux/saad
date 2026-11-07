@@ -141,3 +141,26 @@ test('Gemini can clear an obsolete court while null still leaves it unchanged', 
     assert.doesNotMatch(result.assistantMessage,/__SABEQ_EMPTY__/);
   }
 });
+
+test('Gemini recovers explicit temporary rejection within three attempts', async () => {
+  let calls=0;
+  const {api}=client('unused',async()=>++calls<3 ? Response.json({}, {status:503}) : Response.json({candidates:[{finishReason:'STOP',content:{parts:[{text:'synthetic recovered output'}]}}]}),{LEGAL_AI_PROVIDER:'gemini',GEMINI_API_KEY:'synthetic-gemini-key'});
+  assert.equal(await api.generateText({instructions:'synthetic',input:'synthetic'}),'synthetic recovered output');
+  assert.equal(calls,3);
+});
+
+test('Gemini retry budget preserves failures and never repeats invalid or accepted incomplete output', async () => {
+  for(const [status,expected] of [[503,3],[400,1],[401,1],[429,1],[200,1]]) {
+    let calls=0;
+    const {api}=client('unused',async()=>{calls++;return Response.json(status===200?{candidates:[{finishReason:'MAX_TOKENS'}]}:{},{status});},{LEGAL_AI_PROVIDER:'gemini',GEMINI_API_KEY:'synthetic-gemini-key'});
+    await assert.rejects(api.generateText({instructions:'synthetic',input:'synthetic'}));
+    assert.equal(calls,expected);
+  }
+});
+
+test('cancellation prevents a retry after an explicit temporary rejection', async () => {
+  const controller=new AbortController();let calls=0;
+  const {api}=client('unused',async()=>{calls++;controller.abort();return Response.json({},{status:503});},{LEGAL_AI_PROVIDER:'gemini',GEMINI_API_KEY:'synthetic-gemini-key'});
+  await assert.rejects(api.generateText({instructions:'synthetic',input:'synthetic',signal:controller.signal}),error=>error.kind==='timeout');
+  assert.equal(calls,1);
+});

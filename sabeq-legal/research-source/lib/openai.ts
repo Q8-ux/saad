@@ -134,11 +134,24 @@ function getTextEnvironment(intake = false) {
 
 async function textModelFetch(init: RequestInit, attempts = 3) {
   if ((env as unknown as OpenAIEnvironment).LEGAL_AI_PROVIDER?.trim() !== "gemini") return openAIFetch("responses", "https://api.openai.com/v1/responses", init, attempts);
-  try { return await geminiTextResponse(init, getTextEnvironment()); }
-  catch (error) {
-    if (error instanceof GeminiServiceError) throw new OpenAIServiceError(error.kind, error.status, error.upstreamStatus);
-    throw error;
+  const budget = Math.max(1, Math.min(attempts, 3));
+  for (let attempt = 0; attempt < budget; attempt += 1) {
+    try {
+      if (init.signal?.aborted) throw new OpenAIServiceError("timeout");
+      return await geminiTextResponse(init, getTextEnvironment());
+    } catch (error) {
+      if (init.signal?.aborted) throw new OpenAIServiceError("timeout");
+      // Retry only an explicit transient rejection, never accepted output,
+      // authentication, malformed requests, or an ambiguous lost response.
+      if (error instanceof GeminiServiceError && [502, 503, 504].includes(error.upstreamStatus || 0) && attempt < budget - 1) {
+        await new Promise(resolve => setTimeout(resolve, 650 * (attempt + 1)));
+        continue;
+      }
+      if (error instanceof GeminiServiceError) throw new OpenAIServiceError(error.kind, error.status, error.upstreamStatus);
+      throw error;
+    }
   }
+  throw new OpenAIServiceError("upstream");
 }
 
 // Keep non-reasoning models (including GPT-4.1) compatible across every
