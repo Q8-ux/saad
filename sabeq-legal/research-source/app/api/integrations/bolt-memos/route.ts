@@ -7,13 +7,13 @@ export const dynamic = "force-dynamic";
 const adminVerifyUrl = "https://tuhxdirrffnxtosqaoiq.supabase.co/functions/v1/admin-verify";
 const adminOrigin = "https://q8-ux-sabeq-admin-co-u4ma.bolt.host";
 const maxBodyBytes = 2048;
-const json = (value: unknown, status = 200) => Response.json(value, {
+const json = (value: unknown, status = 200, origin?: string | null) => Response.json(value, {
   status,
   headers: {
     "Cache-Control": "private, no-store",
     "X-Content-Type-Options": "nosniff",
     "Referrer-Policy": "no-referrer",
-    "Access-Control-Allow-Origin": adminOrigin,
+    ...(origin === adminOrigin ? { "Access-Control-Allow-Origin": adminOrigin } : {}),
     "Vary": "Origin",
   },
 });
@@ -41,26 +41,27 @@ async function hasAdminSession(request: Request) {
 
 export async function POST(request: Request) {
   const origin = request.headers.get("origin");
-  if (origin && origin !== adminOrigin && origin !== new URL(request.url).origin) return json({ error: "Origin not authorized" }, 403);
+  const reply = (value: unknown, status = 200) => json(value, status, origin);
+  if (origin && origin !== adminOrigin && origin !== new URL(request.url).origin) return reply({ error: "Origin not authorized" }, 403);
   const declaredLength = Number(request.headers.get("content-length") || 0);
-  if (declaredLength > maxBodyBytes) return json({ error: "Payload too large" }, 413);
+  if (declaredLength > maxBodyBytes) return reply({ error: "Payload too large" }, 413);
   const raw = await request.text();
-  if (new TextEncoder().encode(raw).length > maxBodyBytes) return json({ error: "Payload too large" }, 413);
+  if (new TextEncoder().encode(raw).length > maxBodyBytes) return reply({ error: "Payload too large" }, 413);
 
   let payload: Record<string, unknown>;
   try {
     payload = JSON.parse(raw);
-    if (!payload || typeof payload !== "object" || Array.isArray(payload)) return json({ error: "Invalid request" }, 400);
+    if (!payload || typeof payload !== "object" || Array.isArray(payload)) return reply({ error: "Invalid request" }, 400);
   } catch {
-    return json({ error: "Invalid request" }, 400);
+    return reply({ error: "Invalid request" }, 400);
   }
 
-  if (!(await hasAdminSession(request))) return json({ error: "Unauthorized" }, 401);
+  if (!(await hasAdminSession(request))) return reply({ error: "Unauthorized" }, 401);
 
   try {
     if (payload.action === "list") {
       const offset = payload.offset ?? 0;
-      if (!Number.isSafeInteger(offset) || Number(offset) < 0 || Number(offset) > 100_000) return json({ error: "Invalid pagination" }, 400);
+      if (!Number.isSafeInteger(offset) || Number(offset) < 0 || Number(offset) > 100_000) return reply({ error: "Invalid pagination" }, 400);
       const result = await managerMemos(new URL(`/api/management/memos?source=current&offset=${offset}`, request.url));
       const records = (result.memos || []).slice(0, 50).map((row: Record<string, unknown>) => ({
         id: row.id,
@@ -73,16 +74,16 @@ export async function POST(request: Request) {
         has_output: row.has_output === true || row.has_output === 1,
         source: row.source || "hosted",
       }));
-      return json({ success: true, memos: records, hasMore: result.hasMore === true, offset: result.offset || 0, source: "sabeq-site" });
+      return reply({ success: true, memos: records, hasMore: result.hasMore === true, offset: result.offset || 0, source: "sabeq-site" });
     }
 
     if (payload.action === "get") {
       const id = payload.id;
-      if (typeof id !== "string" || !/^(?:official:|legacy:)?[a-zA-Z0-9_-]{8,96}$/.test(id)) return json({ error: "Invalid memo ID" }, 400);
+      if (typeof id !== "string" || !/^(?:official:|legacy:)?[a-zA-Z0-9_-]{8,96}$/.test(id)) return reply({ error: "Invalid memo ID" }, 400);
       const result = await managerMemos(new URL(`https://sabeq-legal-public.centrino.chatgpt.site/api/management/memos?id=${encodeURIComponent(id)}`));
       const memo = result.memo as Record<string, unknown> | undefined;
-      if (!memo) return json({ error: "Memo not found" }, 404);
-      return json({ success: true, memo: {
+      if (!memo) return reply({ error: "Memo not found" }, 404);
+      return reply({ success: true, memo: {
         id: memo.id,
         client_name: memo.client_name || memo.title || "",
         case_type: memo.case_type || memo.service_type || "",
@@ -95,9 +96,9 @@ export async function POST(request: Request) {
       } });
     }
 
-    return json({ error: "Unknown action" }, 400);
+    return reply({ error: "Unknown action" }, 400);
   } catch {
-    return json({ error: "Memo source unavailable" }, 502);
+    return reply({ error: "Memo source unavailable" }, 502);
   }
 }
 
