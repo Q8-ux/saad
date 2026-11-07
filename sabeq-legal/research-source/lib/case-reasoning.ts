@@ -178,7 +178,7 @@ export function parseCaseAudit(raw:string,plan:CasePlan,content?:PleadingContent
     if(check.status==="blocked"&&plan.issues[check.issueIndex].sourceMarkers.length&&!plan.issues[check.issueIndex].missing&&!plan.researchGaps.length&&!plan.missingFacts.length) throw Error("unexplained blocked issue");
   }
   const defenseReview=content?reviewDefenseSubstance(a,plan,content,evidence):null;
-  return { ...a,defenseReview, ok:a.roleConsistent&&a.factsPreserved&&a.reliefConsistent&&!a.unsupportedAssertions.length&&a.checks.every(c=>c.status!=="omitted")&&(!defenseReview||defenseReview.ok), complete:a.checks.every(c=>c.status==="addressed")&&!plan.missingFacts.length&&!plan.researchGaps.length&&plan.issues.every(i=>i.sourceMarkers.length>0&&!i.missing)&&(!defenseReview||defenseReview.ok)&&(!content||a.checks.every(c=>Boolean(c.substance?.sourceMarkers.length))) };
+  return { ...a,defenseReview, ok:a.roleConsistent&&a.factsPreserved&&a.reliefConsistent&&!a.unsupportedAssertions.length&&a.checks.every(c=>c.status==="addressed")&&(!defenseReview||defenseReview.ok), complete:a.checks.every(c=>c.status==="addressed")&&!plan.missingFacts.length&&!plan.researchGaps.length&&plan.issues.every(i=>i.sourceMarkers.length>0&&!i.missing)&&(!defenseReview||defenseReview.ok)&&(!content||a.checks.every(c=>Boolean(c.substance?.sourceMarkers.length))) };
 }
 export function caseQualitySummary(plan:CasePlan,audit:ReturnType<typeof parseCaseAudit>|null,content:PleadingContent,sourceCount:number) {
   const notices=[...plan.missingFacts,...plan.researchGaps,...plan.issues.map(i=>i.missing).filter(Boolean),...content.factualNotes];

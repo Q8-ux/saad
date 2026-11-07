@@ -56,7 +56,7 @@ test('a defense must cite its own planned source, not a different source elsewhe
 test('blocked research remains incomplete and does not require fabricated reasoning excerpts',()=>{
  const blocked={...strongAudit,checks:[{issueIndex:0,status:'blocked',reason:'لا يتوافر سند للمسألة',substance:{factQuote:'',applicationQuote:'',opposingQuote:'',responseQuote:'',sourceMarkers:[]}}]};
  const result=api.parseCaseAudit(JSON.stringify(blocked),plan,{...content,grounds:''},[]);
- assert.equal(result.ok,true);assert.equal(result.defenseReview.blocked,1);assert.equal(result.complete,false);
+ assert.equal(result.ok,false);assert.equal(result.defenseReview.blocked,1);assert.equal(result.complete,false);
  assert.equal(api.parseCaseAudit(JSON.stringify(blocked),plan,content,[]).ok,false);
 });
 test('retrieval preserves candidates for later issues instead of filling the budget from the first query',()=>{
