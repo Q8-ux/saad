@@ -39,7 +39,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           python - <<'PY'
-          import io,json,os,pathlib,subprocess,tarfile,urllib.request,zipfile
+          import io,json,os,pathlib,shutil,subprocess,tarfile,urllib.request,zipfile
           root=pathlib.Path('_site');root.mkdir(exist_ok=True)
           base='https://api.github.com/repos/'+os.environ['GITHUB_REPOSITORY']
           headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'}
