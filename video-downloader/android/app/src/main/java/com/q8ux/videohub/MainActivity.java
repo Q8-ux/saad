@@ -3,7 +3,6 @@ package com.q8ux.videohub;
 import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -14,10 +13,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.MediaStore;
-import android.security.keystore.KeyGenParameterSpec;
-import android.security.keystore.KeyProperties;
 import android.text.InputType;
-import android.util.Base64;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
@@ -40,22 +36,15 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.security.KeyStore;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.crypto.Cipher;
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.GCMParameterSpec;
 
 public final class MainActivity extends Activity {
     private static final String API = "https://video-hub-api-production.up.railway.app";
-    private static final String KEY_ALIAS = "q8ux_video_hub_android_v1";
-    private static final String PREFS_NAME = "video_hub_private";
     private static final int BG = Color.rgb(17, 15, 36);
     private static final int CARD = Color.rgb(30, 25, 53);
     private static final int BORDER = Color.rgb(79, 67, 112);
@@ -72,7 +61,7 @@ public final class MainActivity extends Activity {
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private final Handler handler = new Handler(Looper.getMainLooper());
 
-    private EditText urlInput, passwordInput;
+    private EditText urlInput;
     private TextView status, previewTitle, previewMeta, headerStatus;
     private Button inspectButton, mp4Button, mp3Button, qualityButton, openFileButton;
     private ProgressBar progress;
@@ -91,11 +80,6 @@ public final class MainActivity extends Activity {
         getWindow().setNavigationBarColor(BG);
         getWindow().getDecorView().setSystemUiVisibility(0);
         buildLayout();
-        String secret = decryptSavedPassword();
-        if (!secret.isEmpty()) {
-            passwordInput.setText(secret);
-            note("كلمة مرور المحرك محفوظة بتشفير Android Keystore. ضع رابط الفيديو وابدأ الفحص.", false);
-        }
         handleIncoming(getIntent());
         checkHealth();
     }
@@ -158,7 +142,7 @@ public final class MainActivity extends Activity {
         return v;
     }
 
-    private EditText input(String hint, boolean password) {
+    private EditText input(String hint) {
         EditText v = new EditText(this);
         v.setSingleLine(true);
         v.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
@@ -167,9 +151,7 @@ public final class MainActivity extends Activity {
         v.setHint(hint);
         v.setPadding(dp(14), dp(11), dp(14), dp(11));
         v.setBackground(shape(Color.rgb(21, 17, 40), BORDER, 12));
-        v.setInputType(password ?
-            InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD :
-            InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_URI);
+        v.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_URI);
         v.setTextDirection(View.TEXT_DIRECTION_LTR);
         v.setGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
         return v;
@@ -241,7 +223,7 @@ public final class MainActivity extends Activity {
         root.addView(card, width(27));
 
         card.addView(text("رابط الفيديو", 14, TEXT, true));
-        urlInput = input("https://www.youtube.com/watch?v=...", false);
+        urlInput = input("https://www.youtube.com/watch?v=...");
         card.addView(urlInput, width(10));
 
         LinearLayout actions = horizontal();
@@ -260,15 +242,6 @@ public final class MainActivity extends Activity {
         qualityParams.rightMargin = dp(8);
         actions.addView(qualityButton, qualityParams);
         card.addView(actions, width(12));
-
-        card.addView(text("كلمة مرور المحرك", 13, MUTED, true), width(20));
-        passwordInput = input("أدخل كلمة المرور الخاصة بموقعك", true);
-        card.addView(passwordInput, width(9));
-
-        Button savePassword = button("🔒 حفظ كلمة المرور بتشفير الجهاز", false);
-        savePassword.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
-        savePassword.setOnClickListener(v -> storePassword());
-        card.addView(savePassword, width(10));
 
         inspectButton = button("فحص الفيديو ←", true);
         inspectButton.setOnClickListener(v -> inspect());
@@ -321,7 +294,7 @@ public final class MainActivity extends Activity {
         root.addView(tips, width(27));
         tips.addView(text("✓ استقبال روابط «مشاركة» من تطبيقات الفيديو", 13, TEXT, true));
         tips.addView(text("✓ حفظ MP4 وMP3 في مجلد Downloads/VideoHub", 12, MUTED, false), width(8));
-        tips.addView(text("✓ لا يُحفظ مفتاح الخادم داخل ملف APK", 12, MUTED, false), width(8));
+        tips.addView(text("✓ الاستخدام دون كلمة مرور مع حدود لحماية الخدمة", 12, MUTED, false), width(8));
         tips.addView(text("ملاحظة: أبقِ التطبيق مفتوحًا حتى انتهاء تنزيل الملف. الجودة وعدم وجود علامة مائية يعتمدان على نسخة المصدر.", 11, MUTED, false), width(12));
 
         TextView footer = text("مسار الفيديو • خاص بالاستخدام المصرح به\nلا يتجاوز تسجيل الدخول أو حماية DRM", 11, MUTED, false);
@@ -407,20 +380,11 @@ public final class MainActivity extends Activity {
         return false;
     }
 
-    private String password() {
-        return passwordInput.getText().toString().trim();
-    }
-
     private void inspect() {
         if (busy) return;
         String link = urlInput.getText().toString().trim();
-        String secret = password();
         if (!supported(link)) {
             note("أدخل رابط HTTPS عامًا من إحدى المنصات المدعومة.", true);
-            return;
-        }
-        if (secret.isEmpty()) {
-            note("أدخل كلمة مرور المحرك أولًا؛ لن تُضمّن كلمة المرور في التطبيق.", true);
             return;
         }
         clipUrl = "";
@@ -437,7 +401,7 @@ public final class MainActivity extends Activity {
                 body.put("url", link);
                 body.put("quality", quality);
                 JSONObject info = new JSONObject(readJsonResponse(
-                    createRequest("/api/info", secret, body)));
+                    createRequest("/api/public/info", body)));
                 String title = info.optString("title", "Video");
                 String platform = info.optString("platform", "Video");
                 String uploader = info.optString("uploader", "");
@@ -475,7 +439,7 @@ public final class MainActivity extends Activity {
     }
 
     private HttpURLConnection createRequest(
-        String path, String secret, JSONObject body) throws IOException {
+        String path, JSONObject body) throws IOException {
         HttpURLConnection con = (HttpURLConnection) new URL(API + path).openConnection();
         con.setRequestMethod("POST");
         con.setInstanceFollowRedirects(false);
@@ -484,7 +448,6 @@ public final class MainActivity extends Activity {
         con.setReadTimeout(190000);
         con.setRequestProperty("Content-Type", "application/json; charset=utf-8");
         con.setRequestProperty("Accept", "application/json, video/mp4, audio/mpeg");
-        con.setRequestProperty("X-Download-Key", secret);
         byte[] bytes = body.toString().getBytes(StandardCharsets.UTF_8);
         con.setFixedLengthStreamingMode(bytes.length);
         try (OutputStream stream = con.getOutputStream()) {
@@ -511,7 +474,6 @@ public final class MainActivity extends Activity {
         String detail = "";
         try { detail = new JSONObject(payload).optString("detail", ""); }
         catch (JSONException ignored) {}
-        if (code == 401) return new IOException("كلمة مرور المحرك غير صحيحة.");
         if (code == 429) return new IOException("طلبات كثيرة خلال وقت قصير؛ حاول لاحقًا.");
         if (code == 504) return new IOException("انتهت مهلة التحميل لدى المزود.");
         return new IOException(detail.isEmpty() ?
@@ -539,7 +501,7 @@ public final class MainActivity extends Activity {
                 JSONObject state = new JSONObject(json);
                 online = "ok".equals(state.optString("status"))
                     && "yt-dlp".equals(state.optString("engine"))
-                    && state.optBoolean("configured", false);
+                    && state.optBoolean("public_app_mode", false);
             } catch (Exception ignored) {
             } finally {
                 if (con != null) con.disconnect();
@@ -552,11 +514,6 @@ public final class MainActivity extends Activity {
 
     private void download(String kind) {
         if (busy || clipUrl.isEmpty()) return;
-        String secret = password();
-        if (secret.isEmpty()) {
-            note("أدخل كلمة مرور المحرك أولًا.", true);
-            return;
-        }
         String link = clipUrl;
         String targetQuality = quality;
         String name = "VideoHub-" + clipId + ("audio".equals(kind) ? ".mp3" : ".mp4");
@@ -573,7 +530,7 @@ public final class MainActivity extends Activity {
                 body.put("url", link);
                 body.put("kind", kind);
                 body.put("quality", targetQuality);
-                con = createRequest("/api/download", secret, body);
+                con = createRequest("/api/public/download", body);
                 if (con.getResponseCode() != 200) throw networkError(con);
                 String mediaType = con.getContentType();
                 if (mediaType == null || (!mediaType.startsWith(mime)
@@ -667,59 +624,5 @@ public final class MainActivity extends Activity {
         }
     }
 
-    private SecretKey keystoreKey() throws Exception {
-        KeyStore store = KeyStore.getInstance("AndroidKeyStore");
-        store.load(null);
-        if (store.containsAlias(KEY_ALIAS)) {
-            return (SecretKey) store.getKey(KEY_ALIAS, null);
-        }
-        KeyGenerator generator = KeyGenerator.getInstance(
-            KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore");
-        KeyGenParameterSpec params = new KeyGenParameterSpec.Builder(
-            KEY_ALIAS, KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
-            .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
-            .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
-            .setKeySize(256)
-            .build();
-        generator.init(params);
-        return generator.generateKey();
-    }
 
-    private void storePassword() {
-        String value = password();
-        if (value.isEmpty()) {
-            note("أدخل كلمة المرور قبل الحفظ.", true);
-            return;
-        }
-        try {
-            Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
-            cipher.init(Cipher.ENCRYPT_MODE, keystoreKey());
-            String iv = Base64.encodeToString(cipher.getIV(), Base64.NO_WRAP);
-            String encrypted = Base64.encodeToString(
-                cipher.doFinal(value.getBytes(StandardCharsets.UTF_8)), Base64.NO_WRAP);
-            getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit()
-                .putString("secret", iv + ":" + encrypted).apply();
-            note("✓ تم حفظ كلمة المرور بتشفير AES/GCM داخل الجهاز.", false);
-        } catch (Exception ex) {
-            note("تعذّر حفظ كلمة المرور بشكل آمن؛ يمكنك استخدامها في هذه الجلسة.", true);
-        }
-    }
-
-    private String decryptSavedPassword() {
-        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-        String encoded = prefs.getString("secret", "");
-        if (encoded == null || encoded.isEmpty()) return "";
-        try {
-            String[] pieces = encoded.split(":", 2);
-            if (pieces.length != 2) return "";
-            Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
-            byte[] iv = Base64.decode(pieces[0], Base64.NO_WRAP);
-            byte[] bytes = Base64.decode(pieces[1], Base64.NO_WRAP);
-            cipher.init(Cipher.DECRYPT_MODE, keystoreKey(), new GCMParameterSpec(128, iv));
-            return new String(cipher.doFinal(bytes), StandardCharsets.UTF_8);
-        } catch (Exception ex) {
-            prefs.edit().remove("secret").apply();
-            return "";
-        }
-    }
 }
