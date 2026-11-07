@@ -179,10 +179,7 @@ export function parseCaseAudit(raw:string,plan:CasePlan,content?:PleadingContent
   }
   const defenseReview=content?reviewDefenseSubstance(a,plan,content,evidence):null;
   const consistent=a.roleConsistent&&a.factsPreserved&&a.reliefConsistent&&!a.unsupportedAssertions.length;
-  // Partial acceptance is distinct from ok/complete. Existing prose must have
-  // verified reasoning; only explicitly missing research may remain blocked.
-  const partialDraftSafe=Boolean(content?.grounds.trim()&&consistent&&defenseReview?.ok&&a.checks.some(c=>c.status==="addressed")&&a.checks.some(c=>c.status==="blocked")&&a.checks.every(c=>c.status==="addressed"||(c.status==="blocked"&&c.reason.trim()&&Boolean(plan.issues[c.issueIndex].missing.trim()||plan.missingFacts.length||plan.researchGaps.length))));
-  return { ...a,defenseReview,partialDraftSafe, ok:consistent&&a.checks.every(c=>c.status==="addressed")&&(!defenseReview||defenseReview.ok), complete:a.checks.every(c=>c.status==="addressed")&&!plan.missingFacts.length&&!plan.researchGaps.length&&plan.issues.every(i=>i.sourceMarkers.length>0&&!i.missing)&&(!defenseReview||defenseReview.ok)&&(!content||a.checks.every(c=>Boolean(c.substance?.sourceMarkers.length))) };
+  return { ...a,defenseReview, ok:consistent&&a.checks.every(c=>c.status==="addressed")&&(!defenseReview||defenseReview.ok), complete:a.checks.every(c=>c.status==="addressed")&&!plan.missingFacts.length&&!plan.researchGaps.length&&plan.issues.every(i=>i.sourceMarkers.length>0&&!i.missing)&&(!defenseReview||defenseReview.ok)&&(!content||a.checks.every(c=>Boolean(c.substance?.sourceMarkers.length))) };
 }
 export function caseQualitySummary(plan:CasePlan,audit:ReturnType<typeof parseCaseAudit>|null,content:PleadingContent,sourceCount:number) {
   const notices=[...plan.missingFacts,...plan.researchGaps,...plan.issues.map(i=>i.missing).filter(Boolean),...content.factualNotes];

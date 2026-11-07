@@ -117,38 +117,12 @@ export async function POST(request: Request) {
     const checkedPlan = casePlan;
     evidence=applyCheckedJudgmentMatches(evidence,checkedPlan);
     let agentAudit: unknown;
-    // Never publish fabricated legal citations; preserve an unpaid factual
-    // draft for counsel instead of sending the visitor back to the beginning.
-    // Paid orders must not be silently downgraded.
-    async function factualReviewDraft(reasonCodes: string[]): Promise<Response> {
-      const safeContent: PleadingContent = {
-        facts: memoInput.facts,
-        requests: memoInput.requests,
-        grounds: "",
-        fields: extraFields,
-        factualNotes: factualRequirements([...preparationNotes, ...matter.missing.map(g => g.ar)]),
-        legalResearchNotes: "",
-      };
-      const document = buildPleadingDocument(template.info, template.definition, kind, memoInput, safeContent);
-      const finalMemo = pleadingText(document);
-      const baseQuality = caseQualitySummary(checkedPlan, null, safeContent, 0);
-      const caseQuality = {
-        ...baseQuality,
-        status: "incomplete" as const,
-        notices: [...new Set([...baseQuality.notices, "تعذّر توثيق الاستشهادات القانونية آلياً. هذه مسودة وقائع وطلبات فقط، وليست مذكرة دفاع مكتملة؛ يتولى المحامي مراجعة الأسانيد قبل تقديمها للمحكمة."])],
-      };
+    // Incomplete research stays pending; never substitute facts-only output
+    // for the integrated memorandum requested by the visitor.
+    async function pendingSourceReview(reasonCodes: string[]): Promise<Response> {
       signal.throwIfAborted();
-      await finishMemoRequest(managementRequestId, "needs_review", finalMemo, "draft_source_review_pending");
-      if (user) await recordServiceActivity({userId:user.id, serviceType:"memo",title:`${document.title} — ${clientName}`,inputText:JSON.stringify({...memoInput,legalIssues}),outputText:finalMemo,metadata:{managementRequestId,caseNumber,documentKind:document.kind,sourceReviewPending:true}});
-      return privateJson({
-        requestId: managementRequestId, caseQuality, memo: finalMemo, document,
-        template: template.info, sourceCoverage: legalSourceCoverage([]),
-        sourceVerification: officialVerificationSummary(), memoControlRevision, defenseRevision,
-        engineRevision: "source-review-factual-draft-1",
-        analysis: {sourceCount:0, lawCount:0, cassationCount:0, sources:[],missingSources:true,researchNotice:caseQuality.notices.join(" ")},
-        stage: "draft_source_review_pending",
-        reviewIssues: [...new Set(reasonCodes)],
-      });
+      await finishMemoRequest(managementRequestId,"needs_review","","source_review");
+      return privateJson({requestId:managementRequestId,error:"لم تكتمل مراجعة أسانيد الدفوع ونصوص المواد. احتُفظ ببياناتك للمراجعة؛ لن تُسلّم مذكرة ناقصة.",stage:"source_review",issues:[...new Set(reasonCodes)]},422);
     }
     let secondaryReviewAttempted = false;
     async function finish(content: PleadingContent, qualityRetried = false): Promise<Response> {
@@ -199,7 +173,7 @@ export async function POST(request: Request) {
         missingStatutes=missingPlannedStatutoryCitations(checkedPlan,evidence,content.grounds);
       }
       if(!citationReview.ok || missingStatutes.length) {
-        if (!paymentLease) return factualReviewDraft([...citationReview.issues.map(i=>i.code), ...(missingStatutes.length ? ["missing_planned_article_text"] : [])]);
+        if (!paymentLease) return pendingSourceReview([...citationReview.issues.map(i=>i.code), ...(missingStatutes.length ? ["missing_planned_article_text"] : [])]);
         await finishMemoRequest(managementRequestId, "needs_review", "", "source_review");
         return privateJson({requestId:managementRequestId,error:citationFailureMessage,stage:"source_review",sourceScope:"bound_file_and_reviewed_judgments",issues:[...new Set([...citationReview.issues.map(i=>i.code),...(missingStatutes.length?["missing_planned_article_text"]:[])])]},422);
       }
@@ -210,7 +184,7 @@ export async function POST(request: Request) {
       // Cleanup must not remove a quoted article or sever its source identity.
       const finalCitations=reviewLegalCitations(`${content.grounds}\n${content.requests}`,evidence,{requireJudgmentAnalogy:true,courtDocument:true,requireArticleText:true});
       if(!finalCitations.ok || missingPlannedStatutoryCitations(checkedPlan,evidence,content.grounds).length) {
-        if (!paymentLease) return factualReviewDraft([...finalCitations.issues.map(i=>i.code), "post_cleanup_source_review"]);
+        if (!paymentLease) return pendingSourceReview([...finalCitations.issues.map(i=>i.code), "post_cleanup_source_review"]);
         await finishMemoRequest(managementRequestId, "needs_review", "", "source_review");
         return privateJson({requestId:managementRequestId,error:citationFailureMessage,stage:"source_review",issues:[...new Set([...finalCitations.issues.map(i=>i.code),...(missingPlannedStatutoryCitations(checkedPlan,evidence,content.grounds).length?["missing_planned_article_text"]:[])])]},422);
       }
@@ -225,8 +199,8 @@ export async function POST(request: Request) {
         try {
           caseAudit = parseCaseAudit(auditText,checkedPlan,content,evidence);
         } catch { throw new RequestError("لم تكتمل مراجعة اتساق الدفوع والوقائع. احتفظ ببياناتك وأعد المحاولة.",422); }
-        if(!caseAudit.ok&&!(qualityRetried&&!paymentLease&&caseAudit.partialDraftSafe)) {
-          if(qualityRetried&&!paymentLease&&!content.grounds.trim()&&caseAudit.roleConsistent&&caseAudit.factsPreserved&&caseAudit.reliefConsistent&&!caseAudit.unsupportedAssertions.length&&caseAudit.checks.every(check=>check.status==="blocked"))return factualReviewDraft(["defense_research_pending"]);
+        if(!caseAudit.ok) {
+          if(qualityRetried&&!paymentLease&&!content.grounds.trim()&&caseAudit.roleConsistent&&caseAudit.factsPreserved&&caseAudit.reliefConsistent&&!caseAudit.unsupportedAssertions.length&&caseAudit.checks.every(check=>check.status==="blocked"))return pendingSourceReview(["defense_research_pending"]);
           if(qualityRetried) {
             await finishMemoRequest(managementRequestId,"needs_review","","defense_review");
             return privateJson({requestId:managementRequestId,error:"لم تجتز المذكرة مراجعة اكتمال الدفوع وربطها بالوقائع والردود والأسانيد المتاحة. احتُفظ ببيانات القضية للمراجعة.",stage:"defense_review",review:{roleConsistent:caseAudit.roleConsistent,factsPreserved:caseAudit.factsPreserved,reliefConsistent:caseAudit.reliefConsistent,blockedIssueIndexes:caseAudit.checks.filter(c=>c.status==="blocked").map(c=>c.issueIndex),omittedIssueIndexes:caseAudit.checks.filter(c=>c.status==="omitted").map(c=>c.issueIndex),unsupportedAssertionCount:caseAudit.unsupportedAssertions.length,issues:caseAudit.defenseReview?.issues||[]}},422);
@@ -240,10 +214,11 @@ export async function POST(request: Request) {
       const finalMemo = pleadingText(document);
       const sources = evidence.map((item,index)=>({marker:`م${index+1}`,title:item.title,reference:item.reference||"غير محدد",kind:isCassationEvidence(item)?"cassation":"legislation",officialSource:item.officialSource,sourceUrl:item.sourceUrl,libraryUpdatedAt:item.libraryUpdatedAt||null,verification:item.verification,corpus:item.corpus,sourceAccess:item.sourceUrl?"original_link":"indexed_upload"})).filter(source=>new RegExp(`[【\\[]\\s*${source.marker}\\s*[】\\]]`).test(citedContent));
       const caseQuality=caseQualitySummary(checkedPlan,caseAudit,content,sources.length);
+      if(caseQuality.status==="incomplete") return pendingSourceReview(["incomplete_defense_coverage"]);
       signal.throwIfAborted();
       await finishMemoRequest(managementRequestId, "needs_review", finalMemo, "draft_generated");
       if(user) await recordServiceActivity({userId:user.id,serviceType:"memo",title:`${document.title} — ${clientName}`,inputText:JSON.stringify({...memoInput,legalIssues}),outputText:finalMemo,metadata:{managementRequestId,sourceCount:sources.length,caseNumber,template:template.info,documentKind:document.kind,pageSections:document.pages.length}});
-      const responseData = {requestId:managementRequestId,caseQuality,...(caseAudit.partialDraftSafe?{stage:"draft_defense_review_pending"}:{}),sourceCoverage:legalSourceCoverage(evidence),memo:finalMemo,document,template:template.info,sourceVerification:officialVerificationSummary(),memoControlRevision,defenseRevision,engineRevision:"reference-memo-sequence-verified-statutes-1",analysis:{sourceCount:sources.length,lawCount:sources.filter(s=>s.kind==="legislation").length,cassationCount:sources.filter(s=>s.kind==="cassation").length,sources,missingSources:!sources.length,researchNotice:caseQuality.status==="incomplete"?caseQuality.notices.join(" "):"",...(agentAudit?{agentAudit}:{})}};
+      const responseData = {requestId:managementRequestId,caseQuality,sourceCoverage:legalSourceCoverage(evidence),memo:finalMemo,document,template:template.info,sourceVerification:officialVerificationSummary(),memoControlRevision,defenseRevision,engineRevision:"reference-memo-sequence-verified-statutes-1",analysis:{sourceCount:sources.length,lawCount:sources.filter(s=>s.kind==="legislation").length,cassationCount:sources.filter(s=>s.kind==="cassation").length,sources,missingSources:!sources.length,researchNotice:caseQuality.status==="incomplete"?caseQuality.notices.join(" "):"",...(agentAudit?{agentAudit}:{})}};
       await completeMemoPayment(paymentLease, responseData);
       return privateJson(responseData);
     }
