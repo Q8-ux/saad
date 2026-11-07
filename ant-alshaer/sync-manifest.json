@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "project_id": "appgprj_6a7f2e060d7c81918dabd7f8c64a441f",
+  "native_base_commit": "17b1a682b634da038663fc347a1e9898455097ce",
+  "files": {
+    "app/api/feedback/transcribe/route.ts": {
+      "sha256": "f2d7b5c1d09845f0ac84400849fada43e72f472f54a834162e1a78d156c99833",
+      "base_sha256": "4ce888df891e85f0578a24006fc8b392ca6aa2273b022596ec94e3d93de3a873"
+    },
+    "app/api/media/process/route.ts": {
+      "sha256": "869b9b75340cc6a45654cc000bd1a7dd722a00217578ed3af62aaea2dd0d4088",
+      "base_sha256": "a0658b269ea4c12fe862e4b4a25230b27f16fd2f9c20e719463408e677130513"
+    },
+    "app/api/poetry/route.ts": {
+      "sha256": "705b0271399ba2c1a719a2289141309d7c7f15b8068596044689b437e914fbb7",
+      "base_sha256": "83451fb786d81e6d40aab1e8f12482396eee0457e09e2066def07837a94a345c"
+    },
+    "app/api/transcribe/route.ts": {
+      "sha256": "1baadeaaeef113f0a2d3dd2ad44b8629409fb5357566c828fe5635671b54bce5",
+      "base_sha256": "7cdca5048243a20356b7ad50e7631d24b285bbb00abf5295f33ce58d668e8e9a"
+    },
+    "app/api/version/route.ts": {
+      "sha256": "b7b7f945667a56bd5d33f50cb61e7c28a58d6c15fdcb5c520f7191fbe9610849",
+      "base_sha256": null
+    },
+    "app/globals.css": {
+      "sha256": "ac46b2fc9cb2fb1598f4acc5825b7daa87fa5248cbd7a3a72a362c1967eddf0f",
+      "base_sha256": "6be4b5fe9c26b178bb65ba92aca0983bf912b8b717601d1abd48073d47c0dee0"
+    },
+    "components/AppUpdates.tsx": {
+      "sha256": "fd071b279a091c9cf96c0e78ee112d6bba2ac50f4199438ca5c9f82aedc537a3",
+      "base_sha256": null
+    },
+    "components/PoetryStudio.tsx": {
+      "sha256": "ad57d9f930275b5bf0c48259a66226d7e00d8a811c14486defea6df13aceaf70",
+      "base_sha256": "7d2393611ece3b42dfc88376fb97db3603b785dd1ae3dc142a3f7e0bc7884a0c"
+    },
+    "docs/free-llm-and-updates.md": {
+      "sha256": "9c910404788e9f336248f2efe68b22728fec6736d0757164a8b51edece941fbd",
+      "base_sha256": null
+    },
+    "lib/app-release.ts": {
+      "sha256": "77767dbd8b947a697193f4cf1f9124810c0d616386d2356be9996b12026d2f6a",
+      "base_sha256": null
+    },
+    "lib/content-safety.ts": {
+      "sha256": "e29646f03cecc63e47d8cf90aab5af4b9284399a6c391f0c060a3ff4163b07b2",
+      "base_sha256": "f2b4067d15951a7def2c17461fe8186b36abd1940d68c55a6b24c4a4251d2984"
+    },
+    "lib/free-llm.ts": {
+      "sha256": "81b6f0333b7edceec83191f6eae656a81bdb2375a8cfbbd632d8e6239320eaa4",
+      "base_sha256": null
+    },
+    "lib/gemini.ts": {
+      "sha256": "dcd01c8baea5832aebb36cc48dbfb167dae271e67ed724d6dd6aac7f6d25fad5",
+      "base_sha256": null
+    },
+    "lib/media-transcription.ts": {
+      "sha256": "8e81ccd07af6cae10ddda095718b4f684d77d73f120a1a11a55c47a52e69d805",
+      "base_sha256": "39c0b90111939f218a083a870f9abf7279b95730da861c80a2e148f95ef4d291"
+    },
+    "lib/runtime-bindings.ts": {
+      "sha256": "0e3e00ae8d38ee0d6fe973542df969c7953e9dec2be2b3275719ffc3071228ab",
+      "base_sha256": "70d3c0e2e5ee1e022ed269d536e9a84ee47166b307d934f992b58ee1a25da2ee"
+    },
+    "lib/text-providers.ts": {
+      "sha256": "7b1fca6354b9577e81b69070bf98af7bed8a99490c707736759b104a7ecb9c48",
+      "base_sha256": null
+    },
+    "tests/free-llm.test.mjs": {
+      "sha256": "0f0da23796092216de943b80fa7d052e7ca280846e1cb10a69b3d19a63fa70e1",
+      "base_sha256": null
+    },
+    "tests/recording-analysis-flow.test.mjs": {
+      "sha256": "78e723d170241028b5370122a0d363563ba24229f1cb1eb95e5c164f22911b97",
+      "base_sha256": null
+    },
+    "tests/transcription-regression.test.mjs": {
+      "sha256": "3c7c6927fd67cb3a3fbc7e3897a58a71b14e6b6ffa175f377f2af8194eb3f6b5",
+      "base_sha256": null
+    },
+    "vite.config.ts": {
+      "sha256": "2daf1ec2afafb95531e79bd06ccff8ca5e9af9b84f504ce6ea4f42b465697cf5",
+      "base_sha256": "43e5f02f727ca043f08ebf34789f330580a7a0cb90f426c92f4a454d066988fc"
+    },
+    "worker/index.ts": {
+      "sha256": "12c9672b2e066cfc020bd6a51c336765a193efc4a7d5123fb59ce0d2c7f39925",
+      "base_sha256": "5f572e80130bce0d941b9f0a7bc2e46c3ed216a6b43e78bb7beafd6c058ff7d0"
+    }
+  }
+}
