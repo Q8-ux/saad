@@ -69,3 +69,13 @@ The Android app no longer prompts for a server password. It uses `/api/public/in
 Android v1.1.0 GitHub release: https://github.com/Q8-ux/saad/releases/tag/video-hub-android-v1.1.0
 
 The Android app ID differs from the older debug build, so it can be installed without a signature conflict. Uninstall the old app after verifying the new installation. Actual passwordless API video extraction and a TikTok MP4 download were verified from GitHub Actions on 7 Nov 2026. A YouTube sample extractor returned HTTP 422 in that test, so not every platform is confirmed working.
+
+
+## Android v1.3.0 — تحميل الفيديو
+
+- **Name:** تحميل الفيديو. Debug package: `com.q8ux.videohub.download.beta`.
+- **Direct download fix:** MP4 and MP3 controls are available before optional metadata inspection. File download calls yt-dlp only once instead of pre-reading metadata and extracting it again.
+- **Live test:** GitHub Actions verified `POST /api/public/download` with no prior `/api/public/info` call. HTTP 200, video/mp4, 3,178,456 bytes, valid `ftyp` MP4 header from a permitted TikTok sample.
+- **Android APK:** https://github.com/Q8-ux/saad/releases/download/video-hub-android-v1.3.0/Video-Downloader-Android-v1.3.0.apk
+- **Stable GitHub mirror:** https://github.com/Q8-ux/saad/raw/refs/heads/main/video-downloader/android/releases/Video-Hub-Android.apk
+- Installed versions v1.0, v1.1 and v1.2 are distinct debug packages. Use the new launcher label `تحميل الفيديو` to open the fixed build. Unsupported/blocked media still cannot be guaranteed to work.
