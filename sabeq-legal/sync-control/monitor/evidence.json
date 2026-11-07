@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "checked_at": "2026-11-07T15:08:53.362Z",
+  "source_kind": "github_snapshot",
+  "note": "قراءة موثّقة وقت الإنشاء؛ لا تثبت الحالة الحية.",
+  "repositories": [
+    {
+      "name": "Q8-ux/saad",
+      "visibility": "public"
+    },
+    {
+      "name": "Q8-ux/sabeq-admin-console",
+      "visibility": "private"
+    }
+  ],
+  "runs": [
+    {
+      "id": 42316918674,
+      "name": "Generated memos integration checks",
+      "status": "completed",
+      "conclusion": "success",
+      "at": "2026-11-07T00:13:49Z",
+      "url": "https://github.com/Q8-ux/sabeq-admin-console/actions/runs/42316918674",
+      "path": ".github/workflows/generated-memos-bridge.yml",
+      "repo": "Q8-ux/sabeq-admin-console"
+    },
+    {
+      "id": 42315649503,
+      "name": "Deploy Sabeq generated memo proxy",
+      "status": "completed",
+      "conclusion": "failure",
+      "at": "2026-11-07T00:01:48Z",
+      "url": "https://github.com/Q8-ux/sabeq-admin-console/actions/runs/42315649503",
+      "path": ".github/workflows/deploy-generated-memo-proxy.yml",
+      "repo": "Q8-ux/sabeq-admin-console"
+    },
+    {
+      "id": 42315647000,
+      "name": "Sabeq live memo bridge deployment probe",
+      "status": "completed",
+      "conclusion": "failure",
+      "at": "2026-11-07T00:02:33Z",
+      "url": "https://github.com/Q8-ux/sabeq-admin-console/actions/runs/42315647000",
+      "path": ".github/workflows/live-memo-bridge-probe.yml",
+      "repo": "Q8-ux/sabeq-admin-console"
+    }
+  ],
+  "memos": null,
+  "sync_verified": false,
+  "last_send_at": null
+}
