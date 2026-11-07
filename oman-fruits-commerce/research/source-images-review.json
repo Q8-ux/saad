@@ -618,33 +618,6 @@
           "active": true
         }
       ],
-      "candidates": [],
-      "next_action": "retain_current_oman_photo"
-    },
-    {
-      "product_id": "oman-035",
-      "name_ar": "الرقي السعودي العسلي",
-      "origin": "السعودية",
-      "original_prices": [
-        {
-          "unit": "حبة كبيرة",
-          "price_kd": "5.000",
-          "confirmed": true,
-          "active": true
-        },
-        {
-          "unit": "حبة متوسطة",
-          "price_kd": "4.000",
-          "confirmed": true,
-          "active": true
-        },
-        {
-          "unit": "حبة صغيرة",
-          "price_kd": "3.000",
-          "confirmed": true,
-          "active": true
-        }
-      ],
       "candidates": [
         {
           "provider": "جمعية دوت كوم (jm3eia.com)",
@@ -672,6 +645,33 @@
         }
       ],
       "next_action": "compare_image_and_check_rights"
+    },
+    {
+      "product_id": "oman-035",
+      "name_ar": "الرقي السعودي العسلي",
+      "origin": "السعودية",
+      "original_prices": [
+        {
+          "unit": "حبة كبيرة",
+          "price_kd": "5.000",
+          "confirmed": true,
+          "active": true
+        },
+        {
+          "unit": "حبة متوسطة",
+          "price_kd": "4.000",
+          "confirmed": true,
+          "active": true
+        },
+        {
+          "unit": "حبة صغيرة",
+          "price_kd": "3.000",
+          "confirmed": true,
+          "active": true
+        }
+      ],
+      "candidates": [],
+      "next_action": "retain_current_oman_photo"
     },
     {
       "product_id": "oman-036",
@@ -716,7 +716,7 @@
       "reason": "صور الذرة المجمدة المعبأة لا تمثل الذرة الكويتية الطازجة"
     },
     {
-      "product_id": "oman-035",
+      "product_id": "oman-034",
       "candidate": "https://furdtk.com/en/shop/chopped-sweet-potato-213729?category=3346",
       "reason": "هذه بطاطا حلوة مقطّعة ومعبأة، لا الكرتون الكامل"
     }
