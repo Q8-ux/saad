@@ -59,6 +59,31 @@ class PasswordlessPublicTests(unittest.IsolatedAsyncioTestCase):
                 video.throttle_public(req("/api/public/download"), "download")
             self.assertEqual(ex.exception.status_code, 429)
 
+
+    async def test_direct_download_does_not_repeat_metadata_fetch(self):
+        from pathlib import Path
+        from fastapi.responses import FileResponse
+
+        async def fake_command(args, timeout):
+            template = args[args.index("-o") + 1]
+            folder = Path(template).parent
+            (folder / "clip-123xyz.mp4").write_bytes(b"\\x00\\x00\\x00\\x18ftypisom" + b"0" * 3200)
+            return 0, b"", b""
+
+        with patch.object(video, "PUBLIC_APP_MODE", True), \
+             patch.object(video, "read_info", side_effect=AssertionError("Duplicate extraction")), \
+             patch.object(video, "command", new_callable=AsyncMock) as mocked:
+            mocked.side_effect = fake_command
+            response = await video.download(
+                video.Clip(url="https://youtu.be/jNQXAC9IVRw", quality="360"),
+                req("/api/public/download", ip="192.0.2.180"))
+            self.assertIsInstance(response, FileResponse)
+            self.assertIn("123xyz.mp4", response.filename)
+            self.assertEqual(mocked.await_count, 1)
+            args = mocked.await_args.args[0]
+            self.assertEqual(args[args.index("--match-filter") + 1], "duration <= 600")
+            await response.background()
+
     async def test_original_private_route_still_requires_password(self):
         with patch.object(video, "APP_PASSWORD", "private-test-key"),              patch.object(video, "authorize", wraps=video.authorize):
             with self.assertRaises(HTTPException) as ex:
