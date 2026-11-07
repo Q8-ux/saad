@@ -8,7 +8,7 @@ import { missingPlannedStatutoryCitations } from "@/lib/statutory-authority-cove
 import { reviewMissingLegalIssues } from "@/lib/meta-secondary-review";
 import { councilDefenseAuditInstructions, councilDefenseRevisionInstructions } from "@/lib/council-defense-review";
 import {scopeEvidenceToFacts,prepareBoundDraft,pleadingAuthorityInstructions} from "@/lib/bound-draft";
-import { applyCheckedJudgmentMatches, caseReasoningInstructions, caseResearchQueries, approvedCaseFacts, buildCheckedCasePlan, CasePlanValidationError, casePlanFailureMessage, caseAuditSchema, parseCaseAudit, caseQualitySummary, defenseAuditInstructions, defenseRevision } from "@/lib/case-reasoning";
+import { applyCheckedJudgmentMatches, caseReasoningInstructions, caseResearchQueries, approvedCaseFacts, buildCheckedCasePlan, CasePlanValidationError, casePlanFailureMessage, caseAuditSchemaForContent, parseCaseAudit, caseQualitySummary, defenseAuditInstructions, defenseRevision } from "@/lib/case-reasoning";
 import { legalSourceCoverage, formatSourceCoverage } from "@/lib/legal-source-coverage";
 import { loadApprovedTemplate } from "@/lib/approved-templates";
 import { arabicMemoInput } from "@/lib/memo-language";
@@ -194,7 +194,7 @@ export async function POST(request: Request) {
       {
           const auditText = await generateText({
             instructions: `${caseReasoningInstructions}\n${councilDefenseAuditInstructions}\n${defenseAuditInstructions}\nأنت مراجع مستقل لا الكاتب. قارن الناتج بالوقائع المعتمدة وخطة المسائل والمصادر. افحص كل مسألة مرة واحدة بفهرسها بدءاً من صفر. addressed فقط إذا عالجها المتن بواقعة وسند مناسب أو منازعة واقعية مبررة؛ مجرد ذكر الكلمة ليس معالجة. blocked فقط لنقص واقعي أو سند موثق مع بيان السبب خارج المتن. omitted عند إغفال مسألة مؤثرة. تحقق من عدم قلب صفات الأطراف أو إنشاء إقرار أو مبلغ أو واقعة أو طلب ضار أو غير مأذون. افحص البدائل وتوقيت السداد وأثره المشروط وعدم افتراض الخصم والتضامن. ضع الادعاءات بلا مصدر أو بوجه صلة غير صحيح في unsupportedAssertions. لا تستمد القانون من الذاكرة.`,
-            input: JSON.stringify({approvedFacts:approvedCaseFacts(memoInput),plan:checkedPlan,content,sources:formatEvidence(evidence)}),schema:caseAuditSchema,maxOutputTokens:12000,
+            input: JSON.stringify({approvedFacts:approvedCaseFacts(memoInput),plan:checkedPlan,content,sources:formatEvidence(evidence),quoteRule:"اختر اقتباساتك من enum للنص النهائي فقط. اختر factQuote الذي يقع حرفياً في applicationQuote المختار ولواقعة المسألة نفسها؛ لا تعيد صياغة الاقتباس ولا تستبدله بعبارة الخطة كاملة."}),schema:caseAuditSchemaForContent(checkedPlan,content),maxOutputTokens:12000,
           });
         try {
           caseAudit = parseCaseAudit(auditText,checkedPlan,content,evidence);
