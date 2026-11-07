@@ -9,36 +9,36 @@ const opposing='قد يقال إن الدفعة الثانية تتعلق بتع
 const response='والرد أن الوقائع المتفق عليها تخصص الدفعتين للدين نفسه، فيبقى الاحتساب مرتبطاً بهذا الإقرار دون افتراض دين آخر.';
 const plan={clientRole:'مدعى عليه',opponentRole:'مدعٍ',characterization:'مطالبة',issues:[{issue:'السداد',factQuote:fact+' في الوقائع الأصلية المفصلة.',document:'',sourceMarkers:[],application:'فحص الرصيد',counterargument:'تعامل آخر',response:'ربط الدفعات',proposedRelief:'رفض المطالبة',missing:''}],missingFacts:[],researchGaps:['لا سند قانوني في هذا الاختبار']};
 const content={facts:fact,grounds:[application,opposing,response,'نص المادة: «هذه عبارة تشريعية اصطناعية وليست تطبيقاً على واقعة أو قانوناً حقيقياً.»'].join('\n'),requests:'رفض المطالبة',fields:{},factualNotes:[],legalResearchNotes:''};
-const addressed=(s,index=0)=>s.properties.checks.items.anyOf.find(b=>b.properties.issueIndex.enum[0]===index&&b.properties.status.enum.includes('addressed'));
-const fields=s=>{
- const a=addressed(s); const choices=a?.properties.substance.anyOf||[];
- return {factQuote:{enum:['',...new Set(choices.flatMap(c=>c.properties.factQuote.enum))]},applicationQuote:{enum:['',...s.$defs.auditReasoning.enum.filter(q=>q!=='__no_reasoning__')]},sourceMarkers:choices[0]?.properties.sourceMarkers||{items:{enum:['__no_source__']}}};
-};
-test('audit schema selects real final application, objection, response and shared fact excerpts',()=>{
- const s=fields(api.caseAuditSchemaForContent(plan,content));
- for(const q of [application,opposing,response])assert.ok(s.applicationQuote.enum.includes(q));
- assert.ok(s.factQuote.enum.some(q=>q.length>=12&&application.includes(q)&&plan.issues[0].factQuote.includes(q)));
- assert.ok(!s.factQuote.enum.includes(plan.issues[0].factQuote));assert.ok(!s.applicationQuote.enum.includes('اقتباس مخترع'));
- assert.ok(!s.applicationQuote.enum.some(q=>q.includes('عبارة تشريعية اصطناعية')));
- const anchor=s.factQuote.enum.find(q=>q.length>=12&&application.includes(q));
- const audit={checks:[{issueIndex:0,status:'addressed',reason:'معالجة وقائعية',substance:{factQuote:anchor,applicationQuote:application,opposingQuote:opposing,responseQuote:response,sourceMarkers:[]}}],roleConsistent:true,factsPreserved:true,reliefConsistent:true,unsupportedAssertions:[]};
- assert.equal(api.parseCaseAudit(JSON.stringify(audit),plan,content,[]).ok,true);
- assert.equal(api.parseCaseAudit(JSON.stringify({...audit,checks:[{...audit.checks[0],substance:{...audit.checks[0].substance,responseQuote:'رد مختلق'}}]}),plan,content,[]).ok,false);
+const request=(p=plan,c=content)=>api.caseAuditRequestForContent(p,c);
+const option=(r,i=0)=>r.checkOptions.find(o=>o.issueIndex===i&&o.status==='addressed');
+const wire=(r,indices=[0])=>({checks:indices.map(i=>({checkKey:option(r,i).checkKey,reason:'معالجة وقائعية مرتبطة',substance:{opposingQuote:opposing,responseQuote:response,sourceMarkers:[]}})),roleConsistent:true,factsPreserved:true,reliefConsistent:true,unsupportedAssertions:[]});
+const compile=r=>new Ajv({allErrors:true}).compile(JSON.parse(JSON.stringify(r.schema)));
+test('flat audit choices bind the actual final application to its own approved fact without statutory quote substitution',()=>{
+ const r=request(),o=option(r),validate=compile(r),a=wire(r);
+ assert.ok(o.factQuote.length>=12&&application.includes(o.factQuote)&&plan.issues[0].factQuote.includes(o.factQuote));
+ assert.equal(o.applicationQuote,application);assert.ok(!r.checkOptions.some(o=>o.applicationQuote.includes('عبارة تشريعية اصطناعية')));
+ assert.equal(validate(a),true);const parsed=api.parseGroundedCaseAudit(JSON.stringify(a),r,plan,content,[]);
+ assert.equal(parsed.ok,true);assert.equal(parsed.complete,false,'source-less factual argument never becomes legally complete');
+ assert.equal(parsed.checks[0].substance.applicationQuote,application);
 });
-test('generic defense has no manufactured fact anchor and blocked fields remain available',()=>{
- const s=fields(api.caseAuditSchemaForContent(plan,{...content,grounds:'يتمسك مقدم المذكرة بكافة الدفوع وبما يقدم من مستندات.'}));
- assert.deepEqual(Array.from(s.factQuote.enum),['']);assert.ok(s.applicationQuote.enum.includes(''));
- assert.ok(api.caseAuditSchema.properties.checks.items.properties.status.enum.includes('blocked'));
+test('generic defense exposes only explicit unaddressed choices and cannot manufacture a fact anchor',()=>{
+ const c={...content,grounds:'يتمسك مقدم المذكرة بكافة الدفوع وبما يقدم من مستندات.'},r=request(plan,c);
+ assert.ok(r.checkOptions.every(o=>o.status!=='addressed'&&o.factQuote===''&&o.applicationQuote===''));
+ const a={...wire(request()),checks:[{checkKey:'issue_0_omitted',reason:'نص عام بلا تطبيق',substance:{opposingQuote:'',responseQuote:'',sourceMarkers:[]}}]};
+ assert.equal(compile(r)(a),true);assert.equal(api.parseGroundedCaseAudit(JSON.stringify(a),r,plan,c,[]).ok,false);
 });
-test('a literal quotation of the case facts remains part of its application, unlike a statutory text block',()=>{
+test('a literal quotation of case facts remains eligible while a labelled statutory text block does not',()=>{
  const quoted=`بحسب المدخلات «${fact}»؛ ولذلك يجب مقابلة الدفعتين بالمطالبة قبل وصف الرصيد بأنه باقٍ دون وفاء.`;
- const s=fields(api.caseAuditSchemaForContent(plan,{...content,grounds:quoted+'\n'+opposing+'\n'+response}));
- assert.ok(s.applicationQuote.enum.includes(quoted));assert.ok(s.factQuote.enum.some(q=>q.length>=12&&quoted.includes(q)));
+ const r=request(plan,{...content,grounds:quoted+'\n'+opposing+'\n'+response});assert.equal(option(r).applicationQuote,quoted);
+ assert.ok(quoted.includes(option(r).factQuote));
 });
-test('quotation pools and excerpt sizes are bounded without mutating the shared audit schema',()=>{
- const long={...content,grounds:Array.from({length:140},(_,i)=>`فقرة اختبار ${i} `+application.repeat(8)).join('\n')};
- const s=fields(api.caseAuditSchemaForContent(plan,long));
- assert.ok(s.applicationQuote.enum.length<=49);assert.ok(s.applicationQuote.enum.every(q=>q.length<=600));assert.ok(s.factQuote.enum.length<=4);
+test('flat provider schema and quotation choices remain bounded for twelve issues without anyOf or length keywords',()=>{
+ const p={...plan,issues:Array.from({length:12},()=>({...plan.issues[0]}))};
+ const c={...content,grounds:Array.from({length:80},(_,i)=>`مقطع ${i}: `+application.repeat(4)+'\n'+opposing+'\n'+response).join('\n')};
+ const r=request(p,c);let count=0,characters=0;
+ function visit(v){if(!v||typeof v!=='object')return;for(const k of ['anyOf','minLength','maxLength'])assert.equal(k in v,false);if(Array.isArray(v.enum)){count+=v.enum.length;characters+=v.enum.reduce((n,x)=>n+(typeof x==='string'?x.length:0),0);}for(const value of Object.values(v))visit(value);}
+ visit(r.schema);assert.ok(count<1000);assert.ok(characters<115000);assert.ok(r.checkOptions.length<=60);
+ assert.ok(r.checkOptions.every(o=>o.applicationQuote.length<=600));compile(r);
  assert.equal(api.caseAuditSchema.properties.checks.items.properties.substance.properties.factQuote.enum,undefined);
 });
 test('planning source markers are constrained to the server dictionary and cannot invent a precedent',async()=>{
@@ -57,7 +57,7 @@ test('no retrieved source forces empty marker arrays while audit markers use onl
   return JSON.stringify({...plan,issues:[{...plan.issues[0],factQuote:fact,sourceMarkers:[]}],precedentMatches:[]});
  });
  const p={...plan,issues:[{...plan.issues[0],sourceMarkers:['م2']}]};
- assert.deepEqual(Array.from(fields(api.caseAuditSchemaForContent(p,content)).sourceMarkers.items.enum),['م2']);
+ assert.deepEqual(Array.from(request(p,content).schema.properties.checks.items.properties.substance.properties.sourceMarkers.items.enum),['م2']);
 });
 test('precedent marker enum excludes unreviewed judicial metadata',async()=>{
  const quote='مبدأ اصطناعي طويل لتجربة ربط مصدر قضائي وهمي فقط ولا يمثل حكماً حقيقياً.';
@@ -67,33 +67,30 @@ test('precedent marker enum excludes unreviewed judicial metadata',async()=>{
   return JSON.stringify({...plan,issues:[{...plan.issues[0],factQuote:fact,sourceMarkers:['م1']}],precedentMatches:[]});
  });
 });
-test('provider schema rejects empty addressed excerpts and cross-issue facts before the independent audit',()=>{
+test('decoder derives issue and its nonempty fact/application pair from an exact known key, never model fields',()=>{
  const otherFact='ورد إقرار بتخصيص الدفعتين إلى الدين نفسه';
  const otherApplication=otherFact+' في الوقائع المتفق عليها، ولذلك لا يفترض دين آخر لإعادة توزيع قيمة الوفاء.';
- const p={...plan,issues:[plan.issues[0],{...plan.issues[0],issue:'تخصيص الوفاء',factQuote:otherFact}]};
- const c={...content,grounds:[application,otherApplication,opposing,response].join('\n')};
- const s=api.caseAuditSchemaForContent(p,c);
- const validate=new Ajv({allErrors:true}).compile(JSON.parse(JSON.stringify(s)));
- const checks=p.issues.map((_,i)=>{
-  const properties=addressed(s,i).properties.substance.anyOf[0].properties;
-  return {issueIndex:i,status:'addressed',reason:'تطبيق على الواقعة المعتمدة',substance:{factQuote:properties.factQuote.enum[0],applicationQuote:properties.applicationQuote.enum[0],opposingQuote:opposing,responseQuote:response,sourceMarkers:[]}};
- });
- const audit={checks,roleConsistent:true,factsPreserved:true,reliefConsistent:true,unsupportedAssertions:[]};
- assert.equal(validate(audit),true,JSON.stringify(validate.errors));
- assert.equal(api.parseCaseAudit(JSON.stringify(audit),p,c,[]).ok,true);
- for(const changes of [{factQuote:''},{factQuote:checks[1].substance.factQuote},{applicationQuote:otherApplication},{factQuote:checks[1].substance.factQuote,applicationQuote:otherApplication}]){
-  const invalid=structuredClone(audit);Object.assign(invalid.checks[0].substance,changes);assert.equal(validate(invalid),false);
- }
- const omitted=structuredClone(audit);omitted.checks[0]={issueIndex:0,status:'omitted',reason:'المعالجة غير كافية',substance:{factQuote:'',applicationQuote:'',opposingQuote:'',responseQuote:'',sourceMarkers:[]}};
- assert.equal(validate(omitted),true);assert.equal(api.parseCaseAudit(JSON.stringify(omitted),p,c,[]).ok,false);
- const repeated=structuredClone(audit);repeated.checks[0].substance.responseQuote=checks[0].substance.applicationQuote;
- assert.equal(api.parseCaseAudit(JSON.stringify(repeated),p,c,[]).ok,false,'schema does not replace independent distinct-reasoning validation');
+ const p={...plan,issues:[plan.issues[0],{...plan.issues[0],issue:'التخصيص',factQuote:otherFact}]};
+ const c={...content,grounds:[application,otherApplication,opposing,response].join('\n')},r=request(p,c),a=wire(r,[0,1]);
+ assert.equal(compile(r)(a),true);let parsed=api.parseGroundedCaseAudit(JSON.stringify(a),r,p,c,[]);assert.equal(parsed.ok,true);
+ assert.ok(parsed.checks[0].substance.applicationQuote.includes(parsed.checks[0].substance.factQuote));
+ assert.ok(p.issues[0].factQuote.includes(parsed.checks[0].substance.factQuote));
+ const forged=structuredClone(a);Object.assign(forged.checks[0],{issueIndex:1,status:'omitted'});Object.assign(forged.checks[0].substance,{factQuote:'معلومة مخترعة',applicationQuote:otherApplication});
+ assert.equal(compile(r)(forged),false);parsed=api.parseGroundedCaseAudit(JSON.stringify(forged),r,p,c,[]);
+ assert.equal(parsed.checks[0].issueIndex,0);assert.equal(parsed.checks[0].status,'addressed');assert.equal(parsed.checks[0].substance.applicationQuote,application);
+ for(const key of ['','issue_99_addressed_0','issue_0_addressed_99']){const invalid=structuredClone(a);invalid.checks[0].checkKey=key;assert.equal(compile(r)(invalid),false);assert.throws(()=>api.parseGroundedCaseAudit(JSON.stringify(invalid),r,p,c,[]));}
+ const duplicate=structuredClone(a);duplicate.checks[1].checkKey=duplicate.checks[0].checkKey;assert.throws(()=>api.parseGroundedCaseAudit(JSON.stringify(duplicate),r,p,c,[]));
 });
-test('audit schema remains within provider enum budgets with twelve issues and bounded shared definitions',()=>{
- const p={...plan,issues:Array.from({length:12},()=>({...plan.issues[0]}))};
- const c={...content,grounds:Array.from({length:80},(_,i)=>`مقطع ${i}: `+application.repeat(4)+'\n'+opposing+'\n'+response).join('\n')};
- const s=api.caseAuditSchemaForContent(p,c);let count=0,characters=0;
- function visit(v){if(!v||typeof v!=='object')return;if(Array.isArray(v.enum)){count+=v.enum.length;characters+=v.enum.reduce((n,x)=>n+(typeof x==='string'?x.length:0),0);}for(const value of Object.values(v))visit(value);}
- visit(s);assert.ok(count<1000);assert.ok(characters<115000);assert.equal(s.properties.checks.items.anyOf.length,24);
- new Ajv().compile(JSON.parse(JSON.stringify(s)));
+test('selected keys cannot bypass empty, invented or repeated rebuttals, unsupported claims, role or relief checks',()=>{
+ const r=request(),a=wire(r);
+ for(const changes of [{responseQuote:''},{responseQuote:application},{opposingQuote:'اقتباس مخترع'}, {responseQuote:'رد قصير'}]){const invalid=structuredClone(a);Object.assign(invalid.checks[0].substance,changes);assert.equal(api.parseGroundedCaseAudit(JSON.stringify(invalid),r,plan,content,[]).ok,false);}
+ for(const changes of [{roleConsistent:false},{factsPreserved:false},{reliefConsistent:false},{unsupportedAssertions:['ادعاء غير مسند']}])assert.equal(api.parseGroundedCaseAudit(JSON.stringify({...a,...changes}),r,plan,content,[]).ok,false);
+});
+test('selected grounded audit still requires the issue own cited source and keeps omitted issues incomplete',()=>{
+ const p={...plan,researchGaps:[],issues:[{...plan.issues[0],sourceMarkers:['م1']}]};
+ const c={...content,grounds:content.grounds+'\n【م1】 【م2】'},r=request(p,c),a=wire(r),e=[{documentId:1,text:'مصدر اختبار اصطناعي'},{documentId:2,text:'مصدر آخر اصطناعي'}];
+ assert.equal(api.parseGroundedCaseAudit(JSON.stringify(a),r,p,c,e).ok,false);
+ a.checks[0].substance.sourceMarkers=['م2'];assert.equal(api.parseGroundedCaseAudit(JSON.stringify(a),r,p,c,e).ok,false);
+ a.checks[0].substance.sourceMarkers=['م1'];const parsed=api.parseGroundedCaseAudit(JSON.stringify(a),r,p,c,e);assert.equal(parsed.ok,true);assert.equal(parsed.complete,true);
+ a.checks[0].checkKey='issue_0_omitted';const omitted=api.parseGroundedCaseAudit(JSON.stringify(a),r,p,c,e);assert.equal(omitted.ok,false);assert.equal(omitted.complete,false);
 });

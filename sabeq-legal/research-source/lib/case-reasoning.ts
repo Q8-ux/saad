@@ -153,7 +153,8 @@ export const caseAuditSchema={type:"object",additionalProperties:false,required:
 /** Constrain the auditor to actual final prose, rather than asking it to
  * reconstruct quotations from memory. The independent validator below is
  * unchanged and still checks the issue, fact, application and source link. */
-export function caseAuditSchemaForContent(plan:CasePlan,content:PleadingContent){
+export type GroundedAuditOption={checkKey:string;issueIndex:number;status:'addressed'|'blocked'|'omitted';factQuote:string;applicationQuote:string};
+export function caseAuditRequestForContent(plan:CasePlan,content:PleadingContent){
  const candidates:string[]=[];
  for(const part of content.grounds.split(/(?:نص المادة|مقتطف من نص المادة)\s*[:：]\s*(?:«[^»]*»|“[^”]*”|"[^"\n]*")/gu)){
   for(const sentence of part.split(/\n+|(?<=[.!؟])\s+/u)){
@@ -178,23 +179,34 @@ export function caseAuditSchemaForContent(plan:CasePlan,content:PleadingContent)
  });
  // Reserve a matching application per issue before filling the bounded pool.
  const selected=[...new Set([...anchors.flatMap(a=>{const q=candidates.find(q=>a.some(f=>q.includes(f)));return q?[q]:[];}),...candidates])].slice(0,48);
- // Addressed checks must use their OWN issue's nonempty fact/application
- // pair. A shared enum allowed the model to select an empty or another
- // issue's quote even while claiming that the issue was addressed.
- // Shared definitions avoid repeating the full response pool per issue.
- const prose={type:'string',enum:selected.length?selected:['__no_prose__']};
- const reasoning=selected.filter(q=>q.length>=40);
- const reasoningProse={type:'string',enum:reasoning.length?reasoning:['__no_reasoning__']};
- const empty={type:'string',enum:['']};
- const checks=plan.issues.flatMap((issue,index):Record<string,unknown>[]=>{
-  const base=caseAuditSchema.properties.checks.items;
+ // Bind issue, status and the actual fact/application pair through one
+ // server-created key. This flat provider schema avoids ambiguous object
+ // unions and never asks the model to recreate or cross-link quotations.
+ const checkOptions:GroundedAuditOption[]=[];
+ plan.issues.forEach((_,index)=>{
   const applications=selected.filter(q=>q.length>=40&&anchors[index].some(f=>q.includes(f))).slice(0,3);
-  const unavailable={...base,properties:{...base.properties,issueIndex:{type:'integer',enum:[index]},status:{type:'string',enum:['blocked','omitted']},substance:{...substanceSchema,properties:{factQuote:empty,applicationQuote:empty,opposingQuote:empty,responseQuote:empty,sourceMarkers:sourceMarkerArraySchema([])}}}};
-  if(!applications.length||reasoning.length<2||selected.length<3)return [unavailable];
-  const addressed={...base,properties:{...base.properties,issueIndex:{type:'integer',enum:[index]},status:{type:'string',enum:['addressed']},substance:{anyOf:applications.map(application=>({...substanceSchema,properties:{...substanceSchema.properties,factQuote:{type:'string',enum:anchors[index].filter(f=>application.includes(f))},applicationQuote:{type:'string',enum:[application]},opposingQuote:{$ref:'#/$defs/auditProse'},responseQuote:{$ref:'#/$defs/auditReasoning'},sourceMarkers:sourceMarkerArraySchema(issue.sourceMarkers)}}))}}};
-  return [addressed,unavailable];
+  if(selected.length>=3&&selected.filter(q=>q.length>=40).length>=2)applications.forEach((application,choice)=>{
+   checkOptions.push({checkKey:`issue_${index}_addressed_${choice}`,issueIndex:index,status:'addressed',factQuote:anchors[index].find(f=>application.includes(f))!,applicationQuote:application});
+  });
+  for(const status of ['blocked','omitted'] as const)checkOptions.push({checkKey:`issue_${index}_${status}`,issueIndex:index,status,factQuote:'',applicationQuote:''});
  });
- return {...caseAuditSchema,$defs:{auditProse:prose,auditReasoning:reasoningProse},properties:{...caseAuditSchema.properties,checks:{...caseAuditSchema.properties.checks,items:{anyOf:checks}}}};
+ const excerpt={type:'object',additionalProperties:false,required:['opposingQuote','responseQuote','sourceMarkers'],properties:{opposingQuote:{type:'string',enum:['',...selected]},responseQuote:{type:'string',enum:['',...selected.filter(q=>q.length>=40)]},sourceMarkers:sourceMarkerArraySchema([...new Set(plan.issues.flatMap(i=>i.sourceMarkers))])}};
+ const check={type:'object',additionalProperties:false,required:['checkKey','reason','substance'],properties:{checkKey:{type:'string',enum:checkOptions.map(o=>o.checkKey)},reason:{type:'string'},substance:excerpt}};
+ const schema={...caseAuditSchema,properties:{...caseAuditSchema.properties,checks:{type:'array',items:check}}};
+ return {schema,checkOptions};
+}
+/** Resolve a reviewer-selected key from the exact request dictionary, then
+ * run the original independent fact/source/reasoning/completeness checks. */
+export function parseGroundedCaseAudit(raw:string,request:ReturnType<typeof caseAuditRequestForContent>,plan:CasePlan,content:PleadingContent,evidence:LegalEvidence[]=[]) {
+ const wire=JSON.parse(raw);
+ if(!wire||!Array.isArray(wire.checks))throw Error('invalid audit selection');
+ const options=new Map(request.checkOptions.map(o=>[o.checkKey,o]));
+ const checks=wire.checks.map((check:{checkKey?:unknown;reason?:unknown;substance?:Record<string,unknown>})=>{
+  if(!check||typeof check.checkKey!=='string'||!options.has(check.checkKey))throw Error('unknown audit selection');
+  const option=options.get(check.checkKey)!;
+  return {issueIndex:option.issueIndex,status:option.status,reason:check.reason,substance:{...check.substance,factQuote:option.factQuote,applicationQuote:option.applicationQuote}};
+ });
+ return parseCaseAudit(JSON.stringify({...wire,checks}),plan,content,evidence);
 }
 export const defenseAuditInstructions=`لكل check أعد substance باقتباسات حرفية قصيرة من grounds النهائي فقط، وليست من الخطة أو الوقائع المنفصلة: factQuote عبارة من واقعة المسألة المعتمدة، applicationQuote جملة تطبيق تشتمل على هذه العبارة، opposingQuote الاعتراض المحتمل، responseQuote الرد المسبب عليه، وsourceMarkers المصادر المستشهد بها فعلاً لهذه المسألة من خطتها فقط. لا تختلق اقتباساً لتبرير addressed. اجعل التطبيق والرد جملتين مختلفتين لا يقل كل منهما عن 40 حرفاً، والاعتراض عن 20 حرفاً، دون إطالة مصطنعة. لا تكرر اقتباس التطبيق لمسألتين. عند عدم وجود هذه المعالجة اختر omitted؛ وعند نقص المصدر أو الواقعة الذي يمنع حتى المعالجة المشروطة اختر blocked مع سبب محدد واجعل حقول الاقتباسات فارغة. addressed يصف جودة معالجة المسألة ولا يعني ثبوت الادعاء أو قبول المحكمة له: غياب صورة التحويل مثلاً لا يمنع معالجة صلة الدفعة بالدين بشروطها واعتراضها والرد عليها، بشرط ألا يجزم النص بثبوت المستند أو السداد. يبقى نقص الإثبات في الخطة وحالة الاكتمال ولا يخفى. لا تعتبر العبارات التحفظية أو تكرار الوقائع وحده معالجة. في غياب المصادر يجوز addressed لحجة واقعية مرتبطة بالمدخلات فقط دون تقرير قانوني بلا سند؛ لا تتحول إلى مذكرة مكتملة قانونياً. افحص كل تقرير عن قاعدة قانونية أو مستند مقروء أو واقعة أو طلب غير مأذون، حتى إذا لم يتضمن رقم مادة، وضع غير المدعوم في unsupportedAssertions.`;
 
