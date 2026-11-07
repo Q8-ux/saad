@@ -39,10 +39,9 @@ jobs:
             sleep 8
             adb shell pidof com.q8ux.videohub.download.beta
             mkdir -p video-downloader/android/test-results
-            adb shell uiautomator dump /sdcard/video-hub-ui.xml
-            adb pull /sdcard/video-hub-ui.xml video-downloader/android/test-results/screen.xml
-            adb shell screencap -p /sdcard/video-hub-screen.png
-            adb pull /sdcard/video-hub-screen.png video-downloader/android/test-results/launch.png
+            adb shell uiautomator dump /data/local/tmp/video-hub-ui.xml
+            adb pull /data/local/tmp/video-hub-ui.xml video-downloader/android/test-results/screen.xml
+            adb exec-out screencap -p > video-downloader/android/test-results/launch.png
             python - <<'PY'
             from pathlib import Path
             import xml.etree.ElementTree as ET
@@ -53,6 +52,7 @@ jobs:
             assert any('تحميل MP4' in s for s in labels), 'Direct MP4 download button missing'
             assert any('تحميل MP3' in s for s in labels), 'Direct MP3 download button missing'
             assert not any('كلمة مرور' in s for s in labels), 'Password prompt persists'
+            assert any('تحميل الفيديو' in s for s in labels), 'Renamed app title missing'
             print('PASS: real Android app launched and password screen absent')
             PY
             adb logcat -d -s AndroidRuntime:E > video-downloader/android/test-results/crashes.txt
