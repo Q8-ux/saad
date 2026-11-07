@@ -43,7 +43,7 @@ export async function openRouterAsResponses(body: ResponsesPayload, apiKey: stri
   if (!apiKey.trim()) return Response.json({ error: { code: "missing_api_key", type: "configuration" } }, { status: 503 });
   const request = openRouterRequest(body, model);
   const result = await fetch(FREE_LLAMA_ENDPOINT, {
-    method: "POST",
+    method: "POST", redirect: "error",
     headers: {
       "Content-Type": "application/json",
       "Authorization": `Bearer ${apiKey}`,
@@ -68,3 +68,4 @@ export async function openRouterAsResponses(body: ResponsesPayload, apiKey: stri
   }
   return Response.json(synthetic, { headers: { "Cache-Control": "no-store" } });
 }
+

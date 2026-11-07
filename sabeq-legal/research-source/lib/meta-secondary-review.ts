@@ -61,3 +61,4 @@ export async function reviewMissingLegalIssues(
       .slice(0, 5).map(warning => warning.slice(0, 260)),
   };
 }
+

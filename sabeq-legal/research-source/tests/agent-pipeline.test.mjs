@@ -46,10 +46,11 @@ test('no-source response preserves facts and rejects invented legal grounds',asy
  }
 });
 
-function memoRoute(h, {pipeline, sources=evidence, auth=async()=>null, limits=async()=>{},model,record=async()=>{}}) {
+function memoRoute(h, {pipeline, sources=evidence, auth=async()=>null, limits=async()=>{},model,record=async()=>{},paid=false}) {
  const search=load('../lib/legal-search.ts',{'@/db':{}});
  return load('../app/api/legal/memo/route.ts',{
   '@/lib/approved-templates':h.templates,'@/lib/sabeq-agent-bridge':pipeline,
+  '@/lib/sadad-payments':{reserveMemoPayment:async()=>paid?{lease:{id:'synthetic-paid-order'}}:{},completeMemoPayment:async()=>{},releaseMemoPayment:async()=>{}},
   '@/lib/legal-search':{...search,searchLegalEvidenceAcross:async()=>sources,searchCassationEvidenceAcross:async()=>[],readHandoffEvidence:async()=>[]},
   '@/lib/openai':{deriveLegalResearchPlan:async()=>({searchQueries:[],legalIssues:[]}),openAIErrorResponse:()=>null,generateText:async options=>{
    if(model) return model(options);
@@ -149,10 +150,10 @@ test('actual agent finalization retains statutory wording through language clean
  assert.equal(archived.length,1);assert.ok(archived[0].outputText.includes(source.text));
  assert.doesNotMatch(value.memo,/يتولى المساعد البحث/);
 });
-test('memo control rejects a wrong repeated article after one correction without a success archive',async t=>{
+test('a paid memo rejects a wrong repeated article after one correction without a success archive',async t=>{
  const h=templateHarness();t.after(h.cleanup);let corrections=0,archived=0;
  const wrong='المادة (12) مكرر من القانون رقم 98765 لسنة 2000 【م1】';
- const route=memoRoute(h,{sources:[controlSource],auth:async()=>({id:'control-test-user'}),record:async()=>{archived++;},pipeline:{agentPipelineEnabled:()=>true,generateAgentPleading:async()=>({content:{...content,grounds:wrong},audit:{}})},model:controlledMemoModel(wrong,()=>{corrections++;})});
+ const route=memoRoute(h,{paid:true,sources:[controlSource],auth:async()=>({id:'control-test-user'}),record:async()=>{archived++;},pipeline:{agentPipelineEnabled:()=>true,generateAgentPleading:async()=>({content:{...content,grounds:wrong},audit:{}})},model:controlledMemoModel(wrong,()=>{corrections++;})});
  const response=await route.POST(request());assert.equal(response.status,422);const value=await response.json();
  assert.equal(value.stage,'source_review');assert.ok(value.issues.includes('unverified_article'));assert.equal(corrections,1);assert.equal(archived,0);assert.match(value.error,/احتُفظ ببياناتك/);
 });
@@ -163,4 +164,26 @@ test('memo control accepts a source-corrected draft and preserves facts and requ
  const route=memoRoute(h,{sources:[controlSource],auth:async()=>({id:'control-test-user'}),record:async value=>{archived.push(value);},pipeline:{agentPipelineEnabled:()=>true,generateAgentPleading:async()=>({content:{...content,grounds:wrong},audit:{}})},model:controlledMemoModel(correct,()=>{corrections++;})});
  const response=await route.POST(request());assert.equal(response.status,200);const value=await response.json();
  assert.equal(corrections,1);assert.equal(archived.length,1);assert.ok(value.memo.includes(caseData.facts));assert.ok(value.memo.includes(caseData.requests));assert.doesNotMatch(value.memo,/مكرر|【م\d+】/);assert.equal(value.caseQuality.humanReviewRequired,true);assert.equal(value.memoControlRevision,'memo-generation-control-1');
+});
+
+test('health reports the same control revision used by the memo validator', async () => {
+  const api = load('../app/api/health/route.ts', {
+    'cloudflare:workers': { env: {} },
+    '@/db': { getD1: () => ({ prepare: () => ({ first: async () => ({ count: 0 }) }) }) },
+    '@/lib/request-security': { privateJson: Response.json.bind(Response) },
+  });
+  const value = await (await api.GET()).json();
+  assert.equal(value.memoControlRevision, 'memo-generation-control-1');
+  assert.equal(value.defenseRevision, 'grounded-defenses-2');
+});
+
+test('an unpaid source failure preserves only facts and requests as visibly incomplete, without a fabricated defense',async t=>{
+ const h=templateHarness();t.after(h.cleanup);const archived=[];
+ const wrong='المادة (12) مكرر من القانون رقم 98765 لسنة 2000 【م1】';
+ const route=memoRoute(h,{sources:[controlSource],auth:async()=>({id:'synthetic-unpaid-case'}),record:async row=>archived.push(row),pipeline:{agentPipelineEnabled:()=>true,generateAgentPleading:async()=>({content:{...content,grounds:wrong},audit:{}})},model:controlledMemoModel(wrong)});
+ const response=await route.POST(request());assert.equal(response.status,200);const value=await response.json();
+ assert.equal(value.caseQuality.status,'incomplete');assert.equal(value.stage,'draft_source_review_pending');assert.equal(value.analysis.sourceCount,0);assert.equal(value.defenseRevision,'grounded-defenses-2');
+ assert.ok(value.memo.includes(caseData.facts));assert.ok(value.memo.includes(caseData.requests));
+ assert.doesNotMatch(value.memo,/المادة|98765|يتمسك مقدم المذكرة|الدفوع وأوجه الدفاع/);
+ assert.equal(archived.length,1);assert.equal(archived[0].metadata.sourceReviewPending,true);
 });

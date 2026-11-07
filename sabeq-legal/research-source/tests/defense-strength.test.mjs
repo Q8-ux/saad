@@ -25,6 +25,7 @@ test('empty defense content is never replaced by a stock reservation in the actu
  const template=await h.templates.loadApprovedTemplate('claim');
  const doc=pleadings.buildPleadingDocument(template.info,template.definition,'memorandum',input,{...content,grounds:''});
  assert.doesNotMatch(pleadings.pleadingText(doc),/يتمسك مقدم المذكرة بكافة أوجه الدفاع/);
+ assert.doesNotMatch(pleadings.pleadingText(doc),/الدفوع وأوجه الدفاع|يتمسك مقدم المذكرة بما ثبت/);
 });
 test('reasoned factual arguments can pass the audit without becoming legally complete or inventing authorities',()=>{
  const result=api.parseCaseAudit(JSON.stringify(strongAudit),plan,strong,[]);
@@ -56,6 +57,7 @@ test('blocked research remains incomplete and does not require fabricated reason
  const blocked={...strongAudit,checks:[{issueIndex:0,status:'blocked',reason:'لا يتوافر سند للمسألة',substance:{factQuote:'',applicationQuote:'',opposingQuote:'',responseQuote:'',sourceMarkers:[]}}]};
  const result=api.parseCaseAudit(JSON.stringify(blocked),plan,{...content,grounds:''},[]);
  assert.equal(result.ok,true);assert.equal(result.defenseReview.blocked,1);assert.equal(result.complete,false);
+ assert.equal(api.parseCaseAudit(JSON.stringify(blocked),plan,content,[]).ok,false);
 });
 test('retrieval preserves candidates for later issues instead of filling the budget from the first query',()=>{
  const search=load('../lib/legal-search.ts',{'@/db':{}});
@@ -78,4 +80,10 @@ test('language cleanup preserves an actual argument after statutory identity is 
   assert.equal(policy.removeDelegatedResearch(text),text);
  }
  assert.match(policy.removeDelegatedResearch('يرجى إرفاق النص القانوني.'),/يتولى المساعد البحث/);
+});
+test('optional secondary review stays off without explicit data approval and credentials',async()=>{
+ let calls=0;
+ const reviewer=load('../lib/meta-secondary-review.ts',{'cloudflare:workers':{env:{}},'./llama-openrouter':{openRouterAsResponses:async()=>{calls++;throw Error('must not run');},DEFAULT_FREE_LLAMA_MODEL:'synthetic:free'}});
+ for(const runtime of [{},{OPENROUTER_API_KEY:'synthetic'},{SABEQ_META_SECOND_REVIEW:'enabled',OPENROUTER_API_KEY:'synthetic'},{SABEQ_META_CASE_DATA_APPROVED:'approved',OPENROUTER_API_KEY:'synthetic'}])assert.equal(reviewer.secondaryReviewConfigured(runtime),false);
+ assert.equal(await reviewer.reviewMissingLegalIssues([{issue:'مسألة اختبارية'}],strong.grounds),null);assert.equal(calls,0);
 });

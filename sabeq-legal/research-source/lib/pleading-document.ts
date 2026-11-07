@@ -99,6 +99,25 @@ export function parsePleadingContent(text: string): PleadingContent {
     factualNotes: value.factualNotes.filter((v: unknown) => typeof v === "string"),
     fields: Object.fromEntries(Object.keys(pleadingFields).map(key => [key,typeof value.fields[key] === "string" ? value.fields[key].trim() : ""])) };
 }
+/**
+ * Keep the court-facing memorandum in the reference sequence even when the
+ * drafting model returns its grounds in one structured JSON field. Only move
+ * explicit headings; never synthesize a rebuttal, a document or a new relief.
+ */
+export function splitMemoGrounds(grounds: string) {
+  const sections: Record<"defenses"|"replies"|"documents", string[]> = {defenses:[],replies:[],documents:[]};
+  let active: "defenses"|"replies"|"documents" = "defenses";
+  for (const line of String(grounds || "").split(/\n+/u)) {
+    const heading = line.trim()
+      .replace(/[\u064b-\u065f\u0670]/gu, "")
+      .replace(/^(?:(?:أولاً|أولا|ثانياً|ثانيا|ثالثاً|ثالثا|رابعاً|رابعا|خامساً|خامسا)\s*[:：.،-]?\s*)/u, "")
+      .replace(/^[\d٠-٩۰-۹]+\s*[.)-]\s*/u, "").trim();
+    if (heading.length <= 90 && /^(?:الرد(?:ود)?\s+على|مناقشة)\s+(?:حجج|دفوع|أقوال|ادعاءات|مزاعم|اعتراضات)(?:\s|$)/u.test(heading)) { active="replies"; continue; }
+    if (heading.length <= 90 && /^(?:حافظة\s+المستندات|المستندات\s+المؤيدة)(?:\s|$)/u.test(heading)) { active="documents"; continue; }
+    if (line.trim()) sections[active].push(line.trim());
+  }
+  return {defenses:sections.defenses.join("\n").trim(),replies:sections.replies.join("\n").trim(),documents:sections.documents.join("\n").trim()};
+}
 export function buildPleadingDocument(template: TemplateInfo, definition: TemplateDefinition, kind: PleadingKind, input: PleadingInput, content: PleadingContent): PleadingDocument {
   const d = definition, L = d.labels, C = d.clauses;
   const value = (key: string) => input[key]?.trim() || content.fields[key]?.trim() || "................";
@@ -128,15 +147,33 @@ export function buildPleadingDocument(template: TemplateInfo, definition: Templa
       sidebar:[h(L.subject),p(input.caseType),...(input.caseNumber ? [p(`رقم الدعوى: ${input.caseNumber}`)] : []),p(C.responsibility,"note")],
       blocks:[p(fill(C.date)),...parties,p(fill(C.processServer)),p(C.moved),...opponent,h(L.subject),p(C.whereas),p(facts),...(grounds ? [h(L.grounds),p(grounds)] : []),h(L.therefore),p(C.relief),p(requests)],after:[h(L.basedOn),p(fill(C.summons)),p(C.reservation)]});
   } else {
+    const memo = splitMemoGrounds(grounds);
+    const hasDefenses = Boolean(memo.defenses);
+    const hasReplies = Boolean(memo.replies);
+    const hasDocuments = Boolean(memo.documents);
+    const section = (index:number,label:string) => h(`${["أولًا","ثانيًا","ثالثًا","رابعًا","خامسًا"][index]}: ${label}`);
     pages.push({title:"مذكرة بدفاع",
-      blocks:[p(`مقدمة من: ${role}`),p(`ضد: ${input.otherParty}`),p(`في الدعوى المنظورة أمام ${court}`),...(input.caseNumber ? [p(`رقم القضية: ${input.caseNumber}`)] : []),...(input.allParties ? [p(input.allParties)] : []),h("الوقائع"),p(facts),...(grounds ? [h("الدفوع وأوجه الدفاع"),p(grounds)] : []),h(L.therefore),p(C.relief),p(requests)]});
+      blocks:[
+        p(`في الدعوى المنظورة أمام ${court}`),
+        ...(input.caseNumber ? [p(`رقم القضية: ${input.caseNumber}`)] : []),
+        p(`مقدمة من: ${role}`),
+        p(`ضد: ${input.otherParty}`),
+        ...(input.allParties ? [p(input.allParties)] : []),
+        section(0,"الوقائع"),p(facts),
+        ...(hasDefenses ? [section(1,"الدفوع وأوجه الدفاع"),p(memo.defenses)] : []),
+        ...(hasReplies ? [section(hasDefenses ? 2 : 1,"الرد على حجج الخصم"),p(memo.replies)] : []),
+        section(1+Number(hasDefenses)+Number(hasReplies),"الطلبات"),
+        p(`${L.therefore || "لكل ما تقدم"}، ${C.relief || "يلتمس مقدم المذكرة الحكم بما يلي:"}`),
+        p(requests),
+        ...(hasDocuments ? [section(2+Number(hasDefenses)+Number(hasReplies),"حافظة المستندات"),p(memo.documents)] : []),
+      ]});
   }
   if (input.allParties && kind !== "memorandum") pages[0].blocks.push(h("بقية الأطراف والصفات"),p(input.allParties));
   const factual = [...content.factualNotes];
   if (kind === "appeal") for (const key of ["judgmentNumber","judgmentDate","judgmentOperative"] as const) if (value(key) === "................") factual.push(`لم تُذكر ${pleadingFields[key]}؛ تُراجع بيانات الحكم قبل إتمام الصحيفة.`);
   if (kind !== "memorandum" && (value("clientAddress") === "................" || value("otherAddress") === "................")) factual.push("تُستكمل عناوين الأطراف اللازمة للإعلان من بيانات القضية.");
   const notes = Array.from(new Set([...factual,...(content.legalResearchNotes ? [content.legalResearchNotes] : [])]));
-  return {title:kind === "memorandum" ? "مذكرة بدفاع" : d.title,kind,template,paper:d.paper,border:d.border,pages:presentationPleadingPages(pages),reviewNotes:notes,approval};
+  return {title:kind === "memorandum" ? "مذكرة بدفاع" : d.title,kind,template,paper:d.paper,border:kind === "memorandum" ? true : d.border,pages:presentationPleadingPages(pages),reviewNotes:notes,approval};
 }
 export function pleadingText(doc: PleadingDocument) {
   return presentationPleadingPages(doc.pages).map(page => [page.title,...(page.sidebar || []).map(b=>b.text),...page.blocks.map(b=>b.text),...(page.after || []).map(b=>b.text)].filter(Boolean).join("\n\n")).join("\n\n");
