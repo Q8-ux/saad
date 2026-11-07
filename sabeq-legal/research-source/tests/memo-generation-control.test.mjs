@@ -85,7 +85,7 @@ test('health reports the same control revision used by the memo validator', asyn
   assert.equal(value.memoControlRevision, 'memo-generation-control-1');
   assert.equal(value.textProvider, 'gemini');
   assert.equal(value.textModel, 'gemini-3.5-flash');
-  assert.equal(value.textProviderRevision, 'gemini-structured-4');
+  assert.equal(value.textProviderRevision, 'free-llm-routing-1');
   assert.equal(value.textFallbackProvider, null);
   runtime.LEGAL_AI_FALLBACK_PROVIDER = 'openai';
   assert.equal((await (await api.GET()).json()).textFallbackProvider, null);

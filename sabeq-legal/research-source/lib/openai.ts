@@ -10,9 +10,10 @@ import { readSSE, partialAssistantMessage } from "./intake-stream";
 import { cleanIntakeContext, cleanCaseOrientation, proceduralFacts, isLegalChoiceQuestion, hasAsked, inferQuestionKey, knownTopicsFromMessages, normalizeQuestion, readQuestionMemory, updateQuestionMemory, validIntakeQuestion, type CaseOrientation, type QuestionMemory } from "./intake-context";
 import { env } from "cloudflare:workers";
 import { geminiTextResponse, GeminiServiceError } from "./gemini";
+import { compatibleTextResponse, textProviderConfig, TextProviderError, type TextProviderEnvironment } from "./text-providers";
 import { prepareCaseContext, projectContextInstructions } from "./project-context";
 
-type OpenAIEnvironment = { OPENAI_API_KEY?: string; OPENAI_MODEL?: string; OPENAI_INTAKE_MODEL?: string; LEGAL_AI_PROVIDER?: string; LEGAL_AI_FALLBACK_PROVIDER?: string; GEMINI_API_KEY?: string; GEMINI_MODEL?: string };
+type OpenAIEnvironment = TextProviderEnvironment;
 type OpenAIOperation = "responses" | "transcription" | "speech" | "file_upload" | "file_delete";
 type OpenAIErrorKind =
   | "configuration"
@@ -121,52 +122,65 @@ function getOpenAIEnvironment() {
 }
 
 function getTextEnvironment(intake = false) {
-  const runtime = env as unknown as OpenAIEnvironment;
-  const provider = runtime.LEGAL_AI_PROVIDER?.trim() || "openai";
-  if (provider === "gemini") {
-    const apiKey = runtime.GEMINI_API_KEY?.trim();
-    if (!apiKey) throw new OpenAIServiceError("configuration");
-    return { apiKey, model: runtime.GEMINI_MODEL?.trim() || "gemini-3.8-flash" };
-  }
-  if (provider !== "openai") throw new OpenAIServiceError("configuration");
-  const config = getOpenAIEnvironment();
-  return intake ? { ...config, model: runtime.OPENAI_INTAKE_MODEL?.trim() || "gpt-4.1-mini" } : config;
+  try { return textProviderConfig(env as unknown as OpenAIEnvironment, undefined, intake); }
+  catch { throw new OpenAIServiceError("configuration"); }
 }
 
 async function textModelFetch(init: RequestInit, attempts = 3) {
-  if ((env as unknown as OpenAIEnvironment).LEGAL_AI_PROVIDER?.trim() !== "gemini") return openAIFetch("responses", "https://api.openai.com/v1/responses", init, attempts);
+  const runtime = env as unknown as OpenAIEnvironment;
+  const primary = getTextEnvironment();
   const budget = Math.max(1, Math.min(attempts, 3));
-  for (let attempt = 0; attempt < budget; attempt += 1) {
-    try {
-      if (init.signal?.aborted) throw new OpenAIServiceError("timeout");
-      return await geminiTextResponse(init, getTextEnvironment());
-    } catch (error) {
-      if (init.signal?.aborted) throw new OpenAIServiceError("timeout");
-      // Retry only an explicit transient rejection, never accepted output,
-      // authentication, malformed requests, or an ambiguous lost response.
-      if (error instanceof GeminiServiceError && [502, 503, 504].includes(error.upstreamStatus || 0) && attempt < budget - 1) {
-        await new Promise(resolve => setTimeout(resolve, 650 * (attempt + 1)));
-        continue;
+  async function run(config: ReturnType<typeof textProviderConfig>, count: number, request: RequestInit): Promise<Response> {
+    if (request.signal?.aborted) throw new OpenAIServiceError("timeout");
+    if (config.provider === "openai") return openAIFetch("responses", config.endpoint, request, count);
+    for (let attempt = 0; attempt < count; attempt += 1) {
+      try {
+        if (request.signal?.aborted) throw new OpenAIServiceError("timeout");
+        return config.provider === "gemini" ? await geminiTextResponse(request, config) : await compatibleTextResponse(request, config);
+      } catch (error) {
+        if (request.signal?.aborted) throw new OpenAIServiceError("timeout");
+        if ((error instanceof GeminiServiceError || error instanceof TextProviderError) && [502, 503, 504].includes(error.upstreamStatus || 0) && attempt < count - 1) {
+          await new Promise(resolve => setTimeout(resolve, 650 * (attempt + 1)));
+          continue;
+        }
+        throw error;
       }
-      const runtime = env as unknown as OpenAIEnvironment;
-      // Only a rejected request can cross to the explicitly configured existing
-      // provider; accepted, ambiguous, cancelled and one-attempt calls never do.
-      if (budget > 1 && error instanceof GeminiServiceError && [429, 502, 503, 504].includes(error.upstreamStatus || 0)
-        && runtime.LEGAL_AI_FALLBACK_PROVIDER?.trim() === "openai" && runtime.OPENAI_API_KEY?.trim()) {
-        const { apiKey, model } = getOpenAIEnvironment();
-        const { model: _primaryModel, reasoning: _primaryReasoning, ...body } = JSON.parse(String(init.body));
-        console.warn("Text provider fallback started", { from: "gemini", to: "openai", upstreamStatus: error.upstreamStatus });
-        return openAIFetch("responses", "https://api.openai.com/v1/responses", {
-          ...init, redirect: "manual",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
-          body: JSON.stringify({ ...body, model, ...responseModelOptions(model), store: false }),
-        }, 1);
-      }
-      if (error instanceof GeminiServiceError) throw new OpenAIServiceError(error.kind, error.status, error.upstreamStatus);
-      throw error;
     }
+    throw new OpenAIServiceError("upstream");
   }
-  throw new OpenAIServiceError("upstream");
+  try {
+    let response: Response;
+    try {
+      response = await run(primary, budget, init);
+      if (response.ok || ![429, 502, 503, 504].includes(response.status)) return response;
+    } catch (error) {
+      if (!(error instanceof GeminiServiceError || error instanceof TextProviderError) || ![429, 502, 503, 504].includes(error.upstreamStatus || 0)) throw error;
+      response = new Response(null, { status: error.upstreamStatus! });
+    }
+    if (init.signal?.aborted) throw new OpenAIServiceError("timeout");
+    const alternate = runtime.LEGAL_AI_FALLBACK_PROVIDER?.trim();
+    if (budget <= 1 || !alternate || alternate === primary.provider) {
+      if (primary.provider === "openai") return response;
+      throw new OpenAIServiceError(response.status === 429 ? "rate_limit" : "upstream", response.status === 429 ? 429 : 503, response.status);
+    }
+    let fallback: ReturnType<typeof textProviderConfig>;
+    try { fallback = textProviderConfig(runtime, alternate); }
+    catch {
+      if (primary.provider === "openai") return response;
+      throw new OpenAIServiceError(response.status === 429 ? "rate_limit" : "upstream", response.status === 429 ? 429 : 503, response.status);
+    }
+    const { model: _model, reasoning: _reasoning, ...body } = JSON.parse(String(init.body));
+    console.warn("Text provider fallback started", { from: primary.provider, to: fallback.provider, upstreamStatus: response.status });
+    return await run(fallback, 1, {
+      ...init, redirect: "manual",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${fallback.apiKey}` },
+      body: JSON.stringify({ ...body, model: fallback.model, ...(fallback.provider === "openai" ? responseModelOptions(fallback.model) : {}), store: false }),
+    });
+  } catch (error) {
+    if (init.signal?.aborted) throw new OpenAIServiceError("timeout");
+    if (error instanceof GeminiServiceError || error instanceof TextProviderError) throw new OpenAIServiceError(error.kind, error.status, error.upstreamStatus);
+    throw error;
+  }
 }
 
 // Keep non-reasoning models (including GPT-4.1) compatible across every
