@@ -2,7 +2,7 @@ type GeminiConfig = { apiKey: string; model: string };
 type GeminiErrorKind = "configuration" | "authentication" | "rate_limit" | "model_access" | "timeout" | "network" | "incomplete" | "empty_response" | "upstream";
 
 export class GeminiServiceError extends Error {
-  constructor(public kind: GeminiErrorKind, public status = 503) {
+  constructor(public kind: GeminiErrorKind, public status = 503, public upstreamStatus?: number) {
     super(`GEMINI_${kind.toUpperCase()}`);
   }
 }
@@ -102,7 +102,8 @@ export async function geminiTextResponse(init: RequestInit, config: GeminiConfig
   }
   if (!response.ok) {
     const kind = [401, 403].includes(response.status) ? "authentication" : response.status === 429 ? "rate_limit" : response.status === 404 ? "model_access" : "upstream";
-    throw new GeminiServiceError(kind, kind === "rate_limit" ? 429 : 503);
+    console.error("Gemini upstream rejected request", { kind, upstreamStatus: response.status });
+    throw new GeminiServiceError(kind, kind === "rate_limit" ? 429 : 503, response.status);
   }
   let payload;
   try { payload = await response.json(); } catch { throw new GeminiServiceError("upstream"); }

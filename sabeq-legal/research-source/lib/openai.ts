@@ -104,7 +104,7 @@ export class OpenAIServiceError extends Error {
   kind: OpenAIErrorKind;
   status: number;
 
-  constructor(kind: OpenAIErrorKind, status = 503) {
+  constructor(kind: OpenAIErrorKind, status = 503, public upstreamStatus?: number) {
     super(`OPENAI_${kind.toUpperCase()}`);
     this.name = "OpenAIServiceError";
     this.kind = kind;
@@ -136,7 +136,7 @@ async function textModelFetch(init: RequestInit, attempts = 3) {
   if ((env as unknown as OpenAIEnvironment).LEGAL_AI_PROVIDER?.trim() !== "gemini") return openAIFetch("responses", "https://api.openai.com/v1/responses", init, attempts);
   try { return await geminiTextResponse(init, getTextEnvironment()); }
   catch (error) {
-    if (error instanceof GeminiServiceError) throw new OpenAIServiceError(error.kind, error.status);
+    if (error instanceof GeminiServiceError) throw new OpenAIServiceError(error.kind, error.status, error.upstreamStatus);
     throw error;
   }
 }
@@ -233,7 +233,7 @@ export function openAIErrorResponse(error: unknown, fallback: string) {
     empty_response: "لم تُرجع خدمة الذكاء الاصطناعي نصاً صالحاً. يرجى المحاولة مجدداً.",
     upstream: fallback,
   }[error.kind];
-  return { message, status: error.status };
+  return { message, status: error.status, code: error.kind, upstreamStatus: error.upstreamStatus };
 }
 
 export async function generateText(options: { instructions: string; input: string; maxOutputTokens?: number; schema?: Record<string,unknown>; signal?: AbortSignal }) {
