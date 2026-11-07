@@ -5,7 +5,7 @@ import {judgmentContext,type JudgmentReference} from './judgment-evidence';
 
 export type LegalEvidence = {
   judgment?:JudgmentReference;
-  corpus?: {scope:string;sourceId:string;sourceSha256:string;databaseSha256:string;recordId:string;continuationPage?:number|null;textSha256:string;page:number;printedPage:string|null;documentId:string;documentTitle:string;articleNumber:string|null;detectedArticleNumber:string|null;articleIdentityUnique:boolean;completeArticleVerified:boolean;currentLawVerified:boolean;reviewStatus:string;editionClaim:string;lawIdentity?:{number:number;year:number;header:string;reviewStatus:string}|null;context:{previousPage:number|null;nextPage:number|null};previousText:string;nextText:string;ocr:unknown;draftingEligible?:boolean;fullImageTranscriptionVerified?:boolean;unresolvedFields?:unknown;sourceImageSha256?:string;hashScope?:string};
+  corpus?: {scope:string;sourceId:string;sourceSha256:string;databaseSha256:string;recordId:string;continuationPage?:number|null;textSha256:string;page:number;printedPage:string|null;documentId:string;documentTitle:string;articleNumber:string|null;detectedArticleNumber:string|null;articleIdentityUnique:boolean;completeArticleVerified:boolean;currentLawVerified:boolean;reviewStatus:string;editionClaim:string;lawIdentity?:{number:number;year:number;header:string;reviewStatus:string}|null;context:{previousPage:number|null;nextPage:number|null};previousText:string;nextText:string;ocr:unknown;draftingEligible?:boolean;fullImageTranscriptionVerified?:boolean;unresolvedFields?:unknown;sourceImageSha256?:string;originalTextSha256?:string;hashScope?:string};
   chunkId?: number;
   documentId: number;
   title: string;
