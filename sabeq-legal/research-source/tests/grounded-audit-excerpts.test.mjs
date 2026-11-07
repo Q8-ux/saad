@@ -41,7 +41,7 @@ test('planning source markers are constrained to the server dictionary and canno
  const p=await api.buildCheckedCasePlan(input,[{documentId:1,text:'مرجع اصطناعي بلا حكم'}],'مصدر اختبار',async options=>{
   calls++;const schema=options.schema;
   assert.deepEqual(Array.from(schema.properties.issues.items.properties.sourceMarkers.items.enum),['م1']);
-  assert.equal(schema.properties.precedentMatches.maxItems,0);assert.equal(schema.properties.precedentMatches.items.properties.reason.minLength,20);assert.equal(schema.properties.precedentMatches.items.properties.issueIndex.minimum,0);
+  assert.equal(schema.properties.precedentMatches.maxItems,0);assert.equal(schema.properties.precedentMatches.items.properties.reason.minLength,undefined);assert.equal(schema.properties.precedentMatches.items.properties.issueIndex.minimum,0);
   return JSON.stringify({...plan,issues:[{...plan.issues[0],factQuote:fact,sourceMarkers:['م1']}],precedentMatches:[]});
  });
  assert.equal(calls,1);assert.equal(p.issues[0].sourceMarkers[0],'م1');
