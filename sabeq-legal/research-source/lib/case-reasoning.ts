@@ -153,7 +153,7 @@ export const caseAuditSchema={type:"object",additionalProperties:false,required:
 /** Constrain the auditor to actual final prose, rather than asking it to
  * reconstruct quotations from memory. The independent validator below is
  * unchanged and still checks the issue, fact, application and source link. */
-export type GroundedAuditOption={checkKey:string;issueIndex:number;status:'addressed'|'blocked'|'omitted';factQuote:string;applicationQuote:string};
+export type GroundedAuditOption={checkKey:string;issueIndex:number;status:'addressed'|'blocked'|'omitted';factQuote:string;applicationQuote:string;candidateIndex:number|null};
 export function caseAuditRequestForContent(plan:CasePlan,content:PleadingContent){
  const candidates:string[]=[];
  for(const part of content.grounds.split(/(?:نص المادة|مقتطف من نص المادة)\s*[:：]\s*(?:«[^»]*»|“[^”]*”|"[^"\n]*")/gu)){
@@ -163,37 +163,44 @@ export function caseAuditRequestForContent(plan:CasePlan,content:PleadingContent
     let end=Math.min(600,remaining.length);
     if(end<remaining.length){const space=remaining.lastIndexOf(' ',end);if(space>100)end=space;}
     const quote=remaining.slice(0,end).trim();
-    if(!/^(?:[(（]\s*)?(?:نص المادة|مقتطف من نص المادة|المادة\s*\d)/u.test(quote)&&!candidates.includes(quote))candidates.push(quote);
+    if(!/^(?:[(（]\s*)?(?:نص المادة|مقتطف من نص المادة)/u.test(quote)&&!candidates.includes(quote))candidates.push(quote);
     remaining=remaining.slice(end).trim();
    }
   }
  }
- const anchors=plan.issues.map(issue=>{
-  const words=normalized(issue.factQuote).split(' '),found:string[]=[];
+ const pairs=plan.issues.map(issue=>{
+  const words=normalized(issue.factQuote).split(' '),fragments:string[]=[];
   for(let start=0;start<words.length;start++)for(let end=start+1;end<=words.length;end++){
    const quote=words.slice(start,end).join(' ');
    if(quote.length>96)break;
-   if(quote.length>=Math.min(12,normalized(issue.factQuote).length)&&candidates.some(p=>p.length>=40&&p.includes(quote)))found.push(quote);
+   if(quote.length>=Math.min(12,normalized(issue.factQuote).length))fragments.push(quote);
   }
-  return [...new Set(found)].sort((a,b)=>b.length-a.length).slice(0,3);
+  const anchors=[...new Set(fragments)].sort((a,b)=>b.length-a.length);
+  return candidates.flatMap((applicationQuote,candidateIndex)=>{
+   const factQuote=applicationQuote.length>=40?anchors.find(f=>applicationQuote.includes(f)):null;
+   return factQuote?[{applicationQuote,factQuote,candidateIndex}]:[];
+  }).sort((a,b)=>b.factQuote.length-a.factQuote.length||a.candidateIndex-b.candidateIndex);
  });
- // Reserve a matching application per issue before filling the bounded pool.
- const selected=[...new Set([...anchors.flatMap(a=>{const q=candidates.find(q=>a.some(f=>q.includes(f)));return q?[q]:[];}),...candidates])].slice(0,48);
+ // Reserve distinct candidate paragraphs for each issue before filling the
+ // bounded shared rebuttal pool. Each paragraph gets its OWN best anchor;
+ // overlapping long anchors in one paragraph cannot hide another argument.
+ const reserved=[0,1].flatMap(round=>pairs.flatMap(p=>p[round]?[p[round].applicationQuote]:[]));
+ const selected=[...new Set([...reserved,...candidates])].slice(0,48);
  // Bind issue, status and the actual fact/application pair through one
  // server-created key. This flat provider schema avoids ambiguous object
  // unions and never asks the model to recreate or cross-link quotations.
  const checkOptions:GroundedAuditOption[]=[];
  plan.issues.forEach((_,index)=>{
-  const applications=selected.filter(q=>q.length>=40&&anchors[index].some(f=>q.includes(f))).slice(0,3);
-  if(selected.length>=3&&selected.filter(q=>q.length>=40).length>=2)applications.forEach((application,choice)=>{
-   checkOptions.push({checkKey:`issue_${index}_addressed_${choice}`,issueIndex:index,status:'addressed',factQuote:anchors[index].find(f=>application.includes(f))!,applicationQuote:application});
+  const applications=pairs[index].filter(p=>selected.includes(p.applicationQuote)).slice(0,8);
+  if(selected.length>=3&&selected.filter(q=>q.length>=40).length>=2)applications.forEach((pair,choice)=>{
+   checkOptions.push({checkKey:`issue_${index}_addressed_${choice}`,issueIndex:index,status:'addressed',...pair});
   });
-  for(const status of ['blocked','omitted'] as const)checkOptions.push({checkKey:`issue_${index}_${status}`,issueIndex:index,status,factQuote:'',applicationQuote:''});
+  for(const status of ['blocked','omitted'] as const)checkOptions.push({checkKey:`issue_${index}_${status}`,issueIndex:index,status,factQuote:'',applicationQuote:'',candidateIndex:null});
  });
  const excerpt={type:'object',additionalProperties:false,required:['opposingQuote','responseQuote','sourceMarkers'],properties:{opposingQuote:{type:'string',enum:['',...selected]},responseQuote:{type:'string',enum:['',...selected.filter(q=>q.length>=40)]},sourceMarkers:sourceMarkerArraySchema([...new Set(plan.issues.flatMap(i=>i.sourceMarkers))])}};
  const check={type:'object',additionalProperties:false,required:['checkKey','reason','substance'],properties:{checkKey:{type:'string',enum:checkOptions.map(o=>o.checkKey)},reason:{type:'string'},substance:excerpt}};
  const schema={...caseAuditSchema,properties:{...caseAuditSchema.properties,checks:{type:'array',items:check}}};
- return {schema,checkOptions};
+ return {schema,checkOptions,excerptOptionCounts:plan.issues.map((_,i)=>checkOptions.filter(o=>o.issueIndex===i&&o.status==='addressed').length)};
 }
 /** Resolve a reviewer-selected key from the exact request dictionary, then
  * run the original independent fact/source/reasoning/completeness checks. */
@@ -206,7 +213,7 @@ export function parseGroundedCaseAudit(raw:string,request:ReturnType<typeof case
   const option=options.get(check.checkKey)!;
   return {issueIndex:option.issueIndex,status:option.status,reason:check.reason,substance:{...check.substance,factQuote:option.factQuote,applicationQuote:option.applicationQuote}};
  });
- return parseCaseAudit(JSON.stringify({...wire,checks}),plan,content,evidence);
+ return {...parseCaseAudit(JSON.stringify({...wire,checks}),plan,content,evidence),excerptOptionCounts:request.excerptOptionCounts,selectedApplications:wire.checks.map((c:{checkKey:string})=>{const o=options.get(c.checkKey)!;return {issueIndex:o.issueIndex,candidateIndex:o.candidateIndex};})};
 }
 export const defenseAuditInstructions=`لكل check أعد substance باقتباسات حرفية قصيرة من grounds النهائي فقط، وليست من الخطة أو الوقائع المنفصلة: factQuote عبارة من واقعة المسألة المعتمدة، applicationQuote جملة تطبيق تشتمل على هذه العبارة، opposingQuote الاعتراض المحتمل، responseQuote الرد المسبب عليه، وsourceMarkers المصادر المستشهد بها فعلاً لهذه المسألة من خطتها فقط. لا تختلق اقتباساً لتبرير addressed. اجعل التطبيق والرد جملتين مختلفتين لا يقل كل منهما عن 40 حرفاً، والاعتراض عن 20 حرفاً، دون إطالة مصطنعة. لا تكرر اقتباس التطبيق لمسألتين. عند عدم وجود هذه المعالجة اختر omitted؛ وعند نقص المصدر أو الواقعة الذي يمنع حتى المعالجة المشروطة اختر blocked مع سبب محدد واجعل حقول الاقتباسات فارغة. addressed يصف جودة معالجة المسألة ولا يعني ثبوت الادعاء أو قبول المحكمة له: غياب صورة التحويل مثلاً لا يمنع معالجة صلة الدفعة بالدين بشروطها واعتراضها والرد عليها، بشرط ألا يجزم النص بثبوت المستند أو السداد. يبقى نقص الإثبات في الخطة وحالة الاكتمال ولا يخفى. لا تعتبر العبارات التحفظية أو تكرار الوقائع وحده معالجة. في غياب المصادر يجوز addressed لحجة واقعية مرتبطة بالمدخلات فقط دون تقرير قانوني بلا سند؛ لا تتحول إلى مذكرة مكتملة قانونياً. افحص كل تقرير عن قاعدة قانونية أو مستند مقروء أو واقعة أو طلب غير مأذون، حتى إذا لم يتضمن رقم مادة، وضع غير المدعوم في unsupportedAssertions.`;
 
