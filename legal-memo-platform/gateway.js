@@ -17,6 +17,7 @@ const { corsPolicy } = require('./cors-policy');
 const { openAiError, openAiErrorDetails } = require('./openai-errors');
 const { createOperationsMonitor } = require('./operations-monitor');
 const { memoPaymentGate } = require('./memo-payment-gate');
+const { textAiConfig, createTextAiClient } = require('./text-ai');
 const { runLegalCouncil, auditArticleReferences } = require('./legal-council');
 
 const publicPort = Number(process.env.PORT || 3000);
@@ -24,7 +25,9 @@ const appPort = Number(process.env.INTERNAL_APP_PORT || 3001);
 const dataDir = path.resolve(__dirname, process.env.DATA_DIR || 'data');
 const databasePath = path.join(dataDir, 'legal-memo.db');
 const uploadDir = path.join(dataDir, 'public-api-uploads');
-const AI_MODEL = process.env.OPENAI_MODEL || 'gpt-4.1-mini';
+const textConfig = textAiConfig();
+const AI_MODEL = textConfig.model;
+const DOCUMENT_MODEL = process.env.OPENAI_MODEL || 'gpt-4.1-mini';
 const TRANSCRIBE_MODEL = process.env.OPENAI_TRANSCRIBE_MODEL || 'gpt-4o-mini-transcribe';
 
 fs.mkdirSync(dataDir, { recursive: true });
@@ -107,6 +110,13 @@ function requireAi(res) {
   return null;
 }
 
+function requireTextAi(res) {
+  const client = createTextAiClient({ OpenAI });
+  if (client) return client;
+  res.status(503).json({ error: 'لم يتم إعداد مزود النص القانوني ومفتاحه على الخادم.' });
+  return null;
+}
+
 function outputText(response) {
   return String(response?.output_text || '').trim();
 }
@@ -163,7 +173,8 @@ async function deleteOpenAiFiles(client, ids = []) {
 app.get('/api/legal/health', (req, res) => {
   res.json({
     ok: true,
-    ai: Boolean(process.env.OPENAI_API_KEY),
+    ai: textConfig.configured,
+    provider: textConfig.provider,
     database: fs.existsSync(databasePath),
     model: AI_MODEL,
   });
@@ -198,7 +209,7 @@ app.get('/api/legal/search', (req, res) => {
 });
 
 app.post('/api/legal/assistant', jsonBody, async (req, res) => {
-  const client = requireAi(res);
+  const client = requireTextAi(res);
   if (!client) return;
   const question = String(req.body?.question || '').trim().slice(0, 12000);
   const language = String(req.body?.language || 'ar').trim().toLowerCase();
@@ -228,7 +239,7 @@ app.post('/api/legal/assistant', jsonBody, async (req, res) => {
 });
 
 app.post('/api/legal/draft-tools', jsonBody, async (req, res) => {
-  const client = requireAi(res);
+  const client = requireTextAi(res);
   if (!client) return;
   const action = String(req.body?.action || '').trim();
   const text = String(req.body?.text || '').trim().slice(0, 30000);
@@ -260,7 +271,7 @@ app.post('/api/legal/draft-tools', jsonBody, async (req, res) => {
 });
 
 app.post('/api/legal/memo', jsonBody, memoPaymentGate(), async (req, res) => {
-  const client = requireAi(res);
+  const client = requireTextAi(res);
   if (!client) return;
   const body = req.body || {};
   const facts = String(body.facts || '').trim().slice(0, 40000);
@@ -408,7 +419,7 @@ app.post('/api/legal/analyze-documents', upload.array('documents', 25), async (r
     }
 
     const response = await client.responses.create({
-      model: AI_MODEL,
+      model: DOCUMENT_MODEL,
       instructions: 'أنت محلل مستندات قانونية كويتية. التزم بالنص الموجود في الملفات فقط ولا تخترع أسماء أو أرقام أو وقائع.',
       input: [{ role: 'user', content }],
     });
@@ -465,7 +476,7 @@ app.use((req, res) => proxy(req, res));
 
 const server = app.listen(publicPort, () => {
   console.log(`SABEQ public legal gateway listening on http://localhost:${publicPort}`);
-  console.log('SABEQ API configuration:', JSON.stringify({ aiConfigured: Boolean(process.env.OPENAI_API_KEY), model: AI_MODEL }));
+  console.log('SABEQ API configuration:', JSON.stringify({ aiConfigured: textConfig.configured, provider: textConfig.provider, model: AI_MODEL }));
 });
 
 function shutdown(signal) {
