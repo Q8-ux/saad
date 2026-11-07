@@ -147,6 +147,38 @@ type DefenseSubstance={factQuote:string;applicationQuote:string;opposingQuote:st
 export type CaseAudit={checks:Array<{issueIndex:number;status:"addressed"|"blocked"|"omitted";reason:string;substance?:DefenseSubstance}>;roleConsistent:boolean;factsPreserved:boolean;reliefConsistent:boolean;unsupportedAssertions:string[]};
 const substanceSchema={type:"object",additionalProperties:false,required:["factQuote","applicationQuote","opposingQuote","responseQuote","sourceMarkers"],properties:{...Object.fromEntries(["factQuote","applicationQuote","opposingQuote","responseQuote"].map(key=>[key,{type:"string"}])),sourceMarkers:strings}};
 export const caseAuditSchema={type:"object",additionalProperties:false,required:["checks","roleConsistent","factsPreserved","reliefConsistent","unsupportedAssertions"],properties:{roleConsistent:{type:"boolean"},factsPreserved:{type:"boolean"},reliefConsistent:{type:"boolean"},unsupportedAssertions:strings,checks:{type:"array",items:{type:"object",additionalProperties:false,required:["issueIndex","status","reason","substance"],properties:{issueIndex:{type:"integer"},status:{type:"string",enum:["addressed","blocked","omitted"]},reason:{type:"string"},substance:substanceSchema}}}}};
+/** Constrain the auditor to actual final prose, rather than asking it to
+ * reconstruct quotations from memory. The independent validator below is
+ * unchanged and still checks the issue, fact, application and source link. */
+export function caseAuditSchemaForContent(plan:CasePlan,content:PleadingContent){
+ const candidates:string[]=[];
+ for(const part of content.grounds.split(/(?:نص المادة|مقتطف من نص المادة)\s*[:：]\s*(?:«[^»]*»|“[^”]*”|"[^"\n]*")/gu)){
+  for(const sentence of part.split(/\n+|(?<=[.!؟])\s+/u)){
+   let remaining=normalized(sentence);
+   while(remaining.length>=20&&candidates.length<120){
+    let end=Math.min(600,remaining.length);
+    if(end<remaining.length){const space=remaining.lastIndexOf(' ',end);if(space>100)end=space;}
+    const quote=remaining.slice(0,end).trim();
+    if(!/^(?:[(（]\s*)?(?:نص المادة|مقتطف من نص المادة|المادة\s*\d)/u.test(quote)&&!candidates.includes(quote))candidates.push(quote);
+    remaining=remaining.slice(end).trim();
+   }
+  }
+ }
+ const anchors=plan.issues.map(issue=>{
+  const words=normalized(issue.factQuote).split(' '),found:string[]=[];
+  for(let start=0;start<words.length;start++)for(let end=start+1;end<=words.length;end++){
+   const quote=words.slice(start,end).join(' ');
+   if(quote.length>96)break;
+   if(quote.length>=Math.min(12,normalized(issue.factQuote).length)&&candidates.some(p=>p.length>=40&&p.includes(quote)))found.push(quote);
+  }
+  return [...new Set(found)].sort((a,b)=>b.length-a.length).slice(0,3);
+ });
+ // Reserve a matching application per issue before filling the bounded pool.
+ const selected=[...new Set([...anchors.flatMap(a=>{const q=candidates.find(q=>a.some(f=>q.includes(f)));return q?[q]:[];}),...candidates])].slice(0,48);
+ const prose={type:'string',enum:['',...selected]};
+ const constrained={...substanceSchema,properties:{...substanceSchema.properties,factQuote:{type:'string',enum:['',...[...new Set(anchors.flat())]]},applicationQuote:prose,opposingQuote:prose,responseQuote:prose}};
+ return {...caseAuditSchema,properties:{...caseAuditSchema.properties,checks:{...caseAuditSchema.properties.checks,items:{...caseAuditSchema.properties.checks.items,properties:{...caseAuditSchema.properties.checks.items.properties,substance:constrained}}}}};
+}
 export const defenseAuditInstructions=`لكل check أعد substance باقتباسات حرفية قصيرة من grounds النهائي فقط، وليست من الخطة أو الوقائع المنفصلة: factQuote عبارة من واقعة المسألة المعتمدة، applicationQuote جملة تطبيق تشتمل على هذه العبارة، opposingQuote الاعتراض المحتمل، responseQuote الرد المسبب عليه، وsourceMarkers المصادر المستشهد بها فعلاً لهذه المسألة من خطتها فقط. لا تختلق اقتباساً لتبرير addressed. اجعل التطبيق والرد جملتين مختلفتين لا يقل كل منهما عن 40 حرفاً، والاعتراض عن 20 حرفاً، دون إطالة مصطنعة. لا تكرر اقتباس التطبيق لمسألتين. عند عدم وجود هذه المعالجة اختر omitted؛ وعند نقص المصدر أو الواقعة الذي يمنع حتى المعالجة المشروطة اختر blocked مع سبب محدد واجعل حقول الاقتباسات فارغة. addressed يصف جودة معالجة المسألة ولا يعني ثبوت الادعاء أو قبول المحكمة له: غياب صورة التحويل مثلاً لا يمنع معالجة صلة الدفعة بالدين بشروطها واعتراضها والرد عليها، بشرط ألا يجزم النص بثبوت المستند أو السداد. يبقى نقص الإثبات في الخطة وحالة الاكتمال ولا يخفى. لا تعتبر العبارات التحفظية أو تكرار الوقائع وحده معالجة. في غياب المصادر يجوز addressed لحجة واقعية مرتبطة بالمدخلات فقط دون تقرير قانوني بلا سند؛ لا تتحول إلى مذكرة مكتملة قانونياً. افحص كل تقرير عن قاعدة قانونية أو مستند مقروء أو واقعة أو طلب غير مأذون، حتى إذا لم يتضمن رقم مادة، وضع غير المدعوم في unsupportedAssertions.`;
 
 // These checks validate evidence of the audit in the actual final prose. They
