@@ -196,19 +196,19 @@ public final class MainActivity extends Activity {
 
         LinearLayout titles = vertical();
         titles.setPadding(dp(11), 0, dp(10), 0);
-        titles.addView(text("مسار الفيديو الجديد", 20, TEXT, true));
-        titles.addView(text("الإصدار 1.2.0 · بدون كلمة مرور", 11, Color.rgb(114, 238, 209), true));
+        titles.addView(text("تحميل الفيديو", 20, TEXT, true));
+        titles.addView(text("الإصدار 1.3.0 · بدون كلمة مرور", 11, Color.rgb(114, 238, 209), true));
         headerStatus = text("● جاري فحص المحرك", 11, MUTED, false);
         titles.addView(headerStatus);
         header.addView(titles, new LinearLayout.LayoutParams(0,
             ViewGroup.LayoutParams.WRAP_CONTENT, 1));
         root.addView(header);
 
-        TextView eyebrow = text("VIDEO HUB  •  v1.2.0  •  NO PASSWORD", 12, Color.rgb(114, 238, 209), true);
+        TextView eyebrow = text("VIDEO HUB  •  v1.3.0  •  NO PASSWORD", 12, Color.rgb(114, 238, 209), true);
         eyebrow.setGravity(Gravity.CENTER);
         root.addView(eyebrow, width(36));
 
-        TextView heading = text("فيديوهاتك من منصات متعددة\nفي تطبيق واحد", 29, TEXT, true);
+        TextView heading = text("تحميل الفيديو والصوت\nمن المنصات المدعومة", 29, TEXT, true);
         heading.setGravity(Gravity.CENTER);
         root.addView(heading, width(9));
 
@@ -252,7 +252,8 @@ public final class MainActivity extends Activity {
 
         inspectButton = button("فحص الفيديو ←", true);
         inspectButton.setOnClickListener(v -> inspect());
-        card.addView(inspectButton, width(20));
+        card.addView(inspectButton, width(12));
+        card.addView(text("الأزرار أعلاه تحمّل الملف مباشرة، حتى عندما لا يستطيع الموقع عرض معلومات الفيديو.", 12, MUTED, false), width(8));
 
         status = text("محرك yt-dlp متعدد المنصات. المحتوى الخاص أو المحمي قد لا يتاح تحميله.", 13, MUTED, false);
         status.setGravity(Gravity.CENTER);
@@ -278,17 +279,17 @@ public final class MainActivity extends Activity {
         preview.addView(previewMeta, width(10));
 
         LinearLayout downloadActions = horizontal();
-        mp4Button = button("⬇ فيديو MP4", true);
+        mp4Button = button("⬇ تحميل MP4 مباشرة", true);
         mp4Button.setOnClickListener(v -> download("video"));
         downloadActions.addView(mp4Button, new LinearLayout.LayoutParams(
             0, dp(50), 1));
-        mp3Button = button("♫ صوت MP3", false);
+        mp3Button = button("♫ تحميل MP3", false);
         mp3Button.setOnClickListener(v -> download("audio"));
         LinearLayout.LayoutParams mp3Layout = new LinearLayout.LayoutParams(
             0, dp(50), 1);
         mp3Layout.rightMargin = dp(8);
         downloadActions.addView(mp3Button, mp3Layout);
-        preview.addView(downloadActions, width(15));
+        card.addView(downloadActions, width(15));
 
         openFileButton = button("📂 فتح آخر ملف محفوظ", false);
         openFileButton.setVisibility(View.GONE);
@@ -301,7 +302,7 @@ public final class MainActivity extends Activity {
         root.addView(tips, width(27));
         tips.addView(text("✓ استقبال روابط «مشاركة» من تطبيقات الفيديو", 13, TEXT, true));
         tips.addView(text("✓ حفظ MP4 وMP3 في مجلد Downloads/VideoHub", 12, MUTED, false), width(8));
-        tips.addView(text("✓ الإصدار 1.2.0 يعمل بلا كلمة مرور أو حساب", 12, Color.rgb(114, 238, 209), true), width(8));
+        tips.addView(text("✓ الإصدار 1.3.0: تحميل مباشر بدون فحص أو كلمة مرور", 12, Color.rgb(114, 238, 209), true), width(8));
         tips.addView(text("✓ يمكن تثبيته إلى جانب النسخة القديمة", 12, MUTED, false), width(8));
         tips.addView(text("ملاحظة: أبقِ التطبيق مفتوحًا حتى انتهاء تنزيل الملف. الجودة وعدم وجود علامة مائية يعتمدان على نسخة المصدر.", 11, MUTED, false), width(12));
 
@@ -321,8 +322,8 @@ public final class MainActivity extends Activity {
     private void setBusy(boolean on) {
         busy = on;
         inspectButton.setEnabled(!on);
-        mp4Button.setEnabled(!on && !clipUrl.isEmpty());
-        mp3Button.setEnabled(!on && !clipUrl.isEmpty());
+        mp4Button.setEnabled(!on);
+        mp3Button.setEnabled(!on);
         qualityButton.setEnabled(!on);
     }
 
@@ -401,7 +402,7 @@ public final class MainActivity extends Activity {
         setBusy(true);
         progress.setIndeterminate(true);
         progress.setVisibility(View.VISIBLE);
-        note("جارٍ قراءة معلومات الفيديو من Railway…", false);
+        note("جارٍ فحص معلومات المقطع (اختياري). يمكنك التحميل مباشرة بدون فحص.", false);
 
         executor.execute(() -> {
             try {
@@ -428,7 +429,7 @@ public final class MainActivity extends Activity {
                     preview.setVisibility(View.VISIBLE);
                     progress.setVisibility(View.GONE);
                     setBusy(false);
-                    note("تم التعرف على الفيديو. اختر الصيغة المطلوبة ثم ابدأ التنزيل.", false);
+                    note("تم التعرف على الفيديو. أزرار التحميل المباشر متاحة فوق، حتى عند تعذر الفحص.", false);
                 });
             } catch (Exception e) {
                 handler.post(() -> {
@@ -482,7 +483,9 @@ public final class MainActivity extends Activity {
         String detail = "";
         try { detail = new JSONObject(payload).optString("detail", ""); }
         catch (JSONException ignored) {}
-        if (code == 429) return new IOException("طلبات كثيرة خلال وقت قصير؛ حاول لاحقًا.");
+        if (code == 422) return new IOException(detail.isEmpty() ? "لم يتمكن المصدر من استخراج الفيديو. جرّب مقطعًا عامًا آخر." : detail);
+        if (code == 413) return new IOException("تجاوز الفيديو حد الخدمة المباشرة: 60 ميغابايت أو 10 دقائق.");
+        if (code == 429) return new IOException("تم بلوغ حد الطلبات مؤقتًا على الخادم. جرّب لاحقًا.");
         if (code == 504) return new IOException("انتهت مهلة التحميل لدى المزود.");
         return new IOException(detail.isEmpty() ?
             "فشل الطلب (HTTP " + code + "). هذا المقطع قد لا يتاح من الخادم." : detail);
@@ -521,10 +524,15 @@ public final class MainActivity extends Activity {
     }
 
     private void download(String kind) {
-        if (busy || clipUrl.isEmpty()) return;
-        String link = clipUrl;
+        if (busy) return;
+        String link = urlInput.getText().toString().trim();
+        if (!supported(link)) {
+            note("ألصق رابط فيديو HTTPS من إحدى المنصات المدعومة ثم اضغط تحميل.", true);
+            return;
+        }
         String targetQuality = quality;
-        String name = "VideoHub-" + clipId + ("audio".equals(kind) ? ".mp3" : ".mp4");
+        String chosenId = link.equals(clipUrl) ? clipId : String.valueOf(System.currentTimeMillis());
+        String name = "Video-" + chosenId + ("audio".equals(kind) ? ".mp3" : ".mp4");
         String mime = "audio".equals(kind) ? "audio/mpeg" : "video/mp4";
         setBusy(true);
         progress.setIndeterminate(true);
