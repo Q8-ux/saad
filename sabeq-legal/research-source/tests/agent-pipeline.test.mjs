@@ -228,3 +228,11 @@ test('one blocked issue prevents partial delivery for both paid and unpaid memor
   assert.equal(value.stage,'defense_review');assert.equal(value.review.blockedIssueIndexes[0],1);assert.equal(value.review.unsupportedAssertionCount,0);assert.doesNotMatch(JSON.stringify(value.review),/مبلغ لم يتم سداده|المستند غير مرفق/);
  }
 });
+
+test('prose cleanup runs before statutory decoration so a removed internal source line receives the existing correction',async t=>{
+ const h=templateHarness();t.after(h.cleanup);let corrections=0;const archived=[];
+ const dirty=reasoningText+'\nملاحظات المراجعة الداخلية 【م1】';
+ const route=memoRoute(h,{sources:[controlSource],auth:async()=>({id:'synthetic-cleanup-order'}),record:async row=>archived.push(row),pipeline:{agentPipelineEnabled:()=>true,generateAgentPleading:async()=>({content:{...content,grounds:dirty},audit:{}})},model:controlledMemoModel('【م1】',()=>{corrections++;})});
+ const response=await route.POST(request());const value=await response.json();assert.equal(response.status,200,JSON.stringify(value));assert.equal(corrections,1);
+ assert.ok(value.memo.includes(controlSource.text));assert.doesNotMatch(value.memo,/ملاحظات المراجعة|يتولى المساعد/);assert.equal(value.caseQuality.audit.ok,true);assert.equal(archived.length,1);
+});

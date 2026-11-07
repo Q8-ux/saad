@@ -126,6 +126,11 @@ export async function POST(request: Request) {
     }
     let secondaryReviewAttempted = false;
     async function finish(content: PleadingContent, qualityRetried = false): Promise<Response> {
+      const cleanProse=(text:string)=>preserveLegalQuotes(text,prose=>correctLegalProse(stripInternalMemoLanguage(removeDelegatedResearch(prose)),[clientName,otherParty,allParties]));
+      // Clean model prose before adding source-owned identity/text. Cleaning
+      // a prose fragment after a protected quote could erase its adjacent
+      // article identity or marker and strand otherwise exact legal wording.
+      content={...content,grounds:cleanProse(content.grounds),requests:cleanProse(content.requests)};
       content=prepareBoundDraft(content,memoInput,evidence);
       // The optional Llama pass checks omissions only. OpenAI remains the
       // writer, and every amended citation must pass the same source checks.
@@ -147,7 +152,7 @@ export async function POST(request: Request) {
             });
             const parsed = JSON.parse(refined) as { grounds?: unknown };
             if (typeof parsed.grounds === "string" && parsed.grounds.trim() && parsed.grounds.length <= 50000) {
-              content = prepareBoundDraft({...content, grounds: parsed.grounds}, memoInput, evidence);
+              content = prepareBoundDraft({...content, grounds: cleanProse(parsed.grounds)}, memoInput, evidence);
             }
           }
         } catch {
@@ -167,7 +172,7 @@ export async function POST(request: Request) {
         });
         const parsed=JSON.parse(corrected);
         if(typeof parsed.grounds!=="string") throw new RequestError(citationFailureMessage,422);
-        content=prepareBoundDraft({...content,grounds:parsed.grounds},memoInput,evidence);
+        content=prepareBoundDraft({...content,grounds:cleanProse(parsed.grounds)},memoInput,evidence);
 
         citationReview=reviewLegalCitations(`${content.grounds}\n${content.requests}`,evidence,{requireJudgmentAnalogy:true,courtDocument:true,requireArticleText:true});
         missingStatutes=missingPlannedStatutoryCitations(checkedPlan,evidence,content.grounds);
@@ -178,10 +183,9 @@ export async function POST(request: Request) {
         return privateJson({requestId:managementRequestId,error:citationFailureMessage,stage:"source_review",sourceScope:"bound_file_and_reviewed_judgments",issues:[...new Set([...citationReview.issues.map(i=>i.code),...(missingStatutes.length?["missing_planned_article_text"]:[])])]},422);
       }
       content.facts = correctLegalProse(stripInternalMemoLanguage(removeDelegatedResearch(content.facts)),[clientName,otherParty,allParties]);
-      content.requests = preserveLegalQuotes(content.requests,prose=>correctLegalProse(stripInternalMemoLanguage(removeDelegatedResearch(prose)),[clientName,otherParty,allParties]));
       content.factualNotes = factualRequirements(content.factualNotes);
-      content.grounds = preserveLegalQuotes(content.grounds,prose=>correctLegalProse(stripInternalMemoLanguage(removeDelegatedResearch(prose)),[clientName,otherParty,allParties]));
-      // Cleanup must not remove a quoted article or sever its source identity.
+      // Source-owned identity/text are added only after prose cleanup; still
+      // verify the exact final content before audit, delivery or archiving.
       const finalCitations=reviewLegalCitations(`${content.grounds}\n${content.requests}`,evidence,{requireJudgmentAnalogy:true,courtDocument:true,requireArticleText:true});
       if(!finalCitations.ok || missingPlannedStatutoryCitations(checkedPlan,evidence,content.grounds).length) {
         if (!paymentLease) return pendingSourceReview([...finalCitations.issues.map(i=>i.code), "post_cleanup_source_review"]);
