@@ -35,9 +35,9 @@ jobs:
           script: |
             set -euo pipefail
             adb install -r video-downloader/android/app/build/outputs/apk/debug/app-debug.apk
-            adb shell am start -W -n com.q8ux.videohub.download.beta/com.q8ux.videohub.MainActivity
+            adb shell am start -W -n com.q8ux.videohub.clean.beta/com.q8ux.videohub.DownloadVideoActivity
             sleep 8
-            adb shell pidof com.q8ux.videohub.download.beta
+            adb shell pidof com.q8ux.videohub.clean.beta
             mkdir -p video-downloader/android/test-results
             adb shell dumpsys activity activities > video-downloader/android/test-results/activities.txt
             adb shell dumpsys window > video-downloader/android/test-results/window.txt
@@ -45,7 +45,7 @@ jobs:
             adb logcat -d -s AndroidRuntime:E > video-downloader/android/test-results/crashes.txt
             python - <<'PY'
             from pathlib import Path
-            app='com.q8ux.videohub.download.beta'
+            app='com.q8ux.videohub.clean.beta'
             activity=Path('video-downloader/android/test-results/activities.txt').read_text()
             window=Path('video-downloader/android/test-results/window.txt').read_text()
             crashes=Path('video-downloader/android/test-results/crashes.txt').read_text()

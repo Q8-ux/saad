@@ -1,18 +1,16 @@
-# تحميل الفيديو — Android v1.3.0
+# تحميل الفيديو – Android 1.4.0
 
-Native Android 10+ app. Visible name: **تحميل الفيديو**.
+Native Android app with a simplified, offline-first launcher `DownloadVideoActivity`. The app lays out its screen **before** making any network call, so connection errors appear as status messages instead of a blank page. Minimal UI avoids complex layout dependencies and uses software rendering on the launcher for older Android GPU implementations.
 
-## Fixed in 1.3.0
-- MP4 and MP3 download controls are visible and enabled independently of the optional video metadata preview.
-- The corresponding Railway backend no longer runs a second `yt-dlp` metadata request before each download. It now runs the downloader once and applies duration/file-size limits.
-- 422, 413, and 429 errors have clearer Arabic messages.
-- No account or password is required in this app.
-- Distinct package `com.q8ux.videohub.download.beta` to avoid conflicting with older debug-signed installs.
-- Accepts URLs via Android Share, and writes output to `Downloads/VideoHub`.
-- Public backend allows 21 host groups as an allowlist, but individual videos or platforms can be unsupported or temporarily blocked.
-- Public download restrictions remain 60 MB and 10 minutes, with hourly quotas.
+- App name: تحميل الفيديو
+- Android 10+, no password or sign-in
+- APK package: `com.q8ux.videohub.clean.beta` (separate from previous debug-signed builds)
+- Direct MP4 and MP3 buttons, paste input and simple TikTok test link
+- Live Railway API: `https://video-hub-api-production.up.railway.app/api/public/download`
+- Saves using Android MediaStore in `Downloads/VideoHub`
+- Public API limits: 60 MB, 10 min, quota. Content behind authentication or DRM is not supported.
+- The old MainActivity is retained but no longer the launcher.
 
-## APK
-https://github.com/Q8-ux/saad/releases/download/video-hub-android-v1.3.0/Video-Downloader-Android-v1.3.0.apk
+**GitHub APK:** https://github.com/Q8-ux/saad/releases/download/video-hub-android-v1.4.0/Tahmeel-Alvideo-v1.4.0.apk
 
-This is a debug-signed test APK, not a Play Store release. No internal creator watermarks are removed and login-only/DRM content is not bypassed.
+This is a debug-signed testing APK; it should not be considered production validated without successful emulator and real-device run. Use a stable private release signing key for future updates.

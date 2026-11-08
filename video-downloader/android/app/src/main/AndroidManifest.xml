@@ -11,8 +11,9 @@
     android:allowBackup="false"
     android:supportsRtl="true">
     <activity
-      android:name=".MainActivity"
+      android:name=".DownloadVideoActivity"
       android:exported="true"
+      android:hardwareAccelerated="false"
       android:configChanges="orientation|screenSize|keyboardHidden"
       android:windowSoftInputMode="adjustResize">
       <intent-filter>
@@ -25,5 +26,6 @@
         <data android:mimeType="text/plain" />
       </intent-filter>
     </activity>
+    <activity android:name=".MainActivity" android:exported="false" />
   </application>
 </manifest>

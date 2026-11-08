@@ -51,6 +51,10 @@ jobs:
       - name: Validate native application source
         run: |
           test -s app/src/main/java/com/q8ux/videohub/MainActivity.java
+          test -s app/src/main/java/com/q8ux/videohub/DownloadVideoActivity.java
+          grep -Fq "android:name=\".DownloadVideoActivity\"" app/src/main/AndroidManifest.xml
+          grep -Fq "setContentView(page)" app/src/main/java/com/q8ux/videohub/DownloadVideoActivity.java
+          grep -Fq "/api/public/download" app/src/main/java/com/q8ux/videohub/DownloadVideoActivity.java
           test -s app/src/main/AndroidManifest.xml
           grep -Fq "MediaStore.Downloads.EXTERNAL_CONTENT_URI" app/src/main/java/com/q8ux/videohub/MainActivity.java
           grep -Fq "/api/public/info" app/src/main/java/com/q8ux/videohub/MainActivity.java
@@ -74,21 +78,21 @@ jobs:
           test -s "$apk"
           "$sdk/build-tools/35.0.0/apksigner" verify --verbose "$apk"
           "$sdk/build-tools/35.0.0/aapt" dump badging "$apk" > build-badging.txt
-          grep -Fq "name='com.q8ux.videohub.download.beta'" build-badging.txt
+          grep -Fq "name='com.q8ux.videohub.clean.beta'" build-badging.txt
           grep -Fq "application-label" build-badging.txt
           grep -Fq "sdkVersion:'29'" build-badging.txt
           mkdir -p dist
-          cp "$apk" dist/Video-Downloader-Android-v1.3.0.apk
-          sha256sum dist/Video-Downloader-Android-v1.3.0.apk > dist/SHA256SUMS.txt
+          cp "$apk" dist/Tahmeel-Alvideo-v1.4.0.apk
+          sha256sum dist/Tahmeel-Alvideo-v1.4.0.apk > dist/SHA256SUMS.txt
           cp build-badging.txt dist/build-badging.txt
           echo "APK packaging, manifest and signature verified."
 
       - name: Upload installable APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: video-hub-android-v1.3.0
+          name: video-hub-android-v1.4.0
           path: |
-            video-downloader/android/dist/Video-Downloader-Android-v1.3.0.apk
+            video-downloader/android/dist/Tahmeel-Alvideo-v1.4.0.apk
             video-downloader/android/dist/SHA256SUMS.txt
             video-downloader/android/dist/build-badging.txt
           retention-days: 30
@@ -98,8 +102,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          tag="video-hub-android-v1.3.0"
-          apk="dist/Video-Downloader-Android-v1.3.0.apk"
+          tag="video-hub-android-v1.4.0"
+          apk="dist/Tahmeel-Alvideo-v1.4.0.apk"
           sha="dist/SHA256SUMS.txt"
           if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             gh release upload "$tag" "$apk" "$sha" --repo "$GITHUB_REPOSITORY" --clobber
@@ -107,7 +111,7 @@ jobs:
             gh release create "$tag" "$apk" "$sha" \
               --repo "$GITHUB_REPOSITORY" \
               --target "$GITHUB_SHA" \
-              --title "تحميل الفيديو Android v1.3.0 — تنزيل مباشر" \
+              --title "تحميل الفيديو Android v1.4.0 — إصلاح الشاشة الفارغة" \
               --prerelease \
               --notes "تطبيق Android أصلي يعمل دون كلمة مرور. يقبل روابط مشاركة الفيديو ويحمّل MP4 وMP3 من واجهة API مقيّدة بعدد الطلبات والحجم. يعمل على Android 10 فأحدث. هذا إصدار تجريبي موقّع بمفتاح Debug. لتفادي تعارض مفاتيح توقيع الإصدار القديم، يحمل التطبيق حزمة جديدة مستقلة؛ يمكنك حذف الإصدار القديم بعد تثبيت هذا الإصدار."
           fi
