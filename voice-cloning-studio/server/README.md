@@ -84,3 +84,25 @@ Run `python -m unittest discover -s tests -v` from this directory with
 lightweight ASGI upstream and do not download or run speech models. The Docker
 build installs upstream runtime/model dependencies and must be validated on the
 deployment host; a local gateway test is not an inference benchmark.
+
+## Connected media tools (v1.1)
+
+The small host also serves bounded public routes under `/api/media/`: the current
+ready-voice catalog, on-demand MP3 synthesis, YouTube search/inspection, and
+10–30 second reference-clip imports. These routes have request/body/concurrency
+limits and no access to private Voicebox records. Existing `/api/voicebox` routes
+retain their required private bearer credential.
+
+Ready-voice synthesis uses the Microsoft Edge online speech service through
+edge-tts; the requested text is sent to that service. It is a preset voice,
+not a clone of the user. History and returned audio are stored on the user's
+browser, not in shared server history. Browser device voices are an additional
+read-aloud option and cannot be downloaded as generated files.
+
+YouTube imports require a rights confirmation, canonical YouTube video URL,
+10–30 second bounds, a verified public recorded source <=2 hours, and a real
+PCM mono 24 kHz WAV output. Source metadata and timestamps are retained with
+locally saved references. Search/preview do not establish import availability.
+When YouTube blocks extraction, the app retains its official embedded player
+and directs the user to upload their authorized original file. No cookies,
+login bypass, proxy rotation, PO tokens or CAPTCHA evasion are used.

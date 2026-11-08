@@ -10,9 +10,13 @@ Arabic RTL web workstation based on the actual Voicebox REST contracts at upstre
 
 Microphone recording and uploads, real decoded waveforms, local capture storage, editable transcripts, script drafts, multitrack clip arrangement and WAV mixing, trimming, fades, speed/pitch, gain, reverb, delay, chorus, compression and filters, project export/import with embedded audio, backup/restore, dark mode, and mobile layout. Voice profiles and audio are never included in the public source repository.
 
+## Connected ready voices and YouTube
+
+The default web workflow now loads the actual ready-voice catalog and calls a lightweight synthesis service automatically, with no private Voicebox key needed for those bounded public tools. Ready voices are labeled separately from voice clones. The YouTube panel supports public search, official playback, time selection, authorized reference import, and local source provenance. Direct file upload remains available when the source refuses extraction.
+
 ## What needs a running Voicebox engine
 
-Voice cloning, TTS generation, preset/designed voices, STT/Whisper transcription, server profiles/import/export, history and job cancellation/retry/favorites, server effect versions, local LLM personality controls, model downloads/load/unload, and MCP. These controls call real upstream endpoints; no demo voices or fabricated results are returned. The client exposes nine engine choices present in the reviewed source; installed model capabilities must be checked on the host.
+Voice cloning, cloned-voice TTS generation, Voicebox preset/designed voices, STT/Whisper transcription, server profiles/import/export, history and job cancellation/retry/favorites, server effect versions, local LLM personality controls, model downloads/load/unload, and MCP. These controls call real upstream endpoints; no demo voices or fabricated results are returned. The client exposes nine engine choices present in the reviewed source; installed model capabilities must be checked on the host.
 
 The deployed lightweight gateway is at `https://voicebox-engine-production.up.railway.app`. Health indicates gateway reachability only. The current hosting account limits services to 1 GB RAM and 2 vCPUs; no full inference engine is provisioned. A correctly authenticated request returns `engine_not_configured` until a capable Voicebox host is connected. No billing upgrade was made.
 
