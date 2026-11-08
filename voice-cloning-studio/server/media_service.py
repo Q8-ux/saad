@@ -1,6 +1,6 @@
 """Bounded public media tools. No access to private Voicebox profiles or files."""
 from __future__ import annotations
-import asyncio,json,os,time
+import asyncio,json,os,time,logging
 from collections import defaultdict,deque
 from starlette.applications import Starlette
 from starlette.requests import Request
@@ -67,6 +67,7 @@ class MediaService:
   except MediaError as e:return JSONResponse({'detail':e.message,'code':e.code},status_code=e.status,headers={'Cache-Control':'no-store'})
   except asyncio.TimeoutError:return JSONResponse({'detail':'انتهت مهلة خدمة المصدر. يمكنك رفع الملف الأصلي من جهازك.','code':'source_timeout'},status_code=504)
   except Exception as e:
+   logging.getLogger('voice_media').warning('Provider failure type=%s status=%s',type(e).__name__,getattr(e,'status',None))
    try:
     from youtube_service import YouTubeServiceError
     if isinstance(e,YouTubeServiceError):return JSONResponse({'detail':e.message,'code':e.code},status_code=e.status_code)
