@@ -50,5 +50,18 @@
   "requestedVerificationSender": "noreplay@sabeq.legal",
   "verificationEmailDomainCheck": "SPF-DKIM-read-only;restricted-sending-key-supported",
   "testEmail": "administrator-only-fixed-message;expected-sender-check;5-per-hour;provider-receipt",
-  "currentVersionLiveLoginTested": false
+  "currentVersionLiveLoginTested": false,
+  "gmailProvider": "google-oauth",
+  "gmailBackendVersion": 210,
+  "gmailRedirectPath": "/api/integrations/gmail/callback",
+  "gmailCredentials": "encrypted-server-vault",
+  "gmailScopes": [
+    "gmail.send",
+    "gmail.readonly"
+  ],
+  "gmailReviewRecipients": "protected-server-runtime",
+  "gmailDrafts": "original-saved-output-deduplicated",
+  "gmailTestsPassed": 10,
+  "gmailLiveConsentVerified": false,
+  "gmailLiveDeliveryVerified": false
 }

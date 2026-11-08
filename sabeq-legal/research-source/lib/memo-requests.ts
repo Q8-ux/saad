@@ -1,4 +1,5 @@
 import { getD1 } from "@/db";
+import { sendSavedDraft } from "@/lib/gmail";
 
 export async function startMemoRequest(input: Record<string, unknown>, user: { id: string; email: string } | null, origin: string) {
   const id = crypto.randomUUID();
@@ -9,4 +10,8 @@ export async function startMemoRequest(input: Record<string, unknown>, user: { i
 export async function finishMemoRequest(id: string, status: "needs_information" | "needs_review" | "generated" | "failed" | "cancelled", output = "", code = "") {
   await getD1().prepare("UPDATE management_memo_requests SET status = ?, output_text = ?, error_code = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?")
     .bind(status, output.slice(0, 140_000), code.slice(0, 80), id).run();
+  if (output.trim() && (status === "generated" || status === "needs_review")) {
+    try { await sendSavedDraft(id); }
+    catch { console.error("gmail_draft_delivery_failed", { stage: "saved_draft_preserved" }); }
+  }
 }

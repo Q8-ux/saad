@@ -14,6 +14,7 @@ import { assertManagementOrigin, assertManagerAction, exchangeManagerCode, manag
 import { bridgeKeys, managerInbox, managerMemos, managerMemoRecovery, managerSnapshot, managerUpdates } from "@/lib/management-data";
 import { mailAction, operationEvent, whatsappAction } from "@/lib/management-integrations";
 import { verificationEmailAction } from "@/lib/verification-email-settings";
+import { gmailAction, gmailSettings } from "@/lib/gmail";
 import { EmailDeliveryError, sendRegistrationInvitation, sendTestEmail } from "@/lib/email";
 import { cleanMultiline, cleanString, enforceRateLimit, readJsonObject, RequestError } from "@/lib/request-security";
 
@@ -31,6 +32,7 @@ export async function GET(request: Request) {
     if (action === "jwks") { const keys = await bridgeKeys(); return managementJson({ keys: [keys.publicKey] }); }
     const manager = await requireManager(request), url = new URL(request.url);
     assertManagerAction(manager, action, "GET");
+    if (action === "gmail") return managementJson(await gmailSettings());
     if (action === "control-accounts") return managementJson(await managementAccounts(null, manager));
     if (action === "verification-email") return managementJson(await verificationEmailAction(null, manager.email));
     if (action === "site") return managementJson(await siteAction(null, manager.email));
@@ -75,6 +77,10 @@ export async function POST(request: Request) {
     const manager = await requireManager(request);
     assertManagerAction(manager, action, "POST");
     await enforceRateLimit(request, "management-write", 150);
+    if (action === "gmail") {
+      await enforceRateLimit(request, data.action === "send-test" ? "gmail-test" : "gmail-management", data.action === "send-test" ? 5 : 30);
+      return managementJson(await gmailAction(data, manager.email, request));
+    }
     if (action === "control-accounts") return managementJson(await managementAccounts(data, manager));
     if (action === "site") return managementJson(await siteAction(data, manager.email));
     if (action === "services") return managementJson(await servicesAction(data));
