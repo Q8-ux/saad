@@ -36,3 +36,9 @@ The GitHub Pages workflow restores the latest successful Pages artifact, updates
 Browser checks used a synthetic two-second tone, not a real person's voice. Audio upload/decoding, radio processing, actual WAV output and the UI's empty/disconnected state are tested separately from inference. No clone, dialect similarity or AI transcription accuracy claim is made without an actual engine run and listening review. Microphone hardware permission/device behavior needs testing on the user's phone; browser page shortcuts do not inject text into other applications like desktop dictation.
 
 Latest live checks: 32 Arabic ready voices returned, including Kuwait Fahed/Noura. With edge-tts7.3.1, actual Arabic synthesis returned an MP3 file (30,528 bytes). Public YouTube search returned real NASA results. Direct extraction on the tested cloud host returned youtube_blocked; import remains source-dependent, with upload/tab-capture alternatives. Speaker cloning remains dependent on a separately provisioned private inference host.
+
+## Interface languages and visual design
+
+Version 1.2 includes Arabic, English, French, Spanish, German, Turkish and Simplified Chinese. The selector changes UI text, accessible labels, direction and the requested ready-voice language. Arabic is RTL and the default; the other six are LTR. The 661 source strings include client controls, dialogs, validations and media-service errors. Typed scripts, transcripts, source titles and personal names remain unchanged. Actual engine language capabilities still govern cloning.
+
+The default cosmic violet theme uses layered gradients and quiet flowing light, readable opaque panels, visible focus, and reduced-motion support. The light variant retains the violet palette. No new runtime dependency or remote translation service is used.

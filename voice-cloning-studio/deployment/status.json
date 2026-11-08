@@ -34,5 +34,36 @@
       "authorized_sample_upload",
       "user_initiated_tab_audio_capture_where_supported"
     ]
+  },
+  "uiLanguages": [
+    "ar",
+    "en",
+    "fr",
+    "es",
+    "de",
+    "tr",
+    "zh"
+  ],
+  "localizedStrings": 661,
+  "theme": "cosmic-violet",
+  "referenceUpload": "12-second synthetic WAV decoded and handed to voice-profile form in browser",
+  "layoutChecks": {
+    "widths": [
+      320,
+      390,
+      768,
+      1440
+    ],
+    "horizontalOverflow": false,
+    "context": "same-origin responsive browser frames"
+  },
+  "readyVoiceCatalogByLanguage": {
+    "ar": 32,
+    "en": 47,
+    "fr": 13,
+    "es": 45,
+    "de": 10,
+    "tr": 2,
+    "zh": 14
   }
 }

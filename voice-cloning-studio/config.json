@@ -1,1 +1,6 @@
-{"apiBase": "https://voicebox-engine-production.up.railway.app/api/voicebox", "version": "1.1.0", "engineProvisioned": false, "mediaBase": "https://voicebox-engine-production.up.railway.app/api/media"}
+{
+  "apiBase": "https://voicebox-engine-production.up.railway.app/api/voicebox",
+  "version": "1.2.0",
+  "engineProvisioned": false,
+  "mediaBase": "https://voicebox-engine-production.up.railway.app/api/media"
+}
