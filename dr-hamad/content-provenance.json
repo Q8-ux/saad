@@ -52,15 +52,6 @@
     ],
     "data": "No forms, analytics, medical inference, patient records, runtime API calls or remote CDN assets added."
   },
-  "clinic_leave_notice": {
-    "id": "clinic-leave-notice",
-    "source": "User-supplied 1000411083.jpg, copied byte-for-byte",
-    "image": "assets/clinic-leave-2026-11-08.jpg",
-    "return_date": "2026-11-08",
-    "expires_at": "2026-11-08T00:00:00+03:00",
-    "timezone": "Asia/Kuwait",
-    "behavior": "Shown before the return date; banner and image dialog are removed at the start of the return date, including on pages left open or resumed from background. Hidden by default when JavaScript is unavailable."
-  },
   "tv_interview": {
     "video_id": "w8qWv5NMbrw",
     "title": "مستشفى الرازي يحقق نقلة نوعية في جراحات الركبة",
