@@ -9,7 +9,7 @@ RUN groupadd -r voicebox && useradd -r -g voicebox -m voicebox
 WORKDIR /app
 COPY requirements-gateway.txt ./
 RUN pip install --no-cache-dir -r requirements-gateway.txt
-COPY gateway.py upstream_proxy.py runtime.py ./
+COPY gateway.py upstream_proxy.py runtime.py media_service.py youtube_service.py ./
 RUN mkdir -p /data && chown -R voicebox:voicebox /app /data
 USER voicebox
 EXPOSE 8080
