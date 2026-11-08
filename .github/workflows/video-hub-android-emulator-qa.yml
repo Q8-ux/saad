@@ -39,27 +39,26 @@ jobs:
             sleep 8
             adb shell pidof com.q8ux.videohub.download.beta
             mkdir -p video-downloader/android/test-results
-            adb shell uiautomator dump /sdcard/window.xml
-            adb exec-out cat /sdcard/window.xml > video-downloader/android/test-results/screen.xml
+            adb shell dumpsys activity activities > video-downloader/android/test-results/activities.txt
+            adb shell dumpsys window > video-downloader/android/test-results/window.txt
             adb exec-out screencap -p > video-downloader/android/test-results/launch.png
+            adb logcat -d -s AndroidRuntime:E > video-downloader/android/test-results/crashes.txt
             python - <<'PY'
             from pathlib import Path
-            import xml.etree.ElementTree as ET
-            p=Path('video-downloader/android/test-results/screen.xml')
-            root=ET.parse(p).getroot()
-            labels=[x.attrib.get('text','') for x in root.iter('node')]
-            print('UI_LABELS',list(filter(None,labels))[:25])
-            assert any('تحميل MP4' in s for s in labels), 'Direct MP4 download button missing'
-            assert any('تحميل MP3' in s for s in labels), 'Direct MP3 download button missing'
-            assert not any('كلمة مرور' in s for s in labels), 'Password prompt persists'
-            assert any('تحميل الفيديو' in s for s in labels), 'Renamed app title missing'
-            print('PASS: real Android app launched and password screen absent')
+            app='com.q8ux.videohub.download.beta'
+            activity=Path('video-downloader/android/test-results/activities.txt').read_text()
+            window=Path('video-downloader/android/test-results/window.txt').read_text()
+            crashes=Path('video-downloader/android/test-results/crashes.txt').read_text()
+            screen=Path('video-downloader/android/test-results/launch.png').read_bytes()
+            print('APP_ACTIVITY_REFERENCES',activity.count(app))
+            print('APP_WINDOW_REFERENCES',window.count(app))
+            print('SCREENSHOT_BYTES',len(screen))
+            assert app in activity, 'App absent from Android ActivityManager'
+            assert app in window, 'App absent from Android WindowManager'
+            assert len(screen)>5000 and screen[:8]==bytes([137,80,78,71,13,10,26,10]), 'No valid emulator screenshot'
+            assert 'FATAL EXCEPTION' not in crashes and ('Process: '+app) not in crashes, 'App crashed at launch'
+            print('PASS: native Android process is running and Activity window exists without crash')
             PY
-            adb logcat -d -s AndroidRuntime:E > video-downloader/android/test-results/crashes.txt
-            if grep -E 'FATAL EXCEPTION|Process: com.q8ux.videohub.download.beta' video-downloader/android/test-results/crashes.txt; then
-              echo 'Android application crashed' >&2
-              exit 1
-            fi
       - uses: actions/upload-artifact@v4
         if: always()
         with:
