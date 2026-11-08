@@ -36,7 +36,7 @@ test('missing sources stay incomplete even if model claims every issue addressed
 });
 test('every output path is audited before archive and source correction preserves generated requests',()=>{
  const route=readFileSync(new URL('../app/api/legal/memo/route.ts',import.meta.url),'utf8');
- const audit=route.indexOf('const auditText = await generateText'),parse=route.indexOf('parseGroundedCaseAudit(auditText'),archive=route.indexOf('if(user) await recordServiceActivity');
+ const audit=route.indexOf('const auditText = await generateText'),parse=route.indexOf('parseGroundedCaseAudit(auditText'),archive=route.indexOf('await completeMemoRequest(managementRequestId');
  assert.ok(audit>=0&&parse>audit&&archive>parse);
  assert.match(route,/return finish\(parsePleadingContent\(revised\),true\)/);
  assert.doesNotMatch(route,/content.requests=memoInput.requests/);
