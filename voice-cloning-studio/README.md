@@ -12,7 +12,7 @@ Microphone recording and uploads, real decoded waveforms, local capture storage,
 
 ## Connected ready voices and YouTube
 
-The default web workflow now loads the actual ready-voice catalog and calls a lightweight synthesis service automatically, with no private Voicebox key needed for those bounded public tools. Ready voices are labeled separately from voice clones. The YouTube panel supports public search, official playback, time selection, authorized reference import, and local source provenance. Direct file upload remains available when the source refuses extraction.
+The default web workflow now loads the actual ready-voice catalog and calls a lightweight synthesis service automatically, with no private Voicebox key needed for those bounded public tools. Ready voices are labeled separately from voice clones. The YouTube panel supports public search, official playback, time selection, authorized reference import, and local source provenance. Direct file upload remains available when the source refuses extraction. Supported desktop browsers can record user-selected tab audio through the browser permission picker; video frames are not recorded. This does not bypass source access restrictions.
 
 ## What needs a running Voicebox engine
 
@@ -34,3 +34,5 @@ python3 deployment/build.py
 The GitHub Pages workflow restores the latest successful Pages artifact, updates this application only, checks unchanged hashes for every other site's file, and publishes. It refuses to replace unrelated sites when a valid prior artifact cannot be found. The shared full-site publisher also includes this project's generated `dist` output.
 
 Browser checks used a synthetic two-second tone, not a real person's voice. Audio upload/decoding, radio processing, actual WAV output and the UI's empty/disconnected state are tested separately from inference. No clone, dialect similarity or AI transcription accuracy claim is made without an actual engine run and listening review. Microphone hardware permission/device behavior needs testing on the user's phone; browser page shortcuts do not inject text into other applications like desktop dictation.
+
+Latest live checks: 32 Arabic ready voices returned, including Kuwait Fahed/Noura. With edge-tts7.3.1, actual Arabic synthesis returned an MP3 file (30,528 bytes). Public YouTube search returned real NASA results. Direct extraction on the tested cloud host returned youtube_blocked; import remains source-dependent, with upload/tab-capture alternatives. Speaker cloning remains dependent on a separately provisioned private inference host.
