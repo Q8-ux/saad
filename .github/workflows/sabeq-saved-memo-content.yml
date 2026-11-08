@@ -1,0 +1,29 @@
+name: Sabeq saved memo persistence
+on:
+  pull_request:
+    paths:
+      - 'sabeq-legal/research-source/**'
+      - '.github/workflows/sabeq-saved-memo-content.yml'
+  push:
+    branches: ['fix/saved-memo-content-20261108']
+    paths:
+      - 'sabeq-legal/research-source/**'
+      - '.github/workflows/sabeq-saved-memo-content.yml'
+permissions:
+  contents: read
+jobs:
+  persistence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install isolated test compiler
+        run: npm install --prefix "$RUNNER_TEMP/sabeq-test-deps" --ignore-scripts --no-audit --no-fund typescript@5.9.3
+      - name: Exercise persistence and authenticated read contracts
+        working-directory: sabeq-legal/research-source
+        run: |
+          ln -s "$RUNNER_TEMP/sabeq-test-deps/node_modules" node_modules
+          node --test tests/saved-memo-persistence.test.mjs tests/management-source-connection.test.mjs tests/memo-responsive-generation.test.mjs tests/case-reasoning.test.mjs

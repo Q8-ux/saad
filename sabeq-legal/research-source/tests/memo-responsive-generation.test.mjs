@@ -27,5 +27,5 @@ test('native confirmation removed, cancel/unmount wired, memo POST excluded from
  assert.match(ui,/generationRequest.current\?\.abort\(\)/);assert.match(ui,/memo-generation-approval/);assert.match(ui,/generationMounted.current = false/);
  assert.match(ui,/retryableResponse = path === "\/api\/legal\/analyze-documents"/);
  const route=readFileSync(new URL('../app/api/legal/memo/route.ts',import.meta.url),'utf8');
- assert.ok(route.indexOf('signal.throwIfAborted();',route.indexOf('const finalMemo'))<route.indexOf('recordServiceActivity({'));
+ assert.ok(route.indexOf('signal.throwIfAborted();',route.indexOf('const finalMemo'))<route.indexOf('await completeMemoRequest(managementRequestId'));
 });

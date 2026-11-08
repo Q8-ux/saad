@@ -38,6 +38,40 @@ function pagination(url: URL) {
   if (!Number.isSafeInteger(offset) || offset < 0 || offset > 100_000) throw new RequestError("رقم الصفحة غير صحيح.");
   return { offset, limit: 50, query: (url.searchParams.get("q") || "").trim().slice(0, 160), status: (url.searchParams.get("status") || "").slice(0, 50) };
 }
+function savedMemoText(value: unknown, depth = 0): string {
+  if (depth > 5) throw new RequestError("تعذّر قراءة بنية النص المحفوظ.", 502);
+  if (typeof value === "string") {
+    if (!value.trim()) return "";
+    if (!/^[{\["]/.test(value.trim())) return value;
+    let parsed: unknown;
+    try { parsed = JSON.parse(value); } catch { throw new RequestError("تعذّر قراءة بنية النص المحفوظ.", 502); }
+    return savedMemoText(parsed, depth + 1);
+  }
+  if (value && typeof value === "object" && !Array.isArray(value)) {
+    const record = value as Record<string, unknown>;
+    for (const key of ["output_text", "memo", "result", "data"]) {
+      if (Object.hasOwn(record, key)) return savedMemoText(record[key], depth + 1);
+    }
+  }
+  throw new RequestError("تعذّر قراءة بنية النص المحفوظ.", 502);
+}
+async function resolveSavedMemo(row: Record<string, unknown>, id: string) {
+  const original = savedMemoText(row.output_text ?? "");
+  if (original || id.startsWith("legacy:")) return {...row,output_text:original,content_source:original ? "request.output_text" : null};
+  // Only exact persisted relationships can recover content. Names and case numbers are never joins.
+  const db = getD1();
+  const services = await db.prepare(`SELECT id,output_text FROM service_records WHERE service_type IN ('memo','memo_archive')
+    AND json_valid(metadata_json) AND json_extract(metadata_json,'$.managementRequestId') = ?`).bind(id).all<{id:string;output_text:string}>();
+  const payments = await db.prepare(`SELECT id,result_json FROM sadad_payments WHERE json_valid(result_json)
+    AND json_extract(result_json,'$.requestId') = ?`).bind(id).all<{id:string;result_json:string}>();
+  const candidates = [
+    ...services.results.map(r=>({text:savedMemoText(r.output_text),source:"service_records.output_text",record_id:r.id})),
+    ...payments.results.map(r=>({text:savedMemoText(r.result_json),source:"sadad_payments.result_json",record_id:r.id})),
+  ].filter(r=>r.text.trim());
+  if (new Set(candidates.map(r=>r.text)).size > 1) throw new RequestError("توجد نسخ محفوظة مختلفة مرتبطة بالطلب؛ يلزم تحديد النسخة الأصلية.",409);
+  const candidate=candidates[0];
+  return {...row,output_text:candidate?.text || "",content_source:candidate?.source || null,content_record_id:candidate?.record_id || null};
+}
 export async function managerMemos(url: URL) {
   const id = url.searchParams.get("id");
   if (id?.startsWith("official:")) {
@@ -51,7 +85,7 @@ export async function managerMemos(url: URL) {
     if (id.startsWith("legacy:")) row = await getD1().prepare("SELECT r.id, r.title AS client_name, u.email, r.service_type AS case_type, '' AS case_number, r.input_text AS input_json, r.output_text, r.status, r.created_at, r.created_at AS updated_at, '' AS error_code FROM service_records r LEFT JOIN public_users u ON u.id = r.user_id WHERE r.id = ? AND r.service_type IN ('memo','memo_archive')").bind(id.slice(7)).first();
     else row = await getD1().prepare("SELECT * FROM management_memo_requests WHERE id = ?").bind(id).first();
     if (!row) throw new RequestError("المذكرة غير موجودة.", 404);
-    return { memo: { ...row, id, source: "hosted" } };
+    return { memo: { ...await resolveSavedMemo(row, id), id, source: "hosted" } };
   }
   const { offset, limit, query, status } = pagination(url);
   const generatedOnly = url.searchParams.get("view") === "generated";
@@ -78,7 +112,7 @@ export async function managerInbox(url: URL) {
 export async function managerSnapshot(email: string) {
   const db = getD1();
   const [memo, historical, contacts, mail, commands, appointments, events, reads, official] = await Promise.all([
-    db.prepare("SELECT COUNT(*) total, SUM(status = 'running') running, SUM(status IN ('failed','cancelled')) failed, SUM(status IN ('needs_review','needs_information')) review FROM management_memo_requests").first(),
+    db.prepare("SELECT COUNT(*) total, SUM(status = 'running') running, SUM(status IN ('failed','cancelled')) failed, SUM(status IN ('needs_review','needs_information','review_pending')) review FROM management_memo_requests").first(),
     db.prepare("SELECT COUNT(*) total FROM service_records WHERE service_type IN ('memo','memo_archive') AND metadata_json NOT LIKE '%\"managementRequestId\"%'").first(),
     db.prepare("SELECT COUNT(*) total, SUM(status = 'new') unread FROM contact_messages").first(),
     db.prepare("SELECT COUNT(*) total, SUM(status = 'new') unread FROM management_emails").first(),

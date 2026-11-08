@@ -10,6 +10,7 @@ function harness({authenticated=false}={}){
   const sqlite=new DatabaseSync(':memory:');
   sqlite.exec(readFileSync(new URL('tests/fixtures/management-source-tables.sql',root),'utf8'));
   sqlite.exec(readFileSync(new URL('drizzle/0005_icy_dark_phoenix.sql',root),'utf8'));
+  sqlite.exec(readFileSync(new URL('drizzle/0006_sadad_payments.sql',root),'utf8'));
   const db={prepare(sql){let args=[];return{bind(...values){args=values;return this;},async first(){return sqlite.prepare(sql).get(...args)||null;},async all(){return{results:sqlite.prepare(sql).all(...args)};},async run(){return sqlite.prepare(sql).run(...args);}};}};
   // Authentication routes and encrypted-vault isolation are covered by the full native management suite.
   const dependencies={'@/db':{getD1:()=>db},'@/lib/management-auth':{base64url:value=>Buffer.from(value).toString('base64url'),sealConfig:async value=>JSON.stringify(value),openConfig:async value=>JSON.parse(value)},'@/lib/management-integrations':{SERVICE_ORIGIN:'https://sabeq-legal-public.centrino.chatgpt.site'},'@/lib/request-security':{RequestError:class extends Error{}}};
@@ -56,7 +57,7 @@ test('generated memo view follows saved output for guests and users, not a statu
  const user=await ledger.startMemoRequest({clientName:'مستخدم اصطناعي'},{id:'synthetic-user',email:'synthetic@example.test'},'https://q8-ux.github.io');
  await ledger.finishMemoRequest(user,'needs_review','نص مذكرة ثانية للاختبار.');
  const empty=await ledger.startMemoRequest({clientName:'مراجعة دون نص'},null,'https://q8-ux.github.io');
- await ledger.finishMemoRequest(empty,'needs_review',' \n\t\r ','source_review');
+ await ledger.finishMemoRequest(empty,'review_pending',' \n\t\r ','source_review');
  await ledger.startMemoRequest({clientName:'طلب قيد التنفيذ'},null,'https://q8-ux.github.io');
  const generated=await data.managerMemos(new URL('https://test.invalid/api/management/memos?view=generated'));
  assert.deepEqual(new Set(generated.memos.map(r=>r.id)),new Set([guest,user]));
@@ -76,3 +77,10 @@ test('the generated view keeps saved historical memos and applies its filter bef
  const result=await data.managerMemos(new URL('https://test.invalid/api/management/memos?view=generated'));
  assert.deepEqual(new Set(result.memos.map(r=>r.id)),new Set([id,'legacy:old-test']));assert.equal(result.hasMore,false);
 }finally{h.close();}});
+test('unauthorized bridge callers cannot read any request detail',async()=>{
+ const h=harness();try{
+ const bridge=h.load('app/api/integrations/bolt-memos/route.ts');
+ const response=await bridge.POST(new Request('https://test.invalid/api/integrations/bolt-memos',{method:'POST',headers:{Origin:'https://q8-ux-sabeq-admin-co-u4ma.bolt.host','Content-Type':'application/json'},body:JSON.stringify({action:'get',id:'synthetic-record-0001'})}));
+ assert.equal(response.status,401);assert.equal((await response.json()).memo,undefined);
+ }finally{h.close();}
+});

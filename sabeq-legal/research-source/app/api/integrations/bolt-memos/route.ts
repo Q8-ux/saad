@@ -91,7 +91,8 @@ export async function POST(request: Request) {
         status: memo.status || "",
         created_at: memo.created_at || "",
         has_output: typeof memo.output_text === "string" && memo.output_text.trim().length > 0,
-        output_text: typeof memo.output_text === "string" ? memo.output_text.slice(0, 140_000) : "",
+        output_text: typeof memo.output_text === "string" ? memo.output_text : "",
+        content_source: memo.content_source || null,
         source: memo.source || "hosted",
       } });
     }
