@@ -1,0 +1,50 @@
+# Run from the server directory; frontend is independently hosted on GitHub Pages.
+FROM python:3.12-slim AS builder
+ARG VOICEBOX_REV=8af7efe62fab8d33e2a5dfbedabaa45f68a5184f
+ENV PIP_DISABLE_PIP_VERSION_CHECK=1 PIP_NO_CACHE_DIR=1
+RUN apt-get update && apt-get install -y --no-install-recommends git build-essential \
+    && rm -rf /var/lib/apt/lists/*
+RUN git init /opt/voicebox && cd /opt/voicebox \
+    && git remote add origin https://github.com/jamiepine/voicebox.git \
+    && git fetch --depth=1 origin "${VOICEBOX_REV}" \
+    && git checkout --detach FETCH_HEAD && rm -rf .git
+COPY constraints.txt /build/constraints.txt
+RUN python -m venv /venv
+ENV PATH="/venv/bin:$PATH"
+RUN pip install --upgrade pip \
+    && pip install --index-url https://download.pytorch.org/whl/cpu \
+       torch==2.6.0+cpu torchaudio==2.6.0+cpu
+# These are upstream's full engine dependencies, not a mocked TTS service.
+# The CPU wheel index keeps dependencies from replacing Torch with CUDA wheels.
+RUN pip install --extra-index-url https://download.pytorch.org/whl/cpu \
+      --constraint /build/constraints.txt -r /opt/voicebox/backend/requirements.txt \
+    && pip install --no-deps chatterbox-tts hume-tada omnivoice
+
+FROM python:3.12-slim
+ENV PATH="/venv/bin:$PATH" \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    HF_HOME=/data/models \
+    HF_HUB_CACHE=/data/models \
+    VOICEBOX_MODELS_DIR=/data/models \
+    NUMBA_CACHE_DIR=/data/numba \
+    VOICEBOX_CLOUD_ENABLED=0 \
+    STUDIO_ALLOWED_ORIGINS=https://q8-ux.github.io \
+    STUDIO_MAX_UPLOAD_MB=100 \
+    STUDIO_APP=engine_runtime:app \
+    OMP_NUM_THREADS=2
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      ffmpeg sox libsndfile1 libgomp1 espeak-ng gosu \
+    && rm -rf /var/lib/apt/lists/* \
+    && groupadd -r voicebox && useradd -r -g voicebox -m voicebox
+COPY --from=builder /venv /venv
+COPY --from=builder /opt/voicebox/backend /opt/voicebox/backend
+COPY --from=builder /opt/voicebox/LICENSE /opt/voicebox/LICENSE
+WORKDIR /app
+COPY gateway.py engine_runtime.py start.sh ./
+RUN chmod 755 /app/start.sh && mkdir -p /data \
+    && chown -R voicebox:voicebox /app /data
+EXPOSE 8080
+HEALTHCHECK --interval=30s --timeout=5s --start-period=180s --retries=3 \
+  CMD python -c "import os,urllib.request; urllib.request.urlopen('http://127.0.0.1:'+os.getenv('PORT','8080')+'/healthz',timeout=4)"
+ENTRYPOINT ["/app/start.sh"]
