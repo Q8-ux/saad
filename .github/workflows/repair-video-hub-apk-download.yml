@@ -26,14 +26,14 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p /tmp/video-apk
-          base="https://github.com/Q8-ux/saad/releases/download/video-hub-android-v1.3.0"
+          base="https://github.com/Q8-ux/saad/releases/download/video-hub-android-v1.4.0"
           curl --fail --location --retry 2 --connect-timeout 15 --max-time 100 -sS \
-            "$base/Video-Downloader-Android-v1.3.0.apk" -o /tmp/video-apk/Video-Hub-Android.apk
+            "$base/Tahmeel-Alvideo-v1.4.0.apk" -o /tmp/video-apk/Video-Hub-Android.apk
           curl --fail --location --retry 2 --connect-timeout 15 --max-time 100 -sS \
             "$base/SHA256SUMS.txt" -o /tmp/video-apk/SHA256SUMS.txt
           cd /tmp/video-apk
           mkdir -p dist
-          cp Video-Hub-Android.apk dist/Video-Downloader-Android-v1.3.0.apk
+          cp Video-Hub-Android.apk dist/Tahmeel-Alvideo-v1.4.0.apk
           sha256sum -c SHA256SUMS.txt
           unzip -t Video-Hub-Android.apk > /tmp/video-apk/zip-check.txt
           unzip -Z1 Video-Hub-Android.apk | grep -q '^AndroidManifest.xml$'

@@ -79,3 +79,12 @@ The Android app ID differs from the older debug build, so it can be installed wi
 - **Android APK:** https://github.com/Q8-ux/saad/releases/download/video-hub-android-v1.3.0/Video-Downloader-Android-v1.3.0.apk
 - **Stable GitHub mirror:** https://github.com/Q8-ux/saad/raw/refs/heads/main/video-downloader/android/releases/Video-Hub-Android.apk
 - Installed versions v1.0, v1.1 and v1.2 are distinct debug packages. Use the new launcher label `تحميل الفيديو` to open the fixed build. Unsupported/blocked media still cannot be guaranteed to work.
+
+
+## تحميل الفيديو v1.4.0 — شاشة البداية المبسطة
+
+The native launcher is now `DownloadVideoActivity` rather than the complex previous `MainActivity`. It calls `setContentView` immediately **before** checking the network, shows a simple link input and always-visible MP4/MP3 buttons, and reports connectivity failures in Arabic. Hardware acceleration is disabled for this launcher for compatibility with some Android renderers. Application ID is `com.q8ux.videohub.clean.beta` to avoid signature conflicts with debug builds 1.0 through 1.3.
+
+Release APK: https://github.com/Q8-ux/saad/releases/download/video-hub-android-v1.4.0/Tahmeel-Alvideo-v1.4.0.apk
+
+The GitHub CI compilation and APK signature check passed. In-person validation on the user's device remains outstanding. The emulator still requires a completed successful launch test.
