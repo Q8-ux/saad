@@ -23,6 +23,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import org.json.JSONObject;
 import java.io.InputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -175,7 +176,7 @@ public final class DownloadVideoActivity extends Activity {
                 c = (HttpURLConnection)new URL(API+"/api/health").openConnection();
                 c.setConnectTimeout(9000); c.setReadTimeout(9000);
                 if (c.getResponseCode() == 200) {
-                    byte[] reply = c.getInputStream().readNBytes(6000);
+                    byte[] reply = readLimited(c.getInputStream(), 6000);
                     ok = new JSONObject(new String(reply, StandardCharsets.UTF_8))
                         .optBoolean("public_app_mode", false);
                 }
@@ -187,11 +188,20 @@ public final class DownloadVideoActivity extends Activity {
                 "● الاتصال بالمحرك غير متاح؛ تحقق من الإنترنت"));
         });
     }
+    private static byte[] readLimited(InputStream input, int limit) throws Exception {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        byte[] buffer = new byte[1024];
+        int received;
+        while (out.size() < limit && (received = input.read(buffer)) != -1) {
+            out.write(buffer, 0, Math.min(received, limit - out.size()));
+        }
+        return out.toByteArray();
+    }
     private static String failure(HttpURLConnection c) throws Exception {
         int code = c.getResponseCode();
         String detail = "";
         try (InputStream in = c.getErrorStream()) {
-            if (in != null) detail = new JSONObject(new String(in.readNBytes(2000), StandardCharsets.UTF_8)).optString("detail","");
+            if (in != null) detail = new JSONObject(new String(readLimited(in, 2000), StandardCharsets.UTF_8)).optString("detail","");
         } catch (Exception ignored) { }
         if (code == 429) return "طلبات كثيرة حاليًا؛ حاول لاحقًا (429).";
         if (code == 413) return "المقطع كبير جدًا للخدمة (413).";
