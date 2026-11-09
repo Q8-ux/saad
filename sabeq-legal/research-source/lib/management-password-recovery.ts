@@ -57,8 +57,8 @@ export async function finishManagementRecovery(data: Record<string, unknown>) {
   const token = data.token, password = data.newPassword, confirm = data.confirmPassword;
   if (typeof token !== "string" || !tokenFormat.test(token)) throw new RequestError("رابط الاسترداد غير صالح أو انتهت صلاحيته.", 401);
   if (typeof password !== "string" || typeof confirm !== "string" || password !== confirm) throw new RequestError("تأكيد كلمة المرور غير مطابق.", 400);
-  if (password.length < 16 || password.length > 256 || !/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/[0-9]/.test(password) || !/[^A-Za-z0-9]/.test(password)) {
-    throw new RequestError("كلمة المرور الجديدة من 16 محرفاً على الأقل، مع حرف كبير وصغير ورقم ورمز.", 400);
+  if (password.length < 1 || password.length > 256) {
+    throw new RequestError("أدخل كلمة المرور الجديدة.", 400);
   }
   const db = getD1();
   const row = await db.prepare("DELETE FROM management_password_resets WHERE token_hash = ? AND expires_at > ? RETURNING account_id").bind(await hash(token),Math.floor(Date.now()/1000)).first<{account_id:string}>();

@@ -186,6 +186,27 @@ export async function managementAccounts(data: Record<string, unknown> | null, m
   return { ok: true, reauthenticate: self };
 }
 
+/** Recovery uses the existing immutable account ID and encrypted account store. */
+export async function managementRecoveryAccount(username: string) {
+  const roster = await accountRoster();
+  const account = roster.accounts.find(row => row.username === normalizeManagementUsername(username) && row.enabled);
+  return account ? { id: account.id, username: account.username, role: account.role } : null;
+}
+
+export async function resetManagementPasswordWithProof(accountId: string, password: string) {
+  if (typeof password !== "string" || password.length < 1 || password.length > 256) throw new RequestError("أدخل كلمة المرور الجديدة.", 400);
+  const roster = await accountRoster();
+  const account = roster.accounts.find(row => row.id === accountId && row.enabled);
+  if (!account) throw new RequestError("رابط الاستعادة غير صالح أو انتهت صلاحيته.", 401);
+  const updated = await changedAccount(account, account.username, password);
+  const next: AccountStore = {
+    ...roster.saved, revision: toHex(crypto.getRandomValues(new Uint8Array(16))),
+    accounts: [...roster.saved.accounts.filter(row => row.id !== account.id), updated],
+  };
+  await saveAccountStore(next, roster.sealed, "management-password-recovery");
+  return { ok: true };
+}
+
 export async function authenticateManagementPassword(data: Record<string, unknown>) {
   const username = normalizeManagementUsername(data.username), password = data.password;
   if (!USERNAME.test(username) || typeof password !== "string" || password.length < 1 || password.length > 256) throw new RequestError(INVALID, 401);

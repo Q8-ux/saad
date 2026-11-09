@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import vm from "node:vm";
+import {webcrypto} from "node:crypto";
 import ts from "typescript";
 
 const source=readFileSync(new URL("../lib/management-password-recovery.ts",import.meta.url),"utf8");
@@ -9,12 +10,14 @@ const login=readFileSync(new URL("../../../sabeq-admin-preview/admin.js",import.
 const route=readFileSync(new URL("../app/api/management/[...path]/route.ts",import.meta.url),"utf8");
 const migration=readFileSync(new URL("../drizzle/0010_management_password_recovery.sql",import.meta.url),"utf8");
 const exports={};
+let recoveryDb=null;
+const resetCalls=[];
 const compiled=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
-vm.runInNewContext(compiled,{exports,require:(id)=>{
+vm.runInNewContext(compiled,{exports,crypto:webcrypto,TextEncoder,require:(id)=>{
  if(id==="cloudflare:workers")return {env:{}};
- if(id==="@/db")return {getD1:()=>{throw Error("No DB calls for invalid username")}};
+ if(id==="@/db")return {getD1:()=>{if(recoveryDb)return recoveryDb;throw Error("No DB calls for invalid username")}};
  if(id==="@/lib/email")return {sendManagementRecoveryEmail:()=>{throw Error("Unexpected email")}};
- if(id==="@/lib/management-password")return {normalizeManagementUsername:(x)=>typeof x==="string"?x.trim().toLowerCase():"",managementRecoveryAccount:()=>null,resetManagementPasswordWithProof:()=>{throw Error("No reset")}};
+ if(id==="@/lib/management-password")return {normalizeManagementUsername:(x)=>typeof x==="string"?x.trim().toLowerCase():"",managementRecoveryAccount:()=>null,resetManagementPasswordWithProof:async(id,password)=>{resetCalls.push({id,password})}};
  if(id==="@/lib/request-security")return {RequestError:class RequestError extends Error{}};
  throw Error("Unexpected import: "+id);
 }});
@@ -45,11 +48,26 @@ test("reset tokens are one-time server-hashed, expire, and cannot be exchanged a
 });
 
 
-test("approved-account entry uses PKCE without restoring the removed password form",()=>{
+test("approved-account entry supports chosen passwords and the PKCE account alternative",()=>{
  const start=login.indexOf('function loginScreen('),end=login.indexOf('async function signIn(',start);
  assert.ok(start>=0&&end>start);
  const entry=login.slice(start,end);assert.match(entry,/data-action="sign-in"/);assert.match(entry,/data-action="switch-account"/);
- assert.doesNotMatch(entry,/data-form="password-login"|name="password"|نسيت كلمة المرور/);
- assert.match(login,/sabeq-admin-proof/);assert.match(login,/sabeq-admin-state/);assert.match(login,/SHA-256/);assert.match(login,/new URLSearchParams\(\{challenge,state\}\)/);
+ assert.match(entry,/data-form="password-login"/);assert.match(entry,/type="password"/);assert.doesNotMatch(entry,/minlength=/);
+ assert.match(login,/sabeq-admin-proof/);assert.match(login,/sabeq-admin-state/);assert.match(login,/SHA-256/);assert.match(login,/new URLSearchParams\(\{challenge,state,console:consoleName\}\)/);
  assert.match(login,/api\('exchange',\{code,verifier\}\)/);
+});
+
+test("password recovery accepts a chosen one-character password only with a valid one-time proof",async()=>{
+ const token="a".repeat(43);let available=true;let proofReads=0;
+ recoveryDb={prepare:(sql)=>{assert.match(sql,/DELETE FROM management_password_resets/);return {bind:()=>({first:async()=>{proofReads++;if(!available)return null;available=false;return {account_id:"memo_supervisor:ahmad"};}})}}};
+ try {
+  await assert.rejects(exports.finishManagementRecovery({token,newPassword:"",confirmPassword:""}));
+  assert.equal(proofReads,0);
+  await assert.rejects(exports.finishManagementRecovery({token:"bad",newPassword:"x",confirmPassword:"x"}));
+  assert.equal(proofReads,0);
+  const result=await exports.finishManagementRecovery({token,newPassword:"x",confirmPassword:"x"});
+  assert.equal(result.ok,true);assert.deepEqual(resetCalls,[{id:"memo_supervisor:ahmad",password:"x"}]);
+  await assert.rejects(exports.finishManagementRecovery({token,newPassword:"x",confirmPassword:"x"}));
+  assert.equal(resetCalls.length,1);
+ } finally {recoveryDb=null;}
 });
