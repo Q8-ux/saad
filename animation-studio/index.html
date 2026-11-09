@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080b1e">
+  <meta name="description" content="مسار الرسوم المتحركة: مساحة عربية لتخطيط وتحريك وتسجيل وإخراج وتسويق القصص المتحركة وربط مسارات سعد الإبداعية.">
+  <title>مسار الرسوم المتحركة | SAAD Animation Studio</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<div class="ambient ambient-one" aria-hidden="true"></div><div class="ambient ambient-two" aria-hidden="true"></div>
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <a class="brand" href="#workspace" aria-label="الصفحة الرئيسية">
+      <span class="brand-logo">✦</span><span><strong>مسار الرسوم المتحركة</strong><small>SAAD ANIMATION STUDIO</small></span>
+    </a>
+    <div class="sidebar-label">مركز الإنتاج</div>
+    <nav aria-label="التنقل الرئيسي">
+      <a class="nav-link active" href="#workspace" data-nav="workspace"><span>◈</span> نظرة عامة</a>
+      <a class="nav-link" href="#story" data-nav="story"><span>▣</span> القصة والسيناريو</a>
+      <a class="nav-link" href="#scenes" data-nav="scenes"><span>◫</span> المشاهد والتحريك</a>
+      <a class="nav-link" href="#audio" data-nav="audio"><span>◉</span> الصوت والتعليق</a>
+      <a class="nav-link" href="#assets" data-nav="assets"><span>✳</span> الجرافيك والتصميم</a>
+      <a class="nav-link" href="#research" data-nav="research"><span>⌕</span> البحث والمراجع</a>
+      <a class="nav-link" href="#marketing" data-nav="marketing"><span>↗</span> التسويق والنشر</a>
+      <a class="nav-link" href="#integrations" data-nav="integrations"><span>⌘</span> المسارات المترابطة</a>
+      <a class="nav-link" href="#export" data-nav="export"><span>↓</span> التصدير والنسخ</a>
+    </nav>
+    <div class="side-bottom"><div class="online-badge"><span class="status-dot"></span> المحرر المحلي يعمل دون خادم</div><p>التحريك والمعاينة والتسجيل والتصدير المحلي. التوليد بالذكاء الاصطناعي يحتاج محركًا مستقلًا.</p><a href="https://github.com/Q8-ux/saad/tree/main/animation-studio" target="_blank" rel="noopener noreferrer">المصدر على GitHub ↗</a></div>
+  </aside>
+  <div class="main-shell">
+    <header class="topbar"><button class="icon-button menu-button" id="mobile-menu" aria-label="إظهار القائمة">☰</button>
+      <div class="topbar-title"><span class="eyebrow">WORKSPACE / PRODUCTION</span><span id="header-title">لوحة الاستوديو</span></div>
+      <div class="topbar-actions"><span id="save-status" class="save-status">● محفوظ محليًا</span><button class="small-btn" id="new-project">+ مشروع جديد</button><button class="icon-button" id="quick-export" title="تنزيل نسخة المشروع">⇩</button></div>
+    </header>
+    <main>
+      <section class="hero" id="workspace">
+        <div class="hero-text"><span class="eyebrow gradient-text">CREATIVE PRODUCTION SYSTEM / V1.0</span><h1>من الفكرة إلى <em>عالم يتحرك.</em></h1><p>اكتب قصتك، رتّب المشاهد، حرّك العناصر، أضف الصوت، أنشئ مواد النشر، ووجّه كل مرحلة إلى الأدوات المتخصصة الموجودة في مشاريعك.</p>
+          <div class="hero-actions"><a href="#scenes" class="primary-btn">ابدأ التحريك <span>←</span></a><a href="#integrations" class="ghost-btn">استعرض المسارات المرتبطة</a></div>
+        </div>
+        <div class="hero-decor" aria-hidden="true"><div class="orbit orbit-a"></div><div class="orbit orbit-b"></div><div class="glass-cube">▶</div><span class="orbit-tag tag-one">RENDER</span><span class="orbit-tag tag-two">VOICE</span><span class="orbit-tag tag-three">3D / 2D</span></div>
+      </section>
+      <section class="metrics" aria-label="إحصائيات المشروع">
+        <article class="metric"><span class="metric-icon cyan">◧</span><small>المشروع النشط</small><strong id="stat-project">—</strong><span class="metric-foot">حفظ محلي</span></article>
+        <article class="metric"><span class="metric-icon purple">▣</span><small>عدد المشاهد</small><strong id="stat-scenes">0</strong><span class="metric-foot">قابل للتعديل</span></article>
+        <article class="metric"><span class="metric-icon gold">◷</span><small>مدة العمل</small><strong id="stat-time">0:00</strong><span class="metric-foot">ثوانٍ مقدّرة</span></article>
+        <article class="metric"><span class="metric-icon green">◉</span><small>جاهزية الإنتاج</small><strong id="stat-ready">0%</strong><span class="metric-foot">فحص أساسي</span></article>
+      </section>
+      <section class="split-head" id="story"><div><span class="eyebrow">PRE-PRODUCTION</span><h2>ملف القصة والهوية</h2><p class="muted">مرجع واحد يرافق كل مشهد ويصدّر مع حزمة المشروع.</p></div><span class="section-chip">01 / الكتابة</span></section>
+      <div class="panel grid-two story-grid">
+        <div class="field-grid">
+          <label>اسم المشروع<input id="project-title" maxlength="100" placeholder="عنوان الفيلم أو الحلقة"></label>
+          <label>نوع المشروع<select id="project-type"><option value="short">فيلم قصير / Reels</option><option value="series">سلسلة حلقات</option><option value="ad">إعلان متحرك</option><option value="educational">محتوى تعليمي</option><option value="story">قصة درامية</option></select></label>
+          <label>أسلوب الرسم<select id="project-style"><option value="toon">كرتون 2D داخل عالم 3D</option><option value="cinematic">3D سينمائي / Blender</option><option value="motion">موشن جرافيك</option><option value="cutout">قصاصات / Cutout 2D</option></select></label>
+          <label>مقاس الإخراج<select id="project-aspect"><option value="9:16">عمودي 9:16 · Shorts</option><option value="16:9">أفقي 16:9 · YouTube</option><option value="1:1">مربع 1:1</option></select></label>
+          <label>اللغة<select id="project-language"><option value="ar">العربية</option><option value="en">English</option><option value="ar-en">عربي / إنجليزي</option></select></label>
+          <label>الجمهور المستهدف<input id="project-audience" maxlength="160" placeholder="مثال: الشباب الخليجي"></label>
+        </div>
+        <div class="stack"><label>الفكرة والملخص<textarea id="project-brief" rows="4" maxlength="4000" placeholder="ما القصة التي تريد تحويلها إلى رسوم متحركة؟"></textarea></label>
+          <label>السيناريو أو التعليق الأساسي<textarea id="project-script" rows="9" maxlength="24000" placeholder="اكتب السيناريو هنا. يمكن نقله إلى استوديو السيناريو لتطوير الشخصيات والحوار..."></textarea></label>
+          <div class="action-line"><button id="outline-scenes" class="small-btn">تحويل الفقرات إلى مشاهد</button><button id="download-script" class="ghost-btn compact">تنزيل السيناريو TXT</button><button id="copy-script" class="ghost-btn compact">نسخ النص</button></div>
+        </div>
+      </div>
+      <section class="split-head" id="scenes"><div><span class="eyebrow">ANIMATION TIMELINE</span><h2>غرفة المشاهد والتحريك</h2><p class="muted">معاينة Canvas متحركة حقيقية. القوالب تمثيلية قابلة للتعديل، وليست إخراج Blender النهائي.</p></div><span class="section-chip">02 / المشاهد</span></section>
+      <div class="stage-layout">
+        <div class="stage-panel panel">
+          <div class="panel-heading"><div><strong>المعاينة المباشرة</strong><small id="playing-label">جاهز للمعاينة</small></div><div class="stage-tags"><span id="ratio-label">9:16</span><span>30 FPS</span><span>CANVAS</span></div></div>
+          <div class="canvas-wrap"><canvas id="preview" width="720" height="1280" aria-label="معاينة الرسوم المتحركة">متصفحك لا يدعم Canvas.</canvas></div>
+          <div class="playback"><button class="play-btn" id="play-toggle" aria-label="تشغيل">▶</button><input id="scrubber" type="range" min="0" max="1000" value="0" aria-label="موضع التشغيل"><span id="play-time">0:00 / 0:00</span><button id="restart" class="icon-button" title="من البداية">↺</button></div>
+          <div class="action-line"><button class="small-btn" id="record-video">⏺ تسجيل الفيديو WebM</button><button class="ghost-btn compact" id="snapshot">حفظ الإطار PNG</button><button class="ghost-btn compact" id="stop-record" disabled>إيقاف التسجيل</button></div>
+          <p class="note" id="record-status">التصدير يعتمد على إمكانات متصفحك؛ ملف WebM يضم تحريك Canvas وصوت الملف المرفوع إن أمكن مزجه. لا ينتج فيديو Three.js أو Blender.</p>
+        </div>
+        <div class="timeline-panel panel"><div class="panel-heading"><strong>قائمة اللقطات</strong><button id="add-scene" class="small-btn">+ مشهد</button></div><div id="scene-list" class="scene-list" aria-live="polite"></div>
+          <div class="scene-editor"><h3>تحرير المشهد المحدد</h3><label>عنوان المشهد<input id="scene-title" maxlength="140"></label><label>وصف الحركة / الكادر<textarea id="scene-visual" rows="3" maxlength="1500"></textarea></label><label>التعليق الصوتي / الحوار<textarea id="scene-narration" rows="3" maxlength="1800"></textarea></label>
+            <div class="field-grid"><label>مدة المشهد (ثانية)<input id="scene-duration" type="number" min="1" max="60" step="1"></label><label>لون الخلفية<input id="scene-color" type="color" value="#152758"></label></div>
+            <div class="action-line"><button id="duplicate-scene" class="ghost-btn compact">نسخ المشهد</button><button id="remove-scene" class="danger-btn">حذف</button></div>
+          </div>
+        </div>
+      </div>
+      <section class="split-head" id="audio"><div><span class="eyebrow">VOICE / SOUND</span><h2>استوديو الصوت</h2><p class="muted">رفع تعليق صوتي، تسجيل ميكروفون، واستماع تجريبي للنص قبل التصدير.</p></div><span class="section-chip">03 / الصوت</span></section>
+      <div class="grid-two">
+        <div class="panel stack"><div class="panel-heading"><strong>تسجيل ورفع الصوت</strong><span class="tag status-local">محلي</span></div><label class="upload-target">اسحب الملف هنا أو اختر ملف صوت<input type="file" id="audio-file" accept="audio/*"></label><audio id="audio-player" controls preload="metadata"></audio><p id="audio-file-name" class="muted">لم يتم تحميل صوت بعد</p><div class="action-line"><button class="small-btn" id="mic-start">● بدء التسجيل</button><button class="ghost-btn compact" id="mic-stop" disabled>إيقاف</button><button class="ghost-btn compact" id="mic-download" disabled>تنزيل التسجيل</button></div><p class="note">المقاطع الصوتية لا تُحفظ داخل النسخة الاحتياطية JSON. نزّل الملف واحتفظ به؛ الإذن مطلوب للميكروفون.</p></div>
+        <div class="panel stack"><div class="panel-heading"><strong>مساعد الأداء الصوتي</strong><span class="tag status-local">من المتصفح</span></div><label>نص القراءة<textarea rows="5" id="speech-text" maxlength="6000" placeholder="اختر تعليقًا من المشاهد أو اكتب النص هنا..."></textarea></label><div class="action-line"><button class="small-btn" id="speak-text">▶ استماع تجريبي</button><button class="ghost-btn compact" id="stop-speech">إيقاف القراءة</button><button class="ghost-btn compact" id="scene-to-speech">تعليق المشهد</button></div><p class="note">هذه قراءة النظام عبر SpeechSynthesis بحسب أصوات الجهاز، وليست نسخًا للصوت، ولا تُدمج تلقائيًا في التصدير. للتوليد الاحترافي افتح مسار «صوتك».</p><a class="text-link" href="../voice-cloning-studio/" target="_blank" rel="noopener noreferrer">فتح مسار صوتك ↗</a></div>
+      </div>
+      <section class="split-head" id="assets"><div><span class="eyebrow">ASSET LAB</span><h2>مكتبة الجرافيك والتصميم</h2><p class="muted">ارفع خلفية للمشهد النشط، واحفظ لوحة ألوانه، ووجّه التصميم للأدوات المتخصصة.</p></div><span class="section-chip">04 / التصميم</span></section>
+      <div class="grid-two">
+        <div class="panel stack"><label class="upload-target">تحميل صورة خلفية للمشهد الحالي<input id="scene-image" type="file" accept="image/png,image/jpeg,image/webp"></label><div id="image-info" class="muted">لم تضف خلفية بعد</div><div class="action-line"><button id="clear-image" class="ghost-btn compact">إزالة صورة المشهد</button><button id="copy-visual-prompt" class="small-btn">نسخ وصف الصورة</button></div><p class="note">نضغط الصور محليًا إلى WebP قبل حفظها داخل متصفحك. لا ترفع صورة لا تمتلك حق استخدامها.</p></div>
+        <div class="panel"><div class="panel-heading"><strong>مسارات التصميم والإنتاج</strong></div><div class="mini-links"><a href="../saad-studio/" target="_blank" rel="noopener noreferrer">استوديو سعد للتصميم <span>↗</span></a><a href="../frame-studio/" target="_blank" rel="noopener noreferrer">مسار الإطارات <span>↗</span></a><a href="https://github.com/mromidev/claude-blender-skills" target="_blank" rel="noopener noreferrer">Blender Animation Skills <span>↗</span></a><a href="https://github.com/mromidev/claude-animated-shorts" target="_blank" rel="noopener noreferrer">Remotion + Three.js <span>↗</span></a></div></div>
+      </div>
+      <section class="split-head" id="research"><div><span class="eyebrow">RESEARCH DESK</span><h2>البحث والتحقق والمراجع</h2><p class="muted">سجّل المصادر الأصلية للمشاهد. أداة البحث تفتح نتائج فعلية في المتصفح ولا تختلق مراجع.</p></div><span class="section-chip">05 / البحث</span></section>
+      <div class="grid-two"><div class="panel stack"><label>موضوع البحث<input id="research-query" maxlength="200" placeholder="مثال: تاريخ الجسور المعلقة"></label><div class="action-line"><button class="small-btn" id="search-web">بحث ويب</button><button class="ghost-btn compact" id="search-youtube">بحث YouTube</button><button class="ghost-btn compact" id="search-github">بحث GitHub</button></div><p class="note">نتائج البحث الخارجية لا تُستورد تلقائيًا. تحقق من صحة الادعاءات والمصادر وحقوق الاستخدام قبل النشر.</p></div>
+      <div class="panel stack"><div class="panel-heading"><strong>دفتر المراجع</strong><span id="reference-count" class="tag status-local">0 مرجع</span></div><label>عنوان المرجع<input id="reference-title" maxlength="160"></label><label>رابط المصدر<input id="reference-url" type="url" placeholder="https://..."></label><div class="action-line"><button class="small-btn" id="add-reference">+ إضافة مرجع</button></div><div id="reference-list" class="references"></div></div></div>
+      <section class="split-head" id="marketing"><div><span class="eyebrow">DISTRIBUTION & GROWTH</span><h2>التسويق والنشر</h2><p class="muted">تجهيز وصف وتسلسل النشر، وتتبع الأداء الفعلي يدويًا دون اختلاق أرقام.</p></div><span class="section-chip">06 / التسويق</span></section>
+      <div class="grid-two"><div class="panel stack"><div class="field-grid"><label>المنصة<select id="market-platform"><option value="youtube">YouTube Shorts</option><option value="tiktok">TikTok</option><option value="instagram">Instagram Reels</option><option value="x">X</option></select></label><label>رابط العمل بعد النشر<input id="market-url" placeholder="https://..." maxlength="400"></label></div><label>نص الحملة<textarea id="market-copy" rows="8" placeholder="اضغط توليد مسودة لتجهيز نص نشر قابل للمراجعة."></textarea></label><div class="action-line"><button id="generate-marketing" class="small-btn">إنشاء مسودة تسويقية</button><button id="copy-marketing" class="ghost-btn compact">نسخ المسودة</button></div><p class="note">المسودة مبنية على بيانات مشروعك؛ لا تدّعي قياس الترند أو تتضمن إحصاءات غير موثقة.</p></div><div class="panel stack"><strong>مؤشرات الحملة الفعلية</strong><div class="field-grid"><label>المشاهدات<input id="market-views" type="number" min="0" step="1" placeholder="0"></label><label>النقرات<input id="market-clicks" type="number" min="0" step="1" placeholder="0"></label><label>الإنفاق (د.ك)<input id="market-spend" type="number" min="0" step=".001" placeholder="0"></label><label>الإيراد (د.ك)<input id="market-revenue" type="number" min="0" step=".001" placeholder="0"></label></div><div class="kpi-strip"><div><small>CTR</small><strong id="kpi-ctr">—</strong></div><div><small>CPC</small><strong id="kpi-cpc">—</strong></div><div><small>ROAS</small><strong id="kpi-roas">—</strong></div></div><div class="mini-links"><a href="../youtube-studio-ai/" target="_blank" rel="noopener noreferrer">استوديو YouTube <span>↗</span></a><a href="../tiktok-growth/" target="_blank" rel="noopener noreferrer">نمو TikTok <span>↗</span></a><a href="../social-request-radar/" target="_blank" rel="noopener noreferrer">راصد الجمهور والمحتوى <span>↗</span></a></div></div></div>
+      <section class="split-head" id="integrations"><div><span class="eyebrow">CONNECTED PATHS</span><h2>مركز المسارات المرتبطة</h2><p class="muted">بوابة موحدة لمشاريعك الفعلية ومحركات mromidev. الروابط متاحة؛ الربط الآلي عبر API منفصل حسب كل أداة.</p></div><span class="section-chip">07 / التكامل</span></section>
+      <div id="tools-grid" class="tools-grid"></div>
+      <section class="split-head" id="export"><div><span class="eyebrow">DELIVERY & BACKUP</span><h2>التسليم وحفظ العمل</h2><p class="muted">جهّز حزمة تسليم قابلة للمراجعة والتعاون مع برنامج مونتاج أو عامل Remotion.</p></div><span class="section-chip">08 / التصدير</span></section>
+      <div class="grid-two"><div class="panel stack"><h3>ملفات التسليم</h3><p class="muted">حزمة المشروع تشمل الإعدادات، السيناريو، المشاهد، المراجع، والمقاييس. لا تشمل الصوت الأصلي.</p><div class="action-line"><button id="export-json" class="small-btn">تنزيل المشروع JSON</button><button id="export-storyboard" class="ghost-btn compact">تنزيل جدول المشاهد CSV</button><button id="export-prompts" class="ghost-btn compact">حزمة برومبتات TXT</button></div><label class="upload-target">استيراد نسخة مشروع سابقة<input id="import-json" type="file" accept=".json,application/json"></label></div><div class="panel stack"><h3>فحص الجاهزية</h3><div id="qa-list" class="qa-list"></div><div class="callout">لإخراج MP4 احترافي عبر Remotion أو Blender يلزم تشغيل المحرك على حاسوب أو خادم مع FFmpeg. صفحة GitHub Pages وحدها ليست خادم تصيير فيديو.</div></div></div>
+      <footer><span>© مسار الرسوم المتحركة · نسخة عمل مستقلة</span><a href="https://github.com/Q8-ux/saad/tree/main/animation-studio" target="_blank" rel="noopener noreferrer">GitHub Source ↗</a></footer>
+    </main>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script src="./app.js" defer></script>
+</body>
+</html>
