@@ -11,6 +11,7 @@ const require=createRequire(import.meta.url),root=resolve(new URL('..',import.me
 function harness(){
  const sqlite=new DatabaseSync(':memory:');
  for(const file of readdirSync(root+'/drizzle').filter(f=>f.endsWith('.sql')).sort())sqlite.exec(readFileSync(root+'/drizzle/'+file,'utf8'));
+ sqlite.exec(readFileSync(root+'/tests/fixtures/management-foundation-schema.sql','utf8'));
  const statements=query=>{let args=[];return{bind(...values){args=values;return this;},async first(){return sqlite.prepare(query).get(...args)||null;},async all(){return{results:sqlite.prepare(query).all(...args)};},async run(){const result=sqlite.prepare(query).run(...args);return{success:true,meta:{changes:Number(result.changes)}};}};};
  const db={prepare:statements,async batch(values){const out=[];for(const v of values)out.push(await v.run());return out;}};
  const runtime={AUTH_SECRET:'synthetic-management-secret-'.repeat(3),MANAGEMENT_ALLOWED_EMAILS:'manager@example.test'};

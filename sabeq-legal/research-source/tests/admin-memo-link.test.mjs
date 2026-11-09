@@ -13,10 +13,10 @@ async function fixture(options={}){
  await new Promise(resolve=>setImmediate(resolve));
  return{calls,timers,document,node,storage,submit:async values=>{await events.get('submit')({preventDefault(){},target:{dataset:{form:'search'},matches:()=>true,values,querySelector:()=>({disabled:false})}});await new Promise(resolve=>setImmediate(resolve));}};
 }
-test('Memos opens the generated view on the same backend and keeps access to all requests',async()=>{
+test('Memos keeps all request states on the same backend and offers the generated filter',async()=>{
  const f=await fixture(),request=f.calls.find(c=>c.url.includes('/memos?'));
  assert.equal(new URL(request.url).origin,'https://sabeq-legal-public.centrino.chatgpt.site');
- assert.equal(new URL(request.url).searchParams.get('view'),'generated');
+ assert.equal(new URL(request.url).searchParams.get('view'),'all');
  assert.match(f.node('workspace').innerHTML,/المذكرات المولدة|المذكرات المولّدة/);
  assert.match(f.node('workspace').innerHTML,/كل طلبات التوليد/);
  assert.match(f.node('workspace').innerHTML,/data-memo="synthetic-memo"/);

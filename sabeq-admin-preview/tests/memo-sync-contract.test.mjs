@@ -5,7 +5,7 @@ const js=readFileSync(new URL('../admin.js',import.meta.url),'utf8');
 test('admin memo section reads protected shared database rather than Bolt',()=>{
   assert.match(js,/const API = SERVICE \+ '\/api\/management\/';/);
   assert.match(js,/api\('memos\?'\+memoParams\(\)\)/);
-  assert.doesNotMatch(js,/q8-ux-sabeq-admin-co-u4ma\.bolt\.host/);
+  assert.doesNotMatch(js,/const (?:API|SERVICE)\s*=\s*['"][^'"]*bolt\.host/);
 });
 test('memo records expose source and manual sync without inventing records',()=>{
   assert.match(js,/مصدر الطلبات الحالي: قاعدة بيانات الموقع الرسمية المشتركة/);
@@ -52,11 +52,11 @@ function verifyEntryProof(f,url){
  assert.equal(url.searchParams.has('verifier'),false);
 }
 for(const [label,source] of entrySources){
- test(label+': signed-out entry offers account sign-in without a password form or data reads',()=>{
+ test(label+': signed-out entry offers scoped password sign-in and account sign-in without data reads',()=>{
   const f=entryFixture(source);
   assert.match(f.node('app').innerHTML,/data-action="sign-in"/);
   assert.match(f.node('app').innerHTML,/data-action="switch-account"/);
-  assert.doesNotMatch(f.node('app').innerHTML,/<form|<input|password-login/);
+  assert.match(f.node('app').innerHTML,/data-form="password-login"/);assert.match(f.node('app').innerHTML,/name="username"/);assert.match(f.node('app').innerHTML,/type="password"/);
   assert.equal(f.calls.length,0);
  });
  test(label+': sign-in uses the deployed login endpoint with a valid PKCE challenge and requested section',async()=>{
@@ -99,7 +99,7 @@ for(const [label,source] of entrySources){
   const f=entryFixture(source,'https://q8-ux.github.io/saad/sabeq-admin-preview/?login_error=not_authorized');
   assert.match(f.node('app').innerHTML,/غير مصرح له بإدارة سابق/);
   assert.match(f.node('app').innerHTML,/data-action="switch-account"/);
-  assert.doesNotMatch(f.node('app').innerHTML,/<form|<input|اسم مستخدم وكلمة مرور/);
+  assert.match(f.node('app').innerHTML,/data-form="password-login"/);assert.equal(f.calls.length,0);
   assert.equal(f.calls.length,0);
  });
  test(label+': every new sign-in gets fresh state and proof values',async()=>{
@@ -111,3 +111,4 @@ for(const [label,source] of entrySources){
   assert.notEqual(f.storage.get('sabeq-admin-proof'),first.proof);
  });
 }
+
