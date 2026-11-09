@@ -31,7 +31,7 @@ test('reasoned factual arguments can pass the audit without becoming legally com
  const result=api.parseCaseAudit(JSON.stringify(strongAudit),plan,strong,[]);
  assert.equal(result.ok,true);assert.equal(result.defenseReview.addressed,1);
  assert.equal(api.caseQualitySummary(plan,result,strong,0).status,'incomplete');
- assert.equal(api.caseQualitySummary(plan,result,strong,0).defenseRevision,'grounded-defenses-2');
+ assert.equal(api.caseQualitySummary(plan,result,strong,0).defenseRevision,'grounded-defenses-3');
 });
 test('invented quotes, altered fact anchors, empty rebuttals and repeated prose fail even with a positive semantic vote',()=>{
  for(const changes of [{factQuote:'إقرار كامل من الخصم'}, {applicationQuote:'تم السداد'}, {responseQuote:application}, {opposingQuote:'اقتباس مختلق لم يرد في المذكرة الحالية'}]){

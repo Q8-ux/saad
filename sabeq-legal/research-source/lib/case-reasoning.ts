@@ -1,3 +1,4 @@
+import {reviewRequestedRelief} from "./legal-drafting-routes";
 import {reviewLegalCitations} from "./legal-citation-review";
 import type { PleadingContent, PleadingInput } from "./pleading-document";
 import type { LegalEvidence } from "./legal-search";
@@ -61,16 +62,16 @@ function unwrapSourceMarker(value: string) {
   const match = /^(?:【(م[1-9]\d*)】|\[(م[1-9]\d*)\]|(م[1-9]\d*))$/.exec(value.trim());
   return match ? (match[1] || match[2] || match[3]) : value;
 }
-export type CasePlanFailureCode = "role" | "facts" | "sources" | "citations" | "format";
+export type CasePlanFailureCode = "role" | "facts" | "sources" | "citations" | "relief" | "substance" | "format";
 export class CasePlanValidationError extends Error {
   constructor(public code: CasePlanFailureCode) { super(code); this.name = "CasePlanValidationError"; }
 }
 function planFailure(error: unknown): CasePlanFailureCode {
   const message = error instanceof Error ? error.message : "";
-  return message === "client role changed" ? "role" : message === "ungrounded issue" ? "facts" : message === "unknown plan source" ? "sources" : message === "numeric citation in plan" ? "citations" : "format";
+  return message === "unsafe proposed relief" ? "relief" : message === "empty reasoning substance" ? "substance" : message === "client role changed" ? "role" : message === "ungrounded issue" ? "facts" : message === "unknown plan source" ? "sources" : message === "numeric citation in plan" ? "citations" : "format";
 }
 export function casePlanFailureMessage(code: CasePlanFailureCode) {
-  const reason = {role:"صفة الموكل",facts:"الاقتباسات من الوقائع المدخلة",sources:"مراجع المصادر المتاحة",citations:"عدم إدخال أرقام قانونية غير متحققة",format:"اكتمال بنية خطة التحليل"}[code];
+  const reason = {role:"صفة الموكل",facts:"الاقتباسات من الوقائع المدخلة",sources:"مراجع المصادر المتاحة",citations:"عدم إدخال أرقام قانونية غير متحققة",relief:"اتساق الطلب المقترح مع الطلب المأذون وصفة الموكل",substance:"وجود تطبيق واعتراض ورد وطلب محدد لكل مسألة",format:"اكتمال بنية خطة التحليل"}[code];
   return `تعذر اعتماد خطة التحليل بعد محاولة تصحيح داخلية: لم تتحقق مطابقة ${reason}. حُفظت بياناتك في النموذج؛ لم تُنشأ مذكرة غير متحققة.`;
 }
 export function caseFactQuotes(input: PleadingInput): string[] {
@@ -120,6 +121,11 @@ export function parseCasePlan(raw:string,input:PleadingInput,evidence:LegalEvide
     if (issue && typeof issue.factQuote === "string") issue.factQuote = unwrapFactQuote(issue.factQuote);
     if (issue && Array.isArray(issue.sourceMarkers)) issue.sourceMarkers = issue.sourceMarkers.map(unwrapSourceMarker);
     if(!issue || !["issue","factQuote","document","application","counterargument","response","proposedRelief","missing"].every(k=>typeof issue[k as keyof typeof issue]==="string") || normalized(issue.factQuote).length<4 || !facts.includes(normalized(issue.factQuote))) throw Error("ungrounded issue");
+    for(const field of [issue.application,issue.counterargument,issue.response,issue.proposedRelief]) {
+      const value=normalized(field).replace(/[\u064b-\u065f\u0670]/gu,"").replace(/[أإآ]/gu,"ا").replace(/[\[\]().:：]/gu,"").trim();
+      if(!value||/^(?:TODO|TBD|يستكمل(?: لاحقا)?|تستكمل(?: لاحقا)?|التطبيق|الاعتراض|الرد|الطلبات)$/iu.test(value))throw Error("empty reasoning substance");
+    }
+    if(!reviewRequestedRelief(input,issue.proposedRelief).ok)throw Error("unsafe proposed relief");
     if(!Array.isArray(issue.sourceMarkers)||issue.sourceMarkers.some(m=>typeof m!=="string"||!/^م[1-9]\d*$/.test(m)||Number(m.slice(1))>evidence.length)) throw Error("unknown plan source");
     // Numeric claims in an internal plan must pass the SAME ownership verifier
     // as the final memo. Supported file references must not be rejected merely
@@ -145,7 +151,7 @@ export function applyCheckedJudgmentMatches(evidence:LegalEvidence[],plan:CasePl
   const {analogy:_old,...judgment}=source.judgment;
   return {...source,judgment:{...judgment,...(match?{analogy:{issue:plan.issues[match.issueIndex].issue,factQuote:match.factQuote,reason:match.reason,differences:match.differences}}:{})}};
 });}
-export const defenseRevision="grounded-defenses-2";
+export const defenseRevision="grounded-defenses-3";
 type DefenseSubstance={factQuote:string;applicationQuote:string;opposingQuote:string;responseQuote:string;sourceMarkers:string[]};
 export type CaseAudit={checks:Array<{issueIndex:number;status:"addressed"|"blocked"|"omitted";reason:string;substance?:DefenseSubstance}>;roleConsistent:boolean;factsPreserved:boolean;reliefConsistent:boolean;unsupportedAssertions:string[]};
 const substanceSchema={type:"object",additionalProperties:false,required:["factQuote","applicationQuote","opposingQuote","responseQuote","sourceMarkers"],properties:{...Object.fromEntries(["factQuote","applicationQuote","opposingQuote","responseQuote"].map(key=>[key,{type:"string"}])),sourceMarkers:strings}};
@@ -271,4 +277,3 @@ export function caseQualitySummary(plan:CasePlan,audit:ReturnType<typeof parseCa
   if(!sourceCount) notices.push("لا توجد مصادر قانونية موثقة مناسبة؛ الناتج تنظيم للوقائع والطلبات وليس مذكرة دفاع مكتملة.");
   return {revision:"case-grounded-memo-1",defenseRevision,contentReview,defenseCoverage:audit?.defenseReview||null,status:contentReview.ok&&sourceCount&&audit?.ok&&audit.complete?"review_required":"incomplete",humanReviewRequired:true,plan,audit,notices:[...new Set(notices)]};
 }
-

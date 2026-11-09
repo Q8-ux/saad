@@ -199,7 +199,7 @@ export async function POST(request: Request) {
       content.legalResearchNotes = evidence.length ? stripInternalMemoLanguage(removeDelegatedResearch(content.legalResearchNotes)) : "";
       content.factualNotes = factualRequirements([...new Set([...content.factualNotes,...preparationNotes,...matter.missing.map(g=>g.ar),...checkedPlan.missingFacts,...checkedPlan.issues.map(i=>i.missing).filter(Boolean)])]);
       const contentReview=reviewCaseContent(content);
-      const routeReview=reviewLegalRouteContent(legalRoute,content);
+      const routeReview=reviewLegalRouteContent(legalRoute,content,memoInput);
       let caseAudit = null;
       {
           const auditRequest=caseAuditRequestForContent(checkedPlan,content);
@@ -283,5 +283,3 @@ export async function POST(request: Request) {
     await releaseMemoPayment(paymentLease).catch(() => undefined);
   }
 }
-
-

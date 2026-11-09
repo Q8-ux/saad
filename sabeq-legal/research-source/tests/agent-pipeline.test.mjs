@@ -213,7 +213,8 @@ test('health reports the same control revision used by the memo validator', asyn
   });
   const value = await (await api.GET()).json();
   assert.equal(value.memoControlRevision, 'memo-generation-control-1');
-  assert.equal(value.defenseRevision, 'grounded-defenses-2');
+  assert.equal(value.defenseRevision, 'grounded-defenses-3');
+  assert.equal(value.legalDraftingRouteRevision, 'legal-drafting-routes-2');
 });
 
 test('an unpaid source failure remains pending and never archives a facts-only substitute',async t=>{
@@ -271,7 +272,6 @@ test('prose cleanup runs before statutory decoration so a removed internal sourc
  assert.ok(value.memo.includes(controlSource.text));assert.doesNotMatch(value.memo,/ملاحظات المراجعة|يتولى المساعد/);assert.equal(value.caseQuality.audit.ok,true);assert.equal(archived.length,1);
 });
 
-
 test('missing facts or relief are corrected once on either drafting path before identical final text reaches both archives',async t=>{
  for(const agents of [false,true])for(const field of ['facts','requests']){
   const h=templateHarness();t.after(h.cleanup);const records=[],ledger=[],baseline=controlledMemoModel('【م1】');let drafts=0,completed=0;
@@ -303,4 +303,3 @@ test('persistent missing relief cannot be silently filled from the input, archiv
  assert.ok(result.review.sectionIssues.some(issue=>issue.section==='requests'));
  assert.ok(ledger.every(row=>!row[2]&&row[3]!=='draft_generated'));
 });
-
