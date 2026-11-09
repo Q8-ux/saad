@@ -39,6 +39,7 @@ jobs:
           fi
           mkdir -p _site/animation-studio
           cp animation-studio/index.html animation-studio/style.css animation-studio/app.js _site/animation-studio/
+          cp -R animation-studio/projects _site/animation-studio/projects
           test -s _site/animation-studio/index.html
           test -s _site/animation-studio/app.js
           test -s _site/animation-studio/style.css
