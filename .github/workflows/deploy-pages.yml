@@ -185,6 +185,7 @@ jobs:
           for p in sabeq-legal sabeq-admin-preview sabeq-ahmad sabeq-legal-system sabeq-legal-pro hessa-alobaid shalayhna zad-restaurants tamweenat tamweenat-admin rattil etf-academy kuwait-digital-sales-plan kuwait-fund-modern livestock-vax-kw waqaya-v2 english-kuwait oman-fruits-pos oman-fruits-commerce project-command-center my-sites reddit-business-agent grok-trading ant-alshaer ai-chess-kuwait elanak-saleem alsaqaf-school youtube-studio-ai remote-ai-hub noura-alattal ai-video-studio muhami-next barcode frame-studio dr-hamad-instagram-demo tiktok-growth longcat-video sinad-kuwait stock-opportunity-radar; do cp -R "$p" "_site/$p"; done
           if [ -d dr-hamad ]; then cp -R dr-hamad _site/dr-hamad; fi
           if [ -d voice-cloning-studio ]; then python voice-cloning-studio/deployment/build.py && cp -R voice-cloning-studio/dist _site/voice-cloning-studio; fi
+          if [ -d dhikr ]; then python dhikr/deployment/build.py && cp -R dhikr/dist _site/dhikr; fi
           mkdir -p _site/saad-studio
           cp -R saad-studio/public/. _site/saad-studio/
           mkdir -p _site/autoclip-studio
