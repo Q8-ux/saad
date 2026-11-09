@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-09T06:37:07.755092Z",
+  "generated_at": "2026-11-09T08:27:17.891909Z",
   "refresh_interval_minutes": 30,
   "records": [
     {
@@ -17,7 +17,7 @@
       "source_url": "https://investoman.om/investment-opportunities/1850",
       "link_scope": "detail",
       "basis": "Official individual investment project page; availability and capital require re-verification",
-      "observed_at": "2026-11-09T06:37:07.755092Z"
+      "observed_at": "2026-11-09T08:27:17.891909Z"
     },
     {
       "id": "be4ddb2ec4c9c469f4fe",
@@ -33,7 +33,7 @@
       "source_url": "https://investoman.om/investment-opportunities/1849",
       "link_scope": "detail",
       "basis": "Official individual investment project page; availability and capital require re-verification",
-      "observed_at": "2026-11-09T06:37:07.755092Z"
+      "observed_at": "2026-11-09T08:27:17.891909Z"
     },
     {
       "id": "f1b7d7d06c8e0a367194",
@@ -49,7 +49,7 @@
       "source_url": "https://investoman.om/investment-opportunities/1842",
       "link_scope": "detail",
       "basis": "Official individual investment project page; availability and capital require re-verification",
-      "observed_at": "2026-11-09T06:37:07.755092Z"
+      "observed_at": "2026-11-09T08:27:17.891909Z"
     },
     {
       "id": "dc7d597802a2d2f13aaf",
@@ -65,7 +65,7 @@
       "source_url": "https://investoman.om/investment-opportunities/1862",
       "link_scope": "detail",
       "basis": "Official individual investment project page; availability and capital require re-verification",
-      "observed_at": "2026-11-09T06:37:07.755092Z"
+      "observed_at": "2026-11-09T08:27:17.891909Z"
     },
     {
       "id": "862d3feb44cb2807c054",
@@ -81,7 +81,7 @@
       "source_url": "https://investoman.om/investment-opportunities/1841",
       "link_scope": "detail",
       "basis": "Official individual investment project page; availability and capital require re-verification",
-      "observed_at": "2026-11-09T06:37:07.755092Z"
+      "observed_at": "2026-11-09T08:27:17.891909Z"
     },
     {
       "id": "111f723392b84b959da9",
@@ -97,7 +97,7 @@
       "source_url": "https://investoman.om/investment-opportunities/1881",
       "link_scope": "detail",
       "basis": "Official individual investment project page; availability and capital require re-verification",
-      "observed_at": "2026-11-09T06:37:07.755092Z"
+      "observed_at": "2026-11-09T08:27:17.891909Z"
     }
   ],
   "sources": [
@@ -109,7 +109,7 @@
       "status": "unavailable",
       "records": 0,
       "last_success_at": null,
-      "last_checked_at": "2026-11-09T06:37:07.755092Z",
+      "last_checked_at": "2026-11-09T08:27:17.891909Z",
       "details": "No verified current records; source may require JavaScript, authorized API or a markup update",
       "attempts": [
         {
@@ -131,8 +131,8 @@
       "url": "https://investoman.om/investment-opportunities",
       "status": "ok",
       "records": 6,
-      "last_success_at": "2026-11-09T06:37:07.755092Z",
-      "last_checked_at": "2026-11-09T06:37:07.755092Z",
+      "last_success_at": "2026-11-09T08:27:17.891909Z",
+      "last_checked_at": "2026-11-09T08:27:17.891909Z",
       "details": "Verified from rendered official public webpage"
     },
     {
