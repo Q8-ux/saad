@@ -14,7 +14,7 @@ sc.render.fps=fps
 aspect=data.get('aspect','9:16')
 w,h={'9:16':(720,1280),'16:9':(1280,720),'1:1':(900,900)}[aspect]
 sc.render.resolution_x=w; sc.render.resolution_y=h; sc.render.resolution_percentage=100
-sc.render.engine='BLENDER_EEVEE_NEXT' if hasattr(sc,'eevee') else 'BLENDER_EEVEE'
+sc.render.engine='BLENDER_EEVEE_NEXT' if bpy.app.version >= (4, 2, 0) else 'BLENDER_EEVEE'
 world=bpy.data.worlds.new('Masar world');sc.world=world;world.use_nodes=True
 world.node_tree.nodes['Background'].inputs['Color'].default_value=(.025,.035,.075,1)
 world.node_tree.nodes['Background'].inputs['Strength'].default_value=.65
