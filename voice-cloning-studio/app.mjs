@@ -1,4 +1,5 @@
-import {initI18n,translate as t,getUILocale} from './i18n.mjs';
+import {validateReferenceFile,prepareFileReference,maxReferenceSeconds} from './reference.mjs';
+import {initI18n,translate as t,getUILocale} from './i18n.mjs?v=1.3.0';
 import {MediaAPI,videoId,embedURL,getDeviceVoices,speakDevice} from './media.mjs';
 import {VoiceboxAPI,APIError,validateBase} from './api.mjs';
 import {localDB,download,blobToDataURL,dataURLToBlob,safeName} from './storage.mjs';
@@ -35,7 +36,7 @@ function bind(id,event,fn){$(id)?.addEventListener(event,run(fn));}
 async function busy(button,fn){if(button?.disabled)return;const html=button?.innerHTML;if(button){button.disabled=true;button.innerHTML='<span class="spinner"></span> لحظة…';}try{return await fn();}finally{if(button){button.disabled=false;button.innerHTML=html;}}}
 function objectURL(key,blob){if(state.urlMap.has(key))URL.revokeObjectURL(state.urlMap.get(key));const u=URL.createObjectURL(blob);state.urlMap.set(key,u);return u;}
 function closeNav(){$('sidebar').classList.remove('open');$('nav-backdrop').hidden=true;$('nav-backdrop').classList.remove('visible');$('mobile-menu').setAttribute('aria-expanded','false');}
-function route(){const page=location.hash.slice(1)||'generate';const valid=pageNames[page]?page:'generate';document.querySelectorAll('.page').forEach(el=>el.classList.toggle('active',el.id==='page-'+valid));document.querySelectorAll('[data-page]').forEach(el=>{const active=el.dataset.page===valid;el.classList.toggle('active',active);if(active)el.setAttribute('aria-current','page');else el.removeAttribute('aria-current');});if(valid!=='youtube'){$('youtube-player')?.removeAttribute('src');if(youtubeCapture?.recorder?.state==='recording')youtubeCapture.recorder.stop();}else if(state.youtubeMeta&&!$('youtube-player').getAttribute('src')){$('youtube-player').src=embedURL(state.youtubeMeta.id,Number($('youtube-start').value),Number($('youtube-end').value));}$('page-crumb').textContent=pageNames[valid];document.title=t(pageNames[valid])+' — '+t('صوتك');closeNav();if(valid==='voices')renderVoices();if(valid==='history')renderHistory();if(valid==='models')renderModels();if(valid==='record')renderCaptures();if(valid==='stories')renderStory();window.scrollTo({top:0,behavior:'instant'});}
+function route(){const page=location.hash.slice(1)||'generate';const valid=pageNames[page]?page:'generate';document.querySelectorAll('.page').forEach(el=>el.classList.toggle('active',el.id==='page-'+valid));document.querySelectorAll('[data-page]').forEach(el=>{const active=el.dataset.page===valid;el.classList.toggle('active',active);if(active)el.setAttribute('aria-current','page');else el.removeAttribute('aria-current');});if(valid!=='youtube'){for(const id of ['reference-video','reference-audio'])$(id)?.pause();$('youtube-player')?.removeAttribute('src');if(youtubeCapture?.recorder?.state==='recording')youtubeCapture.recorder.stop();}else if(state.youtubeMeta&&!state.referenceFile&&!$('youtube-player').getAttribute('src')){$('youtube-player').src=embedURL(state.youtubeMeta.id,Number($('youtube-start').value),Number($('youtube-end').value));}$('page-crumb').textContent=pageNames[valid];document.title=t(pageNames[valid])+' — '+t('صوتك');closeNav();if(valid==='voices')renderVoices();if(valid==='history')renderHistory();if(valid==='models')renderModels();if(valid==='record')renderCaptures();if(valid==='stories')renderStory();window.scrollTo({top:0,behavior:'instant'});}
 function connected(value,message=''){
  state.connected=value;const ready=value||state.mediaReady||state.deviceVoices.length>0;
  $('connection-badge').classList.toggle('connected',ready);
@@ -195,7 +196,9 @@ async function localHistoryAction(button){
  }
 }
 function selectYouTube(meta){
- const id=videoId(meta.url||meta.webpage_url||meta.id||meta.video_id);state.youtubeMeta={...meta,id,url:'https://www.youtube.com/watch?v='+id};state.youtubeBlob=null;
+ ++referenceFileSequence;$('reference-file-panel').removeAttribute('aria-busy');$('reference-file-preview').hidden=true;$('reference-file-status').textContent='';$('youtube-results').after($('youtube-workspace'));for(const id of ['reference-video','reference-audio'])$(id)?.pause();
+ const id=videoId(meta.url||meta.webpage_url||meta.id||meta.video_id);state.youtubeMeta={...meta,id,url:'https://www.youtube.com/watch?v='+id};state.youtubeBlob=null;state.referenceFile=null;
+ $('youtube-source-panel').hidden=false;$('youtube-workspace').classList.remove('local-reference-mode');$('youtube-import-button').hidden=false;$('reference-prepare').hidden=true;
  $('youtube-workspace').hidden=false;$('youtube-video-title').textContent=meta.title||'فيديو يوتيوب';$('youtube-video-meta').textContent=[meta.channel||meta.uploader||'',meta.duration?formatTime(meta.duration):''].filter(Boolean).join(' · ');
  $('youtube-source-link').href=state.youtubeMeta.url;$('youtube-player').src=embedURL(id);$('youtube-start').value=0;$('youtube-end').value=Math.min(20,Number(meta.duration)||20);$('youtube-sample-name').value=(meta.title||'عينة من يوتيوب').slice(0,100);$('youtube-imported').hidden=true;
  $('youtube-import-message').textContent=meta.status==='search_result'?'المعاينة جاهزة؛ يُتحقّق من قابلية الاستيراد عند طلب العينة.':meta.import_available===false?'تعذّر التحقق من الاستيراد على الخادم حاليًا. يمكنك معاينة الفيديو ورفع ملفك الأصلي.':'';
@@ -246,9 +249,40 @@ async function captureYouTubeTab(){
  stream.getVideoTracks().forEach(t=>t.onended=()=>{if(recorder.state!=='inactive')recorder.stop();});
  recorder.start(300);$('youtube-capture-tab').textContent='إيقاف تسجيل التبويب';$('youtube-import-message').textContent='جارٍ تسجيل الصوت؛ شغّل الفيديو الآن. يتوقف تلقائيًا بعد 30 ثانية.';
 }
+let referenceFileSequence=0;
+async function loadReferenceFile(event){
+ const file=event.target.files[0];if(!file)return;const sequence=++referenceFileSequence;event.target.value='';
+ try{
+  state.referenceFile=null;state.youtubeBlob=null;$('youtube-imported').hidden=true;validateReferenceFile(file);$('reference-file-status').textContent='جارٍ قراءة الملف…';$('reference-file-panel').setAttribute('aria-busy','true');
+  const video=file.type.startsWith('video/')||/\.(mp4|mov|mkv)$/i.test(file.name),media=video?$('reference-video'):$('reference-audio'),probe=document.createElement(video?'video':'audio');
+  for(const id of ['reference-video','reference-audio']){$(id).pause();$(id).removeAttribute('src');$(id).hidden=true;}
+  const duration=await new Promise((resolve,reject)=>{const timer=setTimeout(()=>{cleanup();reject(new Error('تعذّر قراءة مدة الملف. استخدم MP4 بصوت AAC أو ملف WAV أو MP3.'));},15000);const cleanup=()=>{clearTimeout(timer);probe.onloadedmetadata=null;probe.onerror=null;};probe.onloadedmetadata=()=>{const duration=probe.duration;cleanup();resolve(duration);};probe.onerror=()=>{cleanup();reject(new Error('تعذّر تشغيل هذا التنسيق في المتصفح. جرّب MP4 أو WAV أو MP3.'));};probe.preload='metadata';probe.src=objectURL('reference-original',file);probe.load();});
+  if(sequence!==referenceFileSequence)return;
+  if(!Number.isFinite(duration)||duration<=0)throw new Error('تعذّر قراءة مدة الملف. استخدم MP4 بصوت AAC أو ملف WAV أو MP3.');if(duration>maxReferenceSeconds)throw new Error('اختر ملفًا لا تتجاوز مدته خمس دقائق.');
+  if(duration<10)throw new Error('العينة قصيرة؛ اختر ملفًا مدته 10 ثوانٍ على الأقل.');
+  state.referenceFile={file,duration};state.youtubeBlob=null;state.youtubeSource=null;
+  $('reference-file-panel').after($('youtube-workspace'));$('youtube-player').removeAttribute('src');$('youtube-source-panel').hidden=true;$('youtube-workspace').hidden=false;$('youtube-workspace').classList.add('local-reference-mode');$('youtube-import-button').hidden=true;$('reference-prepare').hidden=false;$('youtube-imported').hidden=true;
+  $('youtube-start').value=0;$('youtube-end').value=Math.min(30,duration);$('youtube-sample-name').value=file.name.replace(/\.[^.]+$/,'').slice(0,100);$('youtube-reference-text').value='';$('youtube-rights').checked=false;
+  $('reference-file-info').textContent=file.name+' · '+formatTime(duration)+' · '+(file.size/1024/1024).toFixed(1)+' MB';media.src=probe.src;media.hidden=false;$('reference-file-preview').hidden=false;
+  $('reference-file-status').textContent='الملف جاهز. حدّد بداية ونهاية العينة ثم اضغط تجهيز العينة من الملف.';$('youtube-import-message').textContent='اختر جزءًا واضحًا بصوت متحدث واحد.';
+ }catch(error){if(sequence===referenceFileSequence){state.referenceFile=null;$('reference-file-status').textContent=error.message;$('reference-file-preview').hidden=true;}throw error;}
+ finally{if(sequence===referenceFileSequence)$('reference-file-panel').removeAttribute('aria-busy');}
+}
+async function prepareLocalReference(){
+ if(!state.referenceFile)throw new Error('اختر ملفًا أولًا.');const {file,duration}=state.referenceFile,start=Number($('youtube-start').value),end=Number($('youtube-end').value);
+ await busy($('reference-prepare'),async()=>{
+  $('youtube-import-message').textContent='جارٍ استخراج الصوت وتجهيز العينة…';
+  try{const result=await prepareFileReference(file,start,end,duration);state.youtubeBlob=result.blob;state.youtubeSource={type:'user_upload',filename:file.name,start,end,duration:result.duration,rightsConfirmed:$('youtube-rights').checked};$('youtube-sample-audio').src=objectURL('youtube-sample',result.blob);$('youtube-imported').hidden=false;await setRecording(result.blob,$('youtube-sample-name').value||file.name);$('transcript-text').value=$('youtube-reference-text').value;$('youtube-import-message').textContent='العينة جاهزة بصيغة WAV. استمع إليها ثم نزّلها أو استخدمها في ملف صوتي.';}
+  catch(error){$('youtube-import-message').textContent=error.message;throw error;}
+ });
+}
 function setupMediaEvents(){
  bind('youtube-capture-tab','click',captureYouTubeTab);
- bind('youtube-local-file','change',async event=>{const f=event.target.files[0];if(!f)return;const buffer=await decodeAudio(f);if(buffer.duration<10||buffer.duration>30.5)throw new Error('ارفع عينة صوتية جاهزة مدتها من 10 إلى 30 ثانية. يمكنك قصها في قسم المؤثرات أولًا.');state.youtubeBlob=f;state.youtubeSource={type:'user_upload',declaredUrl:state.youtubeMeta?.url||'',rightsConfirmed:$('youtube-rights').checked};$('youtube-sample-audio').src=objectURL('youtube-sample',f);$('youtube-imported').hidden=false;await setRecording(f,f.name);$('transcript-text').value=$('youtube-reference-text').value;$('youtube-import-message').textContent='العينة المرفوعة جاهزة للمراجعة والحفظ.';});
+ bind('youtube-local-file','change',loadReferenceFile);
+ bind('reference-file','change',loadReferenceFile);
+ bind('reference-prepare','click',prepareLocalReference);
+ bind('reference-reselect','click',()=>$('reference-file').click());
+ bind('youtube-download-sample','click',async()=>{if(!state.youtubeBlob)throw new Error('جهّز العينة أولًا.');const wav=state.youtubeBlob.type.includes('wav')?state.youtubeBlob:encodeWav(await decodeAudio(state.youtubeBlob));download(wav,safeName($('youtube-sample-name').value||'reference')+'.wav');});
  if(!navigator.mediaDevices?.getDisplayMedia){$('youtube-capture-tab').disabled=true;$('youtube-capture-note').textContent='تسجيل التبويب غير متاح على هذا الجهاز؛ يمكنك رفع عينة صوتية من جهازك.';}
  bind('stop-browser-voice','click',()=>speechSynthesis?.cancel());
  bind('generation-engine','change',updateProfiles);

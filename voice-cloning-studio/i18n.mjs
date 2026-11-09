@@ -36,7 +36,7 @@ function localize(root=document){
  }
 }
 async function loadLanguage(next){
- const data=next==='ar'?source:await fetch(new URL('./locales/'+next+'.json',import.meta.url)).then(r=>{if(!r.ok)throw new Error('Language file unavailable');return r.json();});
+ const data=next==='ar'?source:await fetch(new URL('./locales/'+next+'.json',import.meta.url),{cache:'no-cache'}).then(r=>{if(!r.ok)throw new Error('Language file unavailable');return r.json();});
  if(Object.keys(source).some(k=>typeof data[k]!=='string'||!data[k]))throw new Error('Incomplete language file');
  for(const [key,value] of Object.entries(data))reverse.set(value,source[key]);
  catalog=data;locale=next;document.documentElement.lang=next;document.documentElement.dir=next==='ar'?'rtl':'ltr';
@@ -44,7 +44,7 @@ async function loadLanguage(next){
  localize();document.title=translate(document.title);const select=document.getElementById('ui-language');if(select)select.value=next;
 }
 export async function initI18n(){
- source=await fetch(new URL('./locales/source.json',import.meta.url)).then(r=>{if(!r.ok)throw new Error('Locale source unavailable');return r.json();});
+ source=await fetch(new URL('./locales/source.json',import.meta.url),{cache:'no-cache'}).then(r=>{if(!r.ok)throw new Error('Locale source unavailable');return r.json();});
  bySource=new Map(Object.entries(source).map(([key,value])=>[value,key]));
  fragments=[...bySource.keys()].filter(value=>value.length>=12).sort((a,b)=>b.length-a.length);
  let saved;try{saved=localStorage.getItem('voice-ui-locale');}catch{}

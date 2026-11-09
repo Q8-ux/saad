@@ -42,3 +42,9 @@ Latest live checks: 32 Arabic ready voices returned, including Kuwait Fahed/Nour
 Version 1.2 includes Arabic, English, French, Spanish, German, Turkish and Simplified Chinese. The selector changes UI text, accessible labels, direction and the requested ready-voice language. Arabic is RTL and the default; the other six are LTR. The 661 source strings include client controls, dialogs, validations and media-service errors. Typed scripts, transcripts, source titles and personal names remain unchanged. Actual engine language capabilities still govern cloning.
 
 The default cosmic violet theme uses layered gradients and quiet flowing light, readable opaque panels, visible focus, and reduced-motion support. The light variant retains the violet palette. No new runtime dependency or remote translation service is used.
+
+## Local audio and video references (v1.3)
+
+The YouTube section now has a standalone file input available before any search. Audio/video files are read locally (100 MiB maximum; up to five minutes), with native format support depending on the browser. Users choose a 10–30 second interval. Web Audio decodes the audio track and exports a mono 24 kHz PCM WAV; the WAV can be downloaded, saved locally, edited, or sent to the existing voice-profile form. File preparation makes no server upload and does not require the private cloning engine. Actual cloning remains a separate engine operation.
+
+Browser verification used a synthetic 65-second MP4 containing AAC audio: the chosen 20–50 second interval produced a playable 30-second WAV, downloaded as mono 24 kHz PCM (1,440,044 bytes). The sample was handed to the voice-profile form. No user's or third party's voice was cloned in this check.

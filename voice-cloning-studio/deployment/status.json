@@ -5,17 +5,17 @@
   "hostingLimitGB": 1,
   "verifiedAt": "2026-11-09",
   "verification": {
-    "unitTests": 6,
+    "unitTests": 8,
     "gatewayTests": 14,
     "browser": "Arabic desktop and 320/390/768 frame viewports; real tone upload, processing and WAV download",
     "publicationTests": 3,
-    "wavExport": "browser-generated mono PCM WAV, 44100 Hz, 2 seconds",
+    "wavExport": "browser-extracted MP4 audio, mono PCM WAV, 24000 Hz, 30 seconds; actual download header verified",
     "gateway": "health 200; unauthenticated profiles 401; authenticated engine_not_configured 503; exact CORS origin confirmed",
     "gatewayAndMediaTests": 37
   },
   "remaining": "Connect a suitably resourced Voicebox inference host. Test speaker identity, Arabic dialect and AI outputs on that host.",
   "url": "https://q8-ux.github.io/saad/voice-cloning-studio/",
-  "version": "1.1.0",
+  "version": "1.3.0",
   "readyVoices": {
     "arabicCatalogCount": 32,
     "kuwait": [
@@ -44,7 +44,7 @@
     "tr",
     "zh"
   ],
-  "localizedStrings": 661,
+  "localizedStrings": 684,
   "theme": "cosmic-violet",
   "referenceUpload": "12-second synthetic WAV decoded and handed to voice-profile form in browser",
   "layoutChecks": {
@@ -65,5 +65,28 @@
     "de": 10,
     "tr": 2,
     "zh": 14
+  },
+  "referenceFileUpload": {
+    "audioAndVideo": true,
+    "localPreparation": true,
+    "maximumBytes": 104857600,
+    "maximumSourceSeconds": 300,
+    "sampleSeconds": [
+      10,
+      30
+    ],
+    "browserCheck": {
+      "source": "65-second synthetic MP4 with AAC audio",
+      "interval": [
+        20,
+        50
+      ],
+      "outputSeconds": 30,
+      "outputChannels": 1,
+      "outputSampleRate": 24000,
+      "outputBytes": 1440044,
+      "downloaded": true,
+      "profileHandoff": true
+    }
   }
 }
