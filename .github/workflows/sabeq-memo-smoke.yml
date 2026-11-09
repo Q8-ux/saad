@@ -42,7 +42,16 @@ jobs:
           curl --fail --location --silent --show-error --retry 2 --max-time 40 https://www.sabeq.legal/ > official.html
           grep -F 'q8-ux.github.io' official.html
           curl --fail --location --silent --show-error --retry 2 --max-time 40 https://q8-ux.github.io/saad/sabeq-legal/ > frontend.html
-          grep -F 'index-Cc5Z_iVY.js' frontend.html
+          node <<'JS'
+          const fs = require('node:fs');
+          const expected = fs.readFileSync('sabeq-legal/index.html', 'utf8');
+          const actual = fs.readFileSync('frontend.html', 'utf8');
+          const assets = [...expected.matchAll(/<script\b[^>]*\bsrc=["']([^"']+\.js(?:\?[^"']*)?)["']/g)].map(match => match[1]);
+          if (!assets.length || assets.some(asset => !actual.includes(asset))) {
+            throw new Error('The published frontend does not match the JavaScript entries in this commit.');
+          }
+          console.log('Published JavaScript entries match the checked-out source:', assets.length);
+          JS
           curl --fail --location --silent --show-error --retry 2 --max-time 80 https://sabeq-legal-research-api.onrender.com/api/operations-health > gateway.json
           grep -F '"operations-monitor-1"' gateway.json
       - name: Check read-only public signing-key route and protected archive endpoint
