@@ -11,7 +11,7 @@ function Animation({scenes,title}) {
   const progress=local/Math.max(1,scene.frames-1);
   const drift=interpolate(progress,[0,1],[-width*.15,width*.15],{extrapolateLeft:'clamp',extrapolateRight:'clamp'});
   const scale=interpolate(progress,[0,1],[.86,1.08],{easing:Easing.inOut(Easing.ease)});
-  const fade=interpolate(local,[0,9,Math.max(10,scene.frames-9),scene.frames],[0,1,1,0],{extrapolateLeft:'clamp',extrapolateRight:'clamp'});
+  const fade=Math.max(0,Math.min(1,local/8,(scene.frames-1-local)/8));
   return <AbsoluteFill style={{backgroundColor:scene.color||'#152758',fontFamily:'"Noto Sans Arabic", Tahoma, sans-serif',overflow:'hidden',color:'white'}}>
     <AbsoluteFill style={{background:'radial-gradient(ellipse at 40% 35%, #4b7dbd77, transparent 65%)'}}/>
     <AbsoluteFill style={{display:'flex',alignItems:'center',justifyContent:'center',transform:`translateX(${drift}px) scale(${scale})`}}>
