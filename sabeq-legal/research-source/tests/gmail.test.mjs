@@ -14,6 +14,7 @@ const clientId='synthetic-client.apps.googleusercontent.com',clientSecret='synth
 const refreshToken='synthetic-refresh-token-only';
 function harness(){
  const sqlite=new DatabaseSync(':memory:');
+ sqlite.exec(readFileSync(root+'/tests/fixtures/dashboard-base-schema.sql','utf8'));
  for(const file of readdirSync(root+'/drizzle').filter(f=>f.endsWith('.sql')).sort())sqlite.exec(readFileSync(root+'/drizzle/'+file,'utf8'));
  const db={prepare(sql){let args=[];return{bind(...values){args=values;return this;},async first(){return sqlite.prepare(sql).get(...args)||null;},async all(){return{results:sqlite.prepare(sql).all(...args)};},async run(){const r=sqlite.prepare(sql).run(...args);return{success:true,meta:{changes:Number(r.changes)}};}};}};
  const runtime={AUTH_SECRET:'synthetic-gmail-vault-secret-'.repeat(3),MANAGEMENT_ALLOWED_EMAILS:'manager@example.test',GMAIL_SENDER_EMAIL:sender,MEMO_REVIEW_RECIPIENTS:recipients.join(',')};
