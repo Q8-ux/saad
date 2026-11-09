@@ -40,7 +40,12 @@ export function caseResearchQueries(input:PleadingInput) {
   if (/إصلاح|اصلاح|تصليح|استهلاك/.test(text)) queries.push("تقدير الضرر تكلفة الإصلاح الأضرار السابقة استبدال أجزاء استهلاك");
   if (/تضامن|مدعى عليهم|مدعى عليهما/.test(text)) queries.push("أساس التضامن تعدد المسؤولين توزيع المسؤولية");
   if (/خيانة|خيانه/.test(text)) queries.push("خيانة الأمانة عناصر الجريمة التسليم القصد الجنائي الأدلة");
-  if (/قرض|مديون|دين|وفاء|سداد|سدد|تحويل|مخالص/.test(text)) queries.push("القانون المدني تعيين الدين عند الوفاء تعدد الديون", "القانون المدني يكون الوفاء للدائن مخالصة صادرة من الدائن", "قانون الإثبات إثبات الالتزام التخلص منه الوقائع منتجة", "القانون المدني الوفاء انقضاء الالتزام نطاق المخالصة", "قانون الإثبات إثبات السداد حجية المحررات رصيد المديونية");
+  if (/قرض|مديون|دين|ديون|وفاء|سداد|سدد|تحويل|مخالص/.test(text)) queries.push("القانون المدني يكون الوفاء للدائن مخالصة صادرة من الدائن", "قانون الإثبات إثبات الالتزام التخلص منه الوقائع منتجة", "القانون المدني الوفاء انقضاء الالتزام نطاق المخالصة", "قانون الإثبات إثبات السداد حجية المحررات رصيد المديونية");
+  if (/تعدد الديون|ديون متعددة|أكثر من دين|اكثر من دين|دين آخر|دين اخر|معاملة أخرى|معامله اخرى/.test(text)) queries.push("القانون المدني تعيين الدين عند الوفاء تعدد الديون");
+  if (/عقد|مقاول|إخلال|اخلال|فسخ/.test(text)) queries.push("القانون المدني العقد شريعة المتعاقدين تعديل أحكامه", "القانون المدني تنفيذ العقد حسن النية وشرف التعامل");
+  if (/فسخ|لم ينفذ|عدم التنفيذ|إخلال|اخلال/.test(text)) queries.push("القانون المدني العقود الملزمة للجانبين الوفاء عند حلول الأجل إعذار طلب الفسخ", "القانون المدني تعويض الضرر الخسارة والكسب نتيجة طبيعية توقع وقت التعاقد");
+  if (/تنفيذ|تنفيذي|منفذ ضده/.test(text)) queries.push("قانون المرافعات السند التنفيذي حق محقق الوجود معين المقدار حال الأداء", "قانون المرافعات إعلان السند التنفيذي إلى المنفذ ضده بيان المطلوب وتكليف المدين بالوفاء");
+  if (/شركة تضامن|شركة التضامن|شريك متضامن|شركاء متضامن/.test(text)) queries.push("قانون الشركات دائني الشركة أموال الشريك الخاصة إنذار الشركة بدفع الدين");
   if (/أصل|اصول|أصول|صورة|صور|توقيع|عقد|محرر/.test(text)) queries.push("قانون الإثبات أصول المحررات حجية الصور المنازعة في المستند");
   if (/خبير|خبراء|خبرة|الخبره|تقرير/.test(text)) queries.push("قانون الإثبات تقرير الخبير بحث اعتراضات الخصوم المستندات والحسابات", "قانون تنظيم الخبرة عمل الخبير اعتراضات الخصوم المستندات");
   if (/حساب|رصيد|فاتور|تناقض|اختلاف|مبالغ/.test(text)) queries.push("قانون الإثبات إثبات مقدار الدين الحساب والمستندات", "القانون المدني التعويض الضرر مقدار المطالبة");
@@ -151,7 +156,7 @@ export function applyCheckedJudgmentMatches(evidence:LegalEvidence[],plan:CasePl
   const {analogy:_old,...judgment}=source.judgment;
   return {...source,judgment:{...judgment,...(match?{analogy:{issue:plan.issues[match.issueIndex].issue,factQuote:match.factQuote,reason:match.reason,differences:match.differences}}:{})}};
 });}
-export const defenseRevision="grounded-defenses-3";
+export const defenseRevision="grounded-defenses-4";
 type DefenseSubstance={factQuote:string;applicationQuote:string;opposingQuote:string;responseQuote:string;sourceMarkers:string[]};
 export type CaseAudit={checks:Array<{issueIndex:number;status:"addressed"|"blocked"|"omitted";reason:string;substance?:DefenseSubstance}>;roleConsistent:boolean;factsPreserved:boolean;reliefConsistent:boolean;unsupportedAssertions:string[]};
 const substanceSchema={type:"object",additionalProperties:false,required:["factQuote","applicationQuote","opposingQuote","responseQuote","sourceMarkers"],properties:{...Object.fromEntries(["factQuote","applicationQuote","opposingQuote","responseQuote"].map(key=>[key,{type:"string"}])),sourceMarkers:strings}};

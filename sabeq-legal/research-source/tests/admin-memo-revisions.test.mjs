@@ -15,6 +15,7 @@ function harness(){
 test('existing memo viewer opens RTL editor with full text and history; staff receive no edit controls',async()=>{
  const h=harness();await h.api.openMemo(h.memo.id);assert.match(h.node('detail-content').innerHTML,/تعديل نص المذكرة/);h.api.editMemo();const html=h.node('detail-content').innerHTML;assert.match(html,/name="text" dir="rtl"/);assert.ok(html.includes(h.memo.output_text));assert.match(html,/حفظ نسخة مصححة/);
  await h.api.showMemoVersion(1);assert.match(h.node('detail-content').innerHTML,/نص أصلي اصطناعي/);assert.match(h.node('detail-content').innerHTML,/نص مصحح اصطناعي/);
+ h.api.setRole('memo_supervisor');await h.api.openMemo(h.memo.id);assert.match(h.node('detail-content').innerHTML,/data-memo-edit/);h.api.editMemo();assert.match(h.node('detail-content').innerHTML,/حفظ نسخة مصححة/);
  h.api.setRole('reviewer');await h.api.openMemo(h.memo.id);assert.doesNotMatch(h.node('detail-content').innerHTML,/data-memo-edit/);
 });
 test('review export includes untruncated memo and inputs, downloads locally and makes no write request',async()=>{

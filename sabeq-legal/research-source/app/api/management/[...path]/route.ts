@@ -2,7 +2,6 @@ import { engineeringPathStatus } from "@/lib/engineering-paths";
 import { siteAction, servicesAction, bookingsAction } from "@/lib/site-controls";
 import { listManagedUsers, updateManagedUser } from "@/lib/user-management";
 import { managementAccounts } from "@/lib/management-password";
-import { requestManagementRecovery, finishManagementRecovery } from "@/lib/management-password-recovery";
 import { mailboxAction } from "@/lib/management-mailboxes";
 import { sadadManagement } from "@/lib/sadad-payments";
 import { programmerAction } from "@/lib/management-programmer";
@@ -10,23 +9,23 @@ import { searchImportedEdition } from "@/lib/legislation-edition-import";
 import { getAuditFile } from "@/lib/legislation-audit";
 import { legislationWorkbench, archiveArticles, archiveAsset } from "@/lib/legislation-workbench";
 import { getD1 } from "@/db";
-import { assertManagementOrigin, assertManagerAction, exchangeManagerCode, managementJson, managerLogin, managerProfile, passwordManagerLogin, requireManager } from "@/lib/management-auth";
-import { bridgeKeys, managerInbox, managerMemos, managerMemoRecovery, managerSnapshot, managerUpdates } from "@/lib/management-data";
+import { assertManagementOrigin, assertManagerAction, exchangeManagerCode, managementJson, managementCorsResponse, managerLogin, managerProfile, passwordManagerLogin, requireManager } from "@/lib/management-auth";
+import { bridgeKeys, managerInbox, managerMemos, managerSnapshot, managerUpdates } from "@/lib/management-data";
 import { readMemoRevision, saveMemoRevision } from "@/lib/management-memo-revisions";
 import { mailAction, operationEvent, whatsappAction } from "@/lib/management-integrations";
 import { verificationEmailAction } from "@/lib/verification-email-settings";
+import { sendTestEmail } from "@/lib/email";
 import { gmailAction, gmailSettings } from "@/lib/gmail";
-import { EmailDeliveryError, sendRegistrationInvitation, sendTestEmail } from "@/lib/email";
 import { cleanMultiline, cleanString, enforceRateLimit, readJsonObject, RequestError } from "@/lib/request-security";
 
 export const dynamic = "force-dynamic";
 function actionPath(request: Request) { return new URL(request.url).pathname.replace(/^\/api\/management\//, ""); }
 function failure(error: unknown) { return managementJson({ error: error instanceof RequestError ? error.message : "تعذر إكمال طلب الإدارة. أعد المحاولة.", code: error instanceof RequestError ? "request_rejected" : "service_unavailable" }, error instanceof RequestError ? error.status : 503); }
-export async function OPTIONS(request: Request) {
+async function managementOptions(request: Request) {
   try { assertManagementOrigin(request); return new Response(null, { status: 204, headers: { "Access-Control-Allow-Origin": "https://q8-ux.github.io", "Access-Control-Allow-Methods": "GET, POST, OPTIONS", "Access-Control-Allow-Headers": "Content-Type, Authorization", "Access-Control-Max-Age": "600", Vary: "Origin" } }); }
   catch (error) { return failure(error); }
 }
-export async function GET(request: Request) {
+async function managementGet(request: Request) {
   try {
     const action = actionPath(request);
     if (action === "login") { await enforceRateLimit(request, "management-login", 20); return await managerLogin(request); }
@@ -53,7 +52,6 @@ export async function GET(request: Request) {
     if (action === "snapshot") return managementJson(await managerSnapshot(manager.email));
     if (action === "memos") return managementJson(await managerMemos(url));
     if (action === "memo-revision") return managementJson(await readMemoRevision(url));
-    if (action === "memo-recovery") return managementJson(await managerMemoRecovery(url));
     if (action === "inbox") return managementJson(await managerInbox(url));
     if (action === "updates") return managementJson(await managerUpdates());
     if (action === "whatsapp") return managementJson(await whatsappAction(null, manager.email));
@@ -62,20 +60,12 @@ export async function GET(request: Request) {
     throw new RequestError("القسم غير موجود.", 404);
   } catch (error) { return failure(error); }
 }
-export async function POST(request: Request) {
+async function managementPost(request: Request) {
   try {
     assertManagementOrigin(request);
     const action = actionPath(request), data = await readJsonObject(request, action === "password-login" ? 4_096 : action === "memo-revision" ? 500_000 : action === "site" ? 200_000 : 20_000);
     if (action === "exchange") { await enforceRateLimit(request, "management-exchange", 30); return managementJson(await exchangeManagerCode(data)); }
     if (action === "password-login") return managementJson(await passwordManagerLogin(request, data));
-    if (action === "password-recovery-request") {
-      await enforceRateLimit(request, "management-recovery-request", 6);
-      return managementJson(await requestManagementRecovery(data));
-    }
-    if (action === "password-recovery-confirm") {
-      await enforceRateLimit(request, "management-recovery-confirm", 10);
-      return managementJson(await finishManagementRecovery(data));
-    }
     const manager = await requireManager(request);
     assertManagerAction(manager, action, "POST");
     await enforceRateLimit(request, "management-write", 150);
@@ -93,43 +83,7 @@ export async function POST(request: Request) {
       return managementJson(await programmerAction(data, manager.email, request.signal));
     }
     if (action === "logout") { await getD1().prepare("DELETE FROM management_sessions WHERE token_hash = ?").bind(manager.hash).run(); return managementJson({ ok: true }); }
-    if (action === "users") {
-      if (data.action === "send-invitation") {
-        if (manager.role !== "administrator") throw new RequestError("إرسال دعوات التسجيل متاح للمشرف فقط.", 403);
-        if (Object.keys(data).some(key => !["action", "id"].includes(key))) throw new RequestError("بيانات طلب الدعوة غير صحيحة.");
-        const id = cleanString(data.id, "المستخدم", { min: 20, max: 80 });
-        const account = await getD1().prepare("SELECT id, name, email, status, email_verified_at FROM public_users WHERE id = ?").bind(id).first<{ id: string; name: string; email: string; status: string; email_verified_at: string }>();
-        if (!account) throw new RequestError("الحساب غير موجود.", 404);
-        if (account.status !== "active" || account.email_verified_at) throw new RequestError("لا يمكن إرسال دعوة لحساب موقوف أو بريده متحقق بالفعل.", 409);
-        await enforceRateLimit(request, "management-registration-invite", 5);
-        try {
-          const messageId = await sendRegistrationInvitation(account.email, account.name);
-          return managementJson({ ok: true, accepted: true, messageId, email: account.email, delivered: false, verificationPending: true });
-        } catch (error) {
-          const reason = error instanceof EmailDeliveryError ? error.reason : "unknown";
-          throw new RequestError(
-            reason === "sender_domain_unverified" ? "رفض Resend الإرسال: نطاق sabeq.legal غير موثق للإرسال. أصلح سجلات النطاق في Resend." :
-            reason === "api_key_rejected" ? "رفض Resend مفتاح إرسال البريد المحفوظ." :
-            reason === "missing_settings" ? "إعدادات إرسال بريد التحقق غير مكتملة. افتح إعدادات البريد في لوحة المشرف." :
-            "تعذر قبول رسالة الدعوة لدى مزود البريد. افتح إعدادات البريد واختبر الإرسال.", 502);
-        }
-      }
-      const result = await updateManagedUser(data, manager.email, manager.role);
-      await operationEvent("admin", "user-updated", "تم تحديث حساب مستخدم وخدماته");
-      if (manager.role !== "administrator" || !result.emailVerificationRequired) return managementJson(result);
-      const account = await getD1().prepare("SELECT name, email, status FROM public_users WHERE id = ?").bind(result.id).first<{ name: string; email: string; status: string }>();
-      if (!account || account.status !== "active") return managementJson({ ...result, invitation: { accepted: false, reason: "not_active" } });
-      try {
-        await enforceRateLimit(request, "management-registration-invite", 5);
-        const messageId = await sendRegistrationInvitation(account.email, account.name);
-        return managementJson({ ...result, invitation: { accepted: true, delivered: false, messageId } });
-      } catch (error) {
-        // User creation/edit succeeded and stays unverified. Never claim a message
-        // was sent on provider failure, and do not roll back or duplicate the user.
-        const reason = error instanceof EmailDeliveryError ? error.reason : error instanceof RequestError && error.status === 429 ? "rate_limited" : "delivery_unavailable";
-        return managementJson({ ...result, invitation: { accepted: false, reason } });
-      }
-    }
+    if (action === "users") { const result = await updateManagedUser(data, manager.email); await operationEvent("admin", "user-updated", "تم تحديث حساب مستخدم وخدماته"); return managementJson(result); }
     if (action === "payments") return managementJson(await sadadManagement(data, manager.email));
     if (action === "mailboxes") return managementJson(await mailboxAction(data, manager.email));
     if (action === "whatsapp") return managementJson(await whatsappAction(data, manager.email));
@@ -177,3 +131,6 @@ export async function POST(request: Request) {
   } catch (error) { return failure(error); }
 }
 
+export async function OPTIONS(request: Request) { return managementCorsResponse(request, await managementOptions(request)); }
+export async function GET(request: Request) { return managementCorsResponse(request, await managementGet(request)); }
+export async function POST(request: Request) { return managementCorsResponse(request, await managementPost(request)); }

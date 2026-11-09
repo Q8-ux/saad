@@ -7,22 +7,29 @@ export { sealConfig, openConfig } from "@/lib/management-vault";
 
 export const MANAGEMENT_HOME = "https://q8-ux.github.io/saad/sabeq-admin-preview/";
 export const MANAGEMENT_ORIGIN = new URL(MANAGEMENT_HOME).origin;
-type Manager = { email: string; name: string; username?: string; role: "operator" | "administrator" | "reviewer" };
+export const BOLT_MANAGEMENT_HOME = "https://q8-ux-sabeq-admin-co-u4ma.bolt.host/";
+export const MANAGEMENT_ORIGINS = [MANAGEMENT_ORIGIN, new URL(BOLT_MANAGEMENT_HOME).origin];
+export function managementConsoleHome(consoleName: string | null) {
+  return consoleName === "bolt" ? BOLT_MANAGEMENT_HOME : MANAGEMENT_HOME;
+}
+export function managementCorsResponse(request: Request, response: Response) {
+  const origin = request.headers.get("origin"), headers = new Headers(response.headers);
+  if (origin && MANAGEMENT_ORIGINS.includes(origin)) headers.set("Access-Control-Allow-Origin", origin);
+  else if (origin && origin !== new URL(request.url).origin) headers.delete("Access-Control-Allow-Origin");
+  headers.set("Vary", [...new Set((headers.get("Vary") || "").split(",").map(s => s.trim()).filter(Boolean).concat("Origin"))].join(", "));
+  return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
+}
+type Manager = { email: string; name: string; username?: string; role: "operator" | "administrator" | "memo_supervisor" };
+const MEMO_SUPERVISOR_SECTIONS = ["memos", "bookings", "inbox"];
 const OPERATOR_SECTIONS = ["overview", "memos", "inbox", "notifications", "users", "legislation", "commands", "updates"];
-// Only expressly scoped operations are available to staff. Unknown actions fail closed.
-const OPERATOR_READ = new Set(["session", "snapshot", "memos", "inbox", "users", "updates", "commands",
-  "legislation", "legislation-workbench", "legislation-articles", "legislation-asset", "legislation-report"]);
-const OPERATOR_WRITE = new Set(["logout", "users", "read", "inbox", "commands"]);
 export function managerProfile(manager: Manager) {
   return { email: manager.email, name: manager.name, ...(manager.username ? { username: manager.username } : {}), role: manager.role,
-    sections: manager.role === "reviewer" ? ["memos"] : manager.role === "operator" ? [...OPERATOR_SECTIONS] : [...OPERATOR_SECTIONS, "site", "services", "bookings", "programmer", "paths", "payments", "mailboxes", "whatsapp", "mail"] };
+    sections: manager.role === "operator" ? [] : manager.role === "memo_supervisor" ? [...MEMO_SUPERVISOR_SECTIONS] : [...OPERATOR_SECTIONS, "site", "services", "bookings", "programmer", "paths", "payments", "mailboxes", "whatsapp", "mail"] };
 }
 export function assertManagerAction(manager: Manager, action: string, method: "GET" | "POST") {
   if (manager.role === "administrator") return;
-  if (manager.role === "reviewer" && (method === "GET" ? ["session", "memos"].includes(action) : action === "logout")) return;
-  if (manager.role !== "operator" || !(method === "GET" ? OPERATOR_READ : OPERATOR_WRITE).has(action)) {
-    throw new RequestError("ليست لديك صلاحية لإجراء هذه العملية.", 403);
-  }
+  const allowed = method === "GET" ? ["session", "memos", "memo-revision", "bookings", "inbox"] : ["logout", "memo-revision", "bookings", "inbox"];
+  if (manager.role !== "memo_supervisor" || !allowed.includes(action)) throw new RequestError("لا يملك هذا الحساب صلاحية الوصول إلى هذا القسم.", 403);
 }
 type Runtime = { AUTH_SECRET?: string; MANAGEMENT_ALLOWED_EMAILS?: string; MANAGEMENT_OWNER_EMAIL?: string };
 export const managementRuntime = () => env as unknown as Runtime;
@@ -37,7 +44,7 @@ export function managementJson(data: unknown, status = 200) {
 }
 export function assertManagementOrigin(request: Request) {
   const origin = request.headers.get("origin");
-  if (origin && origin !== MANAGEMENT_ORIGIN && origin !== new URL(request.url).origin) throw new RequestError("مصدر الطلب غير مسموح.", 403);
+  if (origin && !MANAGEMENT_ORIGINS.includes(origin) && origin !== new URL(request.url).origin) throw new RequestError("مصدر الطلب غير مسموح.", 403);
 }
 export async function digest(value: string) {
   const data = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
@@ -55,23 +62,24 @@ export async function signIntegration(value: string, secret?: string) {
 }
 export async function managerLogin(request: Request) {
   const url = new URL(request.url), challenge = url.searchParams.get("challenge") || "", state = url.searchParams.get("state") || "";
+  const consoleHome = managementConsoleHome(url.searchParams.get("console"));
   if (!/^[A-Za-z0-9_-]{43}$/.test(challenge) || !/^[A-Za-z0-9_-]{32,80}$/.test(state)) throw new RequestError("ابدأ الدخول من رابط لوحة التحكم.");
   const user = await getChatGPTUser(request);
   if (!user) {
     if (url.searchParams.get("auth_return") === "1") {
-      const target = new URL(MANAGEMENT_HOME); target.searchParams.set("login_error", "identity_unavailable");
+      const target = new URL(consoleHome); target.searchParams.set("login_error", "identity_unavailable");
       return new Response(null, { status: 302, headers: { Location: target.href, "Cache-Control": "no-store", "Referrer-Policy": "no-referrer" } });
     }
     url.searchParams.set("auth_return", "1");
     return new Response(null, { status: 302, headers: { Location: new URL(chatGPTSignInPath(url.pathname + url.search), url.origin).href, "Cache-Control": "no-store", "Referrer-Policy": "no-referrer" } });
   }
   if (!(await managerAllowed(user.email))) {
-    const target = new URL(MANAGEMENT_HOME); target.searchParams.set("login_error", "not_authorized");
+    const target = new URL(consoleHome); target.searchParams.set("login_error", "not_authorized");
     return new Response(null, { status: 302, headers: { Location: target.href, "Cache-Control": "no-store", "Referrer-Policy": "no-referrer" } });
   }
   const code = randomToken();
   await getD1().prepare("INSERT INTO management_login_codes (code_hash, email, name, challenge, expires_at) VALUES (?, ?, ?, ?, ?)").bind(await digest(code), user.email.toLowerCase(), user.displayName.slice(0, 160), challenge, Math.floor(Date.now() / 1000) + 60).run();
-  const target = new URL(MANAGEMENT_HOME); target.searchParams.set("code", code); target.searchParams.set("state", state);
+  const target = new URL(consoleHome); target.searchParams.set("code", code); target.searchParams.set("state", state);
   return new Response(null, { status: 302, headers: { Location: target.href, "Cache-Control": "no-store", "Referrer-Policy": "no-referrer" } });
 }
 export async function exchangeManagerCode(data: Record<string, unknown>) {
@@ -91,7 +99,8 @@ export async function passwordManagerLogin(request: Request, data: Record<string
   await enforceRateLimit(rateRequest, "management-password-login", 30);
   await enforceRateLimit(rateRequest, `management-password-account:${await digest(normalizeManagementUsername(data.username).slice(0, 64))}`, 8);
   const account = await authenticateManagementPassword(data);
-   const now = Math.floor(Date.now() / 1000), token = randomToken(), expiresAt = now + 8 * 3600;
+  if (account.role !== "administrator" && account.role !== "memo_supervisor") throw new RequestError("لوحة التحكم متاحة للإداريين فقط.", 403);
+  const now = Math.floor(Date.now() / 1000), token = randomToken(), expiresAt = now + 8 * 3600;
   await getD1().prepare("INSERT INTO management_sessions (token_hash, email, name, expires_at, last_seen_at) VALUES (?, ?, ?, ?, ?)")
     .bind(await digest(token), account.sessionPrincipal, account.username, expiresAt, now).run();
   return { token, expiresAt, manager: managerProfile({ email: account.identity, name: account.username, username: account.username, role: account.role }) };
@@ -102,9 +111,10 @@ export async function requireManager(request: Request) {
   if (!token) throw new RequestError("سجّل الدخول إلى الإدارة للمتابعة.", 401);
   const hash = await digest(token), now = Math.floor(Date.now() / 1000);
   const row = await getD1().prepare("SELECT email, name FROM management_sessions WHERE token_hash = ? AND expires_at > ? AND last_seen_at > ?").bind(hash, now, now - 3600).first<{ email: string; name: string }>();
-  const passwordSession = !!row && /^(staff|staff-admin|staff-reviewer):/.test(row.email);
+  const passwordSession = !!row && /^(staff|staff-admin|staff-memo):/.test(row.email);
   const staff = passwordSession ? await managementPasswordSession(row!.email) : null;
-   if (!row || (passwordSession ? !staff : !(await managerAllowed(row.email)))) throw new RequestError("انتهت الجلسة الإدارية. سجّل الدخول مجدداً.", 401);
+  if (staff?.role === "operator") throw new RequestError("لوحة التحكم متاحة للإداريين فقط.", 403);
+  if (!row || (passwordSession ? !staff : !(await managerAllowed(row.email)))) throw new RequestError("انتهت الجلسة الإدارية. سجّل الدخول مجدداً.", 401);
   await getD1().prepare("UPDATE management_sessions SET last_seen_at = ? WHERE token_hash = ?").bind(now, hash).run();
-  return { email: staff?.identity || row.email, name: staff?.username || row.name, ...(staff ? { username: staff.username } : {}), role: (staff?.role || "administrator") as "operator" | "administrator" | "reviewer", hash };
+  return { email: staff?.identity || row.email, name: staff?.username || row.name, ...(staff ? { username: staff.username } : {}), role: staff?.role || "administrator" as const, hash };
 }

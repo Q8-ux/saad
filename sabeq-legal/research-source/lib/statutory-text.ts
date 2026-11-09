@@ -19,7 +19,7 @@ export function statutoryPromptExcerpt(text:string){return statutoryOCRReview(te
 export function draftStatutoryText(source: LegalEvidence) {
   const c = source.corpus;
   if (source.judgment || c?.draftingEligible === false) return null;
-  const bound = c?.scope === 'bound_file_only' && c.sourceId === 'user-legislation-source' && c.sourceSha256 === boundSha && c.articleIdentityUnique;
+  const bound = Boolean(c && ['bound_file_only','bound_file_with_reviewed_errata'].includes(c.scope) && c.sourceId === 'user-legislation-source' && c.sourceSha256 === boundSha && c.articleIdentityUnique);
   const number = bound ? c.articleNumber : source.verification?.status === 'source_verified' ? source.verification.articleNumber : null;
   if (!number) return null;
   // The resolver labels candidate continuations explicitly: their boundaries

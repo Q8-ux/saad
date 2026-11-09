@@ -7,32 +7,24 @@ import { openConfig, sealConfig } from "@/lib/management-vault";
 
 type PasswordAccount = { username: string; salt: string; hash: string; enabled: boolean; sessionVersion?: string };
 type AccountOverride = Pick<PasswordAccount, "username" | "salt" | "hash"> & { id: string; sessionVersion: string };
-type AccountStore = { version: 1; revision: string; accounts: AccountOverride[] };
-type EffectiveAccount = PasswordAccount & { id: string; seedUsername: string; role: "operator" | "administrator" | "reviewer"; pepper: string };
-type PasswordRuntime = { MANAGEMENT_PASSWORD_USERS?: string; MANAGEMENT_PASSWORD_PEPPER?: string; MANAGEMENT_ADMIN_PASSWORD_USERS?: string; MANAGEMENT_ADMIN_PASSWORD_PEPPER?: string };
+type AccountStore = { version: 1; revision: string; accounts: AccountOverride[]; appliedRecoveryNonce?: string };
+type ManagementPasswordRole = "operator" | "administrator" | "memo_supervisor";
+type EffectiveAccount = PasswordAccount & { id: string; seedUsername: string; role: ManagementPasswordRole; pepper: string };
+type PasswordRuntime = { MANAGEMENT_PASSWORD_USERS?: string; MANAGEMENT_PASSWORD_PEPPER?: string; MANAGEMENT_ADMIN_PASSWORD_USERS?: string; MANAGEMENT_ADMIN_PASSWORD_PEPPER?: string; MANAGEMENT_ADMIN_CREDENTIAL_REPAIR?: string; MANAGEMENT_MEMO_SUPERVISOR_PASSWORD_USERS?: string; MANAGEMENT_MEMO_SUPERVISOR_PASSWORD_PEPPER?: string };
 const USERNAME = /^[a-z][a-z0-9_]{2,31}$/;
 const ITERATIONS = 600_000;
 const INVALID = "اسم المستخدم أو كلمة المرور غير صحيحين.";
 const encoder = new TextEncoder();
 const VAULT_KEY = "control-accounts";
-// A standalone reviewer's password never enters the repository.
-function reviewerPepper() {
-  const secret = (env as unknown as { AUTH_SECRET?: string }).AUTH_SECRET || "";
-  if (secret.length < 32) throw new RequestError("مفتاح حماية حساب المراجع غير مهيأ.", 503);
-  return "sabeq-memo-reviewer-v1:" + secret;
-}
-function reviewerPasswordValid(value: string) {
-  return value.length >= 9 && value.length <= 256 && /[a-z]/.test(value) && /[A-Z]/.test(value) && /[0-9]/.test(value) && /[^A-Za-z0-9]/.test(value);
-}
 
 export function normalizeManagementUsername(value: unknown) {
   return typeof value === "string" ? value.trim().toLowerCase() : "";
 }
 
-function configuration(role: "operator" | "administrator" = "operator") {
+function configuration(role: ManagementPasswordRole = "operator") {
   const runtime = env as unknown as PasswordRuntime;
-  const raw = (role === "administrator" ? runtime.MANAGEMENT_ADMIN_PASSWORD_USERS : runtime.MANAGEMENT_PASSWORD_USERS) || "";
-  const pepper = (role === "administrator" ? runtime.MANAGEMENT_ADMIN_PASSWORD_PEPPER : runtime.MANAGEMENT_PASSWORD_PEPPER) || "";
+  const raw = (role === "administrator" ? runtime.MANAGEMENT_ADMIN_PASSWORD_USERS : role === "memo_supervisor" ? runtime.MANAGEMENT_MEMO_SUPERVISOR_PASSWORD_USERS : runtime.MANAGEMENT_PASSWORD_USERS) || "";
+  const pepper = (role === "administrator" ? runtime.MANAGEMENT_ADMIN_PASSWORD_PEPPER : role === "memo_supervisor" ? runtime.MANAGEMENT_MEMO_SUPERVISOR_PASSWORD_PEPPER : runtime.MANAGEMENT_PASSWORD_PEPPER) || "";
   if (!raw && !pepper) return null;
   try {
     if (raw.length > 50_000 || pepper.length < 32) throw Error();
@@ -64,32 +56,110 @@ async function credentialTag(account: PasswordAccount, pepper: string) {
   return toHex(await peppered(`management-session-v1:${account.username}:${account.salt}:${account.hash}${account.sessionVersion ? `:${account.sessionVersion}` : ""}`, pepper)).slice(0, 32);
 }
 
-async function accountRoster() {
+function accountFailureText(error: unknown) {
+  // D1 wraps the useful database error in cause; log only fixed classifications.
+  const messages: string[] = [], seen = new Set<unknown>();
+  let current = error;
+  for (let depth = 0; depth < 6 && current && !seen.has(current); depth++) {
+    seen.add(current);
+    if (typeof current === "string") { messages.push(current); break; }
+    if (typeof current !== "object") break;
+    if ("message" in current && typeof current.message === "string") messages.push(current.message);
+    current = "cause" in current ? current.cause : undefined;
+  }
+  return messages.join("\n");
+}
+function accountFailureWords(error: unknown) {
+  const allowed = new Set("d1_error d1_exec_error sqlite_error sqlite_auth sqlite_busy error failed failure execute execution executing query queries statement statements batch binding bindings parameter parameters invalid unsupported supported operation method function not cannot could missing found unknown required expected received undefined null object array string number syntax parse parsing malformed database storage transaction begin commit rollback atomic memory limit exceeded many large complex full internal server service request response network timeout closed aborted cancelled denied permission authorized readonly read write insert update delete select returning constraint unique foreign key primary check column table index pattern like escape use prepared sql json body endpoint disabled available".split(" "));
+  return [...new Set((accountFailureText(error).toLowerCase().match(/[a-z_]+/g) || []).filter(word => allowed.has(word)))].slice(0, 32);
+}
+function accountFailureReason(error: unknown) {
+  const message = accountFailureText(error);
+  return /مفتاح حماية التكامل غير مهيأ/.test(message) ? "vault_key_unconfigured" : /ON CONFLICT|PRIMARY KEY or UNIQUE/i.test(message) ? "missing_unique_key" : /FOREIGN KEY/i.test(message) ? "foreign_key_constraint" : /NOT NULL/i.test(message) ? "required_column_missing" : /CHECK constraint/i.test(message) ? "check_constraint" : /UNIQUE constraint/i.test(message) ? "unique_constraint" : /syntax|near .+error/i.test(message) ? "sql_syntax" : /no such table/i.test(message) ? "missing_table" : /no such column|no column named/i.test(message) ? "missing_column" : /not a function|not implemented|not supported|unsupported.*(?:operation|method)|unimplemented/i.test(message) ? "unsupported_operation" : /D1_TYPE_ERROR|unsupported.*(?:type|bind)|parameter|bindings/i.test(message) ? "unsupported_binding" : /not authorized|permission|read.only|SQLITE_AUTH/i.test(message) ? "database_permission" : /transaction|atomic/i.test(message) ? "transaction_error" : /timeout|timed out/i.test(message) ? "database_timeout" : /locked|SQLITE_BUSY/i.test(message) ? "database_busy" : /too (?:many|large)|limit exceeded/i.test(message) ? "database_limit" : /D1|SQLITE|database/i.test(message) ? "database_error" : /crypto|encrypt|operation|key/i.test(message) ? "cryptography_error" : "unknown";
+}
+async function changedAccount(account: EffectiveAccount, username: string, password: string): Promise<AccountOverride> {
+  try {
+    const override: AccountOverride = { id: account.id, username, salt: account.salt, hash: account.hash, sessionVersion: toHex(crypto.getRandomValues(new Uint8Array(16))) };
+    if (password) {
+      override.salt = toHex(crypto.getRandomValues(new Uint8Array(16)));
+      override.hash = toHex(await pbkdf2Async(sha256, await peppered(password, account.pepper), fromHex(override.salt), { c: ITERATIONS, dkLen: 32, asyncTick: 10 }));
+    }
+    return override;
+  } catch (error) {
+    console.error("management_account_derive_failed", { reason: accountFailureReason(error) });
+    throw error;
+  }
+}
+async function saveAccountStore(next: AccountStore, previousSealed: string, actor: string) {
+  let stage = "seal";
+  try {
+    const db = getD1(), sealed = await sealConfig(next);
+    stage = "prepare";
+    // Conditional writes also support legacy vaults without a unique index.
+    const statement = previousSealed
+      ? db.prepare("UPDATE management_vault SET sealed = ?, updated_by = ?, updated_at = CURRENT_TIMESTAMP WHERE integration = ? AND sealed = ?").bind(sealed, actor, VAULT_KEY, previousSealed)
+      : db.prepare("INSERT INTO management_vault (integration, sealed, updated_by, updated_at) SELECT ?, ?, ?, CURRENT_TIMESTAMP WHERE NOT EXISTS (SELECT 1 FROM management_vault WHERE integration = ?)").bind(VAULT_KEY, sealed, actor, VAULT_KEY);
+    stage = "write";
+    const result = await statement.run();
+    if (result.meta.changes !== 1) throw new RequestError("حفظ مشرف آخر تعديلاً متزامناً. حدّث القائمة ثم أعد المحاولة.", 409);
+    return sealed;
+  } catch (error) {
+    console.error("management_account_store_failed", { stage, reason: accountFailureReason(error), words: accountFailureWords(error) });
+    throw error;
+  }
+}
+function administratorRepair() {
+  const raw = (env as unknown as PasswordRuntime).MANAGEMENT_ADMIN_CREDENTIAL_REPAIR;
+  if (!raw) return null;
+  try {
+    if (raw.length > 2_000) throw Error();
+    const value = JSON.parse(raw);
+    if (value.version !== 1 || value.username !== "saad" || typeof value.nonce !== "string" || !/^[a-f0-9]{64}$/.test(value.nonce) || typeof value.password !== "string" || value.password.length < 10 || value.password.length > 256 || !/\S/.test(value.password)) throw Error();
+    return value as { version: 1; username: "saad"; nonce: string; password: string };
+  } catch {
+    console.error("management_administrator_recovery_failed", { stage: "configuration", reason: "invalid_repair_command" });
+    throw new RequestError("إعداد استعادة المشرف غير صحيح. تواصل مع مسؤول النشر.", 503);
+  }
+}
+
+async function accountRoster(repairFor?: string) {
   const accounts: EffectiveAccount[] = [];
-  for (const role of ["administrator", "operator"] as const) {
+  for (const role of ["administrator", "operator", "memo_supervisor"] as const) {
     const config = configuration(role);
     for (const account of config?.accounts || []) accounts.push({ ...account, id: `${role}:${account.username}`, seedUsername: account.username, role, pepper: config!.pepper });
   }
   const row = await getD1().prepare("SELECT sealed FROM management_vault WHERE integration = ?").bind(VAULT_KEY).first<{ sealed: string }>();
-  const saved = row ? await openConfig<AccountStore>(row.sealed) : { version: 1, revision: "environment", accounts: [] } as AccountStore;
+  let saved = row ? await openConfig<AccountStore>(row.sealed) : { version: 1, revision: "environment", accounts: [] } as AccountStore;
+  let sealed = row?.sealed || "";
   const invalid = () => { throw new RequestError("تعذرت قراءة حسابات دخول اللوحة المحفوظة. تواصل مع مسؤول النظام.", 503); };
   if (!saved || saved.version !== 1 || typeof saved.revision !== "string" || (row && !/^[a-f0-9]{32}$/.test(saved.revision)) || !Array.isArray(saved.accounts) || saved.accounts.length > 50) invalid();
+  if (saved.appliedRecoveryNonce !== undefined && (typeof saved.appliedRecoveryNonce !== "string" || !/^[a-f0-9]{64}$/.test(saved.appliedRecoveryNonce))) invalid();
   const ids = new Set<string>();
   for (const override of saved.accounts) {
-    if (!override || typeof override.id !== "string" || !/^(administrator|operator|reviewer):[a-z][a-z0-9_]{2,31}$/.test(override.id) || ids.has(override.id) || typeof override.username !== "string" || !USERNAME.test(override.username) || typeof override.salt !== "string" || !/^[a-f0-9]{32}$/.test(override.salt) || typeof override.hash !== "string" || !/^[a-f0-9]{64}$/.test(override.hash) || typeof override.sessionVersion !== "string" || !/^[a-f0-9]{32}$/.test(override.sessionVersion)) invalid();
+    if (!override || typeof override.id !== "string" || !/^(administrator|operator|memo_supervisor):[a-z][a-z0-9_]{2,31}$/.test(override.id) || ids.has(override.id) || typeof override.username !== "string" || !USERNAME.test(override.username) || typeof override.salt !== "string" || !/^[a-f0-9]{32}$/.test(override.salt) || typeof override.hash !== "string" || !/^[a-f0-9]{64}$/.test(override.hash) || typeof override.sessionVersion !== "string" || !/^[a-f0-9]{32}$/.test(override.sessionVersion)) invalid();
     ids.add(override.id);
     const account = accounts.find(a => a.id === override.id);
     if (account) Object.assign(account, { username: override.username, salt: override.salt, hash: override.hash, sessionVersion: override.sessionVersion });
-    else if (override.id.startsWith("reviewer:")) {
-      accounts.push({ username: override.username, seedUsername: override.id.slice("reviewer:".length), role: "reviewer",
-        id: override.id, salt: override.salt, hash: override.hash, sessionVersion: override.sessionVersion,
-        enabled: true, pepper: reviewerPepper() });
-    } else invalid();
   }
   if (new Set(accounts.map(a => a.username)).size !== accounts.length) invalid();
-  return { accounts, saved, sealed: row?.sealed || "" };
+  const repair = repairFor === "saad" ? administratorRepair() : null;
+  if (repair && saved.appliedRecoveryNonce !== repair.nonce) {
+    const account = accounts.find(a => a.id === "administrator:saad" && a.enabled);
+    if (!account || accounts.some(a => a.id !== account.id && a.username === repair.username)) {
+      console.error("management_administrator_recovery_failed", { stage: "target", reason: "existing_active_administrator_missing_or_conflicting" });
+      throw new RequestError("حساب saad الإداري غير مهيأ أو موقوف؛ لم تتغير أي حسابات.", 503);
+    }
+    const override = await changedAccount(account, repair.username, repair.password);
+    const next: AccountStore = { ...saved, revision: toHex(crypto.getRandomValues(new Uint8Array(16))), appliedRecoveryNonce: repair.nonce, accounts: [...saved.accounts.filter(a => a.id !== account.id), override] };
+    sealed = await saveAccountStore(next, sealed, "deployment-administrator-repair");
+    saved = next;
+    Object.assign(account, override);
+    console.info("management_administrator_recovery_applied");
+  }
+  return { accounts, saved, sealed };
 }
-const accountIdentity = (account: EffectiveAccount) => `${account.role === "administrator" ? "staff-admin" : account.role === "reviewer" ? "staff-reviewer" : "staff"}:${account.seedUsername}`;
+const accountPrefix = (role: ManagementPasswordRole) => role === "administrator" ? "staff-admin" : role === "memo_supervisor" ? "staff-memo" : "staff";
+const accountIdentity = (account: EffectiveAccount) => `${accountPrefix(account.role)}:${account.seedUsername}`;
 type AccountManager = { role: string; email: string; username?: string };
 function safeAccounts(roster: Awaited<ReturnType<typeof accountRoster>>, manager: AccountManager) {
   return { revision: roster.saved.revision, accounts: roster.accounts.map(account => ({ id: account.id, username: account.username, role: account.role, enabled: account.enabled, self: account.role === "administrator" && manager.username === account.username })) };
@@ -98,112 +168,43 @@ export async function managementAccounts(data: Record<string, unknown> | null, m
   if (manager.role !== "administrator") throw new RequestError("تعديل حسابات دخول اللوحة متاح للمشرف فقط.", 403);
   const roster = await accountRoster();
   if (!data) return safeAccounts(roster, manager);
-  if (Object.keys(data).some(key => !["action", "id", "username", "newPassword", "confirmPassword", "revision"].includes(key))) throw new RequestError("يمكن تعديل اسم المستخدم وكلمة المرور فقط.");
+  if (Object.keys(data).some(key => !["id", "username", "newPassword", "confirmPassword", "revision"].includes(key))) throw new RequestError("يمكن تعديل اسم المستخدم وكلمة المرور فقط.");
   if (typeof data.revision !== "string" || data.revision !== roster.saved.revision) throw new RequestError("تغيرت حسابات اللوحة أثناء التعديل. حدّث القائمة ثم أعد المحاولة.", 409);
-  if (data.action === "create-reviewer") {
-    if (data.id !== undefined) throw new RequestError("طلب إنشاء الحساب غير صحيح.");
-    const username = normalizeManagementUsername(data.username);
-    const password = data.newPassword, confirmation = data.confirmPassword;
-    if (!USERNAME.test(username)) throw new RequestError("اسم المراجع غير صحيح.");
-    if (roster.accounts.some(a => a.username === username)) throw new RequestError("اسم المستخدم مستخدم بالفعل.", 409);
-    if (typeof password !== "string" || !reviewerPasswordValid(password)) throw new RequestError("كلمة مرور المراجع تتطلب 9 محارف على الأقل وحروفاً كبيرة وصغيرة وأرقاماً ورمزاً.");
-    if (password !== confirmation) throw new RequestError("تأكيد كلمة المرور غير مطابق.");
-    const salt = toHex(crypto.getRandomValues(new Uint8Array(16)));
-    const hash = toHex(await pbkdf2Async(sha256, await peppered(password, reviewerPepper()), fromHex(salt), { c: ITERATIONS, dkLen: 32, asyncTick: 10 }));
-    const created: AccountOverride = { id: "reviewer:" + username, username, salt, hash, sessionVersion: toHex(crypto.getRandomValues(new Uint8Array(16))) };
-    const next: AccountStore = { version: 1, revision: toHex(crypto.getRandomValues(new Uint8Array(16))), accounts: [...roster.saved.accounts, created] };
-    const sealed = await sealConfig(next);
-    const result = await getD1().prepare("INSERT INTO management_vault (integration, sealed, updated_by) VALUES (?, ?, ?) ON CONFLICT(integration) DO UPDATE SET sealed = excluded.sealed, updated_by = excluded.updated_by, updated_at = CURRENT_TIMESTAMP WHERE management_vault.sealed = ?")
-      .bind(VAULT_KEY, sealed, manager.email, roster.sealed).run();
-    if (result.meta.changes !== 1) throw new RequestError("حفظ مشرف آخر تعديلاً متزامناً. حدّث القائمة ثم أعد المحاولة.", 409);
-    return { ok: true, created: true, username, role: "reviewer" };
-  }
-  if (data.action !== undefined) throw new RequestError("العملية غير مدعومة.");
   const account = roster.accounts.find(a => a.id === data.id);
   if (!account) throw new RequestError("حساب دخول اللوحة غير موجود.", 404);
   const username = normalizeManagementUsername(data.username);
   if (!USERNAME.test(username)) throw new RequestError("اسم المستخدم من 3 إلى 32 محرفاً، يبدأ بحرف إنجليزي ويحتوي حروفاً وأرقاماً وشرطة سفلية فقط.");
   if (roster.accounts.some(a => a.id !== account.id && a.username === username)) throw new RequestError("اسم المستخدم مستخدم لحساب آخر. اختر اسماً مختلفاً.", 409);
   const password = data.newPassword ?? "", confirmation = data.confirmPassword ?? "";
-  if (typeof password !== "string" || typeof confirmation !== "string" ||
-      (password && (account.role === "reviewer" ? !reviewerPasswordValid(password) : password.length < 16 || password.length > 256 || !/\S/.test(password))))
-    throw new RequestError(account.role === "reviewer" ? "كلمة مرور المراجع تحتاج 9 محارف على الأقل وحروفاً كبيرة وصغيرة وأرقاماً ورمزاً." : "كلمة المرور الجديدة من 16 إلى 256 محرفاً.");
+  if (typeof password !== "string" || typeof confirmation !== "string" || (password && (password.length < 16 || password.length > 256 || !/\S/.test(password)))) throw new RequestError("كلمة المرور الجديدة من 16 إلى 256 محرفاً.");
   if (password !== confirmation) throw new RequestError("تأكيد كلمة المرور غير مطابق.");
   if (username === account.username && !password) return { ok: true, reauthenticate: false, ...safeAccounts(roster, manager) };
-  const override: AccountOverride = { id: account.id, username, salt: account.salt, hash: account.hash, sessionVersion: toHex(crypto.getRandomValues(new Uint8Array(16))) };
-  if (password) {
-    override.salt = toHex(crypto.getRandomValues(new Uint8Array(16)));
-    override.hash = toHex(await pbkdf2Async(sha256, await peppered(password, account.pepper), fromHex(override.salt), { c: ITERATIONS, dkLen: 32, asyncTick: 10 }));
-  }
-  const next: AccountStore = { version: 1, revision: toHex(crypto.getRandomValues(new Uint8Array(16))), accounts: [...roster.saved.accounts.filter(a => a.id !== account.id), override] };
-  const sealed = await sealConfig(next);
-  const result = await getD1().prepare("INSERT INTO management_vault (integration, sealed, updated_by) VALUES (?, ?, ?) ON CONFLICT(integration) DO UPDATE SET sealed = excluded.sealed, updated_by = excluded.updated_by, updated_at = CURRENT_TIMESTAMP WHERE management_vault.sealed = ?")
-    .bind(VAULT_KEY, sealed, manager.email, roster.sealed).run();
-  if (result.meta.changes !== 1) throw new RequestError("حفظ مشرف آخر تعديلاً متزامناً. حدّث القائمة ثم أعد المحاولة.", 409);
+  const override = await changedAccount(account, username, password);
+  const next: AccountStore = { ...roster.saved, revision: toHex(crypto.getRandomValues(new Uint8Array(16))), accounts: [...roster.saved.accounts.filter(a => a.id !== account.id), override] };
+  await saveAccountStore(next, roster.sealed, manager.email);
   const self = account.role === "administrator" && manager.username === account.username;
   return { ok: true, reauthenticate: self };
 }
 
-/**
- * Recovery writes only through the same encrypted vault as administrator edits.
- * The account ID is the immutable role:seedUsername, never a user-supplied role.
- */
-export async function managementRecoveryAccount(username: string) {
-  const roster = await accountRoster();
-  const account = roster.accounts.find(row => row.username === normalizeManagementUsername(username) && row.enabled);
-  return account ? { id: account.id, username: account.username, role: account.role } : null;
-}
-
-export async function resetManagementPasswordWithProof(accountId: string, password: string) {
-  const roster = await accountRoster();
-  const account = roster.accounts.find(row => row.id === accountId && row.enabled);
-  if (!account) throw new RequestError("رابط الاستعادة غير صالح أو انتهت صلاحيته.", 401);
-  if (typeof password !== "string" || password.length > 256 ||
-      (account.role === "reviewer" ? !reviewerPasswordValid(password) :
-       password.length < 16 || !/[a-z]/.test(password) || !/[A-Z]/.test(password) ||
-       !/[0-9]/.test(password) || !/[^A-Za-z0-9]/.test(password))) {
-    throw new RequestError(account.role === "reviewer"
-      ? "كلمة المرور الجديدة يجب أن تتضمن 9 أحرف على الأقل وحرفاً كبيراً وصغيراً ورقماً ورمزاً."
-      : "كلمة المرور الجديدة يجب أن تتضمن 16 محرفاً على الأقل وحرفاً كبيراً وصغيراً ورقماً ورمزاً.");
-  }
-  const salt = toHex(crypto.getRandomValues(new Uint8Array(16)));
-  const hash = toHex(await pbkdf2Async(sha256, await peppered(password, account.pepper), fromHex(salt), { c: ITERATIONS, dkLen: 32, asyncTick: 10 }));
-  const updated: AccountOverride = {
-    id: account.id, username: account.username, salt, hash,
-    sessionVersion: toHex(crypto.getRandomValues(new Uint8Array(16))),
-  };
-  const next: AccountStore = {
-    version: 1, revision: toHex(crypto.getRandomValues(new Uint8Array(16))),
-    accounts: [...roster.saved.accounts.filter(row => row.id !== account.id), updated],
-  };
-  const sealed = await sealConfig(next);
-  const result = await getD1().prepare("INSERT INTO management_vault (integration, sealed, updated_by) VALUES (?, ?, ?) ON CONFLICT(integration) DO UPDATE SET sealed = excluded.sealed, updated_by = excluded.updated_by, updated_at = CURRENT_TIMESTAMP WHERE management_vault.sealed = ?")
-    .bind(VAULT_KEY, sealed, "management-password-recovery", roster.sealed).run();
-  if (result.meta.changes !== 1) throw new RequestError("تغيرت إعدادات الحساب أثناء الاستعادة. أعد طلب رابط جديد.", 409);
-  // Every existing password-derived session becomes invalid because its
-  // credential tag includes the newly rotated hash and sessionVersion.
-  return { ok: true };
-}
-
 export async function authenticateManagementPassword(data: Record<string, unknown>) {
   const username = normalizeManagementUsername(data.username), password = data.password;
-  if (!USERNAME.test(username) || typeof password !== "string" || password.length < 9 || password.length > 256) throw new RequestError(INVALID, 401);
-  const { accounts } = await accountRoster();
+  if (!USERNAME.test(username) || typeof password !== "string" || password.length < 10 || password.length > 256) throw new RequestError(INVALID, 401);
+  const { accounts } = await accountRoster(username);
   const account = accounts.find(row => row.username === username && row.enabled), fallback = account || accounts[0];
   if (!fallback) throw new RequestError("دخول حسابات التشغيل غير مهيأ حالياً. تواصل مع الإدارة.", 503);
   const salt = fromHex(account?.salt || "00".repeat(16));
   // Workers caps native PBKDF2 below this cost; the server-only implementation preserves 600000.
   const actual = await pbkdf2Async(sha256, await peppered(password, fallback.pepper), salt, { c: ITERATIONS, dkLen: 32, asyncTick: 10 });
   const valid = sameBytes(actual, fromHex(account?.hash || "00".repeat(32)));
-  if (!account || !valid || (account.role === "operator" && password.length < 16) || (account.role === "administrator" && password.length < 10)) throw new RequestError(INVALID, 401);
-  return { username, role: account.role, identity: accountIdentity(account), sessionPrincipal: `${account.role === "administrator" ? "staff-admin" : account.role === "reviewer" ? "staff-reviewer" : "staff"}:${username}:${await credentialTag(account, account.pepper)}` };
+  if (!account || !valid || (account.role === "operator" && password.length < 16)) throw new RequestError(INVALID, 401);
+  return { username, role: account.role, identity: accountIdentity(account), sessionPrincipal: `${accountPrefix(account.role)}:${username}:${await credentialTag(account, account.pepper)}` };
 }
 
 export async function managementPasswordSession(principal: string) {
-  const match = principal.match(/^(staff|staff-admin|staff-reviewer):([a-z][a-z0-9_]{2,31}):([a-f0-9]{32})$/);
+  const match = principal.match(/^(staff|staff-admin|staff-memo):([a-z][a-z0-9_]{2,31}):([a-f0-9]{32})$/);
   if (!match) return null;
-  const { accounts } = await accountRoster();
-  const account = accounts.find(row => row.username === match[2] && row.enabled && row.role === (match[1] === "staff-admin" ? "administrator" : match[1] === "staff-reviewer" ? "reviewer" : "operator"));
+  const { accounts } = await accountRoster(match[2]);
+  const account = accounts.find(row => row.username === match[2] && row.enabled && row.role === (match[1] === "staff-admin" ? "administrator" : match[1] === "staff-memo" ? "memo_supervisor" : "operator"));
   if (!account || !sameBytes(fromHex(match[3]), fromHex(await credentialTag(account, account.pepper)))) return null;
   return { username: account.username, role: account.role, identity: accountIdentity(account) };
 }

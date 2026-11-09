@@ -213,7 +213,7 @@ test('health reports the same control revision used by the memo validator', asyn
   });
   const value = await (await api.GET()).json();
   assert.equal(value.memoControlRevision, 'memo-generation-control-1');
-  assert.equal(value.defenseRevision, 'grounded-defenses-3');
+  assert.equal(value.defenseRevision, 'grounded-defenses-4');
   assert.equal(value.legalDraftingRouteRevision, 'legal-drafting-routes-2');
 });
 

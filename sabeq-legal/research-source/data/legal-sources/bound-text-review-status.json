@@ -1,1 +1,14 @@
-{"revision":"bound-article-text-review-1","sourceSha256":"8ffeac9838d7101a6776ca689b06ad08401d69850c27969b3b9959a1c40660bd","reviewedAt":"2026-11-07","reviewedArticleCount":6,"reviewedPageCount":3,"reviewKind":"visual_transcription_and_boundaries","wholeCorpusReviewed":false,"currentLawVerified":false,"humanLegalApproval":false}
+{
+  "revision": "bound-article-text-review-2",
+  "sourceSha256": "8ffeac9838d7101a6776ca689b06ad08401d69850c27969b3b9959a1c40660bd",
+  "reviewedAt": "2026-11-09",
+  "reviewedArticleCount": 24,
+  "reviewedPageCount": 20,
+  "reviewKind": "page_transcription_boundaries_and_targeted_primary_errata",
+  "wholeCorpusReviewed": false,
+  "currentLawVerified": false,
+  "humanLegalApproval": false,
+  "fullArticleCount": 23,
+  "reviewedExcerptCount": 1,
+  "targetedSourceCorrectionCount": 3
+}

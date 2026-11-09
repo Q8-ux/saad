@@ -17,7 +17,7 @@ test('a reviewed occurrence replaces only its damaged extraction and server inse
 test('changed source, occurrence, page, law, article or original hash cannot inherit text approval',()=>{
  for(const change of [{sourceSha256:'b'.repeat(64)},{sourceId:'other'},{recordId:'other'},{documentId:'other'},{chunkId:778},{page:8},{articleNumber:'6'},{lawNumber:98766},{lawYear:2001},{originalTextSha256:'c'.repeat(64)},{completeArticleVerified:false},{imageSha256:''}])assert.equal(api.attachBoundArticleReview(source,[{...review,...change}]),source);
 });
-test('altered transcription bytes fail integrity; six text reviews never imply corpus or legal currency approval',async()=>{
+test('altered transcription bytes fail integrity; text reviews never imply corpus or legal currency approval',async()=>{
  await assert.rejects(api.checkBoundArticleReviewIntegrity([{...review,text:text+' تغيير'}]),/integrity/);
- const s=api.boundArticleTextReviewSummary();assert.equal(s.reviewedArticleCount,6);assert.equal(s.wholeCorpusReviewed,false);assert.equal(s.currentLawVerified,false);assert.equal(s.humanLegalApproval,false);
+ const s=api.boundArticleTextReviewSummary();assert.equal(s.reviewedArticleCount,24);assert.equal(s.wholeCorpusReviewed,false);assert.equal(s.currentLawVerified,false);assert.equal(s.humanLegalApproval,false);
 });
