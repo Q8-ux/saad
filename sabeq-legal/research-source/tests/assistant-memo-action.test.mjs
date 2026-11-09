@@ -10,7 +10,7 @@ const require = createRequire(import.meta.url);
 function load(path, dependencies = {}) {
  const exports = {};
  const js = ts.transpileModule(readFileSync(new URL(path, import.meta.url), 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, jsx: ts.JsxEmit.ReactJSX } }).outputText;
- vm.runInNewContext(js, { exports, require: name => dependencies[name] || require(name) });
+ vm.runInNewContext(js, { exports, require: name => name.endsWith("/legal-drafting-routes")?load("../lib/legal-drafting-routes.ts"):dependencies[name] || require(name) });
  return exports;
 }
 const handoff = load('../lib/memo-handoff.ts');
@@ -58,3 +58,4 @@ test('missing administrative fields allow preparation but never skip final form 
 });
 
 test('conflicts stay marked for review while draft preparation remains available',()=>{const results=[];const intake={...complete,contradictions:['تعارض اصطناعي']};const element=control({intake,messages,onContinue:data=>results.push(data)});assert.equal(button(element).props.disabled,false);button(element).props.onClick();assert.ok(results[0].handoffIssues.includes('procedure.conflict'));assert.equal(handoff.isCompleteMemoHandoff(results[0]),false);});
+

@@ -1,4 +1,5 @@
 import { inferProceduralPosition } from "./procedural-position";
+import { resolveLegalDraftingRoute, legalRouteSummary } from "./legal-drafting-routes";
 
 export const availableEvidenceMode = "available_evidence";
 const required = { caseType: "نوع القضية", court: "المحكمة", clientName: "اسم مقدم المذكرة", otherParty: "اسم الطرف الآخر", partyRole: "الصفة", requests: "الطلبات" };
@@ -28,8 +29,11 @@ export function prepareMemoDraft(raw: Record<string, unknown>, extracted: Record
   }
   input.draftMode = availableEvidenceMode;
   if (!text(input.documentKind) && missingFields.length) input.documentKind = "memorandum";
-  return { input, missingFields, notes: [
+  const legalRoute=resolveLegalDraftingRoute(Object.fromEntries(Object.entries(input).map(([key,value])=>[key,text(value)])));
+  return { input, missingFields, legalRoute:legalRouteSummary(legalRoute), routeQuestions:legalRoute.status==="ready"?[]:[{key:"legal.route",question:legalRoute.question}], notes: [
     ...missingFields.map(label => `${label}: غير متاح في المدخلات؛ تتولى المجموعة مراجعته قبل الاعتماد.`),
     ...(position.conflict ? ["توجد صفات إجرائية متعارضة تحتاج مراجعة المجموعة؛ لم تُستنتج صفة بديلة."] : []),
+    ...(legalRoute.status!=="ready"?[legalRoute.question]:[]),
   ] };
 }
+

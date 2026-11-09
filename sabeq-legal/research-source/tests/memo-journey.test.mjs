@@ -5,7 +5,7 @@ import vm from 'node:vm';
 import ts from 'typescript';
 function load(path, dependencies={}) {
  const exports={};
- vm.runInNewContext(ts.transpileModule(readFileSync(new URL(path,import.meta.url),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{exports,require:name=>dependencies[name],URL,Response,Error});
+ vm.runInNewContext(ts.transpileModule(readFileSync(new URL(path,import.meta.url),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{exports,require:name=>name.endsWith("/legal-drafting-routes")?load("../lib/legal-drafting-routes.ts"):dependencies[name],URL,Response,Error});
  return exports;
 }
 const procedure=load('../lib/procedural-position.ts');
@@ -118,3 +118,4 @@ test('unstructured conversation retains visitor text and leaves unknown fields m
  assert.equal(draft.requests,undefined);assert.equal(draft.clientName,undefined);assert.equal(draft.court,undefined);
  assert.equal(importMemoDraft({},null,[{role:'assistant',content:'رد فقط'}]).conversationTranscript,undefined);
 });
+

@@ -1,3 +1,4 @@
+import { legalDraftingRouteRevision } from "@/lib/legal-drafting-routes";
 import { getD1 } from "@/db";
 import { privateJson } from "@/lib/request-security";
 import { officialVerificationSummary } from "@/lib/official-legislation";
@@ -17,9 +18,10 @@ export async function GET() {
       database.prepare("SELECT COUNT(*) AS count FROM legal_chunks WHERE verified = 1").first<{ count: number }>(),
     ]);
     const providerSummary = textProviderSummary(env as unknown as TextProviderEnvironment);
-    return privateJson({ ok: true, legalDocuments: Number(documents?.count || 0), verifiedLegalChunks: Number(chunks?.count || 0),sourceVerification:officialVerificationSummary(),memoControlRevision,defenseRevision,memoLanguageRevision,pleadingStyleRevision,boundArticleTextReview:boundArticleTextReviewSummary(),pleadingLayoutRevision:"plain-header-wide-pages-1",...providerSummary });
+    return privateJson({ ok: true, legalDocuments: Number(documents?.count || 0), verifiedLegalChunks: Number(chunks?.count || 0),sourceVerification:officialVerificationSummary(),memoControlRevision,defenseRevision,memoLanguageRevision,pleadingStyleRevision,legalDraftingRouteRevision,boundArticleTextReview:boundArticleTextReviewSummary(),pleadingLayoutRevision:"plain-header-wide-pages-1",...providerSummary });
   } catch {
     return privateJson({ ok: false }, 503);
   }
 }
+
 

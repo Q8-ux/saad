@@ -5,7 +5,7 @@ import path from 'node:path';
 export const dashboardChecks=[
  {id:'case-context',files:['tests/project-context.test.mjs','tests/dashboard-quality.test.mjs']},
  // Full agent/template integration is verified in the canonical release; this public mirror excludes private form sources.
- {id:'memo-article-text',files:['tests/article-text-in-memos.test.mjs','tests/memo-completeness.test.mjs','tests/reference-pleading-style.test.mjs']},
+ {id:'memo-article-text',files:['tests/article-text-in-memos.test.mjs','tests/memo-completeness.test.mjs','tests/reference-pleading-style.test.mjs','tests/legal-drafting-routes.test.mjs']},
  {id:'admin-permissions-and-failures',files:['tests/management.test.mjs','tests/email-worker-transport.test.mjs','tests/gmail.test.mjs']},
  {id:'admin-service-contract',files:['tests/admin-bridge-contract.test.mjs','tests/management-source-connection.test.mjs','tests/admin-source-status.test.mjs','tests/admin-memo-link.test.mjs']},
  {id:'programmer-client',files:['tests/programmer-client.test.mjs']},
@@ -25,3 +25,4 @@ export function runDashboardChecks(execute=spawnSync,cwd=path.resolve(fileURLToP
   status:failed?'failed':'passed',checks:results,liveBrowserTest:'not_run',liveProviderTest:'not_run',deployed:false};
 }
 if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href){const report=runDashboardChecks();console.log(JSON.stringify(report));process.exitCode=report.status==='passed'?0:1;}
+

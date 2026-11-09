@@ -7,7 +7,7 @@ import ts from 'typescript';
 import React from 'react';
 import {renderToStaticMarkup} from 'react-dom/server';
 const require=createRequire(import.meta.url);
-function load(path,deps={}){const exports={};vm.runInNewContext(ts.transpileModule(readFileSync(new URL(path,import.meta.url),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,jsx:ts.JsxEmit.ReactJSX,esModuleInterop:true}}).outputText,{exports,require:name=>name in deps?deps[name]:require(name),URL,Intl});return exports;}
+function load(path,deps={}){const exports={};vm.runInNewContext(ts.transpileModule(readFileSync(new URL(path,import.meta.url),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,jsx:ts.JsxEmit.ReactJSX,esModuleInterop:true}}).outputText,{exports,require:name=>name.endsWith("/legal-drafting-routes")?load("../lib/legal-drafting-routes.ts"):name in deps?deps[name]:require(name),URL,Intl});return exports;}
 const handoff=load('../lib/memo-handoff.ts'),procedure=load('../lib/procedural-position.ts');
 const journey=load('../lib/memo-journey.ts',{'./procedural-position':procedure});
 const dictation=load('../lib/memo-dictation.ts',{'./pleading-document':{pleadingFields:{}}});
@@ -17,7 +17,7 @@ const source=readFileSync(new URL('../app/sabeq-site.tsx',import.meta.url),'utf8
 const ast=ts.createSourceFile('sabeq-site.tsx',source,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX);
 const functions=ast.statements.filter(node=>ts.isFunctionDeclaration(node)&&['Field','CustomComboBox','MemoWizard'].includes(node.name?.text)).map(node=>node.getText(ast)).join('\n');
 const exports={};
-vm.runInNewContext(ts.transpileModule('import {useState,useEffect,useMemo,useRef} from "react";\n'+functions+'\nexport {MemoWizard};',{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,jsx:ts.JsxEmit.ReactJSX}}).outputText,{exports,require,...handoff,...procedure,...journey,...dictation,...require('lucide-react'),...load('../lib/sadad-client.ts'),...load('../lib/memo-generation.ts'),interfaceLabel:localization.interfaceLabel,tr:localization.interfaceText,pleadingFields:{},selectPleadingKind:()=>"memorandum",emptyAnalysisFields:{},MemoVoiceInput:VoiceInput,ProceduralPositionView:()=>null,Intl});
+vm.runInNewContext(ts.transpileModule('import {useState,useEffect,useMemo,useRef} from "react";\n'+functions+'\nexport {MemoWizard};',{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,jsx:ts.JsxEmit.ReactJSX}}).outputText,{exports,require,...load("../lib/legal-drafting-routes.ts"),...handoff,...procedure,...journey,...dictation,...require('lucide-react'),...load('../lib/sadad-client.ts'),...load('../lib/memo-generation.ts'),interfaceLabel:localization.interfaceLabel,tr:localization.interfaceText,pleadingFields:{},selectPleadingKind:()=>"memorandum",emptyAnalysisFields:{},MemoVoiceInput:VoiceInput,ProceduralPositionView:()=>null,Intl});
 const {copy}=load('../app/site-content.ts');
 const state={memoPrefill:{facts:'وقائع اصطناعية سبق ذكرها في المحادثة',requests:'طلب اصطناعي سبق ذكره',clientName:'اسم اصطناعي أول',otherParty:'اسم اصطناعي ثان',caseType:'مدني',court:'المحكمة الكلية',partyRole:'مدعٍ'}};
 const render=(intake,language='ar')=>renderToStaticMarkup(React.createElement(exports.MemoWizard,{t:copy[language],language,token:'',active:true,initialData:null,assistantSession:{messages:[{role:'user',content:'قضية اصطناعية'}],intake},openAssistant(){}}));
@@ -37,4 +37,12 @@ test('missing requests remain visible for completion without erasing known facts
 test('optional editing retains English and Urdu labels',()=>{
  assert.match(render(state,'en'),/<details><summary>Edit facts and requests<\/summary>/);
  assert.match(render(state,'ur'),/<details><summary>حقائق اور مطالبات میں ترمیم<\/summary>/);
+});
+test('the existing review shows the civil expert route and preserves the supplied draft',()=>{
+ const html=render({...state,memoPrefill:{...state.memoPrefill,requests:'ندب خبير لفحص الحسابات الاصطناعية.'}});
+ assert.match(html,/مسار الصياغة/);assert.match(html,/المدني — ندب خبير/);assert.match(html,/وقائع اصطناعية سبق ذكرها في المحادثة/);
+});
+test('conflicting criminal and administrative classifications display a question instead of claiming a civil form',()=>{
+ const html=render({...state,courtCircuit:'الإدارية',memoPrefill:{...state.memoPrefill,caseType:'جنح',courtCircuit:'الإدارية',partyRole:'متهم'}});
+ assert.match(html,/يُحدد بعد مراجعة المسار/);assert.match(html,/اختلف نوع القضية عن الدائرة/);
 });

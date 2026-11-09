@@ -1,3 +1,4 @@
+import { resolveLegalDraftingRoute, legalRouteQuestion } from "./legal-drafting-routes";
 export const memoApprovalNotice = {
   ar: "هذه المذكرة مسودة غير معتمدة، ولا تُعد معتمدة أو صالحة للتقديم إلى المحكمة إلا بعد مراجعتها ومصادقة مجموعة سابق القانونية عليها.",
   en: "This memorandum is an unapproved draft. It is not approved or ready for court submission until Sabeq Legal Group has reviewed and ratified it.",
@@ -50,6 +51,10 @@ export function memoIntakeGaps(state: IntakeForMemo, language = "ar"): MemoGap[]
   const track = state.orientation?.track || data.caseTrack || "unknown";
   const judgment = state.orientation?.judgment || data.judgmentStatus || "unknown";
   const role = data.partyRole || "";
+  if(knownValue(data.caseType||state.caseType)&&knownValue(role)) {
+    const route=resolveLegalDraftingRoute({...data,caseType:data.caseType||state.caseType,court:data.court||state.court,courtCircuit:state.courtCircuit||data.courtCircuit,caseStage:state.caseStage||data.caseStage,requests:data.requests||state.requests?.join("\n"),facts:data.facts||state.facts?.join("\n")});
+    if(route.status!=="ready")gaps.push({key:"legal.route",question:legalRouteQuestion(route,language)});
+  }
   if (!knownValue(state.caseStage || data.caseStage) || track === "unknown" || judgment === "unknown") add("procedure.stage", "ما آخر ما حصل في هذا الموضوع: هل بقي بينكما أم وصلت إليك ورقة من جهة رسمية؟", "What happened most recently: is this still between you, or have you received an official document?", "تازہ پیش رفت کیا ہے: معاملہ آپ دونوں تک ہے یا کوئی سرکاری کاغذ ملا ہے؟");
   if (state.proceduralPosition?.conflict || state.contradictions?.length) add("procedure.conflict", "ما التصحيح الذي نعتمده بشأن المعلومات المتعارضة في ملخص القضية؟", "Which correction should we use for the conflicting case details?", "متضاد معلومات میں کون سی تصحیح درست ہے؟");
   if (state.proceduralPosition?.needsActor) add("procedure.actor", "من طلب تغيير الحكم بعد صدوره، أنت أم الطرف الآخر؟", "Who asked to change the judgment after it was issued: you or the other party?", "فیصلہ بدلنے کی درخواست کس نے دی: آپ نے یا دوسرے فریق نے؟");
@@ -86,7 +91,7 @@ export function memoIntakeGaps(state: IntakeForMemo, language = "ar"): MemoGap[]
 }
 // Conversation essentials differ from fields required on the final court form.
 export function memoConversationGaps(state: IntakeForMemo, language = "ar"): MemoGap[] {
-  const essential = new Set(["procedure.stage", "procedure.conflict", "procedure.actor", "client.role", "facts", "relief", "matter.relationship", "memo.judgmentOperative"]);
+  const essential = new Set(["legal.route", "procedure.stage", "procedure.conflict", "procedure.actor", "client.role", "facts", "relief", "matter.relationship", "memo.judgmentOperative"]);
   return memoIntakeGaps(state, language).filter(gap => essential.has(gap.key));
 }
 export function canPrepareMemoHandoff(state: IntakeForMemo, messages: ConversationMessage[]) {
@@ -126,3 +131,4 @@ export function buildMemoHandoff(state: IntakeForMemo & { memoPrefill: MemoPrefi
     handoffReady: canOfferMemoHandoff(state, messages) ? "review" : "",
   };
 }
+

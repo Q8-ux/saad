@@ -4,6 +4,7 @@ import { cleanString, cleanMultiline, RequestError } from "@/lib/request-securit
 import { correctLegalProse } from "@/lib/legal-language";
 import { pleadingFields } from "@/lib/pleading-document";
 import { assessMatterFacts } from "@/lib/matter-facts";
+import { resolveLegalDraftingRoute, legalRouteSummary } from "@/lib/legal-drafting-routes";
 
 export function validateMemoInput(raw: Record<string, unknown>) {
     const available = raw.draftMode === availableEvidenceMode;
@@ -30,7 +31,10 @@ export function validateMemoInput(raw: Record<string, unknown>) {
     const documentKind = cleanString(raw.documentKind,"صيغة المستند",{max:30,required:false});
     if (documentKind && !["auto","claim","appeal","memorandum"].includes(documentKind)) throw new RequestError("صيغة المستند غير صحيحة.");
     const caseStage = cleanString(raw.caseStage,"مرحلة القضية",{max:300,required:false});
+    const legalRoute=resolveLegalDraftingRoute({caseType,court,courtCircuit,partyRole,documentKind,caseStage,requests,facts});
+    if(legalRoute.status!=="ready") throw Object.assign(new RequestError(legalRoute.question,422),{stage:"legal_route_review",missingFacts:[{key:"legal.route",question:legalRoute.question}],legalRoute:legalRouteSummary(legalRoute)});
     const matter = assessMatterFacts(facts + " " + requests + " " + allParties);
     if (!matter.ready && !available) throw Object.assign(new RequestError("قبل إعداد المذكرة، يلزم توضيح الوقائع: " + matter.missing.map(g => g.ar).slice(0, 3).join(" "), 422), { stage: "fact_clarification", missingFacts: matter.missing.map(g => ({ key: g.key, question: g.ar })) });
-    return { caseType, clientName, court, courtCircuit, caseNumber, otherParty, partyRole, allParties, facts, requests, legalIssues, conversationTranscript, conversationSummary, assistantResearch, extraFields, documentKind, caseStage, preparationNotes: preparation?.notes || [] };
+    return { caseType, clientName, court, courtCircuit, caseNumber, otherParty, partyRole, allParties, facts, requests, legalIssues, conversationTranscript, conversationSummary, assistantResearch, extraFields, documentKind, caseStage, legalRoute, preparationNotes: preparation?.notes || [] };
 }
+

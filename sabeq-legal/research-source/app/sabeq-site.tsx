@@ -1,3 +1,4 @@
+import { resolveLegalDraftingRoute, legalRouteQuestion } from "@/lib/legal-drafting-routes";
 "use client";
 import { AssistantMemoAction } from "./assistant-memo-action";
 
@@ -21,7 +22,7 @@ import ProceduralPositionView from "./procedural-position-view";
 import { inferProceduralPosition } from "@/lib/procedural-position";
 import { recogniseMemoProcedure, initialMemoStep, nextMemoStep } from "@/lib/memo-journey";
 import PleadingPreview from "./pleading-preview";
-import { pleadingFields, renderPleadingHtml, renderArabicMemoHtml, selectPleadingKind, type PleadingDocument } from "@/lib/pleading-document";
+import { pleadingFields, renderPleadingHtml, renderArabicMemoHtml, type PleadingDocument } from "@/lib/pleading-document";
 import { exportPleadingDocx } from "@/lib/pleading-docx";
 import VoiceCountdown from "./voice-countdown";
 import { LegalVoiceConversation, type VoiceAnalysisResult } from "@/lib/legal-voice-client";
@@ -1022,6 +1023,7 @@ function MemoWizard({ t, language, token, initialData = null, assistantSession, 
   const [memoAnalysis, setMemoAnalysis] = useState<{ sourceCount: number; lawCount: number; cassationCount: number; sources: Array<{ marker: string; title: string; reference: string; kind: "cassation" | "legislation"; officialSource: string; sourceUrl?: string; libraryUpdatedAt?: string | null }> } | null>(null);
   const [facts, setFacts] = useState(openingData.facts || "");
   const [requests, setRequests] = useState(openingData.requests || "");
+  const draftingRoute=resolveLegalDraftingRoute({...memoData,facts,requests});
   const lastUnderstoodStory = useRef(openingData.facts && openingData.requests ? memoStoryText(openingData.facts, openingData.requests) : "");
   const recognisedPosition = useMemo(() => inferProceduralPosition(`${facts}\n${requests}`, memoData.clientName || "", memoData.otherParty || ""), [facts, requests, memoData.clientName, memoData.otherParty, initialData]);
   const [documents, setDocuments] = useState<File[]>([]);
@@ -1484,6 +1486,8 @@ function MemoWizard({ t, language, token, initialData = null, assistantSession, 
       setStep(fromAssistant ? 1 : missing[1]);
       return;
     }
+    const confirmedRoute=resolveLegalDraftingRoute(nextData);
+    if(confirmedRoute.status!=="ready"){setStatus("error");setMemoError(legalRouteQuestion(confirmedRoute,language));setStep(1);return;}
     if (!memoApproved && !assistantReview) { setStatus("error"); setMemoError(generationUi.required); return; }
     const controller = new AbortController();
     generationRequest.current = controller;
@@ -1642,7 +1646,7 @@ function MemoWizard({ t, language, token, initialData = null, assistantSession, 
             {Object.entries(pleadingFields).map(([key,label])=><Field key={key} label={interfaceLabel(label, language)}><textarea name={key} rows={/Grounds|Requests|Operative/.test(key)?3:1} defaultValue={memoData[key] || analysisFields[key as keyof typeof pleadingFields] || ""} maxLength={5000}/></Field>)}</div>
           </details>}
           {step === 1 && !assistantReview && <div className="research-box"><Search size={30} /><h3>{language === "ar" ? "مسار التحليل القانوني للمذكرة" : t.steps[2]}</h3><p>{language === "ar" ? "يحلّل المحرك الوقائع والطلبات، يصنّف المسائل القانونية، يطابقها مع القوانين والمواد الكويتية، ثم يبحث عن مبادئ وأحكام التمييز المتصلة بذات المسألة والسبب قبل بناء الدفوع بصياغة المحاكم الكويتية." : language === "en" ? "The engine classifies the issues, matches verified Kuwaiti laws and provisions, then retrieves materially related Court of Cassation principles before drafting each argument." : "انجن قانونی مسائل کی درجہ بندی کرتا ہے، مصدقہ کویتی قوانین اور متعلقہ امتیازی عدالتی اصولوں سے مطابقت کرتا ہے، پھر ہر دلیل تیار کرتا ہے۔"}</p><div className="analysis-pipeline"><span>1. {tr(language, "تحليل الوقائع")}</span><span>2. {tr(language, "تحديد المواد")}</span><span>3. {tr(language, "مطابقة أحكام التمييز")}</span><span>4. {tr(language, "بناء الدفوع والطلبات")}</span></div><Field label={language === "ar" ? "ملاحظات قانونية إضافية (اختيارية)" : language === "en" ? "Additional legal notes (optional)" : "اضافی قانونی نوٹس (اختیاری)"}><textarea name="legalIssues" rows={6} defaultValue={memoData.legalIssues} placeholder={tr(language, "اتركها فارغة إن لم تكن لديك ملاحظة؛ سيستنتج النظام المسائل القانونية تلقائياً.")} /></Field><div><ShieldCheck size={18} />{language === "ar" ? "لن تُدرج مادة أو حكم تمييز إلا من مصدر موثق، وسيصرّح النظام عند عدم العثور على تطابق." : language === "en" ? "No law or judgment is included unless it is found in the verified legal database." : "کوئی قانون یا فیصلہ شامل نہیں ہوگا جب تک وہ مصدقہ قانونی ڈیٹابیس میں نہ ہو۔"}</div></div>}
-          {(step === 2 || assistantReview) && <div className="review-box"><FileCheck2 size={34} /><h3>{t.review}</h3><p>{t.arabicOnly}</p><p className="template-badge">{tr(language, "الصيغة")}: {tr(language, selectPleadingKind(memoData) === "appeal" ? "صحيفة استئناف" : selectPleadingKind(memoData) === "claim" ? "صحيفة دعوى" : "مذكرة بدفاع")}</p><p role="note" className="form-notice">{memoApprovalNotice[language]}</p>
+          {(step === 2 || assistantReview) && <div className="review-box"><FileCheck2 size={34} /><h3>{t.review}</h3><p>{t.arabicOnly}</p><p className="template-badge">{tr(language, "الصيغة")}: {tr(language, draftingRoute.status!=="ready" ? "يُحدد بعد مراجعة المسار" : draftingRoute.kind === "appeal" ? "صحيفة استئناف" : draftingRoute.kind === "claim" ? "صحيفة دعوى" : "مذكرة بدفاع")}</p><p className="template-badge">{language==="en"?"Drafting route":language==="ur"?"قانونی مسار":"مسار الصياغة"}: {interfaceLabel(draftingRoute.label,language)}{draftingRoute.status==="ready"?" — "+interfaceLabel(({general:"الطلب المحدد",monetary_claim:"مطالبة مالية",expert_appointment:"ندب خبير",medical_expert:"خبرة المسؤولية الطبية",guardianship:"وصاية",care_assignment:"تكليف بالرعاية"}[draftingRoute.purpose]),language):""}</p>{draftingRoute.status!=="ready"&&<p role="status" className="form-notice">{legalRouteQuestion(draftingRoute,language)}</p>}<p role="note" className="form-notice">{memoApprovalNotice[language]}</p>
             {!assistantReview && <dl className="memo-handoff-details">{[[t.caseType, "caseType"], [t.court, "court"], [tr(language, "الدائرة"), "courtCircuit"], [tr(language, "مرحلة القضية"), "caseStage"], [t.clientName, "clientName"], [t.role, "partyRole"], [t.otherParty, "otherParty"], [ui.allParties, "allParties"], [t.facts, "facts"], [t.requests, "requests"]].map(([label, key]) => <div key={key}><dt>{label}</dt><dd>{["caseType", "court", "partyRole", "caseStage"].includes(key) ? interfaceLabel(memoData[key] || "", language) : memoData[key]}</dd></div>)}</dl>}
             <button type="button" className="button button-outline" onClick={() => { captureDraft(); setMemoApproved(false); setStep(0); }}>{assistantReview ? (language === "ar" ? "إرفاق أو استخراج مستندات (اختياري)" : language === "en" ? "Attach or extract documents (optional)" : "دستاویزات منسلک یا اخذ کریں (اختیاری)") : (language === "ar" ? "تعديل الوقائع أو المستندات" : language === "en" ? "Edit facts or documents" : "حقائق یا دستاویزات میں ترمیم")}</button>
             {((paymentPolicy?.publicCheckoutEnabled && paymentPolicy.required) || checkout) && <section className="memo-payment" aria-label={payUi.title}>
@@ -1668,3 +1672,4 @@ function FormNotice({ status, t }: { status: string; t: SiteCopy }) {
   if (status !== "success" && status !== "error") return null;
   return <p className={`form-notice ${status}`}>{status === "success" ? t.sent : t.error}</p>;
 }
+

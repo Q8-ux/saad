@@ -277,3 +277,12 @@ test('unavailable legal research never becomes a demand for visitor-supplied sta
  assert.match(result.assistantMessage,/تعذر التحقق/);assert.equal(result.legalBasis.length,0);
  assert.equal(handoff.isCompleteMemoHandoff(handoff.buildMemoHandoff(result,messages)),false);
 });
+
+
+test('a route conflict is one essential intake question and is not repeated after it was already asked',()=>{
+ const state=initialMatter();state.caseType='جنح';state.courtCircuit='الإدارية';state.memoPrefill={...state.memoPrefill,caseType:'جنح',partyRole:'متهم'};
+ const first=readiness().applyIntakeReadiness(state,memory(),'ar');
+ assert.equal(first.readyForMemo,false);assert.equal(first.questionKey,'legal.route');assert.equal(first.nextQuestions.length,1);assert.match(first.nextQuestions[0],/نوع القضية/);
+ const second=readiness().applyIntakeReadiness(first,first.questionMemory,'ar');
+ assert.equal(second.readyForMemo,false);assert.equal(second.nextQuestions.length,0);assert.ok(second.memoReadiness.missing.some(g=>g.key==='legal.route'));
+});

@@ -151,7 +151,7 @@ export const copy = {
     issues: "المسائل القانونية المطلوب بحثها",
     review: "راجع المعلومات قبل التوليد",
     privacy: "لن ننشر مستنداتك أو تفاصيل قضيتك.",
-    caseTypes: ["مدني", "تجاري", "جزائي", "أحوال شخصية", "إداري", "عمالي", "عقاري", "عسكري"],
+    caseTypes: ["مدني", "تجاري", "جنح", "جنايات", "أحوال شخصية", "إداري", "عمالي قطاع أهلي", "عمالي بنظام خاص", "إيجارات", "عقاري", "تنفيذ", "عسكري"],
     courts: ["الكلية", "الاستئناف", "التمييز", "الدستورية", "الأسرة", "الإدارية", "التجارية", "العسكرية"],
     roles: ["مدعي", "مدعى عليه", "أخرى"],
     loading: "جارٍ التنفيذ...",
@@ -232,7 +232,7 @@ export const copy = {
     libraryText: "Search verified Kuwaiti legislation by title, law number, or subject.", searchPlaceholder: "Example: labour law or compensation...", search: "Search", emptySearch: "Enter a keyword or legal topic to begin.",
     memoModal: "Prepare a legal memorandum", steps: ["Case details", "Facts, requests and documents", "Legal research", "Review and generate"],
     next: "Next", previous: "Previous", generate: "Generate Arabic memorandum", caseType: "Case type", clientName: "Full name", court: "Court", otherParty: "Other party’s name", role: "Role in proceedings", facts: "Case facts", requests: "Requested relief", issues: "Legal issues to research", review: "Review the information before generation", privacy: "We do not publish your documents or case details.",
-    caseTypes: ["Civil", "Commercial", "Criminal", "Personal status", "Administrative", "Labour", "Real estate", "Military"],
+    caseTypes: ["Civil", "Commercial", "Misdemeanor", "Felony", "Personal status", "Administrative", "Private-sector labour", "Special-system employment", "Tenancy", "Real estate", "Enforcement", "Military"],
     courts: ["Court of First Instance", "Court of Appeal", "Court of Cassation", "Constitutional Court", "Family Court", "Administrative Court", "Commercial Court", "Military Court"],
     roles: ["Claimant", "Defendant", "Other"], loading: "Processing...", sent: "Your request has been received.", error: "The request could not be completed. Please try again.",
   },
@@ -266,8 +266,9 @@ export const copy = {
     assistantWelcome: "خوش آمدید۔ کویتی قانون کے بارے میں سوال لکھیں؛ دستیاب قانونی ذرائع میں تلاش کرکے حوالہ دکھایا جائے گا۔", assistantPlaceholder: "اپنا قانونی سوال لکھیں...", disclaimer: "یہ عمومی رہنمائی ہے؛ حقائق دیکھنے والے وکیل کے مشورے کا متبادل نہیں۔",
     libraryText: "عنوان، قانون نمبر یا موضوع کے ذریعے مصدقہ کویتی قوانین تلاش کریں۔", searchPlaceholder: "مثال: قانونِ محنت یا معاوضہ...", search: "تلاش", emptySearch: "تلاش شروع کرنے کے لیے قانونی موضوع لکھیں۔",
     memoModal: "قانونی یادداشت تیار کریں", steps: ["مقدمے کی تفصیل", "حقائق، مطالبات اور دستاویزات", "قانونی تحقیق", "جائزہ اور تیاری"], next: "اگلا", previous: "پچھلا", generate: "عربی یادداشت تیار کریں", caseType: "مقدمے کی قسم", clientName: "پورا نام", court: "عدالت", otherParty: "دوسرے فریق کا نام", role: "مقدمے میں حیثیت", facts: "مقدمے کے حقائق", requests: "مطالبات", issues: "تحقیق کے قانونی نکات", review: "تیاری سے پہلے معلومات کا جائزہ لیں", privacy: "ہم آپ کی دستاویزات یا مقدمے کی تفصیل شائع نہیں کرتے۔",
-    caseTypes: ["دیوانی", "تجارتی", "فوجداری", "عائلی", "انتظامی", "محنت", "جائیداد", "فوجی"], courts: ["ابتدائی عدالت", "اپیل عدالت", "عدالتِ تمییز", "آئینی عدالت", "خاندانی عدالت", "انتظامی عدالت", "تجارتی عدالت", "فوجی عدالت"], roles: ["مدعی", "مدعا علیہ", "دیگر"], loading: "کارروائی جاری ہے...", sent: "آپ کی درخواست موصول ہوگئی ہے۔", error: "درخواست مکمل نہیں ہوسکی۔ دوبارہ کوشش کریں۔",
+    caseTypes: ["دیوانی", "تجارتی", "جنحہ", "جنایت", "عائلی", "انتظامی", "نجی شعبے کی ملازمت", "خاص نظام کی ملازمت", "کرایہ داری", "جائیداد", "نفاذ", "فوجی"], courts: ["ابتدائی عدالت", "اپیل عدالت", "عدالتِ تمییز", "آئینی عدالت", "خاندانی عدالت", "انتظامی عدالت", "تجارتی عدالت", "فوجی عدالت"], roles: ["مدعی", "مدعا علیہ", "دیگر"], loading: "کارروائی جاری ہے...", sent: "آپ کی درخواست موصول ہوگئی ہے۔", error: "درخواست مکمل نہیں ہوسکی۔ دوبارہ کوشش کریں۔",
   },
 } as const;
 
 export type SiteCopy = (typeof copy)[Language];
+

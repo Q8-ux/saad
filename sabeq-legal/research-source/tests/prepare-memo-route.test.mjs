@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import vm from "node:vm";
 import ts from "typescript";
-function load(relative,dependencies){const exports={};vm.runInNewContext(ts.transpileModule(readFileSync(new URL(relative,import.meta.url),"utf8"),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{exports,require:name=>dependencies[name],Response,Request,console:{warn:()=>{}},Object,String});return exports;}
+function load(relative,dependencies){const exports={};vm.runInNewContext(ts.transpileModule(readFileSync(new URL(relative,import.meta.url),"utf8"),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{exports,require:name=>name.endsWith("/legal-drafting-routes")?load("../lib/legal-drafting-routes.ts",{}):dependencies[name],Response,Request,console:{warn:()=>{}},Object,String});return exports;}
 const procedure=load("../lib/procedural-position.ts",{});
 const preparation=load("../lib/memo-preparation.ts",{"./procedural-position":procedure});
 class RequestError extends Error {constructor(message,status){super(message);this.status=status;}}
@@ -19,3 +19,4 @@ test("attachments supplement missing names and requests while reviewed facts sur
  const response=await endpoint(async()=>({facts:"إعادة صياغة غير مطلوبة",clientName:"طرف تجريبي",otherParty:"اسم مخترع",requests:"رفض المطالبة الاصطناعية"}))(request({facts,documentContext:"مستند اصطناعي مقدم من طرف تجريبي"}));
  assert.equal(response.status,200);const result=await response.json();assert.equal(result.input.facts,facts);assert.equal(result.input.clientName,"طرف تجريبي");assert.match(result.input.otherParty,/غير مذكور/);assert.equal(result.input.requests,"رفض المطالبة الاصطناعية");
 });
+

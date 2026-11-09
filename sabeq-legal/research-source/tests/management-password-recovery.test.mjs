@@ -41,7 +41,15 @@ test("reset tokens are one-time server-hashed, expire, and cannot be exchanged a
  assert.match(source,/now\+600/);
  assert.match(route,/enforceRateLimit\(request, "management-recovery-request"/);
  assert.match(route,/enforceRateLimit\(request, "management-recovery-confirm"/);
- assert.match(login,/نسيت كلمة المرور؟/);
- assert.match(login,/url.hash.startsWith\('#reset='\)/);
  assert.doesNotMatch(source,/return\s+\{\s*token\s*[,}]/);
+});
+
+
+test("approved-account entry uses PKCE without restoring the removed password form",()=>{
+ const start=login.indexOf('function loginScreen('),end=login.indexOf('async function signIn(',start);
+ assert.ok(start>=0&&end>start);
+ const entry=login.slice(start,end);assert.match(entry,/data-action="sign-in"/);assert.match(entry,/data-action="switch-account"/);
+ assert.doesNotMatch(entry,/data-form="password-login"|name="password"|نسيت كلمة المرور/);
+ assert.match(login,/sabeq-admin-proof/);assert.match(login,/sabeq-admin-state/);assert.match(login,/SHA-256/);assert.match(login,/new URLSearchParams\(\{challenge,state\}\)/);
+ assert.match(login,/api\('exchange',\{code,verifier\}\)/);
 });

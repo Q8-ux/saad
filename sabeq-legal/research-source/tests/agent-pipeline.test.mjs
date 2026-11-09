@@ -32,6 +32,7 @@ test('bridge sends only server-selected template and evidence with private autho
  });
  assert.equal(result.content.fields.judgmentNumber,'0045/2026');assert.equal(sent.language,'ar');assert.equal(sent.template.sourceSha256,template.sourceSha256);assert.equal(sent.sources[0].marker,'م1');assert.equal(sent.sources[0].sourceId,'legal:1:7');assert.equal(sent.template.emblemData,undefined);
  assert.ok(sent.caseReasoning.instructions.includes(pleadingAuthorityInstructions));
+ assert.equal(sent.caseData.legalRouteId,"civil.monetary_claim.first_instance.claim.claimant");assert.ok(sent.caseReasoning.instructions.includes(sent.caseData.legalRouteId));
 });
 test('unsafe URLs and missing credentials fail before any remote request',async()=>{
  for(const configuration of [{...runtime,SABEQ_AGENT_URL:'http://agents.example.org/internal/sabeq-agents/memo'},{...runtime,SABEQ_AGENT_URL:'https://secret@agents.example.org/internal/sabeq-agents/memo'},{...runtime,SABEQ_AGENT_BRIDGE_TOKEN:''}]){
@@ -51,11 +52,11 @@ test('no-source response preserves facts and rejects invented legal grounds',asy
  }
 });
 
-function memoRoute(h, {pipeline, sources=evidence, auth=async()=>null, limits=async()=>{},model,record=async()=>{},paid=false,complete=async()=>{},ledger}) {
+function memoRoute(h, {pipeline, sources=evidence, auth=async()=>null, limits=async()=>{},model,record=async()=>{},paid=false,complete=async()=>{},ledger,reserve}) {
  const search=load('../lib/legal-search.ts',{'@/db':{}});
  return load('../app/api/legal/memo/route.ts',{
   '@/lib/approved-templates':h.templates,'@/lib/sabeq-agent-bridge':pipeline,
-  '@/lib/sadad-payments':{reserveMemoPayment:async()=>paid?{lease:{id:'synthetic-paid-order'}}:{},completeMemoPayment:complete,releaseMemoPayment:async()=>{}},
+  '@/lib/sadad-payments':{reserveMemoPayment:reserve|| (async()=>paid?{lease:{id:'synthetic-paid-order'}}:{}),completeMemoPayment:complete,releaseMemoPayment:async()=>{}},
   ...(ledger?{'@/lib/memo-requests':ledger}:{}),
   '@/lib/legal-search':{...search,searchLegalEvidenceAcross:async()=>sources,searchCassationEvidenceAcross:async()=>[],readHandoffEvidence:async()=>[]},
   '@/lib/openai':{deriveLegalResearchPlan:async()=>({searchQueries:[],legalIssues:[]}),openAIErrorResponse:()=>null,generateText:async options=>{
@@ -68,7 +69,39 @@ function memoRoute(h, {pipeline, sources=evidence, auth=async()=>null, limits=as
   '@/lib/public-auth':{requireMemoUserOrGuest:auth},'@/lib/service-settings':{requireServiceEnabled:async()=>{}},'@/lib/service-records':{enforceUserServiceLimit:limits,recordServiceActivity:record},'@/lib/request-security':{...h.security,enforceRateLimit:async()=>{}}
  });
 }
-const request=()=>new Request('https://example.org/api/legal/memo',{method:'POST',headers:{Origin:'https://example.org','Content-Type':'application/json'},body:JSON.stringify({...caseData,template:{kind:'appeal'},agentToken:'client-forged'})});
+const request=(overrides={})=>new Request('https://example.org/api/legal/memo',{method:'POST',headers:{Origin:'https://example.org','Content-Type':'application/json'},body:JSON.stringify({...caseData,...overrides,template:{kind:'appeal'},agentToken:'client-forged'})});
+
+test('conflicting and unresolved routes stop before payment reservation, provider, agents or memo creation',async t=>{
+ const h=templateHarness();t.after(h.cleanup);
+ for(const enabled of [false,true])for(const input of [{caseType:'جنح',courtCircuit:'الإدارية',partyRole:'متهم'},{caseType:'أخرى',courtCircuit:'',draftMode:'available_evidence'},{caseType:'جنح',courtCircuit:'جنح',partyRole:'شاكي',documentKind:'claim'}]){
+  let calls=0;const unexpected=async()=>{calls++;throw Error('route gate was bypassed');};
+  const route=memoRoute(h,{pipeline:{agentPipelineEnabled:()=>{calls++;return enabled;},generateAgentPleading:unexpected},model:unexpected,reserve:unexpected,ledger:{startMemoRequest:unexpected,finishMemoRequest:unexpected}});
+  const response=await route.POST(request(input));assert.equal(response.status,422);const data=await response.json();assert.equal(data.stage,'legal_route_review');assert.equal(data.missingFacts[0].key,'legal.route');assert.equal(calls,0);
+ }
+});
+
+test('the selected route reaches all drafting and audit calls and survives both archives unchanged',async t=>{
+ const h=templateHarness();t.after(h.cleanup);const expected='civil.monetary_claim.first_instance.claim.claimant',seen=[],archived=[];
+ const route=memoRoute(h,{auth:async()=>({id:'synthetic'}),pipeline:{agentPipelineEnabled:()=>false},record:async row=>archived.push(row),ledger:{startMemoRequest:async input=>{assert.equal(input.legalRoute.id,expected);return 'synthetic-routed-memo';},finishMemoRequest:async(...row)=>seen.push(row)},model:async options=>{
+  assert.ok(options.instructions.includes(expected));
+  if(options.schema?.properties?.clientRole)return JSON.stringify({clientRole:caseData.partyRole,opponentRole:'خصم',characterization:'مطالبة',issues:[{issue:'المطالبة',factQuote:'مبلغ لم يتم سداده',document:'',sourceMarkers:['م1'],application:'فحص المطالبة',counterargument:'منازعة',response:'مراجعة',proposedRelief:caseData.requests,missing:''}],missingFacts:[],researchGaps:[]});
+  if(options.schema?.properties?.checks)return JSON.stringify({checks:[auditCheck(options,evidence)],roleConsistent:true,factsPreserved:true,reliefConsistent:true,unsupportedAssertions:[]});
+  return JSON.stringify(content);
+ }});
+ const response=await route.POST(request({legalRouteId:'felony.forged'}));assert.equal(response.status,200);const data=await response.json();assert.equal(data.legalRoute.id,expected);assert.equal(archived[0].metadata.legalRoute.id,expected);assert.equal(archived[0].outputText,data.memo);assert.equal(seen.at(-1)[2],data.memo);
+});
+
+test('a persistent heading from another route receives one repair and cannot consume payment or archive success',async t=>{
+ const h=templateHarness();t.after(h.cleanup);let repairs=0,completed=0,archived=0;const saved=[];
+ const wrong={...content,grounds:'مذكرة بدفاع جنح\n'+content.grounds};
+ const route=memoRoute(h,{paid:true,complete:async()=>{completed++;},record:async()=>{archived++;},pipeline:{agentPipelineEnabled:()=>true,generateAgentPleading:async()=>({content:wrong,audit:{}})},ledger:{startMemoRequest:async()=> 'synthetic-route-review',finishMemoRequest:async(...row)=>saved.push(row)},model:async options=>{
+  assert.ok(options.instructions.includes('civil.monetary_claim.first_instance.claim.claimant'));
+  if(options.schema?.properties?.clientRole)return JSON.stringify({clientRole:caseData.partyRole,opponentRole:'خصم',characterization:'مطالبة',issues:[{issue:'المطالبة',factQuote:'مبلغ لم يتم سداده',document:'',sourceMarkers:['م1'],application:'فحص',counterargument:'منازعة',response:'مراجعة',proposedRelief:caseData.requests,missing:''}],missingFacts:[],researchGaps:[]});
+  if(options.schema?.properties?.checks)return JSON.stringify({checks:[auditCheck(options,evidence)],roleConsistent:true,factsPreserved:true,reliefConsistent:true,unsupportedAssertions:[]});
+  repairs++;assert.equal(JSON.parse(options.input).routeReview.ok,false);return JSON.stringify(wrong);
+ }});
+ const response=await route.POST(request());assert.equal(response.status,422);const data=await response.json();assert.equal(data.stage,'legal_route_review');assert.ok(data.review.routeIssues.includes('cross_route_heading'));assert.equal(repairs,1);assert.equal(completed,0);assert.equal(archived,0);assert.equal(saved.at(-1)[1],'needs_review');assert.equal(saved.at(-1)[2],'');
+});
 
 test('memo route invokes agents after auth and retains actual approved document and source links',async t=>{
  const h=templateHarness();t.after(h.cleanup);let authorized=false,limited=false;
@@ -270,3 +303,4 @@ test('persistent missing relief cannot be silently filled from the input, archiv
  assert.ok(result.review.sectionIssues.some(issue=>issue.section==='requests'));
  assert.ok(ledger.every(row=>!row[2]&&row[3]!=='draft_generated'));
 });
+

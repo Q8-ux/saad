@@ -1,3 +1,4 @@
+import { resolveLegalDraftingRoute, legalRouteInstructions, legalDraftingRouteRevision } from "./legal-drafting-routes";
 import {legalResearchInstructions} from "./legal-language";
 import {pleadingAuthorityInstructions} from "./bound-draft";
 import { caseReasoningInstructions, type CasePlan } from "./case-reasoning";
@@ -19,6 +20,8 @@ export function evidenceSourceId(item: LegalEvidence, index=0) {
 }
 
 export async function generateAgentPleading(input: { caseData: PleadingInput; fields: Record<string,string>; documentKind: "claim" | "appeal" | "memorandum"; template: TemplateInfo; evidence: LegalEvidence[]; casePlan?: CasePlan; signal?: AbortSignal }, transport: typeof fetch = fetch): Promise<{content:PleadingContent; audit:AgentAudit}> {
+  const route=resolveLegalDraftingRoute({...input.caseData,documentKind:input.documentKind});
+  if(route.status!=="ready")throw new RequestError(route.question,422);
   const runtime = env as unknown as AgentEnvironment;
   let url: URL;
   try {
@@ -29,7 +32,7 @@ export async function generateAgentPleading(input: { caseData: PleadingInput; fi
   if (token.length < 32) throw new RequestError("لم يكتمل إعداد مسار الصياغة. يرجى مراجعة إدارة المجموعة.",503);
   const requestId = crypto.randomUUID();
   const sources = input.evidence.map((item,index)=>({sourceId:evidenceSourceId(item,index),marker:`م${index+1}`,kind:isCassationEvidence(item)?"cassation":"legislation",title:item.title,text:item.text,reference:(item.reference||"")+corpusContext(item),sourceUrl:item.sourceUrl||""}));
-  const payload = {caseReasoning:{revision:"case-grounded-memo-1",instructions:caseReasoningInstructions+"\n"+legalResearchInstructions+"\n"+pleadingAuthorityInstructions,plan:input.casePlan||null},sourceCoverage:legalSourceCoverage(input.evidence),requestId,language:"ar",documentKind:input.documentKind,template:{id:input.template.id,version:input.template.version,kind:input.template.kind,title:input.template.title,sourceSha256:input.template.sourceSha256},caseData:input.caseData,fields:input.fields,sources};
+  const payload = {caseReasoning:{revision:"case-grounded-memo-1",instructions:caseReasoningInstructions+"\n"+legalResearchInstructions+"\n"+pleadingAuthorityInstructions+"\n"+legalRouteInstructions(route),plan:input.casePlan||null},sourceCoverage:legalSourceCoverage(input.evidence),requestId,language:"ar",documentKind:input.documentKind,template:{id:input.template.id,version:input.template.version,kind:input.template.kind,title:input.template.title,sourceSha256:input.template.sourceSha256},caseData:{...input.caseData,legalRouteId:route.id,legalRouteRevision:legalDraftingRouteRevision},fields:input.fields,sources};
   let response: Response;
   try {
     response = await transport(url, {method:"POST",headers:{"Content-Type":"application/json",Authorization:`Bearer ${token}`},body:JSON.stringify(payload),signal:input.signal ? AbortSignal.any([input.signal,AbortSignal.timeout(185_000)]) : AbortSignal.timeout(185_000),redirect:"error"});
@@ -49,3 +52,4 @@ export async function generateAgentPleading(input: { caseData: PleadingInput; fi
     return {content,audit};
   } catch { throw new RequestError("لم تجتز الصياغة فحص البيانات والمصادر. احتفظ ببياناتك وأعد المحاولة.",503); }
 }
+

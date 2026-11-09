@@ -96,6 +96,13 @@ export const interfaceCopy = [
   ["مقتطف؛ راجع بقية الملف الأصلي.", "Excerpt only; review the rest of the original file.", "صرف اقتباس ہے؛ اصل فائل کا باقی حصہ دیکھیں۔"],
   ["نص مستخرج مباشرة من الملف دون إعادة صياغة.", "Text extracted directly from the file without rewriting.", "فائل سے متن براہ راست اخذ کیا گیا ہے، دوبارہ تحریر نہیں کیا گیا۔"],
   ["لم تثبت قراءة الملف؛ راجع الأصل.", "Reading could not be confirmed; review the original file.", "فائل پڑھے جانے کی تصدیق نہیں ہوئی؛ اصل فائل دیکھیں۔"],
+  ["جنح", "Misdemeanor", "جنحہ"], ["جنايات", "Felony", "جنایت"],
+  ["عمالي قطاع أهلي", "Private-sector labour", "نجی شعبے کی ملازمت"], ["عمالي بنظام خاص", "Special-system employment", "خاص نظام کی ملازمت"], ["تنفيذ", "Enforcement", "نفاذ"],
+  ["الجنح", "Misdemeanor", "جنحہ"], ["الجنايات", "Felony", "جنایت"], ["الإداري", "Administrative", "انتظامی"], ["المدني", "Civil", "دیوانی"], ["التجاري", "Commercial", "تجارتی"], ["العمل في القطاع الأهلي", "Private-sector employment", "نجی شعبے کی ملازمت"],
+  ["الأسرة والأحوال الشخصية", "Family and personal status", "خاندانی اور شخصی معاملات"], ["الإيجارات", "Tenancy", "کرایہ داری"], ["العقار والملكية", "Real estate and ownership", "جائیداد اور ملکیت"], ["التنفيذ ومنازعاته", "Enforcement and related disputes", "نفاذ اور متعلقہ تنازعات"],
+  ["مسار يحتاج تحديداً", "Route needs clarification", "مسار کی وضاحت درکار ہے"], ["مسار يحتاج قالباً معتمداً", "Route needs an approved form", "منظور شدہ نمونہ درکار ہے"], ["يُحدد بعد مراجعة المسار", "Determined after route review", "مسار کے جائزے کے بعد متعین ہوگا"],
+  ["الطلب المحدد", "Specified relief", "متعین مطالبہ"], ["مطالبة مالية", "Monetary claim", "مالی مطالبہ"], ["ندب خبير", "Expert appointment", "ماہر کی تقرری"], ["خبرة المسؤولية الطبية", "Medical-liability expertise", "طبی ذمہ داری کی ماہرانہ جانچ"], ["وصاية", "Guardianship", "وصایت"], ["تكليف بالرعاية", "Care assignment", "نگہداشت کی ذمہ داری"],
+  ["أحوال شخصية", "Personal status", "عائلی"],
 ] as const;
 
 export type InterfaceKey = typeof interfaceCopy[number][0];
@@ -125,3 +132,4 @@ export function interfaceError(error: unknown, language: string, fallback: strin
   // must not display untranslated backend or browser exception messages.
   return language === "ar" && /[\u0600-\u06ff]/.test(message) ? message : fallback;
 }
+

@@ -1,4 +1,5 @@
 import { projectContextInstructions } from "@/lib/project-context";
+import { legalDraftingRouteRevision, legalRouteInstructions, legalRouteSummary, legalRouteResearchQueries, reviewLegalRouteContent } from "@/lib/legal-drafting-routes";
 import { availableEvidenceMode } from "@/lib/memo-preparation";
 import { validateMemoInput } from "@/lib/memo-input";
 import { reserveMemoPayment, completeMemoPayment, releaseMemoPayment, type PaymentLease } from "@/lib/sadad-payments";
@@ -12,7 +13,7 @@ import { applyCheckedJudgmentMatches, caseReasoningInstructions, caseResearchQue
 import { legalSourceCoverage, formatSourceCoverage } from "@/lib/legal-source-coverage";
 import { loadApprovedTemplate } from "@/lib/approved-templates";
 import { arabicMemoInput } from "@/lib/memo-language";
-import { buildPleadingDocument, parsePleadingContent, pleadingContentSchema, pleadingFields, pleadingText, selectPleadingKind, type PleadingContent, type PleadingInput } from "@/lib/pleading-document";
+import { buildPleadingDocument, parsePleadingContent, pleadingContentSchema, pleadingFields, pleadingText, type PleadingContent, type PleadingInput } from "@/lib/pleading-document";
 import { factualRequirements, correctLegalProse, languageReviewInstructions, legalResearchInstructions, removeDelegatedResearch } from "@/lib/legal-language";
 import { formatEvidence, isCassationEvidence, readHandoffEvidence, searchCassationEvidenceAcross, searchLegalEvidenceAcross } from "@/lib/legal-search";
 import { deriveLegalResearchPlan, generateText as modelGenerateText, openAIErrorResponse } from "@/lib/openai";
@@ -56,12 +57,13 @@ function stripInternalMemoLanguage(text: string) {
 export async function POST(request: Request) {
   let managementRequestId = "";
   let paymentLease: PaymentLease | undefined;
+  let draftingInstructions = "";
   try {
     assertSameOrigin(request);
     const signal = AbortSignal.any([request.signal, AbortSignal.timeout(240_000)]);
     const generateText = (options: Parameters<typeof modelGenerateText>[0]) => {
       signal.throwIfAborted();
-      return modelGenerateText({ ...options, instructions:`${options.instructions}\n${pleadingAuthorityInstructions}\n${projectContextInstructions}`, signal });
+      return modelGenerateText({ ...options, instructions:`${options.instructions}\n${pleadingAuthorityInstructions}\n${projectContextInstructions}\n${draftingInstructions}`, signal });
     };
     const user = await requireMemoUserOrGuest(request);
     await requireServiceEnabled("memo", request);
@@ -70,12 +72,13 @@ export async function POST(request: Request) {
     // limit was too low for a normal test flow (retrying after document review
     // exhausted it), so retain abuse protection while allowing real testing.
     if (user) await enforceUserServiceLimit(user, "memo");
-    const { caseType, clientName, court, courtCircuit, caseNumber, otherParty, partyRole, allParties, facts, requests, legalIssues, conversationTranscript, conversationSummary, assistantResearch, extraFields, documentKind, caseStage, preparationNotes } = validateMemoInput(raw);
+    const { caseType, clientName, court, courtCircuit, caseNumber, otherParty, partyRole, allParties, facts, requests, legalIssues, conversationTranscript, conversationSummary, assistantResearch, extraFields, documentKind, caseStage, legalRoute, preparationNotes } = validateMemoInput(raw);
+    draftingInstructions=legalRouteInstructions(legalRoute);
     const entitlement = await reserveMemoPayment(raw);
     if (entitlement.result) return privateJson(entitlement.result);
     paymentLease = entitlement.lease;
     await enforceRateLimit(request, paymentLease ? `legal-memo-paid:${paymentLease.id}` : "legal-memo", 12, "hour");
-    managementRequestId = await startMemoRequest({ ...extraFields, clientName, court, courtCircuit, caseNumber, caseType, partyRole, otherParty, allParties, facts, requests, legalIssues, documentKind, caseStage }, user, request.headers.get("origin") || new URL(request.url).origin);
+    managementRequestId = await startMemoRequest({ ...extraFields, clientName, court, courtCircuit, caseNumber, caseType, partyRole, otherParty, allParties, facts, requests, legalIssues, documentKind, caseStage, legalRoute:legalRouteSummary(legalRoute) }, user, request.headers.get("origin") || new URL(request.url).origin);
     const matter=assessMatterFacts(facts+" "+requests+" "+allParties);
     if(!matter.ready && raw.draftMode !== availableEvidenceMode) {
       await finishMemoRequest(managementRequestId, "needs_information", "", "fact_clarification");
@@ -83,13 +86,14 @@ export async function POST(request: Request) {
     }
     const memoInput: PleadingInput = await arabicMemoInput({ ...extraFields, court, courtCircuit, caseNumber, clientName, partyRole, otherParty, allParties, caseType, facts, requests, conversationTranscript, conversationSummary, assistantResearch, documentKind, caseStage }, generateText);
     for (const key of Object.keys(extraFields)) extraFields[key] = memoInput[key];
-    const kind = selectPleadingKind(memoInput);
+    const kind = legalRoute.kind;
+    memoInput.legalRouteId=legalRoute.id;memoInput.legalRouteRevision=legalDraftingRouteRevision;
     const template = await loadApprovedTemplate(kind === "appeal" ? "appeal" : "claim");
-    const researchContext = `نوع القضية: ${caseType}\nالوقائع: ${facts}\nالطلبات: ${requests}\nملاحظات إضافية: ${legalIssues || "لا توجد"}`;
-    let searchQueries = [...caseResearchQueries(memoInput), caseType, legalIssues, facts.slice(0, 1_400), requests.slice(0, 800)];
+    const researchContext = `المسار المحدد: ${legalRoute.id}\nنوع القضية: ${caseType}\nالوقائع: ${facts}\nالطلبات: ${requests}\nملاحظات إضافية: ${legalIssues || "لا توجد"}`;
+    let searchQueries = [...legalRouteResearchQueries(legalRoute), ...caseResearchQueries(memoInput), caseType, legalIssues, facts.slice(0, 1_400), requests.slice(0, 800)];
     try {
       const plan = await deriveLegalResearchPlan(researchContext, signal);
-      searchQueries = [...caseResearchQueries(memoInput), ...plan.searchQueries, ...plan.legalIssues, ...searchQueries];
+      searchQueries = [...legalRouteResearchQueries(legalRoute), ...caseResearchQueries(memoInput), ...plan.searchQueries, ...plan.legalIssues, ...searchQueries];
     } catch (error) {
       console.error("Legal research planning failed; using direct case terms", { kind: error instanceof Error ? error.name : "unknown" });
     }
@@ -195,6 +199,7 @@ export async function POST(request: Request) {
       content.legalResearchNotes = evidence.length ? stripInternalMemoLanguage(removeDelegatedResearch(content.legalResearchNotes)) : "";
       content.factualNotes = factualRequirements([...new Set([...content.factualNotes,...preparationNotes,...matter.missing.map(g=>g.ar),...checkedPlan.missingFacts,...checkedPlan.issues.map(i=>i.missing).filter(Boolean)])]);
       const contentReview=reviewCaseContent(content);
+      const routeReview=reviewLegalRouteContent(legalRoute,content);
       let caseAudit = null;
       {
           const auditRequest=caseAuditRequestForContent(checkedPlan,content);
@@ -205,13 +210,14 @@ export async function POST(request: Request) {
         try {
           caseAudit = parseGroundedCaseAudit(auditText,auditRequest,checkedPlan,content,evidence);
         } catch { throw new RequestError("لم تكتمل مراجعة اتساق الدفوع والوقائع. احتفظ ببياناتك وأعد المحاولة.",422); }
-        if(!caseAudit.ok || !contentReview.ok) {
+        if(!caseAudit.ok || !contentReview.ok || !routeReview.ok) {
           if(qualityRetried&&!paymentLease&&!content.grounds.trim()&&caseAudit.roleConsistent&&caseAudit.factsPreserved&&caseAudit.reliefConsistent&&!caseAudit.unsupportedAssertions.length&&caseAudit.checks.every(check=>check.status==="blocked"))return pendingSourceReview(["defense_research_pending"]);
           if(qualityRetried) {
-            await finishMemoRequest(managementRequestId,"needs_review","",contentReview.ok?"defense_review":"document_review");
-            return privateJson({requestId:managementRequestId,error:"لم تجتز المذكرة مراجعة اكتمال الوقائع والدفوع والطلبات وربطها بالأسانيد المتاحة. احتُفظ ببيانات القضية للمراجعة.",stage:contentReview.ok?"defense_review":"document_review",review:{sectionIssues:contentReview.issues,roleConsistent:caseAudit.roleConsistent,factsPreserved:caseAudit.factsPreserved,reliefConsistent:caseAudit.reliefConsistent,blockedIssueIndexes:caseAudit.checks.filter(c=>c.status==="blocked").map(c=>c.issueIndex),omittedIssueIndexes:caseAudit.checks.filter(c=>c.status==="omitted").map(c=>c.issueIndex),unsupportedAssertionCount:caseAudit.unsupportedAssertions.length,excerptOptionCounts:caseAudit.excerptOptionCounts,selectedApplications:caseAudit.selectedApplications,issues:caseAudit.defenseReview?.issues||[]}},422);
+            const reviewStage=!routeReview.ok?"legal_route_review":contentReview.ok?"defense_review":"document_review";
+            await finishMemoRequest(managementRequestId,"needs_review","",reviewStage);
+            return privateJson({requestId:managementRequestId,error:"لم تجتز المذكرة مراجعة اكتمال الوقائع والدفوع والطلبات وربطها بالأسانيد المتاحة. احتُفظ ببيانات القضية للمراجعة.",stage:reviewStage,legalRoute:legalRouteSummary(legalRoute),review:{routeIssues:routeReview.issues,sectionIssues:contentReview.issues,roleConsistent:caseAudit.roleConsistent,factsPreserved:caseAudit.factsPreserved,reliefConsistent:caseAudit.reliefConsistent,blockedIssueIndexes:caseAudit.checks.filter(c=>c.status==="blocked").map(c=>c.issueIndex),omittedIssueIndexes:caseAudit.checks.filter(c=>c.status==="omitted").map(c=>c.issueIndex),unsupportedAssertionCount:caseAudit.unsupportedAssertions.length,excerptOptionCounts:caseAudit.excerptOptionCounts,selectedApplications:caseAudit.selectedApplications,issues:caseAudit.defenseReview?.issues||[]}},422);
           }
-          const revised=await generateText({instructions:`${caseReasoningInstructions}\n${legalResearchInstructions}\n${councilDefenseRevisionInstructions}\nأصلح المذكرة كاملة بناء على مراجعة مستقلة وفحص contentReview. أعد صياغة كل قسم ناقص من الوقائع والطلبات المعتمدة دون تعويضه بعنوان أو نقاط فارغة؛ لا تحذف الدفوع القائمة أو تغير الأسماء والصفات والمبالغ والتواريخ وحدود الطلبات. الوقائع مرقمة بترتيبها الزمني، والطلبات الأصلية والاحتياطية منفصلة فقط إذا كانت مأذونة. لكل مسألة: دفع محدد وتطبيق يضم عبارة قصيرة حرفية من factQuote، ثم أقوى اعتراض محتمل والرد المسبب عليه. حافظ على الوقائع المعتمدة والصفات والطلبات. ضع 【م1】 مباشرة بعد السند المطابق فقط من sourceMarkers المسألة. عند غياب السند حلل الوقائع دون قاعدة قانونية مختلقة، وسجل النقص خارج المتن. لا تكتف بتحفظ عام ولا تكرر التطبيق ذاته لعدة مسائل. النواقص خارج المتن في factualNotes وlegalResearchNotes. لا تضف طلباً جوهرياً غير مأذون؛ ضع المقترحات في factualNotes. أعد المحتوى المنظم فقط دون ديباجة.`,input:JSON.stringify({approvedFacts:approvedCaseFacts(memoInput),input:memoInput,plan:checkedPlan,content,contentReview,audit:caseAudit,sources:formatEvidence(evidence)}),schema:pleadingContentSchema,maxOutputTokens:24000});
+          const revised=await generateText({instructions:`${caseReasoningInstructions}\n${legalResearchInstructions}\n${councilDefenseRevisionInstructions}\nأصلح المذكرة كاملة بناء على مراجعة مستقلة وفحص contentReview وrouteReview؛ أصلح عنواناً يخص مساراً آخر دون تغيير المسار المعتمد أو تحويل نوع المستند. أعد صياغة كل قسم ناقص من الوقائع والطلبات المعتمدة دون تعويضه بعنوان أو نقاط فارغة؛ لا تحذف الدفوع القائمة أو تغير الأسماء والصفات والمبالغ والتواريخ وحدود الطلبات. الوقائع مرقمة بترتيبها الزمني، والطلبات الأصلية والاحتياطية منفصلة فقط إذا كانت مأذونة. لكل مسألة: دفع محدد وتطبيق يضم عبارة قصيرة حرفية من factQuote، ثم أقوى اعتراض محتمل والرد المسبب عليه. حافظ على الوقائع المعتمدة والصفات والطلبات. ضع 【م1】 مباشرة بعد السند المطابق فقط من sourceMarkers المسألة. عند غياب السند حلل الوقائع دون قاعدة قانونية مختلقة، وسجل النقص خارج المتن. لا تكتف بتحفظ عام ولا تكرر التطبيق ذاته لعدة مسائل. النواقص خارج المتن في factualNotes وlegalResearchNotes. لا تضف طلباً جوهرياً غير مأذون؛ ضع المقترحات في factualNotes. أعد المحتوى المنظم فقط دون ديباجة.`,input:JSON.stringify({approvedFacts:approvedCaseFacts(memoInput),input:memoInput,plan:checkedPlan,content,contentReview,routeReview,legalRoute:legalRouteSummary(legalRoute),audit:caseAudit,sources:formatEvidence(evidence)}),schema:pleadingContentSchema,maxOutputTokens:24000});
           return finish(parsePleadingContent(revised),true);
         }
       }
@@ -223,8 +229,8 @@ export async function POST(request: Request) {
       if(caseQuality.status==="incomplete") return pendingSourceReview(["incomplete_defense_coverage"]);
       signal.throwIfAborted();
       await finishMemoRequest(managementRequestId, "needs_review", finalMemo, "draft_generated");
-      if(user) await recordServiceActivity({userId:user.id,serviceType:"memo",title:`${document.title} — ${clientName}`,inputText:JSON.stringify({...memoInput,legalIssues}),outputText:finalMemo,metadata:{managementRequestId,sourceCount:sources.length,caseNumber,template:template.info,documentKind:document.kind,pageSections:document.pages.length}});
-      const responseData = {requestId:managementRequestId,caseQuality,sourceCoverage:legalSourceCoverage(evidence),memo:finalMemo,document,template:template.info,sourceVerification:officialVerificationSummary(),memoControlRevision,defenseRevision,engineRevision:memoCompletenessRevision,pleadingStyleRevision,analysis:{sourceCount:sources.length,lawCount:sources.filter(s=>s.kind==="legislation").length,cassationCount:sources.filter(s=>s.kind==="cassation").length,sources,missingSources:!sources.length,researchNotice:caseQuality.status==="incomplete"?caseQuality.notices.join(" "):"",...(agentAudit?{agentAudit}:{})}};
+      if(user) await recordServiceActivity({userId:user.id,serviceType:"memo",title:`${document.title} — ${clientName}`,inputText:JSON.stringify({...memoInput,legalIssues}),outputText:finalMemo,metadata:{managementRequestId,sourceCount:sources.length,caseNumber,template:template.info,documentKind:document.kind,legalRoute:legalRouteSummary(legalRoute),pageSections:document.pages.length}});
+      const responseData = {requestId:managementRequestId,caseQuality,legalRoute:legalRouteSummary(legalRoute),legalDraftingRouteRevision,sourceCoverage:legalSourceCoverage(evidence),memo:finalMemo,document,template:template.info,sourceVerification:officialVerificationSummary(),memoControlRevision,defenseRevision,engineRevision:memoCompletenessRevision,pleadingStyleRevision,analysis:{sourceCount:sources.length,lawCount:sources.filter(s=>s.kind==="legislation").length,cassationCount:sources.filter(s=>s.kind==="cassation").length,sources,missingSources:!sources.length,researchNotice:caseQuality.status==="incomplete"?caseQuality.notices.join(" "):"",...(agentAudit?{agentAudit}:{})}};
       await completeMemoPayment(paymentLease, responseData);
       return privateJson(responseData);
     }
@@ -270,11 +276,12 @@ export async function POST(request: Request) {
     if (managementRequestId) await finishMemoRequest(managementRequestId, request.signal.aborted ? "cancelled" : "failed", "", error instanceof RequestError ? `request_${error.status}` : "generation_failed").catch(() => undefined);
     const openAIError = openAIErrorResponse(error, "تعذر توليد المذكرة حالياً. يرجى المحاولة لاحقاً.");
     if (openAIError) return privateJson({ error: openAIError.message, ...(managementRequestId ? { requestId: managementRequestId } : {}), serviceCode: openAIError.code, upstreamStatus: openAIError.upstreamStatus }, openAIError.status);
-    if (error instanceof RequestError && "stage" in error && "missingFacts" in error) return privateJson({ error: error.message, stage: error.stage, missingFacts: error.missingFacts }, error.status);
+    if (error instanceof RequestError && "stage" in error && "missingFacts" in error) return privateJson({ error: error.message, stage: error.stage, missingFacts: error.missingFacts, ...("legalRoute" in error ? {legalRoute:error.legalRoute} : {}) }, error.status);
     if (error instanceof RequestError) return errorResponse(error);
     return privateJson({ error: "تعذر توليد المذكرة حالياً. يرجى المحاولة لاحقاً." }, 503);
   } finally {
     await releaseMemoPayment(paymentLease).catch(() => undefined);
   }
 }
+
 

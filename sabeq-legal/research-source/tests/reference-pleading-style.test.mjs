@@ -16,9 +16,9 @@ test('the shared style distinguishes criminal attribution from civil relief and 
  assert.match(text,/صحيفة الدعوى.*صحيفة الاستئناف/u);
 });
 test('style coverage reports only observed forms and never claims the supplied examples prove all pleading types',()=>{
- assert.equal(policy.pleadingStyleRevision,'reference-pleading-style-1');
- assert.deepEqual(Array.from(policy.referenceStyleCoverage.observed),['misdemeanor_defense','felony_defense','civil_defense']);
- assert.deepEqual(Array.from(policy.referenceStyleCoverage.notObserved),['claim','appeal']);
+ assert.equal(policy.pleadingStyleRevision,'reference-pleading-style-2');
+ assert.deepEqual(Array.from(policy.referenceStyleCoverage.observed),['misdemeanor_defense','felony_defense','civil_defense','civil_claim','commercial_claim','administrative_claim','guardianship_claim','expert_appointment_claim','medical_expert_claim']);
+ assert.deepEqual(Array.from(policy.referenceStyleCoverage.notObserved),['appeal']);
  assert.equal(policy.referenceStyleCoverage.personalDataStored,false);
  assert.equal(policy.referenceStyleCoverage.legalAuthoritiesImported,false);
 });
@@ -28,4 +28,5 @@ test('style instructions contain rules without case identifiers, external links,
  assert.doesNotMatch(text,/https?:\/\/|@|\+\d|(?:ملف|كود|جلسة|طعن)\s*(?:رقم\s*)?\d/iu);
  assert.doesNotMatch(text,/«[^»]+»|“[^”]+”/u);
 });
+
 
