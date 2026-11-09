@@ -1,0 +1,10 @@
+/admin/*
+  Cache-Control: no-store, max-age=0
+  Referrer-Policy: no-referrer
+  X-Frame-Options: DENY
+  Content-Security-Policy: default-src 'self'; connect-src 'self' https://sabeq-legal-public.centrino.chatgpt.site; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; frame-ancestors 'none'
+/supervisor/*
+  Cache-Control: no-store, max-age=0
+  Referrer-Policy: no-referrer
+  X-Frame-Options: DENY
+  Content-Security-Policy: default-src 'self'; connect-src 'self' https://sabeq-legal-public.centrino.chatgpt.site; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; frame-ancestors 'none'
