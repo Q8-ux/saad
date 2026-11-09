@@ -325,6 +325,12 @@ export const managementMemoRequests = sqliteTable("management_memo_requests", {
   status: text("status").notNull(), errorCode: text("error_code").notNull().default(""), origin: text("origin").notNull().default(""),
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`), updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 }, t => [index("management_memos_created_idx").on(t.createdAt)]);
+export const managementMemoRevisions = sqliteTable("management_memo_revisions", {
+  id: text("id").primaryKey(), requestId: text("request_id").notNull().references(() => managementMemoRequests.id),
+  revision: integer("revision").notNull(), beforeText: text("before_text").notNull(), afterText: text("after_text").notNull(),
+  beforeStatus: text("before_status").notNull(), beforeErrorCode: text("before_error_code").notNull(),
+  createdBy: text("created_by").notNull(), createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+}, t => [uniqueIndex("management_memo_revision_idx").on(t.requestId, t.revision)]);
 export const managementVault = sqliteTable("management_vault", {
   integration: text("integration").primaryKey(), sealed: text("sealed").notNull(), updatedBy: text("updated_by").notNull(),
   updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
@@ -349,3 +355,4 @@ export const managementEmails = sqliteTable("management_emails", {
   subject: text("subject").notNull(), bodyText: text("body_text").notNull(), status: text("status").notNull().default("new"),
   receivedAt: text("received_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
+

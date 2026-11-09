@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {DatabaseSync} from 'node:sqlite';
-import {webcrypto} from 'node:crypto';
+import {webcrypto,createHash} from 'node:crypto';
 import vm from 'node:vm';
 import ts from 'typescript';
 const root=new URL('../',import.meta.url);
@@ -10,10 +10,11 @@ function harness({authenticated=false}={}){
   const sqlite=new DatabaseSync(':memory:');
   sqlite.exec(readFileSync(new URL('tests/fixtures/management-source-tables.sql',root),'utf8'));
   sqlite.exec(readFileSync(new URL('drizzle/0005_icy_dark_phoenix.sql',root),'utf8'));
+  sqlite.exec(readFileSync(new URL('drizzle/0011_saved_memo_revisions.sql',root),'utf8'));
   const db={prepare(sql){let args=[];return{bind(...values){args=values;return this;},async first(){return sqlite.prepare(sql).get(...args)||null;},async all(){return{results:sqlite.prepare(sql).all(...args)};},async run(){return sqlite.prepare(sql).run(...args);}};}};
   // Authentication routes and encrypted-vault isolation are covered by the full native management suite.
-  const dependencies={'@/db':{getD1:()=>db},'@/lib/gmail':{sendSavedDraft:async()=>{}},'@/lib/management-auth':{base64url:value=>Buffer.from(value).toString('base64url'),sealConfig:async value=>JSON.stringify(value),openConfig:async value=>JSON.parse(value)},'@/lib/management-integrations':{SERVICE_ORIGIN:'https://sabeq-legal-public.centrino.chatgpt.site'},'@/lib/request-security':{RequestError:class extends Error{}}};
-  function load(file){const exports={};vm.runInNewContext(ts.transpileModule(readFileSync(new URL(file,root),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{exports,require:name=>{if(name==='@/lib/management-data')return load('lib/management-data.ts');if(!dependencies[name])throw Error('Unexpected test dependency: '+name);return dependencies[name];},crypto:webcrypto,TextEncoder,URL,URLSearchParams,AbortSignal,Request,Response,Headers,fetch:async url=>authenticated&&String(url)==='https://tuhxdirrffnxtosqaoiq.supabase.co/functions/v1/admin-verify'?Response.json({valid:true,role:'admin',must_change_password:false}):new Response('Not found',{status:404})});return exports;}
+  const dependencies={'@/db':{getD1:()=>db},'@/lib/gmail':{sendSavedDraft:async()=>{}},'@/lib/management-auth':{digest:async value=>createHash('sha256').update(value).digest('hex'),base64url:value=>Buffer.from(value).toString('base64url'),sealConfig:async value=>JSON.stringify(value),openConfig:async value=>JSON.parse(value)},'@/lib/management-integrations':{SERVICE_ORIGIN:'https://sabeq-legal-public.centrino.chatgpt.site'},'@/lib/request-security':{RequestError:class extends Error{}}};
+  function load(file){const exports={};vm.runInNewContext(ts.transpileModule(readFileSync(new URL(file,root),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{exports,require:name=>{if(name==='@/lib/management-data')return load('lib/management-data.ts');if(name==='@/lib/management-memo-revisions')return load('lib/management-memo-revisions.ts');if(!dependencies[name])throw Error('Unexpected test dependency: '+name);return dependencies[name];},crypto:webcrypto,TextEncoder,URL,URLSearchParams,AbortSignal,Request,Response,Headers,fetch:async url=>authenticated&&String(url)==='https://tuhxdirrffnxtosqaoiq.supabase.co/functions/v1/admin-verify'?Response.json({valid:true,role:'admin',must_change_password:false}):new Response('Not found',{status:404})});return exports;}
   return{sqlite,load,close:()=>sqlite.close()};
 }
 test('the real request ledger and dashboard share current records when the previous archive returns 404',async()=>{const h=harness();try{

@@ -12,6 +12,7 @@ import { legislationWorkbench, archiveArticles, archiveAsset } from "@/lib/legis
 import { getD1 } from "@/db";
 import { assertManagementOrigin, assertManagerAction, exchangeManagerCode, managementJson, managerLogin, managerProfile, passwordManagerLogin, requireManager } from "@/lib/management-auth";
 import { bridgeKeys, managerInbox, managerMemos, managerMemoRecovery, managerSnapshot, managerUpdates } from "@/lib/management-data";
+import { readMemoRevision, saveMemoRevision } from "@/lib/management-memo-revisions";
 import { mailAction, operationEvent, whatsappAction } from "@/lib/management-integrations";
 import { verificationEmailAction } from "@/lib/verification-email-settings";
 import { gmailAction, gmailSettings } from "@/lib/gmail";
@@ -51,6 +52,7 @@ export async function GET(request: Request) {
     if (action === "session") return managementJson({ manager: managerProfile(manager) });
     if (action === "snapshot") return managementJson(await managerSnapshot(manager.email));
     if (action === "memos") return managementJson(await managerMemos(url));
+    if (action === "memo-revision") return managementJson(await readMemoRevision(url));
     if (action === "memo-recovery") return managementJson(await managerMemoRecovery(url));
     if (action === "inbox") return managementJson(await managerInbox(url));
     if (action === "updates") return managementJson(await managerUpdates());
@@ -63,7 +65,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     assertManagementOrigin(request);
-    const action = actionPath(request), data = await readJsonObject(request, action === "password-login" ? 4_096 : action === "site" ? 200_000 : 20_000);
+    const action = actionPath(request), data = await readJsonObject(request, action === "password-login" ? 4_096 : action === "memo-revision" ? 500_000 : action === "site" ? 200_000 : 20_000);
     if (action === "exchange") { await enforceRateLimit(request, "management-exchange", 30); return managementJson(await exchangeManagerCode(data)); }
     if (action === "password-login") return managementJson(await passwordManagerLogin(request, data));
     if (action === "password-recovery-request") {
@@ -77,6 +79,7 @@ export async function POST(request: Request) {
     const manager = await requireManager(request);
     assertManagerAction(manager, action, "POST");
     await enforceRateLimit(request, "management-write", 150);
+    if (action === "memo-revision") return managementJson(await saveMemoRevision(data, manager.email));
     if (action === "gmail") {
       await enforceRateLimit(request, data.action === "send-test" ? "gmail-test" : "gmail-management", data.action === "send-test" ? 5 : 30);
       return managementJson(await gmailAction(data, manager.email, request));
@@ -173,3 +176,4 @@ export async function POST(request: Request) {
     throw new RequestError("العملية غير موجودة.", 404);
   } catch (error) { return failure(error); }
 }
+

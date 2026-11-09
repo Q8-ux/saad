@@ -2,6 +2,7 @@ import { getD1 } from "@/db";
 import { base64url, openConfig, sealConfig } from "@/lib/management-auth";
 import { SERVICE_ORIGIN } from "@/lib/management-integrations";
 import { RequestError } from "@/lib/request-security";
+import { memoEditState } from "@/lib/management-memo-revisions";
 
 export const OFFICIAL_BACKEND = "https://sabeq-legal-research-api.onrender.com";
 type SigningKeys = { privateKey: JsonWebKey; publicKey: JsonWebKey };
@@ -51,7 +52,8 @@ export async function managerMemos(url: URL) {
     if (id.startsWith("legacy:")) row = await getD1().prepare("SELECT r.id, r.title AS client_name, u.email, r.service_type AS case_type, '' AS case_number, r.input_text AS input_json, r.output_text, r.status, r.created_at, r.created_at AS updated_at, '' AS error_code FROM service_records r LEFT JOIN public_users u ON u.id = r.user_id WHERE r.id = ? AND r.service_type IN ('memo','memo_archive')").bind(id.slice(7)).first();
     else row = await getD1().prepare("SELECT * FROM management_memo_requests WHERE id = ?").bind(id).first();
     if (!row) throw new RequestError("المذكرة غير موجودة.", 404);
-    return { memo: { ...row, id, source: "hosted" } };
+    const edit = id.startsWith("legacy:") ? { editable: false } : await memoEditState(id, String(row.output_text || ""), String(row.status));
+    return { memo: { ...row, id, source: "hosted", edit } };
   }
   const { offset, limit, query, status } = pagination(url);
   const generatedOnly = url.searchParams.get("view") === "generated";
@@ -110,3 +112,4 @@ export async function managerUpdates() {
     return { available: true, commits: results.flat().sort((a, b) => b.date.localeCompare(a.date)).slice(0, 20) };
   } catch { return { available: false, commits: [] }; }
 }
+
