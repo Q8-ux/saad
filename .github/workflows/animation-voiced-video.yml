@@ -1,0 +1,44 @@
+name: Build Online Family Voiced Video
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'animation-studio/projects/online-family.json'
+      - 'animation-studio/projects/online-family-voices.json'
+      - 'animation-studio/renderer/render-voiced.mjs'
+      - '.github/workflows/animation-voiced-video.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  voiced-mp4:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: animation-studio/renderer
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install rendering dependencies
+        run: npm install --no-audit --no-fund
+      - name: Validate scripts
+        run: |
+          node --check render-voiced.mjs
+          node --check render-remotion.mjs
+          ffmpeg -version | head -1
+      - name: Render video with Arabic character voices
+        run: node render-voiced.mjs
+      - name: Verify MP4 audio and video
+        run: |
+          test -s ../online-family-voiced.mp4
+          ffprobe -v error -select_streams a:0 -show_entries stream=codec_name -of csv=p=0 ../online-family-voiced.mp4 | grep -q aac
+          ffprobe -v error -select_streams v:0 -show_entries stream=codec_name -of csv=p=0 ../online-family-voiced.mp4 | grep -q h264
+      - uses: actions/upload-artifact@v4
+        with:
+          name: online-family-voiced-mp4
+          path: animation-studio/online-family-voiced.mp4
+          if-no-files-found: error
+          retention-days: 30
