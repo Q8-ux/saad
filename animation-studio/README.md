@@ -36,3 +36,42 @@
 ## الاختبار اليدوي
 افتح `index.html` بمتصفح حديث أو من GitHub Pages: اكتب سيناريو → أنشئ مشاهد → عدّل زمنها → شغّل المعاينة → نزّل PNG وJSON وCSV → استورد JSON → سجّل ملف WebM إن دعمه المتصفح. تأكد من عدم ظهور أخطاء JavaScript.
 
+
+## محرك تصيير MP4 الجديد (2026-11-09)
+
+تمت إضافة `renderer/` بخادم Node ومعالجة مهام مستقلة، ومحرك Remotion لعمل فيديوهات 2D/موشن مبسطة، ومحرك Blender لمشاهد هندسية ثلاثية الأبعاد متحركة. يتم الاختيار آليًا: `cinematic` إلى Blender، وبقية الأنماط إلى Remotion؛ يمكن إجبار أحدهما من اللوحة. **هذه النماذج ليست إنتاج رسوم كرتونية احترافية كاملة من نص حر؛ لا توجد توليدات شخصيات أو مزامنة شفاه أو تعلّم توليدي هنا.**
+
+### تشغيل محلي
+
+```bash
+cd animation-studio/renderer
+npm install
+export RENDER_API_KEY="replace-with-a-random-secret-at-least-24-characters"
+export ALLOWED_ORIGIN="https://q8-ux.github.io"
+npm start
+```
+
+- Remotion يحتاج Chromium/Chrome و FFmpeg. قد يحمل Remotion متصفحًا مناسبًا عند أول تشغيل.
+- Blender يحتاج تثبيت برنامج Blender وتشغيله عبر `blender` أو تحديد `BLENDER_BIN`.
+- يمكن تشغيل Docker باستخدام `docker build -t masar-renderer .` ثم `docker run -p 10000:10000 -e RENDER_API_KEY=... -e ALLOWED_ORIGIN=https://q8-ux.github.io masar-renderer`.
+- عند تشغيل الخادم محليًا، ضع `http://localhost:10000` في حقل عنوان الخادم في الاستوديو. للمواقع العامة استخدم HTTPS.
+- **لا تستخدم مفتاحًا مشتركًا واسع الصلاحيات لخدمة عامة مفتوحة**: خزّن المفتاح في أسرار الخادم، ودخل نسخة خاصة بالاستوديو في واجهة مقيدة المستخدمين. الكود الحالي نسخة أولية خاصة، وليست منصة SaaS متعددة المستخدمين.
+- يتم تنظيف نتائج المهام بعد نحو ساعة؛ التنزيل قبل انتهاء المهلة. تضيع الطوابير عند إعادة تشغيل الخادم.
+
+### API
+- `GET /health` — معلومة صحة عامة لا تؤكد تشغيل Blender.
+- `POST /api/render/jobs` — يقبل `{title,style,aspect,engine,scenes:[{title,visual,narration,duration,color}]}` ويعيد `202` ومعرّف المهمة.
+- `GET /api/render/jobs/:id` — الحالة.
+- `GET /api/render/jobs/:id/download` — MP4 عند اكتمال المهمة.
+- جميع مسارات `/api/*` تتطلب الترويسة `X-Render-Key: <RENDER_API_KEY>`.
+- حد المشروع: 40 مشهدًا، مدة كل مشهد 1–30 ثانية، ومجموع لا يتجاوز 300 ثانية.
+- الرفع الحالي **نصي للمشاهد فقط**؛ الخلفيات والصوت المسجل في المتصفح لا تُرسل ولا تُركّب تلقائيًا على MP4.
+
+### الفحص
+```bash
+cd animation-studio/renderer
+node --check server.mjs
+npm install
+npm run render:sample
+```
+يوجد workflow `animation-renderer.yml` لفحص البناء وتجربة تصيير MP4 آليًا، لكن **نجاحه لم يتأكد بعد**. لا يُعد وجود المصدر دليلًا على وجود خادم منشور أو فيديو ناتج. 
