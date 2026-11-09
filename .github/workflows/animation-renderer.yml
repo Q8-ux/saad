@@ -1,0 +1,28 @@
+name: Masar Animation Renderer Check
+on:
+  push:
+    paths:
+      - "animation-studio/renderer/**"
+      - ".github/workflows/animation-renderer.yml"
+  workflow_dispatch:
+jobs:
+  smoke-render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: animation-studio/renderer
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install packages
+        run: npm install --no-audit --no-fund
+      - name: Validate JavaScript and Python
+        run: |
+          node --check server.mjs
+          node --check render-remotion.mjs
+          python3 -m py_compile blender-render.py
+      - name: Render actual MP4 smoke sample
+        run: npm run render:sample
