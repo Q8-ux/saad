@@ -45,7 +45,15 @@
   function toast(message) { const node=document.getElementById('notice');node.textContent=message;node.hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>node.hidden=true,5500); }
   function loginScreen(message='') {
     globalThis.SabeqControl?.leave();globalThis.SabeqProgrammer?.clear();globalThis.SabeqLegislation?.leave();
-    app.innerHTML=`<main class="login"><img src="./sabeq-logo.png" width="100" height="100" alt="مجموعة سابق القانونية"><h1>مجموعة سابق القانونية</h1><p>تسجيل الدخول</p><form data-form="password-login">${input('username','اسم المستخدم','','required autocomplete="username" autocapitalize="none" spellcheck="false" dir="ltr" maxlength="32"')}${input('password','كلمة المرور','','required type="password" autocomplete="current-password" dir="ltr" minlength="1" maxlength="256"')}<button class="primary" type="submit">دخول</button></form><p class="muted"><button type="button" data-action="forgot-password" class="secondary">نسيت كلمة المرور؟</button></p><p class="muted" role="status">${esc(message||'أدخل اسم المستخدم وكلمة المرور.')}</p></main>`;
+    app.innerHTML=`<main class="login"><img src="./sabeq-logo.png" width="100" height="100" alt="مجموعة سابق القانونية"><h1>مجموعة سابق القانونية</h1><p>الدخول بالحساب الإداري المعتمد</p><button class="primary" type="button" data-action="sign-in">الدخول إلى لوحة سابق</button><p class="muted"><button type="button" class="secondary" data-action="switch-account">استخدام حساب آخر</button></p><p class="muted" role="status">${esc(message||'استخدم حساب الإدارة المعتمد للمتابعة.')}</p></main>`;
+  }
+  async function signIn(switchAccount=false) {
+    const random=()=>btoa(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(32)))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+    const verifier=random(),state=random(),hash=new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(verifier)));
+    const challenge=btoa(String.fromCharCode(...hash)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+    sessionStorage.setItem('sabeq-admin-section',section);sessionStorage.setItem('sabeq-admin-proof',verifier);sessionStorage.setItem('sabeq-admin-state',state);
+    const path='/api/management/login?'+new URLSearchParams({challenge,state});
+    location.assign(switchAccount?SERVICE+'/signout-with-chatgpt?'+new URLSearchParams({return_to:path}):SERVICE+path);
   }
   function recoveryRequestScreen(message='') {
     app.innerHTML=`<main class="login"><img src="./sabeq-logo.png" width="100" height="100" alt="مجموعة سابق القانونية"><h1>استعادة كلمة المرور</h1><p>أدخل اسم المستخدم. إذا كان له بريد استرداد معتمد فستصلك رسالة برابط مؤقت.</p><form data-form="password-recovery-request">${input('username','اسم المستخدم','','required autocomplete="username" autocapitalize="none" dir="ltr" maxlength="32"')}<button class="primary" type="submit">إرسال رابط الاستعادة</button></form><button type="button" class="secondary" data-action="back-login">العودة لتسجيل الدخول</button><p class="muted" role="status">${esc(message)}</p></main>`;
@@ -85,7 +93,7 @@
       if(section==='overview'||section==='notifications'){snapshot=await api('snapshot');renderSnapshot();}
       else if(section==='memos'){const d=await api('memos?'+memoParams());rows=d.memos;hasMore=d.hasMore;memoArchiveAvailable=d.officialAvailable;memoArchiveError=d.officialError;renderMemos(d.officialAvailable,d.officialError);}
       else if(section==='inbox'){const d=await api('inbox?'+new URLSearchParams({offset:String(offset),q:query}));rows=d.messages;hasMore=d.hasMore;renderInbox(d.officialAvailable);}
-      else if(['users','site','services','bookings'].includes(section)){await globalThis.SabeqControl.mount(content(),section,api,toast,()=>{token='';manager=null;sessionStorage.removeItem(SESSION);loginScreen('حُفظت بيانات دخولك. سجّل الدخول بالاسم وكلمة المرور المعتمدين الآن.');},manager.role);}
+      else if(['users','site','services','bookings'].includes(section)){await globalThis.SabeqControl.mount(content(),section,api,toast,()=>{token='';manager=null;sessionStorage.removeItem(SESSION);loginScreen('حُفظت بيانات الدخول. سجّل الدخول مجدداً للمتابعة.');},manager.role);}
       else if(section==='legislation'){await globalThis.SabeqLegislation.mount(content(),api,managementFile,toast);}
       else if(section==='programmer'){const settings=await api('programmer');globalThis.SabeqProgrammer.mount(content(),settings,api,toast);}
       else if(section==='paths'){const d=await api('paths');renderPaths(d);}
@@ -234,6 +242,7 @@
     if(button.dataset.action==='menu'){const open=document.querySelector('.sidebar').classList.toggle('open');document.querySelector('.scrim').classList.toggle('open',open);document.querySelector('.mobile-menu').setAttribute('aria-expanded',String(open));return;}
     if(button.dataset.action==='close-dialog'){dialog.close();detail.replaceChildren();if(section==='memos')history.replaceState(null,'',location.pathname+'#memos');return;}
 
+    if(['sign-in','switch-account'].includes(button.dataset.action)){button.disabled=true;try{await signIn(button.dataset.action==='switch-account');}catch{button.disabled=false;toast('يلزم السماح بتخزين الجلسة لإكمال الدخول.');}return;}
     if(button.dataset.action==='refresh'){globalThis.SabeqControl?.leave();globalThis.SabeqProgrammer?.leave();globalThis.SabeqLegislation?.leave();await load();return;}
     if(button.dataset.page){offset=Math.max(0,offset+(button.dataset.page==='next'?50:-50));await load();return;}
     button.disabled=true;
@@ -303,7 +312,7 @@
       const requestedSection=hashSection||sessionStorage.getItem('sabeq-admin-section');if(Object.hasOwn(labels,requestedSection)){section=requestedSection;sessionStorage.setItem('sabeq-admin-section',section);}
       pendingMemoId=section==='memos'?memoReference(new URLSearchParams(recordQuery).get('record')||sessionStorage.getItem(RECORD)):'';
       if(pendingMemoId)sessionStorage.setItem(RECORD,pendingMemoId);else sessionStorage.removeItem(RECORD);
-      if(code||loginError){history.replaceState(null,'',location.pathname+(section==='overview'?'':'#'+section));if(loginError){loginScreen(loginError==='identity_unavailable'?'تعذر إكمال هوية الدخول. افتح اللوحة في Chrome ثم أعد الدخول.':'هذا الحساب غير مصرح له باستخدام هذه الخدمة. أدخل اسم مستخدم وكلمة مرور معتمدين.');return;}const verifier=sessionStorage.getItem('sabeq-admin-proof'),expected=sessionStorage.getItem('sabeq-admin-state');sessionStorage.removeItem('sabeq-admin-proof');sessionStorage.removeItem('sabeq-admin-state');if(!state||state!==expected||!verifier)throw Error('طلب الدخول لا يطابق هذه الجلسة. ابدأ الدخول مجدداً.');token='';const data=await api('exchange',{code,verifier});token=data.token;sessionStorage.setItem(SESSION,token);}
+      if(code||loginError){history.replaceState(null,'',location.pathname+(section==='overview'?'':'#'+section));if(loginError){loginScreen(loginError==='identity_unavailable'?'تعذر إكمال هوية الدخول. افتح اللوحة في Chrome ثم أعد الدخول.':'هذا الحساب غير مصرح له بإدارة سابق. اختر استخدام حساب آخر وسجّل الدخول بالحساب الإداري المعتمد.');return;}const verifier=sessionStorage.getItem('sabeq-admin-proof'),expected=sessionStorage.getItem('sabeq-admin-state');sessionStorage.removeItem('sabeq-admin-proof');sessionStorage.removeItem('sabeq-admin-state');if(!state||state!==expected||!verifier)throw Error('طلب الدخول لا يطابق هذه الجلسة. ابدأ الدخول مجدداً.');token='';const data=await api('exchange',{code,verifier});token=data.token;sessionStorage.setItem(SESSION,token);}
       if(!token){loginScreen();return;}manager=(await api('session')).manager;shell();await load();await openPendingMemo();
     }catch(error){token='';manager=null;try{sessionStorage.removeItem(SESSION);}catch{}loginScreen(error.message||'تعذر التحقق من الدخول.');}
   }

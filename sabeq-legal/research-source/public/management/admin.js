@@ -45,7 +45,7 @@
   function toast(message) { const node=document.getElementById('notice');node.textContent=message;node.hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>node.hidden=true,5500); }
   function loginScreen(message='') {
     globalThis.SabeqControl?.leave();globalThis.SabeqProgrammer?.clear();globalThis.SabeqLegislation?.leave();
-    app.innerHTML=`<main class="login"><img src="./sabeq-logo.png" width="100" height="100" alt="مجموعة سابق القانونية"><h1>كل أعمال سابق،<br>في مكان واحد.</h1><p>طلبات المذكرات، رسائل العملاء، تنبيهات التشغيل وتكاملات المكتب.</p><form data-form="password-login">${input('username','اسم المستخدم','','required autocomplete="username" autocapitalize="none" spellcheck="false" dir="ltr" maxlength="32"')}${input('password','كلمة المرور','','required type="password" autocomplete="current-password" dir="ltr" minlength="9" maxlength="256"')}<button class="primary" type="submit">الدخول إلى مركز التحكم</button></form><p class="muted" role="status">${esc(message||'لوحة التحكم مخصصة للمشرفين والموظفين والمراجعين المصرح لهم فقط.')}</p><div class="login-alternative"><button class="secondary" data-action="sign-in">الدخول بالحساب الإداري</button><button class="secondary" data-action="switch-account">تغيير حساب الدخول</button></div><a href="https://www.sabeq.legal" target="_blank" rel="noopener noreferrer">زيارة الموقع الرسمي</a></main>`;
+    app.innerHTML=`<main class="login"><img src="./sabeq-logo.png" width="100" height="100" alt="مجموعة سابق القانونية"><h1>مجموعة سابق القانونية</h1><p>الدخول بالحساب الإداري المعتمد</p><button class="primary" type="button" data-action="sign-in">الدخول إلى لوحة سابق</button><p class="muted"><button type="button" class="secondary" data-action="switch-account">استخدام حساب آخر</button></p><p class="muted" role="status">${esc(message||'استخدم حساب الإدارة المعتمد للمتابعة.')}</p></main>`;
   }
   async function signIn(switchAccount=false) {
     const random=()=>btoa(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(32)))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
@@ -85,7 +85,7 @@
       if(section==='overview'||section==='notifications'){snapshot=await api('snapshot');renderSnapshot();}
       else if(section==='memos'){const d=await api('memos?'+memoParams());rows=d.memos;hasMore=d.hasMore;memoArchiveAvailable=d.officialAvailable;memoArchiveError=d.officialError;renderMemos(d.officialAvailable,d.officialError);}
       else if(section==='inbox'){const d=await api('inbox?'+new URLSearchParams({offset:String(offset),q:query}));rows=d.messages;hasMore=d.hasMore;renderInbox(d.officialAvailable);}
-      else if(['users','site','services','bookings'].includes(section)){await globalThis.SabeqControl.mount(content(),section,api,toast,()=>{token='';manager=null;sessionStorage.removeItem(SESSION);loginScreen('حُفظت بيانات دخولك. سجّل الدخول بالاسم وكلمة المرور المعتمدين الآن.');},manager.role);}
+      else if(['users','site','services','bookings'].includes(section)){await globalThis.SabeqControl.mount(content(),section,api,toast,()=>{token='';manager=null;sessionStorage.removeItem(SESSION);loginScreen('حُفظت بيانات الدخول. سجّل الدخول مجدداً للمتابعة.');},manager.role);}
       else if(section==='legislation'){await globalThis.SabeqLegislation.mount(content(),api,managementFile,toast);}
       else if(section==='programmer'){const settings=await api('programmer');globalThis.SabeqProgrammer.mount(content(),settings,api,toast);}
       else if(section==='paths'){const d=await api('paths');renderPaths(d);}

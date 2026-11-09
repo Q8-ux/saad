@@ -1,5 +1,5 @@
 {
-  "revision": "independent-admin-17-control-accounts-mail-test",
+  "revision": "independent-admin-18-account-entry",
   "backendSource": "59092caf21919597d2ccc6db1cd20bb12ac5f21c",
   "sourceRepository": "https://github.com/Q8-ux/saad",
   "paymentVisibility": "admin-only-by-default",
@@ -63,5 +63,10 @@
   "gmailDrafts": "original-saved-output-deduplicated",
   "gmailTestsPassed": 10,
   "gmailLiveConsentVerified": false,
-  "gmailLiveDeliveryVerified": false
+  "gmailLiveDeliveryVerified": false,
+  "adminEntry": "authorized-account-pkce",
+  "adminPasswordForm": false,
+  "adminEntryAuthentication": "existing-platform-identity-and-server-authorization",
+  "adminEntryValidation": "24-targeted-tests;both-ui-syntax-checks",
+  "adminEntryPublishedAt": "2026-11-09"
 }
