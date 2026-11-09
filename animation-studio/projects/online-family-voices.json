@@ -1,0 +1,79 @@
+{
+  "title": "عائلة أونلاين — تجارب أصوات عربية بنص كويتي",
+  "notes": "الأصوات عربية اصطناعية تجريبية، ولم يتم التحقق من تطابقها مع اللكنة الكويتية. روابط مزود خارجي وقد تنتهي صلاحيتها. مشاهد متعددة المتحدثين تحتاج فصل الحوارات مستقبلًا.",
+  "provider": "heygen",
+  "scenes": [
+    {
+      "scene": 1,
+      "role": "الراوي",
+      "url": "https://resource2.heygen.ai/text_to_speech/9e392e8f43a14aafb78f40ba5b452186/24c7556125674f17bc2c4904074827e5/id=641d18c921254862819d091ea47c4dd5.wav",
+      "durationSeconds": 8.948
+    },
+    {
+      "scene": 2,
+      "role": "مشاري",
+      "url": "https://resource2.heygen.ai/text_to_speech/9e392e8f43a14aafb78f40ba5b452186/24c7556125674f17bc2c4904074827e5/id=a1eacab3fb424303894e41fbb84d8789.wav",
+      "durationSeconds": 3.503
+    },
+    {
+      "scene": 3,
+      "role": "الأم",
+      "url": "https://resource2.heygen.ai/text_to_speech/9e392e8f43a14aafb78f40ba5b452186/deb98dd585124adc9b0e547b161cb2a0/id=f33f8aff74aa4ea888bd1cd7ce7424ef.wav",
+      "durationSeconds": 5.802
+    },
+    {
+      "scene": 4,
+      "role": "أحمد",
+      "url": "https://resource2.heygen.ai/text_to_speech/9e392e8f43a14aafb78f40ba5b452186/dc4ee8e4f0bc4099ad5be2a8431ca556/id=e69a250abf7a42638d1e88084bd95fb3.wav",
+      "durationSeconds": 6.603
+    },
+    {
+      "scene": 5,
+      "role": "مشاري",
+      "url": "https://resource2.heygen.ai/text_to_speech/9e392e8f43a14aafb78f40ba5b452186/24c7556125674f17bc2c4904074827e5/id=fc5a929873c14f2facb2feed13c1bfb2.wav",
+      "durationSeconds": 3.376
+    },
+    {
+      "scene": 6,
+      "role": "الراوي",
+      "url": "https://resource2.heygen.ai/text_to_speech/9e392e8f43a14aafb78f40ba5b452186/033e70e372284077883e538608b65b69/id=48529b1c3b24419ca1d3d1e50cf37427.wav",
+      "durationSeconds": 4.687
+    },
+    {
+      "scene": 7,
+      "role": "مشاري",
+      "url": "https://resource2.heygen.ai/text_to_speech/9e392e8f43a14aafb78f40ba5b452186/24c7556125674f17bc2c4904074827e5/id=b4d0257f9ce7411d884d93205cb06ff1.wav",
+      "durationSeconds": 3.503
+    },
+    {
+      "scene": 8,
+      "role": "الراوي",
+      "url": "https://resource2.heygen.ai/text_to_speech/9e392e8f43a14aafb78f40ba5b452186/033e70e372284077883e538608b65b69/id=75347dcce7a14ef4af81e5ca42b0391a.wav",
+      "durationSeconds": 4.432
+    },
+    {
+      "scene": 9,
+      "role": "أحمد",
+      "url": "https://resource2.heygen.ai/text_to_speech/9e392e8f43a14aafb78f40ba5b452186/dc4ee8e4f0bc4099ad5be2a8431ca556/id=150d6bc6119f46009c76d153474f75e8.wav",
+      "durationSeconds": 4.223
+    },
+    {
+      "scene": 10,
+      "role": "ناصر",
+      "url": "https://resource2.heygen.ai/text_to_speech/9e392e8f43a14aafb78f40ba5b452186/dc4ee8e4f0bc4099ad5be2a8431ca556/id=b68d590994f449ca889da863b74161f5.wav",
+      "durationSeconds": 5.338
+    },
+    {
+      "scene": 11,
+      "role": "أحمد",
+      "url": "https://resource2.heygen.ai/text_to_speech/9e392e8f43a14aafb78f40ba5b452186/dc4ee8e4f0bc4099ad5be2a8431ca556/id=3aa962af1f8341638d113f7db9658e2a.wav",
+      "durationSeconds": 4.989
+    },
+    {
+      "scene": 12,
+      "role": "الراوي",
+      "url": "https://resource2.heygen.ai/text_to_speech/9e392e8f43a14aafb78f40ba5b452186/033e70e372284077883e538608b65b69/id=643d647991454b388b9191cae13f3468.wav",
+      "durationSeconds": 4.142
+    }
+  ]
+}
