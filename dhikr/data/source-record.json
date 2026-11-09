@@ -1,0 +1,21 @@
+{
+  "edition": "quran-uthmani",
+  "urls": [
+    "https://api.alquran.cloud/v1/surah/1/quran-uthmani",
+    "https://api.alquran.cloud/v1/surah/2/quran-uthmani",
+    "https://api.alquran.cloud/v1/surah/3/quran-uthmani",
+    "https://api.alquran.cloud/v1/surah/37/quran-uthmani",
+    "https://api.alquran.cloud/v1/surah/67/quran-uthmani",
+    "https://api.alquran.cloud/v1/surah/99/quran-uthmani",
+    "https://api.alquran.cloud/v1/surah/109/quran-uthmani",
+    "https://api.alquran.cloud/v1/surah/112/quran-uthmani",
+    "https://api.alquran.cloud/v1/surah/113/quran-uthmani",
+    "https://api.alquran.cloud/v1/surah/114/quran-uthmani"
+  ],
+  "sha256": "2ce46c93a61cb61b79c0c00c57a70c1e546cecda5132fe223cd8b94aa3fc0186",
+  "uniqueVerses": 337,
+  "translations": {
+    "en": "en.pickthall",
+    "ur": "ur.jalandhry"
+  }
+}

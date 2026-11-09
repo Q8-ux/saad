@@ -1,0 +1,60 @@
+name: Publish Dhikr Reading and Listening
+on:
+  push:
+    branches: [main]
+    paths: ['dhikr/**', '.github/workflows/deploy-dhikr.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages-v2
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: 24}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Verify Quran passages, languages and playback sequence
+        working-directory: dhikr
+        run: npm run check && npm test
+      - uses: actions/configure-pages@v5
+      - name: Preserve published sites and add the reading site
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python dhikr/deployment/publish.py
+      - uses: actions/upload-pages-artifact@v3
+        with: {path: _site, retention-days: 30}
+      - name: Deploy
+        id: deploy
+        uses: actions/deploy-pages@v4
+      - name: Verify live release
+        env:
+          RELEASE_SHA: ${{ github.sha }}
+        run: |
+          python - <<'PY'
+          import json,os,time,urllib.request
+          url='https://q8-ux.github.io/saad/dhikr/release.json?commit='+os.environ['RELEASE_SHA']
+          for attempt in range(6):
+              try:
+                  request=urllib.request.Request(url,headers={'Cache-Control':'no-cache'})
+                  with urllib.request.urlopen(request,timeout=20) as response:
+                      release=json.load(response)
+                  if release.get('commit')==os.environ['RELEASE_SHA']:
+                      print('Live release verified:',release['commit'])
+                      break
+              except Exception as error:
+                  print('Waiting for live release:',str(error))
+              if attempt==5:
+                  raise SystemExit('Live release does not match the deployed source')
+              time.sleep(8)
+          PY

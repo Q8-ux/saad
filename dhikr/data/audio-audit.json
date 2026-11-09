@@ -1,0 +1,510 @@
+{
+  "checked": "2026-11-09",
+  "source": "https://everyayah.com/data/MaherAlMuaiqly128kbps/",
+  "files": [
+    {
+      "file": "001001.mp3",
+      "status": 200,
+      "bytes": "90341",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "001002.mp3",
+      "status": 200,
+      "bytes": "53917",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "001003.mp3",
+      "status": 200,
+      "bytes": "42214",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "001004.mp3",
+      "status": 200,
+      "bytes": "47647",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "001005.mp3",
+      "status": 200,
+      "bytes": "60186",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "001006.mp3",
+      "status": 200,
+      "bytes": "36780",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "001007.mp3",
+      "status": 200,
+      "bytes": "163840",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "002001.mp3",
+      "status": 200,
+      "bytes": "77322",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "002002.mp3",
+      "status": 200,
+      "bytes": "90697",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "002003.mp3",
+      "status": 200,
+      "bytes": "124552",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "002004.mp3",
+      "status": 200,
+      "bytes": "168020",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "002005.mp3",
+      "status": 200,
+      "bytes": "129567",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "002016.mp3",
+      "status": 200,
+      "bytes": "170527",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "002017.mp3",
+      "status": 200,
+      "bytes": "259135",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "002018.mp3",
+      "status": 200,
+      "bytes": "94459",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "002019.mp3",
+      "status": 200,
+      "bytes": "295915",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "002020.mp3",
+      "status": 200,
+      "bytes": "388702",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "002021.mp3",
+      "status": 200,
+      "bytes": "209398",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "002022.mp3",
+      "status": 200,
+      "bytes": "345234",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "002023.mp3",
+      "status": 200,
+      "bytes": "354847",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "002024.mp3",
+      "status": 200,
+      "bytes": "192261",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "002025.mp3",
+      "status": 200,
+      "bytes": "561319",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "002026.mp3",
+      "status": 200,
+      "bytes": "496118",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "002027.mp3",
+      "status": 200,
+      "bytes": "308036",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "002028.mp3",
+      "status": 200,
+      "bytes": "224026",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "002029.mp3",
+      "status": 200,
+      "bytes": "336039",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "002030.mp3",
+      "status": 200,
+      "bytes": "366968",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "003001.mp3",
+      "status": 200,
+      "bytes": "99474",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "003002.mp3",
+      "status": 200,
+      "bytes": "91115",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "003003.mp3",
+      "status": 200,
+      "bytes": "142524",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "003004.mp3",
+      "status": 200,
+      "bytes": "360281",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "003005.mp3",
+      "status": 200,
+      "bytes": "124970",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "002255.mp3",
+      "status": 200,
+      "bytes": "669989",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "002285.mp3",
+      "status": 200,
+      "bytes": "465607",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "002286.mp3",
+      "status": 200,
+      "bytes": "791615",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "037001.mp3",
+      "status": 200,
+      "bytes": "55171",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "037002.mp3",
+      "status": 200,
+      "bytes": "39288",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "037003.mp3",
+      "status": 200,
+      "bytes": "38034",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "037004.mp3",
+      "status": 200,
+      "bytes": "54335",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "037005.mp3",
+      "status": 200,
+      "bytes": "86518",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "067001.mp3",
+      "status": 200,
+      "bytes": "96549",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "067002.mp3",
+      "status": 200,
+      "bytes": "135837",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "067003.mp3",
+      "status": 200,
+      "bytes": "186410",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "067004.mp3",
+      "status": 200,
+      "bytes": "121208",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "067005.mp3",
+      "status": 200,
+      "bytes": "220264",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "099001.mp3",
+      "status": 200,
+      "bytes": "55171",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "099002.mp3",
+      "status": 200,
+      "bytes": "49737",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "099003.mp3",
+      "status": 200,
+      "bytes": "60604",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "099004.mp3",
+      "status": 200,
+      "bytes": "61440",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "099005.mp3",
+      "status": 200,
+      "bytes": "48483",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "099006.mp3",
+      "status": 200,
+      "bytes": "92787",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "099007.mp3",
+      "status": 200,
+      "bytes": "77740",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "099008.mp3",
+      "status": 200,
+      "bytes": "90279",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "109001.mp3",
+      "status": 200,
+      "bytes": "60604",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "109002.mp3",
+      "status": 200,
+      "bytes": "55171",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "109003.mp3",
+      "status": 200,
+      "bytes": "74815",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "109004.mp3",
+      "status": 200,
+      "bytes": "62694",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "109005.mp3",
+      "status": 200,
+      "bytes": "82756",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "109006.mp3",
+      "status": 200,
+      "bytes": "49319",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "112001.mp3",
+      "status": 200,
+      "bytes": "30511",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "112002.mp3",
+      "status": 200,
+      "bytes": "25078",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "112003.mp3",
+      "status": 200,
+      "bytes": "33437",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "112004.mp3",
+      "status": 200,
+      "bytes": "46393",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "113001.mp3",
+      "status": 200,
+      "bytes": "39706",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "113002.mp3",
+      "status": 200,
+      "bytes": "38870",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "113003.mp3",
+      "status": 200,
+      "bytes": "53499",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "113004.mp3",
+      "status": 200,
+      "bytes": "61440",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "113005.mp3",
+      "status": 200,
+      "bytes": "60186",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "114001.mp3",
+      "status": 200,
+      "bytes": "56842",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "114002.mp3",
+      "status": 200,
+      "bytes": "40124",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "114003.mp3",
+      "status": 200,
+      "bytes": "35527",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "114004.mp3",
+      "status": 200,
+      "bytes": "68963",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "114005.mp3",
+      "status": 200,
+      "bytes": "64784",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "114006.mp3",
+      "status": 200,
+      "bytes": "63948",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "002000.mp3",
+      "status": 200,
+      "bytes": "50991",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "003000.mp3",
+      "status": 200,
+      "bytes": "43886",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "037000.mp3",
+      "status": 200,
+      "bytes": "39706",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "067000.mp3",
+      "status": 200,
+      "bytes": "38452",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "099000.mp3",
+      "status": 200,
+      "bytes": "46393",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "109000.mp3",
+      "status": 200,
+      "bytes": "44304",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "112000.mp3",
+      "status": 200,
+      "bytes": "45558",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "113000.mp3",
+      "status": 200,
+      "bytes": "41378",
+      "type": "audio/mpeg"
+    },
+    {
+      "file": "114000.mp3",
+      "status": 200,
+      "bytes": "45140",
+      "type": "audio/mpeg"
+    }
+  ],
+  "directoryAudit": {
+    "method": "GET source directory index",
+    "uniqueRequiredFiles": 346,
+    "allPresent": true,
+    "missing": []
+  }
+}
