@@ -152,6 +152,12 @@ export function buildPleadingDocument(template: TemplateInfo, definition: Templa
     const hasReplies = Boolean(memo.replies);
     const hasDocuments = Boolean(memo.documents);
     const section = (index:number,label:string) => h(`${["أولًا","ثانيًا","ثالثًا","رابعًا","خامسًا"][index]}: ${label}`);
+    const paragraphs = (text:string,numberFacts=false) => text.split(/\n+/u).map(line=>line.trim()).filter(Boolean).map((line,index)=>{
+      const plain=line.replace(/[\u064b-\u065f\u0670]/gu,"");
+      const numbered=/^(?:[\d٠-٩۰-۹]{1,3}\s*[.)\-–]\s*|(?:أولا|ثانيا|ثالثا|رابعا|خامسا|سادسا|سابعا|ثامنا|تاسعا|عاشرا)\s*[:：\-])/u.test(plain);
+      const defenseHeading=!numberFacts&&line.length<=160&&/^(?:(?:الدفع|السبب)\s|(?:[\d٠-٩۰-۹]{1,3}\s*[.)\-–]\s*|(?:أولا|ثانيا|ثالثا|رابعا|خامسا|سادسا|سابعا|ثامنا|تاسعا|عاشرا)\s*[:：\-]\s*)(?:الدفع|السبب)\s)/u.test(plain);
+      return p(numberFacts&&!numbered?`${index+1}- ${line}`:line,defenseHeading?"heading":undefined);
+    });
     pages.push({title:"مذكرة بدفاع",
       blocks:[
         p(`في الدعوى المنظورة أمام ${court}`),
@@ -159,13 +165,13 @@ export function buildPleadingDocument(template: TemplateInfo, definition: Templa
         p(`مقدمة من: ${role}`),
         p(`ضد: ${input.otherParty}`),
         ...(input.allParties ? [p(input.allParties)] : []),
-        section(0,"الوقائع"),p(facts),
-        ...(hasDefenses ? [section(1,"الدفوع وأوجه الدفاع"),p(memo.defenses)] : []),
-        ...(hasReplies ? [section(hasDefenses ? 2 : 1,"الرد على حجج الخصم"),p(memo.replies)] : []),
+        section(0,"الوقائع"),...paragraphs(facts,true),
+        ...(hasDefenses ? [section(1,"الدفوع وأوجه الدفاع"),...paragraphs(memo.defenses)] : []),
+        ...(hasReplies ? [section(hasDefenses ? 2 : 1,"الرد على حجج الخصم"),...paragraphs(memo.replies)] : []),
         section(1+Number(hasDefenses)+Number(hasReplies),"الطلبات"),
         p(`${L.therefore || "لكل ما تقدم"}، ${C.relief || "يلتمس مقدم المذكرة الحكم بما يلي:"}`),
-        p(requests),
-        ...(hasDocuments ? [section(2+Number(hasDefenses)+Number(hasReplies),"حافظة المستندات"),p(memo.documents)] : []),
+        ...paragraphs(requests),
+        ...(hasDocuments ? [section(2+Number(hasDefenses)+Number(hasReplies),"حافظة المستندات"),...paragraphs(memo.documents)] : []),
       ]});
   }
   if (input.allParties && kind !== "memorandum") pages[0].blocks.push(h("بقية الأطراف والصفات"),p(input.allParties));
@@ -194,3 +200,4 @@ export function renderPleadingHtml(doc: PleadingDocument) {
 export function renderArabicMemoHtml(text: string) {
   return `<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>مذكرة قانونية</title><style>@font-face{font-family:Mohanad;src:url('https://q8-ux.github.io/saad/sabeq-legal/assets/al-mohanad.ttf')}html,body{direction:rtl;text-align:right}body{font-family:Mohanad,Arial,sans-serif;font-size:18px;line-height:1.9;padding:24px;white-space:pre-wrap;overflow-wrap:anywhere}@page{size:A4;margin:18mm}.continuation-page{padding:0}@media print{body{padding:0;font-size:14pt}}</style></head><body lang="ar" dir="rtl">${escapeDocument(stripPleadingResearchAnnotations(text))}</body></html>`;
 }
+

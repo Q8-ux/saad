@@ -7,8 +7,8 @@ import {preserveLegalQuotes,draftStatutoryText} from '@/lib/statutory-text';
 import { missingPlannedStatutoryCitations } from "@/lib/statutory-authority-coverage";
 import { reviewMissingLegalIssues } from "@/lib/meta-secondary-review";
 import { councilDefenseAuditInstructions, councilDefenseRevisionInstructions } from "@/lib/council-defense-review";
-import {scopeEvidenceToFacts,prepareBoundDraft,pleadingAuthorityInstructions} from "@/lib/bound-draft";
-import { applyCheckedJudgmentMatches, caseReasoningInstructions, caseResearchQueries, approvedCaseFacts, buildCheckedCasePlan, CasePlanValidationError, casePlanFailureMessage, caseAuditRequestForContent, parseGroundedCaseAudit, caseQualitySummary, defenseAuditInstructions, defenseRevision } from "@/lib/case-reasoning";
+import {scopeEvidenceToFacts,prepareBoundDraft,pleadingAuthorityInstructions,pleadingStyleRevision} from "@/lib/bound-draft";
+import { applyCheckedJudgmentMatches, caseReasoningInstructions, caseResearchQueries, approvedCaseFacts, buildCheckedCasePlan, CasePlanValidationError, casePlanFailureMessage, caseAuditRequestForContent, parseGroundedCaseAudit, caseQualitySummary, reviewCaseContent, memoCompletenessRevision, defenseAuditInstructions, defenseRevision } from "@/lib/case-reasoning";
 import { legalSourceCoverage, formatSourceCoverage } from "@/lib/legal-source-coverage";
 import { loadApprovedTemplate } from "@/lib/approved-templates";
 import { arabicMemoInput } from "@/lib/memo-language";
@@ -194,6 +194,7 @@ export async function POST(request: Request) {
       }
       content.legalResearchNotes = evidence.length ? stripInternalMemoLanguage(removeDelegatedResearch(content.legalResearchNotes)) : "";
       content.factualNotes = factualRequirements([...new Set([...content.factualNotes,...preparationNotes,...matter.missing.map(g=>g.ar),...checkedPlan.missingFacts,...checkedPlan.issues.map(i=>i.missing).filter(Boolean)])]);
+      const contentReview=reviewCaseContent(content);
       let caseAudit = null;
       {
           const auditRequest=caseAuditRequestForContent(checkedPlan,content);
@@ -204,13 +205,13 @@ export async function POST(request: Request) {
         try {
           caseAudit = parseGroundedCaseAudit(auditText,auditRequest,checkedPlan,content,evidence);
         } catch { throw new RequestError("لم تكتمل مراجعة اتساق الدفوع والوقائع. احتفظ ببياناتك وأعد المحاولة.",422); }
-        if(!caseAudit.ok) {
+        if(!caseAudit.ok || !contentReview.ok) {
           if(qualityRetried&&!paymentLease&&!content.grounds.trim()&&caseAudit.roleConsistent&&caseAudit.factsPreserved&&caseAudit.reliefConsistent&&!caseAudit.unsupportedAssertions.length&&caseAudit.checks.every(check=>check.status==="blocked"))return pendingSourceReview(["defense_research_pending"]);
           if(qualityRetried) {
-            await finishMemoRequest(managementRequestId,"needs_review","","defense_review");
-            return privateJson({requestId:managementRequestId,error:"لم تجتز المذكرة مراجعة اكتمال الدفوع وربطها بالوقائع والردود والأسانيد المتاحة. احتُفظ ببيانات القضية للمراجعة.",stage:"defense_review",review:{roleConsistent:caseAudit.roleConsistent,factsPreserved:caseAudit.factsPreserved,reliefConsistent:caseAudit.reliefConsistent,blockedIssueIndexes:caseAudit.checks.filter(c=>c.status==="blocked").map(c=>c.issueIndex),omittedIssueIndexes:caseAudit.checks.filter(c=>c.status==="omitted").map(c=>c.issueIndex),unsupportedAssertionCount:caseAudit.unsupportedAssertions.length,excerptOptionCounts:caseAudit.excerptOptionCounts,selectedApplications:caseAudit.selectedApplications,issues:caseAudit.defenseReview?.issues||[]}},422);
+            await finishMemoRequest(managementRequestId,"needs_review","",contentReview.ok?"defense_review":"document_review");
+            return privateJson({requestId:managementRequestId,error:"لم تجتز المذكرة مراجعة اكتمال الوقائع والدفوع والطلبات وربطها بالأسانيد المتاحة. احتُفظ ببيانات القضية للمراجعة.",stage:contentReview.ok?"defense_review":"document_review",review:{sectionIssues:contentReview.issues,roleConsistent:caseAudit.roleConsistent,factsPreserved:caseAudit.factsPreserved,reliefConsistent:caseAudit.reliefConsistent,blockedIssueIndexes:caseAudit.checks.filter(c=>c.status==="blocked").map(c=>c.issueIndex),omittedIssueIndexes:caseAudit.checks.filter(c=>c.status==="omitted").map(c=>c.issueIndex),unsupportedAssertionCount:caseAudit.unsupportedAssertions.length,excerptOptionCounts:caseAudit.excerptOptionCounts,selectedApplications:caseAudit.selectedApplications,issues:caseAudit.defenseReview?.issues||[]}},422);
           }
-          const revised=await generateText({instructions:`${caseReasoningInstructions}\n${legalResearchInstructions}\n${councilDefenseRevisionInstructions}\nأصلح المذكرة بناء على مراجعة مستقلة. لكل مسألة: دفع محدد وتطبيق يضم عبارة قصيرة حرفية من factQuote، ثم أقوى اعتراض محتمل والرد المسبب عليه. حافظ على الوقائع المعتمدة والصفات والطلبات. ضع 【م1】 مباشرة بعد السند المطابق فقط من sourceMarkers المسألة. عند غياب السند حلل الوقائع دون قاعدة قانونية مختلقة، وسجل النقص خارج المتن. لا تكتف بتحفظ عام ولا تكرر التطبيق ذاته لعدة مسائل. النواقص خارج المتن في factualNotes وlegalResearchNotes. لا تضف طلباً جوهرياً غير مأذون؛ ضع المقترحات في factualNotes. أعد المحتوى المنظم فقط دون ديباجة.`,input:JSON.stringify({approvedFacts:approvedCaseFacts(memoInput),input:memoInput,plan:checkedPlan,content,audit:caseAudit,sources:formatEvidence(evidence)}),schema:pleadingContentSchema,maxOutputTokens:24000});
+          const revised=await generateText({instructions:`${caseReasoningInstructions}\n${legalResearchInstructions}\n${councilDefenseRevisionInstructions}\nأصلح المذكرة كاملة بناء على مراجعة مستقلة وفحص contentReview. أعد صياغة كل قسم ناقص من الوقائع والطلبات المعتمدة دون تعويضه بعنوان أو نقاط فارغة؛ لا تحذف الدفوع القائمة أو تغير الأسماء والصفات والمبالغ والتواريخ وحدود الطلبات. الوقائع مرقمة بترتيبها الزمني، والطلبات الأصلية والاحتياطية منفصلة فقط إذا كانت مأذونة. لكل مسألة: دفع محدد وتطبيق يضم عبارة قصيرة حرفية من factQuote، ثم أقوى اعتراض محتمل والرد المسبب عليه. حافظ على الوقائع المعتمدة والصفات والطلبات. ضع 【م1】 مباشرة بعد السند المطابق فقط من sourceMarkers المسألة. عند غياب السند حلل الوقائع دون قاعدة قانونية مختلقة، وسجل النقص خارج المتن. لا تكتف بتحفظ عام ولا تكرر التطبيق ذاته لعدة مسائل. النواقص خارج المتن في factualNotes وlegalResearchNotes. لا تضف طلباً جوهرياً غير مأذون؛ ضع المقترحات في factualNotes. أعد المحتوى المنظم فقط دون ديباجة.`,input:JSON.stringify({approvedFacts:approvedCaseFacts(memoInput),input:memoInput,plan:checkedPlan,content,contentReview,audit:caseAudit,sources:formatEvidence(evidence)}),schema:pleadingContentSchema,maxOutputTokens:24000});
           return finish(parsePleadingContent(revised),true);
         }
       }
@@ -223,7 +224,7 @@ export async function POST(request: Request) {
       signal.throwIfAborted();
       await finishMemoRequest(managementRequestId, "needs_review", finalMemo, "draft_generated");
       if(user) await recordServiceActivity({userId:user.id,serviceType:"memo",title:`${document.title} — ${clientName}`,inputText:JSON.stringify({...memoInput,legalIssues}),outputText:finalMemo,metadata:{managementRequestId,sourceCount:sources.length,caseNumber,template:template.info,documentKind:document.kind,pageSections:document.pages.length}});
-      const responseData = {requestId:managementRequestId,caseQuality,sourceCoverage:legalSourceCoverage(evidence),memo:finalMemo,document,template:template.info,sourceVerification:officialVerificationSummary(),memoControlRevision,defenseRevision,engineRevision:"reference-memo-sequence-verified-statutes-1",analysis:{sourceCount:sources.length,lawCount:sources.filter(s=>s.kind==="legislation").length,cassationCount:sources.filter(s=>s.kind==="cassation").length,sources,missingSources:!sources.length,researchNotice:caseQuality.status==="incomplete"?caseQuality.notices.join(" "):"",...(agentAudit?{agentAudit}:{})}};
+      const responseData = {requestId:managementRequestId,caseQuality,sourceCoverage:legalSourceCoverage(evidence),memo:finalMemo,document,template:template.info,sourceVerification:officialVerificationSummary(),memoControlRevision,defenseRevision,engineRevision:memoCompletenessRevision,pleadingStyleRevision,analysis:{sourceCount:sources.length,lawCount:sources.filter(s=>s.kind==="legislation").length,cassationCount:sources.filter(s=>s.kind==="cassation").length,sources,missingSources:!sources.length,researchNotice:caseQuality.status==="incomplete"?caseQuality.notices.join(" "):"",...(agentAudit?{agentAudit}:{})}};
       await completeMemoPayment(paymentLease, responseData);
       return privateJson(responseData);
     }
@@ -276,3 +277,4 @@ export async function POST(request: Request) {
     await releaseMemoPayment(paymentLease).catch(() => undefined);
   }
 }
+

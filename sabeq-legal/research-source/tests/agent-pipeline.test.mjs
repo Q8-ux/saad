@@ -51,11 +51,12 @@ test('no-source response preserves facts and rejects invented legal grounds',asy
  }
 });
 
-function memoRoute(h, {pipeline, sources=evidence, auth=async()=>null, limits=async()=>{},model,record=async()=>{},paid=false}) {
+function memoRoute(h, {pipeline, sources=evidence, auth=async()=>null, limits=async()=>{},model,record=async()=>{},paid=false,complete=async()=>{},ledger}) {
  const search=load('../lib/legal-search.ts',{'@/db':{}});
  return load('../app/api/legal/memo/route.ts',{
   '@/lib/approved-templates':h.templates,'@/lib/sabeq-agent-bridge':pipeline,
-  '@/lib/sadad-payments':{reserveMemoPayment:async()=>paid?{lease:{id:'synthetic-paid-order'}}:{},completeMemoPayment:async()=>{},releaseMemoPayment:async()=>{}},
+  '@/lib/sadad-payments':{reserveMemoPayment:async()=>paid?{lease:{id:'synthetic-paid-order'}}:{},completeMemoPayment:complete,releaseMemoPayment:async()=>{}},
+  ...(ledger?{'@/lib/memo-requests':ledger}:{}),
   '@/lib/legal-search':{...search,searchLegalEvidenceAcross:async()=>sources,searchCassationEvidenceAcross:async()=>[],readHandoffEvidence:async()=>[]},
   '@/lib/openai':{deriveLegalResearchPlan:async()=>({searchQueries:[],legalIssues:[]}),openAIErrorResponse:()=>null,generateText:async options=>{
    if(model) return model(options);
@@ -235,4 +236,37 @@ test('prose cleanup runs before statutory decoration so a removed internal sourc
  const route=memoRoute(h,{sources:[controlSource],auth:async()=>({id:'synthetic-cleanup-order'}),record:async row=>archived.push(row),pipeline:{agentPipelineEnabled:()=>true,generateAgentPleading:async()=>({content:{...content,grounds:dirty},audit:{}})},model:controlledMemoModel('【م1】',()=>{corrections++;})});
  const response=await route.POST(request());const value=await response.json();assert.equal(response.status,200,JSON.stringify(value));assert.equal(corrections,1);
  assert.ok(value.memo.includes(controlSource.text));assert.doesNotMatch(value.memo,/ملاحظات المراجعة|يتولى المساعد/);assert.equal(value.caseQuality.audit.ok,true);assert.equal(archived.length,1);
+});
+
+
+test('missing facts or relief are corrected once on either drafting path before identical final text reaches both archives',async t=>{
+ for(const agents of [false,true])for(const field of ['facts','requests']){
+  const h=templateHarness();t.after(h.cleanup);const records=[],ledger=[],baseline=controlledMemoModel('【م1】');let drafts=0,completed=0;
+  const broken={...content,[field]:''};
+  const route=memoRoute(h,{paid:true,sources:[controlSource],auth:async()=>({id:'synthetic-complete-case'}),record:async row=>records.push(row),complete:async()=>{completed++;},
+   ledger:{startMemoRequest:async()=> 'synthetic-complete-request',finishMemoRequest:async(...args)=>ledger.push(args)},
+   pipeline:{agentPipelineEnabled:()=>agents,generateAgentPleading:async()=>({content:broken,audit:{}})},
+   model:async options=>{
+    if(options.schema?.properties?.facts){drafts++;return JSON.stringify(agents||drafts>1?content:broken);}
+    return baseline(options);
+   }});
+  const response=await route.POST(request()),result=await response.json();
+  assert.equal(response.status,200,JSON.stringify(result));assert.equal(drafts,agents?1:2);
+  assert.equal(result.caseQuality.contentReview.ok,true);assert.equal(result.engineRevision,'complete-memorandum-delivery-1');
+  assert.ok(result.memo.includes(caseData.facts));assert.ok(result.memo.includes(caseData.requests));assert.ok(result.memo.includes(controlSource.text));
+  assert.equal(records.length,1);assert.equal(records[0].outputText,result.memo);
+  assert.equal(ledger.filter(row=>row[3]==='draft_generated').length,1);assert.equal(ledger.find(row=>row[3]==='draft_generated')[2],result.memo);assert.equal(completed,1);
+ }
+});
+test('persistent missing relief cannot be silently filled from the input, archived or consume a paid entitlement',async t=>{
+ const h=templateHarness();t.after(h.cleanup);const baseline=controlledMemoModel('【م1】'),broken={...content,requests:''},ledger=[];let repairs=0,archived=0,completed=0;
+ const route=memoRoute(h,{paid:true,sources:[controlSource],auth:async()=>({id:'synthetic-incomplete-case'}),record:async()=>{archived++;},complete:async()=>{completed++;},
+  ledger:{startMemoRequest:async()=> 'synthetic-incomplete-request',finishMemoRequest:async(...args)=>ledger.push(args)},
+  pipeline:{agentPipelineEnabled:()=>true,generateAgentPleading:async()=>({content:broken,audit:{}})},
+  model:async options=>{if(options.schema?.properties?.facts){repairs++;return JSON.stringify(broken);}return baseline(options);}});
+ const response=await route.POST(request()),result=await response.json();
+ assert.equal(response.status,422);assert.equal(result.stage,'document_review');assert.equal(result.memo,undefined);
+ assert.equal(repairs,1);assert.equal(archived,0);assert.equal(completed,0);
+ assert.ok(result.review.sectionIssues.some(issue=>issue.section==='requests'));
+ assert.ok(ledger.every(row=>!row[2]&&row[3]!=='draft_generated'));
 });

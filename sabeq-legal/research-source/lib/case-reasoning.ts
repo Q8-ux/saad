@@ -252,8 +252,23 @@ export function parseCaseAudit(raw:string,plan:CasePlan,content?:PleadingContent
   const consistent=a.roleConsistent&&a.factsPreserved&&a.reliefConsistent&&!a.unsupportedAssertions.length;
   return { ...a,defenseReview, ok:consistent&&a.checks.every(c=>c.status==="addressed")&&(!defenseReview||defenseReview.ok), complete:a.checks.every(c=>c.status==="addressed")&&!plan.missingFacts.length&&!plan.researchGaps.length&&plan.issues.every(i=>i.sourceMarkers.length>0&&!i.missing)&&(!defenseReview||defenseReview.ok)&&(!content||a.checks.every(c=>Boolean(c.substance?.sourceMarkers.length))) };
 }
-export function caseQualitySummary(plan:CasePlan,audit:ReturnType<typeof parseCaseAudit>|null,content:PleadingContent,sourceCount:number) {
-  const notices=[...plan.missingFacts,...plan.researchGaps,...plan.issues.map(i=>i.missing).filter(Boolean),...content.factualNotes];
-  if(!sourceCount) notices.push("لا توجد مصادر قانونية موثقة مناسبة؛ الناتج تنظيم للوقائع والطلبات وليس مذكرة دفاع مكتملة.");
-  return {revision:"case-grounded-memo-1",defenseRevision,defenseCoverage:audit?.defenseReview||null,status:sourceCount&&audit?.ok&&audit.complete&&content.grounds.trim()?"review_required":"incomplete",humanReviewRequired:true,plan,audit,notices:[...new Set(notices)]};
+export const memoCompletenessRevision = "complete-memorandum-delivery-1";
+export function reviewCaseContent(content: Pick<PleadingContent,"facts"|"grounds"|"requests">) {
+  const labels = {facts:"الوقائع",grounds:"الدفوع والأسانيد",requests:"الطلبات"};
+  const issues: Array<{section:keyof typeof labels;code:"missing_section"|"placeholder_section";message:string}> = [];
+  for (const section of Object.keys(labels) as Array<keyof typeof labels>) {
+    const text = typeof content[section] === "string" ? content[section].trim() : "";
+    const bare = text.normalize("NFKC").replace(/[\u064b-\u065f\u0670]/gu,"").replace(/[أإآ]/gu,"ا").replace(/[^\p{L}\p{N}\s]/gu,"").replace(/\s+/gu," ").trim();
+    const placeholder = /^(?:الوقائع|الدفوع(?: واوجه الدفاع)?|الاسباب|الطلبات|يستكمل(?: لاحقا)?|تستكمل(?: لاحقا)?|قيد الاستكمال|لا يوجد|TODO|TBD)$/iu.test(bare);
+    if (!text || !/\p{L}/u.test(bare) || placeholder) issues.push({section,code:text?"placeholder_section":"missing_section",message:`لم تكتمل صياغة قسم ${labels[section]}؛ يلزم تصحيحه قبل تسليم المذكرة.`});
+  }
+  return {revision:memoCompletenessRevision,ok:issues.length===0,issues};
 }
+export function caseQualitySummary(plan:CasePlan,audit:ReturnType<typeof parseCaseAudit>|null,content:PleadingContent,sourceCount:number) {
+  const contentReview=reviewCaseContent(content);
+  const notices=[...plan.missingFacts,...plan.researchGaps,...plan.issues.map(i=>i.missing).filter(Boolean),...content.factualNotes];
+  notices.push(...contentReview.issues.map(issue=>issue.message));
+  if(!sourceCount) notices.push("لا توجد مصادر قانونية موثقة مناسبة؛ الناتج تنظيم للوقائع والطلبات وليس مذكرة دفاع مكتملة.");
+  return {revision:"case-grounded-memo-1",defenseRevision,contentReview,defenseCoverage:audit?.defenseReview||null,status:contentReview.ok&&sourceCount&&audit?.ok&&audit.complete?"review_required":"incomplete",humanReviewRequired:true,plan,audit,notices:[...new Set(notices)]};
+}
+
