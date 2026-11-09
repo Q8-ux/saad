@@ -28,7 +28,10 @@
     ],
     "marketPriceSourceName": "Talabat Mart",
     "subcategory": "اللحوم والدجاج",
-    "categoryKey": "لحوم ودواجن"
+    "categoryKey": "لحوم ودواجن",
+    "subcategoryLabel": "برجر جاهز",
+    "subcategoryEn": "Burger patties",
+    "subcategoryUr": "برگر پیٹیز"
   },
   {
     "id": "BRG-0031",
@@ -51,7 +54,10 @@
     "marketPriceCheckedAt": "2026-10-26",
     "marketPriceSource": "https://makanifoods.com/collections/special-offer",
     "subcategory": "اللحوم والدجاج",
-    "categoryKey": "لحوم ودواجن"
+    "categoryKey": "لحوم ودواجن",
+    "subcategoryLabel": "برجر جاهز",
+    "subcategoryEn": "Burger patties",
+    "subcategoryUr": "برگر پیٹیز"
   },
   {
     "id": "BRG-0030",
@@ -72,7 +78,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "اللحوم والدجاج",
-    "categoryKey": "لحوم ودواجن"
+    "categoryKey": "لحوم ودواجن",
+    "subcategoryLabel": "برجر جاهز",
+    "subcategoryEn": "Burger patties",
+    "subcategoryUr": "برگر پیٹیز"
   },
   {
     "id": "BRG-0029",
@@ -108,7 +117,10 @@
     "marketPriceSource": "https://makanifoods.com/ar/collections/frozen_poultry",
     "marketPriceSourceName": "Makani Foods",
     "subcategory": "اللحوم والدجاج",
-    "categoryKey": "لحوم ودواجن"
+    "categoryKey": "لحوم ودواجن",
+    "subcategoryLabel": "برجر جاهز",
+    "subcategoryEn": "Burger patties",
+    "subcategoryUr": "برگر پیٹیز"
   },
   {
     "id": "BRG-0028",
@@ -131,7 +143,10 @@
     "marketPriceSource": "https://makanifoods.com/ar/collections/frozen_poultry",
     "marketPriceCheckedAt": "2026-10-26",
     "subcategory": "اللحوم والدجاج",
-    "categoryKey": "لحوم ودواجن"
+    "categoryKey": "لحوم ودواجن",
+    "subcategoryLabel": "برجر جاهز",
+    "subcategoryEn": "Burger patties",
+    "subcategoryUr": "برگر پیٹیز"
   },
   {
     "id": "BRG-0036",
@@ -152,7 +167,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "اللحوم والدجاج",
-    "categoryKey": "لحوم ودواجن"
+    "categoryKey": "لحوم ودواجن",
+    "subcategoryLabel": "دجاج ومقبلات",
+    "subcategoryEn": "Chicken & sides",
+    "subcategoryUr": "چکن اور سائیڈز"
   },
   {
     "id": "BRG-0027",
@@ -173,7 +191,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "اللحوم والدجاج",
-    "categoryKey": "لحوم ودواجن"
+    "categoryKey": "لحوم ودواجن",
+    "subcategoryLabel": "دجاج ومقبلات",
+    "subcategoryEn": "Chicken & sides",
+    "subcategoryUr": "چکن اور سائیڈز"
   },
   {
     "id": "BRG-0033",
@@ -194,7 +215,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "اللحوم والدجاج",
-    "categoryKey": "لحوم ودواجن"
+    "categoryKey": "لحوم ودواجن",
+    "subcategoryLabel": "دجاج ومقبلات",
+    "subcategoryEn": "Chicken & sides",
+    "subcategoryUr": "چکن اور سائیڈز"
   },
   {
     "id": "BRG-0034",
@@ -215,7 +239,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "اللحوم والدجاج",
-    "categoryKey": "لحوم ودواجن"
+    "categoryKey": "لحوم ودواجن",
+    "subcategoryLabel": "دجاج ومقبلات",
+    "subcategoryEn": "Chicken & sides",
+    "subcategoryUr": "چکن اور سائیڈز"
   },
   {
     "id": "BRG-0035",
@@ -236,7 +263,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "اللحوم والدجاج",
-    "categoryKey": "لحوم ودواجن"
+    "categoryKey": "لحوم ودواجن",
+    "subcategoryLabel": "دجاج ومقبلات",
+    "subcategoryEn": "Chicken & sides",
+    "subcategoryUr": "چکن اور سائیڈز"
   },
   {
     "id": "BRG-0037",
@@ -259,7 +289,10 @@
     "marketPriceSource": "https://makanifoods.com/",
     "marketPriceCheckedAt": "2026-10-26",
     "subcategory": "اللحوم والدجاج",
-    "categoryKey": "لحوم ودواجن"
+    "categoryKey": "لحوم ودواجن",
+    "subcategoryLabel": "دجاج ومقبلات",
+    "subcategoryEn": "Chicken & sides",
+    "subcategoryUr": "چکن اور سائیڈز"
   },
   {
     "id": "BRG-0038",
@@ -282,7 +315,10 @@
     "marketPriceCheckedAt": "2026-10-26",
     "marketPriceSource": "https://www.cityhyper.com/ar/sadia/",
     "subcategory": "اللحوم والدجاج",
-    "categoryKey": "لحوم ودواجن"
+    "categoryKey": "لحوم ودواجن",
+    "subcategoryLabel": "دجاج ومقبلات",
+    "subcategoryEn": "Chicken & sides",
+    "subcategoryUr": "چکن اور سائیڈز"
   },
   {
     "id": "BRG-0039",
@@ -303,7 +339,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "اللحوم والدجاج",
-    "categoryKey": "لحوم ودواجن"
+    "categoryKey": "لحوم ودواجن",
+    "subcategoryLabel": "دجاج ومقبلات",
+    "subcategoryEn": "Chicken & sides",
+    "subcategoryUr": "چکن اور سائیڈز"
   },
   {
     "id": "BRG-0021",
@@ -324,7 +363,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "المخبوزات",
-    "categoryKey": "خبز ومخبوزات"
+    "categoryKey": "خبز ومخبوزات",
+    "subcategoryLabel": "برجر جاهز",
+    "subcategoryEn": "Burger patties",
+    "subcategoryUr": "برگر پیٹیز"
   },
   {
     "id": "BRG-0024",
@@ -345,7 +387,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "المخبوزات",
-    "categoryKey": "خبز ومخبوزات"
+    "categoryKey": "خبز ومخبوزات",
+    "subcategoryLabel": "برجر جاهز",
+    "subcategoryEn": "Burger patties",
+    "subcategoryUr": "برگر پیٹیز"
   },
   {
     "id": "BRG-0019",
@@ -366,7 +411,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "المخبوزات",
-    "categoryKey": "خبز ومخبوزات"
+    "categoryKey": "خبز ومخبوزات",
+    "subcategoryLabel": "خبز بريوش",
+    "subcategoryEn": "Brioche buns",
+    "subcategoryUr": "بریوش بن"
   },
   {
     "id": "BRG-0022",
@@ -387,7 +435,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "المخبوزات",
-    "categoryKey": "خبز ومخبوزات"
+    "categoryKey": "خبز ومخبوزات",
+    "subcategoryLabel": "خبز بريوش",
+    "subcategoryEn": "Brioche buns",
+    "subcategoryUr": "بریوش بن"
   },
   {
     "id": "BRG-0018",
@@ -408,7 +459,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "المخبوزات",
-    "categoryKey": "خبز ومخبوزات"
+    "categoryKey": "خبز ومخبوزات",
+    "subcategoryLabel": "برجر جاهز",
+    "subcategoryEn": "Burger patties",
+    "subcategoryUr": "برگر پیٹیز"
   },
   {
     "id": "BRG-0025",
@@ -429,7 +483,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "المخبوزات",
-    "categoryKey": "خبز ومخبوزات"
+    "categoryKey": "خبز ومخبوزات",
+    "subcategoryLabel": "خبز برجر",
+    "subcategoryEn": "Burger buns",
+    "subcategoryUr": "برگر بن"
   },
   {
     "id": "BRG-0015",
@@ -450,7 +507,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "المخبوزات",
-    "categoryKey": "خبز ومخبوزات"
+    "categoryKey": "خبز ومخبوزات",
+    "subcategoryLabel": "خبز برجر",
+    "subcategoryEn": "Burger buns",
+    "subcategoryUr": "برگر بن"
   },
   {
     "id": "BRG-0016",
@@ -471,7 +531,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "المخبوزات",
-    "categoryKey": "خبز ومخبوزات"
+    "categoryKey": "خبز ومخبوزات",
+    "subcategoryLabel": "برجر جاهز",
+    "subcategoryEn": "Burger patties",
+    "subcategoryUr": "برگر پیٹیز"
   },
   {
     "id": "BRG-0017",
@@ -492,7 +555,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "المخبوزات",
-    "categoryKey": "خبز ومخبوزات"
+    "categoryKey": "خبز ومخبوزات",
+    "subcategoryLabel": "برجر جاهز",
+    "subcategoryEn": "Burger patties",
+    "subcategoryUr": "برگر پیٹیز"
   },
   {
     "id": "BRG-0020",
@@ -513,7 +579,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "المخبوزات",
-    "categoryKey": "خبز ومخبوزات"
+    "categoryKey": "خبز ومخبوزات",
+    "subcategoryLabel": "خبز بريوش",
+    "subcategoryEn": "Brioche buns",
+    "subcategoryUr": "بریوش بن"
   },
   {
     "id": "BRG-0023",
@@ -534,7 +603,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "المخبوزات",
-    "categoryKey": "خبز ومخبوزات"
+    "categoryKey": "خبز ومخبوزات",
+    "subcategoryLabel": "خبز برجر",
+    "subcategoryEn": "Burger buns",
+    "subcategoryUr": "برگر بن"
   },
   {
     "id": "BRG-0026",
@@ -555,7 +627,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "المخبوزات",
-    "categoryKey": "خبز ومخبوزات"
+    "categoryKey": "خبز ومخبوزات",
+    "subcategoryLabel": "خبز برجر",
+    "subcategoryEn": "Burger buns",
+    "subcategoryUr": "برگر بن"
   },
   {
     "id": "BRG-0046",
@@ -576,7 +651,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "الأجبان ومنتجات الألبان",
-    "categoryKey": "أجبان وألبان"
+    "categoryKey": "أجبان وألبان",
+    "subcategoryLabel": "أجبان",
+    "subcategoryEn": "Cheese",
+    "subcategoryUr": "پنیر"
   },
   {
     "id": "BRG-0045",
@@ -597,7 +675,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "الأجبان ومنتجات الألبان",
-    "categoryKey": "أجبان وألبان"
+    "categoryKey": "أجبان وألبان",
+    "subcategoryLabel": "أجبان",
+    "subcategoryEn": "Cheese",
+    "subcategoryUr": "پنیر"
   },
   {
     "id": "BRG-0047",
@@ -618,7 +699,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "الأجبان ومنتجات الألبان",
-    "categoryKey": "أجبان وألبان"
+    "categoryKey": "أجبان وألبان",
+    "subcategoryLabel": "أجبان",
+    "subcategoryEn": "Cheese",
+    "subcategoryUr": "پنیر"
   },
   {
     "id": "BRG-0048",
@@ -641,7 +725,10 @@
     "marketPriceSource": "https://makanifoods.com/",
     "marketPriceCheckedAt": "2026-10-26",
     "subcategory": "الأجبان ومنتجات الألبان",
-    "categoryKey": "أجبان وألبان"
+    "categoryKey": "أجبان وألبان",
+    "subcategoryLabel": "أجبان",
+    "subcategoryEn": "Cheese",
+    "subcategoryUr": "پنیر"
   },
   {
     "id": "BRG-0044",
@@ -662,7 +749,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "الأجبان ومنتجات الألبان",
-    "categoryKey": "أجبان وألبان"
+    "categoryKey": "أجبان وألبان",
+    "subcategoryLabel": "أجبان",
+    "subcategoryEn": "Cheese",
+    "subcategoryUr": "پنیر"
   },
   {
     "id": "BRG-0040",
@@ -683,7 +773,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "الأجبان ومنتجات الألبان",
-    "categoryKey": "أجبان وألبان"
+    "categoryKey": "أجبان وألبان",
+    "subcategoryLabel": "أجبان",
+    "subcategoryEn": "Cheese",
+    "subcategoryUr": "پنیر"
   },
   {
     "id": "BRG-0041",
@@ -704,7 +797,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "الأجبان ومنتجات الألبان",
-    "categoryKey": "أجبان وألبان"
+    "categoryKey": "أجبان وألبان",
+    "subcategoryLabel": "أجبان",
+    "subcategoryEn": "Cheese",
+    "subcategoryUr": "پنیر"
   },
   {
     "id": "BRG-0042",
@@ -725,7 +821,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "الأجبان ومنتجات الألبان",
-    "categoryKey": "أجبان وألبان"
+    "categoryKey": "أجبان وألبان",
+    "subcategoryLabel": "أجبان",
+    "subcategoryEn": "Cheese",
+    "subcategoryUr": "پنیر"
   },
   {
     "id": "BRG-0043",
@@ -748,7 +847,10 @@
     "marketPriceCheckedAt": "2026-10-26",
     "marketPriceSource": "https://www.co-opkw.com/",
     "subcategory": "الأجبان ومنتجات الألبان",
-    "categoryKey": "أجبان وألبان"
+    "categoryKey": "أجبان وألبان",
+    "subcategoryLabel": "بهارات وتوابل",
+    "subcategoryEn": "Spices & seasoning",
+    "subcategoryUr": "مصالحے"
   },
   {
     "id": "BRG-0091",
@@ -769,7 +871,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "البطاطا والمقبلات",
-    "categoryKey": "بطاطس ومجمدات"
+    "categoryKey": "بطاطس ومجمدات",
+    "subcategoryLabel": "بطاطس",
+    "subcategoryEn": "Fries & potatoes",
+    "subcategoryUr": "آلو اور فرائز"
   },
   {
     "id": "BRG-0090",
@@ -792,7 +897,10 @@
     "marketPriceSource": "https://makanifoods.com/",
     "marketPriceCheckedAt": "2026-10-26",
     "subcategory": "البطاطا والمقبلات",
-    "categoryKey": "بطاطس ومجمدات"
+    "categoryKey": "بطاطس ومجمدات",
+    "subcategoryLabel": "بطاطس",
+    "subcategoryEn": "Fries & potatoes",
+    "subcategoryUr": "آلو اور فرائز"
   },
   {
     "id": "BRG-0089",
@@ -813,7 +921,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "البطاطا والمقبلات",
-    "categoryKey": "بطاطس ومجمدات"
+    "categoryKey": "بطاطس ومجمدات",
+    "subcategoryLabel": "بطاطس",
+    "subcategoryEn": "Fries & potatoes",
+    "subcategoryUr": "آلو اور فرائز"
   },
   {
     "id": "BRG-0088",
@@ -834,7 +945,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "البطاطا والمقبلات",
-    "categoryKey": "بطاطس ومجمدات"
+    "categoryKey": "بطاطس ومجمدات",
+    "subcategoryLabel": "بطاطس",
+    "subcategoryEn": "Fries & potatoes",
+    "subcategoryUr": "آلو اور فرائز"
   },
   {
     "id": "BRG-0087",
@@ -855,7 +969,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "البطاطا والمقبلات",
-    "categoryKey": "بطاطس ومجمدات"
+    "categoryKey": "بطاطس ومجمدات",
+    "subcategoryLabel": "بطاطس",
+    "subcategoryEn": "Fries & potatoes",
+    "subcategoryUr": "آلو اور فرائز"
   },
   {
     "id": "BRG-0086",
@@ -876,7 +993,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "البطاطا والمقبلات",
-    "categoryKey": "بطاطس ومجمدات"
+    "categoryKey": "بطاطس ومجمدات",
+    "subcategoryLabel": "بطاطس",
+    "subcategoryEn": "Fries & potatoes",
+    "subcategoryUr": "آلو اور فرائز"
   },
   {
     "id": "BRG-0080",
@@ -897,7 +1017,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "البطاطا والمقبلات",
-    "categoryKey": "بطاطس ومجمدات"
+    "categoryKey": "بطاطس ومجمدات",
+    "subcategoryLabel": "أجبان",
+    "subcategoryEn": "Cheese",
+    "subcategoryUr": "پنیر"
   },
   {
     "id": "BRG-0081",
@@ -918,7 +1041,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "البطاطا والمقبلات",
-    "categoryKey": "بطاطس ومجمدات"
+    "categoryKey": "بطاطس ومجمدات",
+    "subcategoryLabel": "بطاطس",
+    "subcategoryEn": "Fries & potatoes",
+    "subcategoryUr": "آلو اور فرائز"
   },
   {
     "id": "BRG-0082",
@@ -939,7 +1065,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "البطاطا والمقبلات",
-    "categoryKey": "بطاطس ومجمدات"
+    "categoryKey": "بطاطس ومجمدات",
+    "subcategoryLabel": "بطاطس",
+    "subcategoryEn": "Fries & potatoes",
+    "subcategoryUr": "آلو اور فرائز"
   },
   {
     "id": "BRG-0083",
@@ -960,7 +1089,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "البطاطا والمقبلات",
-    "categoryKey": "بطاطس ومجمدات"
+    "categoryKey": "بطاطس ومجمدات",
+    "subcategoryLabel": "بطاطس",
+    "subcategoryEn": "Fries & potatoes",
+    "subcategoryUr": "آلو اور فرائز"
   },
   {
     "id": "BRG-0084",
@@ -981,7 +1113,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "البطاطا والمقبلات",
-    "categoryKey": "بطاطس ومجمدات"
+    "categoryKey": "بطاطس ومجمدات",
+    "subcategoryLabel": "بطاطس",
+    "subcategoryEn": "Fries & potatoes",
+    "subcategoryUr": "آلو اور فرائز"
   },
   {
     "id": "BRG-0085",
@@ -1002,7 +1137,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "البطاطا والمقبلات",
-    "categoryKey": "بطاطس ومجمدات"
+    "categoryKey": "بطاطس ومجمدات",
+    "subcategoryLabel": "بطاطس",
+    "subcategoryEn": "Fries & potatoes",
+    "subcategoryUr": "آلو اور فرائز"
   },
   {
     "id": "BRG-0092",
@@ -1023,7 +1161,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "البطاطا والمقبلات",
-    "categoryKey": "بطاطس ومجمدات"
+    "categoryKey": "بطاطس ومجمدات",
+    "subcategoryLabel": "بطاطس",
+    "subcategoryEn": "Fries & potatoes",
+    "subcategoryUr": "آلو اور فرائز"
   },
   {
     "id": "BRG-0093",
@@ -1044,7 +1185,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "البطاطا والمقبلات",
-    "categoryKey": "بطاطس ومجمدات"
+    "categoryKey": "بطاطس ومجمدات",
+    "subcategoryLabel": "خضروات البرجر",
+    "subcategoryEn": "Burger vegetables",
+    "subcategoryUr": "برگر کی سبزیاں"
   },
   {
     "id": "BRG-0094",
@@ -1065,7 +1209,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "البطاطا والمقبلات",
-    "categoryKey": "بطاطس ومجمدات"
+    "categoryKey": "بطاطس ومجمدات",
+    "subcategoryLabel": "أجبان",
+    "subcategoryEn": "Cheese",
+    "subcategoryUr": "پنیر"
   },
   {
     "id": "BRG-0095",
@@ -1086,7 +1233,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "البطاطا والمقبلات",
-    "categoryKey": "بطاطس ومجمدات"
+    "categoryKey": "بطاطس ومجمدات",
+    "subcategoryLabel": "بطاطس",
+    "subcategoryEn": "Fries & potatoes",
+    "subcategoryUr": "آلو اور فرائز"
   },
   {
     "id": "BRG-0096",
@@ -1107,7 +1257,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "البطاطا والمقبلات",
-    "categoryKey": "بطاطس ومجمدات"
+    "categoryKey": "بطاطس ومجمدات",
+    "subcategoryLabel": "بطاطس",
+    "subcategoryEn": "Fries & potatoes",
+    "subcategoryUr": "آلو اور فرائز"
   },
   {
     "id": "BRG-0097",
@@ -1128,7 +1281,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "البطاطا والمقبلات",
-    "categoryKey": "بطاطس ومجمدات"
+    "categoryKey": "بطاطس ومجمدات",
+    "subcategoryLabel": "بطاطس",
+    "subcategoryEn": "Fries & potatoes",
+    "subcategoryUr": "آلو اور فرائز"
   },
   {
     "id": "BRG-0066",
@@ -1149,7 +1305,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "الصلصات والتتبيلات",
-    "categoryKey": "صلصات وتوابل"
+    "categoryKey": "صلصات وتوابل",
+    "subcategoryLabel": "كاتشب",
+    "subcategoryEn": "Ketchup",
+    "subcategoryUr": "کیچپ"
   },
   {
     "id": "BRG-0065",
@@ -1172,7 +1331,10 @@
     "marketPriceCheckedAt": "2026-10-26",
     "marketPriceSource": "https://makanifoods.com/collections/full-price",
     "subcategory": "الصلصات والتتبيلات",
-    "categoryKey": "صلصات وتوابل"
+    "categoryKey": "صلصات وتوابل",
+    "subcategoryLabel": "كاتشب",
+    "subcategoryEn": "Ketchup",
+    "subcategoryUr": "کیچپ"
   },
   {
     "id": "BRG-0068",
@@ -1193,7 +1355,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "الصلصات والتتبيلات",
-    "categoryKey": "صلصات وتوابل"
+    "categoryKey": "صلصات وتوابل",
+    "subcategoryLabel": "كاتشب",
+    "subcategoryEn": "Ketchup",
+    "subcategoryUr": "کیچپ"
   },
   {
     "id": "BRG-0067",
@@ -1214,7 +1379,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "الصلصات والتتبيلات",
-    "categoryKey": "صلصات وتوابل"
+    "categoryKey": "صلصات وتوابل",
+    "subcategoryLabel": "كاتشب",
+    "subcategoryEn": "Ketchup",
+    "subcategoryUr": "کیچپ"
   },
   {
     "id": "BRG-0069",
@@ -1235,7 +1403,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "الصلصات والتتبيلات",
-    "categoryKey": "صلصات وتوابل"
+    "categoryKey": "صلصات وتوابل",
+    "subcategoryLabel": "مايونيز",
+    "subcategoryEn": "Mayonnaise",
+    "subcategoryUr": "مایونیز"
   },
   {
     "id": "BRG-0070",
@@ -1256,7 +1427,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "الصلصات والتتبيلات",
-    "categoryKey": "صلصات وتوابل"
+    "categoryKey": "صلصات وتوابل",
+    "subcategoryLabel": "مايونيز",
+    "subcategoryEn": "Mayonnaise",
+    "subcategoryUr": "مایونیز"
   },
   {
     "id": "BRG-0059",
@@ -1277,7 +1451,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "الصلصات والتتبيلات",
-    "categoryKey": "صلصات وتوابل"
+    "categoryKey": "صلصات وتوابل",
+    "subcategoryLabel": "زيوت القلي",
+    "subcategoryEn": "Cooking oils",
+    "subcategoryUr": "کھانے کے تیل"
   },
   {
     "id": "BRG-0060",
@@ -1298,7 +1475,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "الصلصات والتتبيلات",
-    "categoryKey": "صلصات وتوابل"
+    "categoryKey": "صلصات وتوابل",
+    "subcategoryLabel": "زيوت القلي",
+    "subcategoryEn": "Cooking oils",
+    "subcategoryUr": "کھانے کے تیل"
   },
   {
     "id": "BRG-0061",
@@ -1319,7 +1499,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "الصلصات والتتبيلات",
-    "categoryKey": "صلصات وتوابل"
+    "categoryKey": "صلصات وتوابل",
+    "subcategoryLabel": "زيوت القلي",
+    "subcategoryEn": "Cooking oils",
+    "subcategoryUr": "کھانے کے تیل"
   },
   {
     "id": "BRG-0079",
@@ -1340,7 +1523,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "الصلصات والتتبيلات",
-    "categoryKey": "صلصات وتوابل"
+    "categoryKey": "صلصات وتوابل",
+    "subcategoryLabel": "بهارات وتوابل",
+    "subcategoryEn": "Spices & seasoning",
+    "subcategoryUr": "مصالحے"
   },
   {
     "id": "BRG-0049",
@@ -1361,7 +1547,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "الصلصات والتتبيلات",
-    "categoryKey": "صلصات وتوابل"
+    "categoryKey": "صلصات وتوابل",
+    "subcategoryLabel": "صلصات",
+    "subcategoryEn": "Sauces",
+    "subcategoryUr": "ساس"
   },
   {
     "id": "BRG-0050",
@@ -1382,7 +1571,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "الصلصات والتتبيلات",
-    "categoryKey": "صلصات وتوابل"
+    "categoryKey": "صلصات وتوابل",
+    "subcategoryLabel": "صلصات",
+    "subcategoryEn": "Sauces",
+    "subcategoryUr": "ساس"
   },
   {
     "id": "BRG-0051",
@@ -1403,7 +1595,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "الصلصات والتتبيلات",
-    "categoryKey": "صلصات وتوابل"
+    "categoryKey": "صلصات وتوابل",
+    "subcategoryLabel": "بهارات وتوابل",
+    "subcategoryEn": "Spices & seasoning",
+    "subcategoryUr": "مصالحے"
   },
   {
     "id": "BRG-0052",
@@ -1424,7 +1619,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "الصلصات والتتبيلات",
-    "categoryKey": "صلصات وتوابل"
+    "categoryKey": "صلصات وتوابل",
+    "subcategoryLabel": "بهارات وتوابل",
+    "subcategoryEn": "Spices & seasoning",
+    "subcategoryUr": "مصالحے"
   },
   {
     "id": "BRG-0053",
@@ -1445,7 +1643,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "الصلصات والتتبيلات",
-    "categoryKey": "صلصات وتوابل"
+    "categoryKey": "صلصات وتوابل",
+    "subcategoryLabel": "صلصات وتوابل",
+    "subcategoryEn": "Sauces & spices",
+    "subcategoryUr": "ساس اور مصالحے"
   },
   {
     "id": "BRG-0054",
@@ -1466,7 +1667,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "الصلصات والتتبيلات",
-    "categoryKey": "صلصات وتوابل"
+    "categoryKey": "صلصات وتوابل",
+    "subcategoryLabel": "خبز برجر",
+    "subcategoryEn": "Burger buns",
+    "subcategoryUr": "برگر بن"
   },
   {
     "id": "BRG-0055",
@@ -1487,7 +1691,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "الصلصات والتتبيلات",
-    "categoryKey": "صلصات وتوابل"
+    "categoryKey": "صلصات وتوابل",
+    "subcategoryLabel": "صلصات",
+    "subcategoryEn": "Sauces",
+    "subcategoryUr": "ساس"
   },
   {
     "id": "BRG-0056",
@@ -1508,7 +1715,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "الصلصات والتتبيلات",
-    "categoryKey": "صلصات وتوابل"
+    "categoryKey": "صلصات وتوابل",
+    "subcategoryLabel": "صلصات",
+    "subcategoryEn": "Sauces",
+    "subcategoryUr": "ساس"
   },
   {
     "id": "BRG-0057",
@@ -1529,7 +1739,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "الصلصات والتتبيلات",
-    "categoryKey": "صلصات وتوابل"
+    "categoryKey": "صلصات وتوابل",
+    "subcategoryLabel": "صلصات",
+    "subcategoryEn": "Sauces",
+    "subcategoryUr": "ساس"
   },
   {
     "id": "BRG-0058",
@@ -1550,7 +1763,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "الصلصات والتتبيلات",
-    "categoryKey": "صلصات وتوابل"
+    "categoryKey": "صلصات وتوابل",
+    "subcategoryLabel": "صلصات",
+    "subcategoryEn": "Sauces",
+    "subcategoryUr": "ساس"
   },
   {
     "id": "BRG-0062",
@@ -1571,7 +1787,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "الصلصات والتتبيلات",
-    "categoryKey": "صلصات وتوابل"
+    "categoryKey": "صلصات وتوابل",
+    "subcategoryLabel": "برجر جاهز",
+    "subcategoryEn": "Burger patties",
+    "subcategoryUr": "برگر پیٹیز"
   },
   {
     "id": "BRG-0063",
@@ -1592,7 +1811,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "الصلصات والتتبيلات",
-    "categoryKey": "صلصات وتوابل"
+    "categoryKey": "صلصات وتوابل",
+    "subcategoryLabel": "صلصات",
+    "subcategoryEn": "Sauces",
+    "subcategoryUr": "ساس"
   },
   {
     "id": "BRG-0064",
@@ -1613,7 +1835,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "الصلصات والتتبيلات",
-    "categoryKey": "صلصات وتوابل"
+    "categoryKey": "صلصات وتوابل",
+    "subcategoryLabel": "صلصات",
+    "subcategoryEn": "Sauces",
+    "subcategoryUr": "ساس"
   },
   {
     "id": "BRG-0071",
@@ -1634,7 +1859,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "الصلصات والتتبيلات",
-    "categoryKey": "صلصات وتوابل"
+    "categoryKey": "صلصات وتوابل",
+    "subcategoryLabel": "مايونيز",
+    "subcategoryEn": "Mayonnaise",
+    "subcategoryUr": "مایونیز"
   },
   {
     "id": "BRG-0072",
@@ -1655,7 +1883,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "الصلصات والتتبيلات",
-    "categoryKey": "صلصات وتوابل"
+    "categoryKey": "صلصات وتوابل",
+    "subcategoryLabel": "مايونيز",
+    "subcategoryEn": "Mayonnaise",
+    "subcategoryUr": "مایونیز"
   },
   {
     "id": "BRG-0073",
@@ -1676,7 +1907,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "الصلصات والتتبيلات",
-    "categoryKey": "صلصات وتوابل"
+    "categoryKey": "صلصات وتوابل",
+    "subcategoryLabel": "مايونيز",
+    "subcategoryEn": "Mayonnaise",
+    "subcategoryUr": "مایونیز"
   },
   {
     "id": "BRG-0074",
@@ -1697,7 +1931,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "الصلصات والتتبيلات",
-    "categoryKey": "صلصات وتوابل"
+    "categoryKey": "صلصات وتوابل",
+    "subcategoryLabel": "مايونيز",
+    "subcategoryEn": "Mayonnaise",
+    "subcategoryUr": "مایونیز"
   },
   {
     "id": "BRG-0075",
@@ -1718,7 +1955,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "الصلصات والتتبيلات",
-    "categoryKey": "صلصات وتوابل"
+    "categoryKey": "صلصات وتوابل",
+    "subcategoryLabel": "مايونيز",
+    "subcategoryEn": "Mayonnaise",
+    "subcategoryUr": "مایونیز"
   },
   {
     "id": "BRG-0076",
@@ -1739,7 +1979,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "الصلصات والتتبيلات",
-    "categoryKey": "صلصات وتوابل"
+    "categoryKey": "صلصات وتوابل",
+    "subcategoryLabel": "مايونيز",
+    "subcategoryEn": "Mayonnaise",
+    "subcategoryUr": "مایونیز"
   },
   {
     "id": "BRG-0077",
@@ -1760,7 +2003,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "الصلصات والتتبيلات",
-    "categoryKey": "صلصات وتوابل"
+    "categoryKey": "صلصات وتوابل",
+    "subcategoryLabel": "صلصات وتوابل",
+    "subcategoryEn": "Sauces & spices",
+    "subcategoryUr": "ساس اور مصالحے"
   },
   {
     "id": "BRG-0078",
@@ -1781,7 +2027,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "الصلصات والتتبيلات",
-    "categoryKey": "صلصات وتوابل"
+    "categoryKey": "صلصات وتوابل",
+    "subcategoryLabel": "صلصات وتوابل",
+    "subcategoryEn": "Sauces & spices",
+    "subcategoryUr": "ساس اور مصالحے"
   },
   {
     "id": "BRG-0005",
@@ -1802,7 +2051,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "الخضروات الطازجة",
-    "categoryKey": "خضروات طازجة"
+    "categoryKey": "خضروات طازجة",
+    "subcategoryLabel": "خضروات البرجر",
+    "subcategoryEn": "Burger vegetables",
+    "subcategoryUr": "برگر کی سبزیاں"
   },
   {
     "id": "BRG-0006",
@@ -1823,7 +2075,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "الخضروات الطازجة",
-    "categoryKey": "خضروات طازجة"
+    "categoryKey": "خضروات طازجة",
+    "subcategoryLabel": "خضروات البرجر",
+    "subcategoryEn": "Burger vegetables",
+    "subcategoryUr": "برگر کی سبزیاں"
   },
   {
     "id": "BRG-0008",
@@ -1844,7 +2099,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "الخضروات الطازجة",
-    "categoryKey": "خضروات طازجة"
+    "categoryKey": "خضروات طازجة",
+    "subcategoryLabel": "خضروات البرجر",
+    "subcategoryEn": "Burger vegetables",
+    "subcategoryUr": "برگر کی سبزیاں"
   },
   {
     "id": "BRG-0009",
@@ -1867,7 +2125,10 @@
     "marketPriceCheckedAt": "2026-10-26",
     "marketPriceSource": "https://www.co-opkw.com/",
     "subcategory": "الخضروات الطازجة",
-    "categoryKey": "خضروات طازجة"
+    "categoryKey": "خضروات طازجة",
+    "subcategoryLabel": "خضروات البرجر",
+    "subcategoryEn": "Burger vegetables",
+    "subcategoryUr": "برگر کی سبزیاں"
   },
   {
     "id": "BRG-0001",
@@ -1888,7 +2149,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "الخضروات الطازجة",
-    "categoryKey": "خضروات طازجة"
+    "categoryKey": "خضروات طازجة",
+    "subcategoryLabel": "خضروات البرجر",
+    "subcategoryEn": "Burger vegetables",
+    "subcategoryUr": "برگر کی سبزیاں"
   },
   {
     "id": "BRG-0002",
@@ -1909,7 +2173,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "الخضروات الطازجة",
-    "categoryKey": "خضروات طازجة"
+    "categoryKey": "خضروات طازجة",
+    "subcategoryLabel": "خضروات البرجر",
+    "subcategoryEn": "Burger vegetables",
+    "subcategoryUr": "برگر کی سبزیاں"
   },
   {
     "id": "BRG-0003",
@@ -1930,7 +2197,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "الخضروات الطازجة",
-    "categoryKey": "خضروات طازجة"
+    "categoryKey": "خضروات طازجة",
+    "subcategoryLabel": "خضروات البرجر",
+    "subcategoryEn": "Burger vegetables",
+    "subcategoryUr": "برگر کی سبزیاں"
   },
   {
     "id": "BRG-0004",
@@ -1951,7 +2221,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "الخضروات الطازجة",
-    "categoryKey": "خضروات طازجة"
+    "categoryKey": "خضروات طازجة",
+    "subcategoryLabel": "خضروات طازجة",
+    "subcategoryEn": "Fresh vegetables",
+    "subcategoryUr": "تازہ سبزیاں"
   },
   {
     "id": "BRG-0007",
@@ -1972,7 +2245,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "الخضروات الطازجة",
-    "categoryKey": "خضروات طازجة"
+    "categoryKey": "خضروات طازجة",
+    "subcategoryLabel": "خضروات البرجر",
+    "subcategoryEn": "Burger vegetables",
+    "subcategoryUr": "برگر کی سبزیاں"
   },
   {
     "id": "BRG-0010",
@@ -1993,7 +2269,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "الخضروات الطازجة",
-    "categoryKey": "خضروات طازجة"
+    "categoryKey": "خضروات طازجة",
+    "subcategoryLabel": "خضروات طازجة",
+    "subcategoryEn": "Fresh vegetables",
+    "subcategoryUr": "تازہ سبزیاں"
   },
   {
     "id": "BRG-0011",
@@ -2014,7 +2293,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "الخضروات الطازجة",
-    "categoryKey": "خضروات طازجة"
+    "categoryKey": "خضروات طازجة",
+    "subcategoryLabel": "بهارات وتوابل",
+    "subcategoryEn": "Spices & seasoning",
+    "subcategoryUr": "مصالحے"
   },
   {
     "id": "BRG-0012",
@@ -2035,7 +2317,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "الخضروات الطازجة",
-    "categoryKey": "خضروات طازجة"
+    "categoryKey": "خضروات طازجة",
+    "subcategoryLabel": "بهارات وتوابل",
+    "subcategoryEn": "Spices & seasoning",
+    "subcategoryUr": "مصالحے"
   },
   {
     "id": "BRG-0013",
@@ -2056,7 +2341,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "الخضروات الطازجة",
-    "categoryKey": "خضروات طازجة"
+    "categoryKey": "خضروات طازجة",
+    "subcategoryLabel": "بهارات وتوابل",
+    "subcategoryEn": "Spices & seasoning",
+    "subcategoryUr": "مصالحے"
   },
   {
     "id": "BRG-0014",
@@ -2077,7 +2365,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "الخضروات الطازجة",
-    "categoryKey": "خضروات طازجة"
+    "categoryKey": "خضروات طازجة",
+    "subcategoryLabel": "خضروات طازجة",
+    "subcategoryEn": "Fresh vegetables",
+    "subcategoryUr": "تازہ سبزیاں"
   },
   {
     "id": "BRG-0098",
@@ -2098,7 +2389,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "المشروبات الغازية",
-    "categoryKey": "مشروبات"
+    "categoryKey": "مشروبات",
+    "subcategoryLabel": "مشروبات",
+    "subcategoryEn": "Soft drinks",
+    "subcategoryUr": "سافٹ ڈرنکس"
   },
   {
     "id": "BRG-0099",
@@ -2119,7 +2413,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "المشروبات الغازية",
-    "categoryKey": "مشروبات"
+    "categoryKey": "مشروبات",
+    "subcategoryLabel": "مشروبات",
+    "subcategoryEn": "Soft drinks",
+    "subcategoryUr": "سافٹ ڈرنکس"
   },
   {
     "id": "BRG-0100",
@@ -2140,7 +2437,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "المشروبات الغازية",
-    "categoryKey": "مشروبات"
+    "categoryKey": "مشروبات",
+    "subcategoryLabel": "علب وأكواب",
+    "subcategoryEn": "Boxes & cups",
+    "subcategoryUr": "ڈبے اور کپ"
   },
   {
     "id": "BRG-0101",
@@ -2161,7 +2461,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "المشروبات الغازية",
-    "categoryKey": "مشروبات"
+    "categoryKey": "مشروبات",
+    "subcategoryLabel": "علب وأكواب",
+    "subcategoryEn": "Boxes & cups",
+    "subcategoryUr": "ڈبے اور کپ"
   },
   {
     "id": "BRG-0102",
@@ -2182,7 +2485,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "المشروبات الغازية",
-    "categoryKey": "مشروبات"
+    "categoryKey": "مشروبات",
+    "subcategoryLabel": "مشروبات",
+    "subcategoryEn": "Soft drinks",
+    "subcategoryUr": "سافٹ ڈرنکس"
   },
   {
     "id": "BRG-0103",
@@ -2203,7 +2509,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "المشروبات الغازية",
-    "categoryKey": "مشروبات"
+    "categoryKey": "مشروبات",
+    "subcategoryLabel": "علب وأكواب",
+    "subcategoryEn": "Boxes & cups",
+    "subcategoryUr": "ڈبے اور کپ"
   },
   {
     "id": "BRG-0104",
@@ -2224,7 +2533,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "المشروبات الغازية",
-    "categoryKey": "مشروبات"
+    "categoryKey": "مشروبات",
+    "subcategoryLabel": "علب وأكواب",
+    "subcategoryEn": "Boxes & cups",
+    "subcategoryUr": "ڈبے اور کپ"
   },
   {
     "id": "BRG-0105",
@@ -2245,7 +2557,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "المشروبات الغازية",
-    "categoryKey": "مشروبات"
+    "categoryKey": "مشروبات",
+    "subcategoryLabel": "مشروبات",
+    "subcategoryEn": "Soft drinks",
+    "subcategoryUr": "سافٹ ڈرنکس"
   },
   {
     "id": "BRG-0106",
@@ -2266,7 +2581,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "المشروبات الغازية",
-    "categoryKey": "مشروبات"
+    "categoryKey": "مشروبات",
+    "subcategoryLabel": "علب وأكواب",
+    "subcategoryEn": "Boxes & cups",
+    "subcategoryUr": "ڈبے اور کپ"
   },
   {
     "id": "BRG-0107",
@@ -2287,7 +2605,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "المشروبات الغازية",
-    "categoryKey": "مشروبات"
+    "categoryKey": "مشروبات",
+    "subcategoryLabel": "علب وأكواب",
+    "subcategoryEn": "Boxes & cups",
+    "subcategoryUr": "ڈبے اور کپ"
   },
   {
     "id": "BRG-0108",
@@ -2308,7 +2629,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "المشروبات الغازية",
-    "categoryKey": "مشروبات"
+    "categoryKey": "مشروبات",
+    "subcategoryLabel": "مشروبات",
+    "subcategoryEn": "Soft drinks",
+    "subcategoryUr": "سافٹ ڈرنکس"
   },
   {
     "id": "BRG-0109",
@@ -2329,7 +2653,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "المشروبات الغازية",
-    "categoryKey": "مشروبات"
+    "categoryKey": "مشروبات",
+    "subcategoryLabel": "علب وأكواب",
+    "subcategoryEn": "Boxes & cups",
+    "subcategoryUr": "ڈبے اور کپ"
   },
   {
     "id": "BRG-0110",
@@ -2350,7 +2677,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "المشروبات الغازية",
-    "categoryKey": "مشروبات"
+    "categoryKey": "مشروبات",
+    "subcategoryLabel": "مشروبات",
+    "subcategoryEn": "Soft drinks",
+    "subcategoryUr": "سافٹ ڈرنکس"
   },
   {
     "id": "BRG-0111",
@@ -2371,7 +2701,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "المشروبات الغازية",
-    "categoryKey": "مشروبات"
+    "categoryKey": "مشروبات",
+    "subcategoryLabel": "علب وأكواب",
+    "subcategoryEn": "Boxes & cups",
+    "subcategoryUr": "ڈبے اور کپ"
   },
   {
     "id": "BRG-0112",
@@ -2392,7 +2725,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "المشروبات الغازية",
-    "categoryKey": "مشروبات"
+    "categoryKey": "مشروبات",
+    "subcategoryLabel": "علب وأكواب",
+    "subcategoryEn": "Boxes & cups",
+    "subcategoryUr": "ڈبے اور کپ"
   },
   {
     "id": "BRG-0113",
@@ -2413,7 +2749,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "المشروبات الغازية",
-    "categoryKey": "مشروبات"
+    "categoryKey": "مشروبات",
+    "subcategoryLabel": "علب وأكواب",
+    "subcategoryEn": "Boxes & cups",
+    "subcategoryUr": "ڈبے اور کپ"
   },
   {
     "id": "BRG-0114",
@@ -2434,7 +2773,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "المشروبات الغازية",
-    "categoryKey": "مشروبات"
+    "categoryKey": "مشروبات",
+    "subcategoryLabel": "علب وأكواب",
+    "subcategoryEn": "Boxes & cups",
+    "subcategoryUr": "ڈبے اور کپ"
   },
   {
     "id": "BRG-0115",
@@ -2455,7 +2797,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "المشروبات الغازية",
-    "categoryKey": "مشروبات"
+    "categoryKey": "مشروبات",
+    "subcategoryLabel": "علب وأكواب",
+    "subcategoryEn": "Boxes & cups",
+    "subcategoryUr": "ڈبے اور کپ"
   },
   {
     "id": "BRG-0116",
@@ -2476,7 +2821,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "المشروبات الغازية",
-    "categoryKey": "مشروبات"
+    "categoryKey": "مشروبات",
+    "subcategoryLabel": "علب وأكواب",
+    "subcategoryEn": "Boxes & cups",
+    "subcategoryUr": "ڈبے اور کپ"
   },
   {
     "id": "BRG-0117",
@@ -2497,7 +2845,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "المشروبات الغازية",
-    "categoryKey": "مشروبات"
+    "categoryKey": "مشروبات",
+    "subcategoryLabel": "علب وأكواب",
+    "subcategoryEn": "Boxes & cups",
+    "subcategoryUr": "ڈبے اور کپ"
   },
   {
     "id": "BRG-0118",
@@ -2518,7 +2869,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "المشروبات الغازية",
-    "categoryKey": "مشروبات"
+    "categoryKey": "مشروبات",
+    "subcategoryLabel": "علب وأكواب",
+    "subcategoryEn": "Boxes & cups",
+    "subcategoryUr": "ڈبے اور کپ"
   },
   {
     "id": "BRG-0119",
@@ -2539,7 +2893,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "المشروبات الغازية",
-    "categoryKey": "مشروبات"
+    "categoryKey": "مشروبات",
+    "subcategoryLabel": "مشروبات",
+    "subcategoryEn": "Soft drinks",
+    "subcategoryUr": "سافٹ ڈرنکس"
   },
   {
     "id": "BRG-0120",
@@ -2560,7 +2917,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "المشروبات الغازية",
-    "categoryKey": "مشروبات"
+    "categoryKey": "مشروبات",
+    "subcategoryLabel": "أوراق وأكياس",
+    "subcategoryEn": "Wraps & bags",
+    "subcategoryUr": "ریپر اور تھیلے"
   },
   {
     "id": "BRG-0121",
@@ -2581,7 +2941,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "المشروبات الغازية",
-    "categoryKey": "مشروبات"
+    "categoryKey": "مشروبات",
+    "subcategoryLabel": "علب وأكواب",
+    "subcategoryEn": "Boxes & cups",
+    "subcategoryUr": "ڈبے اور کپ"
   },
   {
     "id": "BRG-0122",
@@ -2602,7 +2965,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "المشروبات الغازية",
-    "categoryKey": "مشروبات"
+    "categoryKey": "مشروبات",
+    "subcategoryLabel": "مشروبات",
+    "subcategoryEn": "Soft drinks",
+    "subcategoryUr": "سافٹ ڈرنکس"
   },
   {
     "id": "BRG-0123",
@@ -2623,7 +2989,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "المشروبات الغازية",
-    "categoryKey": "مشروبات"
+    "categoryKey": "مشروبات",
+    "subcategoryLabel": "علب وأكواب",
+    "subcategoryEn": "Boxes & cups",
+    "subcategoryUr": "ڈبے اور کپ"
   },
   {
     "id": "BRG-0124",
@@ -2644,7 +3013,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "المشروبات الغازية",
-    "categoryKey": "مشروبات"
+    "categoryKey": "مشروبات",
+    "subcategoryLabel": "مشروبات",
+    "subcategoryEn": "Soft drinks",
+    "subcategoryUr": "سافٹ ڈرنکس"
   },
   {
     "id": "BRG-0125",
@@ -2665,7 +3037,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "المشروبات الغازية",
-    "categoryKey": "مشروبات"
+    "categoryKey": "مشروبات",
+    "subcategoryLabel": "علب وأكواب",
+    "subcategoryEn": "Boxes & cups",
+    "subcategoryUr": "ڈبے اور کپ"
   },
   {
     "id": "BRG-0126",
@@ -2686,7 +3061,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "المشروبات الغازية",
-    "categoryKey": "مشروبات"
+    "categoryKey": "مشروبات",
+    "subcategoryLabel": "علب وأكواب",
+    "subcategoryEn": "Boxes & cups",
+    "subcategoryUr": "ڈبے اور کپ"
   },
   {
     "id": "BRG-0127",
@@ -2707,7 +3085,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "المشروبات الغازية",
-    "categoryKey": "مشروبات"
+    "categoryKey": "مشروبات",
+    "subcategoryLabel": "علب وأكواب",
+    "subcategoryEn": "Boxes & cups",
+    "subcategoryUr": "ڈبے اور کپ"
   },
   {
     "id": "BRG-0128",
@@ -2728,7 +3109,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "المشروبات الغازية",
-    "categoryKey": "مشروبات"
+    "categoryKey": "مشروبات",
+    "subcategoryLabel": "مشروبات",
+    "subcategoryEn": "Soft drinks",
+    "subcategoryUr": "سافٹ ڈرنکس"
   },
   {
     "id": "BRG-0129",
@@ -2749,7 +3133,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "المشروبات الغازية",
-    "categoryKey": "مشروبات"
+    "categoryKey": "مشروبات",
+    "subcategoryLabel": "علب وأكواب",
+    "subcategoryEn": "Boxes & cups",
+    "subcategoryUr": "ڈبے اور کپ"
   },
   {
     "id": "BRG-0130",
@@ -2770,7 +3157,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "المشروبات الغازية",
-    "categoryKey": "مشروبات"
+    "categoryKey": "مشروبات",
+    "subcategoryLabel": "علب وأكواب",
+    "subcategoryEn": "Boxes & cups",
+    "subcategoryUr": "ڈبے اور کپ"
   },
   {
     "id": "BRG-0131",
@@ -2791,7 +3181,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "المشروبات الغازية",
-    "categoryKey": "مشروبات"
+    "categoryKey": "مشروبات",
+    "subcategoryLabel": "علب وأكواب",
+    "subcategoryEn": "Boxes & cups",
+    "subcategoryUr": "ڈبے اور کپ"
   },
   {
     "id": "BRG-0132",
@@ -2812,7 +3205,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "المياه",
-    "categoryKey": "مياه"
+    "categoryKey": "مياه",
+    "subcategoryLabel": "مياه",
+    "subcategoryEn": "Water",
+    "subcategoryUr": "پانی"
   },
   {
     "id": "BRG-0133",
@@ -2833,7 +3229,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "المياه",
-    "categoryKey": "مياه"
+    "categoryKey": "مياه",
+    "subcategoryLabel": "مياه",
+    "subcategoryEn": "Water",
+    "subcategoryUr": "پانی"
   },
   {
     "id": "BRG-0134",
@@ -2854,7 +3253,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "المياه",
-    "categoryKey": "مياه"
+    "categoryKey": "مياه",
+    "subcategoryLabel": "مياه",
+    "subcategoryEn": "Water",
+    "subcategoryUr": "پانی"
   },
   {
     "id": "BRG-0135",
@@ -2875,7 +3277,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "المياه",
-    "categoryKey": "مياه"
+    "categoryKey": "مياه",
+    "subcategoryLabel": "مياه",
+    "subcategoryEn": "Water",
+    "subcategoryUr": "پانی"
   },
   {
     "id": "BRG-0136",
@@ -2896,7 +3301,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "المياه",
-    "categoryKey": "مياه"
+    "categoryKey": "مياه",
+    "subcategoryLabel": "مياه",
+    "subcategoryEn": "Water",
+    "subcategoryUr": "پانی"
   },
   {
     "id": "BRG-0137",
@@ -2917,7 +3325,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "المياه",
-    "categoryKey": "مياه"
+    "categoryKey": "مياه",
+    "subcategoryLabel": "مياه",
+    "subcategoryEn": "Water",
+    "subcategoryUr": "پانی"
   },
   {
     "id": "BRG-0138",
@@ -2938,7 +3349,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "المياه",
-    "categoryKey": "مياه"
+    "categoryKey": "مياه",
+    "subcategoryLabel": "مياه",
+    "subcategoryEn": "Water",
+    "subcategoryUr": "پانی"
   },
   {
     "id": "BRG-0139",
@@ -2959,7 +3373,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "المياه",
-    "categoryKey": "مياه"
+    "categoryKey": "مياه",
+    "subcategoryLabel": "مياه",
+    "subcategoryEn": "Water",
+    "subcategoryUr": "پانی"
   },
   {
     "id": "BRG-0140",
@@ -2980,7 +3397,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "المياه",
-    "categoryKey": "مياه"
+    "categoryKey": "مياه",
+    "subcategoryLabel": "مياه",
+    "subcategoryEn": "Water",
+    "subcategoryUr": "پانی"
   },
   {
     "id": "BRG-0141",
@@ -3001,7 +3421,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "المياه",
-    "categoryKey": "مياه"
+    "categoryKey": "مياه",
+    "subcategoryLabel": "مياه",
+    "subcategoryEn": "Water",
+    "subcategoryUr": "پانی"
   },
   {
     "id": "BRG-0142",
@@ -3022,7 +3445,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "المياه",
-    "categoryKey": "مياه"
+    "categoryKey": "مياه",
+    "subcategoryLabel": "مياه",
+    "subcategoryEn": "Water",
+    "subcategoryUr": "پانی"
   },
   {
     "id": "BRG-0143",
@@ -3043,7 +3469,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "المياه",
-    "categoryKey": "مياه"
+    "categoryKey": "مياه",
+    "subcategoryLabel": "مياه",
+    "subcategoryEn": "Water",
+    "subcategoryUr": "پانی"
   },
   {
     "id": "BRG-0144",
@@ -3064,7 +3493,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "المياه",
-    "categoryKey": "مياه"
+    "categoryKey": "مياه",
+    "subcategoryLabel": "مياه",
+    "subcategoryEn": "Water",
+    "subcategoryUr": "پانی"
   },
   {
     "id": "BRG-0145",
@@ -3085,7 +3517,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "المياه",
-    "categoryKey": "مياه"
+    "categoryKey": "مياه",
+    "subcategoryLabel": "مياه",
+    "subcategoryEn": "Water",
+    "subcategoryUr": "پانی"
   },
   {
     "id": "BRG-0146",
@@ -3106,7 +3541,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "المياه",
-    "categoryKey": "مياه"
+    "categoryKey": "مياه",
+    "subcategoryLabel": "مياه",
+    "subcategoryEn": "Water",
+    "subcategoryUr": "پانی"
   },
   {
     "id": "BRG-0147",
@@ -3127,7 +3565,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "المياه",
-    "categoryKey": "مياه"
+    "categoryKey": "مياه",
+    "subcategoryLabel": "مياه",
+    "subcategoryEn": "Water",
+    "subcategoryUr": "پانی"
   },
   {
     "id": "BRG-0156",
@@ -3148,7 +3589,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "التغليف والنظافة",
-    "categoryKey": "تغليف واستهلاكيات"
+    "categoryKey": "تغليف واستهلاكيات",
+    "subcategoryLabel": "علب وأكواب",
+    "subcategoryEn": "Boxes & cups",
+    "subcategoryUr": "ڈبے اور کپ"
   },
   {
     "id": "BRG-0157",
@@ -3169,7 +3613,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "التغليف والنظافة",
-    "categoryKey": "تغليف واستهلاكيات"
+    "categoryKey": "تغليف واستهلاكيات",
+    "subcategoryLabel": "علب وأكواب",
+    "subcategoryEn": "Boxes & cups",
+    "subcategoryUr": "ڈبے اور کپ"
   },
   {
     "id": "BRG-0150",
@@ -3190,7 +3637,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "التغليف والنظافة",
-    "categoryKey": "تغليف واستهلاكيات"
+    "categoryKey": "تغليف واستهلاكيات",
+    "subcategoryLabel": "علب وأكواب",
+    "subcategoryEn": "Boxes & cups",
+    "subcategoryUr": "ڈبے اور کپ"
   },
   {
     "id": "BRG-0151",
@@ -3211,7 +3661,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "التغليف والنظافة",
-    "categoryKey": "تغليف واستهلاكيات"
+    "categoryKey": "تغليف واستهلاكيات",
+    "subcategoryLabel": "علب وأكواب",
+    "subcategoryEn": "Boxes & cups",
+    "subcategoryUr": "ڈبے اور کپ"
   },
   {
     "id": "BRG-0148",
@@ -3232,7 +3685,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "التغليف والنظافة",
-    "categoryKey": "تغليف واستهلاكيات"
+    "categoryKey": "تغليف واستهلاكيات",
+    "subcategoryLabel": "علب وأكواب",
+    "subcategoryEn": "Boxes & cups",
+    "subcategoryUr": "ڈبے اور کپ"
   },
   {
     "id": "BRG-0149",
@@ -3253,7 +3709,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "التغليف والنظافة",
-    "categoryKey": "تغليف واستهلاكيات"
+    "categoryKey": "تغليف واستهلاكيات",
+    "subcategoryLabel": "علب وأكواب",
+    "subcategoryEn": "Boxes & cups",
+    "subcategoryUr": "ڈبے اور کپ"
   },
   {
     "id": "BRG-0152",
@@ -3274,7 +3733,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "التغليف والنظافة",
-    "categoryKey": "تغليف واستهلاكيات"
+    "categoryKey": "تغليف واستهلاكيات",
+    "subcategoryLabel": "زيوت القلي",
+    "subcategoryEn": "Cooking oils",
+    "subcategoryUr": "کھانے کے تیل"
   },
   {
     "id": "BRG-0154",
@@ -3295,7 +3757,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "التغليف والنظافة",
-    "categoryKey": "تغليف واستهلاكيات"
+    "categoryKey": "تغليف واستهلاكيات",
+    "subcategoryLabel": "أوراق وأكياس",
+    "subcategoryEn": "Wraps & bags",
+    "subcategoryUr": "ریپر اور تھیلے"
   },
   {
     "id": "BRG-0155",
@@ -3316,7 +3781,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "التغليف والنظافة",
-    "categoryKey": "تغليف واستهلاكيات"
+    "categoryKey": "تغليف واستهلاكيات",
+    "subcategoryLabel": "أوراق وأكياس",
+    "subcategoryEn": "Wraps & bags",
+    "subcategoryUr": "ریپر اور تھیلے"
   },
   {
     "id": "BRG-0158",
@@ -3337,7 +3805,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "التغليف والنظافة",
-    "categoryKey": "تغليف واستهلاكيات"
+    "categoryKey": "تغليف واستهلاكيات",
+    "subcategoryLabel": "سلامة العاملين",
+    "subcategoryEn": "Staff hygiene",
+    "subcategoryUr": "عملے کی حفاظت"
   },
   {
     "id": "BRG-0153",
@@ -3358,7 +3829,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "التغليف والنظافة",
-    "categoryKey": "تغليف واستهلاكيات"
+    "categoryKey": "تغليف واستهلاكيات",
+    "subcategoryLabel": "سلامة العاملين",
+    "subcategoryEn": "Staff hygiene",
+    "subcategoryUr": "عملے کی حفاظت"
   },
   {
     "id": "BRG-0159",
@@ -3379,7 +3853,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "التغليف والنظافة",
-    "categoryKey": "تغليف واستهلاكيات"
+    "categoryKey": "تغليف واستهلاكيات",
+    "subcategoryLabel": "أوراق وأكياس",
+    "subcategoryEn": "Wraps & bags",
+    "subcategoryUr": "ریپر اور تھیلے"
   },
   {
     "id": "BRG-0160",
@@ -3400,7 +3877,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "التغليف والنظافة",
-    "categoryKey": "تغليف واستهلاكيات"
+    "categoryKey": "تغليف واستهلاكيات",
+    "subcategoryLabel": "مناديل",
+    "subcategoryEn": "Napkins & tissues",
+    "subcategoryUr": "نیپکن"
   },
   {
     "id": "BRG-0161",
@@ -3421,7 +3901,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "التغليف والنظافة",
-    "categoryKey": "تغليف واستهلاكيات"
+    "categoryKey": "تغليف واستهلاكيات",
+    "subcategoryLabel": "أوراق وأكياس",
+    "subcategoryEn": "Wraps & bags",
+    "subcategoryUr": "ریپر اور تھیلے"
   },
   {
     "id": "BRG-0162",
@@ -3442,7 +3925,10 @@
     "unitUr": "پیک",
     "marketPrice": null,
     "subcategory": "التغليف والنظافة",
-    "categoryKey": "تغليف واستهلاكيات"
+    "categoryKey": "تغليف واستهلاكيات",
+    "subcategoryLabel": "أوراق وأكياس",
+    "subcategoryEn": "Wraps & bags",
+    "subcategoryUr": "ریپر اور تھیلے"
   },
   {
     "id": "TWB-0001",
@@ -3464,7 +3950,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "لحوم ودواجن",
-    "categoryKey": "لحوم ودواجن"
+    "categoryKey": "لحوم ودواجن",
+    "subcategoryLabel": "برجر جاهز",
+    "subcategoryEn": "Burger patties",
+    "subcategoryUr": "برگر پیٹیز"
   },
   {
     "id": "TWB-0002",
@@ -3486,7 +3975,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "لحوم ودواجن",
-    "categoryKey": "لحوم ودواجن"
+    "categoryKey": "لحوم ودواجن",
+    "subcategoryLabel": "برجر جاهز",
+    "subcategoryEn": "Burger patties",
+    "subcategoryUr": "برگر پیٹیز"
   },
   {
     "id": "TWB-0003",
@@ -3508,7 +4000,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "لحوم ودواجن",
-    "categoryKey": "لحوم ودواجن"
+    "categoryKey": "لحوم ودواجن",
+    "subcategoryLabel": "لحوم ودواجن",
+    "subcategoryEn": "Meat & poultry",
+    "subcategoryUr": "گوشت اور مرغی"
   },
   {
     "id": "TWB-0004",
@@ -3530,7 +4025,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "لحوم ودواجن",
-    "categoryKey": "لحوم ودواجن"
+    "categoryKey": "لحوم ودواجن",
+    "subcategoryLabel": "لحوم ودواجن",
+    "subcategoryEn": "Meat & poultry",
+    "subcategoryUr": "گوشت اور مرغی"
   },
   {
     "id": "TWB-0005",
@@ -3552,7 +4050,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "لحوم ودواجن",
-    "categoryKey": "لحوم ودواجن"
+    "categoryKey": "لحوم ودواجن",
+    "subcategoryLabel": "برجر جاهز",
+    "subcategoryEn": "Burger patties",
+    "subcategoryUr": "برگر پیٹیز"
   },
   {
     "id": "TWB-0006",
@@ -3574,7 +4075,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "لحوم ودواجن",
-    "categoryKey": "لحوم ودواجن"
+    "categoryKey": "لحوم ودواجن",
+    "subcategoryLabel": "برجر جاهز",
+    "subcategoryEn": "Burger patties",
+    "subcategoryUr": "برگر پیٹیز"
   },
   {
     "id": "TWB-0007",
@@ -3596,7 +4100,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "لحوم ودواجن",
-    "categoryKey": "لحوم ودواجن"
+    "categoryKey": "لحوم ودواجن",
+    "subcategoryLabel": "لحوم ودواجن",
+    "subcategoryEn": "Meat & poultry",
+    "subcategoryUr": "گوشت اور مرغی"
   },
   {
     "id": "TWB-0008",
@@ -3618,7 +4125,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "خبز ومخبوزات",
-    "categoryKey": "خبز ومخبوزات"
+    "categoryKey": "خبز ومخبوزات",
+    "subcategoryLabel": "برجر جاهز",
+    "subcategoryEn": "Burger patties",
+    "subcategoryUr": "برگر پیٹیز"
   },
   {
     "id": "TWB-0009",
@@ -3640,7 +4150,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "خبز ومخبوزات",
-    "categoryKey": "خبز ومخبوزات"
+    "categoryKey": "خبز ومخبوزات",
+    "subcategoryLabel": "برجر جاهز",
+    "subcategoryEn": "Burger patties",
+    "subcategoryUr": "برگر پیٹیز"
   },
   {
     "id": "TWB-0010",
@@ -3662,7 +4175,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "خبز ومخبوزات",
-    "categoryKey": "خبز ومخبوزات"
+    "categoryKey": "خبز ومخبوزات",
+    "subcategoryLabel": "برجر جاهز",
+    "subcategoryEn": "Burger patties",
+    "subcategoryUr": "برگر پیٹیز"
   },
   {
     "id": "TWB-0011",
@@ -3684,7 +4200,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "خبز ومخبوزات",
-    "categoryKey": "خبز ومخبوزات"
+    "categoryKey": "خبز ومخبوزات",
+    "subcategoryLabel": "خبز برجر",
+    "subcategoryEn": "Burger buns",
+    "subcategoryUr": "برگر بن"
   },
   {
     "id": "TWB-0012",
@@ -3706,7 +4225,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "خبز ومخبوزات",
-    "categoryKey": "خبز ومخبوزات"
+    "categoryKey": "خبز ومخبوزات",
+    "subcategoryLabel": "برجر جاهز",
+    "subcategoryEn": "Burger patties",
+    "subcategoryUr": "برگر پیٹیز"
   },
   {
     "id": "TWB-0013",
@@ -3728,7 +4250,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "أجبان وألبان",
-    "categoryKey": "أجبان وألبان"
+    "categoryKey": "أجبان وألبان",
+    "subcategoryLabel": "أجبان",
+    "subcategoryEn": "Cheese",
+    "subcategoryUr": "پنیر"
   },
   {
     "id": "TWB-0014",
@@ -3750,7 +4275,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "أجبان وألبان",
-    "categoryKey": "أجبان وألبان"
+    "categoryKey": "أجبان وألبان",
+    "subcategoryLabel": "أجبان",
+    "subcategoryEn": "Cheese",
+    "subcategoryUr": "پنیر"
   },
   {
     "id": "TWB-0015",
@@ -3772,7 +4300,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "أجبان وألبان",
-    "categoryKey": "أجبان وألبان"
+    "categoryKey": "أجبان وألبان",
+    "subcategoryLabel": "أجبان",
+    "subcategoryEn": "Cheese",
+    "subcategoryUr": "پنیر"
   },
   {
     "id": "TWB-0016",
@@ -3794,7 +4325,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "أجبان وألبان",
-    "categoryKey": "أجبان وألبان"
+    "categoryKey": "أجبان وألبان",
+    "subcategoryLabel": "أجبان",
+    "subcategoryEn": "Cheese",
+    "subcategoryUr": "پنیر"
   },
   {
     "id": "TWB-0017",
@@ -3816,7 +4350,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "أجبان وألبان",
-    "categoryKey": "أجبان وألبان"
+    "categoryKey": "أجبان وألبان",
+    "subcategoryLabel": "أجبان",
+    "subcategoryEn": "Cheese",
+    "subcategoryUr": "پنیر"
   },
   {
     "id": "TWB-0018",
@@ -3838,7 +4375,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "أجبان وألبان",
-    "categoryKey": "أجبان وألبان"
+    "categoryKey": "أجبان وألبان",
+    "subcategoryLabel": "بهارات وتوابل",
+    "subcategoryEn": "Spices & seasoning",
+    "subcategoryUr": "مصالحے"
   },
   {
     "id": "TWB-0019",
@@ -3860,7 +4400,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "بطاط ومجمدات",
-    "categoryKey": "بطاطس ومجمدات"
+    "categoryKey": "بطاطس ومجمدات",
+    "subcategoryLabel": "بطاطس",
+    "subcategoryEn": "Fries & potatoes",
+    "subcategoryUr": "آلو اور فرائز"
   },
   {
     "id": "TWB-0020",
@@ -3882,7 +4425,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "بطاط ومجمدات",
-    "categoryKey": "بطاطس ومجمدات"
+    "categoryKey": "بطاطس ومجمدات",
+    "subcategoryLabel": "بطاطس",
+    "subcategoryEn": "Fries & potatoes",
+    "subcategoryUr": "آلو اور فرائز"
   },
   {
     "id": "TWB-0021",
@@ -3904,7 +4450,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "بطاط ومجمدات",
-    "categoryKey": "بطاطس ومجمدات"
+    "categoryKey": "بطاطس ومجمدات",
+    "subcategoryLabel": "بطاطس",
+    "subcategoryEn": "Fries & potatoes",
+    "subcategoryUr": "آلو اور فرائز"
   },
   {
     "id": "TWB-0022",
@@ -3926,7 +4475,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "بطاط ومجمدات",
-    "categoryKey": "بطاطس ومجمدات"
+    "categoryKey": "بطاطس ومجمدات",
+    "subcategoryLabel": "خضروات البرجر",
+    "subcategoryEn": "Burger vegetables",
+    "subcategoryUr": "برگر کی سبزیاں"
   },
   {
     "id": "TWB-0023",
@@ -3948,7 +4500,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "بطاط ومجمدات",
-    "categoryKey": "بطاطس ومجمدات"
+    "categoryKey": "بطاطس ومجمدات",
+    "subcategoryLabel": "أجبان",
+    "subcategoryEn": "Cheese",
+    "subcategoryUr": "پنیر"
   },
   {
     "id": "TWB-0024",
@@ -3970,7 +4525,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "بطاط ومجمدات",
-    "categoryKey": "بطاطس ومجمدات"
+    "categoryKey": "بطاطس ومجمدات",
+    "subcategoryLabel": "دجاج ومقبلات",
+    "subcategoryEn": "Chicken & sides",
+    "subcategoryUr": "چکن اور سائیڈز"
   },
   {
     "id": "TWB-0025",
@@ -3992,7 +4550,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "صلصات وتتبيلات",
-    "categoryKey": "صلصات وتوابل"
+    "categoryKey": "صلصات وتوابل",
+    "subcategoryLabel": "كاتشب",
+    "subcategoryEn": "Ketchup",
+    "subcategoryUr": "کیچپ"
   },
   {
     "id": "TWB-0026",
@@ -4014,7 +4575,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "صلصات وتتبيلات",
-    "categoryKey": "صلصات وتوابل"
+    "categoryKey": "صلصات وتوابل",
+    "subcategoryLabel": "مايونيز",
+    "subcategoryEn": "Mayonnaise",
+    "subcategoryUr": "مایونیز"
   },
   {
     "id": "TWB-0027",
@@ -4036,7 +4600,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "صلصات وتتبيلات",
-    "categoryKey": "صلصات وتوابل"
+    "categoryKey": "صلصات وتوابل",
+    "subcategoryLabel": "صلصات",
+    "subcategoryEn": "Sauces",
+    "subcategoryUr": "ساس"
   },
   {
     "id": "TWB-0028",
@@ -4058,7 +4625,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "صلصات وتتبيلات",
-    "categoryKey": "صلصات وتوابل"
+    "categoryKey": "صلصات وتوابل",
+    "subcategoryLabel": "برجر جاهز",
+    "subcategoryEn": "Burger patties",
+    "subcategoryUr": "برگر پیٹیز"
   },
   {
     "id": "TWB-0029",
@@ -4080,7 +4650,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "صلصات وتتبيلات",
-    "categoryKey": "صلصات وتوابل"
+    "categoryKey": "صلصات وتوابل",
+    "subcategoryLabel": "صلصات",
+    "subcategoryEn": "Sauces",
+    "subcategoryUr": "ساس"
   },
   {
     "id": "TWB-0030",
@@ -4102,7 +4675,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "صلصات وتتبيلات",
-    "categoryKey": "صلصات وتوابل"
+    "categoryKey": "صلصات وتوابل",
+    "subcategoryLabel": "صلصات",
+    "subcategoryEn": "Sauces",
+    "subcategoryUr": "ساس"
   },
   {
     "id": "TWB-0031",
@@ -4124,7 +4700,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "صلصات وتتبيلات",
-    "categoryKey": "صلصات وتوابل"
+    "categoryKey": "صلصات وتوابل",
+    "subcategoryLabel": "خضروات البرجر",
+    "subcategoryEn": "Burger vegetables",
+    "subcategoryUr": "برگر کی سبزیاں"
   },
   {
     "id": "TWB-0032",
@@ -4146,7 +4725,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "صلصات وتتبيلات",
-    "categoryKey": "صلصات وتوابل"
+    "categoryKey": "صلصات وتوابل",
+    "subcategoryLabel": "صلصات وتوابل",
+    "subcategoryEn": "Sauces & spices",
+    "subcategoryUr": "ساس اور مصالحے"
   },
   {
     "id": "TWB-0033",
@@ -4168,7 +4750,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "صلصات وتتبيلات",
-    "categoryKey": "صلصات وتوابل"
+    "categoryKey": "صلصات وتوابل",
+    "subcategoryLabel": "صلصات وتوابل",
+    "subcategoryEn": "Sauces & spices",
+    "subcategoryUr": "ساس اور مصالحے"
   },
   {
     "id": "TWB-0034",
@@ -4190,7 +4775,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "صلصات وتتبيلات",
-    "categoryKey": "صلصات وتوابل"
+    "categoryKey": "صلصات وتوابل",
+    "subcategoryLabel": "بهارات وتوابل",
+    "subcategoryEn": "Spices & seasoning",
+    "subcategoryUr": "مصالحے"
   },
   {
     "id": "TWB-0035",
@@ -4212,7 +4800,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "صلصات وتتبيلات",
-    "categoryKey": "صلصات وتوابل"
+    "categoryKey": "صلصات وتوابل",
+    "subcategoryLabel": "بهارات وتوابل",
+    "subcategoryEn": "Spices & seasoning",
+    "subcategoryUr": "مصالحے"
   },
   {
     "id": "TWB-0036",
@@ -4234,7 +4825,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "صلصات وتتبيلات",
-    "categoryKey": "صلصات وتوابل"
+    "categoryKey": "صلصات وتوابل",
+    "subcategoryLabel": "بهارات وتوابل",
+    "subcategoryEn": "Spices & seasoning",
+    "subcategoryUr": "مصالحے"
   },
   {
     "id": "TWB-0037",
@@ -4256,7 +4850,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "صلصات وتتبيلات",
-    "categoryKey": "صلصات وتوابل"
+    "categoryKey": "صلصات وتوابل",
+    "subcategoryLabel": "صلصات وتوابل",
+    "subcategoryEn": "Sauces & spices",
+    "subcategoryUr": "ساس اور مصالحے"
   },
   {
     "id": "TWB-0038",
@@ -4278,7 +4875,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "صلصات وتتبيلات",
-    "categoryKey": "صلصات وتوابل"
+    "categoryKey": "صلصات وتوابل",
+    "subcategoryLabel": "خضروات البرجر",
+    "subcategoryEn": "Burger vegetables",
+    "subcategoryUr": "برگر کی سبزیاں"
   },
   {
     "id": "TWB-0039",
@@ -4300,7 +4900,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "زيوت ومواد تشغيل غذائية",
-    "categoryKey": "زيوت ومواد غذائية"
+    "categoryKey": "زيوت ومواد غذائية",
+    "subcategoryLabel": "زيوت القلي",
+    "subcategoryEn": "Cooking oils",
+    "subcategoryUr": "کھانے کے تیل"
   },
   {
     "id": "TWB-0040",
@@ -4322,7 +4925,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "زيوت ومواد تشغيل غذائية",
-    "categoryKey": "زيوت ومواد غذائية"
+    "categoryKey": "زيوت ومواد غذائية",
+    "subcategoryLabel": "زيوت القلي",
+    "subcategoryEn": "Cooking oils",
+    "subcategoryUr": "کھانے کے تیل"
   },
   {
     "id": "TWB-0041",
@@ -4344,7 +4950,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "زيوت ومواد تشغيل غذائية",
-    "categoryKey": "زيوت ومواد غذائية"
+    "categoryKey": "زيوت ومواد غذائية",
+    "subcategoryLabel": "زيوت ومواد غذائية",
+    "subcategoryEn": "Oils & pantry",
+    "subcategoryUr": "تیل اور غذائی سامان"
   },
   {
     "id": "TWB-0042",
@@ -4366,7 +4975,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "زيوت ومواد تشغيل غذائية",
-    "categoryKey": "زيوت ومواد غذائية"
+    "categoryKey": "زيوت ومواد غذائية",
+    "subcategoryLabel": "زيوت ومواد غذائية",
+    "subcategoryEn": "Oils & pantry",
+    "subcategoryUr": "تیل اور غذائی سامان"
   },
   {
     "id": "TWB-0043",
@@ -4388,7 +5000,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "زيوت ومواد تشغيل غذائية",
-    "categoryKey": "زيوت ومواد غذائية"
+    "categoryKey": "زيوت ومواد غذائية",
+    "subcategoryLabel": "زيوت ومواد غذائية",
+    "subcategoryEn": "Oils & pantry",
+    "subcategoryUr": "تیل اور غذائی سامان"
   },
   {
     "id": "TWB-0044",
@@ -4410,7 +5025,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "زيوت ومواد تشغيل غذائية",
-    "categoryKey": "زيوت ومواد غذائية"
+    "categoryKey": "زيوت ومواد غذائية",
+    "subcategoryLabel": "زيوت ومواد غذائية",
+    "subcategoryEn": "Oils & pantry",
+    "subcategoryUr": "تیل اور غذائی سامان"
   },
   {
     "id": "TWB-0045",
@@ -4432,7 +5050,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "تغليف واستهلاكيات",
-    "categoryKey": "تغليف واستهلاكيات"
+    "categoryKey": "تغليف واستهلاكيات",
+    "subcategoryLabel": "برجر جاهز",
+    "subcategoryEn": "Burger patties",
+    "subcategoryUr": "برگر پیٹیز"
   },
   {
     "id": "TWB-0046",
@@ -4454,7 +5075,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "تغليف واستهلاكيات",
-    "categoryKey": "تغليف واستهلاكيات"
+    "categoryKey": "تغليف واستهلاكيات",
+    "subcategoryLabel": "برجر جاهز",
+    "subcategoryEn": "Burger patties",
+    "subcategoryUr": "برگر پیٹیز"
   },
   {
     "id": "TWB-0047",
@@ -4476,7 +5100,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "تغليف واستهلاكيات",
-    "categoryKey": "تغليف واستهلاكيات"
+    "categoryKey": "تغليف واستهلاكيات",
+    "subcategoryLabel": "برجر جاهز",
+    "subcategoryEn": "Burger patties",
+    "subcategoryUr": "برگر پیٹیز"
   },
   {
     "id": "TWB-0048",
@@ -4498,7 +5125,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "تغليف واستهلاكيات",
-    "categoryKey": "تغليف واستهلاكيات"
+    "categoryKey": "تغليف واستهلاكيات",
+    "subcategoryLabel": "أوراق وأكياس",
+    "subcategoryEn": "Wraps & bags",
+    "subcategoryUr": "ریپر اور تھیلے"
   },
   {
     "id": "TWB-0049",
@@ -4520,7 +5150,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "تغليف واستهلاكيات",
-    "categoryKey": "تغليف واستهلاكيات"
+    "categoryKey": "تغليف واستهلاكيات",
+    "subcategoryLabel": "أوراق وأكياس",
+    "subcategoryEn": "Wraps & bags",
+    "subcategoryUr": "ریپر اور تھیلے"
   },
   {
     "id": "TWB-0050",
@@ -4542,7 +5175,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "تغليف واستهلاكيات",
-    "categoryKey": "تغليف واستهلاكيات"
+    "categoryKey": "تغليف واستهلاكيات",
+    "subcategoryLabel": "بطاطس",
+    "subcategoryEn": "Fries & potatoes",
+    "subcategoryUr": "آلو اور فرائز"
   },
   {
     "id": "TWB-0051",
@@ -4564,7 +5200,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "تغليف واستهلاكيات",
-    "categoryKey": "تغليف واستهلاكيات"
+    "categoryKey": "تغليف واستهلاكيات",
+    "subcategoryLabel": "علب وأكواب",
+    "subcategoryEn": "Boxes & cups",
+    "subcategoryUr": "ڈبے اور کپ"
   },
   {
     "id": "TWB-0052",
@@ -4586,7 +5225,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "تغليف واستهلاكيات",
-    "categoryKey": "تغليف واستهلاكيات"
+    "categoryKey": "تغليف واستهلاكيات",
+    "subcategoryLabel": "علب وأكواب",
+    "subcategoryEn": "Boxes & cups",
+    "subcategoryUr": "ڈبے اور کپ"
   },
   {
     "id": "TWB-0053",
@@ -4608,7 +5250,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "تغليف واستهلاكيات",
-    "categoryKey": "تغليف واستهلاكيات"
+    "categoryKey": "تغليف واستهلاكيات",
+    "subcategoryLabel": "علب وأكواب",
+    "subcategoryEn": "Boxes & cups",
+    "subcategoryUr": "ڈبے اور کپ"
   },
   {
     "id": "TWB-0054",
@@ -4630,7 +5275,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "تغليف واستهلاكيات",
-    "categoryKey": "تغليف واستهلاكيات"
+    "categoryKey": "تغليف واستهلاكيات",
+    "subcategoryLabel": "علب وأكواب",
+    "subcategoryEn": "Boxes & cups",
+    "subcategoryUr": "ڈبے اور کپ"
   },
   {
     "id": "TWB-0055",
@@ -4652,7 +5300,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "تغليف واستهلاكيات",
-    "categoryKey": "تغليف واستهلاكيات"
+    "categoryKey": "تغليف واستهلاكيات",
+    "subcategoryLabel": "مناديل",
+    "subcategoryEn": "Napkins & tissues",
+    "subcategoryUr": "نیپکن"
   },
   {
     "id": "TWB-0056",
@@ -4674,7 +5325,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "تغليف واستهلاكيات",
-    "categoryKey": "تغليف واستهلاكيات"
+    "categoryKey": "تغليف واستهلاكيات",
+    "subcategoryLabel": "أوراق وأكياس",
+    "subcategoryEn": "Wraps & bags",
+    "subcategoryUr": "ریپر اور تھیلے"
   },
   {
     "id": "TWB-0057",
@@ -4696,7 +5350,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "تغليف واستهلاكيات",
-    "categoryKey": "تغليف واستهلاكيات"
+    "categoryKey": "تغليف واستهلاكيات",
+    "subcategoryLabel": "سلامة العاملين",
+    "subcategoryEn": "Staff hygiene",
+    "subcategoryUr": "عملے کی حفاظت"
   },
   {
     "id": "TWB-0058",
@@ -4718,7 +5375,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "تغليف واستهلاكيات",
-    "categoryKey": "تغليف واستهلاكيات"
+    "categoryKey": "تغليف واستهلاكيات",
+    "subcategoryLabel": "تغليف واستهلاكيات",
+    "subcategoryEn": "Packaging & disposables",
+    "subcategoryUr": "پیکنگ اور استعمالی سامان"
   },
   {
     "id": "TWB-0059",
@@ -4740,7 +5400,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "تغليف واستهلاكيات",
-    "categoryKey": "تغليف واستهلاكيات"
+    "categoryKey": "تغليف واستهلاكيات",
+    "subcategoryLabel": "تغليف واستهلاكيات",
+    "subcategoryEn": "Packaging & disposables",
+    "subcategoryUr": "پیکنگ اور استعمالی سامان"
   },
   {
     "id": "TWB-0060",
@@ -4762,7 +5425,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "تغليف واستهلاكيات",
-    "categoryKey": "تغليف واستهلاكيات"
+    "categoryKey": "تغليف واستهلاكيات",
+    "subcategoryLabel": "أوراق وأكياس",
+    "subcategoryEn": "Wraps & bags",
+    "subcategoryUr": "ریپر اور تھیلے"
   },
   {
     "id": "TWB-0061",
@@ -4784,7 +5450,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "تغليف واستهلاكيات",
-    "categoryKey": "تغليف واستهلاكيات"
+    "categoryKey": "تغليف واستهلاكيات",
+    "subcategoryLabel": "تغليف واستهلاكيات",
+    "subcategoryEn": "Packaging & disposables",
+    "subcategoryUr": "پیکنگ اور استعمالی سامان"
   },
   {
     "id": "TWB-0062",
@@ -4806,7 +5475,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "تغليف واستهلاكيات",
-    "categoryKey": "تغليف واستهلاكيات"
+    "categoryKey": "تغليف واستهلاكيات",
+    "subcategoryLabel": "تغليف واستهلاكيات",
+    "subcategoryEn": "Packaging & disposables",
+    "subcategoryUr": "پیکنگ اور استعمالی سامان"
   },
   {
     "id": "TWB-0063",
@@ -4828,7 +5500,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "تغليف واستهلاكيات",
-    "categoryKey": "تغليف واستهلاكيات"
+    "categoryKey": "تغليف واستهلاكيات",
+    "subcategoryLabel": "تغليف واستهلاكيات",
+    "subcategoryEn": "Packaging & disposables",
+    "subcategoryUr": "پیکنگ اور استعمالی سامان"
   },
   {
     "id": "TWB-0064",
@@ -4850,7 +5525,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "تنظيف وتعقيم",
-    "categoryKey": "تنظيف وتعقيم"
+    "categoryKey": "تنظيف وتعقيم",
+    "subcategoryLabel": "تنظيف وتعقيم",
+    "subcategoryEn": "Cleaning & hygiene",
+    "subcategoryUr": "صفائی اور جراثیم کشی"
   },
   {
     "id": "TWB-0065",
@@ -4872,7 +5550,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "تنظيف وتعقيم",
-    "categoryKey": "تنظيف وتعقيم"
+    "categoryKey": "تنظيف وتعقيم",
+    "subcategoryLabel": "تنظيف وتعقيم",
+    "subcategoryEn": "Cleaning & hygiene",
+    "subcategoryUr": "صفائی اور جراثیم کشی"
   },
   {
     "id": "TWB-0066",
@@ -4894,7 +5575,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "تنظيف وتعقيم",
-    "categoryKey": "تنظيف وتعقيم"
+    "categoryKey": "تنظيف وتعقيم",
+    "subcategoryLabel": "تنظيف وتعقيم",
+    "subcategoryEn": "Cleaning & hygiene",
+    "subcategoryUr": "صفائی اور جراثیم کشی"
   },
   {
     "id": "TWB-0067",
@@ -4916,7 +5600,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "تنظيف وتعقيم",
-    "categoryKey": "تنظيف وتعقيم"
+    "categoryKey": "تنظيف وتعقيم",
+    "subcategoryLabel": "تنظيف وتعقيم",
+    "subcategoryEn": "Cleaning & hygiene",
+    "subcategoryUr": "صفائی اور جراثیم کشی"
   },
   {
     "id": "TWB-0068",
@@ -4938,7 +5625,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "تنظيف وتعقيم",
-    "categoryKey": "تنظيف وتعقيم"
+    "categoryKey": "تنظيف وتعقيم",
+    "subcategoryLabel": "تنظيف وتعقيم",
+    "subcategoryEn": "Cleaning & hygiene",
+    "subcategoryUr": "صفائی اور جراثیم کشی"
   },
   {
     "id": "TWB-0069",
@@ -4960,7 +5650,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "تنظيف وتعقيم",
-    "categoryKey": "تنظيف وتعقيم"
+    "categoryKey": "تنظيف وتعقيم",
+    "subcategoryLabel": "مناديل",
+    "subcategoryEn": "Napkins & tissues",
+    "subcategoryUr": "نیپکن"
   },
   {
     "id": "TWB-0070",
@@ -4982,7 +5675,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "تنظيف وتعقيم",
-    "categoryKey": "تنظيف وتعقيم"
+    "categoryKey": "تنظيف وتعقيم",
+    "subcategoryLabel": "تنظيف وتعقيم",
+    "subcategoryEn": "Cleaning & hygiene",
+    "subcategoryUr": "صفائی اور جراثیم کشی"
   },
   {
     "id": "TWB-0071",
@@ -5004,7 +5700,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "تنظيف وتعقيم",
-    "categoryKey": "تنظيف وتعقيم"
+    "categoryKey": "تنظيف وتعقيم",
+    "subcategoryLabel": "تنظيف وتعقيم",
+    "subcategoryEn": "Cleaning & hygiene",
+    "subcategoryUr": "صفائی اور جراثیم کشی"
   },
   {
     "id": "TWB-0072",
@@ -5026,7 +5725,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "تنظيف وتعقيم",
-    "categoryKey": "تنظيف وتعقيم"
+    "categoryKey": "تنظيف وتعقيم",
+    "subcategoryLabel": "تنظيف وتعقيم",
+    "subcategoryEn": "Cleaning & hygiene",
+    "subcategoryUr": "صفائی اور جراثیم کشی"
   },
   {
     "id": "KWREF-0001",
@@ -5048,7 +5750,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "خبز ومخبوزات",
-    "categoryKey": "خبز ومخبوزات"
+    "categoryKey": "خبز ومخبوزات",
+    "subcategoryLabel": "برجر جاهز",
+    "subcategoryEn": "Burger patties",
+    "subcategoryUr": "برگر پیٹیز"
   },
   {
     "id": "KWREF-0002",
@@ -5070,7 +5775,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "خبز ومخبوزات",
-    "categoryKey": "خبز ومخبوزات"
+    "categoryKey": "خبز ومخبوزات",
+    "subcategoryLabel": "برجر جاهز",
+    "subcategoryEn": "Burger patties",
+    "subcategoryUr": "برگر پیٹیز"
   },
   {
     "id": "KWREF-0003",
@@ -5092,7 +5800,10 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "أجبان وألبان",
-    "categoryKey": "أجبان وألبان"
+    "categoryKey": "أجبان وألبان",
+    "subcategoryLabel": "برجر جاهز",
+    "subcategoryEn": "Burger patties",
+    "subcategoryUr": "برگر پیٹیز"
   },
   {
     "id": "KWREF-0004",
@@ -5114,6 +5825,9 @@
     "sourceCatalog": "burger-supplies",
     "notes": "صنف مطلوب للمطاعم؛ يحتاج صورة مطابقة وسعر سوق موثق",
     "subcategory": "لحوم ودواجن",
-    "categoryKey": "لحوم ودواجن"
+    "categoryKey": "لحوم ودواجن",
+    "subcategoryLabel": "برجر جاهز",
+    "subcategoryEn": "Burger patties",
+    "subcategoryUr": "برگر پیٹیز"
   }
 ]
