@@ -67,5 +67,69 @@ $('export-prompts').onclick=()=>download('masar-prompts.txt',state.scenes.map((s
 $('import-json').onchange=async e=>{const f=e.target.files[0];if(!f)return;if(f.size>10e6)return toast('ملف المشروع كبير جدًا');try{const obj=JSON.parse(await f.text());if(!Array.isArray(obj.scenes)||!obj.scenes.length||typeof obj.title!=='string')throw Error('صيغة غير صحيحة');if(!confirm('استيراد المشروع سيستبدل البيانات الحالية. هل أكملت النسخ الاحتياطي؟'))return;state={...base(),...obj,marketing:{...base().marketing,...obj.marketing}};selected=0;playhead=0;Object.entries(bindings).forEach(([id,k])=>$(id).value=state[k]);Object.entries(fields).forEach(([id,k])=>$(id).value=state.marketing[k]||'');save();references();sceneList();loadScene();draw();kpis();toast('تم الاستيراد')}catch(e){toast('ملف المشروع غير صالح: '+e.message)}};
 $('mobile-menu').onclick=()=>$('sidebar').classList.toggle('open');
 $$('.nav-link').forEach(a=>a.addEventListener('click',()=>{$$('.nav-link').forEach(b=>b.classList.remove('active'));a.classList.add('active');$('sidebar').classList.remove('open');$('header-title').textContent=a.textContent.trim()}));
+
+// Remote render is opt-in; do not persist the credential or silently send project data.
+let renderJobId=null,renderBase='',renderKey='',renderTimer=null;
+const statusRender=text=>{$('renderer-status').textContent=text};
+const configRender=()=>{
+ const raw=$('renderer-url').value.trim().replace(/\/+$/,'');
+ let url;
+ try{url=new URL(raw);if(url.protocol!=='https:'&&!['localhost','127.0.0.1'].includes(url.hostname))throw Error()}catch{throw Error('أدخل عنوان HTTPS صحيحًا للخادم')}
+ const key=$('renderer-key').value.trim();
+ if(!key)throw Error('أدخل مفتاح التصيير');
+ return {base:url.origin+url.pathname.replace(/\/+$/,''),key};
+};
+async function apiRender(method,path,payload){
+ const cfg=configRender();
+ const res=await fetch(cfg.base+path,{method,headers:{'X-Render-Key':cfg.key,...(payload?{'Content-Type':'application/json'}:{})},...(payload?{body:JSON.stringify(payload)}:{})});
+ if(!res.ok){let err;try{err=(await res.json()).error}catch{}throw Error(err||'HTTP '+res.status)}
+ return res;
+}
+const friendlyRender=e=>String(e?.message||e||'فشل الاتصال').slice(0,200);
+$('renderer-health').onclick=async()=>{
+ try{
+ const cfg=configRender();statusRender('جارٍ فحص الاتصال...');
+ const u=await fetch(cfg.base+'/health');if(!u.ok)throw Error('HTTP '+u.status);
+ const x=await u.json();statusRender(x.renderer?'الخادم متصل ويدعم واجهة التصيير. جاهزية Blender تحتاج اختبار مهمة فعلية.':'الخادم لا يعلن دعمه للتصيير الحقيقي');
+ }catch(e){statusRender('تعذر الاتصال: '+friendlyRender(e))}
+};
+$('renderer-submit').onclick=async()=>{
+ try{
+ const cfg=configRender();
+ const payload={title:state.title,style:state.style,aspect:state.aspect,engine:$('renderer-engine').value,scenes:state.scenes.map(s=>({title:s.title,visual:s.visual,narration:s.narration,duration:Number(s.duration),color:s.color}))};
+ const dur=payload.scenes.reduce((n,s)=>n+s.duration,0);
+ if(dur>300)throw Error('الحد الأقصى للفيديو 300 ثانية');
+ if(!confirm('سترسل نصوص المشاهد إلى خادم التصيير المحدد. هل تريد المتابعة؟'))return;
+ $('renderer-submit').disabled=true;
+ const res=await apiRender('POST','/api/render/jobs',payload),data=await res.json();
+ renderJobId=data.job.id;renderBase=cfg.base;renderKey=cfg.key;
+ $('renderer-refresh').disabled=false;$('renderer-download').disabled=true;
+ statusRender('أُرسلت المهمة '+renderJobId+' · الحالة: '+data.job.status);
+ if(renderTimer)clearInterval(renderTimer);
+ renderTimer=setInterval(()=>{if(renderJobId)pollRender()},5000);
+ pollRender();
+ }catch(e){statusRender('تعذّر إرسال التصيير: '+friendlyRender(e))}
+ finally{$('renderer-submit').disabled=false}
+};
+async function pollRender(){
+ if(!renderJobId)return;
+ try{
+ const res=await apiRender('GET','/api/render/jobs/'+renderJobId),data=await res.json(),job=data.job;
+ const names={queued:'في الطابور',running:'جارٍ التصيير',completed:'اكتمل التصيير',failed:'فشل التصيير'};
+ statusRender('المهمة '+job.id+' · المحرك '+job.engine+' · '+(names[job.status]||job.status)+(job.error?' · '+job.error:''));
+ if(['completed','failed'].includes(job.status)){if(renderTimer)clearInterval(renderTimer);renderTimer=null;$('renderer-download').disabled=job.status!=='completed'}
+ }catch(e){statusRender('تعذر تحديث الحالة: '+friendlyRender(e));if(renderTimer)clearInterval(renderTimer);renderTimer=null}
+}
+$('renderer-refresh').onclick=pollRender;
+$('renderer-download').onclick=async()=>{
+ if(!renderJobId)return;
+ try{
+ statusRender('جارٍ تنزيل MP4...');
+ const response=await apiRender('GET','/api/render/jobs/'+renderJobId+'/download');
+ const file=await response.blob();download('masar-animation-'+renderJobId.slice(0,8)+'.mp4',file,'video/mp4');
+ statusRender('تم إرسال MP4 إلى التنزيل. تحقق من الملف قبل النشر.');
+ }catch(e){statusRender('تعذر تنزيل الملف: '+friendlyRender(e))}
+};
+
 references();sceneList();loadScene();refreshStats();kpis();draw();
 })();
