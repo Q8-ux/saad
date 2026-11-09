@@ -1,5 +1,5 @@
-import {SECTIONS as WIRD_SECTIONS, ALL_SECTIONS as SECTIONS, arabic as arabicOriginal, repeatTarget, tracksFor, advanceCursor, safeSaved} from './library.mjs';
-import {LANGUAGES, message, SECTION_NAMES, DUA_MEANINGS, applyLanguage} from './i18n.mjs';
+import {SECTIONS as WIRD_SECTIONS, ALL_SECTIONS as SECTIONS, arabic as arabicOriginal, repeatTarget, tracksFor, advanceCursor, safeSaved} from './library.mjs?v=20261109-book-3';
+import {LANGUAGES, message, SECTION_NAMES, DUA_MEANINGS, applyLanguage} from './i18n.mjs?v=20261109-book-3';
 
 const $ = selector => document.querySelector(selector);
 let saved;
@@ -291,7 +291,6 @@ async function load() {
     const fromHash=SECTIONS.findIndex(s=>s.id===location.hash.slice(1));
     if(fromHash>=0)selected=fromHash;
     renderIndex();renderPassage();updatePlayer();
-    if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js',{scope:'./'}).catch(()=>{});
   }catch(error){
     ready=false;updatePlayer();
     $('#quranText').replaceChildren();const p=document.createElement('p');p.className='error-text';p.textContent=t('textError');const b=document.createElement('button');b.className='retry-button';b.textContent=t('retry');b.addEventListener('click',load);$('#quranText').append(p,b);

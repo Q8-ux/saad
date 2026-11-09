@@ -8,7 +8,7 @@ root = Path(__file__).resolve().parents[1]
 out = root / 'dist'
 shutil.rmtree(out, ignore_errors=True)
 out.mkdir()
-for name in ['index.html', 'styles.css', 'app.mjs', 'library.mjs', 'i18n.mjs', 'sw.js', 'manifest.webmanifest']:
+for name in ['index.html', 'refresh.html', 'styles.css', 'app.mjs', 'library.mjs', 'i18n.mjs', 'updates.mjs', 'sw.js', 'manifest.webmanifest']:
     shutil.copy2(root / name, out / name)
 for name in ['assets', 'data']:
     shutil.copytree(root / name, out / name)

@@ -7,10 +7,12 @@
   <meta name="description" content="للذاكرين والذاكرات، مساحة هادئة لقراءة مقاطع القرآن والأدعية والاستماع إليها، بتلاوة الشيخ ماهر المعيقلي مع التكرار ومتابعة القراءة.">
   <meta name="google" content="notranslate">
   <title>للذاكرين والذاكرات | قراءة واستماع</title>
-  <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
-  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="app-version" content="20261109-book-3">
+  <link rel="icon" href="assets/icon.svg?v=20261109-book-3" type="image/svg+xml">
+  <link rel="manifest" href="manifest.webmanifest?v=20261109-book-3">
   <link rel="preload" href="assets/amiri-quran.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=20261109-book-3">
+  <script type="module" src="updates.mjs?v=20261109-book-3"></script>
   <script>try{if(JSON.parse(localStorage.getItem('dhikr-v1')||'{}').theme==='dark')document.documentElement.dataset.theme='dark'}catch{}</script>
 </head>
 <body>
@@ -53,6 +55,6 @@
   <dialog id="sourcesDialog"><button class="close-dialog icon-button" data-close aria-label="إغلاق">×</button><span class="eyebrow">عن للذاكرين والذاكرات</span><h2>مساحةٌ واضحة المصادر</h2><p>المقاطع وأعداد تكرارها وصيغ الأدعية من الصورة التي أرفقتها. أعداد التكرار هنا لتنظيم قائمتك الشخصية.</p><p>نص القرآن بالرسم العثماني من <a href="https://alquran.cloud" target="_blank" rel="noopener">Al Quran Cloud</a>، المبني على نص <a href="https://tanzil.net" target="_blank" rel="noopener">مشروع تنزيل</a>. يُعرض النص كما ورد من المصدر.</p><p>تلاوة الشيخ ماهر المعيقلي من <a href="https://everyayah.com/data/MaherAlMuaiqly128kbps/" target="_blank" rel="noopener">EveryAyah</a>، مع مصدر احتياطي للتسجيل نفسه من MP3Quran.</p><p id="duaSourceNote">الأدعية بقراءة آلية عربية مستقلة. تلاوة القرآن تسجيل أصلي للقارئ.</p><p>يُحفظ تقدم القراءة وإعداداتك على جهازك فقط. يحتاج بث التلاوة إلى الإنترنت. أُعدّ هذا الورد للقراءة والاستماع دون إضافة أحكام على أشخاص بعينهم.</p><p id="translationSources"></p><a class="source-repo" href="https://github.com/Q8-ux/saad/tree/main/dhikr" target="_blank" rel="noopener">المشروع على GitHub ↗</a></dialog>
   <dialog id="resetDialog"><h2>جلسة جديدة</h2><p>هل تريد تصفير عدّادات القراءة؟ تبقى إعدادات الخط والتكرار محفوظة.</p><div class="dialog-actions"><button id="confirmReset" class="button primary">ابدأ جلسة جديدة</button><button class="button outline" data-close>العودة للقراءة</button></div></dialog>
   <noscript><div class="noscript">يرجى تفعيل JavaScript لعرض النصوص وتشغيل المقاطع الصوتية.</div></noscript>
-  <script type="module" src="app.mjs"></script>
+  <script type="module" src="app.mjs?v=20261109-book-3"></script>
 </body>
 </html>
