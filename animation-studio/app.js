@@ -149,5 +149,27 @@ $('renderer-download').onclick=async()=>{
  }catch(e){statusRender('تعذر تنزيل الملف: '+friendlyRender(e))}
 };
 
+
+$('load-family-voices').onclick=async()=>{
+ const target=$('family-voice-list');
+ target.textContent='جارٍ تحميل المقاطع الصوتية...';
+ try{
+  const response=await fetch('./projects/online-family-voices.json',{cache:'no-store'});
+  if(!response.ok)throw Error('HTTP '+response.status);
+  const data=await response.json();
+  target.replaceChildren();
+  if(!Array.isArray(data.scenes)||data.scenes.length!==12)throw Error('ملف الصوت غير مكتمل');
+  for(const entry of data.scenes){
+   const url=new URL(entry.url);
+   if(url.protocol!=='https:'||url.hostname!=='resource2.heygen.ai')continue;
+   const card=document.createElement('div');card.className='voice-clip';
+   const heading=document.createElement('strong');heading.textContent='المشهد '+entry.scene+' · '+entry.role;
+   const audio=document.createElement('audio');audio.controls=true;audio.preload='none';audio.src=url.href;audio.setAttribute('aria-label','استماع إلى صوت '+entry.role+' في المشهد '+entry.scene);
+   card.append(heading,audio);target.append(card);
+  }
+  toast('تم تحميل مقاطع الأصوات التجريبية');
+ }catch(e){target.textContent='تعذر تحميل الأصوات: '+e.message}
+};
+
 references();sceneList();loadScene();refreshStats();kpis();draw();
 })();
