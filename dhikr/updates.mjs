@@ -1,5 +1,5 @@
 // Start update checks independently of Quran-data loading.
-const VERSION='20261109-book-3';
+const VERSION='20261109-night-4';
 if('serviceWorker' in navigator){
   const hadController=Boolean(navigator.serviceWorker.controller);
   let reloading=false,pending=false,registration;

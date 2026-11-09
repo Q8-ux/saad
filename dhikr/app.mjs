@@ -1,10 +1,10 @@
-import {SECTIONS as WIRD_SECTIONS, ALL_SECTIONS as SECTIONS, arabic as arabicOriginal, repeatTarget, tracksFor, advanceCursor, safeSaved} from './library.mjs?v=20261109-book-3';
-import {LANGUAGES, message, SECTION_NAMES, DUA_MEANINGS, applyLanguage} from './i18n.mjs?v=20261109-book-3';
+import {SECTIONS as WIRD_SECTIONS, ALL_SECTIONS as SECTIONS, arabic as arabicOriginal, repeatTarget, tracksFor, advanceCursor, safeSaved} from './library.mjs?v=20261109-night-4';
+import {LANGUAGES, message, SECTION_NAMES, DUA_MEANINGS, applyLanguage} from './i18n.mjs?v=20261109-night-4';
 
 const $ = selector => document.querySelector(selector);
 let saved;
 try { saved = safeSaved(JSON.parse(localStorage.getItem('dhikr-v1') || '{}')); } catch { saved = safeSaved({}); }
-const state = {counts: {}, overrides: {}, font: 32, theme: 'light', lang: 'ar', ...saved, filter: 'all', view: 'read', continuous: false};
+const state = {counts: {}, overrides: {}, font: 32, theme: 'dark', lang: 'ar', ...saved, filter: 'all', view: 'read', continuous: false};
 let selected = Math.max(0, SECTIONS.findIndex(s => s.id === state.selected));
 const t = key => message(state.lang, key);
 const arabic = n => state.lang === 'ar' ? arabicOriginal(n) : new Intl.NumberFormat(state.lang === 'ur' ? 'ur-u-nu-arabext' : 'en', {useGrouping:false}).format(n);
@@ -23,10 +23,8 @@ function status(message = '') {$('#playerStatus').textContent = message;}
 function target(index = selected) {return repeatTarget(SECTIONS[index], state.overrides);}
 function count(index = selected) {return state.counts[SECTIONS[index].id] || 0;}
 function applyTheme() {
-  document.documentElement.dataset.theme = state.theme;
+  document.documentElement.dataset.theme = 'dark';
   document.documentElement.style.setProperty('--quran-size', state.font + 'px');
-  $('#theme').setAttribute('aria-label', state.theme === 'dark' ? t('themeLight') : t('themeDark'));
-  $('#theme').title = state.theme === 'dark' ? t('themeLight') : t('themeDark');
   $('#fontSmaller').disabled = state.font <= 24;
   $('#fontLarger').disabled = state.font >= 46;
 }
@@ -237,7 +235,6 @@ function formatTime(time) {if (!Number.isFinite(time)) return '0:00';return `${M
 $('#sectionList').addEventListener('click', event => {const node=event.target.closest('[data-index]');if (node) selectSection(Number(node.dataset.index));});
 document.querySelectorAll('[data-filter]').forEach(button => button.addEventListener('click',() => {state.filter=button.dataset.filter;updateFilters();renderIndex();}));
 document.querySelectorAll('[data-view]').forEach(button => button.addEventListener('click',() => {state.view=button.dataset.view;document.body.classList.toggle('listening',state.view==='listen');document.querySelectorAll('[data-view]').forEach(b=>{b.classList.toggle('chosen',b===button);b.setAttribute('aria-pressed',String(b===button));});if (state.view === 'listen' && !playing && !busy) togglePlayback();}));
-$('#theme').addEventListener('click',()=>{state.theme=state.theme==='light'?'dark':'light';applyTheme();persist();});
 for (const [selector,delta] of [['#fontSmaller',-2],['#fontLarger',2]]) $(selector).addEventListener('click',()=>{state.font=Math.min(46,Math.max(24,state.font+delta));applyTheme();persist();});
 $('#bookmark').addEventListener('click',()=>{persist();toast(t('bookmarkSaved'));});
 $('#repeatTarget').addEventListener('change',event=>{stopAudio();state.overrides[SECTIONS[selected].id]=Number(event.target.value);state.counts[SECTIONS[selected].id]=Math.min(count(),target());persist();renderIndex();updateProgress();toast(t('repeatSaved'));});

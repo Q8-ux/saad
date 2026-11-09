@@ -69,5 +69,5 @@ export function safeSaved(value) {
     const count = Number(value.counts?.[section.id]);
     if (Number.isInteger(count) && count >= 0) counts[section.id] = Math.min(count, target);
   }
-  return {counts, overrides, lang:['ar','en','ur'].includes(value.lang) ? value.lang : 'ar', selected: ALL_SECTIONS.some(s => s.id === value.selected) ? value.selected : 'fatiha', theme: value.theme === 'dark' ? 'dark' : 'light', font: Math.min(46, Math.max(24, Number(value.font) || 32))};
+  return {counts, overrides, lang:['ar','en','ur'].includes(value.lang) ? value.lang : 'ar', selected: ALL_SECTIONS.some(s => s.id === value.selected) ? value.selected : 'fatiha', theme: 'dark', font: Math.min(46, Math.max(24, Number(value.font) || 32))};
 }

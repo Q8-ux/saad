@@ -1,4 +1,4 @@
-const VERSION = '20261109-book-3';
+const VERSION = '20261109-night-4';
 const CACHE = 'dhikr-' + VERSION;
 const versioned = path => `${path}?v=${VERSION}`;
 const SHELL = ['./','./index.html',...['./styles.css','./app.mjs','./library.mjs','./i18n.mjs','./updates.mjs','./assets/icon.svg','./manifest.webmanifest'].map(versioned),'./data/quran.json','./data/translations.json','./assets/cairo.woff2','./assets/amiri-quran.woff2','./assets/naskh.woff2',...Array.from({length:7},(_,i)=>`./assets/dua-${i+1}.mp3`)];
