@@ -21,6 +21,24 @@ function loadScene(){let s=active();if(!s)return;['title','visual','narration','
 $('add-scene').onclick=()=>{state.scenes.push({id:Date.now(),title:'مشهد '+(state.scenes.length+1),visual:'وصف المشهد',narration:'',duration:6,color:'#152758',image:''});selected=state.scenes.length-1;save();sceneList();loadScene();draw()};
 $('duplicate-scene').onclick=()=>{const s=active();state.scenes.splice(selected+1,0,{...s,id:Date.now()});selected++;save();sceneList();loadScene()};
 $('remove-scene').onclick=()=>{if(state.scenes.length===1)return toast('يجب الاحتفاظ بمشهد واحد على الأقل');state.scenes.splice(selected,1);selected=Math.max(0,selected-1);save();sceneList();loadScene();draw()};
+
+$('load-online-family').onclick=async()=>{
+ try{
+  if(!confirm('تحميل مسرحية «عائلة أونلاين» (12 مشهدًا) سيستبدل المشروع الحالي. احفظ نسخة JSON أولًا إن لزم. متابعة؟'))return;
+  const response=await fetch('./projects/online-family.json',{cache:'no-store'});
+  if(!response.ok)throw Error('تعذر تحميل ملف المسرحية: HTTP '+response.status);
+  const project=await response.json();
+  if(!Array.isArray(project.scenes)||project.scenes.length!==12)throw Error('ملف المسرحية غير مكتمل');
+  state={...base(),...project,marketing:{...base().marketing,...project.marketing}};
+  selected=0;playhead=0;playing=false;last=0;cancelAnimationFrame(raf);
+  Object.entries(bindings).forEach(([id,key])=>$(id).value=state[key]||'');
+  Object.entries(fields).forEach(([id,key])=>$(id).value=state.marketing[key]||'');
+  save();sceneList();loadScene();references();kpis();draw();
+  toast('تم تحميل 12 مشهدًا من مسرحية عائلة أونلاين');
+  document.getElementById('scenes').scrollIntoView({behavior:'smooth'});
+ }catch(e){toast('فشل تحميل المسرحية: '+e.message)}
+};
+
 $('outline-scenes').onclick=()=>{const parts=(state.script||state.brief).split(/\n\s*\n|(?=المشهد\s*[0-9٠-٩]+)/).map(x=>x.trim()).filter(Boolean).slice(0,30);if(!parts.length)return toast('اكتب القصة أو السيناريو أولاً');if(state.scenes.length>1&&!confirm('استبدال المشاهد الحالية بمشاهد مستخرجة من النص؟'))return;state.scenes=parts.map((text,i)=>({id:Date.now()+i,title:'المشهد '+(i+1),visual:text.slice(0,900),narration:text.slice(0,800),duration:Math.min(30,Math.max(4,Math.ceil(text.length/25))),color:['#152758','#27345c','#173f51','#37305e'][i%4],image:''}));selected=0;playhead=0;save();sceneList();loadScene();draw();toast('أنشئت '+parts.length+' مشاهد قابلة للتعديل')};
 $('new-project').onclick=()=>{if(!confirm('إنشاء مشروع جديد؟ صدّر مشروعك الحالي قبل الاستبدال.'))return;state=base();selected=0;playhead=0;Object.entries(bindings).forEach(([id,k])=>$(id).value=state[k]);save();sceneList();loadScene();draw();toast('تم إنشاء المشروع الجديد')};
 const canvas=$('preview'),ctx=canvas.getContext('2d');let imageCache={};
