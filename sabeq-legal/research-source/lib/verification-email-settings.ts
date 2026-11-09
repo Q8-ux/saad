@@ -7,18 +7,12 @@ type DeliveryEnvironment = { RESEND_API_KEY?: string; AUTH_FROM_EMAIL?: string }
 const INTEGRATION = "verification-email";
 const DEFAULT_SENDER = "noreplay@sabeq.legal";
 
-// Existing deployments used noreply@sabeq.legal. Keep the administrator's
-// stored provider key and settings intact while honoring the requested sender.
-function canonicalSender(value: string) {
-  return value.trim().replace(/(^|<)noreply@sabeq\.legal(?=>|$)/i, `$1${DEFAULT_SENDER}`);
-}
-
 export async function verificationEmailDelivery() {
   const saved = await integrationConfig<DeliveryConfig>(INTEGRATION);
-  if (saved) return { ...saved, fromEmail: canonicalSender(saved.fromEmail), source: "management" as const };
+  if (saved) return { ...saved, source: "management" as const };
   const runtime = env as unknown as DeliveryEnvironment;
   return {
-    fromEmail: canonicalSender(runtime.AUTH_FROM_EMAIL || ""),
+    fromEmail: runtime.AUTH_FROM_EMAIL?.trim() || "",
     apiKey: runtime.RESEND_API_KEY?.trim() || "",
     source: "environment" as const,
   };
@@ -66,10 +60,7 @@ async function checkSender(config: Awaited<ReturnType<typeof verificationEmailDe
       base.records.push({ record: row.record, name: row.name, type: row.type, value: row.value, status: row.status, ...(Number.isSafeInteger(row.priority) ? { priority: row.priority } : {}) });
     }
     const capabilities = detail.data.capabilities as { sending?: string } | undefined;
-    // Resend's sending capability is authoritative. New domain configurations may
-    // use CNAME records without a separate SPF entry, so do not require both
-    // legacy record labels. Still reject any sending record marked unverified.
-    const verified = capabilities?.sending === "enabled" && records.every(row => row.status === "verified");
+    const verified = capabilities?.sending === "enabled" && records.some(row => row.record === "SPF") && records.some(row => row.record === "DKIM") && records.every(row => row.status === "verified");
     return result(verified ? "verified" : "domain_unverified");
   } catch { return result("unknown"); }
 }

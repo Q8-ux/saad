@@ -114,7 +114,7 @@ function administratorRepair() {
   try {
     if (raw.length > 2_000) throw Error();
     const value = JSON.parse(raw);
-    if (value.version !== 1 || value.username !== "saad" || typeof value.nonce !== "string" || !/^[a-f0-9]{64}$/.test(value.nonce) || typeof value.password !== "string" || value.password.length < 10 || value.password.length > 256 || !/\S/.test(value.password)) throw Error();
+    if (value.version !== 1 || value.username !== "saad" || typeof value.nonce !== "string" || !/^[a-f0-9]{64}$/.test(value.nonce) || typeof value.password !== "string" || value.password.length < 1 || value.password.length > 256) throw Error();
     return value as { version: 1; username: "saad"; nonce: string; password: string };
   } catch {
     console.error("management_administrator_recovery_failed", { stage: "configuration", reason: "invalid_repair_command" });
@@ -176,7 +176,7 @@ export async function managementAccounts(data: Record<string, unknown> | null, m
   if (!USERNAME.test(username)) throw new RequestError("اسم المستخدم من 3 إلى 32 محرفاً، يبدأ بحرف إنجليزي ويحتوي حروفاً وأرقاماً وشرطة سفلية فقط.");
   if (roster.accounts.some(a => a.id !== account.id && a.username === username)) throw new RequestError("اسم المستخدم مستخدم لحساب آخر. اختر اسماً مختلفاً.", 409);
   const password = data.newPassword ?? "", confirmation = data.confirmPassword ?? "";
-  if (typeof password !== "string" || typeof confirmation !== "string" || (password && (password.length < 16 || password.length > 256 || !/\S/.test(password)))) throw new RequestError("كلمة المرور الجديدة من 16 إلى 256 محرفاً.");
+  if (typeof password !== "string" || typeof confirmation !== "string" || (password && (password.length < 1 || password.length > 256))) throw new RequestError("أدخل كلمة المرور الجديدة.");
   if (password !== confirmation) throw new RequestError("تأكيد كلمة المرور غير مطابق.");
   if (username === account.username && !password) return { ok: true, reauthenticate: false, ...safeAccounts(roster, manager) };
   const override = await changedAccount(account, username, password);
@@ -188,7 +188,7 @@ export async function managementAccounts(data: Record<string, unknown> | null, m
 
 export async function authenticateManagementPassword(data: Record<string, unknown>) {
   const username = normalizeManagementUsername(data.username), password = data.password;
-  if (!USERNAME.test(username) || typeof password !== "string" || password.length < 10 || password.length > 256) throw new RequestError(INVALID, 401);
+  if (!USERNAME.test(username) || typeof password !== "string" || password.length < 1 || password.length > 256) throw new RequestError(INVALID, 401);
   const { accounts } = await accountRoster(username);
   const account = accounts.find(row => row.username === username && row.enabled), fallback = account || accounts[0];
   if (!fallback) throw new RequestError("دخول حسابات التشغيل غير مهيأ حالياً. تواصل مع الإدارة.", 503);
@@ -196,7 +196,7 @@ export async function authenticateManagementPassword(data: Record<string, unknow
   // Workers caps native PBKDF2 below this cost; the server-only implementation preserves 600000.
   const actual = await pbkdf2Async(sha256, await peppered(password, fallback.pepper), salt, { c: ITERATIONS, dkLen: 32, asyncTick: 10 });
   const valid = sameBytes(actual, fromHex(account?.hash || "00".repeat(32)));
-  if (!account || !valid || (account.role === "operator" && password.length < 16)) throw new RequestError(INVALID, 401);
+  if (!account || !valid) throw new RequestError(INVALID, 401);
   return { username, role: account.role, identity: accountIdentity(account), sessionPrincipal: `${accountPrefix(account.role)}:${username}:${await credentialTag(account, account.pepper)}` };
 }
 

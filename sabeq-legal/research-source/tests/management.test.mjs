@@ -10,7 +10,6 @@ import ts from 'typescript';
 const require=createRequire(import.meta.url),root=resolve(new URL('..',import.meta.url).pathname);
 function harness(){
  const sqlite=new DatabaseSync(':memory:');
- for(const file of readdirSync(root+'/drizzle').filter(f=>f.endsWith('.sql')).sort())sqlite.exec(readFileSync(root+'/drizzle/'+file,'utf8'));
  sqlite.exec(readFileSync(root+'/tests/fixtures/management-foundation-schema.sql','utf8'));
  const statements=query=>{let args=[];return{bind(...values){args=values;return this;},async first(){return sqlite.prepare(query).get(...args)||null;},async all(){return{results:sqlite.prepare(query).all(...args)};},async run(){const result=sqlite.prepare(query).run(...args);return{success:true,meta:{changes:Number(result.changes)}};}};};
  const db={prepare:statements,async batch(values){const out=[];for(const v of values)out.push(await v.run());return out;}};
@@ -27,6 +26,14 @@ function harness(){
 const request=(path,token,body,origin='https://q8-ux.github.io')=>new Request('https://sabeq-legal-public.centrino.chatgpt.site/api/management/'+path,{method:body?'POST':'GET',headers:{Origin:origin,...(token?{Authorization:'Bearer '+token}:{}),...(body?{'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{})});
 
 const staffNames=['user1','user2','user3','user5','it_user'];
+test('administrator and memo supervisor may choose short passwords without a composition policy',async()=>{const h=harness();try{
+ configureAdministrator(h);memoSupervisorConfiguration(h);const routes=h.load('app/api/management/[...path]/route.ts');let session=await adminLogin(h);
+ for(const [id,username,password] of [['memo_supervisor:ahmad','Ahmad','ض'],['administrator:saad','saad','x']]){
+  const roster=await (await routes.GET(request('control-accounts',session.token))).json();const result=await routes.POST(request('control-accounts',session.token,{id,username,newPassword:password,confirmPassword:password,revision:roster.revision}));assert.equal(result.status,200);
+  const loginResponse=await routes.POST(request('password-login',null,{username,password}));assert.equal(loginResponse.status,200);const fresh=await loginResponse.json();assert.equal(fresh.manager.role,id.startsWith('administrator')?'administrator':'memo_supervisor');if(username==='saad'){assert.equal((await routes.GET(request('session',session.token))).status,401);session=fresh;}
+ }
+ const js=readFileSync(root+'/public/management/admin.js','utf8'),control=readFileSync(root+'/public/management/control.js','utf8');assert.doesNotMatch(js,/minlength="(?:10|16)"/);assert.doesNotMatch(control,/minlength="16"/);assert.ok(!js.includes('حرف كبير وصغير ورقم ورمز'));
+}finally{h.close();}});
 function memoSupervisorConfiguration(h){const password='MemoTest#11',pepper='synthetic-memo-supervisor-pepper-'.repeat(3),salt=Buffer.alloc(16,91);h.runtime.MANAGEMENT_MEMO_SUPERVISOR_PASSWORD_PEPPER=pepper;h.runtime.MANAGEMENT_MEMO_SUPERVISOR_PASSWORD_USERS=JSON.stringify({version:1,accounts:[{username:'ahmad',salt:salt.toString('hex'),hash:pbkdf2Sync(createHmac('sha256',pepper).update(password).digest(),salt,600000,32,'sha256').toString('hex'),enabled:true}]});return password;}
 test('memo supervisor signs in case-insensitively with a server-owned scope and cannot reach any administration or finance action',async()=>{const h=harness();try{
  configureStaff(h);configureAdministrator(h);const password=memoSupervisorConfiguration(h),routes=h.load('app/api/management/[...path]/route.ts');
@@ -128,9 +135,9 @@ test('deployment-authorized repair restores only the existing Saad administrator
  assert.ok(!JSON.stringify(await (await routes.GET(request('control-accounts',other.token))).json()).includes(nonce));
 }finally{h.close();}});
 
-test('repair refuses other targets and malformed commands, never creates or re-enables an administrator',async()=>{for(const mode of ['target','nonce','short-password','disabled','not-configured']){const h=harness();try{
+test('repair refuses other targets and malformed commands, never creates or re-enables an administrator',async()=>{for(const mode of ['target','nonce','empty-password','disabled','not-configured']){const h=harness();try{
  configureStaff(h);configureAdministrator(h);h.runtime.MANAGEMENT_ADMIN_PASSWORD_USERS=JSON.stringify({version:1,accounts:[adminAccount,{...adminAccount,username:'other_admin'}]});const command={version:1,username:'saad',nonce:'b'.repeat(64),password:'SyntheticRepairPassword!'};
- if(mode==='target')command.username='user1';if(mode==='nonce')command.nonce='invalid';if(mode==='short-password')command.password='short';
+ if(mode==='target')command.username='user1';if(mode==='nonce')command.nonce='invalid';if(mode==='empty-password')command.password='';
  if(mode==='disabled')h.runtime.MANAGEMENT_ADMIN_PASSWORD_USERS=JSON.stringify({version:1,accounts:[{...adminAccount,enabled:false},{...adminAccount,username:'other_admin'}]});
  if(mode==='not-configured')h.runtime.MANAGEMENT_ADMIN_PASSWORD_USERS=JSON.stringify({version:1,accounts:[{...adminAccount,username:'other_admin'}]});
  h.runtime.MANAGEMENT_ADMIN_CREDENTIAL_REPAIR=JSON.stringify(command);assert.equal((await h.load('lib/management-password.ts').authenticateManagementPassword({username:'other_admin',password:adminPassword})).role,'administrator');await assert.rejects(h.load('lib/management-password.ts').authenticateManagementPassword({username:'saad',password:'Synthetic-Probe-Password!'}),e=>e.status===503);
@@ -205,7 +212,7 @@ test('resetting another administrator password persists encrypted, rejects the o
 test('duplicate names, malformed changes, role injection and stale versions leave accounts unchanged',async()=>{const h=harness();try{
  configureStaff(h);configureAdministrator(h);const manager=await adminLogin(h),routes=h.load('app/api/management/[...path]/route.ts');
  const list=await (await routes.GET(request('control-accounts',manager.token))).json();const base={id:'operator:user1',username:'user1',revision:list.revision};
- for(const [change,status] of [[{username:'SAAD'},409],[{username:'a'},400],[{username:'bad<script>'},400],[{newPassword:'short',confirmPassword:'short'},400],[{newPassword:'Valid-Synthetic-Password',confirmPassword:'different'},400],[{role:'administrator'},400],[{enabled:true},400],[{id:'operator:missing'},404],[{revision:'stale'},409]]){
+ for(const [change,status] of [[{username:'SAAD'},409],[{username:'a'},400],[{username:'bad<script>'},400],[{newPassword:123,confirmPassword:123},400],[{newPassword:'Valid-Synthetic-Password',confirmPassword:'different'},400],[{role:'administrator'},400],[{enabled:true},400],[{id:'operator:missing'},404],[{revision:'stale'},409]]){
   assert.equal((await routes.POST(request('control-accounts',manager.token,{...base,...change}))).status,status);
  }
  assert.equal(h.sqlite.prepare("SELECT COUNT(*) n FROM management_vault WHERE integration='control-accounts'").get().n,0);
@@ -244,7 +251,7 @@ test('password throttling and same-origin protection apply to administrator logi
 
 async function login(h){const auth=h.load('lib/management-auth.ts'),verifier=auth.randomToken(),code=auth.randomToken();h.sqlite.prepare('INSERT INTO management_login_codes VALUES (?,?,?,?,?)').run(await auth.digest(code),'manager@example.test','مدير اصطناعي',await auth.proofChallenge(verifier),Math.floor(Date.now()/1000)+60);return{...(await auth.exchangeManagerCode({code,verifier})),code,verifier};}
 
-test('new migration adds isolated management tables without dropping the original service tables',()=>{const h=harness();try{const names=h.sqlite.prepare("SELECT name FROM sqlite_master WHERE type='table'").all().map(r=>r.name);for(const name of ['management_memo_requests','management_vault','management_sessions','contact_messages','public_users','service_records'])assert.ok(names.includes(name));assert.equal(h.sqlite.prepare('SELECT COUNT(*) n FROM public_users').get().n,0);}finally{h.close();}});
+test('exported final schema preserves management tables alongside the original service tables',()=>{const h=harness();try{const names=h.sqlite.prepare("SELECT name FROM sqlite_master WHERE type='table'").all().map(r=>r.name);for(const name of ['management_memo_requests','management_vault','management_sessions','contact_messages','public_users','service_records'])assert.ok(names.includes(name));assert.equal(h.sqlite.prepare('SELECT COUNT(*) n FROM public_users').get().n,0);}finally{h.close();}});
 test('unauthenticated and cross-origin management reads/writes never reach client data or external services',async()=>{const h=harness();try{const routes=h.load('app/api/management/[...path]/route.ts');for(const path of ['snapshot','memos','inbox','commands','whatsapp','mail','legislation','legislation-report','legislation-workbench','legislation-articles','legislation-asset']){assert.equal((await routes.GET(request(path))).status,401);}const session=await login(h);assert.equal((await routes.POST(request('commands',session.token,{title:'أمر اصطناعي'},'https://other.example'))).status,403);assert.equal(h.network.length,0);}finally{h.close();}});
 test('PKCE code is single use, wrong proof does not consume it, expired sessions and revoked allowlist fail closed',async()=>{const h=harness();try{const auth=h.load('lib/management-auth.ts');const verifier=auth.randomToken(),code=auth.randomToken();h.sqlite.prepare('INSERT INTO management_login_codes VALUES(?,?,?,?,?)').run(await auth.digest(code),'manager@example.test','اختبار',await auth.proofChallenge(verifier),Math.floor(Date.now()/1000)+60);await assert.rejects(auth.exchangeManagerCode({code,verifier:auth.randomToken()}));const result=await auth.exchangeManagerCode({code,verifier});await assert.rejects(auth.exchangeManagerCode({code,verifier}));assert.equal((await auth.requireManager(request('session',result.token))).email,'manager@example.test');h.runtime.MANAGEMENT_ALLOWED_EMAILS='';await assert.rejects(auth.requireManager(request('session',result.token)));h.runtime.MANAGEMENT_ALLOWED_EMAILS='manager@example.test';h.sqlite.prepare('UPDATE management_sessions SET expires_at=0').run();await assert.rejects(auth.requireManager(request('session',result.token)));}finally{h.close();}});
 test('login uses the actual platform Request, prevents redirect loops and ignores a conflicting render identity',async()=>{const h=harness();try{
