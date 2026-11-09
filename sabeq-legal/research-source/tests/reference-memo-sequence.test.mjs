@@ -26,8 +26,13 @@ test('reference format keeps facts, defenses, rebuttal, relief and actual exhibi
     'رابعًا: الطلبات','خامسًا: حافظة المستندات'];
   for (const heading of headings) assert.ok(text.includes(heading),heading);
   for (let i=1;i<headings.length;i++) assert.ok(text.indexOf(headings[i-1])<text.indexOf(headings[i]));
-  for (const original of [input.facts,input.requests,input.clientName,input.otherParty,input.court,input.caseNumber])
-    assert.ok(text.includes(original),original);
+  // Separate paragraph blocks may add blank lines; every original line and its order remain exact.
+  for (const original of [input.facts,input.requests,input.clientName,input.otherParty,input.court,input.caseNumber]) {
+    let from=0;
+    for(const line of original.split('\n').filter(Boolean)) {
+      const at=text.indexOf(line,from);assert.ok(at>=from,line);from=at+line.length;
+    }
+  }
   assert.equal((text.match(/حافظة المستندات/g)||[]).length,1);
   assert.match(document.renderPleadingHtml(doc),/first-page framed/);
   assert.doesNotMatch(text,/وزارة العدل|المساعد الذكي|صفحة PDF/);
