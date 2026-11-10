@@ -1,0 +1,3 @@
+# Upstream v6.19.6 / da29b69db4cf4854c6d6fb4195e5628db04c219d
+# Requires Python ==3.14.10. The runner uses uv's isolated environment.
+free-claude-code==6.19.6

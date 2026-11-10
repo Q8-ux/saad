@@ -6,12 +6,13 @@
 
 | الإعداد | الغرض |
 | --- | --- |
-| POETRY_AI_PROVIDER | openai أو gemini أو groq أو nvidia أو openrouter |
+| POETRY_AI_PROVIDER | openai أو gemini أو groq أو nvidia أو openrouter أو fcc |
 | POETRY_AI_FALLBACK_PROVIDER | مزود ثانٍ مسمى؛ الرجوع مرة بعد رفض 429/502/503/504 فقط |
 | GROQ_API_KEY / GROQ_MODEL | مفتاح Groq ونموذجه؛ الافتراضي qwen/qwen3.8-27b |
 | GEMINI_API_KEY / GEMINI_MODEL | حساب Gemini ونموذج مفعّل فيه |
 | NVIDIA_API_KEY / NVIDIA_MODEL | حساب NVIDIA ونموذج صريح متاح في الحساب |
 | OPENROUTER_API_KEY / OPENROUTER_MODEL | نموذج مثبت ينتهي بـ :free |
+| FCC_BASE_URL / FCC_API_KEY / FCC_MODEL | بوابة FCC عبر HTTPS ورمزها السري ونموذج صريح؛ راجع [دليل الربط](free-claude-code.md) |
 
 توضع المفاتيح في إعدادات الخادم فقط. لا يثبت وجود دعم برمجي وجود مفتاح أو حصة مجانية أو جودة شعرية. يحافظ التطبيق على مخطط JSON وعقد الأبيات والمراجعة وسلامة المحتوى قبل الحفظ. لا تبديل عند رد مبتور أو خطأ شبكة مبهم أو مصادقة مرفوضة.
 

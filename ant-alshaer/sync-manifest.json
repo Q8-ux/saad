@@ -36,7 +36,7 @@
       "base_sha256": "7d2393611ece3b42dfc88376fb97db3603b785dd1ae3dc142a3f7e0bc7884a0c"
     },
     "docs/free-llm-and-updates.md": {
-      "sha256": "9c910404788e9f336248f2efe68b22728fec6736d0757164a8b51edece941fbd",
+      "sha256": "d70765c409be857cda196120f950f9d4674d310c3f09183914f6577989a7fa4c",
       "base_sha256": null
     },
     "lib/app-release.ts": {
@@ -60,11 +60,11 @@
       "base_sha256": "39c0b90111939f218a083a870f9abf7279b95730da861c80a2e148f95ef4d291"
     },
     "lib/runtime-bindings.ts": {
-      "sha256": "0e3e00ae8d38ee0d6fe973542df969c7953e9dec2be2b3275719ffc3071228ab",
+      "sha256": "31bcd33a89daf921faff847f04100552accf55da4ffdabfb2e05476a40e14178",
       "base_sha256": "70d3c0e2e5ee1e022ed269d536e9a84ee47166b307d934f992b58ee1a25da2ee"
     },
     "lib/text-providers.ts": {
-      "sha256": "7b1fca6354b9577e81b69070bf98af7bed8a99490c707736759b104a7ecb9c48",
+      "sha256": "4448f0e93b43dc2a4beaf9f26e0c9fae989681049190874397ccdace75df1407",
       "base_sha256": null
     },
     "tests/free-llm.test.mjs": {
@@ -84,8 +84,20 @@
       "base_sha256": "43e5f02f727ca043f08ebf34789f330580a7a0cb90f426c92f4a454d066988fc"
     },
     "worker/index.ts": {
-      "sha256": "12c9672b2e066cfc020bd6a51c336765a193efc4a7d5123fb59ce0d2c7f39925",
+      "sha256": "dcaf81bee62da397bb66f7d426406caf2b908924e8b59fc84d7e926eede853b8",
       "base_sha256": "5f572e80130bce0d941b9f0a7bc2e46c3ed216a6b43e78bb7beafd6c058ff7d0"
+    },
+    "app/api/admin/route.ts": {
+      "base_sha256": "2319503eaef88c491b96ba2d1b6d05fee0bba5252e62085c531aac46e1248d26",
+      "sha256": "872a0c471644fcaaacecc050351289355bcf8e2f63cd4785b24bea17ef966294"
+    },
+    "docs/free-claude-code.md": {
+      "base_sha256": null,
+      "sha256": "279c65dbb5892353ba8a8c9f92274d05e172889e11c957082d5fda7e7d214726"
+    },
+    "tests/fcc-routing.test.mjs": {
+      "base_sha256": null,
+      "sha256": "b17ee09dba0db45d3262c9272439b7ca40108c2be3bada1d16722cc6611886e0"
     }
   }
 }

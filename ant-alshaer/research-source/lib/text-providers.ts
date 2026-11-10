@@ -1,6 +1,6 @@
 import { matchesJsonSchema } from "./gemini";
 
-export type TextProvider = "openai" | "gemini" | "groq" | "nvidia" | "openrouter";
+export type TextProvider = "openai" | "gemini" | "groq" | "nvidia" | "openrouter" | "fcc";
 export type TextProviderEnvironment = Record<string, string | undefined>;
 type ProviderErrorKind = "configuration" | "authentication" | "rate_limit" | "model_access" | "timeout" | "network" | "incomplete" | "empty_response" | "upstream";
 export class TextProviderError extends Error {
@@ -9,7 +9,29 @@ export class TextProviderError extends Error {
   }
 }
 
-export function textProviderConfig(runtime: TextProviderEnvironment, provider = runtime.LEGAL_AI_PROVIDER?.trim() || "openai", intake = false, requireKey = true) {
+// The gateway address is deployment configuration, never a visitor-supplied URL.
+// Workers cannot reach a developer's localhost FCC process.
+export function fccChatEndpoint(base: string | undefined) {
+  let url: URL;
+  try { url = new URL(base?.trim() || ""); } catch { throw new TextProviderError("configuration"); }
+  const host = url.hostname.toLowerCase().replace(/\.$/, "");
+  if (url.protocol !== "https:" || url.username || url.password || url.search || url.hash ||
+      (url.port && url.port !== "443") || !["/", "/v1", "/v1/"].includes(url.pathname) ||
+      !host.includes(".") || /^[\d.]+$/.test(host) || host.includes(":") ||
+      /(?:^|\.)(?:localhost|local|internal|test|invalid|example)$/.test(host)) {
+    throw new TextProviderError("configuration");
+  }
+  url.pathname = "/v1/chat/completions";
+  return url.href;
+}
+
+export function textProviderConfig(runtime: TextProviderEnvironment, provider = runtime.POETRY_AI_PROVIDER?.trim() || "openai", intake = false, requireKey = true) {
+  if (provider === "fcc") {
+    const apiKey = runtime.FCC_API_KEY?.trim() || "";
+    const model = runtime.FCC_MODEL?.trim() || "";
+    if ((requireKey && !apiKey) || /[\r\n\0]/.test(apiKey) || !/^[a-zA-Z0-9._:/-]{1,180}$/.test(model)) throw new TextProviderError("configuration");
+    return { provider: "fcc" as TextProvider, apiKey, model, endpoint: fccChatEndpoint(runtime.FCC_BASE_URL) };
+  }
   const choices = {
     openai: { apiKey: runtime.OPENAI_API_KEY, model: intake ? runtime.OPENAI_INTAKE_MODEL || "gpt-4.1-mini" : runtime.OPENAI_MODEL || "gpt-5.6", endpoint: "https://api.openai.com/v1/responses" },
     gemini: { apiKey: runtime.GEMINI_API_KEY, model: runtime.GEMINI_MODEL || "gemini-3.8-flash", endpoint: "https://generativelanguage.googleapis.com/v1beta/models/" },
@@ -18,7 +40,7 @@ export function textProviderConfig(runtime: TextProviderEnvironment, provider = 
     openrouter: { apiKey: runtime.OPENROUTER_API_KEY, model: runtime.OPENROUTER_MODEL || "", endpoint: "https://openrouter.ai/api/v1/chat/completions" },
   };
   if (!Object.hasOwn(choices, provider)) throw new TextProviderError("configuration");
-  const selected = choices[provider as TextProvider];
+  const selected = choices[provider as keyof typeof choices];
   const apiKey = selected.apiKey?.trim();
   const model = selected.model.trim();
   if (requireKey && !apiKey || !/^[a-zA-Z0-9._:/-]{1,180}$/.test(model) || provider === "openrouter" && !model.endsWith(":free")) throw new TextProviderError("configuration");
@@ -26,21 +48,21 @@ export function textProviderConfig(runtime: TextProviderEnvironment, provider = 
 }
 
 export function textProviderSummary(runtime: TextProviderEnvironment) {
-  const provider = runtime.LEGAL_AI_PROVIDER?.trim() || "openai";
+  const provider = runtime.POETRY_AI_PROVIDER?.trim() || "openai";
   let model: string | null = null;
   let configured = false;
   let fallback: string | null = null;
   try { const config = textProviderConfig(runtime, undefined, false, false); model = config.model; configured = Boolean(config.apiKey); } catch { /* Configuration only; not a live provider probe. */ }
-  const alternate = runtime.LEGAL_AI_FALLBACK_PROVIDER?.trim();
+  const alternate = runtime.POETRY_AI_FALLBACK_PROVIDER?.trim();
   if (alternate && alternate !== provider) {
     try { fallback = textProviderConfig(runtime, alternate).provider; } catch { /* An absent alternate never changes the primary. */ }
   }
-  return { textProvider: provider, textModel: model, textProviderConfigured: configured, textFallbackProvider: fallback, textFallbackPolicy: fallback ? "explicit-rejection-once" : null, textProviderRevision: "free-llm-routing-1" };
+  return { textProvider: provider, textModel: model, textProviderConfigured: configured, textFallbackProvider: fallback, textFallbackPolicy: fallback ? "explicit-rejection-once" : null, textProviderRevision: "fcc-routing-1" };
 }
 
 // Text only. File IDs, audio and image payloads stay with their existing client.
 export async function compatibleTextResponse(init: RequestInit, config: ReturnType<typeof textProviderConfig>, transport: typeof fetch = fetch): Promise<Response> {
-  if (!["groq", "nvidia", "openrouter"].includes(config.provider)) throw new TextProviderError("configuration");
+  if (!["groq", "nvidia", "openrouter", "fcc"].includes(config.provider)) throw new TextProviderError("configuration");
   const body = JSON.parse(String(init.body));
   if (typeof body.instructions !== "string" || typeof body.input !== "string") throw new TextProviderError("configuration");
   const schema = body.text?.format?.schema;

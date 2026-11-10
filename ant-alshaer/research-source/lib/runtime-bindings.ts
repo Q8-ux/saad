@@ -22,6 +22,9 @@ export type RuntimeBindings = {
   MASAR_ANT_ALSHAER_TOKEN?: string;
   POETRY_AI_PROVIDER?: string;
   POETRY_AI_FALLBACK_PROVIDER?: string;
+  FCC_BASE_URL?: string;
+  FCC_API_KEY?: string;
+  FCC_MODEL?: string;
   GROQ_API_KEY?: string;
   GROQ_MODEL?: string;
   GEMINI_API_KEY?: string;

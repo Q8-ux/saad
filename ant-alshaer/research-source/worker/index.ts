@@ -25,6 +25,11 @@ interface Env {
   OPENAI_SAFETY_MODEL?: string;
   MASAR_API_URL?: string;
   MASAR_ANT_ALSHAER_TOKEN?: string;
+  POETRY_AI_PROVIDER?: string;
+  POETRY_AI_FALLBACK_PROVIDER?: string;
+  FCC_BASE_URL?: string;
+  FCC_API_KEY?: string;
+  FCC_MODEL?: string;
   NVIDIA_API_KEY?: string;
   NVIDIA_ANALYSIS_MODEL?: string;
   NVIDIA_DRAFT_MODEL?: string;

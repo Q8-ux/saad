@@ -1,0 +1,24 @@
+{
+  "date": "2026-11-10",
+  "project_id": "appgprj_6a7f2e060d7c81918dabd7f8c64a441f",
+  "upstream": {
+    "repository": "https://github.com/Alishahryar1/free-claude-code",
+    "version": "6.19.6",
+    "commit": "da29b69db4cf4854c6d6fb4195e5628db04c219d",
+    "python": "3.14.10",
+    "installed_version_check": "passed"
+  },
+  "typescript": "passed",
+  "production_build": "passed",
+  "application_tests": { "passed": 38, "failed": 0 },
+  "fcc_routing_tests": 5,
+  "launcher_version_check": "free-claude-code 6.19.6",
+  "launcher_foreign_project_rejection": "passed",
+  "launcher_missing_source_rejection": "passed",
+  "worker_version_smoke": "passed",
+  "admin_without_session": 401,
+  "default_text_provider": "openai",
+  "live_fcc_generation": false,
+  "live_fcc_reason": "No permanent FCC gateway URL, gateway token or selected FCC model is configured in production.",
+  "verification_scope": "Local package installation, launcher, adapter contracts, existing regressions, TypeScript and production Worker artifact; no real user story or recording was sent to FCC."
+}
