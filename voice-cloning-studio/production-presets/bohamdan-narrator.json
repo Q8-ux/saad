@@ -1,0 +1,47 @@
+{
+  "name": "راوي بوحمدان",
+  "version": 1,
+  "provider": "HeyGen Voice",
+  "voiceId": "dc4ee8e4f0bc4099ad5be2a8431ca556",
+  "catalogName": "Fouad - Deep & Evocative",
+  "language": "ar",
+  "register": "العربية الفصحى",
+  "speed": 1,
+  "style": "صوت رجالي عميق، واضح، جهوري دون صراخ، مناسب للتاريخ والتشويق",
+  "delivery": "جمل قصيرة، وقف واضح عند نهاية الفكرة، إبراز التحولات، هدوء في الرثاء",
+  "processing": {
+    "highpass_hz": 70,
+    "warmth_eq": {
+      "hz": 120,
+      "gain_db": 2
+    },
+    "mud_eq": {
+      "hz": 280,
+      "gain_db": -1
+    },
+    "presence_eq": {
+      "hz": 2800,
+      "gain_db": 1.2
+    },
+    "compression": {
+      "threshold": 0.12,
+      "ratio": 2.2,
+      "attack_ms": 18,
+      "release_ms": 200,
+      "makeup": 1.2
+    },
+    "target_lufs": -16,
+    "true_peak_ceiling_db": -1.5
+  },
+  "status": "Reusable preset for an existing verified public voice; a new designed voice was not created.",
+  "installation_scope": "Production preset registered in voice-cloning-studio/production-presets; not a Voicebox clone, browser voice, or new runtime engine.",
+  "id": "bohamdan-narrator-v1",
+  "synthesis": {
+    "integration": "HeyGen connected speech synthesis",
+    "voiceId": "dc4ee8e4f0bc4099ad5be2a8431ca556",
+    "language": "ar",
+    "speed": 1,
+    "outputFormat": "pcm_48000"
+  },
+  "source_url": "https://github.com/Q8-ux/saad/tree/main/voice-cloning-studio/production-presets"
+}
