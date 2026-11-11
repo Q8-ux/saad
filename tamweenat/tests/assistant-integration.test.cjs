@@ -12,9 +12,17 @@ const support = read("tamweenat/assets/support-runtime.js");
 const voice = read("tamweenat/assets/voice-assistant.js");
 const api = read("tamweenat-api/server.js");
 
+// The public storefront uses the lightweight cart/assistant runtime; the login URL redirects to it.
+assert.match(restaurant, /location\\.replace\\(\"\\.\\/\"\\)/, 'restaurant login must redirect to storefront');
+assert.match(home, /assistant-v1\\.js/, 'storefront must provide ordering assistant');
+assert.match(home, /cart-v2\\.js/, 'storefront must provide the live basket');
+assert.match(admin, /admin-v23\\.js/, 'admin must load its own dashboard');
+// Legacy bundled pages, when present, still require support runtime before their loader.
 for (const [name, source] of [["restaurant", restaurant], ["home", home], ["admin", admin]]) {
-  assert.match(source, /support-runtime\.js/, `${name} must load the reliability runtime`);
-  assert.ok(source.indexOf("support-runtime.js") < source.indexOf("loader-807f1f72f7f0.js"), `${name} must load support before the application`);
+  if (source.includes("loader-807f1f72f7f0.js")) {
+    assert.match(source, /support-runtime\\.js/, `${name} must load the reliability runtime`);
+    assert.ok(source.indexOf("support-runtime.js") < source.indexOf("loader-807f1f72f7f0.js"));
+  }
 }
 
 assert.match(support, /service_temporarily_unavailable/);
