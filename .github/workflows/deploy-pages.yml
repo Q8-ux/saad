@@ -143,7 +143,9 @@ jobs:
         run: npm test && npm run check
       - name: Validate Tamweenat release smoke checks
         if: steps.waqaya.outputs.only != 'true' && (steps.scope.outputs.sabeq_only != 'true' || steps.tamweenat.outputs.only == 'true')
-        run: node tamweenat/tests/release-smoke.cjs
+        run: |
+          node tamweenat/tests/release-smoke.cjs
+          node tamweenat/tests/cart-v2.test.cjs
       - name: Validate Tamweenat published entrypoints
         if: steps.waqaya.outputs.only != 'true'
         run: |
