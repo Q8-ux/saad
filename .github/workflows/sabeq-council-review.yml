@@ -12,6 +12,8 @@ on:
       - 'sabeq-legal/research-source/lib/council-defense-review.ts'
       - 'sabeq-legal/research-source/lib/case-reasoning.ts'
       - 'sabeq-legal/research-source/tests/case-reasoning.test.mjs'
+      - 'sabeq-legal/research-source/tests/defense-memo-route.test.mjs'
+      - 'sabeq-legal/research-source/tests/grounded-audit-excerpts.test.mjs'
       - '.github/workflows/sabeq-council-review.yml'
   pull_request:
     paths:
@@ -20,6 +22,8 @@ on:
       - 'sabeq-legal/research-source/lib/council-defense-review.ts'
       - 'sabeq-legal/research-source/lib/case-reasoning.ts'
       - 'sabeq-legal/research-source/tests/case-reasoning.test.mjs'
+      - 'sabeq-legal/research-source/tests/defense-memo-route.test.mjs'
+      - 'sabeq-legal/research-source/tests/grounded-audit-excerpts.test.mjs'
       - '.github/workflows/sabeq-council-review.yml'
   workflow_dispatch:
 
@@ -64,4 +68,4 @@ jobs:
       - name: Run active memo and statutory regressions
         working-directory: sabeq-legal/research-source
         run: |
-          node --test tests/article-text-in-memos.test.mjs tests/verified-article-narrative.test.mjs tests/memo-generation-control.test.mjs tests/case-reasoning.test.mjs
+          node --test tests/article-text-in-memos.test.mjs tests/verified-article-narrative.test.mjs tests/memo-generation-control.test.mjs tests/case-reasoning.test.mjs tests/grounded-audit-excerpts.test.mjs tests/defense-memo-route.test.mjs

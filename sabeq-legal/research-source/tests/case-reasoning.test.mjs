@@ -49,6 +49,13 @@ test('display-only wrappers are normalized without rewriting facts or source ide
  for(const quote of ['صلح جزئي ... وسداد سابق','صلح نهائي وسداد سابق']) assert.throws(()=>api.parseCasePlan(JSON.stringify(plan({issues:[issue({factQuote:quote})]})),input,evidence));
  assert.throws(()=>api.parseCasePlan(JSON.stringify(plan({issues:[issue({sourceMarkers:['【م99】']})]})),input,evidence));
 });
+test('a normalized planning choice recovers the original literal wording for drafting', () => {
+ const original = 'تسلم الطرف  قيمة الدفعة بموجب القيد.';
+ const planned = plan({issues:[issue({factQuote:original.replace('  ', ' ')})]});
+ const checked = api.parseCasePlan(JSON.stringify(planned), {...input, facts:original}, evidence);
+ assert.equal(checked.issues[0].factQuote, original);
+ assert.equal(api.resolveDefenseFactReferences('أورد الطرف {{FACT_1}} في وصفه.', api.defenseFactReferences(checked)), 'أورد الطرف «' + original + '» في وصفه.');
+});
 test('invalid plan is regenerated once from originals with pinned role and safe reason',async()=>{
  const calls=[];
  const result=await api.buildCheckedCasePlan(input,evidence,'synthetic sources',async options=>{calls.push(options);return JSON.stringify(calls.length===1?plan({clientRole:'مدعٍ'}):plan());});

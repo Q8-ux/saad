@@ -115,3 +115,66 @@ test('a paragraph starting with an article reference may contain actual factual 
  const r=request(plan,{...content,grounds:[paragraph,opposing,response,'نص المادة: «نص قانوني اصطناعي محمي يظل خارج مقاطع تطبيق الوقائع.»'].join('\n')});
  assert.ok(r.checkOptions.some(o=>o.applicationQuote===paragraph));assert.ok(!r.checkOptions.some(o=>o.applicationQuote.includes('نص قانوني اصطناعي محمي')));
 });
+
+test('a late issue keeps its application and distinct rebuttals after more than 120 earlier passages', () => {
+ const lateFact = 'دوّن الطرفان تخصيص الحوالة لإصلاح المعدات';
+ const lateApplication = lateFact + '، فيقتصر أثرها في هذا الاختبار على المبلغ المرتبط بإصلاح تلك المعدات.';
+ const lateOpposing = 'قد يقول الخصم إن قيد الحوالة ليس كافياً لتحديد المبلغ الذي وصل إلى مستحقه.';
+ const lateResponse = 'والرد أن وصف العملية يحدد الغرض منها، مع وجوب مطابقة مبلغها مع كشف الحساب قبل الاستنتاج.';
+ const p = {...plan, issues:[plan.issues[0], {...plan.issues[0], issue:'تخصيص الحوالة', factQuote:lateFact}]};
+ const earlier = Array.from({length:125}, (_, i) => `هذه فقرة اختبارية سابقة ترتيبها ${i} ولا تتناول وجه الدفاع المتأخر في المستند.`);
+ const c = {...content, grounds:[application, opposing, response, ...earlier, lateApplication, lateOpposing, lateResponse].join('\n')};
+ const r = request(p, c);
+ assert.ok(option(r, 0));
+ assert.equal(option(r, 1)?.applicationQuote, lateApplication);
+ const a = wire(r, [0, 1]);
+ a.checks[1].substance.opposingQuoteKey = quoteKey(r, lateOpposing);
+ a.checks[1].substance.responseQuoteKey = quoteKey(r, lateResponse);
+ assert.equal(compile(r)(a), true);
+ assert.equal(api.parseGroundedCaseAudit(JSON.stringify(a), r, p, c).ok, true);
+});
+
+test('separate issues that rely on the same fact retain distinct applications and rebuttals', () => {
+ const otherApplication = fact + ' في هذه الواقعة، ويختلف أثر تعدد الدفعات في تحديد ترتيب الاحتساب عن أثره في مقدار الرصيد.';
+ const otherObjection = 'قد يتمسك الخصم بأن ترتيب احتساب الدفعتين غير مؤثر ما دام مجموعهما ثابتاً.';
+ const otherResponse = 'والرد أن اختلاف تاريخي الدفعتين يوجب التحقق من الرصيد الذي عالجته كل واحدة بحسب توقيتها.';
+ const p = {...plan, issues:[plan.issues[0], {...plan.issues[0], issue:'ترتيب الاحتساب'}]};
+ const earlier = Array.from({length:125}, (_, i) => 'فقرة اختبارية لا تعالج هذه المسألة ورقمها في الاختبار ' + i);
+ const c = {...content, grounds:[application, opposing, response, ...earlier, otherApplication, otherObjection, otherResponse].join('\n')};
+ const r = request(p, c);
+ const a = wire(r, [0, 1]);
+ a.checks[0].checkKey = r.checkOptions.find(o => o.issueIndex === 0 && o.applicationQuote === application)?.checkKey;
+ a.checks[1].checkKey = r.checkOptions.find(o => o.issueIndex === 1 && o.applicationQuote === otherApplication)?.checkKey;
+ a.checks[1].substance.opposingQuoteKey = quoteKey(r, otherObjection);
+ a.checks[1].substance.responseQuoteKey = quoteKey(r, otherResponse);
+ assert.equal(compile(r)(a), true);
+ assert.equal(api.parseGroundedCaseAudit(JSON.stringify(a), r, p, c).ok, true);
+ a.checks[1].checkKey = r.checkOptions.find(o => o.issueIndex === 1 && o.applicationQuote === application)?.checkKey;
+ assert.equal(api.parseGroundedCaseAudit(JSON.stringify(a), r, p, c).ok, false);
+});
+
+test('punctuation within the factual quote stays in the application and inline rebuttals are distinct', () => {
+ const exactFact = 'أثبت القيد أن الخانة «فارغة». ثم أُلحق به بيان بتاريخ مختلف';
+ const app = `يفيد ورود “${exactFact}” أن مطابقة القيد بالبيان تسبق نسبة مضمونه إلى المعاملة نفسها؛`;
+ const objection = 'قد يدفع الخصم بأن اختلاف التاريخ وحده لا ينفي اتصال البيان بالقيد؛';
+ const reply = 'والرد أن التدقيق ينصب على تاريخ الإلحاق ومصدر البيان معاً لتحديد ما يصلح منهما لإثبات المعاملة.';
+ const p = {...plan, issues:[{...plan.issues[0], factQuote:exactFact}]};
+ const c = {...content, grounds:`${app} ${objection} ${reply}`};
+ const r = request(p, c);
+ assert.equal(option(r)?.applicationQuote, app);
+ const a = wire(r);
+ a.checks[0].substance.opposingQuoteKey = quoteKey(r, objection);
+ a.checks[0].substance.responseQuoteKey = quoteKey(r, reply);
+ assert.equal(compile(r)(a), true);
+ assert.equal(api.parseGroundedCaseAudit(JSON.stringify(a), r, p, c).ok, true);
+});
+
+test('known fact references expand literally in prose, and unresolved references block delivery', () => {
+ const exact = 'أثبت القيد أن الخانة «فارغة».';
+ const p = {...plan, issues:[{...plan.issues[0], factQuote:exact}]};
+ const refs = api.defenseFactReferences(p);
+ assert.equal(refs[0].reference, '{{FACT_1}}');
+ const resolved = api.resolveDefenseFactReferences('ورد {{FACT_1}}. نص المادة: «لفظ مصطنع {{FACT_1}}».', refs);
+ assert.equal(resolved, 'ورد “' + exact + '”. نص المادة: «لفظ مصطنع {{FACT_1}}».');
+ assert.equal(api.reviewCaseContent({...content, grounds:content.grounds + ' {{FACT_99}}'}).ok, false);
+});
