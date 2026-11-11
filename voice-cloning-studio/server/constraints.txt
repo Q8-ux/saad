@@ -1,6 +1,6 @@
 # Keep every engine on one CPU Torch ABI and the upstream transformer boundary.
 torch==2.6.0+cpu
 torchaudio==2.6.0+cpu
-transformers==4.57.6
+transformers==4.57.3
 numpy==1.26.4
 qwen-tts==0.1.1
