@@ -1,0 +1,40 @@
+name: Verify Arabic voice cloning engines
+
+on:
+  pull_request:
+    paths:
+      - 'voice-cloning-studio/server/Dockerfile.engine'
+      - 'voice-cloning-studio/server/cloning/**'
+      - 'voice-cloning-studio/server/tests/smoke_cloning.py'
+      - '.github/workflows/verify-voice-studio-cloning.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: voice-studio-cloning-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  arabic-wav:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: voice-cloning-studio/server
+      - name: Build private inference image
+        working-directory: voice-cloning-studio/server
+        run: docker build --file Dockerfile.engine --tag sawtak-cloning-test .
+      - name: Generate Arabic WAV with both engines
+        working-directory: voice-cloning-studio/server
+        run: |
+          docker run --detach --name sawtak-cloning-test \
+            --env STUDIO_API_TOKEN=local-smoke-test-key-not-a-secret \
+            --volume "$PWD/tests/smoke_cloning.py:/tmp/smoke_cloning.py:ro" \
+            sawtak-cloning-test
+          docker exec --user voicebox sawtak-cloning-test python /tmp/smoke_cloning.py
+      - name: Print engine logs on failure
+        if: failure()
+        run: docker logs --tail 200 sawtak-cloning-test || true

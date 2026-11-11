@@ -48,3 +48,13 @@ The default cosmic violet theme uses layered gradients and quiet flowing light, 
 The YouTube section now has a standalone file input available before any search. Audio/video files are read locally (100 MiB maximum; up to five minutes), with native format support depending on the browser. Users choose a 10–30 second interval. Web Audio decodes the audio track and exports a mono 24 kHz PCM WAV; the WAV can be downloaded, saved locally, edited, or sent to the existing voice-profile form. File preparation makes no server upload and does not require the private cloning engine. Actual cloning remains a separate engine operation.
 
 Browser verification used a synthetic 65-second MP4 containing AAC audio: the chosen 20–50 second interval produced a playable 30-second WAV, downloaded as mono 24 kHz PCM (1,440,044 bytes). The sample was handed to the voice-profile form. No user's or third party's voice was cloned in this check.
+
+## Arabic cloning engines (v1.4)
+
+The generation, voice-profile and model selectors support
+[MOSS-TTS-Nano ONNX](https://github.com/OpenMOSS/MOSS-TTS-Nano) and
+[Habibi-TTS MSA](https://github.com/SWivid/Habibi-TTS). The choices become
+selectable when the connected Voicebox host reports the matching model IDs.
+They use the existing voice library and generation history. See
+[server/README.md](server/README.md#moss-and-habibi-cloning) for the inference
+image and gateway configuration.

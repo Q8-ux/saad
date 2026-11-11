@@ -682,5 +682,8 @@
   "s702": "Choose a file first.",
   "s703": "Extracting audio and preparing the sample…",
   "s704": "WAV sample ready. Listen, then download it or use it in a voice profile.",
-  "s705": "Prepare a sample first."
+  "s705": "Prepare a sample first.",
+  "s706": "Clone a voice from a recording on the CPU.",
+  "s707": "Clone a voice in Modern Standard Arabic from a recording and its transcript.",
+  "s708": "The selected engine is unavailable on the server."
 }

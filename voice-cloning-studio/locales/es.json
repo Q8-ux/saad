@@ -682,5 +682,8 @@
   "s702": "Elige primero un archivo.",
   "s703": "Extrayendo audio y preparando muestra…",
   "s704": "La muestra WAV está lista. Escúchala y descárgala o úsala en un perfil de voz.",
-  "s705": "Prepara primero la muestra."
+  "s705": "Prepara primero la muestra.",
+  "s706": "Clona una voz a partir de una grabación en la CPU.",
+  "s707": "Clona una voz en árabe estándar moderno a partir de una grabación y su transcripción.",
+  "s708": "El motor seleccionado no está disponible en el servidor."
 }

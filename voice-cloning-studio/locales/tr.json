@@ -682,5 +682,8 @@
   "s702": "Önce bir dosya seçin.",
   "s703": "Ses çıkarılıyor ve örnek hazırlanıyor…",
   "s704": "Örnek WAV biçiminde hazır. Dinleyin, ardından indirin veya bir ses profilinde kullanın.",
-  "s705": "Önce örneği hazırlayın."
+  "s705": "Önce örneği hazırlayın.",
+  "s706": "İşlemci üzerinde bir kayıttan ses klonlayın.",
+  "s707": "Bir kayıt ve dökümünden Modern Standart Arapça ses klonlayın.",
+  "s708": "Seçilen motor sunucuda kullanılamıyor."
 }

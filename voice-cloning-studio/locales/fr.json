@@ -682,5 +682,8 @@
   "s702": "Choisissez d’abord un fichier.",
   "s703": "Extraction de l’audio et préparation de l’échantillon…",
   "s704": "Échantillon WAV prêt. Écoutez-le, puis téléchargez-le ou utilisez-le dans un profil vocal.",
-  "s705": "Préparez d’abord un échantillon."
+  "s705": "Préparez d’abord un échantillon.",
+  "s706": "Clonage d’une voix à partir d’un enregistrement sur le processeur.",
+  "s707": "Clonage en arabe standard moderne à partir d’un enregistrement et de sa transcription.",
+  "s708": "Le moteur sélectionné est indisponible sur le serveur."
 }
