@@ -4,6 +4,14 @@ const path = require('node:path');
 const vm = require('node:vm');
 
 const source = fs.readFileSync(path.join(__dirname, '../cart-v2.js'), 'utf8');
+const storefront = fs.readFileSync(path.join(__dirname, '../index.html'), 'utf8');
+const inlineCatalog = storefront.match(/<script>([\s\S]*?)<\/script>/);
+assert.ok(inlineCatalog, 'Storefront catalog script must exist');
+new vm.Script(inlineCatalog[1]); // Fail on broken inline JavaScript.
+assert.ok(storefront.includes('window.TamweenatStore.add(p,1)'));
+assert.ok(storefront.includes('window.TamweenatStore.openCart()'));
+assert.ok(storefront.indexOf('src="./cart-v2.js') < storefront.indexOf('<script>(()=>{'));
+
 function makeHarness(storage = new Map()) {
   class Element {
     constructor(tag = 'div') {
