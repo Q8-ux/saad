@@ -5,6 +5,7 @@
   const MAX_QTY = 9999;
   const basket = new Map();
   let products = [];
+  let catalogScoped = false; // Non-vegetable items remain saved, but are hidden while scoped.
   const byId = id => document.getElementById(id);
   const drawer = byId('drawer');
   const lang = () => window.TamweenatI18n?.lang || 'ar';
@@ -40,6 +41,7 @@
     } catch (_) { /* Preserve in-memory basket when storage is unavailable. */ }
   }
   function productFor(id) { return products.find(p => productId(p) === id); }
+  function visibleItems() { return [...basket].filter(([id]) => !catalogScoped || !!productFor(id)); }
   function setText(id, value) { const element = byId(id); if (element) element.textContent = value; }
   function status(message) { setText('cartStatus', message); }
   function makeButton(label, aria, action) {
@@ -58,7 +60,7 @@
     render();
   }
   function render() {
-    const items = [...basket].map(([id, qty]) => ({id, qty, product: productFor(id)}));
+    const items = visibleItems().map(([id, qty]) => ({id, qty, product: productFor(id)}));
     const count = items.reduce((sum, item) => sum + item.qty, 0);
     const total = items.reduce((sum, item) => sum +
       (priced(item.product) ? Number(item.product.price) * item.qty : 0), 0);
@@ -129,7 +131,7 @@
   }
   function add(product, qty = 1) {
     const id = productId(product);
-    if (!id) return false;
+    if (!id || (catalogScoped && !productFor(id))) return false;
     const amount = quantity(qty);
     basket.set(id, Math.min(MAX_QTY, (basket.get(id) || 0) + amount));
     if (!products.some(p => productId(p) === id)) products.push(product);
@@ -152,14 +154,14 @@
     document.body.classList.remove('cart-is-open');
   }
   function orderText() {
-    const lines = [...basket].map(([id, qty], index) => {
+    const lines = visibleItems().map(([id, qty], index) => {
       const product = productFor(id);
       const name = product ? nameOf(product) : id;
       const price = priced(product) ? money(Number(product.price) * qty) + ' د.ك' :
         tr('يحتاج عرض سعر','Quotation required','قیمت درکار ہے');
       return (index + 1) + '. ' + name + ' × ' + qty + ' — ' + price;
     });
-    const total = [...basket].reduce((sum, [id, qty]) => {
+    const total = visibleItems().reduce((sum, [id, qty]) => {
       const product = productFor(id);
       return sum + (priced(product) ? Number(product.price) * qty : 0);
     }, 0);
@@ -206,7 +208,8 @@
   byId('cartCopy')?.addEventListener('click', copyOrder);
   byId('cartDownload')?.addEventListener('click', downloadOrder);
   byId('cartClear')?.addEventListener('click', () => {
-    basket.clear();
+    if (catalogScoped) { for (const [id] of visibleItems()) basket.delete(id); }
+    else basket.clear();
     save();
     render();
     status(tr('تم إفراغ السلة.','Basket cleared.','ٹوکری خالی کردی گئی۔'));
@@ -222,10 +225,10 @@
   });
   window.TamweenatStore = {
     get products() { return products; },
-    setProducts(list) { products = Array.isArray(list) ? list : []; render(); },
+    setProducts(list, options = {}) { products = Array.isArray(list) ? list : []; catalogScoped = options.visibleOnly === true; render(); },
     add, openCart, closeCart, getOrderText: orderText,
-    getCart() { return [...basket].map(([id, qty]) => ({id, qty})); },
-    clear() { basket.clear(); save(); render(); }
+    getCart() { return visibleItems().map(([id, qty]) => ({id, qty})); },
+    clear() { if (catalogScoped) { for (const [id] of visibleItems()) basket.delete(id); } else basket.clear(); save(); render(); }
   };
   render();
 })();
