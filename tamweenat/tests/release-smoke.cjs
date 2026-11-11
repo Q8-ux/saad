@@ -6,7 +6,11 @@ const read=p=>fs.readFileSync(path.join(root,p),'utf8');
 const home=read('tamweenat/index.html');
 const admin=read('tamweenat-admin/index.html');
 const workflows=JSON.parse(read('tamweenat-admin/internal-workflows.json'));
-assert(home.includes('كتالوج احتياجات مطاعم البرجر'));
+assert(home.includes('كتالوج الخضروات الطازجة'));
+assert(home.includes("products=a.filter(p=>group(p)==='خضروات طازجة')"));
+assert(home.includes('setProducts(products,{visibleOnly:true})'));
+assert(home.includes('<div id="filters" class="filters" hidden>'));
+assert(!home.includes('data-filter="لحوم ودواجن"'));
 assert(home.includes('renderFilters()'));
 const catalog=JSON.parse(read('tamweenat/catalog.json'));
 assert(catalog.length>0);
@@ -15,6 +19,8 @@ assert(catalog.every(p=>p.active!==true || (Number(p.price)>0 && !String(p.price
 assert(/fetch\(['\"]\.\/catalog-photos\.json(?:\?[^'\"]*)?['\"]/.test(home));
 const photos=JSON.parse(read('tamweenat/catalog-photos.json'));
 assert(photos.length>=238);
+assert(photos.some(p=>p.categoryKey==='خضروات طازجة'));
+assert(photos.some(p=>p.categoryKey!=='خضروات طازجة')); // Preserve hidden categories in source catalog.
 assert(photos.every(p=>p.subcategoryLabel && p.subcategoryEn && p.subcategoryUr));
 assert(home.includes('id="subfilters"'));
 assert(home.includes('src="./cart-v2.js'));
