@@ -63,6 +63,9 @@
     const total = items.reduce((sum, item) => sum +
       (priced(item.product) ? Number(item.product.price) * item.qty : 0), 0);
     const quoteCount = items.filter(item => !priced(item.product)).length;
+    setText('cartCopy', tr('نسخ قائمة الطلب','Copy draft','فہرست کاپی کریں'));
+    setText('cartDownload', tr('تنزيل قائمة الطلب','Download draft','فہرست ڈاؤن لوڈ کریں'));
+    setText('cartClear', tr('إفراغ السلة','Clear basket','ٹوکری خالی کریں'));
     setText('cartCount', String(count));
     setText('barCount', String(count));
     setText('barTotal', money(total));
