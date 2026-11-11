@@ -29,5 +29,5 @@ assert "السعر عند التأكيد" not in html, "Old price-on-confirmatio
 assert "catalog-photos.json" in html, "Old catalog reference in published artifact"
 assert "storefront-v7.css" in html, "New design stylesheet missing"
 assert "cart-v2.js" in html, "Basket script missing from published artifact"
-assert "id=\\\"cartCopy\\\"" in html, "Basket action controls missing from published artifact"
+assert 'id="cartCopy"' in html, "Basket action controls missing from published artifact"
 print("Tamweenat updated; verified price labels, photos, and design; unrelated sites retained")
