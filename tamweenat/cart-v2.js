@@ -110,7 +110,7 @@
       input.value = String(item.qty);
       input.setAttribute('aria-label', tr('كمية ' + name.textContent,
         'Quantity of ' + name.textContent, 'مقدار ' + name.textContent));
-      input.addEventListener('change', () => update(item.id, input.value));
+      input.addEventListener('change', () => update(item.id, quantity(input.value)));
       actions.append(input);
       actions.append(makeButton('+', tr('زيادة الكمية','Increase quantity','مقدار بڑھائیں'),
         () => update(item.id, item.qty + 1)));
