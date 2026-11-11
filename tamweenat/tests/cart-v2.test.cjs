@@ -97,4 +97,21 @@ h2.document.dispatch('keydown', {key: 'Escape'});
 assert.equal(h2.ids.get('drawer').hidden, true);
 h2.window.TamweenatStore.clear();
 assert.equal(h2.ids.get('cartCount').textContent, '0');
+// Vegetables-only visibility must not delete the saved items from hidden categories.
+const scopedStorage = new Map([['tamweenat-basket-v2', JSON.stringify([
+  {id: 'VEG-1', qty: 2}, {id: 'MEAT-1', qty: 1}
+])] ]);
+const scoped = makeHarness(scopedStorage);
+const vegetable = {id: 'VEG-1', name: 'طماطم', price: 1, priceStatus: 'observed_market_price'};
+const hiddenMeat = {id: 'MEAT-1', name: 'برغر', price: 2, priceStatus: 'observed_market_price'};
+scoped.window.TamweenatStore.setProducts([vegetable], {visibleOnly: true});
+assert.equal(scoped.ids.get('cartCount').textContent, '2');
+assert.equal(scoped.ids.get('barTotal').textContent, '2.000');
+assert.equal(scoped.window.TamweenatStore.add(hiddenMeat, 1), false);
+assert.equal(scoped.window.TamweenatStore.getOrderText().includes('MEAT-1'), false);
+scoped.window.TamweenatStore.clear();
+assert.equal(scoped.ids.get('cartCount').textContent, '0');
+assert.deepEqual(JSON.parse(scopedStorage.get('tamweenat-basket-v2')), [{id: 'MEAT-1', qty: 1}]);
+scoped.window.TamweenatStore.setProducts([vegetable, hiddenMeat]);
+assert.equal(scoped.ids.get('cartCount').textContent, '1');
 console.log('Tamweenat cart v2: open, close, add, quote, quantity, remove, persistence and clear PASS');
