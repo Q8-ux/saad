@@ -2,6 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {load} from './template-harness.mjs';
 const policy=load('../lib/bound-draft.ts');
+const {appealReferenceInstructions,appealReferenceStyle}=load('../lib/appeal-reference-style.ts');
+const {resolveLegalDraftingRoute}=load('../lib/legal-drafting-routes.ts');
 
 test('reference examples are explicitly style-only and cannot donate personal data or legal authorities',()=>{
  assert.match(policy.pleadingAuthorityInstructions,/النماذج مرجع أسلوبي فقط/);
@@ -16,11 +18,38 @@ test('the shared style distinguishes criminal attribution from civil relief and 
  assert.match(text,/صحيفة الدعوى.*صحيفة الاستئناف/u);
 });
 test('style coverage reports only observed forms and never claims the supplied examples prove all pleading types',()=>{
- assert.equal(policy.pleadingStyleRevision,'reference-pleading-style-2');
- assert.deepEqual(Array.from(policy.referenceStyleCoverage.observed),['misdemeanor_defense','felony_defense','civil_defense','civil_claim','commercial_claim','administrative_claim','guardianship_claim','expert_appointment_claim','medical_expert_claim']);
- assert.deepEqual(Array.from(policy.referenceStyleCoverage.notObserved),['appeal']);
+ assert.equal(policy.pleadingStyleRevision,'reference-pleading-style-3');
+ assert.deepEqual(Array.from(policy.referenceStyleCoverage.observed),['misdemeanor_defense','felony_defense','civil_defense','civil_claim','commercial_claim','administrative_claim','guardianship_claim','expert_appointment_claim','medical_expert_claim','appeal']);
+ assert.deepEqual(Array.from(policy.referenceStyleCoverage.notObserved),[]);
  assert.equal(policy.referenceStyleCoverage.personalDataStored,false);
  assert.equal(policy.referenceStyleCoverage.legalAuthoritiesImported,false);
+});
+
+test('appeal rules follow the resolved appellant route and exclude other families and unapproved text',()=>{
+ const base={documentKind:'appeal',court:'محكمة الاستئناف',partyRole:'مستأنف',requests:'تعديل الحكم في حدود الطلب الأصلي.'};
+ const labels={civil:'مدني',commercial:'تجاري',family:'أحوال شخصية',administrative:'إداري'};
+ for(const [family,caseType] of Object.entries(labels)){
+  const route=resolveLegalDraftingRoute({...base,caseType});
+  assert.equal(route.status,'ready',family);
+  assert.equal(route.family,family);
+  const text=appealReferenceInstructions(route,appealReferenceStyle);
+  for(const rule of appealReferenceStyle.common)assert.ok(text.includes(rule));
+  for(const [key,rules] of Object.entries(appealReferenceStyle.families)){
+   for(const rule of rules)assert.equal(text.includes(rule),key===family);
+  }
+  assert.equal(appealReferenceInstructions(route,{...appealReferenceStyle,common:['تعليمات اختبارية محقونة']}),'');
+ }
+ const execution=resolveLegalDraftingRoute({...base,caseType:'تنفيذ'});
+ assert.equal(execution.status,'template_review');
+ assert.ok(appealReferenceStyle.families.enforcement.length);
+ assert.equal(appealReferenceInstructions(execution,appealReferenceStyle),'');
+ for(const change of [
+  {caseType:'جنح'},{caseType:'جنايات'},{partyRole:'مستأنف ضده'},
+  {documentKind:'memorandum'},{court:'محكمة التمييز'},{caseType:'أخرى'},
+ ]){
+  const route=resolveLegalDraftingRoute({...base,caseType:'مدني',...change});
+  assert.equal(appealReferenceInstructions(route,appealReferenceStyle),'');
+ }
 });
 test('style instructions contain rules without case identifiers, external links, sample quotations or contact details',()=>{
  const text=policy.referencePleadingStyleInstructions;

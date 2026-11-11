@@ -12,6 +12,7 @@ import {scopeEvidenceToFacts,prepareBoundDraft,pleadingAuthorityInstructions,ple
 import { applyCheckedJudgmentMatches, caseReasoningInstructions, caseResearchQueries, approvedCaseFacts, buildCheckedCasePlan, CasePlanValidationError, casePlanFailureMessage, caseAuditRequestForContent, parseGroundedCaseAudit, caseQualitySummary, reviewCaseContent, memoCompletenessRevision, defenseAuditInstructions, defenseRevision } from "@/lib/case-reasoning";
 import { legalSourceCoverage, formatSourceCoverage } from "@/lib/legal-source-coverage";
 import { loadApprovedTemplate } from "@/lib/approved-templates";
+import { appealReferenceInstructions } from "@/lib/appeal-reference-style";
 import { arabicMemoInput } from "@/lib/memo-language";
 import { buildPleadingDocument, parsePleadingContent, pleadingContentSchema, pleadingFields, pleadingText, type PleadingContent, type PleadingInput } from "@/lib/pleading-document";
 import { factualRequirements, correctLegalProse, languageReviewInstructions, legalResearchInstructions, removeDelegatedResearch } from "@/lib/legal-language";
@@ -89,6 +90,8 @@ export async function POST(request: Request) {
     const kind = legalRoute.kind;
     memoInput.legalRouteId=legalRoute.id;memoInput.legalRouteRevision=legalDraftingRouteRevision;
     const template = await loadApprovedTemplate(kind === "appeal" ? "appeal" : "claim");
+    const appealInstructions = appealReferenceInstructions(legalRoute, template.referenceStyle);
+    if (appealInstructions) draftingInstructions += "\n" + appealInstructions;
     const researchContext = `المسار المحدد: ${legalRoute.id}\nنوع القضية: ${caseType}\nالوقائع: ${facts}\nالطلبات: ${requests}\nملاحظات إضافية: ${legalIssues || "لا توجد"}`;
     let searchQueries = [...legalRouteResearchQueries(legalRoute), ...caseResearchQueries(memoInput), caseType, legalIssues, facts.slice(0, 1_400), requests.slice(0, 800)];
     try {
@@ -235,7 +238,7 @@ export async function POST(request: Request) {
       return privateJson(responseData);
     }
     if (agentPipelineEnabled()) {
-      const result = await generateAgentPleading({signal,caseData:{...memoInput,legalIssues},fields:extraFields,documentKind:kind,template:template.info,evidence,casePlan:checkedPlan});
+      const result = await generateAgentPleading({signal,caseData:{...memoInput,legalIssues},fields:extraFields,documentKind:kind,template:template.info,evidence,casePlan:checkedPlan,referenceStyle:template.referenceStyle});
       agentAudit = result.audit;
       return await finish(result.content);
     }

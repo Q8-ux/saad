@@ -17,6 +17,33 @@ test('both reviewed originals persist byte-for-byte in R2 and authoritative defi
 test('failed source persistence does not create a falsely approved record',async t=>{
  const h=templateHarness();t.after(h.cleanup);h.bucket.put=async()=>{throw Error('synthetic storage outage');};await assert.rejects(h.templates.ensureApprovedTemplates());assert.equal(h.sql('SELECT count(*) AS n FROM legal_drafting_templates')[0].n,0);
 });
+test('an existing appeal template gains the reviewed style catalog without replacing its layout or original',async t=>{
+ const h=templateHarness();
+ t.after(h.cleanup);
+ await h.templates.ensureApprovedTemplates();
+ h.sql(`UPDATE legal_drafting_templates
+   SET definition_json=json_set(json_remove(definition_json,'$.referenceStyle'),'$.labels.subject','عنوان إداري اختباري محفوظ')
+   WHERE kind='appeal'`);
+ const before=h.sql("SELECT * FROM legal_drafting_templates WHERE kind='appeal'")[0];
+ const listed=(await h.templates.listApprovedTemplates()).find(template=>template.kind==='appeal');
+ assert.equal(listed.referenceStyle.reviewedFiles,8);
+ assert.equal(listed.referenceStyle.reviewedPages,115);
+ assert.deepEqual(Array.from(listed.referenceStyle.families),['civil','commercial','family','administrative','enforcement']);
+ const after=h.sql("SELECT * FROM legal_drafting_templates WHERE kind='appeal'")[0];
+ const {referenceStyle,...layout}=JSON.parse(after.definition_json);
+ assert.deepEqual(layout,JSON.parse(before.definition_json));
+ assert.equal(after.source_sha256,before.source_sha256);
+ assert.equal(after.source_object_key,before.source_object_key);
+ assert.equal(after.version,before.version);
+ assert.equal(h.writes,2);
+ const loaded=await h.templates.loadApprovedTemplate('appeal');
+ assert.equal(loaded.definition.referenceStyle,undefined);
+ assert.equal(loaded.definition.labels.subject,'عنوان إداري اختباري محفوظ');
+ assert.deepEqual(JSON.parse(JSON.stringify(loaded.referenceStyle)),referenceStyle);
+ assert.equal((await h.templates.loadApprovedTemplate('claim')).referenceStyle,undefined);
+ await h.templates.listApprovedTemplates();
+ assert.equal(h.sql("SELECT definition_json FROM legal_drafting_templates WHERE kind='appeal'")[0].definition_json,after.definition_json);
+});
 test('claim keeps fixed preamble and identifiers; appeal keeps four ordered sections and correct original party role',async t=>{
  const h=templateHarness();t.after(h.cleanup);const claim=await h.templates.loadApprovedTemplate('claim'),appeal=await h.templates.loadApprovedTemplate('appeal');
  const first=doc.buildPleadingDocument(claim.info,claim.definition,'claim',input,content);const text=doc.pleadingText(first);for(const term of ['صحيفة الدعوى','بناءً على طلب/','قد انتقلت وأعلنت صورة','الموضوع والطلبات','بناءً عليه','0012/2026','00500.250','01/02/2026'])assert.ok(text.includes(term),term);assert.doesNotMatch(text,/2020|٢٠٢٠|هاتف رقم|المادة\s*18|غير معتمدة|ملاحظات المراجعة|مراجعة المسودة|المساعد/);
@@ -39,24 +66,68 @@ d=Document(io.BytesIO(b));x=z.read('word/document.xml').decode();assert '00500.2
  const claim=await h.templates.loadApprovedTemplate('claim');writeFileSync(new URL('../tmp/template-qa/claim.docx',import.meta.url),exporter.exportPleadingDocx(doc.buildPleadingDocument(claim.info,claim.definition,'claim',input,content)));
 });
 test('originals cannot be read without real server admin authorization',async()=>{
- let reads=0;const auth=load('../lib/admin-service-auth.ts',{'cloudflare:workers':{env:{ADMIN_SERVICE_TOKEN:'a'.repeat(48)}}});const route=load('../app/api/admin/templates/route.ts',{'@/lib/admin-service-auth':auth,'@/lib/approved-templates':{listApprovedTemplates:async()=>{reads++;return[];},readApprovedTemplateOriginal:async()=>{reads++;return null;}}});
+ let reads=0;const auth=load('../lib/admin-service-auth.ts',{'cloudflare:workers':{env:{ADMIN_SERVICE_TOKEN:'a'.repeat(48)}},'@/db':{getD1:()=>{throw Error('unauthorized request accessed D1');}}});const route=load('../app/api/admin/templates/route.ts',{'@/lib/admin-service-auth':auth,'@/lib/approved-templates':{listApprovedTemplates:async()=>{reads++;return[];},readApprovedTemplateOriginal:async()=>{reads++;return null;}}});
  for(const headers of [{},{Authorization:'Bearer '+'b'.repeat(48)}])assert.equal((await route.GET(new Request('https://example.org/api/admin/templates?id=sabeq-claim-20261001-v1',{headers}))).status,401);assert.equal(reads,0);
 });
 
 test('generation uses stored template and structured content, retains sources and rejects malformed completion',async t=>{
  const h=templateHarness();t.after(h.cleanup);let malformed=false,wrong=false,correctedWrong=false,calls=0,record,archives=0;
+ const draftInstructions=[];
+ const factQuote='لم يسدد ناصر الافتراضي مبلغ';
+ const application='بحسب الوقائع المدخلة '+factQuote+' المطالبة، ويلزم فحص أصل الالتزام ومقداره بمستندات الاختبار.';
+ const opposing='قد ينازع الخصم في استحقاق الرصيد أو يقدم ما يفيد الوفاء بالمبلغ.';
+ const answer='يعالج هذا الاعتراض بمقابلة الرصيد بالمستندات المقدمة وربط كل دفعة بالمطالبة دون افتراض ثبوت الوفاء.';
+ const supportedGrounds=[application,opposing,answer].join('\n')+' 【م1】';
  const search=load('../lib/legal-search.ts',{'@/db':{}});
  const route=load('../app/api/legal/memo/route.ts',{
   '@/lib/approved-templates':h.templates,
   '@/lib/sabeq-agent-bridge':{agentPipelineEnabled:()=>false},
   '@/lib/legal-search':{...search,searchLegalEvidenceAcross:async()=>[{documentId:1,title:'دليل اصطناعي',reference:'نص اختبار',text:'مصدر اصطناعي',documentType:'قانون',officialSource:'اختبار',sourceUrl:'https://example.org/source'}],searchCassationEvidenceAcross:async()=>[],readHandoffEvidence:async()=>[]},
-  '@/lib/openai':{deriveLegalResearchPlan:async()=>({searchQueries:[],legalIssues:[]}),openAIErrorResponse:()=>null,generateText:async options=>{if(options.schema?.properties?.clientRole)return JSON.stringify({clientRole:options.schema.properties.clientRole.enum[0],opponentRole:'مدعى عليه',characterization:'واقعة اصطناعية',issues:[{issue:'طلب أصلي',factQuote:input.facts,document:'مذكور',sourceMarkers:['م1'],application:'تطبيق على الوقائع المدخلة',counterargument:'منازعة افتراضية',response:'فحص المستند',proposedRelief:'الطلب الأصلي',missing:''}],missingFacts:[],researchGaps:[],precedentMatches:[]});if(options.schema?.properties?.checks)return JSON.stringify({checks:[{issueIndex:0,status:'addressed',reason:'فحص اصطناعي'}],roleConsistent:true,factsPreserved:true,reliefConsistent:true,unsupportedAssertions:[]});calls++;if(options.schema?.properties?.grounds&&!options.schema.properties.facts)return JSON.stringify({grounds:correctedWrong?"المادة 9999 تمنح حقاً مختلقاً 【م1】":"تطبيق على واقعة اصطناعية 【م1】"});assert.equal(options.schema.additionalProperties,false);assert.match(options.instructions,/لا تُنشئ ترويسة أو ديباجة/);return malformed?'incomplete':JSON.stringify({...content,grounds:wrong?'المادة 9999 تمنح حقاً مختلقاً 【م1】':'تطبيق على واقعة اصطناعية 【م1】',fields:{judgmentNumber:'0045/2026'},factualNotes:['أرفق النص القانوني','عنوان الخصم غير واضح']});}},
+  '@/lib/openai':{
+   deriveLegalResearchPlan:async()=>({searchQueries:[],legalIssues:[]}),
+   openAIErrorResponse:()=>null,
+   generateText:async options=>{
+    if(options.schema?.properties?.grounds)draftInstructions.push(options.instructions);
+    if(options.schema?.properties?.clientRole){
+     return JSON.stringify({
+      clientRole:options.schema.properties.clientRole.enum[0],opponentRole:'مدعى عليه',characterization:'واقعة اصطناعية',
+      issues:[{issue:'طلب أصلي',factQuote,document:'مذكور',sourceMarkers:['م1'],application,counterargument:opposing,response:answer,proposedRelief:'الطلب الأصلي',missing:''}],
+      missingFacts:[],researchGaps:[],precedentMatches:[],
+     });
+    }
+    if(options.schema?.properties?.checks){
+     const {checkOptions,quoteOptions}=JSON.parse(options.input);
+     const selected=checkOptions.find(option=>option.issueIndex===0&&option.status==='addressed');
+     const key=text=>quoteOptions.find(option=>option.quote.includes(text)).quoteKey;
+     return JSON.stringify({
+      checks:[{checkKey:selected.checkKey,reason:'فحص اصطناعي',substance:{opposingQuoteKey:key(opposing),responseQuoteKey:key(answer),sourceMarkers:['م1']}}],
+      roleConsistent:true,factsPreserved:true,reliefConsistent:true,unsupportedAssertions:[],
+     });
+    }
+    calls++;
+    const fabricated='المادة 9999 تمنح حقاً مختلقاً 【م1】';
+    if(options.schema?.properties?.grounds&&!options.schema.properties.facts){
+     return JSON.stringify({grounds:correctedWrong?fabricated:supportedGrounds});
+    }
+    assert.equal(options.schema.additionalProperties,false);
+    assert.match(options.instructions,/لا تُنشئ ترويسة أو ديباجة/);
+    return malformed?'incomplete':JSON.stringify({
+     ...content,grounds:wrong?fabricated:supportedGrounds,
+     fields:{judgmentNumber:'0045/2026'},factualNotes:['أرفق النص القانوني','عنوان الخصم غير واضح'],
+    });
+   },
+  },
   '@/lib/public-auth':{requireMemoUserOrGuest:async()=>({id:'synthetic-user'})},'@/lib/service-settings':{requireServiceEnabled:async()=>{}},'@/lib/service-records':{enforceUserServiceLimit:async()=>{},recordServiceActivity:async value=>{record=value;archives++;}},'@/lib/request-security':{...h.security,enforceRateLimit:async()=>{}}
  });
  const request=()=>new Request('https://example.org/api/legal/memo',{method:'POST',headers:{Origin:'https://example.org','Content-Type':'application/json'},body:JSON.stringify({...input,partyRole:'مستأنف',court:'محكمة الاستئناف',judgmentNumber:'0012/2026'})});
- const response=await route.POST(request());assert.equal(response.status,200);const result=await response.json();assert.equal(result.document.kind,'appeal');assert.equal(result.document.pages.length,4);assert.equal(result.template.sourceFilename,'appeal.pdf');assert.ok(result.document.pages[0].sidebar.some(b=>b.text.includes('0012/2026')));assert.equal(result.analysis.sources[0].sourceUrl,'https://example.org/source');assert.doesNotMatch(result.memo,/أرفق النص القانوني/);assert.equal(record.metadata.template.id,result.template.id);assert.equal(record.metadata.document,undefined);
+ const response=await route.POST(request());const result=await response.json();assert.equal(response.status,200,JSON.stringify({stage:result.stage,issues:result.issues,error:result.error}));assert.equal(result.document.kind,'appeal');assert.equal(result.document.pages.length,4);assert.equal(result.template.sourceFilename,'appeal.pdf');assert.ok(result.document.pages[0].sidebar.some(b=>b.text.includes('0012/2026')));assert.equal(result.analysis.sources[0].sourceUrl,'https://example.org/source');assert.doesNotMatch(result.memo,/أرفق النص القانوني/);assert.equal(record.metadata.template.id,result.template.id);assert.equal(record.metadata.document,undefined);
+ assert.ok(draftInstructions[0].includes('قواعد صياغة صحيفة الاستئناف'));
+ assert.match(draftInstructions[0],/رتّب أوجه الاعتراض المدنية/);
+ assert.doesNotMatch(result.memo,/قواعد صياغة صحيفة الاستئناف/);
  assert.equal(result.analysis.sourceCount,1);assert.doesNotMatch(result.memo,/【م\d+】|\[م\d+\]/);assert.doesNotMatch(JSON.stringify(result.document.pages),/【م\d+】|\[م\d+\]/);
  malformed=true;const failure=await route.POST(request());assert.equal(failure.status,503);assert.equal((await failure.json()).memo,undefined);assert.equal(calls,2);
  malformed=false;wrong=true;const corrected=await route.POST(request());assert.equal(corrected.status,200);assert.doesNotMatch((await corrected.json()).memo,/9999/);assert.equal(archives,2);
  correctedWrong=true;const unsafe=await route.POST(request());assert.equal(unsafe.status,422);assert.equal((await unsafe.json()).memo,undefined);assert.equal(archives,2);assert.equal(calls,6);
+ assert.equal(draftInstructions.length,6);
+ assert.ok(draftInstructions.every(value=>value.includes('قواعد صياغة صحيفة الاستئناف')));
 });

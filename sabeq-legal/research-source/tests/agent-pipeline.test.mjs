@@ -39,6 +39,24 @@ test('unsafe URLs and missing credentials fail before any remote request',async(
   let calls=0;await assert.rejects(bridge(configuration).generateAgentPleading({caseData,fields:{},documentKind:'claim',template,evidence},async()=>{calls++;}));assert.equal(calls,0);
  }
 });
+test('the agent receives the stored rules for the selected appeal family outside its source evidence',async t=>{
+ const h=templateHarness();
+ t.after(h.cleanup);
+ const appeal=await h.templates.loadApprovedTemplate('appeal');
+ await bridge(runtime).generateAgentPleading({
+  caseData:{...caseData,caseType:'تجاري',court:'محكمة الاستئناف',partyRole:'مستأنف'},
+  fields:{},documentKind:'appeal',template:appeal.info,evidence,referenceStyle:appeal.referenceStyle,
+ },async(_url,init)=>{
+  const sent=JSON.parse(init.body);
+  const instructions=sent.caseReasoning.instructions;
+  assert.ok(instructions.includes(appeal.referenceStyle.families.commercial[0]));
+  assert.ok(!instructions.includes(appeal.referenceStyle.families.civil[0]));
+  assert.equal(sent.template.referenceStyle,undefined);
+  assert.equal(sent.sources.length,1);
+  assert.equal(sent.sources[0].text,evidence[0].text);
+  return reply(sent);
+ });
+});
 test('cross-case responses and fabricated citations never reach the final template',async()=>{
  for(const change of [{requestId:'different-case'},{content:{...content,grounds:'مصدر مزيف 【م99】'}},{audit:{steps:['draft'],modelRequests:1,missingSources:false,sourceIds:['legal:1:7']}}]){
   await assert.rejects(bridge(runtime).generateAgentPleading({caseData,fields:{},documentKind:'claim',template,evidence},async(_url,init)=>reply(JSON.parse(init.body),change)));
