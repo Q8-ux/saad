@@ -15,7 +15,8 @@ import zipfile
 PROJECT = 'voice-cloning-studio'
 REPO = 'Q8-ux/saad'
 SOURCE = Path(__file__).resolve().parents[1]
-LIMIT = 256 * 1024 * 1024
+# Allow published snapshots up to the GitHub Pages size limit.
+LIMIT = 1024 * 1024 * 1024
 
 class SafeRedirect(urllib.request.HTTPRedirectHandler):
     def redirect_request(self, req, fp, code, msg, headers, newurl):
@@ -63,21 +64,24 @@ def restore(data, destination):
         if any(destination.iterdir()):
             raise RuntimeError('Restore destination must be empty.')
     destination.mkdir(parents=True, exist_ok=True)
-    with zipfile.ZipFile(io.BytesIO(data)) as archive:
-        candidates = [info for info in archive.infolist() if info.filename.rsplit('/', 1)[-1] == 'artifact.tar']
-        if len(candidates) != 1 or candidates[0].file_size > LIMIT:
+    with zipfile.ZipFile(io.BytesIO(data)) as bundle:
+        candidates = [info for info in bundle.infolist() if info.filename.rsplit('/', 1)[-1] == 'artifact.tar']
+        if len(candidates) != 1:
             raise RuntimeError('Invalid Pages artifact envelope.')
-        payload = archive.read(candidates[0])
-    with tarfile.open(fileobj=io.BytesIO(payload), mode='r:*') as archive:
-        members = archive.getmembers()
-        if sum(max(0, m.size) for m in members) > LIMIT:
-            raise RuntimeError('Expanded Pages archive exceeds the safe limit.')
-        root = destination.resolve()
-        for member in members:
-            target = (root / member.name).resolve()
-            if not target.is_relative_to(root) or member.name.startswith('/') or member.issym() or member.islnk() or not (member.isfile() or member.isdir()):
-                raise RuntimeError('Unsafe path in the Pages archive.')
-        archive.extractall(destination, members=members, filter='data')
+        payload = candidates[0]
+        if payload.file_size > LIMIT:
+            raise RuntimeError(f'Pages tar exceeds the safe limit ({payload.file_size:,} bytes).')
+        print(f'Restoring Pages tar ({payload.file_size:,} bytes).')
+        with bundle.open(payload) as stream, tarfile.open(fileobj=stream, mode='r:*') as archive:
+            members = archive.getmembers()
+            if sum(max(0, m.size) for m in members) > LIMIT:
+                raise RuntimeError('Expanded Pages archive exceeds the safe limit.')
+            root = destination.resolve()
+            for member in members:
+                target = (root / member.name).resolve()
+                if not target.is_relative_to(root) or member.name.startswith('/') or member.issym() or member.islnk() or not (member.isfile() or member.isdir()):
+                    raise RuntimeError('Unsafe path in the Pages archive.')
+            archive.extractall(destination, members=members, filter='data')
     if not (destination / 'index.html').is_file():
         raise RuntimeError('The prior Pages snapshot has no root index. Refusing publication.')
 
