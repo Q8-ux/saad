@@ -48,17 +48,31 @@ export async function managerMemos(url: URL) {
     return { memo: { ...data.record, id, source: "official" } };
   }
   if (id) {
-    let row;
-    if (id.startsWith("legacy:")) row = await getD1().prepare("SELECT r.id, r.title AS client_name, u.email, r.service_type AS case_type, '' AS case_number, r.input_text AS input_json, r.output_text, r.status, r.created_at, r.created_at AS updated_at, '' AS error_code FROM service_records r LEFT JOIN public_users u ON u.id = r.user_id WHERE r.id = ? AND r.service_type IN ('memo','memo_archive')").bind(id.slice(7)).first();
-    else row = await getD1().prepare("SELECT * FROM management_memo_requests WHERE id = ?").bind(id).first();
+    const legacy = id.startsWith("legacy:");
+    const db = getD1();
+    const row = legacy
+      ? await db.prepare("SELECT r.id, r.title AS client_name, u.email, r.service_type AS case_type, '' AS case_number, r.input_text AS input_json, r.output_text, r.status, r.created_at, r.created_at AS updated_at, '' AS error_code FROM service_records r LEFT JOIN public_users u ON u.id = r.user_id WHERE r.id = ? AND r.service_type IN ('memo','memo_archive')").bind(id.slice(7)).first()
+      : await db.prepare("SELECT * FROM management_memo_requests WHERE id = ?").bind(id).first();
     if (!row) throw new RequestError("المذكرة غير موجودة.", 404);
-    const edit = id.startsWith("legacy:") ? { editable: false } : await memoEditState(id, String(row.output_text || ""), String(row.status));
-    return { memo: { ...row, id, source: "hosted", edit } };
+    if (legacy) return { memo: { ...row, id, source: "hosted", edit: { editable: false } } };
+    const saved = await memoEditState(id, {
+      output_text: String(row.output_text ?? ""), status: String(row.status),
+      error_code: String(row.error_code ?? ""), input_json: String(row.input_json ?? ""),
+    });
+    const status = row.status === "needs_review" && !saved.output_text.trim() ? "review_pending" : row.status;
+    return { memo: { ...row, ...saved, status, id, source: "hosted" } };
   }
   const { offset, limit, query, status } = pagination(url);
   const generatedOnly = url.searchParams.get("view") === "generated";
   const rows = await getD1().prepare(`SELECT * FROM (
-    SELECT id, client_name, email, case_type, case_number, status, error_code, created_at, updated_at, CASE WHEN user_id IS NULL THEN 'guest' ELSE 'user' END AS visitor_type, CASE WHEN length(trim(COALESCE(output_text,''), char(9)||char(10)||char(13)||' ')) > 0 THEN 1 ELSE 0 END AS has_output FROM management_memo_requests
+    SELECT id, client_name, email, case_type, case_number,
+      CASE WHEN status = 'needs_review' AND has_output = 0 THEN 'review_pending' ELSE status END AS status,
+      error_code, created_at, updated_at, visitor_type, has_output
+    FROM (
+      SELECT *, CASE WHEN user_id IS NULL THEN 'guest' ELSE 'user' END AS visitor_type,
+        CASE WHEN length(trim(COALESCE(output_text,''), char(9)||char(10)||char(13)||' ')) > 0 THEN 1 ELSE 0 END AS has_output
+      FROM management_memo_requests
+    )
     UNION ALL
     SELECT 'legacy:' || r.id, r.title, COALESCE(u.email,''), 'مذكرة محفوظة سابقاً', '', r.status, '', r.created_at, r.created_at, 'user', CASE WHEN length(trim(COALESCE(r.output_text,''), char(9)||char(10)||char(13)||' ')) > 0 THEN 1 ELSE 0 END FROM service_records r LEFT JOIN public_users u ON r.user_id = u.id WHERE r.service_type IN ('memo','memo_archive') AND r.metadata_json NOT LIKE '%"managementRequestId"%'
     ) WHERE (? = '' OR client_name LIKE ? OR email LIKE ? OR case_number LIKE ?) AND (? = '' OR status = ?) AND (? = 0 OR has_output = 1) ORDER BY created_at DESC, id LIMIT ? OFFSET ?`)
@@ -80,7 +94,7 @@ export async function managerInbox(url: URL) {
 export async function managerSnapshot(email: string) {
   const db = getD1();
   const [memo, historical, contacts, mail, commands, appointments, events, reads, official] = await Promise.all([
-    db.prepare("SELECT COUNT(*) total, SUM(status = 'running') running, SUM(status IN ('failed','cancelled')) failed, SUM(status IN ('needs_review','needs_information')) review FROM management_memo_requests").first(),
+    db.prepare("SELECT COUNT(*) total, SUM(status = 'running') running, SUM(status IN ('failed','cancelled')) failed, SUM(status IN ('needs_review','review_pending','needs_information')) review FROM management_memo_requests").first(),
     db.prepare("SELECT COUNT(*) total FROM service_records WHERE service_type IN ('memo','memo_archive') AND metadata_json NOT LIKE '%\"managementRequestId\"%'").first(),
     db.prepare("SELECT COUNT(*) total, SUM(status = 'new') unread FROM contact_messages").first(),
     db.prepare("SELECT COUNT(*) total, SUM(status = 'new') unread FROM management_emails").first(),

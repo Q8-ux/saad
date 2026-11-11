@@ -69,6 +69,7 @@ export async function POST(request: Request) {
         case_type: row.case_type || "",
         case_number: row.case_number || "",
         status: row.status || "",
+        error_code: row.error_code || "",
         created_at: row.created_at || "",
         updated_at: row.updated_at || "",
         has_output: row.has_output === true || row.has_output === 1,
@@ -89,9 +90,11 @@ export async function POST(request: Request) {
         case_type: memo.case_type || memo.service_type || "",
         case_number: memo.case_number || "",
         status: memo.status || "",
+        error_code: memo.error_code || "",
         created_at: memo.created_at || "",
         has_output: typeof memo.output_text === "string" && memo.output_text.trim().length > 0,
         output_text: typeof memo.output_text === "string" ? memo.output_text.slice(0, 140_000) : "",
+        content_source: memo.content_source || null,
         source: memo.source || "hosted",
       } });
     }
