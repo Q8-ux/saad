@@ -1,6 +1,8 @@
 # Run from the server directory; frontend is independently hosted on GitHub Pages.
 FROM python:3.12-slim AS builder
 ARG VOICEBOX_REV=8af7efe62fab8d33e2a5dfbedabaa45f68a5184f
+ARG MOSS_REV=8b7bcc9341b3b4ef3a3a58ba1338a7d85ff133eb
+ARG HABIBI_REV=9274498d8425b946866cfec1f6eee4841a9d80f3
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1 PIP_NO_CACHE_DIR=1
 RUN apt-get update && apt-get install -y --no-install-recommends git build-essential \
     && rm -rf /var/lib/apt/lists/*
@@ -8,7 +10,15 @@ RUN git init /opt/voicebox && cd /opt/voicebox \
     && git remote add origin https://github.com/jamiepine/voicebox.git \
     && git fetch --depth=1 origin "${VOICEBOX_REV}" \
     && git checkout --detach FETCH_HEAD && rm -rf .git
+COPY cloning/voicebox.patch /build/voicebox.patch
+COPY cloning/studio_clone_backends.py /opt/voicebox/backend/backends/studio_clone_backends.py
+RUN cd /opt/voicebox && git apply --check /build/voicebox.patch && git apply /build/voicebox.patch
+RUN git init /opt/moss-tts-nano && cd /opt/moss-tts-nano \
+    && git remote add origin https://github.com/OpenMOSS/MOSS-TTS-Nano.git \
+    && git fetch --depth=1 origin "${MOSS_REV}" \
+    && git checkout --detach FETCH_HEAD && rm -rf .git
 COPY constraints.txt /build/constraints.txt
+COPY cloning/requirements.txt /build/cloning-requirements.txt
 RUN python -m venv /venv
 ENV PATH="/venv/bin:$PATH"
 RUN pip install --upgrade pip \
@@ -19,9 +29,13 @@ RUN pip install --upgrade pip \
 RUN pip install --extra-index-url https://download.pytorch.org/whl/cpu \
       --constraint /build/constraints.txt -r /opt/voicebox/backend/requirements.txt \
     && pip install --no-deps chatterbox-tts hume-tada omnivoice
+RUN pip install --constraint /build/constraints.txt -r /build/cloning-requirements.txt \
+    && pip install --no-deps f5-tts==1.1.5 \
+       "habibi-tts @ git+https://github.com/SWivid/Habibi-TTS.git@${HABIBI_REV}"
 
 FROM python:3.12-slim
 ENV PATH="/venv/bin:$PATH" \
+    PYTHONPATH=/opt/moss-tts-nano \
     PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     HF_HOME=/data/models \
@@ -40,6 +54,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY --from=builder /venv /venv
 COPY --from=builder /opt/voicebox/backend /opt/voicebox/backend
 COPY --from=builder /opt/voicebox/LICENSE /opt/voicebox/LICENSE
+COPY --from=builder /opt/moss-tts-nano/onnx_tts_runtime.py /opt/moss-tts-nano/ort_cpu_runtime.py /opt/moss-tts-nano/text_normalization_pipeline.py /opt/moss-tts-nano/tts_robust_normalizer_single_script.py /opt/moss-tts-nano/LICENSE /opt/moss-tts-nano/
+COPY --from=builder /opt/moss-tts-nano/moss_tts_nano /opt/moss-tts-nano/moss_tts_nano
 WORKDIR /app
 COPY gateway.py engine_runtime.py start.sh ./
 RUN chmod 755 /app/start.sh && mkdir -p /data \

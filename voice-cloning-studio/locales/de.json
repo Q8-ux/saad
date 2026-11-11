@@ -682,5 +682,8 @@
   "s702": "Wähle zuerst eine Datei.",
   "s703": "Audio wird extrahiert und die Probe aufbereitet …",
   "s704": "Die WAV-Probe ist bereit. Höre sie an und lade sie herunter oder verwende sie für ein Stimmprofil.",
-  "s705": "Bereite zuerst die Probe auf."
+  "s705": "Bereite zuerst die Probe auf.",
+  "s706": "Klonen einer Stimme aus einer Aufnahme auf der CPU.",
+  "s707": "Stimmenklonen auf modernem Hocharabisch aus einer Aufnahme und ihrer Transkription.",
+  "s708": "Die ausgewählte Engine ist auf dem Server nicht verfügbar."
 }

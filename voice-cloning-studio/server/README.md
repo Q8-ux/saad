@@ -106,3 +106,47 @@ locally saved references. Search/preview do not establish import availability.
 When YouTube blocks extraction, the app retains its official embedded player
 and directs the user to upload their authorized original file. No cookies,
 login bypass, proxy rotation, PO tokens or CAPTCHA evasion are used.
+
+## MOSS and Habibi cloning
+
+`Dockerfile.engine` adds both engines to the pinned Voicebox API. Build the
+image from this directory and run it on an inference host with a persistent
+`/data` mount. Keep the small Railway gateway on its existing Dockerfile and
+set its `STUDIO_UPSTREAM_URL` to the private inference service's
+`/api/voicebox` endpoint. Set `STUDIO_UPSTREAM_TOKEN` to the inference host's
+`STUDIO_API_TOKEN`. The upstream must use HTTPS unless it is on loopback.
+
+| API engine | Model ID | Language and weights |
+| --- | --- | --- |
+| `moss_tts_nano` | `moss-tts-nano-onnx` | MOSS-TTS-Nano ONNX and its audio codec, Apache-2.0 |
+| `habibi_tts` | `habibi-tts-msa` | Habibi specialized Modern Standard Arabic checkpoint, Apache-2.0 |
+
+For a local installation, export a private `STUDIO_API_TOKEN` of at least 24
+characters and run these commands in this directory:
+
+```sh
+docker build -f Dockerfile.engine -t sawtak-voicebox .
+docker run --name sawtak-voicebox --rm -e STUDIO_API_TOKEN \
+  -p 127.0.0.1:8080:8080 -v sawtak-voicebox-data:/data sawtak-voicebox
+```
+
+In the studio connection settings, use `http://127.0.0.1:8080/api/voicebox`
+and the same access key when the browser is on that host.
+
+The inference image has the runtime dependencies. It fetches the selected
+engine's pinned weights into `/data/models/studio-cloning` on first load.
+Use the existing Models page to monitor download and load state. The two new
+engines share the CPU slot and release one model before loading the other.
+Peak memory includes ONNX or Torch and its audio codec. Measure it on the
+target host before selecting a capacity.
+
+Use a Voicebox cloned profile with a reference recording and its exact
+transcript. Both engines can use the same profile. If it has several samples,
+they use the first sample and its matching transcript. Existing profiles,
+generation jobs and WAV export go through the same authenticated API.
+
+The `Verify Arabic voice cloning engines` GitHub workflow builds the inference
+image and runs a short API generation through each engine using an Arabic
+reference synthesized by eSpeak NG. The test checks WAV validity and model
+state. Use an authorized recording to evaluate pronunciation and similarity
+for a production voice.
