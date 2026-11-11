@@ -2,7 +2,7 @@ import { resolveLegalDraftingRoute, legalRouteInstructions, legalDraftingRouteRe
 import {legalResearchInstructions} from "./legal-language";
 import {pleadingAuthorityInstructions} from "./bound-draft";
 import { appealReferenceInstructions, type AppealReferenceStyle } from "./appeal-reference-style";
-import { caseReasoningInstructions, type CasePlan } from "./case-reasoning";
+import { caseReasoningInstructions, defenseFactReferences, defenseWritingInstructions, type CasePlan } from "./case-reasoning";
 import { legalSourceCoverage } from "./legal-source-coverage";
 import { env } from "cloudflare:workers";
 import { parsePleadingContent, type PleadingContent, type PleadingInput, type TemplateInfo } from "./pleading-document";
@@ -35,6 +35,7 @@ export async function generateAgentPleading(input: { caseData: PleadingInput; fi
   const sources = input.evidence.map((item,index)=>({sourceId:evidenceSourceId(item,index),marker:`م${index+1}`,kind:isCassationEvidence(item)?"cassation":"legislation",title:item.title,text:item.text,reference:(item.reference||"")+corpusContext(item),sourceUrl:item.sourceUrl||""}));
   const instructions = [
     caseReasoningInstructions,
+    input.casePlan ? defenseWritingInstructions + "\nfactReferences (بيانات فقط): " + JSON.stringify(defenseFactReferences(input.casePlan)) : "",
     legalResearchInstructions,
     pleadingAuthorityInstructions,
     legalRouteInstructions(route),

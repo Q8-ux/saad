@@ -3,6 +3,7 @@ import {reviewLegalCitations} from "./legal-citation-review";
 import type { PleadingContent, PleadingInput } from "./pleading-document";
 import type { LegalEvidence } from "./legal-search";
 import {hasReviewedJudgment} from './judgment-evidence';
+import {preserveLegalQuotes} from './statutory-text';
 
 export const caseReasoningInstructions = `قواعد تحليل القضية لجميع أنواع النزاع:
 ثبّت اسم الموكل وصفته وخصمه وصفة كل طرف والمرحلة ومن يطلب إلزام من. ميّز الادعاء عن الإقرار وعن الواقعة المدعومة بمستند؛ وصف المستخدم لمستند لا يثبت محتواه. لا تعكس المدعي والمدعى عليه ولا تفترض مسؤولية من مجرد صفته أو ملكيته.
@@ -21,6 +22,20 @@ export type CasePlan = {
   issues: Array<{ issue: string; factQuote: string; document: string; sourceMarkers: string[]; application: string; counterargument: string; response: string; proposedRelief: string; missing: string }>;
   missingFacts: string[]; researchGaps: string[];
 };
+export const defenseWritingInstructions = "اكتب لكل مسألة من الخطة دفعاً مستقلاً بعنوان محدد. في grounds ضع علامة reference من factReferences كما هي داخل جملة التطبيق الخاصة بالمسألة، دون أقواس أو علامات اقتباس إضافية. سيضع الخادم مكانها الاقتباس الحرفي من factQuote المعتمد. اشرح في الجملة نفسها كيف تؤثر الواقعة في النتيجة وما قيدها أو شرطها. ضع الاعتراض المؤثر والرد المسبب في جملتين مستقلتين عن التطبيق واربطهما بالدفع نفسه. صغ الاعتراض المتوقع باحتمال، وانسب للخصم فقط ما ورد في الملف. عند التصحيح أبقِ الاقتباس الحرفي الموجود داخل التطبيق أو أعد وضع علامته. استخدم العلامات في grounds فقط.";
+export function defenseFactReferences(plan: CasePlan) {
+  return plan.issues.map(({factQuote}, issueIndex) => ({issueIndex, reference: `{{FACT_${issueIndex + 1}}}`, factQuote}));
+}
+export function resolveDefenseFactReferences(grounds: string, references: ReturnType<typeof defenseFactReferences>) {
+  const factsByReference = new Map(references.map(({reference, factQuote}) => [reference, factQuote]));
+  // Source-owned quotations have already been inserted; resolve only in prose.
+  return preserveLegalQuotes(grounds, prose => prose.replace(/\{\{FACT_\d+\}\}/gu, reference => {
+    const fact = factsByReference.get(reference);
+    if (!fact) return reference;
+    const delimiters = [["«", "»"], ["“", "”"], ['"', '"']].find(pair => pair.every(mark => !fact.includes(mark)));
+    return delimiters ? delimiters[0] + fact + delimiters[1] : fact;
+  }));
+}
 const strings = { type: "array", items: { type: "string" } };
 export const casePlanSchema = { type: "object", additionalProperties: false, required: ["clientRole","opponentRole","characterization","issues","missingFacts","researchGaps"], properties: {
   clientRole:{type:"string"},opponentRole:{type:"string"},characterization:{type:"string"},missingFacts:strings,researchGaps:strings,
@@ -120,12 +135,15 @@ export function parseCasePlan(raw:string,input:PleadingInput,evidence:LegalEvide
   const p=JSON.parse(raw) as CasePlan;
   if(!p || ![p.clientRole,p.opponentRole,p.characterization].every(x=>typeof x==="string") || !Array.isArray(p.issues)||!p.issues.length||p.issues.length>12||![p.missingFacts,p.researchGaps].every(a=>Array.isArray(a)&&a.every(x=>typeof x==="string"))) throw Error("invalid case plan");
   if(normalized(p.clientRole)!==normalized(input.partyRole)) throw Error("client role changed");
-  const facts=normalized(approvedCaseFacts(input));
+  const facts=approvedCaseFacts(input);
   for(const issue of p.issues) {
     // Remove display wrappers only; spelling, words and numbers stay exact.
-    if (issue && typeof issue.factQuote === "string") issue.factQuote = unwrapFactQuote(issue.factQuote);
+    if (issue && typeof issue.factQuote === "string") {
+      const quote = unwrapFactQuote(issue.factQuote);
+      issue.factQuote = facts.includes(quote) ? quote : caseFactQuotes(input).find(original => normalized(original) === normalized(quote)) ?? quote;
+    }
     if (issue && Array.isArray(issue.sourceMarkers)) issue.sourceMarkers = issue.sourceMarkers.map(unwrapSourceMarker);
-    if(!issue || !["issue","factQuote","document","application","counterargument","response","proposedRelief","missing"].every(k=>typeof issue[k as keyof typeof issue]==="string") || normalized(issue.factQuote).length<4 || !facts.includes(normalized(issue.factQuote))) throw Error("ungrounded issue");
+    if(!issue || !["issue","factQuote","document","application","counterargument","response","proposedRelief","missing"].every(k=>typeof issue[k as keyof typeof issue]==="string") || normalized(issue.factQuote).length<4 || !facts.includes(issue.factQuote)) throw Error("ungrounded issue");
     for(const field of [issue.application,issue.counterargument,issue.response,issue.proposedRelief]) {
       const value=normalized(field).replace(/[\u064b-\u065f\u0670]/gu,"").replace(/[أإآ]/gu,"ا").replace(/[\[\]().:：]/gu,"").trim();
       if(!value||/^(?:TODO|TBD|يستكمل(?: لاحقا)?|تستكمل(?: لاحقا)?|التطبيق|الاعتراض|الرد|الطلبات)$/iu.test(value))throw Error("empty reasoning substance");
@@ -156,7 +174,7 @@ export function applyCheckedJudgmentMatches(evidence:LegalEvidence[],plan:CasePl
   const {analogy:_old,...judgment}=source.judgment;
   return {...source,judgment:{...judgment,...(match?{analogy:{issue:plan.issues[match.issueIndex].issue,factQuote:match.factQuote,reason:match.reason,differences:match.differences}}:{})}};
 });}
-export const defenseRevision="grounded-defenses-4";
+export const defenseRevision="grounded-defenses-5";
 type DefenseSubstance={factQuote:string;applicationQuote:string;opposingQuote:string;responseQuote:string;sourceMarkers:string[]};
 export type CaseAudit={checks:Array<{issueIndex:number;status:"addressed"|"blocked"|"omitted";reason:string;substance?:DefenseSubstance}>;roleConsistent:boolean;factsPreserved:boolean;reliefConsistent:boolean;unsupportedAssertions:string[]};
 const substanceSchema={type:"object",additionalProperties:false,required:["factQuote","applicationQuote","opposingQuote","responseQuote","sourceMarkers"],properties:{...Object.fromEntries(["factQuote","applicationQuote","opposingQuote","responseQuote"].map(key=>[key,{type:"string"}])),sourceMarkers:strings}};
@@ -165,26 +183,38 @@ export const caseAuditSchema={type:"object",additionalProperties:false,required:
  * reconstruct quotations from memory. The independent validator below is
  * unchanged and still checks the issue, fact, application and source link. */
 export type GroundedAuditOption={checkKey:string;issueIndex:number;status:'addressed'|'blocked'|'omitted';factQuote:string;applicationQuote:string;candidateIndex:number|null};
-export function caseAuditRequestForContent(plan:CasePlan,content:PleadingContent){
- const candidates:string[]=[];
- for(const part of content.grounds.split(/(?:نص المادة|مقتطف من نص المادة)\s*[:：]\s*(?:«[^»]*»|“[^”]*”|"[^"\n]*")/gu)){
-  for(const sentence of part.split(/\n+|(?<=[.!؟])\s+/u)){
-   let remaining=normalized(sentence);
-   while(remaining.length>=20&&candidates.length<120){
+function defenseAuditPassages(grounds: string) {
+ const candidates = new Set<string>();
+ const addPassage = (text: string) => {
+   let remaining=normalized(text);
+   while(remaining.length>=20){
     let end=Math.min(600,remaining.length);
     if(end<remaining.length){const space=remaining.lastIndexOf(' ',end);if(space>100)end=space;}
     const quote=remaining.slice(0,end).trim();
-    if(!/^(?:[(（]\s*)?(?:نص المادة|مقتطف من نص المادة)/u.test(quote)&&!candidates.includes(quote))candidates.push(quote);
+    if(!/^(?:[(（]\s*)?(?:نص المادة|مقتطف من نص المادة)/u.test(quote))candidates.add(quote);
     remaining=remaining.slice(end).trim();
    }
-  }
+ };
+ const boundaries = /(?:(نص المادة|مقتطف من نص المادة)\s*[:：]\s*)?(?:«[^»]*»|“[^”]*”|"[^"\n]*")|(\n+|[.!؟?](?=\s)|[؛;](?=\s*(?:الاعتراض(?: المحتمل)?\s*[:：]|و?قد\s+(?:يدفع|يقول|ينازع|يجادل|يتمسك|يثار)|و?الرد(?:\s|[:：])|ويرد\s+على)))/gu;
+ let start = 0;
+ // Exclude statutory text and keep punctuation within factual quotations.
+ for (const boundary of grounds.matchAll(boundaries)) {
+  if (!boundary[1] && !boundary[2]) continue;
+  const end = boundary.index + boundary[0].length;
+  addPassage(grounds.slice(start, boundary[1] ? boundary.index : end));
+  start = end;
  }
+ addPassage(grounds.slice(start));
+ return [...candidates];
+}
+export function caseAuditRequestForContent(plan:CasePlan,content:PleadingContent){
+ const candidates = defenseAuditPassages(content.grounds);
  const pairs=plan.issues.map(issue=>{
-  const words=normalized(issue.factQuote).split(' '),fragments:string[]=[];
+  const fact=normalized(issue.factQuote),words=fact.split(' '),fragments:string[]=[];
   for(let start=0;start<words.length;start++)for(let end=start+1;end<=words.length;end++){
    const quote=words.slice(start,end).join(' ');
    if(quote.length>96)break;
-   if(quote.length>=Math.min(12,normalized(issue.factQuote).length))fragments.push(quote);
+   if(quote.length>=Math.min(12,fact.length))fragments.push(quote);
   }
   const anchors=[...new Set(fragments)].sort((a,b)=>b.length-a.length);
   return candidates.flatMap((applicationQuote,candidateIndex)=>{
@@ -192,27 +222,39 @@ export function caseAuditRequestForContent(plan:CasePlan,content:PleadingContent
    return factQuote?[{applicationQuote,factQuote,candidateIndex}]:[];
   }).sort((a,b)=>b.factQuote.length-a.factQuote.length||a.candidateIndex-b.candidateIndex);
  });
- // Reserve distinct candidate paragraphs for each issue before filling the
- // bounded shared rebuttal pool. Each paragraph gets its OWN best anchor;
- // overlapping long anchors in one paragraph cannot hide another argument.
- const reserved=[0,1].flatMap(round=>pairs.flatMap(p=>p[round]?[p[round].applicationQuote]:[]));
- const selected=[...new Set([...reserved,...candidates])].slice(0,48);
+ // Application pairs are selected per issue across the whole draft. The
+ // shared rebuttal pool first keeps passages near each primary application.
+ const primary = new Set<number>();
+ for (const options of [...pairs].sort((a, b) => a.length - b.length)) {
+  const distinct = options.find(({candidateIndex}) => !primary.has(candidateIndex));
+  if (distinct) primary.add(distinct.candidateIndex);
+ }
+ const reserved = new Set([0, 1, 2].flatMap(offset => [...primary].map(index => index + offset)).filter(index => index < candidates.length));
+ const remaining = candidates.map((_, index) => index).filter(index => !reserved.has(index));
+ const slots = Math.min(48 - reserved.size, remaining.length);
+ for (let index = 0; index < slots; index++) {
+  reserved.add(remaining[Math.round(index * (remaining.length - 1) / Math.max(1, slots - 1))]);
+ }
+ const longQuoteCount = [...reserved].filter(index => candidates[index].length >= 40).length;
  // Bind issue, status and the actual fact/application pair through one
  // server-created key. This flat provider schema avoids ambiguous object
  // unions and never asks the model to recreate or cross-link quotations.
  const checkOptions:GroundedAuditOption[]=[];
  plan.issues.forEach((_,index)=>{
-  const applications=pairs[index].filter(p=>selected.includes(p.applicationQuote)).slice(0,8);
-  if(selected.length>=3&&selected.filter(q=>q.length>=40).length>=2)applications.forEach((pair,choice)=>{
+  const applications=pairs[index].filter(({candidateIndex})=>{
+   const applicationInPool = reserved.has(candidateIndex) ? 1 : 0;
+   return reserved.size - applicationInPool >= 2 && longQuoteCount - applicationInPool >= 1;
+  }).slice(0,8);
+  applications.forEach((pair,choice)=>{
    checkOptions.push({checkKey:`issue_${index}_addressed_${choice}`,issueIndex:index,status:'addressed',...pair});
   });
   for(const status of ['blocked','omitted'] as const)checkOptions.push({checkKey:`issue_${index}_${status}`,issueIndex:index,status,factQuote:'',applicationQuote:'',candidateIndex:null});
  });
- const quoteOptions=selected.map((quote,index)=>({quoteKey:`quote_${index}`,quote,candidateIndex:candidates.indexOf(quote)}));
+ const quoteOptions=[...reserved].map((candidateIndex,index)=>({quoteKey:`quote_${index}`,quote:candidates[candidateIndex],candidateIndex}));
  const excerpt={type:'object',additionalProperties:false,required:['opposingQuoteKey','responseQuoteKey','sourceMarkers'],properties:{opposingQuoteKey:{type:'string',enum:['none',...quoteOptions.map(o=>o.quoteKey)]},responseQuoteKey:{type:'string',enum:['none',...quoteOptions.filter(o=>o.quote.length>=40).map(o=>o.quoteKey)]},sourceMarkers:sourceMarkerArraySchema([...new Set(plan.issues.flatMap(i=>i.sourceMarkers))])}};
  const check={type:'object',additionalProperties:false,required:['checkKey','reason','substance'],properties:{checkKey:{type:'string',enum:checkOptions.map(o=>o.checkKey)},reason:{type:'string'},substance:excerpt}};
  const schema={...caseAuditSchema,properties:{...caseAuditSchema.properties,checks:{type:'array',items:check}}};
- return {schema,checkOptions,quoteOptions,excerptOptionCounts:plan.issues.map((_,i)=>checkOptions.filter(o=>o.issueIndex===i&&o.status==='addressed').length)};
+ return {schema,checkOptions,quoteOptions,applicationCandidateCounts:pairs.map(options=>options.length),excerptOptionCounts:plan.issues.map((_,i)=>checkOptions.filter(o=>o.issueIndex===i&&o.status==='addressed').length)};
 }
 /** Resolve a reviewer-selected key from the exact request dictionary, then
  * run the original independent fact/source/reasoning/completeness checks. */
@@ -227,7 +269,7 @@ export function parseGroundedCaseAudit(raw:string,request:ReturnType<typeof case
   const option=options.get(check.checkKey)!;
   return {issueIndex:option.issueIndex,status:option.status,reason:check.reason,substance:{factQuote:option.factQuote,applicationQuote:option.applicationQuote,opposingQuote:readQuote(check.substance?.opposingQuoteKey),responseQuote:readQuote(check.substance?.responseQuoteKey),sourceMarkers:check.substance?.sourceMarkers}};
  });
- return {...parseCaseAudit(JSON.stringify({...wire,checks}),plan,content,evidence),excerptOptionCounts:request.excerptOptionCounts,selectedApplications:wire.checks.map((c:{checkKey:string})=>{const o=options.get(c.checkKey)!;return {issueIndex:o.issueIndex,candidateIndex:o.candidateIndex};})};
+ return {...parseCaseAudit(JSON.stringify({...wire,checks}),plan,content,evidence),applicationCandidateCounts:request.applicationCandidateCounts,excerptOptionCounts:request.excerptOptionCounts,selectedApplications:wire.checks.map((c:{checkKey:string})=>{const o=options.get(c.checkKey)!;return {issueIndex:o.issueIndex,candidateIndex:o.candidateIndex};})};
 }
 export const defenseAuditInstructions=`لكل check أعد substance باقتباسات حرفية قصيرة من grounds النهائي فقط، وليست من الخطة أو الوقائع المنفصلة: factQuote عبارة من واقعة المسألة المعتمدة، applicationQuote جملة تطبيق تشتمل على هذه العبارة، opposingQuote الاعتراض المحتمل، responseQuote الرد المسبب عليه، وsourceMarkers المصادر المستشهد بها فعلاً لهذه المسألة من خطتها فقط. لا تختلق اقتباساً لتبرير addressed. اجعل التطبيق والرد جملتين مختلفتين لا يقل كل منهما عن 40 حرفاً، والاعتراض عن 20 حرفاً، دون إطالة مصطنعة. لا تكرر اقتباس التطبيق لمسألتين. عند عدم وجود هذه المعالجة اختر omitted؛ وعند نقص المصدر أو الواقعة الذي يمنع حتى المعالجة المشروطة اختر blocked مع سبب محدد واجعل حقول الاقتباسات فارغة. addressed يصف جودة معالجة المسألة ولا يعني ثبوت الادعاء أو قبول المحكمة له: غياب صورة التحويل مثلاً لا يمنع معالجة صلة الدفعة بالدين بشروطها واعتراضها والرد عليها، بشرط ألا يجزم النص بثبوت المستند أو السداد. يبقى نقص الإثبات في الخطة وحالة الاكتمال ولا يخفى. لا تعتبر العبارات التحفظية أو تكرار الوقائع وحده معالجة. في غياب المصادر يجوز addressed لحجة واقعية مرتبطة بالمدخلات فقط دون تقرير قانوني بلا سند؛ لا تتحول إلى مذكرة مكتملة قانونياً. افحص كل تقرير عن قاعدة قانونية أو مستند مقروء أو واقعة أو طلب غير مأذون، حتى إذا لم يتضمن رقم مادة، وضع غير المدعوم في unsupportedAssertions.`;
 
@@ -270,7 +312,7 @@ export function reviewCaseContent(content: Pick<PleadingContent,"facts"|"grounds
   for (const section of Object.keys(labels) as Array<keyof typeof labels>) {
     const text = typeof content[section] === "string" ? content[section].trim() : "";
     const bare = text.normalize("NFKC").replace(/[\u064b-\u065f\u0670]/gu,"").replace(/[أإآ]/gu,"ا").replace(/[^\p{L}\p{N}\s]/gu,"").replace(/\s+/gu," ").trim();
-    const placeholder = /^(?:الوقائع|الدفوع(?: واوجه الدفاع)?|الاسباب|الطلبات|يستكمل(?: لاحقا)?|تستكمل(?: لاحقا)?|قيد الاستكمال|لا يوجد|TODO|TBD)$/iu.test(bare);
+  const placeholder = /^(?:الوقائع|الدفوع(?: واوجه الدفاع)?|الاسباب|الطلبات|يستكمل(?: لاحقا)?|تستكمل(?: لاحقا)?|قيد الاستكمال|لا يوجد|TODO|TBD)$/iu.test(bare) || /\{\{FACT_[^{}\r\n]*\}\}/iu.test(text);
     if (!text || !/\p{L}/u.test(bare) || placeholder) issues.push({section,code:text?"placeholder_section":"missing_section",message:`لم تكتمل صياغة قسم ${labels[section]}؛ يلزم تصحيحه قبل تسليم المذكرة.`});
   }
   return {revision:memoCompletenessRevision,ok:issues.length===0,issues};
