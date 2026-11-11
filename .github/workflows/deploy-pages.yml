@@ -33,6 +33,7 @@ on:
       - 'oman-fruits-commerce/**'
       - 'project-command-center/**'
       - 'my-sites/**'
+      - 'nlk-multilingual/**'
       - 'grok-trading/**'
       - 'reddit-business-agent/**'
       - 'ai-chess-kuwait/**'
@@ -185,7 +186,7 @@ jobs:
         run: |
           rm -rf _site && mkdir -p _site
           cp index.html 404.html cyber-archive.css cyber-archive.js cyber-data.js sabeq.html _site/
-          for p in sabeq-legal sabeq-admin-preview sabeq-ahmad sabeq-legal-system sabeq-legal-pro hessa-alobaid shalayhna zad-restaurants tamweenat tamweenat-admin rattil etf-academy kuwait-digital-sales-plan kuwait-fund-modern livestock-vax-kw waqaya-v2 english-kuwait oman-fruits-pos oman-fruits-commerce project-command-center my-sites reddit-business-agent grok-trading ant-alshaer ai-chess-kuwait elanak-saleem alsaqaf-school youtube-studio-ai remote-ai-hub noura-alattal ai-video-studio animation-studio muhami-next barcode frame-studio dr-hamad-instagram-demo tiktok-growth longcat-video sinad-kuwait stock-opportunity-radar; do cp -R "$p" "_site/$p"; done
+          for p in sabeq-legal sabeq-admin-preview sabeq-ahmad sabeq-legal-system sabeq-legal-pro hessa-alobaid shalayhna zad-restaurants tamweenat tamweenat-admin rattil etf-academy kuwait-digital-sales-plan kuwait-fund-modern livestock-vax-kw waqaya-v2 english-kuwait oman-fruits-pos oman-fruits-commerce project-command-center my-sites nlk-multilingual reddit-business-agent grok-trading ant-alshaer ai-chess-kuwait elanak-saleem alsaqaf-school youtube-studio-ai remote-ai-hub noura-alattal ai-video-studio animation-studio muhami-next barcode frame-studio dr-hamad-instagram-demo tiktok-growth longcat-video sinad-kuwait stock-opportunity-radar; do cp -R "$p" "_site/$p"; done
           if [ -d dr-hamad ]; then cp -R dr-hamad _site/dr-hamad; fi
           if [ -d voice-cloning-studio ]; then python voice-cloning-studio/deployment/build.py && cp -R voice-cloning-studio/dist _site/voice-cloning-studio; fi
           if [ -d dhikr ]; then python dhikr/deployment/build.py && cp -R dhikr/dist _site/dhikr; fi
@@ -202,6 +203,9 @@ jobs:
         if: steps.scope.outputs.sabeq_only != 'true' && steps.tamweenat.outputs.only != 'true' && steps.rattil.outputs.only != 'true' && steps.waqaya.outputs.only != 'true'
         run: |
           test -s _site/404.html
+          test -s _site/nlk-multilingual/index.html
+          node --check _site/nlk-multilingual/app.js
+          node nlk-multilingual/verify.mjs
           test -s _site/oman-fruits-commerce/index.html
           test -s _site/oman-fruits-commerce/manager/index.html
           test -s _site/oman-fruits-commerce/sales/index.html
