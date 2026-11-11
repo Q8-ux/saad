@@ -54,3 +54,23 @@ header .brand:before{content:"ت"!important;background:var(--accent)!important;c
 .grid .card h3{font-family:Cairo,Tahoma,Arial,sans-serif!important;font-size:18px!important;font-weight:800!important;line-height:1.65!important;letter-spacing:0!important;margin:12px 0 8px!important;min-height:3.3em!important;max-height:4.95em!important;overflow:hidden!important;display:-webkit-box!important;-webkit-box-orient:vertical!important;-webkit-line-clamp:3!important;line-clamp:3!important;overflow-wrap:anywhere!important;word-break:normal!important;text-align:start!important}
 @media(max-width:700px){.grid .card h3{font-size:17px!important;line-height:1.65!important;min-height:3.3em!important;max-height:4.95em!important}}
 @media(max-width:370px){.grid .card h3{font-size:18px!important}}
+
+/* Basket v2: overlay above the assistant, usable on mobile and desktop. */
+body.cart-is-open{overflow:hidden!important}
+#drawer.drawer{z-index:1000!important;align-items:flex-end!important;overscroll-behavior:contain}
+#drawer.drawer.open{display:flex!important}
+#drawer .sheet{width:min(700px,100%)!important;max-height:min(92dvh,900px)!important;overflow-y:auto!important;overscroll-behavior:contain;border-radius:22px 22px 0 0!important;box-shadow:0 -16px 60px #071f1690!important}
+#drawer .cartrow{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:14px!important;flex-wrap:wrap!important}
+#drawer .cart-product{flex:1 1 220px!important;min-width:0!important;display:flex!important;flex-direction:column!important;gap:3px!important;overflow-wrap:anywhere!important}
+#drawer .cart-product strong{font-size:16px!important;line-height:1.65!important}
+#drawer .cart-product small{font-size:14px!important}
+#drawer .cart-quantity{display:flex!important;align-items:center!important;gap:7px!important;direction:ltr!important}
+#drawer .cart-quantity button{min-width:36px!important;min-height:38px!important;border:1px solid #bfd5c8!important;border-radius:9px!important;background:#eaf4ed!important;color:#154b31!important;font-size:20px!important;font-weight:800!important}
+#drawer .cart-quantity input{width:65px!important;min-height:38px!important;border:1px solid #bfd5c8!important;border-radius:9px!important;text-align:center!important;font-size:16px!important}
+#drawer .cart-actions{display:flex!important;gap:9px!important;flex-wrap:wrap!important;margin:18px 0 8px!important}
+#drawer .cart-actions button{border:0!important;border-radius:10px!important;padding:11px 15px!important;background:#17573c!important;color:#fff!important;font-size:15px!important;font-weight:800!important}
+#drawer .cart-actions .cart-clear{background:#f1e6e2!important;color:#763f30!important}
+#drawer .cart-actions button:disabled{opacity:.45!important;cursor:not-allowed!important}
+#drawer .cart-pricing-note{background:#fff5e8!important;color:#714d25!important;padding:10px 12px!important;border-radius:10px!important;font-size:14px!important;line-height:1.7!important}
+#drawer .cart-status{font-size:14px!important;color:#17573c!important;min-height:20px!important}
+@media(max-width:700px){#drawer .sheet{padding:16px!important}#drawer .cartrow{align-items:flex-start!important}#drawer .cart-quantity{width:100%!important;justify-content:flex-end!important}#drawer .cart-actions button{flex:1 1 140px!important}}
