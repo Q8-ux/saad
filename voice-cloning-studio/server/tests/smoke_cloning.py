@@ -109,6 +109,10 @@ def main():
                 model = next(item for item in status if item["model_name"] == model_name)
                 assert model["downloaded"] and model["loaded"]
                 client.post("/models/unload", json={"model_name": model_name}).raise_for_status()
+            memory_peak = Path("/sys/fs/cgroup/memory.peak")
+            if memory_peak.is_file():
+                peak_gib = int(memory_peak.read_text()) / (1024 ** 3)
+                print(f"Inference container peak memory: {peak_gib:.2f} GiB", flush=True)
         finally:
             client.delete(f"/profiles/{profile_id}").raise_for_status()
 
