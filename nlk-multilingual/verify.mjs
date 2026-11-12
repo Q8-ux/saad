@@ -43,7 +43,7 @@ new vm.Script(detailJs, { filename: "pages.js" });
 const detailsContext = vm.createContext({});
 const preamble = detailJs.slice(0, detailJs.indexOf("const store="));
 assert.ok(preamble.includes("const localization"), "Internal page text data missing");
-vm.runInContext(preamble + "\\nthis.__details = {pages,localization};".replace("\\\\n","\\n"), detailsContext);
+vm.runInContext(preamble + "\nthis.__details = { pages, localization };", detailsContext);
 const { pages, localization } = detailsContext.__details;
 assert.equal(Object.keys(pages).length, 14, "Expected 14 independently addressable topics");
 for (const locale of locales) {
@@ -55,7 +55,7 @@ for (const locale of locales) {
       "Missing internal page content: " + locale + "/" + topic);
   }
 }
-for (const match of html.matchAll(/href="\\.\\/page\\.html\\?topic=([^"&]+)"/g)) {
+for (const match of html.matchAll(/href="\.\/page\.html\?topic=([^"&]+)"/g)) {
   assert.ok(Object.hasOwn(pages, match[1]), "Broken internal topic: " + match[1]);
 }
 assert.ok(detailHtml.includes('id="detail-points"'), "Detail content container missing");
