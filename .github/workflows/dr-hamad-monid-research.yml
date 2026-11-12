@@ -1,5 +1,7 @@
-name: Dr Hamad - Monid Research (manual)
+name: Dr Hamad - Monid Research and SEO QA
 on:
+  schedule:
+    - cron: '15 04 * * 1'
   pull_request:
     paths:
       - 'dr-hamad/monid/**'
@@ -53,11 +55,15 @@ jobs:
         with:
           node-version: '20'
       - run: node --check dr-hamad/monid/research.mjs
+      - run: node --check dr-hamad/monid/run-all.mjs
+      - run: node --check dr-hamad/monid/public-audit.mjs
+      - run: node --test dr-hamad/monid/run-all.test.mjs
+      - run: node dr-hamad/monid/run-all.mjs
       - run: node --test dr-hamad/monid/research.test.mjs
       - run: node dr-hamad/verify.cjs
   editorial-research:
     needs: validate
-    if: github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'workflow_dispatch' && inputs.mode != 'discover'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -80,5 +86,27 @@ jobs:
         with:
           name: dr-hamad-monid-review-${{ github.run_number }}
           path: dr-hamad/monid/output/report.json
+          retention-days: 7
+          if-no-files-found: error
+
+  weekly-monitor:
+    needs: validate
+    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.mode == 'discover')
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Run local SEO audit and free Monid discovery when configured
+        env:
+          MONID_API_KEY: ${{ secrets.MONID_API_KEY }}
+        run: node dr-hamad/monid/run-all.mjs
+      - name: Upload weekly draft report (not deployed)
+        uses: actions/upload-artifact@v4
+        with:
+          name: dr-hamad-weekly-seo-monid-${{ github.run_number }}
+          path: dr-hamad/monid/output/
           retention-days: 7
           if-no-files-found: error
