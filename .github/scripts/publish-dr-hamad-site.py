@@ -10,7 +10,11 @@ import subprocess
 import tarfile
 import zipfile
 
-FILES = tuple(str(p) for p in Path("dr-hamad").rglob("*") if p.is_file())
+PRIVATE_PATH = Path("dr-hamad/monid")
+def is_private_path(path):
+    return path == PRIVATE_PATH or PRIVATE_PATH in path.parents
+
+FILES = tuple(str(p) for p in Path("dr-hamad").rglob("*") if p.is_file() and not is_private_path(p))
 
 def digest(path):
     result = hashlib.sha256()
@@ -23,7 +27,7 @@ def manifest(root):
     return {
         str(path.relative_to(root)): digest(path)
         for path in root.rglob("*")
-        if path.is_file() and str(path.relative_to(root)) not in FILES
+        if path.is_file() and str(path.relative_to(root)) not in FILES and not is_private_path(path.relative_to(root))
     }
 
 def extract(archive, root):
@@ -41,6 +45,12 @@ def overlay(root, source):
         if not (source / name).is_file() or not (source / name).stat().st_size:
             raise RuntimeError(f"Platform source file missing: {name}")
     protected = manifest(root)
+    # Remove prior private backend files from the public Pages artifact if present.
+    private_dir = root / PRIVATE_PATH
+    if private_dir.is_symlink():
+        raise RuntimeError("Private Monid path cannot be a symlink")
+    if private_dir.is_dir():
+        shutil.rmtree(private_dir)
     for name in FILES:
         (root / name).parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(source / name, root / name)
