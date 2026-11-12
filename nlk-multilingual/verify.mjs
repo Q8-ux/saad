@@ -72,11 +72,16 @@ assert.ok(html.includes("https://timeskuwait.com/wp-content/uploads/2025/07/Kuwa
   "Verified real library exterior photograph missing");
 assert.ok(html.includes("https://kuwaittimes.com/kuwaittimes/uploads/images/2024/06/25/123491.jpg"),
   "Verified real library interior fallback photograph missing");
-assert.ok(html.includes('id="hero-photo-source"'), "Photographic source attribution missing");
-assert.ok(css.includes(".hero-photo-frame") && css.includes(".hero-photo-attribution"),
-  "Responsive photo framing and source caption CSS missing");
-assert.ok(js.includes('heroPhotoAlt') && js.includes('heroPhotoSourceExterior') && js.includes('heroPhotoSourceInterior'),
-  "Localized photographic alt text and fallback credits missing");
+assert.ok(!html.includes('class="hero-photo-caption"') && !html.includes('class="hero-photo-attribution"'),
+  "Crossed-out image title, location and credit must not appear on the homepage");
+assert.ok(css.includes(".hero-photo-frame") && !css.includes(".hero-photo-caption"),
+  "Photo layout must remain without obsolete caption styling");
+assert.ok(js.includes("heroPhotoAlt") && js.includes("heroPhotoUnavailable"),
+  "Accessible photograph alternative text or error message missing");
+assert.ok(html.includes("كل ما يحتاجه فِكرك من معلومات"),
+  "Revised Arabic services heading missing from initial HTML");
+assert.ok(js.includes('servicesTitle:"كل ما يحتاجه فِكرك من معلومات"'),
+  "Revised Arabic services heading missing from translation data");
 assert.ok(js.includes('handleLibraryPhotoError'), "Real photograph fallback handler missing");
 assert.ok(css.includes("family=Cairo:wght@400;500;600;700;800"), "Cairo web-font import missing");
 assert.ok(css.includes('html[lang="ar"] body'), "Arabic locale font selector missing");
@@ -85,4 +90,4 @@ assert.ok(css.includes("transition:none!important;animation:none!important}}"),
   "Critical CSS reduced-motion rule was truncated");
 assert.ok(!css.includes("Noor"), "Obsolete Noor font rules still present");
 assert.ok(js.includes('document.documentElement.dir='), "Direction switching missing");
-console.log("PASS: real photographic hero, CSS, source credits, Cairo, syntax, 6 locales, 14 internal pages and 8 service links.");
+console.log("PASS: clean photographic hero, updated Arabic services heading, Cairo, 6 locales, 14 internal pages and 8 service links.");
