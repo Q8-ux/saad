@@ -17,7 +17,7 @@ const translations = {
   ar:{
     skip:"تجاوز إلى المحتوى",disclaimer:"نموذج تطويري مستقل غير رسمي، لا يستقبل أي معاملات حكومية.",official:"الموقع الرسمي",brand:"مكتبة الكويت الوطنية",brandSub:"ذاكرة وطن · أفق معرفة",navHome:"الرئيسية",navServices:"الخدمات",navCollections:"المجموعات",navAbout:"عن المكتبة",language:"اللغة",
     heroEyebrow:"بوابتك إلى المعرفة والتراث الكويتي",heroTitle1:"معرفة تحفظ الماضي",heroTitle2:"وتلهم المستقبل",heroDesc:"اكتشف خدمات البحث والمصادر المعرفية والببليوجرافيا الوطنية وحقوق المؤلف عبر تجربة مصممة للباحث والقارئ.",explore:"استكشف الخدمات",goOfficial:"انتقل للموقع الرسمي",heroTag1:"التراث الوطني",heroTag2:"مصادر البحث",heroTag3:"حقوق المؤلف",artCaption:"إرث معرفي يتجدد",
-    servicesKicker:"خدمات المكتبة",servicesTitle:"كل ما تحتاجه في مكان واحد",servicesDesc:"ابحث داخل دليل الخدمات، ثم انتقل إلى الصفحة الرسمية لإتمام الخطوة التالية.",allOfficial:"دليل الخدمات الرسمي",searchLabel:"البحث في الخدمات",searchPlaceholder:"ابحث عن خدمة، مثل: ISBN أو قواعد البيانات",voiceTitle:"البحث الصوتي",filterAll:"جميع الخدمات",filterResearch:"البحث والمصادر",filterAuthors:"المؤلفون والنشر",filterVisitors:"الزوار والأنشطة",emptyTitle:"لم نجد خدمات مطابقة",emptyDesc:"جرّب كلمة بحث مختلفة أو اختر جميع الخدمات.",
+    servicesKicker:"خدمات المكتبة",servicesTitle:"كل ما يحتاجه فِكرك من معلومات",servicesDesc:"ابحث داخل دليل الخدمات، ثم انتقل إلى الصفحة الرسمية لإتمام الخطوة التالية.",allOfficial:"دليل الخدمات الرسمي",searchLabel:"البحث في الخدمات",searchPlaceholder:"ابحث عن خدمة، مثل: ISBN أو قواعد البيانات",voiceTitle:"البحث الصوتي",filterAll:"جميع الخدمات",filterResearch:"البحث والمصادر",filterAuthors:"المؤلفون والنشر",filterVisitors:"الزوار والأنشطة",emptyTitle:"لم نجد خدمات مطابقة",emptyDesc:"جرّب كلمة بحث مختلفة أو اختر جميع الخدمات.",
     collectionsKicker:"مجموعات ومعرفة",collectionsTitle:"مسارات إلى ذاكرة الكويت",collectionsDesc:"مصادر مرجعية منشورة في موقع المكتبة الرسمي.",collection1:"الببليوجرافيا الوطنية",collection1Desc:"سجل الإنتاج الفكري المنشور في الكويت.",collection2:"المكتبة الرقمية",collection2Desc:"مشروع حفظ المقتنيات التراثية وإتاحتها رقمياً، قيد التطوير.",collection3:"قواعد البيانات",collection3Desc:"مصادر أكاديمية وأدوات للبحث العلمي.",
     aboutKicker:"عن المكتبة",aboutTitle:"المعرفة مسؤولية وطنية",aboutDesc:"تأسست مكتبة الكويت الوطنية بموجب المرسوم رقم 52 لسنة 1994 بهدف جمع وتنظيم وحفظ التراث والإنتاج الفكري الوطني، وتعزيز البحث والتعاون المعرفي.",aboutPoint1:"حفظ الذاكرة الثقافية",aboutPoint2:"تمكين الباحثين والقراء",aboutPoint3:"دعم حقوق المبدعين",aboutLink:"التأسيس والأهداف الرسمية",ctaKicker:"ابدأ رحلتك",ctaTitle:"إرث الكويت المعرفي بين يديك",ctaDesc:"الخدمات الرسمية متاحة من خلال موقع مكتبة الكويت الوطنية.",ctaButton:"زيارة المكتبة الرسمية",footerNote:"نموذج أولي مستقل لتصميم تجربة المستخدم، وليس خدمة حكومية رسمية.",backTop:"العودة للأعلى ↑",
     linkLabel:"الاطلاع على الخدمة",statusMatches:"{n} خدمة في دليل الخدمات",statusNoMatches:"لا توجد نتائج مطابقة",voiceUnsupported:"البحث الصوتي غير مدعوم في هذا المتصفح.",voiceListening:"جارٍ الاستماع... تحدث الآن.",voiceDenied:"تعذر استخدام الميكروفون؛ يمكنك البحث بالكتابة.",fontTitle:"تكبير حجم النص",contrastTitle:"تبديل التباين المرتفع",menuTitle:"فتح القائمة",
@@ -135,40 +135,34 @@ const internalCopy = {
 };
 const photographicHeroCopy = {
   ar:{
-    heroPhotoTitle:"مكتبة الكويت الوطنية",heroPhotoLocation:"مدينة الكويت • شارع الخليج العربي",
-    heroPhotoCredit:"صورة فوتوغرافية حقيقية · المصدر:",heroPhotoUnavailable:"تعذر تحميل الصورة الفوتوغرافية مؤقتاً",
+    heroPhotoUnavailable:"تعذر تحميل الصورة الفوتوغرافية مؤقتاً",
     heroPhotoAlt:"صورة فوتوغرافية حقيقية لمكتبة الكويت الوطنية في مدينة الكويت",
-    heroPhotoSourceExterior:"ذا تايمز الكويت",heroPhotoSourceInterior:"كويت تايمز"
+    
   },
   en:{
-    heroPhotoTitle:"National Library of Kuwait",heroPhotoLocation:"Kuwait City • Arabian Gulf Street",
-    heroPhotoCredit:"Authentic photograph · Source:",heroPhotoUnavailable:"The photograph is temporarily unavailable",
+    heroPhotoUnavailable:"The photograph is temporarily unavailable",
     heroPhotoAlt:"Real photograph of the National Library of Kuwait in Kuwait City",
-    heroPhotoSourceExterior:"The Times Kuwait",heroPhotoSourceInterior:"Kuwait Times"
+    
   },
   fr:{
-    heroPhotoTitle:"Bibliothèque nationale du Koweït",heroPhotoLocation:"Koweït • Rue du Golfe arabique",
-    heroPhotoCredit:"Photographie authentique · Source :",heroPhotoUnavailable:"La photographie est temporairement indisponible",
+    heroPhotoUnavailable:"La photographie est temporairement indisponible",
     heroPhotoAlt:"Photographie réelle de la Bibliothèque nationale du Koweït",
-    heroPhotoSourceExterior:"The Times Kuwait",heroPhotoSourceInterior:"Kuwait Times"
+    
   },
   ur:{
-    heroPhotoTitle:"کویت کی قومی لائبریری",heroPhotoLocation:"کویت سٹی • شارع الخلیج العربی",
-    heroPhotoCredit:"حقیقی تصویر · ماخذ:",heroPhotoUnavailable:"تصویر عارضی طور پر دستیاب نہیں",
+    heroPhotoUnavailable:"تصویر عارضی طور پر دستیاب نہیں",
     heroPhotoAlt:"کویت کی قومی لائبریری کی حقیقی تصویر",
-    heroPhotoSourceExterior:"دی ٹائمز کویت",heroPhotoSourceInterior:"کویت ٹائمز"
+    
   },
   hi:{
-    heroPhotoTitle:"कुवैत राष्ट्रीय पुस्तकालय",heroPhotoLocation:"कुवैत सिटी • अरब गल्फ़ स्ट्रीट",
-    heroPhotoCredit:"वास्तविक फ़ोटोग्राफ़ · स्रोत:",heroPhotoUnavailable:"फ़ोटो अस्थायी रूप से उपलब्ध नहीं है",
+    heroPhotoUnavailable:"फ़ोटो अस्थायी रूप से उपलब्ध नहीं है",
     heroPhotoAlt:"कुवैत राष्ट्रीय पुस्तकालय की वास्तविक फ़ोटो",
-    heroPhotoSourceExterior:"The Times Kuwait",heroPhotoSourceInterior:"Kuwait Times"
+    
   },
   zh:{
-    heroPhotoTitle:"科威特国家图书馆",heroPhotoLocation:"科威特城 • 阿拉伯海湾大道",
-    heroPhotoCredit:"真实照片 · 来源：",heroPhotoUnavailable:"照片暂时无法加载",
+    heroPhotoUnavailable:"照片暂时无法加载",
     heroPhotoAlt:"科威特国家图书馆的真实照片",
-    heroPhotoSourceExterior:"The Times Kuwait",heroPhotoSourceInterior:"Kuwait Times"
+    
   }
 };
 for (const language of Object.keys(internalCopy)) {
@@ -264,8 +258,7 @@ function applyLocale(){
   dom.language.setAttribute("aria-label",tr("language"));
   const image=document.getElementById("library-hero-photo");
   if(image) image.alt=tr("heroPhotoAlt");
-  const source=document.getElementById("hero-photo-source");
-  if(source) source.textContent=tr(image?.dataset.fallbackUsed==="true"?"heroPhotoSourceInterior":"heroPhotoSourceExterior");
+
   document.getElementById("filters").setAttribute("aria-label",tr("filterAll"));
   voiceStatus="";
   renderServices();
@@ -334,14 +327,9 @@ dom.voice.addEventListener("click",function(){
 const libraryPhoto=document.getElementById("library-hero-photo");
 if(libraryPhoto){
   const handleLibraryPhotoError=function(){
-    const credit=document.getElementById("hero-photo-source");
     if(libraryPhoto.dataset.fallbackUsed!=="true"){
       libraryPhoto.dataset.fallbackUsed="true";
       libraryPhoto.src=libraryPhoto.dataset.fallbackSrc;
-      if(credit){
-        credit.href="https://kuwaittimes.com/article/15919/kuwait/other-news/national-library-of-kuwait-a-reliable-source-for-research/";
-        credit.textContent=tr("heroPhotoSourceInterior");
-      }
     } else {
       libraryPhoto.closest(".hero-photo-frame")?.classList.add("photo-failed");
       const unavailable=document.querySelector(".hero-photo-unavailable");
