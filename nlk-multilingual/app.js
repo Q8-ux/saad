@@ -333,7 +333,7 @@ dom.voice.addEventListener("click",function(){
 // Preserve a credited secondary real photo if the original publisher blocks hotlinking.
 const libraryPhoto=document.getElementById("library-hero-photo");
 if(libraryPhoto){
-  libraryPhoto.addEventListener("error",function(){
+  const handleLibraryPhotoError=function(){
     const credit=document.getElementById("hero-photo-source");
     if(libraryPhoto.dataset.fallbackUsed!=="true"){
       libraryPhoto.dataset.fallbackUsed="true";
@@ -347,7 +347,12 @@ if(libraryPhoto){
       const unavailable=document.querySelector(".hero-photo-unavailable");
       if(unavailable)unavailable.hidden=false;
     }
-  });
+  };
+  libraryPhoto.addEventListener("error",handleLibraryPhotoError);
+  // A fast image failure may occur before deferred scripts attach their listeners.
+  if(libraryPhoto.complete && libraryPhoto.naturalWidth===0){
+    handleLibraryPhotoError();
+  }
 }
 setContrast(contrast);
 setFont(fontIndex);
