@@ -6,6 +6,7 @@ on:
     paths:
       - 'dr-hamad/monid/**'
       - '.github/workflows/dr-hamad-monid-research.yml'
+      - '.github/scripts/publish-dr-hamad-site.py'
   workflow_dispatch:
     inputs:
       topic:
@@ -61,6 +62,15 @@ jobs:
       - run: node dr-hamad/monid/run-all.mjs
       - run: node --test dr-hamad/monid/research.test.mjs
       - run: node dr-hamad/verify.cjs
+      - name: Assert private Monid backend excluded from Pages deployment
+        run: |
+          python -m py_compile .github/scripts/publish-dr-hamad-site.py
+          python - <<'PY'
+          import runpy
+          config = runpy.run_path(".github/scripts/publish-dr-hamad-site.py")
+          assert all(not p.startswith("dr-hamad/monid/") for p in config["FILES"]), "Monid private backend selected for public deployment"
+          print("Private Monid code excluded from public Pages files")
+          PY
   editorial-research:
     needs: validate
     if: github.event_name == 'workflow_dispatch' && inputs.mode != 'discover'
