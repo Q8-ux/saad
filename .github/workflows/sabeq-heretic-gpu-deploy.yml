@@ -1,0 +1,86 @@
+name: Sabeq Heretic GPU deployment (manual only)
+
+on:
+  workflow_dispatch:
+    inputs:
+      deploy_to_authorized_gpu:
+        description: "I confirm the GPU machine is mine to deploy to, and I accept its hosting cost"
+        type: boolean
+        required: true
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sabeq-heretic-gpu-deploy
+  cancel-in-progress: false
+
+jobs:
+  configuration-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate deployment file contracts
+        run: node --test legal-memo-platform/inference/heretic/deployment.test.mjs legal-memo-platform/inference/heretic/deploy-workflow.test.mjs
+      - name: Validate Docker Compose syntax without provisioning a GPU
+        run: |
+          cd legal-memo-platform/inference/heretic
+          mkdir -p secrets
+          printf '%s' 'synthetic-ci-only' > secrets/inference_api_key
+          HERETIC_HOSTNAME=heretic.example.invalid docker compose -f compose.yaml config --quiet
+
+  deploy-existing-gpu:
+    needs: configuration-check
+    if: ${{ github.ref == 'refs/heads/main' && inputs.deploy_to_authorized_gpu == true }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: sabeq-heretic-gpu
+    env:
+      GPU_SSH_HOST: ${{ secrets.SABEQ_GPU_SSH_HOST }}
+      GPU_SSH_USER: ${{ secrets.SABEQ_GPU_SSH_USER }}
+      GPU_SSH_PRIVATE_KEY: ${{ secrets.SABEQ_GPU_SSH_PRIVATE_KEY }}
+      GPU_SSH_KNOWN_HOSTS: ${{ secrets.SABEQ_GPU_SSH_KNOWN_HOSTS }}
+      HERETIC_HOSTNAME: ${{ secrets.SABEQ_HERETIC_HOSTNAME }}
+      HERETIC_API_KEY: ${{ secrets.SABEQ_HERETIC_API_KEY }}
+      HERETIC_MODEL: heretic-9b-q4
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy to the pre-provisioned NVIDIA GPU using pinned SSH host key
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          : "${GPU_SSH_HOST:?missing GPU SSH hostname secret}"
+          : "${GPU_SSH_USER:?missing GPU SSH username secret}"
+          : "${GPU_SSH_PRIVATE_KEY:?missing private SSH key secret}"
+          : "${GPU_SSH_KNOWN_HOSTS:?missing verified SSH host key secret}"
+          : "${HERETIC_HOSTNAME:?missing HTTPS DNS hostname secret}"
+          : "${HERETIC_API_KEY:?missing private inference access token secret}"
+          [[ "$GPU_SSH_HOST" =~ ^[a-zA-Z0-9.-]+$ ]] || exit 2
+          [[ "$GPU_SSH_USER" =~ ^[a-z_][a-z0-9_-]*$ ]] || exit 2
+          [[ "$HERETIC_HOSTNAME" =~ ^[a-zA-Z0-9.-]+$ ]] || exit 2
+          work="$(mktemp -d)"
+          trap 'rm -rf "$work"' EXIT
+          printf '%s\n' "$GPU_SSH_PRIVATE_KEY" > "$work/id_ed25519"
+          printf '%s\n' "$GPU_SSH_KNOWN_HOSTS" > "$work/known_hosts"
+          printf '%s' "$HERETIC_API_KEY" > "$work/inference_api_key"
+          printf 'HERETIC_HOSTNAME=%s\n' "$HERETIC_HOSTNAME" > "$work/.env"
+          chmod 600 "$work"/*
+          ssh -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$work/known_hosts" -i "$work/id_ed25519" \
+            "$GPU_SSH_USER@$GPU_SSH_HOST" \
+            'mkdir -p "$HOME/sabeq-heretic/secrets" && chmod 700 "$HOME/sabeq-heretic/secrets"'
+          scp -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$work/known_hosts" -i "$work/id_ed25519" \
+            legal-memo-platform/inference/heretic/compose.yaml \
+            legal-memo-platform/inference/heretic/Caddyfile \
+            "$work/.env" "$GPU_SSH_USER@$GPU_SSH_HOST:sabeq-heretic/"
+          scp -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$work/known_hosts" -i "$work/id_ed25519" \
+            "$work/inference_api_key" "$GPU_SSH_USER@$GPU_SSH_HOST:sabeq-heretic/secrets/inference_api_key"
+          ssh -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$work/known_hosts" -i "$work/id_ed25519" \
+            "$GPU_SSH_USER@$GPU_SSH_HOST" \
+            'chmod 600 "$HOME/sabeq-heretic/.env" "$HOME/sabeq-heretic/secrets/inference_api_key" && cd "$HOME/sabeq-heretic" && docker compose -f compose.yaml config --quiet && docker compose -f compose.yaml up -d --remove-orphans'
+      - name: Verify real inference with synthetic prompt only
+        env:
+          HERETIC_CHAT_COMPLETIONS_URL: https://${{ secrets.SABEQ_HERETIC_HOSTNAME }}/v1/chat/completions
+        run: node legal-memo-platform/inference/heretic/smoke-test.mjs

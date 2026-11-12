@@ -58,3 +58,21 @@ npm test --prefix legal-memo-platform
 ## المراجع
 - https://github.com/ggml-org/llama.cpp
 - https://huggingface.co/mradermacher/DeepSeek-V4-Pro-Qwen3.5-9B-UNCENSORED-heretic-GGUF
+
+
+## نشر آلي محمي عبر GitHub Actions على GPU موجود مسبقاً
+تجهيز الخادم لا ينشئ أو يستأجر GPU. قبل النشر يجب امتلاك آلة NVIDIA مجهزة بـ Docker وDocker Compose وNVIDIA Container Toolkit وDNS حقيقي يشير إليها. تُضبط أسرار `sabeq-heretic-gpu` في إعدادات GitHub Environment (لا تحفظها في ملف عام):
+
+- `SABEQ_GPU_SSH_HOST`: اسم خادم GPU الحقيقي
+- `SABEQ_GPU_SSH_USER`: اسم حساب التشغيل المصرح له باستخدام Docker
+- `SABEQ_GPU_SSH_PRIVATE_KEY`: مفتاح SSH خاص بحساب النشر
+- `SABEQ_GPU_SSH_KNOWN_HOSTS`: بصمة host key موثقة خارجياً، **لا تستخدم ssh-keyscan تلقائياً للثقة**
+- `SABEQ_HERETIC_HOSTNAME`: اسم نطاق خدمة HTTPS
+- `SABEQ_HERETIC_API_KEY`: مفتاح bearer قوي وفريد للخادم
+
+بعد ضبط الأسرار وقيود الموافقة على Environment شغّل يدوياً:
+https://github.com/Q8-ux/saad/actions/workflows/sabeq-heretic-gpu-deploy.yml
+
+ضع علامة اختيار `deploy_to_authorized_gpu` فقط إذا كنت تملك الاستضافة وتقبل تكلفتها. يرفض المسار التشغيل على غير `main`، ويستخدم SSH بتثبيت بصمة المضيف، وينشئ ملفات السر داخل المضيف دون وضعها في Git. ثم يفحص **استجابة فعلية** لنموذج GGUF بنص اختبار اصطناعي فقط؛ أي فشل يبقي التفعيل في الموقع مغلقاً.
+
+**لا** ينقل هذا المسار تغيير الموقع الأصلي إلى خادم سابق المباشر؛ ما زال مطلوباً نشر مصدر الخلفية الأصلية واختباره بمعزل عن بيانات العملاء. لا تضع بيانات قضايا أو كلمات مرور في أي سجل اختبار.
