@@ -52,7 +52,7 @@ html[lang="ar"] select {
   display:flex;
   flex-direction:column;
   justify-content:center;
-  gap:13px;
+  gap:0;
 }
 .hero-photo-frame {
   position:relative;
@@ -76,51 +76,6 @@ html[lang="ar"] select {
   background:#1b3946;
 }
 .hero-photo-frame:hover .hero-photo {transform:scale(1.025)}
-.hero-photo-scrim {
-  position:absolute;
-  inset:0;
-  pointer-events:none;
-  background:linear-gradient(to top,rgba(5,20,31,.87) 0%,rgba(5,20,31,.1) 43%,transparent 66%);
-}
-.hero-photo-caption {
-  position:absolute;
-  inset-inline:28px;
-  bottom:26px;
-  z-index:2;
-  display:flex;
-  align-items:center;
-  gap:10px;
-  color:#fff;
-  font-size:1.01rem;
-  font-weight:800;
-  text-shadow:0 2px 11px rgba(0,0,0,.55);
-  flex-wrap:wrap;
-}
-.hero-photo-marker{color:#dfc087;font-size:.7rem;line-height:1}
-.hero-photo-caption-secondary {
-  display:block;
-  width:100%;
-  padding-inline-start:21px;
-  color:#e1ebec;
-  font-size:.76rem;
-  font-weight:500;
-  margin-top:-5px;
-}
-.hero-photo-attribution {
-  display:flex;
-  gap:6px;
-  align-items:center;
-  flex-wrap:wrap;
-  color:#bed0d1;
-  font-size:.67rem;
-  line-height:1.65;
-}
-.hero-photo-attribution a {
-  color:#f0d4a0;
-  font-weight:700;
-  text-decoration:underline;
-  text-underline-offset:3px;
-}
 .hero-photo-unavailable[hidden]{display:none!important}
 .hero-photo-unavailable {
   position:absolute;
@@ -147,12 +102,19 @@ html[dir="ltr"] .hero-photo-frame{border-radius:86px 23px 23px 23px}
   .hero-photo-shell{padding-top:5px;padding-bottom:27px;gap:9px}
   .hero-photo-frame{height:clamp(260px,74vw,345px);border-radius:15px 50px 15px 15px}
   html[dir="ltr"] .hero-photo-frame{border-radius:50px 15px 15px 15px}
-  .hero-photo-caption{bottom:20px;inset-inline:19px;font-size:.9rem}
-  .hero-photo-caption-secondary{font-size:.69rem}
-  .hero-photo-attribution{font-size:.64rem}
   .hero-copy{padding-bottom:9px}
 }
 @media(prefers-reduced-motion:reduce){
   .hero-photo{transition:none!important}
   .hero-photo-frame:hover .hero-photo{transform:none!important}
+}
+
+/* Final photo-only layout: architectural image with no superimposed wording. */
+#services-title {
+  max-width: 26ch;
+  line-height: 1.45;
+  text-wrap: balance;
+}
+@media(max-width:580px){
+  #services-title{max-width:100%;font-size:clamp(1.65rem,7.8vw,2.1rem)}
 }
