@@ -1,12 +1,22 @@
 import { matchesJsonSchema } from "./gemini";
 
-export type TextProvider = "openai" | "gemini" | "groq" | "nvidia" | "openrouter";
+export type TextProvider = "openai" | "gemini" | "groq" | "nvidia" | "openrouter" | "heretic";
 export type TextProviderEnvironment = Record<string, string | undefined>;
 type ProviderErrorKind = "configuration" | "authentication" | "rate_limit" | "model_access" | "timeout" | "network" | "incomplete" | "empty_response" | "upstream";
 export class TextProviderError extends Error {
   constructor(public kind: ProviderErrorKind, public status = 503, public upstreamStatus?: number) {
     super(`TEXT_PROVIDER_${kind.toUpperCase()}`);
   }
+}
+
+function hereticEndpoint(value?: string) {
+  try {
+    const url = new URL(value || "");
+    // Heretic hosts are operated by us: refuse plaintext, URL credentials, and redirect-style parameters.
+    if (url.protocol !== "https:" || url.pathname !== "/v1/chat/completions" ||
+        url.username || url.password || url.search || url.hash) return null;
+    return url.toString();
+  } catch { return null; }
 }
 
 export function textProviderConfig(runtime: TextProviderEnvironment, provider = runtime.LEGAL_AI_PROVIDER?.trim() || "openai", intake = false, requireKey = true) {
@@ -16,13 +26,16 @@ export function textProviderConfig(runtime: TextProviderEnvironment, provider = 
     groq: { apiKey: runtime.GROQ_API_KEY, model: runtime.GROQ_MODEL || "qwen/qwen3.8-27b", endpoint: "https://api.groq.com/openai/v1/chat/completions" },
     nvidia: { apiKey: runtime.NVIDIA_API_KEY, model: runtime.NVIDIA_MODEL || "", endpoint: "https://integrate.api.nvidia.com/v1/chat/completions" },
     openrouter: { apiKey: runtime.OPENROUTER_API_KEY, model: runtime.OPENROUTER_MODEL || "", endpoint: "https://openrouter.ai/api/v1/chat/completions" },
+    heretic: { apiKey: runtime.HERETIC_API_KEY, model: runtime.HERETIC_MODEL || "", endpoint: hereticEndpoint(runtime.HERETIC_CHAT_COMPLETIONS_URL) },
   };
   if (!Object.hasOwn(choices, provider)) throw new TextProviderError("configuration");
   const selected = choices[provider as TextProvider];
   const apiKey = selected.apiKey?.trim();
   const model = selected.model.trim();
-  if (requireKey && !apiKey || !/^[a-zA-Z0-9._:/-]{1,180}$/.test(model) || provider === "openrouter" && !model.endsWith(":free")) throw new TextProviderError("configuration");
-  return { provider: provider as TextProvider, apiKey: apiKey || "", model, endpoint: selected.endpoint };
+  if (requireKey && !apiKey || !/^[a-zA-Z0-9._:/-]{1,180}$/.test(model) ||
+      provider === "openrouter" && !model.endsWith(":free") ||
+      provider === "heretic" && !selected.endpoint) throw new TextProviderError("configuration");
+  return { provider: provider as TextProvider, apiKey: apiKey || "", model, endpoint: selected.endpoint! };
 }
 
 export function textProviderSummary(runtime: TextProviderEnvironment) {
@@ -40,7 +53,7 @@ export function textProviderSummary(runtime: TextProviderEnvironment) {
 
 // Text only. File IDs, audio and image payloads stay with their existing client.
 export async function compatibleTextResponse(init: RequestInit, config: ReturnType<typeof textProviderConfig>, transport: typeof fetch = fetch): Promise<Response> {
-  if (!["groq", "nvidia", "openrouter"].includes(config.provider)) throw new TextProviderError("configuration");
+  if (!["groq", "nvidia", "openrouter", "heretic"].includes(config.provider)) throw new TextProviderError("configuration");
   const body = JSON.parse(String(init.body));
   if (typeof body.instructions !== "string" || typeof body.input !== "string") throw new TextProviderError("configuration");
   const schema = body.text?.format?.schema;

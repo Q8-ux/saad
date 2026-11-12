@@ -323,3 +323,28 @@ test('schema diagnostics expose only fixed reason categories and never vendor pr
   await assert.rejects(api.generateText({instructions:'synthetic',input:'synthetic'}));assert.equal(logs[0][1].schemaReason,reason);assert.doesNotMatch(JSON.stringify(logs),/PRIVATE_CASE_TEXT|exceeds|contains|Objects/);
  }
 });
+
+test('Heretic GGUF reaches the actual native legal text adapter with synthetic-only content', async () => {
+  const calls = [];
+  const schema = { type: 'object', additionalProperties: false, required: ['facts'], properties: { facts: { type: 'string' } } };
+  const { api } = client('gpt-4.1-mini', async (url, init) => {
+    calls.push({ url, init });
+    assert.equal(url, 'https://gpu.example.test/v1/chat/completions');
+    assert.equal(init.redirect, 'manual');
+    assert.equal(init.headers.Authorization, 'Bearer synthetic-heretic-token');
+    assert.equal(init.headers['x-goog-api-key'], undefined);
+    const request = JSON.parse(init.body);
+    assert.equal(request.model, 'heretic-9b-q4');
+    assert.equal(request.messages[1].content, 'وقائع اختبارية لا تخص أي عميل.');
+    assert.match(request.messages[0].content, /لا تختلق/);
+    assert.doesNotMatch(init.body, /synthetic-heretic-token/);
+    return Response.json({ choices: [{ finish_reason: 'stop', message: { content: '{"facts":"وقائع افتراضية فقط."}' } }] });
+  }, {
+    LEGAL_AI_PROVIDER: 'heretic', HERETIC_API_KEY: 'synthetic-heretic-token',
+    HERETIC_MODEL: 'heretic-9b-q4', HERETIC_CHAT_COMPLETIONS_URL: 'https://gpu.example.test/v1/chat/completions',
+  });
+  assert.equal(await api.generateText({
+    instructions: 'لا تختلق مادة قانونية أو حكمًا.', input: 'وقائع اختبارية لا تخص أي عميل.', schema,
+  }), '{"facts":"وقائع افتراضية فقط."}');
+  assert.equal(calls.length, 1);
+});
