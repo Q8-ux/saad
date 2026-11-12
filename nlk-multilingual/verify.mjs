@@ -37,5 +37,11 @@ assert.ok(serviceData.every(service => service.url.startsWith("https://www.nlk.g
 assert.ok(html.includes('content="noindex,nofollow"'), "Prototype should not be indexed");
 assert.ok(html.includes('class="prototype-note"'), "Unofficial disclaimer missing");
 assert.ok(css.includes("prefers-reduced-motion"), "Reduced-motion support missing");
+assert.ok(css.includes("family=Cairo:wght@400;500;600;700;800"), "Cairo web-font import missing");
+assert.ok(css.includes('html[lang="ar"] body'), "Arabic locale font selector missing");
+assert.ok(css.includes('font-family: "Cairo", "Noto Sans Arabic"'), "Arabic Cairo font not configured");
+assert.ok(css.includes("transition:none!important;animation:none!important}}"),
+  "Critical CSS reduced-motion rule was truncated");
+assert.ok(!css.includes("Noor"), "Obsolete Noor font rules still present");
 assert.ok(js.includes('document.documentElement.dir='), "Direction switching missing");
 console.log("PASS: JavaScript syntax, 6 complete UI localizations, 8 services, trusted links and baseline accessibility hooks.");
