@@ -362,7 +362,21 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
       background-position: center;
     }
     .drawing-paper > canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
+    #guide { pointer-events: none; }
     #sketch { touch-action: none; cursor: crosshair; }
+    .color-targets { position: absolute; inset: 0; width: 100%; height: 100%; }
+    .flag-area {
+      fill: #faf6e9;
+      stroke: #b0ad9e;
+      stroke-width: 1;
+      cursor: pointer;
+    }
+    .flag-area[data-painted="true"] { fill: var(--swatch); }
+    .flag-area:focus { outline: none; }
+    .flag-area:focus-visible { stroke: #7a482a; stroke-width: 5; }
+    @media (hover: hover) {
+      .flag-area:hover { stroke: #7a482a; stroke-width: 3; }
+    }
     .final-sample {
       position: absolute;
       inset-block-start: 12px;
@@ -401,6 +415,38 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     .practice-tools .guide-button { margin-inline-end: auto; }
     .practice-tools .guide-button[aria-pressed="true"] { background: var(--sage); border-color: #c9d3c3; }
     .practice-note { margin: 7px 2px 1px; color: var(--subtle); font-size: 13px; line-height: 1.55; }
+    .color-practice { margin-block-end: 10px; }
+    .flag-palette { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+    .flag-palette .swatch {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      min-height: 43px;
+      padding: 4px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fdfbf3;
+      color: var(--forest);
+      font-size: 13px;
+      font-weight: 800;
+    }
+    .swatch::before {
+      content: "";
+      flex: 0 0 15px;
+      height: 15px;
+      border: 1px solid #6f776c;
+      border-radius: 50%;
+      background: var(--swatch);
+    }
+    .swatch:hover { background: var(--sage); }
+    .swatch[aria-pressed="true"] { border-color: var(--forest); background: var(--sage); box-shadow: inset 0 0 0 1px var(--forest); }
+    .color-details { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 2px 10px; margin-block-start: 6px; }
+    .color-details p { margin: 0; color: var(--subtle); font-size: 13px; line-height: 1.55; }
+    #color-feedback[data-tone="error"] { color: #943820; }
+    #color-feedback[data-tone="complete"] { color: var(--forest); font-weight: 800; }
+    #color-progress { white-space: nowrap; font-weight: 800; }
+    .practice-tools.is-coloring { justify-content: flex-end; }
     .no-script { margin: 8px 0 0; color: var(--subtle); }
 
     @media (max-width: 850px) {
@@ -449,6 +495,9 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
       .mode-switch { width: 100%; }
       .mode-switch button { flex: 1; }
       .practice-tools .small-button { padding-inline: 7px; font-size: 12px; }
+      .flag-palette { gap: 4px; }
+      .flag-palette .swatch { gap: 4px; font-size: 12px; }
+      .swatch::before { flex-basis: 12px; height: 12px; }
     }
 
     @media (max-width: 470px) {
@@ -511,7 +560,18 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
             <button type="button" id="practice-mode" aria-pressed="false">التدريب</button>
           </div>
         </div>
+        <div id="color-practice" class="color-practice" hidden>
+          <div id="flag-palette" class="flag-palette" role="group" aria-label="اختر لون العلم"></div>
+          <div class="color-details">
+            <p id="color-feedback" role="status">اختر لونًا واضغط مكانه في الخريطة.</p>
+            <p id="color-progress"></p>
+          </div>
+        </div>
         <div class="drawing-paper" id="paper">
+          <svg id="color-targets" class="color-targets" viewBox="0 0 600 560" role="group" aria-label="مناطق تلوين خريطة الكويت" hidden>
+            <defs><clipPath id="color-land"><path id="color-land-path"></path></clipPath></defs>
+            <g id="flag-areas" clip-path="url(#color-land)"></g>
+          </svg>
           <canvas id="guide" role="img" aria-label="أربعة أحرف مائلة تميل رؤوسها نحو أعلى اليسار"></canvas>
           <canvas id="sketch" aria-label="مساحة التدريب على الرسم" aria-describedby="practice-note" hidden></canvas>
           <button type="button" class="final-sample" id="final-sample">
@@ -526,7 +586,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
           </div>
           <a id="download-map" class="small-button" href="./kuwait-map-flag.svg" download="Kuwait_Map_Vertical_Flag.svg" hidden>تحميل الرسمة</a>
           <div id="practice-options" hidden>
-            <div class="practice-tools">
+            <div class="practice-tools" id="practice-tools">
               <button class="small-button guide-button" id="toggle-guide" type="button" aria-pressed="true">
                 إخفاء الدليل
               </button>
@@ -547,7 +607,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     </div>
   </main>
 
-  <script id="kuwait-artwork" type="application/json">{"mainland": "M420.85 78.02L422.69 83.02L425.4 87.55L427.93 93.35L429.1 99.64L429.03 110.69L429.86 117.75L433.22 127.56L440 141.85L447.97 152.79L454.84 152.5L459.29 165.84L465.3 179.14L476.24 194.89L481.34 206.63L480.26 212.68L474.48 213.52L463.84 208.89L458.39 205.56L456.67 202.82L451.58 202.06L445.24 200.71L440.55 199.9L425.4 202.44L417.73 209.07L411.15 215.69L395.21 224.57L384.25 234.8L378.51 243.91L373.04 251.09L361.23 256.67L360.14 261.35L357.68 265.77L363.46 266.28L373.11 264.56L380.28 263.14L386.05 260.9L392.11 258.66L395.7 260.84L388.29 265.83L388.31 269.41L386.69 273.54L393.05 277.89L397.46 277.86L402.4 276.18L408.18 274.23L409.79 267.07L413.63 265.4L418.6 267.02L423.81 263.15L426.53 258.74L430.65 256.8L432.54 258.54L436.53 264.12L437.08 264.91L440.91 268.38L443.55 269.3L450.79 271.81L460.39 269.85L458.52 283.03L458.26 288.53L459.12 297.31L461.92 310.48L464.13 316.51L467.71 322.28L469.1 328.32L475.5 368.92L480.07 378.9L493.02 398.41L496.93 402.16L506.93 405.51L507.69 409.99L506.59 415.86L506.25 421.84L508.41 427.71L515.51 437.82L517.03 441.43L519.73 445.56L525.84 448.16L536.56 450.49L534.02 455.07L532.94 460.33L533.22 465.77L534.78 470.83L530.85 468.06L529.45 466.78L529.14 469.13L529.39 470.64L530.55 471.77L533.01 473.04L531.06 475.58L529.84 476.3L528.82 475.88L527.72 474.9L525.95 474.9L525.71 481.13L528.1 482.6L531.65 480.79L534.78 477.11L535.5 480.17L536.56 494.49L537.49 498.16L539.6 502.16L543.66 507.62L546.66 510.85L546.74 510.92L500.63 511.4L454.46 511.88L408.28 512.37L362.12 512.86L348.18 513L346.02 505.1L341.16 499.97L335.2 495.73L329.66 490.57L325.73 483.82L322.18 475.03L319.69 465.95L318.69 449.9L317.49 442.39L303.09 402.65L290.58 381.14L287.4 375.68L287.37 375.67L287.24 375.64L287.21 375.64L272.72 373.71L246.87 370.29L221 366.85L195.13 363.42L169.28 360.01L140.23 356.37L111.26 352.76L82.27 349.16L53.26 345.55L60.8 337.09L99.85 293.24L116.12 265.8L132.76 247.5L136.62 241.67L144.32 221.43L163.73 189.29L168.8 178.11L169.44 175.11L170.44 166.1L171.78 161.83L181.28 144.11L203.37 87.89L212.25 75.26L225.86 66.05L267.7 48.82L282.65 47L349.75 47L364.61 49.88Z", "islands": "M522.19 236.24L526.24 237.84L528.27 239.57L531.27 242.12L533.32 244.82L535.37 247.53L538.09 255.64L537.54 258.67L533.69 257.3L531.22 256.75L528.74 255.11L521.59 248.81L516.64 246.9L509.77 245.81L504.27 246.1L504.48 238.3L504.48 238.28L507.35 233.77L511.87 233.16Z M525.95 162.68L521.04 171.77L513.06 181.91L503.5 190.63L493.83 195.4L492.09 195.22L482.6 194.2L476.33 186.53L467.26 164.9L456.46 145.4L454.94 143.58L453.5 141.86L448.31 138.78L446.32 135.67L451.29 132.18L454.31 130.58L459.93 126.67L462.8 125.89L463.77 124.17L465.3 113.89L461.18 112.25L459 111.89L456.51 112.02L456.46 112.03L459.04 107.6L462.72 107.93L469.04 112.03L471.97 112.49L475.57 112.22L477.6 110.22L476.12 105.57L480.81 103.5L484.65 101.13L485.63 98.48L481.46 95.58L481.44 95.57L478.48 95.17L475.06 96.76L472.59 95.57L471.45 93.61L470.81 90.48L470.56 87.32L470.81 85.25L470.81 85.22L466.23 85.28L465.59 84.76L464.66 83.97L465.74 81.79L469.04 79.32L472.78 77.76L476.45 77.54L480 78.67L483.36 81.15L523.81 138.62L527.72 149.38Z M454.84 75.04L453.17 76.63L450.65 79.99L449.51 81.15L442.43 84.88L440.51 85.22L438.58 84.08L437.15 82.07L436.77 80.16L440.36 77.68L445.69 70.58L448.56 68.96L458.7 67.53L458.72 67.53L462.72 67.92L461.92 71Z", "colors": {"red": "#ce1126", "white": "#ffffff", "green": "#007a3d", "black": "#000000"}, "left": 52.76, "right": 547.24, "top": 46.5, "bottom": 513.5, "redEdge": 217.75, "greenEdge": 382.25, "black": "M52.76 46.5H547.24L382.25 163.5H217.75Z", "lines": "M52.76 46.5L217.75 163.5H382.25L547.24 46.5M217.75 163.5V513.5M382.25 163.5V513.5"}</script>
+  <script id="kuwait-artwork" type="application/json">{"mainland": "M420.85 78.02L422.69 83.02L425.4 87.55L427.93 93.35L429.1 99.64L429.03 110.69L429.86 117.75L433.22 127.56L440 141.85L447.97 152.79L454.84 152.5L459.29 165.84L465.3 179.14L476.24 194.89L481.34 206.63L480.26 212.68L474.48 213.52L463.84 208.89L458.39 205.56L456.67 202.82L451.58 202.06L445.24 200.71L440.55 199.9L425.4 202.44L417.73 209.07L411.15 215.69L395.21 224.57L384.25 234.8L378.51 243.91L373.04 251.09L361.23 256.67L360.14 261.35L357.68 265.77L363.46 266.28L373.11 264.56L380.28 263.14L386.05 260.9L392.11 258.66L395.7 260.84L388.29 265.83L388.31 269.41L386.69 273.54L393.05 277.89L397.46 277.86L402.4 276.18L408.18 274.23L409.79 267.07L413.63 265.4L418.6 267.02L423.81 263.15L426.53 258.74L430.65 256.8L432.54 258.54L436.53 264.12L437.08 264.91L440.91 268.38L443.55 269.3L450.79 271.81L460.39 269.85L458.52 283.03L458.26 288.53L459.12 297.31L461.92 310.48L464.13 316.51L467.71 322.28L469.1 328.32L475.5 368.92L480.07 378.9L493.02 398.41L496.93 402.16L506.93 405.51L507.69 409.99L506.59 415.86L506.25 421.84L508.41 427.71L515.51 437.82L517.03 441.43L519.73 445.56L525.84 448.16L536.56 450.49L534.02 455.07L532.94 460.33L533.22 465.77L534.78 470.83L530.85 468.06L529.45 466.78L529.14 469.13L529.39 470.64L530.55 471.77L533.01 473.04L531.06 475.58L529.84 476.3L528.82 475.88L527.72 474.9L525.95 474.9L525.71 481.13L528.1 482.6L531.65 480.79L534.78 477.11L535.5 480.17L536.56 494.49L537.49 498.16L539.6 502.16L543.66 507.62L546.66 510.85L546.74 510.92L500.63 511.4L454.46 511.88L408.28 512.37L362.12 512.86L348.18 513L346.02 505.1L341.16 499.97L335.2 495.73L329.66 490.57L325.73 483.82L322.18 475.03L319.69 465.95L318.69 449.9L317.49 442.39L303.09 402.65L290.58 381.14L287.4 375.68L287.37 375.67L287.24 375.64L287.21 375.64L272.72 373.71L246.87 370.29L221 366.85L195.13 363.42L169.28 360.01L140.23 356.37L111.26 352.76L82.27 349.16L53.26 345.55L60.8 337.09L99.85 293.24L116.12 265.8L132.76 247.5L136.62 241.67L144.32 221.43L163.73 189.29L168.8 178.11L169.44 175.11L170.44 166.1L171.78 161.83L181.28 144.11L203.37 87.89L212.25 75.26L225.86 66.05L267.7 48.82L282.65 47L349.75 47L364.61 49.88Z", "islands": "M522.19 236.24L526.24 237.84L528.27 239.57L531.27 242.12L533.32 244.82L535.37 247.53L538.09 255.64L537.54 258.67L533.69 257.3L531.22 256.75L528.74 255.11L521.59 248.81L516.64 246.9L509.77 245.81L504.27 246.1L504.48 238.3L504.48 238.28L507.35 233.77L511.87 233.16Z M525.95 162.68L521.04 171.77L513.06 181.91L503.5 190.63L493.83 195.4L492.09 195.22L482.6 194.2L476.33 186.53L467.26 164.9L456.46 145.4L454.94 143.58L453.5 141.86L448.31 138.78L446.32 135.67L451.29 132.18L454.31 130.58L459.93 126.67L462.8 125.89L463.77 124.17L465.3 113.89L461.18 112.25L459 111.89L456.51 112.02L456.46 112.03L459.04 107.6L462.72 107.93L469.04 112.03L471.97 112.49L475.57 112.22L477.6 110.22L476.12 105.57L480.81 103.5L484.65 101.13L485.63 98.48L481.46 95.58L481.44 95.57L478.48 95.17L475.06 96.76L472.59 95.57L471.45 93.61L470.81 90.48L470.56 87.32L470.81 85.25L470.81 85.22L466.23 85.28L465.59 84.76L464.66 83.97L465.74 81.79L469.04 79.32L472.78 77.76L476.45 77.54L480 78.67L483.36 81.15L523.81 138.62L527.72 149.38Z M454.84 75.04L453.17 76.63L450.65 79.99L449.51 81.15L442.43 84.88L440.51 85.22L438.58 84.08L437.15 82.07L436.77 80.16L440.36 77.68L445.69 70.58L448.56 68.96L458.7 67.53L458.72 67.53L462.72 67.92L461.92 71Z", "colors": {"red": "#ce1126", "white": "#ffffff", "green": "#007a3d", "black": "#000000"}, "left": 52.76, "right": 547.24, "top": 46.5, "bottom": 513.5, "redEdge": 217.75, "greenEdge": 382.25, "blackBase": 163.5, "black": "M52.76 46.5H547.24L382.25 163.5H217.75Z", "lines": "M52.76 46.5L217.75 163.5H382.25L547.24 46.5M217.75 163.5V513.5M382.25 163.5V513.5"}</script>
   <script>
     "use strict";
 
@@ -592,21 +652,21 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     const mapSteps = [
       {
         title: "حدود الكويت",
-        description: "ابدأ من الزاوية الغربية. ارسم الحدود البرية، ثم اتبع الساحل الشرقي واترك تجويف جون الكويت مفتوحًا نحو البحر.",
+        description: "ابدأ من الزاوية الغربية وتتبع الخط المتقطّع بإصبعك أو بالقلم. عند الساحل، ارسم انحناءة جون الكويت.",
         picture: "محيط اليابسة في الكويت وفيه انحناءة جون الكويت على الساحل."
       },
       {
         title: "الجزر الرئيسية",
-        description: "ارسم بوبيان إلى الشرق من الساحل الشمالي، ووربة فوقها. أضف فيلكا قرب مدخل جون الكويت.",
+        description: "تتبّع بوبيان إلى الشرق من الساحل الشمالي، ثم وربة فوقها، ثم فيلكا قرب مدخل جون الكويت.",
         picture: "حدود الكويت مع جزر بوبيان ووربة وفيلكا."
       },
       {
         title: "تقسيم العلم",
-        description: "ارسم شبه منحرف أسود في الأعلى، ثم مدّ خطّين رأسيين من طرفَي قاعدته القصيرة إلى أسفل الخريطة.",
+        description: "تتبّع حدود الجزء الأسود في الأعلى. مدّ خطّين رأسيين من طرفَي قاعدته القصيرة إلى أسفل الخريطة.",
         picture: "تقسيم الخريطة إلى ثلاثة أشرطة رأسية مع شبه منحرف في الأعلى."
       },
       {
-        title: "ألوان العلم",
+        title: "تلوين العلم",
         description: "الأسود في أعلى الخريطة، وتنسدل تحته ثلاثة أشرطة طولية. الأخضر يمين، والأبيض في الوسط، والأحمر يسار.",
         picture: "خريطة الكويت. في أعلاها الأسود وتحته الأخضر يمينًا والأبيض في الوسط والأحمر يسارًا."
       }
@@ -653,6 +713,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
       black: new Path2D(mapArtwork.black),
       lines: new Path2D(mapArtwork.lines)
     };
+    const colorAreas = isKuwait ? getColorAreas(mapArtwork) : [];
     const renderScene = isKuwait ? renderKuwaitMap : renderBirds;
     const paper = byId("paper");
     const guideCanvas = byId("guide");
@@ -667,15 +728,42 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     const undoButton = byId("undo");
     const clearButton = byId("clear");
     const status = byId("drawing-status");
+    const colorFeedback = byId("color-feedback");
+    const colorProgress = byId("color-progress");
     const number = new Intl.NumberFormat("ar-KW-u-nu-arab", { useGrouping: false });
     const storageKey = isKuwait ? "kuwait-drawing-lesson:drawing-v1" : "birds-drawing-lesson:drawing-v1";
-    let stage = isKuwait ? steps.length - 1 : 0;
+    const paintStorageKey = "kuwait-drawing-lesson:colors-v1";
+    let stage = 0;
     let practice = false;
     let guideVisible = true;
     let strokes = readDrawing();
     let clearedStrokes = null;
     let activeStroke = null;
     let activePointer = null;
+    let selectedColor = null;
+    let paintedAreas = isKuwait ? readPainting() : [];
+    let clearedAreas = null;
+
+    function getColorAreas({ left, right, top, bottom, redEdge, greenEdge, blackBase, black }) {
+      return [
+        { id: "black", name: "أسود", label: "أعلى الخريطة", path: black },
+        { id: "green", name: "أخضر", label: "الشريط الأيمن", path: "M" + right + " " + top + "V" + bottom + "H" + greenEdge + "V" + blackBase + "Z" },
+        { id: "white", name: "أبيض", label: "الشريط الأوسط", path: "M" + redEdge + " " + blackBase + "H" + greenEdge + "V" + bottom + "H" + redEdge + "Z" },
+        { id: "red", name: "أحمر", label: "الشريط الأيسر", path: "M" + left + " " + top + "L" + redEdge + " " + blackBase + "V" + bottom + "H" + left + "Z" }
+      ];
+    }
+
+    function readPainting() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(paintStorageKey) || "[]");
+        if (Array.isArray(saved)) {
+          return [...new Set(saved.filter((id) => colorAreas.some((area) => area.id === id)))];
+        }
+      } catch {
+        // A blocked or invalid storage entry starts a blank exercise.
+      }
+      return [];
+    }
 
     function readDrawing() {
       try {
@@ -788,7 +876,9 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
       clearCanvas(canvas, context);
       if (visibleStep < 0) return;
       setView(context, canvas.width, canvas.height);
-      context.globalAlpha = asGuide ? 0.36 : 1;
+      const tracing = asGuide && visibleStep < mapSteps.length - 1;
+      context.globalAlpha = asGuide ? (tracing ? 0.62 : 0.75) : 1;
+      context.setLineDash(tracing ? [6, 5] : []);
 
       if (visibleStep === mapSteps.length - 1 && !asGuide) {
         const { left, right, top, bottom, redEdge, greenEdge, colors } = mapArtwork;
@@ -810,7 +900,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
       }
 
       const colorFor = (introduced) => highlight && visibleStep === introduced ? terracotta : blue;
-      context.lineWidth = 2.7;
+      context.lineWidth = tracing ? 3.5 : 2.2;
       context.strokeStyle = colorFor(0);
       context.stroke(mapPaths.mainland);
       if (visibleStep >= 1) {
@@ -827,8 +917,8 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     }
 
     function renderGuide() {
-      const visibleStep = practice && !guideVisible ? -1 : stage;
-      renderScene(guideCanvas, visibleStep, !practice, practice);
+      const visibleStep = practice && !guideVisible && !isColoringMap() ? -1 : stage;
+      renderScene(guideCanvas, visibleStep, !practice || (isKuwait && !isColoringMap()), practice);
     }
 
     function sketchLine(points) {
@@ -868,6 +958,11 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     }
 
     function refreshTools() {
+      if (isColoringMap()) {
+        undoButton.disabled = !paintedAreas.length && !clearedAreas;
+        clearButton.disabled = !paintedAreas.length;
+        return;
+      }
       undoButton.disabled = !strokes.length && !clearedStrokes;
       clearButton.disabled = !strokes.length;
     }
@@ -878,22 +973,97 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
       practiceButton.setAttribute("aria-pressed", String(practice));
       previewButton.setAttribute("aria-pressed", String(!practice));
       guideCanvas.setAttribute("aria-hidden", String(practice));
-      sketchCanvas.hidden = !practice;
       byId("practice-options").hidden = !practice;
       updateStage();
-      refreshTools();
+    }
+
+    function isColoringMap() {
+      return isKuwait && practice && stage === steps.length - 1;
     }
 
     if (isKuwait) {
       const emphasis = document.createElement("span");
       emphasis.textContent = "الكويت";
       byId("lesson-title").replaceChildren("خريطة ", emphasis);
-      byId("lesson-description").textContent = "ارسم خريطة الكويت وزيّنها بألوان العلم بالطول.";
+      byId("lesson-description").textContent = "تتبّع حدود الكويت ثم لوّن الخريطة بألوان العلم.";
       byId("materials").textContent = "ورقة وقلم وألوان";
       byId("birds-lesson").removeAttribute("aria-current");
       byId("kuwait-lesson").setAttribute("aria-current", "page");
       document.title = "خريطة الكويت بألوان العلم | مرسم";
       document.querySelector('meta[name="description"]').content = "خريطة الكويت بألوان العلم بالطول، مع درس رسم تفاعلي.";
+      byId("color-land-path").setAttribute("d", mapArtwork.mainland + " " + mapArtwork.islands);
+    }
+
+    const areaControls = colorAreas.map((area) => {
+      const swatch = document.createElement("button");
+      swatch.type = "button";
+      swatch.className = "swatch";
+      swatch.textContent = area.name;
+      swatch.style.setProperty("--swatch", mapArtwork.colors[area.id]);
+      swatch.addEventListener("click", () => {
+        selectedColor = area.id;
+        updateColorControls();
+        showColorFeedback("اضغط داخل الخريطة لتلوّن باللون ال" + area.name + ".");
+      });
+      byId("flag-palette").append(swatch);
+
+      const target = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      target.setAttribute("class", "flag-area");
+      target.setAttribute("d", area.path);
+      target.setAttribute("role", "button");
+      target.setAttribute("tabindex", "0");
+      target.style.setProperty("--swatch", mapArtwork.colors[area.id]);
+      target.addEventListener("click", () => paintArea(area));
+      target.addEventListener("keydown", (event) => {
+        if (event.key !== "Enter" && event.key !== " ") return;
+        event.preventDefault();
+        paintArea(area);
+      });
+      byId("flag-areas").append(target);
+      return { area, swatch, target };
+    });
+
+    function showColorFeedback(message, tone = "") {
+      colorFeedback.textContent = message;
+      colorFeedback.dataset.tone = tone;
+    }
+
+    function updateColorControls() {
+      for (const { area, swatch, target } of areaControls) {
+        const painted = paintedAreas.includes(area.id);
+        swatch.setAttribute("aria-pressed", String(selectedColor === area.id));
+        target.dataset.painted = String(painted);
+        target.setAttribute("aria-label", area.label + (painted ? "، ملوّن" : ""));
+      }
+      colorProgress.textContent = number.format(paintedAreas.length) + " من " + number.format(colorAreas.length) + " ألوان";
+      refreshTools();
+    }
+
+    function savePainting(message) {
+      try {
+        localStorage.setItem(paintStorageKey, JSON.stringify(paintedAreas));
+      } catch {
+        // The colors remain available while the page is open.
+      }
+      updateColorControls();
+      showColorFeedback(message, paintedAreas.length === colorAreas.length ? "complete" : "");
+    }
+
+    function paintArea(area) {
+      if (paintedAreas.includes(area.id)) {
+        showColorFeedback("لوّنت هذا الجزء بالفعل.");
+        return;
+      }
+      if (!selectedColor) {
+        showColorFeedback("اختر لونًا من اللوحة أولًا.");
+        return;
+      }
+      if (selectedColor !== area.id) {
+        showColorFeedback("هذا المكان لونه " + area.name + ". جرّب مرة ثانية.", "error");
+        return;
+      }
+      paintedAreas.push(area.id);
+      savePainting(paintedAreas.length === colorAreas.length ? "أحسنت، لوّنت العلم كاملًا!" : "صحيح. اختر اللون التالي.");
     }
 
     const meterBars = steps.map(() => document.createElement("span"));
@@ -919,6 +1089,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     function updateStage() {
       const step = steps[stage];
       const lastStep = stage === steps.length - 1;
+      const coloring = isColoringMap();
       byId("step-count").textContent = "الخطوة " + number.format(stage + 1) + " من " + number.format(steps.length);
       byId("step-title").textContent = step.title;
       byId("step-copy").textContent = step.description;
@@ -928,7 +1099,19 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
       byId("download-map").hidden = !isKuwait || !lastStep || practice;
       finalButton.hidden = practice || lastStep;
       previousButton.disabled = stage === 0;
-      byId("next-label").textContent = lastStep ? (practice ? "عرض الخطوة" : "تدرّب على الرسم") : "الخطوة التالية";
+      const practiceLabel = isKuwait ? "شاهد النموذج" : "عرض الخطوة";
+      byId("next-label").textContent = lastStep ? (practice ? practiceLabel : "تدرّب على الرسم") : "الخطوة التالية";
+      sketchCanvas.hidden = !practice || coloring;
+      byId("color-practice").hidden = !coloring;
+      byId("color-targets").toggleAttribute("hidden", !coloring);
+      byId("practice-tools").classList.toggle("is-coloring", coloring);
+      guideButton.hidden = coloring;
+      byId("practice-note").hidden = coloring;
+      if (coloring) {
+        updateColorControls();
+      } else {
+        refreshTools();
+      }
 
       stepButtons.forEach((button, index) => {
         if (index === stage) button.setAttribute("aria-current", "step");
@@ -941,6 +1124,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     }
 
     function selectStep(index) {
+      if (activeStroke) finishStroke();
       stage = Math.max(0, Math.min(steps.length - 1, index));
       updateStage();
     }
@@ -1026,6 +1210,17 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
       sketchCanvas.addEventListener(type, finishStroke);
     }
     undoButton.addEventListener("click", () => {
+      if (isColoringMap()) {
+        if (paintedAreas.length) {
+          paintedAreas.pop();
+          savePainting("تم التراجع عن آخر لون.");
+        } else if (clearedAreas) {
+          paintedAreas = clearedAreas;
+          clearedAreas = null;
+          savePainting("تمت استعادة الألوان.");
+        }
+        return;
+      }
       if (strokes.length) {
         strokes.pop();
         status.textContent = "تم التراجع عن آخر خط.";
@@ -1039,6 +1234,13 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
       refreshTools();
     });
     clearButton.addEventListener("click", () => {
+      if (isColoringMap()) {
+        clearedAreas = paintedAreas;
+        paintedAreas = [];
+        savePainting("تم مسح الألوان. اضغط تراجع لاستعادتها.");
+        undoButton.focus({ preventScroll: true });
+        return;
+      }
       if (!strokes.length) return;
       clearedStrokes = strokes;
       strokes = [];
@@ -1051,8 +1253,12 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
 
     new ResizeObserver(resizePaper).observe(paper);
     resizePaper();
-    updateStage();
-    refreshTools();
+    if (isKuwait) {
+      changeMode(true);
+      if (paintedAreas.length === colorAreas.length) showColorFeedback("لوّنت العلم كاملًا.", "complete");
+    } else {
+      updateStage();
+    }
     renderScene(byId("final-thumbnail"), steps.length - 1, false);
   </script>
 </body>
