@@ -1,0 +1,19 @@
+# Public API surface is intentionally limited to a single authenticated route.
+# Certificate issuance requires DNS to point at this GPU server.
+{$HERETIC_HOSTNAME} {
+    @chat {
+        method POST
+        path /v1/chat/completions
+    }
+    handle @chat {
+        reverse_proxy llama:8080 {
+            transport http {
+                dial_timeout 5s
+                response_header_timeout 75s
+            }
+        }
+    }
+    handle {
+        respond 404
+    }
+}
