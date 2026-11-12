@@ -25,7 +25,7 @@ jobs:
         with:
           node-version: "22"
       - name: Verify secure deployment config checks
-        run: node --test legal-memo-platform/inference/heretic/deployment.test.mjs
+        run: node --test legal-memo-platform/inference/heretic/deployment.test.mjs legal-memo-platform/inference/heretic/deploy-workflow.test.mjs
       - name: Validate Compose without deploying or transferring real keys
         shell: bash
         run: |
