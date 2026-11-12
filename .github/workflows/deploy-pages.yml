@@ -51,7 +51,7 @@ on:
       - '.github/workflows/deploy-pages.yml'
   workflow_dispatch:
 permissions: { contents: write, actions: read, pages: write, id-token: write }
-concurrency: { group: pages-v2, cancel-in-progress: true }
+concurrency: { group: pages-v2, cancel-in-progress: false }
 jobs:
   build-and-deploy:
     environment: { name: github-pages, url: '${{ steps.deployment.outputs.page_url }}' }
