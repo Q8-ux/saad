@@ -50,7 +50,7 @@ on:
       - 'workforce-platform/apps/web/**'
       - '.github/workflows/deploy-pages.yml'
   workflow_dispatch:
-permissions: { contents: write, actions: read, pages: write, id-token: write }
+permissions: { contents: write, actions: read, pages: write, id-token: write, statuses: write }
 concurrency: { group: pages-v2, cancel-in-progress: false }
 jobs:
   build-and-deploy:
@@ -365,3 +365,23 @@ jobs:
           git add live-dashboard-status.txt
           git commit -m "Record smart assistant deployment ${GITHUB_RUN_ID}" || true
           git push || true
+
+      - name: Record NLK GitHub commit deployment status
+        if: ${{ always() && steps.nlk.outputs.changed == 'true' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          state="failure"
+          description="NLK Pages deploy or public-home verification failed"
+          if [[ "${{ job.status }}" == "success" ]]; then
+            state="success"
+            description="NLK Pages published, revision and homepage checked"
+          fi
+          gh api --method POST "repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}" \
+            -f state="$state" \
+            -f context="NLK public deployment" \
+            -f description="$description" \
+            -f target_url="https://q8-ux.github.io/saad/nlk-multilingual/" \
+            --silent
+          echo "NLK public deployment status: $state" >> "$GITHUB_STEP_SUMMARY"
