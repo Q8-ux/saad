@@ -127,4 +127,18 @@ def main():
 
 
 if __name__ == "__main__":
+    import sys
+    if len(sys.argv) == 2 and sys.argv[1] == "--probe":
+        # Evaluate whether fast-path preservation is possible. The workflow
+        # must perform a complete build instead of silently failing when no
+        # previous successful Pages artifact is available for restoration.
+        try:
+            candidate = locate_prior_artifact(os.environ["GITHUB_REPOSITORY"])
+        except Exception as error:
+            print(f"NLK fast-path unavailable: {error}", file=sys.stderr)
+            sys.exit(1)
+        print(f"NLK fast-path previous Pages artifact available: run {candidate}")
+        sys.exit(0)
+    if len(sys.argv) != 1:
+        raise SystemExit("Usage: publish.py [--probe]")
     main()
