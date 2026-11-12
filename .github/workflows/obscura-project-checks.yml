@@ -1,0 +1,55 @@
+name: Obscura public project checks
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'agent-paths/obscura/**'
+      - '.github/workflows/obscura-project-checks.yml'
+  workflow_dispatch:
+    inputs:
+      project:
+        description: Project to check
+        type: choice
+        default: all
+        options: [all, sabeq, poetry, library, doctor, chess, store, research, animation]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - name: Check out source
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+          sparse-checkout: agent-paths/obscura
+
+      - name: Install Obscura
+        run: bash agent-paths/obscura/install.sh "$RUNNER_TEMP/obscura-bin"
+
+      - name: Check live public pages
+        env:
+          OBSCURA_PROJECT: ${{ inputs.project || 'all' }}
+        run: |
+          python3 agent-paths/obscura/check.py "$OBSCURA_PROJECT" \
+            --binary "$RUNNER_TEMP/obscura-bin/obscura" --output obscura-report --screenshots
+
+      - name: Save run summary
+        if: ${{ always() }}
+        run: |
+          if [[ -f obscura-report/report.md ]]; then
+            cat obscura-report/report.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload report and screenshots
+        if: ${{ always() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: obscura-report
+          path: obscura-report/
+          if-no-files-found: ignore
+          retention-days: 14
