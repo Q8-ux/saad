@@ -4,7 +4,12 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "check": "node --check app.mjs && node --check audio.mjs && node --check api.mjs && node --check storage.mjs && node --check media.mjs && node --check i18n.mjs && node --check reference.mjs",
+    "check": "node --check app.mjs && node --check audio.mjs && node --check api.mjs && node --check storage.mjs && node --check media.mjs && node --check i18n.mjs && node --check reference.mjs && node --check local-clone-page.mjs && node --check local-clone-worker.mjs && node --check deployment/build-clone-runtime.mjs",
     "test": "node --test tests/*.test.mjs"
+  },
+  "dependencies": {
+    "@sctg/sentencepiece-js": "1.3.3",
+    "esbuild": "0.27.2",
+    "onnxruntime-web": "1.30.0"
   }
 }

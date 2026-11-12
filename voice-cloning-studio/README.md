@@ -10,13 +10,21 @@ Arabic RTL web workstation based on the actual Voicebox REST contracts at upstre
 
 Microphone recording and uploads, real decoded waveforms, local capture storage, editable transcripts, script drafts, multitrack clip arrangement and WAV mixing, trimming, fades, speed/pitch, gain, reverb, delay, chorus, compression and filters, project export/import with embedded audio, backup/restore, dark mode, and mobile layout. Voice profiles and audio are never included in the public source repository.
 
+### Clone a voice in your browser
+
+Open the **نسخ الصوت** tab. Choose an audio or video file or a recording saved on this device. Select 10–30 seconds with one speaker, confirm permission to use the voice, and enter the new text. The result can be played, downloaded as WAV, or reused from the local history. A prepared sample in the YouTube and file-import section can also be sent to this tab.
+
+The browser worker runs [MOSS-TTS-Nano](https://github.com/OpenMOSS/MOSS-TTS-Nano) with [int8 TTS weights](https://huggingface.co/REALBITS/MOSS-TTS-Nano-100M-ONNX-int8) and the upstream audio tokenizer. The first generation downloads about 290 MB of public model files. The browser can cache them for later runs. The reference and text stay on the device. Runtime speed and memory depend on the device. A recent desktop browser is a practical fallback if a phone cannot load the model.
+
+On 2026-11-12, the browser flow generated an Arabic test sentence from a synthetic 13-second reference and exported a playable 3.6-second, 48 kHz stereo PCM WAV. Sample saving and local history were also verified. Speaker similarity and Kuwaiti pronunciation still need listening review on the intended reference.
+
 ## Connected ready voices and YouTube
 
 The default web workflow now loads the actual ready-voice catalog and calls a lightweight synthesis service automatically, with no private Voicebox key needed for those bounded public tools. Ready voices are labeled separately from voice clones. The YouTube panel supports public search, official playback, time selection, authorized reference import, and local source provenance. Direct file upload remains available when the source refuses extraction. Supported desktop browsers can record user-selected tab audio through the browser permission picker; video frames are not recorded. This does not bypass source access restrictions.
 
 ## What needs a running Voicebox engine
 
-Voice cloning, cloned-voice TTS generation, Voicebox preset/designed voices, STT/Whisper transcription, server profiles/import/export, history and job cancellation/retry/favorites, server effect versions, local LLM personality controls, model downloads/load/unload, and MCP. These controls call real upstream endpoints; no demo voices or fabricated results are returned. The client exposes nine engine choices present in the reviewed source; installed model capabilities must be checked on the host.
+Hosted voice cloning, Voicebox preset/designed voices, STT/Whisper transcription, server profiles/import/export, server history, job cancellation/retry/favorites, server effect versions, local LLM personality controls, model downloads/load/unload, and MCP call the connected Voicebox endpoints. Installed engine capabilities depend on the host.
 
 The deployed lightweight gateway is at `https://voicebox-engine-production.up.railway.app`. Health indicates gateway reachability only. The current hosting account limits services to 1 GB RAM and 2 vCPUs; no full inference engine is provisioned. A correctly authenticated request returns `engine_not_configured` until a capable Voicebox host is connected. No billing upgrade was made.
 
@@ -35,13 +43,13 @@ The GitHub Pages workflow restores the latest successful Pages artifact, updates
 
 Browser checks used a synthetic two-second tone, not a real person's voice. Audio upload/decoding, radio processing, actual WAV output and the UI's empty/disconnected state are tested separately from inference. No clone, dialect similarity or AI transcription accuracy claim is made without an actual engine run and listening review. Microphone hardware permission/device behavior needs testing on the user's phone; browser page shortcuts do not inject text into other applications like desktop dictation.
 
-Latest live checks: 32 Arabic ready voices returned, including Kuwait Fahed/Noura. With edge-tts7.3.1, actual Arabic synthesis returned an MP3 file (30,528 bytes). Public YouTube search returned real NASA results. Direct extraction on the tested cloud host returned youtube_blocked; import remains source-dependent, with upload/tab-capture alternatives. Speaker cloning remains dependent on a separately provisioned private inference host.
+Earlier media checks returned 32 Arabic ready voices, including Kuwait Fahed/Noura. Arabic ready-voice synthesis returned a 30,528-byte MP3. Public YouTube search returned NASA results. Direct extraction on the tested cloud host returned youtube_blocked. Local file upload and tab capture are available when the browser supports them.
 
 ## Interface languages and visual design
 
 Version 1.2 includes Arabic, English, French, Spanish, German, Turkish and Simplified Chinese. The selector changes UI text, accessible labels, direction and the requested ready-voice language. Arabic is RTL and the default; the other six are LTR. The 661 source strings include client controls, dialogs, validations and media-service errors. Typed scripts, transcripts, source titles and personal names remain unchanged. Actual engine language capabilities still govern cloning.
 
-The default cosmic violet theme uses layered gradients and quiet flowing light, readable opaque panels, visible focus, and reduced-motion support. The light variant retains the violet palette. No new runtime dependency or remote translation service is used.
+The default cosmic violet theme uses layered gradients, opaque panels, visible focus, and reduced-motion support. The light variant retains the violet palette. Interface translations are shipped with the application.
 
 ## Local audio and video references (v1.3)
 
