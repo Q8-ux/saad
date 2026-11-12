@@ -123,3 +123,38 @@ test('gateway text routes and council share the provider, while files and audio 
   }
   assert.match(source, /runLegalCouncil\(\{ client, model: AI_MODEL/);
 });
+
+test('Heretic requires an explicit HTTPS authenticated endpoint and a model', () => {
+  const base = { LEGAL_AI_PROVIDER: 'heretic', HERETIC_API_KEY: 'synthetic-heretic', HERETIC_MODEL: 'heretic-9b' };
+  for (const extra of [{}, { HERETIC_CHAT_COMPLETIONS_URL: 'http://localhost:8080/v1/chat/completions' },
+    { HERETIC_CHAT_COMPLETIONS_URL: 'https://private.example/v1/other' },
+    { HERETIC_CHAT_COMPLETIONS_URL: 'https://user:pass@private.example/v1/chat/completions' }]) {
+    assert.equal(createTextAiClient({ env: { ...base, ...extra } }), null);
+  }
+  assert.equal(textAiConfig({ ...base, HERETIC_CHAT_COMPLETIONS_URL: 'https://private.example/v1/chat/completions' }).configured, true);
+});
+
+test('Heretic text request preserves legal context and rejects incomplete output', async () => {
+  const hereticEnv = {
+    LEGAL_AI_PROVIDER: 'heretic',
+    HERETIC_API_KEY: 'synthetic-heretic',
+    HERETIC_MODEL: 'heretic-9b',
+    HERETIC_CHAT_COMPLETIONS_URL: 'https://private.example/v1/chat/completions',
+  };
+  const client = createTextAiClient({ env: hereticEnv, fetchImpl: async (url, init) => {
+    assert.equal(url, hereticEnv.HERETIC_CHAT_COMPLETIONS_URL);
+    assert.equal(init.headers.Authorization, 'Bearer synthetic-heretic');
+    assert.equal(init.redirect, 'error');
+    assert.ok(init.signal instanceof AbortSignal);
+    const request = JSON.parse(init.body);
+    assert.equal(request.model, 'heretic-9b');
+    assert.equal(request.messages[0].content, input.instructions);
+    assert.equal(request.messages[1].content, input.input);
+    assert.doesNotMatch(url + init.body, /synthetic-heretic/);
+    return Response.json({ choices: [{ finish_reason: 'stop', message: { content: 'هذه مسودة وتحتاج مراجعة بشرية.' } }] });
+  } });
+  assert.match((await client.responses.create(input)).output_text, /مراجعة بشرية/);
+  const truncated = createTextAiClient({ env: hereticEnv, fetchImpl: async () =>
+    Response.json({ choices: [{ finish_reason: 'length', message: { content: 'partial' } }] }) });
+  await assert.rejects(truncated.responses.create(input), /ai_response_incomplete/);
+});
