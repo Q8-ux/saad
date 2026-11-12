@@ -14,3 +14,21 @@ html.high-contrast{--teal:#03594f;--muted:#33434f;--line:#859b9b;--gold:#ffdb7f;
 @media(max-width:880px){.mobile-menu{display:grid;place-items:center}.nav{display:none;position:absolute;top:100%;left:0;right:0;padding:18px 24px;background:#fff;box-shadow:0 15px 20px rgba(0,0,0,.12);flex-direction:column;align-items:stretch;gap:0}.nav.open{display:flex}.nav a{padding:11px;border-bottom:1px solid #eee}.header-inner{min-height:78px}.header-actions{margin-inline-start:auto}.hero-layout{grid-template-columns:1fr}.hero{min-height:unset}.hero-copy{padding-block:63px 0}.hero-art{height:340px;max-width:580px;width:100%;margin-inline:auto}.hero-art svg{height:100%}.orbit-one{height:320px;width:320px}.orbit-two{height:380px;width:380px}.art-caption{bottom:0}.services-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.collection-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.collection-card.feature-collection{grid-column:span 2;min-height:300px}.about-section{grid-template-columns:1fr}.about-image{height:350px;max-width:600px;width:100%}.section{padding-block:70px}}
 @media(max-width:580px){.container{width:min(100% - 28px,1200px)}.note-inner{padding-block:7px;gap:5px;flex-direction:column;line-height:1.35}.header-inner{min-height:70px;gap:7px}.brand{min-width:0;gap:7px}.brand-logo{height:42px;width:42px;flex-shrink:0}.brand-logo svg{width:35px}.brand-text strong{font-size:.75rem}.brand-text small{font-size:.57rem}.header-actions{gap:4px}.language-select{max-width:81px;padding-inline:4px;height:37px;font-size:.69rem}.icon-button{height:37px;min-width:35px;padding:0 5px;font-size:.81rem}#contrast-btn{display:none}.hero-copy{padding-top:50px}.hero h1{font-size:clamp(2rem,9vw,3.15rem)}.hero-copy>p{font-size:.85rem;line-height:1.95}.hero-buttons{gap:9px}.btn{font-size:.72rem;min-height:46px;padding-inline:13px;gap:10px}.hero-keywords{margin-top:30px}.hero-art{height:250px;margin-top:10px}.art-caption{display:none}.orbit-one{height:235px;width:235px}.orbit-two{height:280px;width:280px}.section{padding-block:57px}.section-top{align-items:start;flex-direction:column;gap:10px}.section-top h2{font-size:1.8rem}.finder{padding:14px 12px 7px}.searchbox{padding-inline:10px}.searchbox input{font-size:.77rem;height:48px}.voice-btn{width:47px}.filters{gap:5px}.filter{padding:6px 9px;font-size:.69rem}.services-grid{grid-template-columns:1fr}.service-card{min-height:205px;padding:22px}.service-icon{margin-bottom:13px}.collection-grid{grid-template-columns:1fr}.collection-card,.collection-card.feature-collection{grid-column:auto;min-height:260px}.collection-graphic{font-size:9rem}.about-image{height:290px}.about-frame{inset:48px 50px}.cta-inner,.footer-row{align-items:flex-start;flex-direction:column}.cta-section h2{font-size:1.7rem}.footer-links{gap:17px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
+/*
+ * Arabic typography: Noor is the requested primary family.
+ * It is a licensed font that has NOT been supplied for web redistribution.
+ * Browsers use local Noor when installed; otherwise Noto Sans Arabic remains
+ * an explicit fallback. No third-party font binaries are embedded or copied.
+ * Other language scripts retain their existing optimized type stacks.
+ */
+html[lang="ar"] body {
+  font-family: "Noor", "Noor Regular", "Noor-Regular", "Noto Sans Arabic", "DM Sans", system-ui, sans-serif;
+}
+html[lang="ar"] h1,
+html[lang="ar"] h2,
+html[lang="ar"] h3,
+html[lang="ar"] .brand-text strong {
+  font-family: inherit;
+  letter-spacing: normal;
+}
