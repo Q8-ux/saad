@@ -32,8 +32,35 @@ for (const locale of locales) {
   }
 }
 assert.equal(serviceData.length, 8, "Expected eight grounded services");
-assert.ok(serviceData.every(service => service.url.startsWith("https://www.nlk.gov.kw/")),
-  "Service links must point only to verified official domain pages");
+assert.ok(serviceData.every(service => service.url === "./page.html?topic=" + service.id),
+  "Every homepage service must open its own internal detail route");
+assert.ok(!html.includes("nlk.gov.kw") && !js.includes("nlk.gov.kw"),
+  "No homepage link may send the visitor back to the previous site");
+const detailHtml = readFileSync(resolve(directory, "page.html"), "utf8");
+const detailJs = readFileSync(resolve(directory, "pages.js"), "utf8");
+const detailCss = readFileSync(resolve(directory, "pages.css"), "utf8");
+new vm.Script(detailJs, { filename: "pages.js" });
+const detailsContext = vm.createContext({});
+const preamble = detailJs.slice(0, detailJs.indexOf("const store="));
+assert.ok(preamble.includes("const localization"), "Internal page text data missing");
+vm.runInContext(preamble + "\\nthis.__details = {pages,localization};".replace("\\\\n","\\n"), detailsContext);
+const { pages, localization } = detailsContext.__details;
+assert.equal(Object.keys(pages).length, 14, "Expected 14 independently addressable topics");
+for (const locale of locales) {
+  const group = localization[locale];
+  assert.ok(group && group.ui, "Missing internal page locale: " + locale);
+  for (const topic of Object.keys(pages)) {
+    const copy = group.topics[topic];
+    assert.ok(Array.isArray(copy) && copy.length === 5 && copy.every(Boolean),
+      "Missing internal page content: " + locale + "/" + topic);
+  }
+}
+for (const match of html.matchAll(/href="\\.\\/page\\.html\\?topic=([^"&]+)"/g)) {
+  assert.ok(Object.hasOwn(pages, match[1]), "Broken internal topic: " + match[1]);
+}
+assert.ok(detailHtml.includes('id="detail-points"'), "Detail content container missing");
+assert.ok(detailCss.includes(".inner-body"), "Detail responsive CSS missing");
+assert.ok(!detailHtml.includes("nlk.gov.kw"), "Detail template contains old site links");
 assert.ok(html.includes('content="noindex,nofollow"'), "Prototype should not be indexed");
 assert.ok(html.includes('class="prototype-note"'), "Unofficial disclaimer missing");
 assert.ok(css.includes("prefers-reduced-motion"), "Reduced-motion support missing");
@@ -44,4 +71,4 @@ assert.ok(css.includes("transition:none!important;animation:none!important}}"),
   "Critical CSS reduced-motion rule was truncated");
 assert.ok(!css.includes("Noor"), "Obsolete Noor font rules still present");
 assert.ok(js.includes('document.documentElement.dir='), "Direction switching missing");
-console.log("PASS: JavaScript syntax, 6 complete UI localizations, 8 services, trusted links and baseline accessibility hooks.");
+console.log("PASS: syntax, Cairo, six locales, 14 internal topics, 8 redirected service cards and no legacy links.");
