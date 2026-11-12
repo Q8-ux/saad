@@ -68,12 +68,14 @@ assert.ok(html.includes('id="library-hero-photo"'), "Homepage real photograph mi
 assert.ok(html.includes('class="hero-photo-frame"'), "Photographic hero layout missing");
 assert.ok(!html.includes('class="hero-art"') && !html.includes('<svg viewBox="0 0 520 500"'),
   "Old generated building illustration is still embedded in hero");
-assert.ok(/https:\/\/www\.kuna\.net\.kw\/NewsPictures\/2026\/1\/9\//.test(html),
-  "Photo must point to verified real library architecture photo from KUNA");
+assert.ok(html.includes("https://timeskuwait.com/wp-content/uploads/2025/07/Kuwait-National-Library-780x470.jpeg"),
+  "Verified real library exterior photograph missing");
+assert.ok(html.includes("https://kuwaittimes.com/kuwaittimes/uploads/images/2024/06/25/123491.jpg"),
+  "Verified real library interior fallback photograph missing");
 assert.ok(html.includes('id="hero-photo-source"'), "Photographic source attribution missing");
 assert.ok(css.includes(".hero-photo-frame") && css.includes(".hero-photo-attribution"),
   "Responsive photo framing and source caption CSS missing");
-assert.ok(js.includes('heroPhotoAlt') && js.includes('heroPhotoSourceKuna') && js.includes('heroPhotoSourceTimes'),
+assert.ok(js.includes('heroPhotoAlt') && js.includes('heroPhotoSourceExterior') && js.includes('heroPhotoSourceInterior'),
   "Localized photographic alt text and fallback credits missing");
 assert.ok(js.includes('handleLibraryPhotoError'), "Real photograph fallback handler missing");
 assert.ok(css.includes("family=Cairo:wght@400;500;600;700;800"), "Cairo web-font import missing");
