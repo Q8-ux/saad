@@ -1,6 +1,7 @@
 // Pure document model shared by the preview and exports. Template definitions
 // are loaded by the server from D1, not accepted from the visitor or the model.
 export type PleadingKind = "claim" | "appeal" | "memorandum";
+export type MemorandumTitle = "مذكرة تعقيب" | "مذكرة ادعاء مدني";
 export type TemplateDefinition = {
   kind: "claim" | "appeal";
   title: string;
@@ -118,8 +119,9 @@ export function splitMemoGrounds(grounds: string) {
   }
   return {defenses:sections.defenses.join("\n").trim(),replies:sections.replies.join("\n").trim(),documents:sections.documents.join("\n").trim()};
 }
-export function buildPleadingDocument(template: TemplateInfo, definition: TemplateDefinition, kind: PleadingKind, input: PleadingInput, content: PleadingContent): PleadingDocument {
+export function buildPleadingDocument(template: TemplateInfo, definition: TemplateDefinition, kind: PleadingKind, input: PleadingInput, content: PleadingContent, memorandumTitle?: MemorandumTitle): PleadingDocument {
   const d = definition, L = d.labels, C = d.clauses;
+  const title = kind === "memorandum" ? memorandumTitle ?? "مذكرة بدفاع" : d.title;
   const value = (key: string) => input[key]?.trim() || content.fields[key]?.trim() || "................";
   const fill = (text: string) => text.replace(/\{\{(\w+)\}\}/g, (_,key) => value(key));
   const p = (text: string, style?: PleadingBlock["style"]): PleadingBlock => ({text, ...(style ? {style} : {})});
@@ -158,7 +160,9 @@ export function buildPleadingDocument(template: TemplateInfo, definition: Templa
       const defenseHeading=!numberFacts&&line.length<=160&&/^(?:(?:الدفع|السبب)\s|(?:[\d٠-٩۰-۹]{1,3}\s*[.)\-–]\s*|(?:أولا|ثانيا|ثالثا|رابعا|خامسا|سادسا|سابعا|ثامنا|تاسعا|عاشرا)\s*[:：\-]\s*)(?:الدفع|السبب)\s)/u.test(plain);
       return p(numberFacts&&!numbered?`${index+1}- ${line}`:line,defenseHeading?"heading":undefined);
     });
-    pages.push({title:"مذكرة بدفاع",
+    const groundsHeading = memorandumTitle === "مذكرة تعقيب" ? "أوجه التعقيب"
+      : memorandumTitle === "مذكرة ادعاء مدني" ? "أسانيد الادعاء المدني" : "الدفوع وأوجه الدفاع";
+    pages.push({title,
       blocks:[
         p(`في الدعوى المنظورة أمام ${court}`),
         ...(input.caseNumber ? [p(`رقم القضية: ${input.caseNumber}`)] : []),
@@ -166,7 +170,7 @@ export function buildPleadingDocument(template: TemplateInfo, definition: Templa
         p(`ضد: ${input.otherParty}`),
         ...(input.allParties ? [p(input.allParties)] : []),
         section(0,"الوقائع"),...paragraphs(facts,true),
-        ...(hasDefenses ? [section(1,"الدفوع وأوجه الدفاع"),...paragraphs(memo.defenses)] : []),
+        ...(hasDefenses ? [section(1,groundsHeading),...paragraphs(memo.defenses)] : []),
         ...(hasReplies ? [section(hasDefenses ? 2 : 1,"الرد على حجج الخصم"),...paragraphs(memo.replies)] : []),
         section(1+Number(hasDefenses)+Number(hasReplies),"الطلبات"),
         p(`${L.therefore || "لكل ما تقدم"}، ${C.relief || "يلتمس مقدم المذكرة الحكم بما يلي:"}`),
@@ -179,7 +183,7 @@ export function buildPleadingDocument(template: TemplateInfo, definition: Templa
   if (kind === "appeal") for (const key of ["judgmentNumber","judgmentDate","judgmentOperative"] as const) if (value(key) === "................") factual.push(`لم تُذكر ${pleadingFields[key]}؛ تُراجع بيانات الحكم قبل إتمام الصحيفة.`);
   if (kind !== "memorandum" && (value("clientAddress") === "................" || value("otherAddress") === "................")) factual.push("تُستكمل عناوين الأطراف اللازمة للإعلان من بيانات القضية.");
   const notes = Array.from(new Set([...factual,...(content.legalResearchNotes ? [content.legalResearchNotes] : [])]));
-  return {title:kind === "memorandum" ? "مذكرة بدفاع" : d.title,kind,template,paper:d.paper,border:kind === "memorandum" ? true : d.border,pages:presentationPleadingPages(pages),reviewNotes:notes,approval};
+  return {title,kind,template,paper:d.paper,border:kind === "memorandum" ? true : d.border,pages:presentationPleadingPages(pages),reviewNotes:notes,approval};
 }
 export function pleadingText(doc: PleadingDocument) {
   return presentationPleadingPages(doc.pages).map(page => [page.title,...(page.sidebar || []).map(b=>b.text),...page.blocks.map(b=>b.text),...(page.after || []).map(b=>b.text)].filter(Boolean).join("\n\n")).join("\n\n");

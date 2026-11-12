@@ -9,7 +9,7 @@ export function approvedAppealReference(value: unknown): AppealReferenceStyle | 
   return JSON.stringify(value) === appealReferenceJson ? appealReferenceStyle : undefined;
 }
 
-export function appealReferenceInstructions(route: LegalDraftingRoute, reference?: AppealReferenceStyle): string {
+export function appealReferenceInstructions(route: LegalDraftingRoute, reference?: unknown): string {
   const style = approvedAppealReference(reference);
   if (!style || route.status !== "ready" || route.kind !== "appeal" || route.degree !== "appeal" || route.role !== "appellant" || !route.family) {
     return "";

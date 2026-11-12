@@ -4,8 +4,8 @@ import type {LegalEvidence} from './legal-search';
 import {hasReviewedJudgment} from './judgment-evidence';
 import {draftStatutoryText} from './statutory-text';
 const normal=(s:string)=>s.normalize('NFKC').replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').replace(/[\u064b-\u065f]/g,'');
-export const pleadingStyleRevision = "reference-pleading-style-3";
-export const referenceStyleCoverage = {observed:["misdemeanor_defense","felony_defense","civil_defense","civil_claim","commercial_claim","administrative_claim","guardianship_claim","expert_appointment_claim","medical_expert_claim","appeal"],notObserved:[],personalDataStored:false,legalAuthoritiesImported:false} as const;
+export const pleadingStyleRevision = "reference-pleading-style-4";
+export const referenceStyleCoverage = {observed:["misdemeanor_defense","felony_defense","civil_defense","civil_claim","commercial_claim","administrative_claim","guardianship_claim","expert_appointment_claim","medical_expert_claim","appeal","commercial_defense","family_memorandum","tenancy_memorandum","appeal_memorandum","ancillary_civil_claim","expert_comment"],notObserved:[],personalDataStored:false,legalAuthoritiesImported:false} as const;
 // Only abstract drafting rules are retained; reference files stay outside the project.
 export const referencePleadingStyleInstructions = `النماذج مرجع أسلوبي فقط، وليست مدخلات للقضية الجديدة ولا مصدراً قانونياً. لا تنقل منها أسماء أو صفات أشخاص أو بيانات شخصية أو وقائع أو أحداث أو مبالغ أو تواريخ أو أرقام قضايا أو أرقام مواد أو طعون أو نصوص أحكام أو تذييلات أو شعارات. كل قيمة واقعية من بيانات القضية الجديدة، وكل سند من مصادر القضية الجديدة المعاد التحقق منها وحدها؛ التشابه في نوع النزاع لا يجيز استعارة دفع أو واقعة أو استشهاد من نموذج.
 الصيغة المشتركة: تعريف نوع الورقة وأطرافها وصفاتهم وبيانات المحكمة والقضية والجلسة المتاحة، ثم وقائع موجزة أمينة بترتيب زمني، ثم دفوع مرتبة بعناوين محددة، ثم رد مرتبط بحجج الخصم الفعلية عند وجودها، ثم طلبات واضحة في حدود التفويض. يبني الخادم الترويسة وترتيب القالب؛ لا تكررها في حقول المحتوى. لا تفترض أن عنوان الملف يحدد نوع الدعوى؛ العبرة بمضمونه والصفة والمرحلة المعتمدتين للقضية الجديدة.

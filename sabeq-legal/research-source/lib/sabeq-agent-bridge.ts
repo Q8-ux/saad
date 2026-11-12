@@ -1,7 +1,7 @@
 import { resolveLegalDraftingRoute, legalRouteInstructions, legalDraftingRouteRevision } from "./legal-drafting-routes";
 import {legalResearchInstructions} from "./legal-language";
 import {pleadingAuthorityInstructions} from "./bound-draft";
-import { appealReferenceInstructions, type AppealReferenceStyle } from "./appeal-reference-style";
+import { selectDraftingReference, type DraftingReferenceStyle } from "./memorandum-reference-style";
 import { caseReasoningInstructions, type CasePlan } from "./case-reasoning";
 import { legalSourceCoverage } from "./legal-source-coverage";
 import { env } from "cloudflare:workers";
@@ -20,7 +20,7 @@ export function evidenceSourceId(item: LegalEvidence, index=0) {
   return `legal:${item.documentId}:${item.chunkId || `excerpt-${index}`}`;
 }
 
-export async function generateAgentPleading(input: { caseData: PleadingInput; fields: Record<string,string>; documentKind: "claim" | "appeal" | "memorandum"; template: TemplateInfo; evidence: LegalEvidence[]; casePlan?: CasePlan; signal?: AbortSignal; referenceStyle?: AppealReferenceStyle }, transport: typeof fetch = fetch): Promise<{content:PleadingContent; audit:AgentAudit}> {
+export async function generateAgentPleading(input: { caseData: PleadingInput; fields: Record<string,string>; documentKind: "claim" | "appeal" | "memorandum"; template: TemplateInfo; evidence: LegalEvidence[]; casePlan?: CasePlan; signal?: AbortSignal; referenceStyle?: DraftingReferenceStyle }, transport: typeof fetch = fetch): Promise<{content:PleadingContent; audit:AgentAudit}> {
   const route=resolveLegalDraftingRoute({...input.caseData,documentKind:input.documentKind});
   if(route.status!=="ready")throw new RequestError(route.question,422);
   const runtime = env as unknown as AgentEnvironment;
@@ -38,7 +38,7 @@ export async function generateAgentPleading(input: { caseData: PleadingInput; fi
     legalResearchInstructions,
     pleadingAuthorityInstructions,
     legalRouteInstructions(route),
-    appealReferenceInstructions(route, input.referenceStyle),
+    selectDraftingReference(route, input.referenceStyle, input.caseData).instructions,
   ].filter(Boolean).join("\n");
   const payload = {caseReasoning:{revision:"case-grounded-memo-1",instructions,plan:input.casePlan||null},sourceCoverage:legalSourceCoverage(input.evidence),requestId,language:"ar",documentKind:input.documentKind,template:{id:input.template.id,version:input.template.version,kind:input.template.kind,title:input.template.title,sourceSha256:input.template.sourceSha256},caseData:{...input.caseData,legalRouteId:route.id,legalRouteRevision:legalDraftingRouteRevision},fields:input.fields,sources};
   let response: Response;

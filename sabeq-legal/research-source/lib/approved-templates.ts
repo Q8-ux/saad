@@ -4,7 +4,8 @@ import { RequestError } from "./request-security";
 import claimSource from "@/data/drafting-templates/claim-source.json";
 import appealSource from "@/data/drafting-templates/appeal-source.json";
 import type { TemplateDefinition, TemplateInfo } from "./pleading-document";
-import { appealReferenceJson, appealReferenceStyle, approvedAppealReference, type AppealReferenceStyle } from "./appeal-reference-style";
+import { appealReferenceStyle, approvedAppealReference } from "./appeal-reference-style";
+import { memorandumReferenceStyle, approvedMemorandumReference, type DraftingReferenceStyle } from "./memorandum-reference-style";
 
 type ObjectBucket = { head(key: string): Promise<unknown>; put(key: string, bytes: Uint8Array, options: { httpMetadata: { contentType: string }; customMetadata: Record<string,string> }): Promise<unknown>; get(key: string): Promise<{ body: ReadableStream; customMetadata?: Record<string,string> } | null> };
 function bucket() {
@@ -38,7 +39,11 @@ const definitions: Record<"claim" | "appeal",TemplateDefinition> = {
 };
 
 type Row = {id:string; kind:"claim"|"appeal"; version:number; title:string; source_filename:string; source_sha256:string; source_object_key:string; page_count:number; definition_json:string; approved_at:string; status:string};
-type StoredDefinition = TemplateDefinition & { referenceStyle?: AppealReferenceStyle };
+type StoredDefinition = TemplateDefinition & { referenceStyle?: DraftingReferenceStyle };
+const referenceStyles = {
+  appeal: { catalog: appealReferenceStyle, verify: approvedAppealReference, appliesTo: "appeal" },
+  claim: { catalog: memorandumReferenceStyle, verify: approvedMemorandumReference, appliesTo: "memorandum" },
+} as const;
 const selectedColumns = "id,kind,version,title,source_filename,source_sha256,source_object_key,page_count,definition_json,approved_at,status";
 function info(row:Row): TemplateInfo { return {id:row.id,kind:row.kind,version:row.version,title:row.title,sourceFilename:row.source_filename,sourceSha256:row.source_sha256,approvedAt:row.approved_at}; }
 async function sha256(bytes:Uint8Array) { return Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256",new Uint8Array(bytes).buffer))).map(b=>b.toString(16).padStart(2,"0")).join(""); }
@@ -53,16 +58,17 @@ function parseDefinition(kind: Row["kind"], json: string): StoredDefinition {
 
 async function readDefinition(row: Row): Promise<StoredDefinition> {
   const definition = parseDefinition(row.kind, row.definition_json);
-  if (row.kind !== "appeal" || approvedAppealReference(definition.referenceStyle)) return definition;
+  const reference = referenceStyles[row.kind];
+  if (reference.verify(definition.referenceStyle)) return definition;
 
   // Merge only the server-owned style field, including on older template rows.
   const updated = await getD1().prepare(`
     UPDATE legal_drafting_templates
     SET definition_json = json_set(definition_json, '$.referenceStyle', json(?))
-    WHERE id = ? AND kind = 'appeal' AND status = 'approved'
+    WHERE id = ? AND kind = ? AND status = 'approved'
     RETURNING definition_json
-  `).bind(appealReferenceJson, row.id).first<Pick<Row, "definition_json">>();
-  if (!updated) throw new RequestError("تعذّر تحديث مرجع صياغة الاستئناف المعتمد. أعد المحاولة.", 503);
+  `).bind(JSON.stringify(reference.catalog), row.id, row.kind).first<Pick<Row, "definition_json">>();
+  if (!updated) throw new RequestError("تعذّر تحديث مرجع الصياغة المعتمد. أعد المحاولة.", 503);
   return parseDefinition(row.kind, updated.definition_json);
 }
 
@@ -78,8 +84,8 @@ export async function ensureApprovedTemplates() {
     const key=`approved-drafting-templates/${source.id}/${source.sourceSha256}.pdf`;
     await bucket().put(key,bytes,{httpMetadata:{contentType:"application/pdf"},customMetadata:{sha256:source.sourceSha256,templateId:source.id}});
     if (!await bucket().head(key)) throw new Error("Template original was not persisted");
-    const definition = definitions[source.kind as "claim" | "appeal"];
-    const stored = source.kind === "appeal" ? { ...definition, referenceStyle: appealReferenceStyle } : definition;
+    const kind = source.kind as Row["kind"];
+    const stored = { ...definitions[kind], referenceStyle: referenceStyles[kind].catalog };
     await db.prepare(`INSERT INTO legal_drafting_templates (id,kind,version,title,source_filename,source_sha256,source_object_key,page_count,definition_json,status,approved_by,approved_at) VALUES (?,?,?,?,?,?,?,?,?,'approved','project_owner',?) ON CONFLICT(id) DO NOTHING`).bind(source.id,source.kind,source.version,source.title,source.sourceFilename,source.sourceSha256,key,source.pageCount,JSON.stringify(stored),source.approvedAt).run();
   }
 }
@@ -88,24 +94,30 @@ export async function loadApprovedTemplate(kind:"claim"|"appeal") {
   const row=await getD1().prepare(`SELECT ${selectedColumns} FROM legal_drafting_templates WHERE kind = ? AND status = 'approved' ORDER BY version DESC LIMIT 1`).bind(kind).first<Row>();
   if (!row) throw new RequestError("القالب المعتمد غير متاح حالياً؛ لم تُنشأ صحيفة بصيغة بديلة.",503);
   const { referenceStyle, ...definition } = await readDefinition(row);
-  return { info: info(row), definition, referenceStyle: kind === "appeal" ? approvedAppealReference(referenceStyle) : undefined };
+  return { info: info(row), definition, referenceStyle: referenceStyles[kind].verify(referenceStyle) };
 }
 export async function listApprovedTemplates() {
   await ensureApprovedTemplates();
   const rows=await getD1().prepare(`SELECT ${selectedColumns} FROM legal_drafting_templates WHERE status = 'approved' ORDER BY kind,version DESC`).all<Row>();
-  const activeAppeal = rows.results.find(row => row.kind === "appeal");
+  const active = new Map<Row["kind"], string>();
+  for (const row of rows.results) {
+    if (!active.has(row.kind)) active.set(row.kind, row.id);
+  }
   return Promise.all(rows.results.map(async (row: Row) => {
     const result = { ...info(row), pageCount: row.page_count, originalStored: !!await bucket().head(row.source_object_key) };
-    if (row.id !== activeAppeal?.id) return result;
-    const style = approvedAppealReference((await readDefinition(row)).referenceStyle);
+    const reference = referenceStyles[row.kind];
+    if (!reference || row.id !== active.get(row.kind)) return result;
+    const style = reference.verify((await readDefinition(row)).referenceStyle);
     if (!style) return result;
     return {
       ...result,
       referenceStyle: {
         revision: style.revision,
+        appliesTo: reference.appliesTo,
         reviewedFiles: style.reviewedFiles,
         reviewedPages: style.reviewedPages,
         families: Object.keys(style.families),
+        ...("procedures" in style ? { procedures: Object.keys(style.procedures) } : {}),
       },
     };
   }));

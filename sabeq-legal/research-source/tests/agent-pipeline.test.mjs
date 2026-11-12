@@ -62,6 +62,23 @@ test('cross-case responses and fabricated citations never reach the final templa
   await assert.rejects(bridge(runtime).generateAgentPleading({caseData,fields:{},documentKind:'claim',template,evidence},async(_url,init)=>reply(JSON.parse(init.body),change)));
  }
 });
+test('the agent receives the stored memorandum reference for expert review as drafting guidance',async t=>{
+ const h=templateHarness();
+ t.after(h.cleanup);
+ const memo=await h.templates.loadApprovedTemplate('claim');
+ await bridge(runtime).generateAgentPleading({
+  caseData:{...caseData,caseType:'تجاري',partyRole:'مدعى عليه',caseStage:'أمام إدارة الخبراء'},
+  fields:{},documentKind:'memorandum',template:memo.info,evidence,referenceStyle:memo.referenceStyle,
+ },async(_url,init)=>{
+  const sent=JSON.parse(init.body);
+  assert.ok(sent.caseReasoning.instructions.includes(memo.referenceStyle.procedures.expert_comment[0]));
+  assert.ok(sent.caseReasoning.instructions.includes(memo.referenceStyle.families.commercial[0]));
+  assert.equal(sent.template.referenceStyle,undefined);
+  assert.equal(sent.sources.length,1);
+  assert.equal(sent.sources[0].text,evidence[0].text);
+  return reply(sent);
+ });
+});
 test('no-source response preserves facts and rejects invented legal grounds',async()=>{
  const api=bridge(runtime);
  for(const grounds of ['', 'المادة 999']) {
@@ -172,7 +189,7 @@ function controlledMemoModel(correction,onCorrection=()=>{}) {
   throw Error('unexpected control test call');
  };
 }
-test('direct drafting and its existing correction receive the same concise rules without extra model calls',async t=>{
+for(const kind of ['claim','memorandum'])test(kind+' drafting and correction use the applicable stored rules without extra model calls',async t=>{
  const h=templateHarness();t.after(h.cleanup);let calls=0,audits=0;const drafting=[];
  const baseline=controlledMemoModel('');
  const route=memoRoute(h,{sources:[controlSource],pipeline:{agentPipelineEnabled:()=>false},model:async options=>{
@@ -187,9 +204,15 @@ test('direct drafting and its existing correction receive the same concise rules
   }
   return baseline(options);
  }});
- const response=await route.POST(request());const value=await response.json();assert.equal(response.status,200,JSON.stringify(value));
+ const response=await route.POST(request({documentKind:kind,caseStage:'تعقيب على تقرير الخبير'}));const value=await response.json();assert.equal(response.status,200,JSON.stringify(value));
+ assert.equal(value.document.title,kind==='memorandum'?'مذكرة تعقيب':'صحيفة الدعوى');
+ if(kind==='memorandum')assert.match(value.memo,/أوجه التعقيب/);
  assert.equal(drafting.length,2);assert.equal(audits,2);assert.equal(calls,5);
- for(const instructions of drafting)assert.ok(instructions.includes(pleadingAuthorityInstructions));
+ for(const instructions of drafting){
+  assert.ok(instructions.includes(pleadingAuthorityInstructions));
+  assert.equal(instructions.includes('قواعد صياغة المذكرة'),kind==='memorandum');
+  assert.equal(instructions.includes('رتّب التعقيب في حدود المأمورية'),kind==='memorandum');
+ }
  assert.ok(value.memo.includes(caseData.facts));assert.ok(value.memo.includes(caseData.requests));
  assert.ok(value.memo.includes(controlSource.text));
  assert.equal(value.caseQuality.humanReviewRequired,true);

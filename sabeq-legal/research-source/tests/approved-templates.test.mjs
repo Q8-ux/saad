@@ -40,7 +40,7 @@ test('an existing appeal template gains the reviewed style catalog without repla
  assert.equal(loaded.definition.referenceStyle,undefined);
  assert.equal(loaded.definition.labels.subject,'عنوان إداري اختباري محفوظ');
  assert.deepEqual(JSON.parse(JSON.stringify(loaded.referenceStyle)),referenceStyle);
- assert.equal((await h.templates.loadApprovedTemplate('claim')).referenceStyle,undefined);
+ assert.equal((await h.templates.loadApprovedTemplate('claim')).referenceStyle.reviewedFiles,10);
  await h.templates.listApprovedTemplates();
  assert.equal(h.sql("SELECT definition_json FROM legal_drafting_templates WHERE kind='appeal'")[0].definition_json,after.definition_json);
 });
@@ -51,6 +51,31 @@ test('claim keeps fixed preamble and identifiers; appeal keeps four ordered sect
  assert.equal(second.pages.length,4);assert.match(second.pages[1].blocks[0].text,/المقامة من ناصر الافتراضي ضد سالم التجريبي/);assert.ok(second.pages[2].blocks.some(b=>b.text==='أسباب الاستئناف'));assert.equal(second.pages[3].blocks[0].text,'لذلك');assert.doesNotMatch(doc.pleadingText(second),/إلزام المستأنف بالمصروفات/);
  assert.equal(doc.selectPleadingKind({...input,partyRole:'مستأنف ضده',court:'محكمة الاستئناف'}),'memorandum');assert.equal(doc.selectPleadingKind({...input,partyRole:'مستأنف',court:'محكمة الاستئناف'}),'appeal');assert.equal(doc.selectPleadingKind({...input,court:'محكمة التمييز'}),'memorandum');
  mkdirSync(new URL('../tmp/template-qa/',import.meta.url),{recursive:true});for(const [name,value] of [['claim',first],['appeal',second]]){writeFileSync(new URL(`../tmp/template-qa/${name}.json`,import.meta.url),JSON.stringify(value));writeFileSync(new URL(`../tmp/template-qa/${name}.html`,import.meta.url),doc.renderPleadingHtml(value));}
+});
+test('the existing memorandum base stores the new reference without replacing the approved forms',async t=>{
+ const h=templateHarness();
+ t.after(h.cleanup);
+ await h.templates.ensureApprovedTemplates();
+ h.sql("UPDATE legal_drafting_templates SET definition_json=json_remove(definition_json,'$.referenceStyle') WHERE kind='claim'");
+ const before=h.sql("SELECT * FROM legal_drafting_templates WHERE kind='claim'")[0];
+ const listed=await h.templates.listApprovedTemplates();
+ const memo=listed.find(template=>template.kind==='claim');
+ const appeal=listed.find(template=>template.kind==='appeal');
+ assert.equal(memo.referenceStyle.appliesTo,'memorandum');
+ assert.equal(memo.referenceStyle.reviewedFiles,10);
+ assert.equal(memo.referenceStyle.reviewedPages,107);
+ assert.equal(appeal.referenceStyle.reviewedFiles,8);
+ const after=h.sql("SELECT * FROM legal_drafting_templates WHERE kind='claim'")[0];
+ const {referenceStyle,...layout}=JSON.parse(after.definition_json);
+ assert.deepEqual(layout,JSON.parse(before.definition_json));
+ assert.equal(after.source_sha256,before.source_sha256);
+ assert.equal(after.source_object_key,before.source_object_key);
+ const loaded=await h.templates.loadApprovedTemplate('claim');
+ assert.equal(loaded.definition.referenceStyle,undefined);
+ assert.deepEqual(JSON.parse(JSON.stringify(loaded.referenceStyle)),referenceStyle);
+ await h.templates.listApprovedTemplates();
+ assert.equal(h.sql("SELECT definition_json FROM legal_drafting_templates WHERE kind='claim'")[0].definition_json,after.definition_json);
+ assert.equal(h.writes,2);
 });
 test('preview escapes hostile content and never drops long case text',async t=>{
  const h=templateHarness();t.after(h.cleanup);const template=await h.templates.loadApprovedTemplate('claim');const long='واقعة اصطناعية طويلة '.repeat(1500)+'النهاية المحفوظة';const result=doc.buildPleadingDocument(template.info,template.definition,'claim',{...input,clientName:'<script>alert(1)</script>'},{...content,facts:long});const html=doc.renderPleadingHtml(result);assert.doesNotMatch(html,/<script>|onerror=/);assert.match(html,/&lt;script&gt;/);assert.ok(doc.pleadingText(result).replace(/\s+/g,' ').includes(long.replace(/\s+/g,' ')));assert.doesNotMatch(html,/chatgpt|مراجعة المسودة|ملاحظات المراجعة|المساعد|غير معتمدة/);

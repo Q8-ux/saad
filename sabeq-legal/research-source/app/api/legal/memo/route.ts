@@ -12,7 +12,7 @@ import {scopeEvidenceToFacts,prepareBoundDraft,pleadingAuthorityInstructions,ple
 import { applyCheckedJudgmentMatches, caseReasoningInstructions, caseResearchQueries, approvedCaseFacts, buildCheckedCasePlan, CasePlanValidationError, casePlanFailureMessage, caseAuditRequestForContent, parseGroundedCaseAudit, caseQualitySummary, reviewCaseContent, memoCompletenessRevision, defenseAuditInstructions, defenseRevision } from "@/lib/case-reasoning";
 import { legalSourceCoverage, formatSourceCoverage } from "@/lib/legal-source-coverage";
 import { loadApprovedTemplate } from "@/lib/approved-templates";
-import { appealReferenceInstructions } from "@/lib/appeal-reference-style";
+import { selectDraftingReference } from "@/lib/memorandum-reference-style";
 import { arabicMemoInput } from "@/lib/memo-language";
 import { buildPleadingDocument, parsePleadingContent, pleadingContentSchema, pleadingFields, pleadingText, type PleadingContent, type PleadingInput } from "@/lib/pleading-document";
 import { factualRequirements, correctLegalProse, languageReviewInstructions, legalResearchInstructions, removeDelegatedResearch } from "@/lib/legal-language";
@@ -90,8 +90,8 @@ export async function POST(request: Request) {
     const kind = legalRoute.kind;
     memoInput.legalRouteId=legalRoute.id;memoInput.legalRouteRevision=legalDraftingRouteRevision;
     const template = await loadApprovedTemplate(kind === "appeal" ? "appeal" : "claim");
-    const appealInstructions = appealReferenceInstructions(legalRoute, template.referenceStyle);
-    if (appealInstructions) draftingInstructions += "\n" + appealInstructions;
+    const referenceStyle = selectDraftingReference(legalRoute, template.referenceStyle, memoInput);
+    if (referenceStyle.instructions) draftingInstructions += "\n" + referenceStyle.instructions;
     const researchContext = `المسار المحدد: ${legalRoute.id}\nنوع القضية: ${caseType}\nالوقائع: ${facts}\nالطلبات: ${requests}\nملاحظات إضافية: ${legalIssues || "لا توجد"}`;
     let searchQueries = [...legalRouteResearchQueries(legalRoute), ...caseResearchQueries(memoInput), caseType, legalIssues, facts.slice(0, 1_400), requests.slice(0, 800)];
     try {
@@ -225,7 +225,7 @@ export async function POST(request: Request) {
         }
       }
       const citedContent=`${content.grounds}\n${content.requests}`;
-      const document = buildPleadingDocument(template.info,template.definition,kind,memoInput,content);
+      const document = buildPleadingDocument(template.info,template.definition,kind,memoInput,content,referenceStyle.memorandumTitle);
       const finalMemo = pleadingText(document);
       const sources = evidence.map((item,index)=>({marker:`م${index+1}`,title:item.title,reference:item.reference||"غير محدد",kind:isCassationEvidence(item)?"cassation":"legislation",officialSource:item.officialSource,sourceUrl:item.sourceUrl,libraryUpdatedAt:item.libraryUpdatedAt||null,verification:item.verification,corpus:item.corpus,sourceAccess:item.sourceUrl?"original_link":"indexed_upload"})).filter(source=>new RegExp(`[【\\[]\\s*${source.marker}\\s*[】\\]]`).test(citedContent));
       const caseQuality=caseQualitySummary(checkedPlan,caseAudit,content,sources.length);
