@@ -1,5 +1,9 @@
 name: Dr Hamad - Monid Research (manual)
 on:
+  pull_request:
+    paths:
+      - 'dr-hamad/monid/**'
+      - '.github/workflows/dr-hamad-monid-research.yml'
   workflow_dispatch:
     inputs:
       topic:
@@ -40,7 +44,20 @@ concurrency:
   group: dr-hamad-monid-research
   cancel-in-progress: false
 jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: node --check dr-hamad/monid/research.mjs
+      - run: node --test dr-hamad/monid/research.test.mjs
+      - run: node dr-hamad/verify.cjs
   editorial-research:
+    needs: validate
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -48,8 +65,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Validate Monid adapter
-        run: node --test dr-hamad/monid/research.test.mjs
       - name: Monid research (unpublished)
         env:
           MONID_API_KEY: ${{ secrets.MONID_API_KEY }}
