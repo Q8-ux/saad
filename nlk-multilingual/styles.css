@@ -24,11 +24,13 @@ html.high-contrast{--teal:#03594f;--muted:#33434f;--line:#859b9b;--gold:#ffdb7f;
  */
 html[lang="ar"] body {
   font-family: "Noor", "Noor Regular", "Noor-Regular", "Noto Sans Arabic", "DM Sans", system-ui, sans-serif;
+  font-weight: 400; /* Noor Regular — المعتاد */
 }
 html[lang="ar"] h1,
 html[lang="ar"] h2,
 html[lang="ar"] h3,
 html[lang="ar"] .brand-text strong {
   font-family: inherit;
+  font-weight: 700; /* Noor Bold for readability of headings */
   letter-spacing: normal;
 }
