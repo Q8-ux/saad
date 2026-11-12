@@ -64,6 +64,18 @@ assert.ok(!detailHtml.includes("nlk.gov.kw"), "Detail template contains old site
 assert.ok(html.includes('content="noindex,nofollow"'), "Prototype should not be indexed");
 assert.ok(html.includes('class="prototype-note"'), "Unofficial disclaimer missing");
 assert.ok(css.includes("prefers-reduced-motion"), "Reduced-motion support missing");
+assert.ok(html.includes('id="library-hero-photo"'), "Homepage real photograph missing");
+assert.ok(html.includes('class="hero-photo-frame"'), "Photographic hero layout missing");
+assert.ok(!html.includes('class="hero-art"') && !html.includes('<svg viewBox="0 0 520 500"'),
+  "Old generated building illustration is still embedded in hero");
+assert.ok(/https:\/\/www\.kuna\.net\.kw\/NewsPictures\/2026\/1\/9\//.test(html),
+  "Photo must point to verified real library architecture photo from KUNA");
+assert.ok(html.includes('id="hero-photo-source"'), "Photographic source attribution missing");
+assert.ok(css.includes(".hero-photo-frame") && css.includes(".hero-photo-attribution"),
+  "Responsive photo framing and source caption CSS missing");
+assert.ok(js.includes('heroPhotoAlt') && js.includes('heroPhotoSourceKuna') && js.includes('heroPhotoSourceTimes'),
+  "Localized photographic alt text and fallback credits missing");
+assert.ok(js.includes('handleLibraryPhotoError'), "Real photograph fallback handler missing");
 assert.ok(css.includes("family=Cairo:wght@400;500;600;700;800"), "Cairo web-font import missing");
 assert.ok(css.includes('html[lang="ar"] body'), "Arabic locale font selector missing");
 assert.ok(css.includes('font-family: "Cairo", "Noto Sans Arabic"'), "Arabic Cairo font not configured");
@@ -71,4 +83,4 @@ assert.ok(css.includes("transition:none!important;animation:none!important}}"),
   "Critical CSS reduced-motion rule was truncated");
 assert.ok(!css.includes("Noor"), "Obsolete Noor font rules still present");
 assert.ok(js.includes('document.documentElement.dir='), "Direction switching missing");
-console.log("PASS: syntax, Cairo, six locales, 14 internal topics, 8 redirected service cards and no legacy links.");
+console.log("PASS: real photographic hero, CSS, source credits, Cairo, syntax, 6 locales, 14 internal pages and 8 service links.");
