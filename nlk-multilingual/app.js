@@ -133,8 +133,46 @@ const internalCopy = {
   hi:{goOfficial:"नए सेवा पेज देखें",servicesDesc:"अपनी सेवा का नया पेज इसी वेबसाइट पर खोलें।",allOfficial:"सभी आंतरिक पेज",aboutLink:"पुस्तकालय परिचय",ctaButton:"संग्रह देखें",ctaDesc:"इस नई साइट पर ज्ञान और सेवाओं के पेज खोजें।",linkLabel:"पेज खोलें",official:"वेबसाइट पेज",morePathsKicker:"अतिरिक्त शोध विषय",morePathsTitle:"कुवैत के पुस्तकालय खोजें",portalTitle:"कुवैत पुस्तकालय पोर्टल",portalDesc:"स्थानीय पुस्तकालयों और कैटलॉग का परिचय।",thesesTitle:"शोध-प्रबंध",thesesDesc:"विश्वविद्यालयों के शोध संसाधनों का परिचय।",publicTitle:"सार्वजनिक पुस्तकालय",publicDesc:"पुस्तकालयों और उनकी सूचियों की जानकारी।"},
   zh:{goOfficial:"浏览新版服务页面",servicesDesc:"查找服务并在本站打开对应的新版内页。",allOfficial:"全部站内页面",aboutLink:"了解图书馆",ctaButton:"探索馆藏",ctaDesc:"在新版网站内部浏览知识与服务介绍。",linkLabel:"打开页面",official:"站内页面",morePathsKicker:"更多研究专题",morePathsTitle:"探索科威特各类图书馆",portalTitle:"科威特图书馆门户",portalDesc:"了解本地图书馆及其目录服务。",thesesTitle:"学位论文",thesesDesc:"了解大学研究论文资源。",publicTitle:"公共图书馆目录",publicDesc:"探索公共图书馆与馆藏目录。"}
 };
+const photographicHeroCopy = {
+  ar:{
+    heroPhotoTitle:"مكتبة الكويت الوطنية",heroPhotoLocation:"مدينة الكويت • شارع الخليج العربي",
+    heroPhotoCredit:"صورة فوتوغرافية حقيقية · المصدر:",heroPhotoUnavailable:"تعذر تحميل الصورة الفوتوغرافية مؤقتاً",
+    heroPhotoAlt:"صورة حقيقية لمبنى مكتبة الكويت الوطنية في مدينة الكويت بواجهته الحجرية وأعلام الكويت",
+    heroPhotoSourceKuna:"كونا (KUNA)",heroPhotoSourceTimes:"تايمز الكويت"
+  },
+  en:{
+    heroPhotoTitle:"National Library of Kuwait",heroPhotoLocation:"Kuwait City • Arabian Gulf Street",
+    heroPhotoCredit:"Authentic photograph · Source:",heroPhotoUnavailable:"The photograph is temporarily unavailable",
+    heroPhotoAlt:"Authentic photograph of the National Library of Kuwait building, stone facade and Kuwaiti flags",
+    heroPhotoSourceKuna:"KUNA News Agency",heroPhotoSourceTimes:"Times Kuwait"
+  },
+  fr:{
+    heroPhotoTitle:"Bibliothèque nationale du Koweït",heroPhotoLocation:"Koweït • Rue du Golfe arabique",
+    heroPhotoCredit:"Photographie authentique · Source :",heroPhotoUnavailable:"La photographie est temporairement indisponible",
+    heroPhotoAlt:"Photo authentique du bâtiment de la Bibliothèque nationale du Koweït avec ses drapeaux",
+    heroPhotoSourceKuna:"Agence KUNA",heroPhotoSourceTimes:"Times Kuwait"
+  },
+  ur:{
+    heroPhotoTitle:"کویت کی قومی لائبریری",heroPhotoLocation:"کویت سٹی • شارع الخلیج العربی",
+    heroPhotoCredit:"حقیقی تصویر · ماخذ:",heroPhotoUnavailable:"تصویر عارضی طور پر دستیاب نہیں",
+    heroPhotoAlt:"کویت کی قومی لائبریری کی اصل عمارت، پتھر کی دیواروں اور کویتی پرچموں کی تصویر",
+    heroPhotoSourceKuna:"کونا نیوز ایجنسی",heroPhotoSourceTimes:"ٹائمز کویت"
+  },
+  hi:{
+    heroPhotoTitle:"कुवैत राष्ट्रीय पुस्तकालय",heroPhotoLocation:"कुवैत सिटी • अरब गल्फ़ स्ट्रीट",
+    heroPhotoCredit:"वास्तविक फ़ोटोग्राफ़ · स्रोत:",heroPhotoUnavailable:"फ़ोटो अस्थायी रूप से उपलब्ध नहीं है",
+    heroPhotoAlt:"कुवैत राष्ट्रीय पुस्तकालय की असली इमारत, पत्थर की दीवारें और कुवैती झंडे",
+    heroPhotoSourceKuna:"KUNA समाचार एजेंसी",heroPhotoSourceTimes:"Times Kuwait"
+  },
+  zh:{
+    heroPhotoTitle:"科威特国家图书馆",heroPhotoLocation:"科威特城 • 阿拉伯海湾大道",
+    heroPhotoCredit:"真实照片 · 来源：",heroPhotoUnavailable:"照片暂时无法加载",
+    heroPhotoAlt:"科威特国家图书馆真实建筑照片，展示石材外立面与科威特国旗",
+    heroPhotoSourceKuna:"科威特通讯社 KUNA",heroPhotoSourceTimes:"Times Kuwait"
+  }
+};
 for (const language of Object.keys(internalCopy)) {
-  Object.assign(translations[language], internalCopy[language]);
+  Object.assign(translations[language], internalCopy[language], photographicHeroCopy[language]);
 }
 
 const dom = {
@@ -224,6 +262,10 @@ function applyLocale(){
   dom.menu.setAttribute("aria-label",tr("menuTitle"));
   dom.nav.setAttribute("aria-label",tr("navServices"));
   dom.language.setAttribute("aria-label",tr("language"));
+  const image=document.getElementById("library-hero-photo");
+  if(image) image.alt=tr("heroPhotoAlt");
+  const source=document.getElementById("hero-photo-source");
+  if(source) source.textContent=tr(image?.dataset.fallbackUsed==="true"?"heroPhotoSourceTimes":"heroPhotoSourceKuna");
   document.getElementById("filters").setAttribute("aria-label",tr("filterAll"));
   voiceStatus="";
   renderServices();
@@ -287,6 +329,26 @@ dom.voice.addEventListener("click",function(){
   recognition.onend=function(){dom.voice.classList.remove("listening");if(voiceStatus===tr("voiceListening")){voiceStatus="";renderServices();}};
   try{recognition.start();}catch{voiceStatus=tr("voiceDenied");renderServices();}
 });
+// The image is a real library photograph, not a generated graphic.
+// Preserve a credited secondary real photo if the original publisher blocks hotlinking.
+const libraryPhoto=document.getElementById("library-hero-photo");
+if(libraryPhoto){
+  libraryPhoto.addEventListener("error",function(){
+    const credit=document.getElementById("hero-photo-source");
+    if(libraryPhoto.dataset.fallbackUsed!=="true"){
+      libraryPhoto.dataset.fallbackUsed="true";
+      libraryPhoto.src=libraryPhoto.dataset.fallbackSrc;
+      if(credit){
+        credit.href="https://timeskuwait.com/kuwait-national-library-14-years-on-a-beacon-of-culture-and-heritage/";
+        credit.textContent=tr("heroPhotoSourceTimes");
+      }
+    } else {
+      libraryPhoto.closest(".hero-photo-frame")?.classList.add("photo-failed");
+      const unavailable=document.querySelector(".hero-photo-unavailable");
+      if(unavailable)unavailable.hidden=false;
+    }
+  });
+}
 setContrast(contrast);
 setFont(fontIndex);
 applyLocale();
