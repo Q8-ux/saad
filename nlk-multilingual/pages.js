@@ -468,7 +468,7 @@ function node(tag,className,text){
 function textTo(id,value){$(id).textContent=value;}
 function link(id,topicId){$(id).href=href(topicId);}
 function setHrefLanguages(){
-  document.querySelectorAll('a[href="./index.html"]').forEach(a=>a.href="./index.html?lang="+encodeURIComponent(lang));
+  document.querySelectorAll('a[href^="./index.html"]').forEach(a=>a.href="./index.html?lang="+encodeURIComponent(lang));
 }
 function card(slug){
   const item=pages[slug], t=localization[lang].topics[slug], u=localization[lang].ui;
