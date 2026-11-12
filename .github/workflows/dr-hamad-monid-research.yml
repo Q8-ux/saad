@@ -58,6 +58,7 @@ jobs:
       - run: node --check dr-hamad/monid/run-all.mjs
       - run: node --check dr-hamad/monid/public-audit.mjs
       - run: node --test dr-hamad/monid/run-all.test.mjs
+      - run: node dr-hamad/monid/run-all.mjs
       - run: node --test dr-hamad/monid/research.test.mjs
       - run: node dr-hamad/verify.cjs
   editorial-research:
