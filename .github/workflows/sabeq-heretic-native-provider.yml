@@ -4,6 +4,7 @@ on:
     paths:
       - "sabeq-legal/research-source/lib/text-providers.ts"
       - "sabeq-legal/research-source/tests/text-providers.test.mjs"
+      - "sabeq-legal/research-source/tests/model-compatibility.test.mjs"
       - ".github/workflows/sabeq-heretic-native-provider.yml"
   push:
     branches: [main]
@@ -29,4 +30,4 @@ jobs:
           cache-dependency-path: sabeq-legal/research-source/package-lock.json
       - run: npm ci --ignore-scripts --no-audit --no-fund
       - name: Verify text-only GGUF connector and schema guards
-        run: node --test tests/text-providers.test.mjs
+        run: node --test tests/text-providers.test.mjs tests/model-compatibility.test.mjs
