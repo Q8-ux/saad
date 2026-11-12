@@ -1,5 +1,16 @@
 'use strict';
 
+function hereticEndpoint(value) {
+  try {
+    const url = new URL(value || '');
+    if (url.protocol !== 'https:' || !url.pathname.endsWith('/chat/completions') ||
+        url.username || url.password || url.search || url.hash) return undefined;
+    return url.toString();
+  } catch {
+    return undefined;
+  }
+}
+
 function textAiConfig(env = process.env) {
   const provider = (env.LEGAL_AI_PROVIDER || 'openai').trim().toLowerCase();
   const choices = {
@@ -9,10 +20,11 @@ function textAiConfig(env = process.env) {
     groq: { key: env.GROQ_API_KEY, model: env.GROQ_MODEL || 'qwen/qwen3.8-27b', endpoint: 'https://api.groq.com/openai/v1/chat/completions' },
     nvidia: { key: env.NVIDIA_API_KEY, model: env.NVIDIA_MODEL || '', endpoint: 'https://integrate.api.nvidia.com/v1/chat/completions' },
     openrouter: { key: env.OPENROUTER_API_KEY, model: env.OPENROUTER_MODEL || '', endpoint: 'https://openrouter.ai/api/v1/chat/completions' },
+    heretic: { key: env.HERETIC_API_KEY, model: env.HERETIC_MODEL || '', endpoint: hereticEndpoint(env.HERETIC_CHAT_COMPLETIONS_URL) },
   };
   const selected = Object.hasOwn(choices, provider) ? choices[provider] : undefined;
   const model = selected?.model.trim() || '';
-  return { provider, model, apiKey: selected?.key?.trim() || '', endpoint: selected?.endpoint, configured: Boolean(selected?.key?.trim() && /^[a-zA-Z0-9._:/-]{1,180}$/.test(model) && (provider !== 'openrouter' || model.endsWith(':free'))) };
+  return { provider, model, apiKey: selected?.key?.trim() || '', endpoint: selected?.endpoint, configured: Boolean(selected?.key?.trim() && /^[a-zA-Z0-9._:/-]{1,180}$/.test(model) && (provider !== 'openrouter' || model.endsWith(':free')) && (provider !== 'heretic' || Boolean(selected?.endpoint))) };
 }
 
 function aiError(code, status = 503) {
@@ -22,7 +34,7 @@ function aiError(code, status = 503) {
 function createSingleTextAiClient({ env = process.env, OpenAI, fetchImpl = fetch } = {}) {
   const config = textAiConfig(env);
   if (!config.configured) return null;
-  if (['groq', 'nvidia', 'openrouter'].includes(config.provider)) return { responses: { create: async (input, options = {}) => {
+  if (['groq', 'nvidia', 'openrouter', 'heretic'].includes(config.provider)) return { responses: { create: async (input, options = {}) => {
     if (typeof input.input !== 'string' || typeof input.instructions !== 'string') throw aiError('unsupported_text_input', 400);
     options.signal?.throwIfAborted();
     const response = await fetchImpl(config.endpoint, {
@@ -84,7 +96,7 @@ function createTextAiClient(options = {}) {
     try { return await primary.responses.create(input, requestOptions); }
     catch (error) {
       const alternate = env.LEGAL_AI_FALLBACK_PROVIDER?.trim().toLowerCase();
-      const explicitRejection = /^(?:groq|nvidia|openrouter|gemini|meta)_request_failed$/.test(error.code || '') || config.provider === 'openai' && typeof error.status === 'number';
+      const explicitRejection = /^(?:groq|nvidia|openrouter|heretic|gemini|meta)_request_failed$/.test(error.code || '') || config.provider === 'openai' && typeof error.status === 'number';
       if (requestOptions.signal?.aborted || !explicitRejection || ![429, 502, 503, 504].includes(error.status) || !alternate || alternate === config.provider) throw error;
       const fallback = createSingleTextAiClient({ ...options, env: { ...env, LEGAL_AI_PROVIDER: alternate } });
       if (!fallback) throw error;
