@@ -1,0 +1,131 @@
+{
+  "sabeq": {
+    "name": "سابق القانونية",
+    "source": "sabeq-legal",
+    "checks": [
+      {
+        "id": "sabeq-domain", "name": "النطاق الرسمي",
+        "url": "https://www.sabeq.legal/", "title": "مجموعة سابق القانونية",
+        "lang": "ar", "dir": "rtl", "selector": "iframe#site",
+        "frame_url": "https://q8-ux.github.io/saad/sabeq-legal/"
+      },
+      {
+        "id": "sabeq-site", "name": "الواجهة العامة والخدمات",
+        "url": "https://q8-ux.github.io/saad/sabeq-legal/",
+        "title": "مجموعة سابق القانونية", "lang": "ar", "dir": "rtl", "selector": "#services"
+      },
+      {
+        "id": "sabeq-admin-preview", "name": "معاينة لوحة الإدارة العامة",
+        "url": "https://q8-ux.github.io/saad/sabeq-admin-preview/",
+        "title": "مركز إدارة سابق", "lang": "ar", "dir": "rtl", "selector": "#app"
+      }
+    ]
+  },
+  "poetry": {
+    "name": "أنت الشاعر — النسخة الأصلية",
+    "source": "ant-alshaer",
+    "checks": [
+      {
+        "id": "poetry-portal", "name": "البوابة ووجهة التطبيق",
+        "url": "https://q8-ux.github.io/saad/ant-alshaer/", "title": "أنت الشاعر",
+        "lang": "ar", "dir": "rtl", "selector": "iframe.site-frame",
+        "frame_url": "https://abyat-alshier.centrino.chatgpt.site/"
+      },
+      {
+        "id": "poetry-version", "name": "معرّف إصدار التطبيق الفعلي",
+        "url": "https://abyat-alshier.centrino.chatgpt.site/api/version", "json_field": "build_id"
+      }
+    ]
+  },
+  "library": {
+    "name": "نموذج مكتبة الكويت الوطنية",
+    "source": "nlk-multilingual",
+    "checks": [
+      {
+        "id": "library-ar", "name": "دليل الخدمات بالعربية",
+        "url": "https://q8-ux.github.io/saad/nlk-multilingual/?lang=ar",
+        "title": "مكتبة الكويت الوطنية", "lang": "ar", "dir": "rtl", "selector": "#service-grid a[href]"
+      },
+      {
+        "id": "library-en", "name": "دليل الخدمات بالإنجليزية",
+        "url": "https://q8-ux.github.io/saad/nlk-multilingual/?lang=en",
+        "title": "National Library of Kuwait", "lang": "en", "dir": "ltr", "selector": "#service-grid a[href]",
+        "screenshot": true
+      },
+      {
+        "id": "library-catalog", "name": "صفحة الفهرس الداخلية بالإنجليزية",
+        "url": "https://q8-ux.github.io/saad/nlk-multilingual/page.html?topic=catalog&lang=en",
+        "title": "Library catalog", "lang": "en", "dir": "ltr", "selector": "#page-summary"
+      }
+    ]
+  },
+  "doctor": {
+    "name": "موقع د. حمد",
+    "source": "dr-hamad",
+    "checks": [
+      {
+        "id": "doctor-site", "name": "الموقع ومكتبة المنشورات",
+        "url": "https://q8-ux.github.io/saad/dr-hamad/", "title": "د. حمد ساكت العنزي",
+        "lang": "ar", "dir": "rtl", "selector": "#library", "screenshot": true
+      },
+      {
+        "id": "doctor-article", "name": "مقال خشونة الركبة وروابط مراجعه",
+        "url": "https://q8-ux.github.io/saad/dr-hamad/article.html", "title": "خشونة الركبة",
+        "lang": "ar", "dir": "rtl", "selector": "main h1", "source_selector": "#references a[href^='https://']"
+      }
+    ]
+  },
+  "chess": {
+    "name": "الشطرنج",
+    "source": "ai-chess-kuwait",
+    "checks": [
+      {
+        "id": "chess-portal", "name": "البوابة ووجهة اللعبة",
+        "url": "https://q8-ux.github.io/saad/ai-chess-kuwait/", "title": "AI Chess Kuwait",
+        "lang": "ar", "dir": "rtl", "selector": "iframe",
+        "frame_url": "https://ai-chess-kuwait.onrender.com/"
+      },
+      {
+        "id": "chess-app", "name": "واجهة اللعبة الفعلية",
+        "url": "https://ai-chess-kuwait.onrender.com/", "title": "AI Chess Kuwait"
+      }
+    ]
+  },
+  "store": {
+    "name": "متجر عمان للخضروات",
+    "source": "oman-fruits-commerce",
+    "checks": [
+      {
+        "id": "store-catalog", "name": "ظهور أصناف الكتالوج",
+        "url": "https://q8-ux.github.io/saad/oman-fruits-commerce/", "title": "شركة عمان للفواكه والخضروات",
+        "lang": "ar", "dir": "rtl", "selector": ".product-card"
+      },
+      {
+        "id": "store-checkout", "name": "صفحة إتمام الطلب",
+        "url": "https://q8-ux.github.io/saad/oman-fruits-commerce/checkout/", "title": "إتمام الطلب",
+        "lang": "ar", "dir": "rtl", "selector": "#app"
+      }
+    ]
+  },
+  "research": {
+    "name": "البحث في التعليقات",
+    "source": "social-request-radar",
+    "checks": [
+      {
+        "id": "research-portal", "name": "صفحة مسار البحث العام",
+        "url": "https://q8-ux.github.io/saad/social-request-radar/", "title": "رادار"
+      }
+    ]
+  },
+  "animation": {
+    "name": "مسار الرسوم المتحركة",
+    "source": "animation-studio",
+    "checks": [
+      {
+        "id": "animation-studio", "name": "الاستوديو وعناصر معاينة المشاهد",
+        "url": "https://q8-ux.github.io/saad/animation-studio/", "title": "مسار الرسوم المتحركة",
+        "lang": "ar", "dir": "rtl", "selector": "canvas#preview"
+      }
+    ]
+  }
+}
