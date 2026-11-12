@@ -2,16 +2,16 @@
 
 // Independent, non-official prototype. No personal data is sent to this project.
 // Search filters the LOCAL SERVICE DIRECTORY, not the library's holdings catalog.
-const officialBase = "https://www.nlk.gov.kw/";
+const localPage = slug => "./page.html?topic=" + encodeURIComponent(slug);
 const serviceData = [
-  {id:"catalog",category:"research",icon:"⌕",url:officialBase,tag:"catalog books library فهرس كتاب"},
-  {id:"databases",category:"research",icon:"▦",url:officialBase+"LibraryDataBase.aspx",tag:"research databases academic ebsco معرفة"},
-  {id:"bibliography",category:"research",icon:"▤",url:officialBase+"NationalBibliography.aspx",tag:"bibliography national books publication"},
-  {id:"digital",category:"research",icon:"◇",url:officialBase+"DigitalLibrary.aspx",tag:"digital archive collections heritage تراث"},
-  {id:"copyright",category:"authors",icon:"©",url:officialBase+"CopyRightData.aspx",tag:"copyright authors intellectual property حق المؤلف"},
-  {id:"isbn",category:"authors",icon:"#",url:officialBase+"CopyRightData.aspx",tag:"isbn publishing number الترقيم الدولي"},
-  {id:"deposit",category:"authors",icon:"▣",url:officialBase+"CopyRightData.aspx",tag:"legal deposit publication إيداع"},
-  {id:"rooms",category:"visitors",icon:"⌂",url:officialBase+"UserServices.aspx",tag:"rooms events hall theatre booking قاعات"}
+  {id:"catalog",category:"research",icon:"⌕",url:localPage("catalog"),tag:"catalog books library فهرس كتاب"},
+  {id:"databases",category:"research",icon:"▦",url:localPage("databases"),tag:"research databases academic ebsco معرفة"},
+  {id:"bibliography",category:"research",icon:"▤",url:localPage("bibliography"),tag:"bibliography national books publication"},
+  {id:"digital",category:"research",icon:"◇",url:localPage("digital"),tag:"digital archive collections heritage تراث"},
+  {id:"copyright",category:"authors",icon:"©",url:localPage("copyright"),tag:"copyright authors intellectual property حق المؤلف"},
+  {id:"isbn",category:"authors",icon:"#",url:localPage("isbn"),tag:"isbn publishing number الترقيم الدولي"},
+  {id:"deposit",category:"authors",icon:"▣",url:localPage("deposit"),tag:"legal deposit publication إيداع"},
+  {id:"rooms",category:"visitors",icon:"⌂",url:localPage("rooms"),tag:"rooms events hall theatre booking قاعات"}
 ];
 const translations = {
   ar:{
@@ -123,6 +123,20 @@ const translations = {
     }
   }
 };
+
+/* Internal navigation in all six languages; no outdated external-site promises. */
+const internalCopy = {
+  ar:{goOfficial:"دليل الخدمات الجديد",servicesDesc:"ابحث عن الخدمة وافتح صفحتها الجديدة داخل الموقع دون الانتقال إلى الموقع القديم.",allOfficial:"جميع الصفحات الداخلية",aboutLink:"اقرأ عن المكتبة",ctaButton:"تصفح المجموعات",ctaDesc:"اكتشف مسارات المعرفة والخدمات داخل البوابة المطوّرة.",linkLabel:"افتح الصفحة",official:"صفحات الموقع"},
+  en:{goOfficial:"Explore our new service pages",servicesDesc:"Find a service and open its new page without leaving this site.",allOfficial:"All internal pages",aboutLink:"Read about the library",ctaButton:"Explore collections",ctaDesc:"Browse the library's informational guides within the redesigned site.",linkLabel:"Open page",official:"Site pages"},
+  fr:{goOfficial:"Voir les nouvelles pages de services",servicesDesc:"Ouvrez les pages des services directement sur ce site.",allOfficial:"Toutes les pages internes",aboutLink:"En savoir plus",ctaButton:"Explorer les collections",ctaDesc:"Parcourez les guides informatifs au sein du site rénové.",linkLabel:"Ouvrir la page",official:"Rubriques du site"},
+  ur:{goOfficial:"نئے خدمات کے صفحات",servicesDesc:"خدمت منتخب کریں اور اسی ویب سائٹ پر اس کا نیا صفحہ کھولیں۔",allOfficial:"تمام اندرونی صفحات",aboutLink:"لائبریری کا تعارف",ctaButton:"مجموعے دیکھیں",ctaDesc:"اسی نئی ویب سائٹ میں علمی صفحات تلاش کریں۔",linkLabel:"صفحہ کھولیں",official:"ویب سائٹ کے صفحات"},
+  hi:{goOfficial:"नए सेवा पेज देखें",servicesDesc:"अपनी सेवा का नया पेज इसी वेबसाइट पर खोलें।",allOfficial:"सभी आंतरिक पेज",aboutLink:"पुस्तकालय परिचय",ctaButton:"संग्रह देखें",ctaDesc:"इस नई साइट पर ज्ञान और सेवाओं के पेज खोजें।",linkLabel:"पेज खोलें",official:"वेबसाइट पेज"},
+  zh:{goOfficial:"浏览新版服务页面",servicesDesc:"查找服务并在本站打开对应的新版内页。",allOfficial:"全部站内页面",aboutLink:"了解图书馆",ctaButton:"探索馆藏",ctaDesc:"在新版网站内部浏览知识与服务介绍。",linkLabel:"打开页面",official:"站内页面"}
+};
+for (const language of Object.keys(internalCopy)) {
+  Object.assign(translations[language], internalCopy[language]);
+}
+
 const dom = {
   language:document.getElementById("language"), search:document.getElementById("search"),
   grid:document.getElementById("service-grid"),filters:document.querySelectorAll("[data-filter]"),
@@ -157,9 +171,7 @@ function createElement(tag,className,textValue){
 function makeCard(item){
   const texts=translations[locale].service[item.id];
   const a=createElement("a","service-card");
-  a.href=item.url;
-  a.target="_blank";
-  a.rel="noopener noreferrer";
+  a.href=item.url+"&lang="+encodeURIComponent(locale);
   a.setAttribute("aria-label",texts[0]+" — "+tr("linkLabel"));
   const icon=createElement("span","service-icon",item.icon);
   icon.setAttribute("aria-hidden","true");
@@ -215,6 +227,11 @@ function applyLocale(){
   document.getElementById("filters").setAttribute("aria-label",tr("filterAll"));
   voiceStatus="";
   renderServices();
+  document.querySelectorAll('a[href^="./page.html?topic="]').forEach(function(anchor){
+    const url = new URL(anchor.getAttribute("href"), location.href);
+    url.searchParams.set("lang",locale);
+    anchor.setAttribute("href","./page.html"+url.search);
+  });
 }
 function setContrast(enabled){
   contrast=enabled;
