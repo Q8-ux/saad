@@ -1,0 +1,64 @@
+# Dedicated NVIDIA GPU host only; no GPU is provisioned by this file.
+# GPU allocation, billing and HTTPS domain remain under the operator's control.
+services:
+  llama:
+    image: ghcr.io/ggml-org/llama.cpp:server-cuda
+    restart: unless-stopped
+    command:
+      - "--hf-repo"
+      - "mradermacher/DeepSeek-V4-Pro-Qwen3.5-9B-UNCENSORED-heretic-GGUF:Q4_K_M"
+      - "--no-mmproj"
+      - "--host"
+      - "0.0.0.0"
+      - "--port"
+      - "8080"
+      - "--ctx-size"
+      - "4096"
+      - "--n-gpu-layers"
+      - "99"
+      - "--parallel"
+      - "1"
+      - "--alias"
+      - "heretic-9b-q4"
+      - "--api-key-file"
+      - "/run/secrets/inference_api_key"
+      - "--log-disable"
+    volumes:
+      - model_cache:/root/.cache/huggingface
+    secrets:
+      - inference_api_key
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    networks: [inference_internal]
+
+  ingress:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      HERETIC_HOSTNAME: ${HERETIC_HOSTNAME:?Set the DNS hostname of this GPU server}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on: [llama]
+    networks: [inference_internal]
+
+secrets:
+  inference_api_key:
+    file: ./secrets/inference_api_key
+
+networks:
+  inference_internal:
+
+volumes:
+  model_cache:
+  caddy_data:
+  caddy_config:

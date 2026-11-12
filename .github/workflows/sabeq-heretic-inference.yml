@@ -1,0 +1,35 @@
+name: Sabeq Heretic inference configuration checks
+
+on:
+  pull_request:
+    paths:
+      - "legal-memo-platform/inference/heretic/**"
+      - ".github/workflows/sabeq-heretic-inference.yml"
+  push:
+    branches: [main]
+    paths:
+      - "legal-memo-platform/inference/heretic/**"
+      - ".github/workflows/sabeq-heretic-inference.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Verify secure deployment config checks
+        run: node --test legal-memo-platform/inference/heretic/deployment.test.mjs
+      - name: Validate Compose without deploying or transferring real keys
+        shell: bash
+        run: |
+          cd legal-memo-platform/inference/heretic
+          mkdir -p secrets
+          printf 'synthetic-key-for-ci-only\n' > secrets/inference_api_key
+          HERETIC_HOSTNAME=heretic.example.invalid docker compose -f compose.yaml config --quiet
