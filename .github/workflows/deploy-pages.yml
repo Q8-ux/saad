@@ -116,17 +116,27 @@ jobs:
         id: nlk
         env:
           BEFORE_SHA: ${{ github.event.before }}
+          GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
           only=false
+          changed=false
           if [[ "$GITHUB_EVENT_NAME" == "push" && "$BEFORE_SHA" =~ ^[0-9a-f]{40}$ && ! "$BEFORE_SHA" =~ ^0+$ ]]; then
             git fetch --no-tags --depth=1 origin "$BEFORE_SHA"
-            changed="$(git diff --name-only "$BEFORE_SHA" "$GITHUB_SHA")"
-            if [[ -n "$changed" ]] && printf '%s\n' "$changed" | grep -Eq '^nlk-multilingual/' && ! printf '%s\n' "$changed" | grep -Eqv '^(nlk-multilingual/|\.github/workflows/deploy-pages\.yml$)' ; then
-              only=true
+            changed_paths="$(git diff --name-only "$BEFORE_SHA" "$GITHUB_SHA")"
+            if [[ -n "$changed_paths" ]] && printf '%s\n' "$changed_paths" | grep -Eq '^nlk-multilingual/'; then
+              changed=true
+              if ! printf '%s\n' "$changed_paths" | grep -Eqv '^(nlk-multilingual/|\.github/workflows/deploy-pages\.yml$)'; then
+                only=true
+              fi
             fi
           fi
+          if [[ "$only" == "true" ]] && ! python nlk-multilingual/deployment/publish.py --probe; then
+            echo "::warning::Previous successful Pages artifact unavailable; selecting full combined build"
+            only=false
+          fi
           echo "only=$only" >> "$GITHUB_OUTPUT"
+          echo "changed=$changed" >> "$GITHUB_OUTPUT"
       - uses: actions/setup-node@v4
         if: (steps.scope.outputs.sabeq_changed == 'true' && steps.tamweenat.outputs.only != 'true' && steps.waqaya.outputs.only != 'true') && steps.nlk.outputs.only != 'true'
         with: { node-version: '22' }
@@ -221,6 +231,10 @@ jobs:
           for p in dashboard admin-control attendance-smart transfers emergency ai-tools notifications profile; do cp -R "workforce-platform/apps/web/out/$p" "_site/$p"; done
           echo 'smart-assistant-flags-v23' > _site/interface-version.txt
           touch _site/.nojekyll
+          if [[ "${{ steps.nlk.outputs.changed }}" == "true" ]]; then
+            test -s _site/nlk-multilingual/index.html
+            printf '%s\n' "$GITHUB_SHA" > _site/nlk-multilingual/release-version.txt
+          fi
       - name: Validate combined site
         if: (steps.scope.outputs.sabeq_only != 'true' && steps.tamweenat.outputs.only != 'true' && steps.rattil.outputs.only != 'true' && steps.waqaya.outputs.only != 'true') && steps.nlk.outputs.only != 'true'
         run: |
@@ -281,17 +295,22 @@ jobs:
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
-      - name: Verify Cairo NLK live release
-        if: steps.nlk.outputs.only == 'true'
+      - name: Verify updated NLK public homepage
+        if: steps.nlk.outputs.changed == 'true'
         shell: bash
         run: |
           set -euo pipefail
           url="https://q8-ux.github.io/saad/nlk-multilingual/release-version.txt?revision=$GITHUB_SHA"
+          home="https://q8-ux.github.io/saad/nlk-multilingual/?revision=$GITHUB_SHA"
           for attempt in 1 2 3 4 5 6 7 8; do
             release="$(curl --fail --location --silent --show-error --max-time 15 -H 'Cache-Control: no-cache' "$url" || true)"
             if [[ "$release" == "$GITHUB_SHA" ]]; then
-              echo "NLK deployed and Cairo font included: $release" >> "$GITHUB_STEP_SUMMARY"
-              exit 0
+              curl --fail --location --silent --show-error --max-time 15 -H 'Cache-Control: no-cache' "$home" -o /tmp/nlk-home-release.html
+              if grep -Fq 'كل ما يحتاجه فِكرك من معلومات' /tmp/nlk-home-release.html && ! grep -Fq 'hero-photo-caption' /tmp/nlk-home-release.html && ! grep -Fq 'hero-photo-attribution' /tmp/nlk-home-release.html; then
+                echo "NLK live homepage verified for release $release: new title and clean real photograph" >> "$GITHUB_STEP_SUMMARY"
+                exit 0
+              fi
+              echo "::warning::NLK version matched but homepage HTML is still stale"
             fi
             echo "NLK release not yet current; attempt $attempt"
             sleep 8
