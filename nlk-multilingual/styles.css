@@ -35,3 +35,124 @@ html[lang="ar"] input,
 html[lang="ar"] select {
   font-family: inherit;
 }
+
+
+/* Home hero — a REAL PHOTO of the National Library of Kuwait, replacing all SVG illustration.
+   The photograph is loaded remotely from its publishing source; no copyrighted copy is
+   stored in this open-source repository. Editorial permission must be confirmed for production. */
+.hero-layout {
+  grid-template-columns: minmax(0,1.04fr) minmax(0,.96fr);
+  gap:clamp(24px,4.4vw,68px);
+}
+.hero-photo-shell {
+  position:relative;
+  width:100%;
+  min-width:0;
+  padding-block:36px 23px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  gap:13px;
+}
+.hero-photo-frame {
+  position:relative;
+  isolation:isolate;
+  width:100%;
+  height:510px;
+  margin:0;
+  border-radius:23px 86px 23px 23px;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.22);
+  background:linear-gradient(135deg,#335868 0%,#213f53 50%,#142e41 100%);
+  box-shadow:0 26px 66px rgba(0,0,0,.33),0 0 0 7px rgba(255,255,255,.045);
+}
+.hero-photo {
+  width:100%;
+  height:100%;
+  display:block;
+  object-fit:cover;
+  object-position:center center;
+  transition:transform .7s ease;
+  background:#1b3946;
+}
+.hero-photo-frame:hover .hero-photo {transform:scale(1.025)}
+.hero-photo-scrim {
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:linear-gradient(to top,rgba(5,20,31,.87) 0%,rgba(5,20,31,.1) 43%,transparent 66%);
+}
+.hero-photo-caption {
+  position:absolute;
+  inset-inline:28px;
+  bottom:26px;
+  z-index:2;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  color:#fff;
+  font-size:1.01rem;
+  font-weight:800;
+  text-shadow:0 2px 11px rgba(0,0,0,.55);
+  flex-wrap:wrap;
+}
+.hero-photo-marker{color:#dfc087;font-size:.7rem;line-height:1}
+.hero-photo-caption-secondary {
+  display:block;
+  width:100%;
+  padding-inline-start:21px;
+  color:#e1ebec;
+  font-size:.76rem;
+  font-weight:500;
+  margin-top:-5px;
+}
+.hero-photo-attribution {
+  display:flex;
+  gap:6px;
+  align-items:center;
+  flex-wrap:wrap;
+  color:#bed0d1;
+  font-size:.67rem;
+  line-height:1.65;
+}
+.hero-photo-attribution a {
+  color:#f0d4a0;
+  font-weight:700;
+  text-decoration:underline;
+  text-underline-offset:3px;
+}
+.hero-photo-unavailable[hidden]{display:none!important}
+.hero-photo-unavailable {
+  position:absolute;
+  z-index:3;
+  inset-inline:24px;
+  top:40%;
+  margin:0;
+  padding:12px;
+  text-align:center;
+  color:#f1f6f6;
+  background:rgba(4,26,37,.82);
+  border-radius:10px;
+  font-size:.9rem;
+}
+.hero-photo-frame.photo-failed .hero-photo{opacity:0}
+html[dir="ltr"] .hero-photo-frame{border-radius:86px 23px 23px 23px}
+@media(max-width:880px){
+  .hero-layout{grid-template-columns:1fr;gap:6px}
+  .hero-photo-shell{max-width:640px;margin-inline:auto;padding-top:0;padding-bottom:47px}
+  .hero-photo-frame{height:380px;border-radius:18px 66px 18px 18px}
+  html[dir="ltr"] .hero-photo-frame{border-radius:66px 18px 18px 18px}
+}
+@media(max-width:580px){
+  .hero-photo-shell{padding-top:5px;padding-bottom:27px;gap:9px}
+  .hero-photo-frame{height:clamp(260px,74vw,345px);border-radius:15px 50px 15px 15px}
+  html[dir="ltr"] .hero-photo-frame{border-radius:50px 15px 15px 15px}
+  .hero-photo-caption{bottom:20px;inset-inline:19px;font-size:.9rem}
+  .hero-photo-caption-secondary{font-size:.69rem}
+  .hero-photo-attribution{font-size:.64rem}
+  .hero-copy{padding-bottom:9px}
+}
+@media(prefers-reduced-motion:reduce){
+  .hero-photo{transition:none!important}
+  .hero-photo-frame:hover .hero-photo{transform:none!important}
+}
