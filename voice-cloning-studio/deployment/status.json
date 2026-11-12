@@ -3,7 +3,7 @@
   "gateway": "deployed",
   "inferenceEngine": "not_provisioned",
   "hostingLimitGB": 1,
-  "verifiedAt": "2026-11-09",
+  "verifiedAt": "2026-11-12",
   "verification": {
     "unitTests": 8,
     "gatewayTests": 14,
@@ -13,9 +13,9 @@
     "gateway": "health 200; unauthenticated profiles 401; authenticated engine_not_configured 503; exact CORS origin confirmed",
     "gatewayAndMediaTests": 37
   },
-  "remaining": "Connect a suitably resourced Voicebox inference host. Test speaker identity, Arabic dialect and AI outputs on that host.",
+  "remaining": "Validate voice similarity and Gulf pronunciation with the intended reference and test model loading on the user’s device.",
   "url": "https://q8-ux.github.io/saad/voice-cloning-studio/",
-  "version": "1.3.0",
+  "version": "1.5.0",
   "readyVoices": {
     "arabicCatalogCount": 32,
     "kuwait": [
@@ -88,5 +88,24 @@
       "downloaded": true,
       "profileHandoff": true
     }
+  },
+  "browserCloning": {
+    "engine": "MOSS-TTS-Nano ONNX int8 in a browser worker",
+    "hostedInferenceRequired": false,
+    "modelBytes": 288397552,
+    "testReference": "synthetic speech, 12.999 seconds",
+    "arabicWav": {
+      "seconds": 3.6,
+      "sampleRate": 48000,
+      "channels": 2,
+      "bytes": 691244
+    },
+    "verified": [
+      "browser generation",
+      "audio decodability",
+      "WAV download",
+      "sample save",
+      "local history"
+    ]
   }
 }
