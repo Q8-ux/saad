@@ -1,0 +1,37 @@
+const paths = {
+  logo: '<path d="M4 20h16M6 17h12M7 15V8m5 7V8m5 7V8M3 8h18L12 3 3 8Z"/>',
+  grid: '<rect x="3.5" y="3.5" width="6" height="6" rx="1"/><rect x="14.5" y="3.5" width="6" height="6" rx="1"/><rect x="3.5" y="14.5" width="6" height="6" rx="1"/><rect x="14.5" y="14.5" width="6" height="6" rx="1"/>',
+  file: '<path d="M13 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10l-7-7Z"/><path d="M13 3v7h7M8 14h8m-8 3h5"/>',
+  files: '<path d="M8 7H5v14h11v-3M9 3h7l4 4v10H9V3Zm7 0v5h4M12 11h5m-5 3h5"/>',
+  edit: '<path d="M12 20H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9m1 2 4 4m-10 5 4.4-.9L21 6.5 17.5 3 10 10.6 9 15Z"/>',
+  book: '<path d="M12 6v15m0-15C9 3 5 3 2 4v15c4-1 8-1 10 2 2-3 6-3 10-2V4c-3-1-7-1-10 2Z"/>',
+  scale: '<path d="M12 3v18m-5 0h10M5 6h14M5 6l-3 7h6L5 6Zm14 0-3 7h6l-3-7Z"/>',
+  cards: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18m-14 5h4"/>',
+  users: '<circle cx="9" cy="8" r="3"/><path d="M3 20v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2m2-15a3 3 0 1 1 0 6m1 3a4 4 0 0 1 3 4v2"/>',
+  chevron: '<path d="m14 6-6 6 6 6"/>',
+  left: '<path d="M20 12H4m7-7-7 7 7 7"/>',
+  right: '<path d="M4 12h16m-7-7 7 7-7 7"/>',
+  external: '<path d="M14 4h6v6m0-6-9 9m8 0v6H5V5h6"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  search: '<circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4 4"/>',
+  menu: '<path d="M4 6h16M4 12h16M4 18h16"/>',
+  x: '<path d="m6 6 12 12M18 6 6 18"/>',
+  logout: '<path d="M10 17v3H4V4h6v3m-1 5h12m-4-4 4 4-4 4"/>',
+  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  check: '<path d="m5 12 4 4L19 6"/>',
+  checkCircle: '<circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/>',
+  arrowDown: '<path d="M12 3v12m-4-4 4 4 4-4M4 16v4h16v-4"/>',
+  print: '<path d="M7 8V3h10v5M7 17H3V9h18v8h-4m-10-3h10v7H7v-7Zm10-3h.1"/>',
+  archive: '<path d="M4 8v12h16V8M3 4h18v4H3V4Zm7 8h4"/>',
+  link: '<path d="m10 13 4-4m-6 7-2 2a3 3 0 0 1-4-4l4-4a3 3 0 0 1 4 0m4 4a3 3 0 0 0 4 0l4-4a3 3 0 0 0-4-4l-2 2"/>',
+  shield: '<path d="m12 3 8 3v5c0 5-4 8-8 10-4-2-8-5-8-10V6l8-3Z"/><path d="m9 12 2 2 4-5"/>',
+  calendar: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4m10-4v4M3 10h18"/>',
+  spark: '<path d="m12 2 2.2 7.8L22 12l-7.8 2.2L12 22l-2.2-7.8L2 12l7.8-2.2L12 2Z"/>',
+  flag: '<path d="M5 21V4m0 1c4-3 8 3 14 0v10c-6 3-10-3-14 0"/>',
+  layers: '<path d="m12 3 9 5-9 5-9-5 9-5Zm-9 9 9 5 9-5M3 16l9 5 9-5"/>',
+  pin: '<path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/>',
+};
+
+export function icon(name, size = 20) {
+  return `<svg aria-hidden="true" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">${paths[name] || ''}</svg>`;
+}
