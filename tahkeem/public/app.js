@@ -1,4 +1,5 @@
 import { icon } from './icons.js';
+import { courts, format, languages, memoBodyLimit, memoDocuments, memoLineRole, types } from './memo-format.js';
 
 const app = document.querySelector('#app');
 const dialog = document.querySelector('#dialog');
@@ -6,12 +7,12 @@ const toast = document.querySelector('#toast');
 const dateFormat = new Intl.DateTimeFormat('ar-KW', { timeZone: 'Asia/Kuwait', dateStyle: 'medium' });
 const numbers = new Intl.NumberFormat('ar-KW');
 const currency = new Intl.NumberFormat('ar-KW', { style: 'currency', currency: 'KWD' });
-const memoTypes = ['مذكرة دفاع', 'صحيفة دعوى', 'صحيفة استئناف', 'مذكرة رد', 'مذكرة تمييز', 'مذكرة تنفيذ'];
-const courts = ['المحكمة الكلية', 'المحكمة الجزئية', 'محكمة الاستئناف', 'محكمة التمييز', 'محكمة الأسرة', 'المحكمة الدستورية', 'إدارة التنفيذ'];
+const memoTypes = Object.keys(types);
 const statuses = { review: 'تحتاج مراجعة', approved: 'معتمدة داخليًا', archived: 'مؤرشفة' };
 const kinds = { law: 'القوانين والتشريعات', article: 'المواد القانونية', judgment: 'الأحكام والمبادئ' };
 const state = { account: null, model: false, setup: false, authMode: 'login', version: 0, memo: null,
-  compose: null, references: new Map(), selected: new Set(), clients: new Map(), editorDirty: false };
+  compose: null, references: new Map(), selected: new Set(), clients: new Map(), editorDirty: false,
+  memoLanguage: '', chat: [], attachmentsAvailable: false, uploads: new Map() };
 let toastTimeout;
 
 const h = value => String(value ?? '').replace(/[&<>"']/g, character =>
@@ -44,12 +45,14 @@ const heading = (title, description = '', action = '') =>
 const empty = (glyph, title, copy, action = '') =>
   `<div class="empty"><span class="empty-mark">${icon(glyph,22)}</span><h3>${h(title)}</h3>${copy ? `<p>${h(copy)}</p>` : ''}${action}</div>`;
 
-async function api(endpoint, { method = 'GET', data } = {}) {
+async function api(endpoint, { method = 'GET', data, binary, signal } = {}) {
   let response;
   try {
     response = await fetch(`/api${endpoint}`, {
       method, cache: 'no-store', credentials: 'same-origin',
-      ...(data === undefined ? {} : { headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }),
+      signal,
+      ...(binary ? { headers: { 'Content-Type': 'application/octet-stream' }, body: binary } :
+        data === undefined ? {} : { headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }),
     });
   } catch {
     throw new Error('تعذر الاتصال بتحكيم. أعد المحاولة.');
@@ -64,16 +67,19 @@ async function api(endpoint, { method = 'GET', data } = {}) {
       clearSession();
       authPage();
     }
-    throw new Error(payload.error || 'تعذر تنفيذ الطلب.');
+    throw Object.assign(new Error(payload.error || 'تعذر تنفيذ الطلب.'), { status: response.status });
   }
   return payload;
 }
 
 function clearSession() {
-  Object.assign(state, { account: null, authMode: 'login', memo: null, compose: null, editorDirty: false });
+  Object.assign(state, { account: null, authMode: 'login', memo: null, compose: null, editorDirty: false,
+    memoLanguage: '', chat: [] });
   state.references.clear();
   state.selected.clear();
   state.clients.clear();
+  for (const upload of state.uploads.values()) upload.controller?.abort();
+  state.uploads.clear();
   if (dialog.open) dialog.close();
   state.version++;
 }
@@ -131,7 +137,8 @@ function shell(route, pageTitle, content) {
   const workNav = account.active ? `<div class="nav-group"><p class="nav-label">مساحة العمل</p>
     ${nav('نظرة عامة','overview','grid')}
     ${nav('مذكراتي','memos','files')}
-    ${nav('مذكرة جديدة','compose','edit')}</div>
+    ${nav('مذكرة جديدة','compose','edit')}
+    ${nav('المحكّم الذكي','arbitrator','spark')}</div>
     <div class="nav-group"><p class="nav-label">المكتبة القانونية</p>
     ${nav(kinds.law,'library','book',{kind:'law'})}
     ${nav(kinds.article,'library','file',{kind:'article'})}
@@ -155,6 +162,7 @@ function shell(route, pageTitle, content) {
       <div class="breadcrumb"><button class="icon-btn menu-button" type="button" data-action="menu-open" aria-label="فتح القائمة" aria-expanded="false" aria-controls="navigation">${icon('menu',19)}</button>
         <span>تحكيم</span>${icon('chevron',13)}<strong>${h(pageTitle)}</strong></div>
       <div class="top-actions"><span class="date-chip">${icon('calendar',16)}${h(date(Date.now()))}</span>
+        ${account.active ? `<a class="icon-btn arbitrator-shortcut" href="#arbitrator" aria-label="فتح المحكّم الذكي" title="المحكّم الذكي">${icon('spark',18)}</a>` : ''}
         ${account.active ? `<button class="icon-btn" type="button" data-action="go-search" aria-label="بحث المكتبة">${icon('search',18)}</button>` : ''}
         <button class="icon-btn" type="button" data-action="logout" aria-label="تسجيل الخروج">${icon('logout',18)}</button></div>
     </header><main class="workspace" id="main" tabindex="-1">${content}</main></div></div>`;
@@ -309,11 +317,168 @@ function openDialog(title, html) {
 }
 
 function newCompose(query) {
-  if (!state.compose) state.compose = { id: crypto.randomUUID(), method: 'template' };
+  if (!state.compose) {
+    const key = `tahkeem-draft-${state.account.id}`;
+    const id = sessionStorage.getItem(key) || crypto.randomUUID();
+    sessionStorage.setItem(key,id);
+    state.compose = { id, method: state.model ? 'model' : 'template', language: 'ar', attachments: [] };
+  }
   const requestedType = query.get('type');
   if (memoTypes.includes(requestedType)) state.compose.type = requestedType;
   const source = query.get('source');
   if (source && state.references.has(source) && state.selected.size < 8) state.selected.add(source);
+}
+
+const caseFields = [
+  ['facts', 'الوقائع', 'Facts', 12000, 5, 'اكتب كل واقعة في سطر بحسب ترتيبها.'],
+  ['evidence', 'المستندات والأدلة', 'Documents and evidence', 5000, 3, 'اذكر المستند والواقعة التي يدعمها.'],
+  ['grounds', 'الدفوع أو أوجه الطلب', 'Grounds and submissions', 6000, 4],
+  ['opponentGrounds', 'دفوع الخصم', 'Opposing submissions', 4000, 3],
+  ['reply', 'الرد على الخصم', 'Reply to opposing submissions', 5000, 3],
+  ['requests', 'الطلبات الأصلية', 'Primary relief', 5000, 3],
+  ['alternativeRequests', 'الطلبات الاحتياطية', 'Alternative relief', 4000, 3],
+];
+
+function caseInputs(data, english = false) {
+  return caseFields.map(([name, ar, en, max, rows, placeholder]) => label(english ? en : ar,
+    textarea(english ? 'en-' + name : name, data[english ? 'en-' + name : name], `dir="${english ? 'ltr' : 'auto'}"
+      maxlength="${max}" rows="${rows}" ${name === 'facts' && !english ? 'required minlength="15"' : ''}
+      ${!english && placeholder ? `placeholder="${h(placeholder)}"` : ''}`), name === 'facts' || name === 'evidence')).join('');
+}
+
+const fileSize = new Intl.NumberFormat('ar-KW', { style: 'unit', unit: 'megabyte', unitDisplay: 'short', maximumFractionDigits: 2 });
+
+function attachmentRows(items, editable) {
+  return items.length ? items.map(item=>`<li class="attachment-row">
+    <div class="attachment-name"><strong dir="auto">${h(item.name)}</strong>
+    <small>${h(fileSize.format(item.bytes/1_000_000))}</small>
+    ${item.status === 'uploading' ? `<progress max="${item.bytes || 1}" value="${Math.min(item.bytes,(item.uploadedParts||0)*(item.partSize||1))}" aria-label="تقدم الرفع"></progress>` : ''}
+    ${item.status === 'uploading' && !item.file && editable ? '<small>اختر الملف نفسه لمتابعة رفعه.</small>' : ''}
+    ${item.status === 'queued' ? '<small>في انتظار الرفع</small>' : ''}
+    ${item.error ? `<small class="form-error">${h(item.error)}</small>` : ''}</div>
+    <div class="actions">
+      ${item.status === 'ready' ? link('تنزيل',`/api/attachments/${item.id}/download`,'arrowDown','secondary') : ''}
+      ${item.error && item.status === 'uploading' && item.file && editable ?
+        button('متابعة الرفع','retry-attachment',null,'secondary',`data-id="${item.id}"`) : ''}
+      ${editable ? button(item.status === 'uploading' && !item.error ? 'إلغاء' : 'إزالة','remove-attachment',null,'subtle',`data-id="${item.id}"`) : ''}
+    </div></li>`).join('') : '<li class="hint">لا توجد مرفقات.</li>';
+}
+
+function memoAttachments(memoId, items = [], editable = true) {
+  if (!state.attachmentsAvailable && !items.length) return '';
+  return `<section class="panel form-section stack" data-attachments="${memoId}" data-editable="${editable}">
+    <h2>مرفقات القضية</h2>
+    <ul class="attachment-list" aria-live="polite">${attachmentRows(mergedAttachments(memoId,items),editable)}</ul>
+    ${editable && state.attachmentsAvailable ? label('إضافة ملفات',`<input type="file" multiple data-memo-id="${memoId}">`) : ''}
+    <p class="hint">تُحفظ المرفقات مع القضية. ليدخل مضمونها في الصياغة، اذكر خلاصته في حقل المستندات والأدلة.</p>
+  </section>`;
+}
+
+function mergedAttachments(memoId, saved) {
+  const items = new Map(saved.map(item=>[item.id,item]));
+  for (const upload of state.uploads.values()) {
+    if (upload.memoId === memoId) items.set(upload.id,upload);
+  }
+  return [...items.values()];
+}
+
+function attachmentRecord(memoId) {
+  if (state.memo?.id === memoId) return state.memo;
+  if (state.compose?.id === memoId) return state.compose;
+  return null;
+}
+
+function updateAttachmentPanel(memoId) {
+  const panel = app.querySelector(`[data-attachments="${memoId}"]`);
+  if (!panel) return;
+  const saved = attachmentRecord(memoId)?.attachments || [];
+  panel.querySelector('.attachment-list').innerHTML =
+    attachmentRows(mergedAttachments(memoId,saved),panel.dataset.editable==='true');
+}
+
+async function uploadAttachment(upload, saved) {
+  const controller = new AbortController();
+  const { memoId, name, bytes, file } = upload;
+  Object.assign(upload,{controller,error:'',status:'uploading'});
+  updateAttachmentPanel(memoId);
+  try {
+    const options = {signal:controller.signal};
+    const sampleBytes = 65536;
+    const sample = new Blob([file.slice(0,sampleBytes), file.slice(-sampleBytes)]);
+    const digest = await crypto.subtle.digest('SHA-256',await sample.arrayBuffer());
+    const fingerprint = Array.from(new Uint8Array(digest),byte=>byte.toString(16).padStart(2,'0')).join('');
+    if (controller.signal.aborted || !state.uploads.has(upload.id)) return;
+    const existing = saved.find(item=>item.status==='uploading' && item.name===name &&
+      item.bytes===bytes && item.fingerprint===fingerprint && !state.uploads.has(item.id));
+    if (existing) {
+      state.uploads.delete(upload.id);
+      Object.assign(upload,existing);
+      state.uploads.set(upload.id,upload);
+    }
+    const id = upload.id;
+    const created = await api('/attachments',{...options,method:'POST',data:{id,memoId,name,bytes,fingerprint}});
+    Object.assign(upload,created);
+    updateAttachmentPanel(memoId);
+    while (upload.status === 'uploading') {
+      const offset = upload.uploadedParts*upload.partSize;
+      const part = file.slice(offset,offset+upload.partSize);
+      const result = await api(`/attachments/${id}/parts/${upload.uploadedParts}`,{...options,method:'PUT',binary:part});
+      Object.assign(upload,result);
+      updateAttachmentPanel(memoId);
+    }
+    upload.file = null;
+  } catch (error) {
+    if (!controller.signal.aborted) upload.error = error.message;
+  } finally {
+    upload.controller = null;
+    updateAttachmentPanel(memoId);
+  }
+}
+
+let uploadQueue = Promise.resolve();
+function queueUpload(upload) {
+  upload.status = 'queued';
+  upload.error = '';
+  uploadQueue = uploadQueue.then(async ()=>{
+    if (state.uploads.has(upload.id) && !upload.removing) {
+      await uploadAttachment(upload,attachmentRecord(upload.memoId)?.attachments || []);
+    }
+  }).catch(error=>flash(error.message));
+}
+
+async function deleteAttachment(id) {
+  const draft = state.uploads.get(id);
+  const panel = app.querySelector('[data-attachments]');
+  const memoId = draft?.memoId || panel?.dataset.attachments;
+  const memo = attachmentRecord(memoId);
+  const row = draft || memo?.attachments?.find(item=>item.id===id);
+  if (!row) return;
+  if (row.removing) return;
+  if (row.status === 'ready' && !window.confirm('هل تريد إزالة هذا المرفق؟')) return;
+  row.removing = true;
+  draft?.controller?.abort();
+  try { await api(`/attachments/${id}`,{method:'DELETE'}); }
+  catch (error) {
+    if (error.status !== 404) {
+      row.removing = false;
+      if (draft) draft.error = error.message;
+      updateAttachmentPanel(memoId);
+      throw error;
+    }
+  }
+  state.uploads.delete(id);
+  if (memo?.id === memoId) memo.attachments = (memo.attachments || []).filter(item=>item.id!==id);
+  updateAttachmentPanel(memoId);
+}
+
+function selectAttachments(memoId, files) {
+  for (const file of files) {
+    const id = crypto.randomUUID();
+    const upload = {id,memoId,file,name:file.name,bytes:file.size};
+    state.uploads.set(id,upload);
+    queueUpload(upload);
+  }
+  updateAttachmentPanel(memoId);
 }
 
 function composePage(query) {
@@ -325,18 +490,29 @@ function composePage(query) {
       <div class="stack">
         <section class="panel form-section"><h2>بيانات القضية</h2><div class="form-grid">
           ${label('نوع المذكرة',`<select name="type" required>${memoTypes.map(type=>option(type,type,data.type||memoTypes[0])).join('')}</select>`)}
-          ${label('عنوان المذكرة',input('title',data.title,'required maxlength="140" minlength="3" placeholder="عنوان يسهل العثور عليه"'))}
-          ${label('المحكمة',`<select name="court" required>${option('','اختر المحكمة',data.court||'')}${courts.map(court=>option(court,court,data.court)).join('')}</select>`)}
+          ${label('لغة المذكرة',`<select name="language">${Object.entries(languages).map(([value,name])=>option(value,name,data.language)).join('')}</select>`)}
+          ${label('عنوان المذكرة',input('title',data.title,'required maxlength="140" minlength="3" dir="auto" placeholder="عنوان يسهل العثور عليه"'))}
+          ${label('المحكمة',`<select name="court" required>${option('','اختر المحكمة',data.court||'')}${Object.keys(courts).map(court=>option(court,court,data.court)).join('')}</select>`)}
           ${label('رقم القضية',input('number',data.number,'dir="auto" maxlength="60"'))}
-          ${label('الدائرة',input('circuit',data.circuit,'maxlength="100"'),true)}
-          ${label('مقدم المذكرة وصفته',input('party',data.party,'maxlength="200"'))}
-          ${label('الخصم وصفته',input('opponent',data.opponent,'maxlength="200"'))}
+          ${label('الدائرة',input('circuit',data.circuit,'dir="auto" maxlength="100"'),true)}
+          ${label('مقدم المذكرة وصفته',input('party',data.party,'dir="auto" maxlength="200"'))}
+          ${label('الخصم وصفته',input('opponent',data.opponent,'dir="auto" maxlength="200"'))}
         </div></section>
-        <section class="panel form-section"><h2>الوقائع والطلبات</h2><div class="form-grid">
-          ${label('الوقائع',textarea('facts',data.facts,'required minlength="15" maxlength="12000" rows="5" placeholder="اكتب الوقائع بحسب ترتيبها، وكل واقعة في سطر"'),true)}
-          ${label('الدفوع أو أوجه الطلب',textarea('grounds',data.grounds,'maxlength="6000" rows="4"'))}
-          ${label('الطلبات',textarea('requests',data.requests,'maxlength="5000" rows="4"'))}
-        </div></section>
+        <section class="panel form-section"><h2>الوقائع والدفوع والطلبات</h2>
+          <p class="hint" id="english-entry" hidden>اكتب البيانات بالإنجليزية عند استخدام القالب. يمكنك ترجمة متن عربي بالصياغة الذكية عند توفرها.</p>
+          <div class="form-grid">${caseInputs(data)}</div></section>
+        <details id="english-copy" class="panel form-section translation-panel" hidden>
+          <summary>مدخلات النسخة الإنجليزية</summary>
+          <p class="hint">أدخل نص الحقول المقابلة عند استخدام القالب. تستطيع الصياغة الذكية ترجمة الحقول الفارغة من المدخلات العربية.</p>
+          <div class="form-grid" lang="en" dir="ltr">
+            ${label('English title',input('en-title',data['en-title'],'maxlength="140"'))}
+            ${label('Circuit',input('en-circuit',data['en-circuit'],'maxlength="100"'))}
+            ${label('Filing party and capacity',input('en-party',data['en-party'],'maxlength="200"'))}
+            ${label('Opposing party and capacity',input('en-opponent',data['en-opponent'],'maxlength="200"'))}
+            ${caseInputs(data,true)}
+          </div>
+        </details>
+        ${memoAttachments(data.id,data.attachments)}
       </div>
       <aside class="compose-aside">
         <section class="panel form-section"><h2>المراجع</h2>
@@ -346,8 +522,8 @@ function composePage(query) {
         </section>
         <section class="panel form-section stack"><h2>طريقة الصياغة</h2>
           <label class="checkline"><input type="radio" name="method" value="template" ${data.method !== 'model'?'checked':''}> قالب مرتب يعتمد على المدخلات</label>
-          <label class="checkline"><input type="radio" name="method" value="model" ${data.method === 'model'?'checked':''} ${state.model?'':'disabled'}> صياغة مساعدة للدفوع</label>
-          ${state.model ? '<label class="checkline" id="model-consent" hidden><input type="checkbox" name="allowModel"> أوافق على إرسال نص الوقائع والدفوع والطلبات إلى خدمة الصياغة المهيأة.</label>' : '<p class="hint">خدمة الصياغة الذكية غير متصلة. القوالب متاحة الآن.</p>'}
+          <label class="checkline"><input type="radio" name="method" value="model" ${data.method === 'model'?'checked':''} ${state.model?'':'disabled'}> تحليل الدفوع والترجمة بالذكاء الاصطناعي</label>
+          ${state.model ? '<label class="checkline" id="model-consent" hidden><input type="checkbox" name="allowModel"> أوافق على إرسال النص الذي أدخلته للوقائع والمستندات والدفوع والطلبات إلى خدمة الصياغة. راجع النص واحذف البيانات الحساسة قبل الإرسال.</label>' : '<p class="hint">القوالب متاحة. التحليل والترجمة الآلية يحتاجان إلى خدمة صياغة متصلة.</p>'}
           ${errorBox}${submit('توليد المسودة','spark')}
         </section>
       </aside>
@@ -386,20 +562,42 @@ function modelConsent() {
   if (!visible) check.checked = false;
 }
 
+function updateComposeLanguage() {
+  const form = document.querySelector('#compose');
+  if (!form) return;
+  const bilingual = form.elements.language.value === 'both';
+  const panel = form.querySelector('#english-copy');
+  panel.hidden = !bilingual;
+  if (bilingual && form.elements.method.value !== 'model') panel.open = true;
+  form.querySelector('#english-entry').hidden = form.elements.language.value !== 'en';
+}
+
 function memoPage(memo) {
+  if (state.memo?.id !== memo.id) state.memoLanguage = '';
   state.memo = memo;
   memo.sources.filter(item=>item.origin==='corpus').forEach(item=>{
     if (!state.references.has(item.id)) state.references.set(item.id,item);
   });
   state.editorDirty = false;
   const editing = memo.status !== 'archived';
+  const documents = memoDocuments(memo);
+  const activeLanguage = documents.find(item=>item.language === state.memoLanguage)?.language || documents[0].language;
+  state.memoLanguage = activeLanguage;
   return `${heading('مراجعة المذكرة',memo.title,link('مذكراتي','#memos','right','secondary'))}
     <div class="form-layout"><section class="panel form-section">
     <form id="editor" class="stack" data-form="save-memo">
-      <div class="actions">${statusBadge(memo.status)}${badge(memo.method==='model'?'صياغة مساعدة':memo.method==='manual'?'محررة':'قالب')}
+      <div class="actions">${statusBadge(memo.status)}${badge(languages[memo.input?.language] || languages.ar)}
+      ${badge(memo.method==='model'?'صياغة مساعدة':memo.method==='manual'?'محررة':'قالب')}
       <span class="hint">آخر تحديث ${h(date(memo.updated_at))}</span></div>
-      ${label('عنوان المذكرة',input('title',memo.title,`required minlength="3" maxlength="140" ${editing?'':'readonly'}`))}
-      ${label('نص المذكرة',textarea('body',memo.body,`class="editor" required minlength="20" maxlength="35000" ${editing?'':'readonly'}`))}
+      ${memo.needsCitationReview ? note('راجع الإحالات الواردة في النص وطابقها مع المراجع المعتمدة قبل الاعتماد.','warning') : ''}
+      ${label('عنوان المذكرة',input('title',memo.title,`dir="auto" required minlength="3" maxlength="140" ${editing?'':'readonly'}`))}
+      ${documents.length > 1 ? `<div class="language-switch" role="group" aria-label="نسخة المذكرة">
+        ${documents.map(({language})=>button(languages[language],'memo-language',null,'secondary',
+          `data-language="${language}" aria-pressed="${language===activeLanguage}"`)).join('')}</div>` : ''}
+      ${documents.map(({language,body},index)=>`<div data-memo-language="${language}" ${language===activeLanguage?'':'hidden'}>
+        ${label(language==='ar'?'نص المذكرة':'Memorandum text',textarea(index?'alternateBody':'body',body,
+          `class="editor" lang="${language}" dir="${format[language].dir}" required minlength="20" maxlength="${memoBodyLimit}" ${editing?'':'readonly'}`))}
+      </div>`).join('')}
       ${errorBox}<div class="actions">
         ${editing ? submit('حفظ التعديلات','check') : ''}
         ${memo.status === 'review' ? button('اعتماد داخلي','approve-memo','checkCircle','soft') : ''}
@@ -411,12 +609,57 @@ function memoPage(memo) {
       <div class="actions">${link('تنزيل Word',`/api/memos/${memo.id}/word`,'arrowDown','secondary','data-export')}
       ${button('طباعة أو PDF','print-memo','print','secondary')}</div>
       ${memo.status === 'approved' ? '' : '<p class="hint">يحمل الملف علامة «مسودة للمراجعة» حتى الاعتماد الداخلي.</p>'}</section>
+      ${memoAttachments(memo.id,memo.attachments,editing)}
       <section class="panel form-section"><h2>مراجع هذه المذكرة</h2>
       <div class="memo-sources">${memo.sources.length ? memo.sources.map(item=>`<div class="memo-source">
         <strong>${h(item.title)}</strong><p>${h([item.identity,item.edition,item.locator].filter(Boolean).join(' · '))}</p>
         ${sourceButton(item,'عرض المصدر')} ${item.citable ? '' : badge('للمراجعة','review')}</div>`).join('') :
         '<p class="hint">لم تُحدّد مراجع لهذه المسودة.</p>'}</div></section>
     </aside></div>`;
+}
+
+function chatTurns() {
+  return state.chat.map(({question,language,reply})=>{
+    const direction = format[language].dir;
+    const citations = new Map(reply.sources.map((source,index)=>[source.id,index+1]));
+    reply.sources.forEach(source=>state.references.set(source.id,source));
+    return `<div class="chat-turn">
+      <p class="chat-question" dir="auto">${h(question)}</p>
+      <article class="chat-answer">
+        <div lang="${language}" dir="${direction}"><p>${h(reply.intro)}</p>
+        ${reply.points.length ? `<ul>${reply.points.map(point=>`<li>${h(point.text)} ${point.sourceIds.map(id=>`<sup>[${citations.get(id)}]</sup>`).join(' ')}</li>`).join('')}</ul>` : ''}</div>
+        ${reply.sources.length ? `<ol class="chat-sources">${reply.sources.map(source=>`<li>
+          <div><strong dir="auto">${h(source.title)}</strong>
+          <p class="hint">${h(source.locator || source.authority)}</p>
+          ${source.excerpt ? `<p dir="auto" class="chat-excerpt">${h(source.excerpt)}</p>` : ''}
+          <div class="actions">${sourceButton(source,'عرض المصدر')}${referenceStatus(source)}</div></div>
+        </li>`).join('')}</ol>` : ''}
+        ${reply.mode === 'guide' ? link('مذكرة جديدة','#compose','plus','secondary') : ''}
+      </article></div>`;
+  }).join('');
+}
+
+function arbitratorPage() {
+  return `${heading('المحكّم الذكي','اسأل عن مرجع كويتي، أو اطلب إرشادًا في إعداد المذكرة.')}
+    <section class="panel form-section chat-panel">
+      <div id="chat-transcript" class="chat-transcript" aria-live="polite">
+        ${state.chat.length ? chatTurns() : `<div class="chat-suggestions" aria-label="أسئلة مقترحة">
+          ${button('ابحث عن قانون الإثبات','chat-example','search','secondary','data-question="قانون الإثبات"')}
+          ${button('المادة ٢ من المرافعات','chat-example','book','secondary','data-question="المادة ٢ من قانون المرافعات"')}
+          ${button('كيف أعدّ مذكرة دفاع؟','chat-example','edit','secondary','data-question="كيف أكتب مذكرة دفاع؟"')}
+        </div>`}
+      </div>
+      <form class="stack chat-form" data-form="arbitrator">
+        ${label('سؤالك',textarea('question','','dir="auto" rows="3" minlength="4" maxlength="1000" required placeholder="اكتب اسم القانون أو رقم المادة أو سؤالك"'))}
+        ${state.model ? '<label class="checkline"><input type="checkbox" name="allowModel"> أوافق على إرسال السؤال والسؤال السابق إلى خدمة التحليل. استخدم سؤالًا يخلو من البيانات الشخصية.</label>' : ''}
+        ${errorBox}<p class="hint" data-chat-busy role="status" hidden>جارٍ البحث في المكتبة…</p>
+        <div class="actions">
+          ${submit('إرسال','spark')}
+          ${label('لغة الإجابة',`<select name="language">${option('ar',languages.ar,state.chat.at(-1)?.language||'ar')}${option('en',languages.en,state.chat.at(-1)?.language)}</select>`)}
+          ${button('محادثة جديدة','chat-reset',null,'subtle','id="chat-reset" ' + (state.chat.length?'':'hidden'))}
+        </div>
+      </form>
+    </section>`;
 }
 
 function proceduresPage() {
@@ -532,6 +775,7 @@ async function renderRoute({ focus = false } = {}) {
   }
   if (route.name === 'clients' && state.account.role !== 'owner') route.name = 'overview';
   const titles = { overview:'نظرة عامة', memos:'مذكراتي', memo:'مراجعة المذكرة', compose:'مذكرة جديدة',
+    arbitrator:'المحكّم الذكي',
     library:kinds[route.query.get('kind')] || kinds.law, procedures:'المرافعات والإجراءات', courts:'دليل المحاكم',
     clients:'العملاء والاشتراكات', subscription:state.account.role==='owner'?'سجل التحصيل':'اشتراكي' };
   if (!Object.hasOwn(titles,route.name)) route.name = 'overview';
@@ -560,7 +804,16 @@ async function renderRoute({ focus = false } = {}) {
         break;
       }
       case 'compose':
+        newCompose(params);
+        if (state.attachmentsAvailable) {
+          const draft = state.compose;
+          draft.attachments = await api(`/attachments?memoId=${draft.id}`);
+          if (ownVersion !== state.version) return;
+        }
         content = composePage(params);
+        break;
+      case 'arbitrator':
+        content = arbitratorPage();
         break;
       case 'library': {
         const query = queryObject(params,['kind','q','category','page']);
@@ -599,6 +852,7 @@ async function renderRoute({ focus = false } = {}) {
   shell(route,title,content);
   if (route.name === 'compose') {
     modelConsent();
+    updateComposeLanguage();
     composeReferences('');
   }
   if (focus) {
@@ -639,9 +893,11 @@ function startPrint() {
   if (state.editorDirty) return flash('احفظ تعديلاتك أولًا لتظهر في التصدير.');
   const memo = state.memo;
   const paper = document.querySelector('#print');
-  const body = memo.body.split('\n').filter(line=>line.trim());
-  paper.innerHTML = (memo.status === 'approved' ? '' : '<p class="print-title">مسودة للمراجعة</p>') +
-    body.map((line,index)=>`<p class="${index===0||line===memo.memo_type||line===memo.title?'print-title':/^(أولاً|ثانياً|ثالثاً) —/.test(line)?'print-heading':''}">${h(line)}</p>`).join('');
+  paper.innerHTML = memoDocuments(memo).map(({language,body,title})=>`<section lang="${language}" dir="${format[language].dir}">
+    ${memo.status === 'approved' ? '' : `<p class="print-title">${h(format[language].draft)}</p>`}
+    ${body.split('\n').filter(line=>line.trim()).map((line,index)=>
+      `<p class="print-${memoLineRole(line,index,title,memo.memo_type)||'text'}">${h(line)}</p>`).join('')}
+    </section>`).join('');
   window.print();
 }
 
@@ -663,6 +919,7 @@ document.addEventListener('submit',async event=>{
       clearSession();
       state.account = result.account;
       state.model = result.modelAvailable;
+      state.attachmentsAvailable = result.attachmentsAvailable;
       state.setup = false;
       history.replaceState(null,'',result.account.active?'#overview':'#subscription');
       await renderRoute({focus:true});
@@ -671,13 +928,43 @@ document.addEventListener('submit',async event=>{
       if (location.hash === href) await renderRoute();
       else location.hash=href;
     } else if (action === 'compose') {
-      const method = data.method;
-      const memo = await api('/memos',{method:'POST',data:{...data,id:state.compose.id,
-        sourceIds:[...state.selected],method,allowModel:data.allowModel==='on'}});
+      if ([...state.uploads.values()].some(item=>item.memoId===state.compose.id && ['uploading','queued'].includes(item.status))) {
+        throw new Error('انتظر اكتمال رفع المرفقات، أو ألغِ الرفع قبل التوليد.');
+      }
+      const entries = Object.entries(data);
+      const main = Object.fromEntries(entries.filter(([key])=>!key.startsWith('en-')));
+      const english = Object.fromEntries(entries.filter(([key])=>key.startsWith('en-')).map(([key,value])=>[key.slice(3),value]));
+      const memo = await api('/memos',{method:'POST',data:{...main,id:state.compose.id,
+        ...(main.language === 'both' ? {english} : {}), sourceIds:[...state.selected],allowModel:main.allowModel==='on'}});
+      sessionStorage.removeItem(`tahkeem-draft-${state.account.id}`);
+      for (const upload of state.uploads.values()) if (upload.memoId === memo.id) state.uploads.delete(upload.id);
       state.compose = null;
       state.selected.clear();
       location.hash=`memo/${memo.id}`;
       flash('حُفظت المسودة للمراجعة.');
+    } else if (action === 'arbitrator') {
+      const generation = state.version;
+      const question = data.question.trim();
+      const busy = form.querySelector('[data-chat-busy]');
+      const reset = form.querySelector('#chat-reset');
+      busy.hidden=false;
+      reset.disabled=true;
+      try {
+        const reply = await api('/arbitrator',{method:'POST',data:{question,language:data.language,
+          previous:state.chat.at(-1)?.question,allowModel:data.allowModel==='on'}});
+        if (state.version !== generation) return;
+        state.chat = [...state.chat.slice(-11),{question,language:data.language,reply}];
+        const transcript = app.querySelector('#chat-transcript');
+        transcript.innerHTML = chatTurns();
+        transcript.scrollTop=transcript.scrollHeight;
+        form.elements.question.value='';
+        if (form.elements.allowModel) form.elements.allowModel.checked=false;
+        reset.hidden=false;
+        form.elements.question.focus();
+      } finally {
+        busy.hidden=true;
+        reset.disabled=false;
+      }
     } else if (action === 'save-memo') {
       await saveMemo();
     } else if (action === 'approve-memo') {
@@ -804,6 +1091,33 @@ document.addEventListener('click', async event=>{
           <label class="checkline"><input type="checkbox" name="reviewed" required> راجعت الوقائع والطلبات وصحة المراجع وسريانها على القضية.</label>
           ${errorBox}${submit('اعتماد المذكرة','checkCircle')}</form>`);
         break;
+      case 'memo-language':
+        state.memoLanguage=buttonEl.dataset.language;
+        app.querySelectorAll('[data-memo-language]').forEach(panel=>{
+          panel.hidden=panel.dataset.memoLanguage!==state.memoLanguage;
+        });
+        app.querySelectorAll('[data-action="memo-language"]').forEach(control=>{
+          control.setAttribute('aria-pressed',String(control.dataset.language===state.memoLanguage));
+        });
+        break;
+      case 'chat-example': {
+        const question=app.querySelector('[data-form="arbitrator"] [name="question"]');
+        question.value=buttonEl.dataset.question;
+        question.focus();
+        break;
+      }
+      case 'chat-reset':
+        state.chat=[];
+        await renderRoute({focus:true});
+        break;
+      case 'retry-attachment': {
+        const upload = state.uploads.get(id);
+        if (upload?.file) { queueUpload(upload); updateAttachmentPanel(upload.memoId); }
+        break;
+      }
+      case 'remove-attachment':
+        await deleteAttachment(id);
+        break;
       case 'archive-memo':
         await saveMemo({status:'archived'}); break;
       case 'restore-memo':
@@ -830,7 +1144,14 @@ document.addEventListener('input',event=>{
 
 document.addEventListener('change',event=>{
   const field = event.target;
+  if (field.matches('input[type="file"][data-memo-id]')) {
+    const files = [...field.files];
+    field.value = '';
+    selectAttachments(field.dataset.memoId,files);
+    return;
+  }
   if (field.name === 'method') modelConsent();
+  if (field.closest('#compose') && ['method','language'].includes(field.name)) updateComposeLanguage();
   if (field.name !== 'sourceId') return;
   if (!field.checked) state.selected.delete(field.value);
   else if (state.selected.size < 8) state.selected.add(field.value);
@@ -847,7 +1168,10 @@ window.addEventListener('hashchange',()=>{
 });
 window.addEventListener('afterprint',()=>{document.querySelector('#print').textContent='';});
 window.addEventListener('beforeunload',event=>{
-  if (state.editorDirty) { event.preventDefault(); event.returnValue=''; }
+  if (state.editorDirty || [...state.uploads.values()].some(item=>['queued','uploading'].includes(item.status) && !item.error)) {
+    event.preventDefault();
+    event.returnValue='';
+  }
 });
 
 async function boot() {
@@ -855,6 +1179,7 @@ async function boot() {
     const result=await api('/session');
     state.account=result.account;
     state.model=result.modelAvailable;
+    state.attachmentsAvailable=result.attachmentsAvailable;
     state.setup=result.setupAvailable;
     if (state.account) {
       if (location.hash.startsWith('#invite=')) history.replaceState(null,'','#overview');

@@ -1,5 +1,6 @@
 import { createApp } from './app.mjs';
-import { modelFromEnvironment } from './memos.mjs';
+import { attachmentStorage } from './attachments.mjs';
+import { modelFromEnvironment } from './model.mjs';
 import { initialize, postgresStore } from './store.mjs';
 
 const env = process.env;
@@ -13,7 +14,7 @@ if (env.TAHKEEM_SETUP_TOKEN_SHA256 && !/^[a-f0-9]{64}$/.test(env.TAHKEEM_SETUP_T
 }
 const db = postgresStore(env.DATABASE_URL);
 await initialize(db);
-const app = createApp({ db, origin: site.origin, model: modelFromEnvironment(env),
+const app = createApp({ db, origin: site.origin, model: modelFromEnvironment(env), storage: attachmentStorage(env),
   setupHash: env.TAHKEEM_SETUP_TOKEN_SHA256, setupUntil:env.TAHKEEM_SETUP_UNTIL, trustProxy: production && Boolean(env.RENDER) });
 const server = app.listen(port, '0.0.0.0', () => console.log(`Tahkeem listening on port ${port}`));
 

@@ -1,10 +1,14 @@
 import { randomUUID } from 'node:crypto';
+import { pipeline } from 'node:stream/promises';
 import { fileURLToPath } from 'node:url';
 import express from 'express';
 import * as accounts from './accounts.mjs';
+import { arbitratorReply } from './arbitrator.mjs';
+import { attachmentPartSize, beginAttachment, downloadAttachment, listAttachments, removeAttachment, savePart } from './attachments.mjs';
 import { catalog, libraryPage, saveReference, selectedSources, setReferenceApproval } from './library.mjs';
 import { corpusByIds, corpusStats } from './corpus.mjs';
-import { changeMemo, generateMemo, getMemo, memoDocx, memoInput } from './memos.mjs';
+import { memoInput } from './memo-draft.mjs';
+import { changeMemo, generateMemo, getMemo, memoDocx, needsCitationReview } from './memos.mjs';
 import { getSessionAccount, HttpError, isUuid, limit, publicAccount, removeSession, requireThat,
   sessionCookie, textField } from './security.mjs';
 import { one } from './store.mjs';
@@ -12,12 +16,13 @@ import { one } from './store.mjs';
 const publicDir = fileURLToPath(new URL('../public/', import.meta.url));
 const methodsWithBody = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 
-export function createApp({ db, origin, setupHash = '', setupUntil, model = null, trustProxy = false }) {
+export function createApp({ db, origin, setupHash = '', setupUntil, model = null, storage = null, trustProxy = false }) {
   const app = express();
   app.disable('x-powered-by');
   if (trustProxy) app.set('trust proxy', 1);
   const secureCookie = new URL(origin).protocol === 'https:';
   const canSetup = () => Boolean(setupHash) && (!setupUntil || Date.parse(setupUntil) > Date.now());
+  const modelAvailable = async () => Boolean(model) && (!model.available || await model.available());
 
   app.use((req, res, next) => {
     res.set({
@@ -32,7 +37,7 @@ export function createApp({ db, origin, setupHash = '', setupUntil, model = null
   app.get('/healthz', async (req, res) => {
     res.set('Cache-Control', 'no-store');
     await db.query('SELECT 1');
-    res.json({ ok: true, app: 'tahkeem' });
+    res.json({ ok: true, app: 'tahkeem', release: '2.0.0', attachmentsConfigured: Boolean(storage) });
   });
 
   const api = express.Router();
@@ -40,13 +45,15 @@ export function createApp({ db, origin, setupHash = '', setupUntil, model = null
     res.set('Cache-Control', 'no-store');
     if (methodsWithBody.has(req.method)) {
       requireThat(req.get('origin') === origin, 403, 'تعذر التحقق من مصدر الطلب.');
-      if (req.method !== 'DELETE') requireThat(req.is('application/json'), 415, 'صيغة الطلب غير مدعومة.');
+      if (req.method !== 'DELETE' && !(req.method === 'PUT' && req.is('application/octet-stream'))) {
+        requireThat(req.is('application/json'), 415, 'صيغة الطلب غير مدعومة.');
+      }
     }
     next();
   });
-  api.use(express.json({ limit: '160kb', strict: true }));
+  api.use(express.json({ limit: '512kb', strict: true }));
   api.use((req, res, next) => {
-    if (methodsWithBody.has(req.method) && req.method !== 'DELETE') {
+    if (methodsWithBody.has(req.method) && req.method !== 'DELETE' && req.is('application/json')) {
       requireThat(req.body && !Array.isArray(req.body), 400, 'الطلب غير صالح.');
     }
     next();
@@ -54,13 +61,14 @@ export function createApp({ db, origin, setupHash = '', setupUntil, model = null
 
   api.get('/session', async (req, res) => {
     const account = await getSessionAccount(db, req);
-    res.json({ account: publicAccount(account), modelAvailable: Boolean(model),
+    res.json({ account: publicAccount(account), modelAvailable: Boolean(account) && await modelAvailable(),
+      attachmentsAvailable: Boolean(storage),
       setupAvailable: canSetup() && !account && !await accounts.ownerExists(db) });
   });
 
-  function sendSession(res, { account, session }) {
+  async function sendSession(res, { account, session }) {
     sessionCookie(res, session, secureCookie);
-    res.json({ account, modelAvailable: Boolean(model) });
+    res.json({ account, modelAvailable: account.active && await modelAvailable(), attachmentsAvailable: Boolean(storage) });
   }
 
   api.post('/setup', async (req, res) => sendSession(res, await accounts.createOwner(db, req.body, canSetup() ? setupHash : '', req.ip)));
@@ -119,6 +127,33 @@ export function createApp({ db, origin, setupHash = '', setupUntil, model = null
     res.json(record);
   });
 
+  api.post('/arbitrator', async (req, res) => {
+    await limit(db, `arbitrator:${req.account.id}`, 36);
+    if (req.body.allowModel === true) await limit(db, `model:${req.account.id}`, 12);
+    res.json(await arbitratorReply(db, req.body, model));
+  });
+
+  api.get('/attachments', async (req, res) => res.json(await listAttachments(db, req.account.id, req.query.memoId)));
+  api.post('/attachments', async (req, res) => {
+    res.status(201).json(await beginAttachment(db, storage, req.account, req.body));
+  });
+  api.put('/attachments/:id/parts/:part', express.raw({ type: 'application/octet-stream', limit: attachmentPartSize, inflate: false }),
+    async (req, res) => {
+      requireThat(req.is('application/octet-stream'), 415, 'صيغة جزء الملف غير مدعومة.');
+      requireThat(/^\d+$/.test(req.params.part), 400, 'رقم جزء الملف غير صالح.');
+      res.json(await savePart(db, storage, req.account, req.params.id, Number(req.params.part), req.body));
+    });
+  api.delete('/attachments/:id', async (req, res) => {
+    await removeAttachment(db, storage, req.account, req.params.id);
+    res.sendStatus(204);
+  });
+  api.get('/attachments/:id/download', async (req, res) => {
+    const { headers, stream } = await downloadAttachment(db, storage, req, req.params.id);
+    res.set(headers);
+    if (stream) await pipeline(stream, res);
+    else res.end();
+  });
+
   api.get('/memos', async (req, res) => {
     const query = textField(req.query.q, 'البحث', 140);
     const status = textField(req.query.status, 'الحالة', 20);
@@ -151,7 +186,10 @@ export function createApp({ db, origin, setupHash = '', setupUntil, model = null
     const result = await generateMemo(db, req.account, req.body.id || randomUUID(), input, sources, method, model);
     res.status(201).json(result);
   });
-  api.get('/memos/:id', async (req, res) => res.json(await getMemo(db, req.account.id, req.params.id)));
+  api.get('/memos/:id', async (req, res) => {
+    const memo = await getMemo(db, req.account.id, req.params.id);
+    res.json({ ...memo, needsCitationReview: needsCitationReview(memo), attachments: await listAttachments(db, req.account.id, memo.id) });
+  });
   api.patch('/memos/:id', async (req, res) => res.json(await changeMemo(db, req.account.id, req.params.id, req.body)));
   api.get('/memos/:id/word', async (req, res) => {
     const memo = await getMemo(db, req.account.id, req.params.id);

@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { once } from 'node:events';
 import { createServer } from 'node:http';
+import { Readable } from 'node:stream';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { PGlite } from '@electric-sql/pglite';
@@ -9,6 +10,7 @@ import { initialize } from '../server/store.mjs';
 import { sha } from '../server/security.mjs';
 import { amountInFils } from '../server/accounts.mjs';
 import { normalizeSearch } from '../server/library.mjs';
+import { attachmentPartSize } from '../server/attachments.mjs';
 
 const setup = 'synthetic-test-owner-setup-very-long-token';
 const password = 'Test synthetic password 2026';
@@ -32,20 +34,42 @@ async function environment(t) {
   server.listen(0,'127.0.0.1');
   await once(server,'listening');
   const origin = `http://127.0.0.1:${server.address().port}`;
-  const ready = createApp({db, origin, setupHash: sha(setup), model: async input =>
-    input.title.includes('مرفوضة') ? 'يطبق حكم وفق المادة (٩٩٩٩) وهي إحالة غير صحيحة.' : 'تراجع دلالة الإيصال على مقدار المطالبة.'});
+  const objects = new Map();
+  const storage = {
+    async put(key, data) { objects.set(key, data); },
+    async get(key) { return Readable.from([objects.get(key)]); },
+    async remove(keys) { keys.forEach(key => objects.delete(key)); },
+  };
+  const model = {
+    async complete({ messages, schema }) {
+      const input = JSON.parse(messages[1].content);
+      if (schema.properties.points) return { points: [{ text: 'The reviewed excerpt addresses the document.',
+        sourceIds: Object.keys(input.references) }] };
+      const argument = input.caseDetails.grounds?.join(' ').includes('إحالة مرفوضة')
+        ? 'يطبق حكم وفق المادة (٩٩٩٩) وهي إحالة غير صحيحة.' : 'تراجع دلالة الإيصال على مقدار المطالبة.';
+      const analyses = Object.fromEntries(input.languages.map(language => [language, [{
+        issue: language === 'ar' ? 'قيمة المستند' : 'Value of the document',
+        analysis: language === 'ar' ? argument : 'The document merits review.',
+        application: language === 'ar' ? 'يفحص الإيصال المدخل.' : 'Examine the submitted receipt.',
+        sourceIds: Object.keys(input.reviewedReferences),
+      }]]));
+      return { analyses, translations: { facts: ['The letter was received on 2026/11/13.'],
+        requests: ['Verify the amount claimed.'] } };
+    },
+  };
+  const ready = createApp({db, origin, setupHash: sha(setup), model, storage});
   server.on('request',ready);
   t.after(async ()=>{
     await new Promise(resolve=>server.close(resolve));
     await raw.close();
   });
   return {
-    db, origin,
-    async call(path,{cookie,method='GET',data,from=origin}={}) {
+    db, origin, objects,
+    async call(path,{cookie,method='GET',data,binary,from=origin}={}) {
       const response = await fetch(origin + path, {
-        method, headers: { ...(cookie?{cookie}:{}), ...(data===undefined?{}:{
-          'Content-Type':'application/json',Origin:from,
-        }) }, ...(data===undefined?{}:{body:JSON.stringify(data)}),
+        method, headers: { ...(cookie?{cookie}:{}), Origin:from,
+          ...(data !== undefined || binary ? { 'Content-Type':binary ? 'application/octet-stream' : 'application/json' } : {}) },
+        body: binary || (data === undefined ? undefined : JSON.stringify(data)),
       });
       const body = response.headers.get('content-type')?.includes('application/json')
         ? await response.json() : Buffer.from(await response.arrayBuffer());
@@ -165,9 +189,13 @@ test('reference approval and guard against generated citations',async t=>{
   assert.match(good.body.body,/المادة الاصطناعية رقم 9001/);
   assert.match(good.body.body,/تراجع دلالة الإيصال/);
   assert.equal(good.body.status,'review');
-  const bad=await post('/api/memos',{...caseInput,id:randomUUID(),title:'إحالة مرفوضة',allowModel:true},owner.cookie);
+  const bad=await post('/api/memos',{...caseInput,id:randomUUID(),grounds:'إحالة مرفوضة',allowModel:true},owner.cookie);
   assert.equal(bad.status,422);
   assert.equal((await call('/api/overview',{cookie:owner.cookie})).body.counts.open,1);
+  const chat=await post('/api/arbitrator',{question:'مرجع اصطناعي للبرمجيات',language:'en',allowModel:true},owner.cookie);
+  assert.equal(chat.status,200);
+  assert.equal(chat.body.mode,'model');
+  assert.equal(chat.body.points[0].sourceIds[0],reference.body.id);
 });
 
 test('imported material keeps article suffix, page and review status', async t => {
@@ -206,4 +234,81 @@ test('imported material keeps article suffix, page and review status', async t =
   assert.equal(memo.status,201,JSON.stringify(memo.body));
   assert.equal(memo.body.sources[0].origin,'corpus');
   assert.doesNotMatch(memo.body.body,/المادة ٢/);
+  const bot=(question,language,cookie)=>call('/api/arbitrator',{method:'POST',cookie,data:{question,language}});
+  assert.equal((await bot('المادة ٢ مكرر من تشريع افتراضي','ar')).status,401);
+  const answer=await bot('Article 2 from legislation','en',cookie);
+  assert.equal(answer.status,200,JSON.stringify(answer.body));
+  assert.equal(answer.body.mode,'library');
+  assert.ok(answer.body.sources.some(item=>item.id===corpusId && !item.citable && item.excerpt));
+  assert.ok(answer.body.sources.every(item=>item.id!==corpusId+'-repeated'));
+  assert.equal((await bot('كيف أكتب مذكرة دفاع؟','ar',cookie)).body.mode,'guide');
+});
+
+test('bilingual memoranda preserve submissions and check both versions before approval', async t => {
+  const {call}=await environment(t);
+  const post=(path,data,cookie)=>call(path,{method:'POST',data,cookie});
+  const owner=await post('/api/setup',{code:setup,name:'مالك الاختبار',email:'owner@example.test',password});
+  const data={...baseInput,language:'both',evidence:'صورة خطاب تجريبي',opponentGrounds:'ينازع الخصم في الاستلام.',
+    reply:'يتمسك مقدم المذكرة بإيصال التسلم.',alternativeRequests:'إعادة الفحص احتياطيًا.'};
+  assert.equal((await post('/api/memos',data,owner.cookie)).status,422);
+  const english={title:'Synthetic bilingual memorandum',party:'First party, defendant',opponent:'Second party, claimant',
+    facts:'A written demand was received.\nA synthetic receipt was produced.',evidence:'Copy of a sample letter.',
+    grounds:'Examine the receipt.',opponentGrounds:'Receipt is disputed.',reply:'The filing party relies on the receipt.',
+    requests:'Verify the amount claimed.',alternativeRequests:'Order review in the alternative.'};
+  const result=await post('/api/memos',{...data,english},owner.cookie);
+  assert.equal(result.status,201,JSON.stringify(result.body));
+  assert.match(result.body.body,/دفوع الخصم والرد عليها/);
+  assert.match(result.body.body,/الطلبات الاحتياطية\n1\. إعادة الفحص/);
+  assert.match(result.body.alternate_body,/Court of First Instance/);
+  assert.match(result.body.alternate_body,/Opposing submissions and reply/);
+  assert.match(result.body.alternate_body,/Alternative relief\n1\. Order review/);
+  const memo='/api/memos/'+result.body.id;
+  const patch=(data)=>call(memo,{method:'PATCH',cookie:owner.cookie,data:{version:1,...data}});
+  const unsafe=await patch({alternateBody:result.body.alternate_body+'\nUnder Article 9999.',status:'approved',reviewed:true});
+  assert.equal(unsafe.status,422);
+  assert.equal((await patch({status:'approved',reviewed:true})).status,200);
+  const englishOnly=await post('/api/memos',{...baseInput,...english,language:'en'},owner.cookie);
+  assert.equal(englishOnly.status,201,JSON.stringify(englishOnly.body));
+  assert.equal(englishOnly.body.alternate_body,null);
+  assert.match(englishOnly.body.body,/^Court of First Instance/);
+  const model=await post('/api/memos',{...baseInput,language:'both',method:'model',allowModel:true,grounds:'',
+    facts:'تم تسلم الخطاب التجريبي في 2026/11/13.',requests:'التحقق من قيمة المطالبة.'},owner.cookie);
+  assert.equal(model.status,201,JSON.stringify(model.body));
+  assert.match(model.body.body,/2026\/11\/13/);
+  assert.match(model.body.alternate_body,/The letter was received on 2026\/11\/13/);
+});
+
+test('attachments stream multiple parts, handle retries and respect account boundaries', async t => {
+  const {call,objects,db}=await environment(t);
+  const post=(path,data,cookie)=>call(path,{method:'POST',data,cookie});
+  const owner=await post('/api/setup',{code:setup,name:'مالك الاختبار',email:'owner@example.test',password});
+  const created=await post('/api/owner/clients',{name:'عميل الاختبار',email:'client@example.test'},owner.cookie);
+  const client=await post('/api/invite',{code:created.body.invite.split('=')[1],password});
+  await db.query("UPDATE accounts SET access_until=now()+interval '1 month' WHERE id=$1",[client.body.account.id]);
+  const id=randomUUID();
+  const memoId=randomUUID();
+  const first=Buffer.alloc(attachmentPartSize, 0x6d);
+  const last=Buffer.from([0x61,0x62,0xff]);
+  const metadata={id,memoId,name:'مستند تجريبي.bin',bytes:first.length+last.length,fingerprint:sha('synthetic attachment')};
+  assert.equal((await post('/api/attachments',metadata,client.cookie)).status,201);
+  const part=(index,binary,cookie=client.cookie)=>call(`/api/attachments/${id}/parts/${index}`,{method:'PUT',binary,cookie});
+  assert.equal((await part(1,last)).status,409);
+  assert.equal((await part(0,first,owner.cookie)).status,404);
+  assert.equal((await part(0,first)).body.uploadedParts,1);
+  assert.equal((await post('/api/attachments',{...metadata,fingerprint:sha('different attachment')},client.cookie)).status,409);
+  assert.equal((await post('/api/attachments',metadata,client.cookie)).body.uploadedParts,1);
+  assert.equal((await part(0,first)).body.uploadedParts,1);
+  assert.equal((await part(1,last)).body.status,'ready');
+  const download=`/api/attachments/${id}/download`;
+  assert.equal((await call(download)).status,401);
+  assert.equal((await call(download,{cookie:owner.cookie})).status,404);
+  const file=await call(download,{cookie:client.cookie});
+  assert.equal(file.status,200);
+  assert.equal(file.headers.get('content-length'),String(metadata.bytes));
+  assert.deepEqual(file.body,Buffer.concat([first,last]));
+  const memo=await post('/api/memos',{...baseInput,id:memoId},client.cookie);
+  assert.equal(memo.status,201);
+  assert.equal((await call('/api/memos/'+memoId,{cookie:client.cookie})).body.attachments[0].id,id);
+  assert.equal((await call(`/api/attachments/${id}`,{method:'DELETE',cookie:client.cookie})).status,204);
+  assert.equal(objects.size,0);
 });

@@ -1,6 +1,9 @@
 import serverless from 'serverless-http';
+import { Readable } from 'node:stream';
 import { createApp } from '../server/app.mjs';
-import { modelFromEnvironment } from '../server/memos.mjs';
+import { attachmentDownloadPath, attachmentPartPath, attachmentPartSize, attachmentStorage,
+  downloadAttachment } from '../server/attachments.mjs';
+import { modelFromEnvironment } from '../server/model.mjs';
 import { initialize, postgresStore } from '../server/store.mjs';
 
 const env = process.env;
@@ -21,12 +24,13 @@ async function start() {
     await db.close();
     throw error;
   }
+  const storage = attachmentStorage(env);
   const app = createApp({ db, origin, setupHash:env.TAHKEEM_SETUP_TOKEN_SHA256, setupUntil:env.TAHKEEM_SETUP_UNTIL,
-    model:modelFromEnvironment({ ...env, NODE_ENV:'production' }) });
-  return serverless(app, { binary: true });
+    model:modelFromEnvironment({ ...env, NODE_ENV:'production' }), storage });
+  return { db, handle: serverless(app, { binary: true }), storage };
 }
 
-const bodyLimit = 160 * 1024;
+const bodyLimit = 512 * 1024;
 
 export default {
   async fetch(request) {
@@ -35,11 +39,23 @@ export default {
       handlerPromise = null;
       throw error;
     });
-    let handler;
-    try { handler = await handlerPromise; }
+    let running;
+    try { running = await handlerPromise; }
     catch (error) {
       console.error('Tahkeem startup failed',error.code || error.name);
       return Response.json({error:'تعذر بدء تحكيم.'},{status:503});
+    }
+    const download = attachmentDownloadPath.exec(url.pathname);
+    if (download && ['GET','HEAD'].includes(request.method)) {
+      try {
+        const result = await downloadAttachment(running.db, running.storage, {
+          method: request.method, get: name => request.headers.get(name),
+        }, download[1]);
+        return new Response(result.stream ? Readable.toWeb(result.stream) : null, { headers: result.headers });
+      } catch (error) {
+        return Response.json({ error: error.status ? error.message : 'تعذر تنزيل المرفق.' },
+          { status: error.status || 503, headers: { 'Cache-Control': 'no-store' } });
+      }
     }
 
     let body = '';
@@ -47,12 +63,13 @@ export default {
       const reader = request.body.getReader();
       const chunks = [];
       let bytes = 0;
+      const limit = request.method === 'PUT' && attachmentPartPath.test(url.pathname) ? attachmentPartSize : bodyLimit;
       try {
         for (;;) {
           const {done,value} = await reader.read();
           if (done) break;
           bytes += value.byteLength;
-          if (bytes > bodyLimit) {
+          if (bytes > limit) {
             await reader.cancel();
             return Response.json({error:'حجم الطلب أكبر من الحد المسموح.'},{status:413});
           }
@@ -71,7 +88,7 @@ export default {
       requestContext:{http:{method:request.method,path:url.pathname,sourceIp:remoteIp,protocol:'HTTP/1.1'}},
       body,isBase64Encoded:Boolean(body),
     };
-    const output = await handler(event,{});
+    const output = await running.handle(event,{});
     const replyHeaders = new Headers();
     for (const [key,value] of Object.entries(output.headers ?? {})) replyHeaders.set(key,String(value));
     for (const cookie of output.cookies ?? []) replyHeaders.append('Set-Cookie',cookie);

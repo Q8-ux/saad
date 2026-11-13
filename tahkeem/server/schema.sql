@@ -72,7 +72,20 @@ CREATE TABLE IF NOT EXISTS memos (
   updated_at timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS memos_account ON memos(account_id, updated_at DESC);
+ALTER TABLE memos ADD COLUMN IF NOT EXISTS alternate_body text;
 
+CREATE TABLE IF NOT EXISTS memo_attachments (
+  id uuid PRIMARY KEY,
+  account_id uuid NOT NULL REFERENCES accounts(id),
+  memo_id uuid NOT NULL,
+  name text NOT NULL,
+  fingerprint text NOT NULL,
+  bytes bigint NOT NULL CHECK(bytes >= 0),
+  uploaded_parts bigint NOT NULL DEFAULT 0 CHECK(uploaded_parts >= 0),
+  status text NOT NULL CHECK(status IN ('uploading','ready','deleting')),
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS memo_attachments_memo ON memo_attachments(account_id,memo_id);
 
 CREATE TABLE IF NOT EXISTS corpus_articles (
   id text PRIMARY KEY,
