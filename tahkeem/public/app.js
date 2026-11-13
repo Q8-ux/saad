@@ -1,5 +1,5 @@
 import { icon } from './icons.js';
-import { courts, format, languages, memoBodyLimit, memoDocuments, memoLineRole, types } from './memo-format.js';
+import { courts, format, languages, memoBodyLimit, memoDocuments, memoLineRole, types } from './memo-format.js?v=2.1';
 
 const app = document.querySelector('#app');
 const dialog = document.querySelector('#dialog');

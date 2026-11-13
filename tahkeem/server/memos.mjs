@@ -82,7 +82,7 @@ export async function memoDocx(memo) {
       return new Paragraph({
         ...(role === 'title' ? { heading: HeadingLevel.TITLE } : {}),
         bidirectional: rtl, alignment: role === 'title' ? AlignmentType.CENTER : rtl ? AlignmentType.RIGHT : AlignmentType.LEFT,
-        keepNext: Boolean(role), spacing: { before: role === 'heading' ? 210 : 0, after: 115, line: 345 },
+        keepNext: Boolean(role), spacing: { before: role === 'heading' ? 185 : 0, after: 90, line: 305 },
         children: [textRun(line, Boolean(role))],
       });
     });

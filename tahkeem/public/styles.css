@@ -235,6 +235,7 @@ td{overflow-wrap:anywhere}
   #print p{white-space:pre-wrap;margin:0 0 8pt;overflow-wrap:anywhere;orphans:3;widows:3}
   #print p.print-title{text-align:center;font-weight:700;font-size:15pt}
   #print p.print-heading{font-weight:700;margin-top:12pt;break-after:avoid}
+  #print p.print-subheading{font-weight:700;break-after:avoid}
   #print section+section{break-before:page}
 }
 .subscription-notice{margin-bottom:13px}

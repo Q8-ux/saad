@@ -57,5 +57,8 @@ export function memoDocuments(memo) {
 export function memoLineRole(line, index, title, type) {
   if (index === 0 || line === title || line === type || line === types[type]?.en) return 'title';
   if (/^(?:أولاً|ثانياً|ثالثاً|رابعاً|خامساً|سادساً) —|^(?:I|II|III|IV|V|VI)\. |^المراجع المحددة للمراجعة$/u.test(line)) return 'heading';
+  if (Object.values(format).some(copy => [copy.position, copy.reply, copy.primary, copy.alternative].includes(line))) {
+    return 'subheading';
+  }
   return '';
 }
