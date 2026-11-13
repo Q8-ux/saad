@@ -237,11 +237,72 @@ function managerSettings(target){
  target.innerHTML=`<div class="panel" style="max-width:790px"><h3>إعدادات الشركة ونقطة البيع</h3><form id="settings-form"><div class="form-grid">${field("company_name","اسم المتجر","text",settings.company_name,true)}${field("phone","هاتف الشركة","tel",settings.phone)}${field("address","عنوان المتجر","text",settings.address)}${field("delivery_fee","رسوم التوصيل (د.ك)","number",settings.delivery_fee)}${field("free_delivery_over","توصيل مجاني للطلبات فوق","number",settings.free_delivery_over??"")}${field("staff_max_discount_pct","الحد الأقصى لخصم الموظف (%)","number",settings.staff_max_discount_pct)}${sel("print_size","حجم ورق الطباعة",[{value:"a4",label:"A4 - ورقتان"},{value:"80mm",label:"80mm - إيصالان"}],settings.print_size)}</div><div class="row wrap"><label class="inline"><input type="checkbox" name="pay_cod" ${settings.pay_cod?"checked":""}> الدفع عند الاستلام</label><label class="inline"><input type="checkbox" name="pay_transfer" ${settings.pay_transfer?"checked":""}> تحويل يدوي</label><label class="inline"><input type="checkbox" name="pay_credit" ${settings.pay_credit?"checked":""}> البيع الآجل</label></div><div class="field" style="margin-top:16px"><label>سياسة الخصوصية</label><textarea class="textarea" name="privacy_policy">${esc(settings.privacy_policy)}</textarea></div><button class="btn primary">حفظ إعدادات المتجر</button></form><p class="muted tiny">لا يوجد ربط بنكي مباشر أو KNET قبل إعداد مزود دفع رسمي مستقل.</p></div>`;
  q("#settings-form").addEventListener("submit",async e=>{e.preventDefault();const f=formValues(e.currentTarget);const data={company_name:f.company_name,phone:f.phone,address:f.address,delivery_fee:num(f.delivery_fee),free_delivery_over:f.free_delivery_over?num(f.free_delivery_over):null,staff_max_discount_pct:num(f.staff_max_discount_pct),print_size:f.print_size,pay_cod:!!f.pay_cod,pay_transfer:!!f.pay_transfer,pay_credit:!!f.pay_credit,privacy_policy:f.privacy_policy};try{await api(db.from("settings").update(data).eq("id",1));settings={...settings,...data};toast("حُفظت الإعدادات على الخادم");await renderManager()}catch(e){err(e)}});
 }
+
 async function managerTeam(target){
- const staff=await api(db.rpc("list_team"));
- target.innerHTML=`<div class="panel"><h3>إدارة صلاحيات الموظفين</h3><p class="notice">لأمان المتجر، لا يمكن لأي حساب الحصول على صلاحية المدير من الموقع. مالك قاعدة البيانات يعيّن المدير يدويًا لحساب موثوق ومؤكد البريد. مدير المتجر يستطيع منح صلاحية «موظف» فقط.</p><form id="grant-staff" class="row wrap"><input class="input" type="email" name="email" placeholder="بريد موظف مؤكد" required style="max-width:360px"><button class="btn primary">منح صلاحية موظف</button></form><div class="table-wrap" style="margin-top:20px"><table class="data-table"><thead><tr><th>البريد</th><th>الصلاحية</th><th>تاريخ الإضافة</th><th>الإجراء</th></tr></thead><tbody>${(staff||[]).map(s=>`<tr><td>${esc(s.email)}</td><td>${esc(s.role)}</td><td>${date(s.created_at)}</td><td>${s.role==="staff"?`<button class="btn small red" data-revoke-staff="${esc(s.user_id)}">سحب صلاحية</button>`:"يحميه مالك النظام"}</td></tr>`).join("")}</tbody></table></div></div>`;
- q("#grant-staff").addEventListener("submit",async e=>{e.preventDefault();const f=formValues(e.currentTarget);try{await api(db.rpc("grant_staff_by_email",{_email:f.email}));toast("مُنحت صلاحية الموظف");await renderManager()}catch(e){err(e)}});
+ let staff;
+ try{
+   staff=await api(db.from("employee_directory").select("id,display_name,login_email,position_title,status,user_id,created_at").order("created_at",{ascending:false}));
+ }catch(error){
+   target.innerHTML='<div class="panel"><h2>إدارة الموظفين</h2><p class="notice">لم يتم تطبيق تحديث قاعدة بيانات الموظفين بعد. تتطلب الإضافة أو التعديل تنفيذ ملف database/employee_directory.sql بواسطة مالك قاعدة البيانات.</p></div>';
+   return;
+ }
+ const active=staff.filter(x=>x.status==="active").length;
+ const rows=staff.map(x=>'<tr><td><strong>'+esc(x.display_name)+'</strong></td><td>'+esc(x.position_title)+'</td><td><small class="muted">'+esc(x.login_email)+'</small></td><td><span class="badge '+(x.status==="active"?"":"warning")+'">'+(x.status==="active"?"مفعّل":x.status==="pending"?"بانتظار الاعتماد":"موقوف")+'</span></td><td><div class="actions-row"><button class="btn small" data-team-action="edit" data-team-id="'+esc(x.id)+'">تعديل</button> '+(x.status==="active"?'<button class="btn small red" data-team-action="disable" data-team-id="'+esc(x.id)+'">إيقاف</button>':'<button class="btn small primary" data-team-action="activate" data-team-id="'+esc(x.id)+'">تفعيل</button>')+' <button class="btn small red" data-team-action="delete" data-team-id="'+esc(x.id)+'">حذف</button></div></td></tr>').join('');
+ target.innerHTML='<div class="panel"><div class="section-head"><div><h2>إدارة المستخدمين والموظفين</h2><p class="muted">اسم الموظف يظهر في شاشات العمل؛ بريد الدخول مخصص للمصادقة ولا يحل محل الاسم.</p></div><span class="badge">'+active+' مفعل من '+staff.length+'</span></div>'
+ +'<form id="create-employee" class="staff-form"><div class="form-grid">'
+ +field("employee-name","اسم الموظف","text","",true)+field("employee-email","بريد تسجيل الدخول","email","",true)+field("employee-position","المسمّى الوظيفي","text","موظف المبيعات")
+ +'</div><button class="btn primary">➕ إضافة موظف جديد</button></form>'
+ +'<p class="notice" style="margin:16px 0">إضافة الموظف تنشئ سجلًا باسمه، وليس كلمة مرور. ينشئ الموظف حسابه من صفحة الدخول ويؤكد بريده ثم يضغط المدير «تفعيل». لا تُمنح صلاحية المدير تلقائيًا.</p>'
+ +'<div class="table-wrap"><table class="data-table"><thead><tr><th>اسم الموظف</th><th>المسمّى</th><th>بريد الدخول</th><th>الحالة</th><th>الإجراءات</th></tr></thead><tbody>'+(rows||'<tr><td colspan="5" class="center muted">لا يوجد موظفون بعد</td></tr>')+'</tbody></table></div></div>';
+ q("#create-employee").addEventListener("submit",async e=>{
+   e.preventDefault();const values=formValues(e.currentTarget),button=e.currentTarget.querySelector("button");button.disabled=true;
+   try{await api(db.rpc("manage_employee",{p_action:"create",p_employee_id:null,p_display_name:values["employee-name"],p_login_email:values["employee-email"],p_position_title:values["employee-position"]}));toast("تمت إضافة الموظف بالاسم، والحساب بانتظار التفعيل");await managerTeam(target)}
+   catch(error){err(error)}finally{button.disabled=false}
+ });
+ target.onclick=async event=>{
+   const button=event.target.closest("button[data-team-action]");if(!button)return;
+   const action=button.dataset.teamAction,id=button.dataset.teamId,entry=staff.find(x=>x.id===id);
+   if(!entry)return;
+   let name=null,email=null,position=null;
+   if(action==="edit"){
+     name=prompt("اسم الموظف",entry.display_name);if(name===null)return;
+     position=prompt("المسمّى الوظيفي",entry.position_title);if(position===null)return;
+     if(entry.status==="pending"){email=prompt("بريد الدخول",entry.login_email);if(email===null)return}
+   }else if(action==="disable"){
+     if(!confirm("إيقاف صلاحية الموظف وسحب حق استقبال الطلبات؟"))return;
+   }else if(action==="activate"){
+     if(!confirm("هل تحققت من هوية الموظف وملكيته لبريد الدخول؟"))return;
+   }else if(action==="delete"){
+     if(!confirm("إزالة الموظف وسحب صلاحياته؟ تبقى سجلات الفواتير السابقة والتدقيق محفوظة."))return;
+   }else return;
+   button.disabled=true;
+   try{await api(db.rpc("manage_employee",{p_action:action,p_employee_id:id,p_display_name:name,p_login_email:email,p_position_title:position}));toast("تم حفظ التعديل");await managerTeam(target)}
+   catch(error){err(error)}finally{button.disabled=false}
+ };
 }
+async function managerReports(target){
+ const records=managerCache.orders||[];
+ target.innerHTML='<div class="panel"><h2>تقارير الإدارة</h2><p class="muted">تقارير المدير فقط. مؤشرات الفواتير هنا محدودة بآخر 250 فاتورة؛ الحسابات والميزانية التفصيلية تُستخرج من دفتر القيود.</p>'
+ +'<div class="row wrap"><label>من <input type="date" class="input" id="report-from" value="'+daysAgo(29)+'"></label><label>إلى <input type="date" class="input" id="report-to" value="'+today()+'"></label><button id="report-refresh" class="btn primary">تحديث</button><button id="report-export" class="btn">تصدير CSV</button></div>'
+ +'<div id="report-output" style="margin-top:18px"></div></div><div class="panel" style="margin-top:18px"><h3>الميزانية ودفتر القيود</h3>'
+ +(settings.opening_entered?'<div class="success">الأرصدة الافتتاحية مدخلة. راجع بيانات التكاليف قبل اعتماد الربح النهائي.</div>':'<div class="notice">الميزانية العمومية غير مكتملة دون الأرصدة الافتتاحية وتكاليف البضاعة.</div>')
+ +'<button class="btn primary" id="report-ledger">عرض المحاسبة والميزانية</button></div>';
+ const calc=()=>{
+   const from=q("#report-from").value,to=q("#report-to").value;
+   const selected=records.filter(o=>{const d=String(o.created_at||"").slice(0,10);return d>=from&&d<=to});
+   const valid=selected.filter(o=>o.status!=="returned"&&o.status!=="cancelled");
+   const sum=key=>valid.reduce((acc,o)=>acc+num(o[key]),0);
+   return {selected,valid,total:sum("total"),paid:sum("paid"),balance:valid.reduce((acc,o)=>acc+Math.max(0,num(o.total)-num(o.paid)),0)};
+ };
+ const render=()=>{
+   const r=calc();q("#report-output").innerHTML='<div class="stats-grid"><div class="stat"><small>عدد الطلبات</small><strong>'+r.selected.length+'</strong></div><div class="stat"><small>مجموع الفواتير السارية</small><strong>'+cash(r.total)+'</strong></div><div class="stat"><small>المبالغ المحصلة</small><strong>'+cash(r.paid)+'</strong></div><div class="stat"><small>المتبقي على العملاء</small><strong>'+cash(r.balance)+'</strong></div></div>'+(records.length>=250?'<div class="notice">تنبيه: تقرير الفواتير يعرض آخر 250 طلبًا فقط، استخدم دفتر القيود للفترة المحاسبية الكاملة.</div>':'');
+ };
+ q("#report-refresh").addEventListener("click",render);
+ q("#report-export").addEventListener("click",()=>{const rows=calc().selected.map(o=>({invoice:o.invoice_no,date:o.created_at,name:o.customer_snapshot?.name,status:o.status,total:o.total,paid:o.paid}));exportCsv(rows,"oman-manager-invoices.csv")});
+ q("#report-ledger").addEventListener("click",()=>{managerTab="accounts";renderManager()});
+ render();
+}
+
 document.addEventListener("click",async e=>{
  const b=e.target.closest("button");if(!b)return;
  const id=b.dataset.showOrder||b.dataset.printOrder||b.dataset.updateOrder||b.dataset.receiveOrder;
