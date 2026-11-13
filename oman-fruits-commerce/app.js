@@ -100,7 +100,7 @@ async function init(){
  db=makeClient();loadCart();
  if(page==="login"){await renderLogin();return}
  await basic();
- if(page==="home"||page==="checkout"){location.replace(route("sales"));return}
+ if(page==="home"||page==="checkout"||page==="order"){location.replace(route("sales"));return}
  else if(page==="checkout")renderCheckout();
  else if(page==="order")await renderTracking();
  else if(page==="sales"){if(await guard("sales"))await renderSales()}
