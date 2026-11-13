@@ -181,6 +181,73 @@ td{overflow-wrap:anywhere}
 .compose-refs{max-height:276px;overflow:auto;display:grid;gap:8px;padding:2px 3px}
 .checkline{display:flex;align-items:start;gap:8px;font-size:12px;line-height:1.55;color:var(--ink)}
 .checkline small{color:var(--muted);display:block}
+.voice-field > label {
+  cursor: text;
+}
+.voice-control {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  min-width: 0;
+}
+.voice-control > [data-voice-input] {
+  flex: 1 1 auto;
+  width: 0;
+}
+.voice-actions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 5px;
+}
+.voice-actions .icon-btn {
+  min-width: 44px;
+  min-height: 45px;
+  padding: 5px;
+}
+.voice-actions .voice-mic {
+  background: var(--light-purple);
+  border-color: #e2d3e8;
+  color: var(--purple);
+}
+.voice-mic[aria-pressed=true] {
+  background: var(--red-bg);
+  border-color: var(--red);
+  color: var(--red);
+}
+.voice-field .voice-status {
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.voice-field .voice-error {
+  color: var(--red);
+}
+.voice-analysis {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--canvas);
+  font-size: 12px;
+  font-weight: 400;
+  overflow-wrap: anywhere;
+}
+.voice-analysis h3 {
+  font-size: 12px;
+  color: var(--purple);
+}
+.voice-analysis ul {
+  margin: 2px 0 0;
+  padding-inline-start: 20px;
+}
+.voice-alternate {
+  margin-block-start: 12px;
+}
+@media (min-width: 791px) and (max-width: 1080px) {
+  .form-grid .voice-actions {
+    flex-direction: column;
+  }
+}
 .form-error{font-size:12px;line-height:1.65;color:var(--red);overflow-wrap:anywhere}
 .notice{padding:9px 12px;border-radius:9px;background:#f6f0f8;color:#523061;font-size:12px;border:1px solid #eadced;overflow-wrap:anywhere}
 .notice.warning{background:#fbf0e8;color:#75432f;border-color:#f0dbd0}

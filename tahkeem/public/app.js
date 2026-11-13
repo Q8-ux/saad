@@ -1,5 +1,7 @@
-import { icon } from './icons.js';
+import { icon } from './icons.js?v=2.3';
 import { courts, format, languages, memoBodyLimit, memoDocuments, memoLineRole, types } from './memo-format.js?v=2.1';
+import { cancelDictation, finishDictation, toggleDictation } from './dictation.js?v=2.3';
+import { reviewMemo, reviewText } from './text-review.js?v=2.3';
 
 const app = document.querySelector('#app');
 const dialog = document.querySelector('#dialog');
@@ -34,6 +36,26 @@ const sourceButton = (item, title) => item.origin === 'corpus' ? button(title,'r
 const label = (title, control, wide = false) => `<label class="field${wide ? ' span' : ''}"><span>${h(title)}</span>${control}</label>`;
 const input = (name, value = '', attrs = '') => `<input name="${name}" value="${h(value)}" ${attrs}>`;
 const textarea = (name, value = '', attrs = '') => `<textarea name="${name}" ${attrs}>${h(value)}</textarea>`;
+let voiceSequence = 0;
+function voiceField(title, name, value, attrs, { multiline = false, wide = false, language = '', review = '' } = {}) {
+  const id = `voice-${++voiceSequence}`;
+  const control = (multiline ? textarea : input)(name, value, `${attrs} id="${id}" data-voice-input
+    aria-describedby="${id}-status voice-privacy"`);
+  return `<div class="field voice-field${wide ? ' span' : ''}" data-voice-field data-voice-language="${language}" data-voice-review="${review}">
+    <label for="${id}">${h(title)}</label>
+    <div class="voice-control">
+      ${control}
+      <div class="voice-actions">
+        <button type="button" class="icon-btn voice-mic" data-action="dictate" aria-label="إملاء ${h(title)}"
+          title="إملاء ${h(title)}" aria-pressed="false" aria-describedby="voice-privacy">${icon('mic',19)}</button>
+        ${review ? `<button type="button" class="icon-btn voice-review" data-action="review-field"
+          aria-label="تحليل ${h(title)}" title="تحليل ${h(title)}" aria-expanded="false" aria-controls="${id}-analysis">${icon('spark',18)}</button>` : ''}
+      </div>
+    </div>
+    <small id="${id}-status" class="voice-status" data-voice-status role="status" hidden></small>
+    ${review ? `<div id="${id}-analysis" data-voice-analysis aria-live="polite" hidden></div>` : ''}
+  </div>`;
+}
 const option = (value, text, selected) => `<option value="${h(value)}"${value === selected ? ' selected' : ''}>${h(text)}</option>`;
 const submit = (title, glyph) => `<button type="submit" class="button primary">${glyph ? icon(glyph,16) : ''}${h(title)}</button>`;
 const errorBox = '<p class="form-error" role="alert" hidden></p>';
@@ -73,6 +95,8 @@ async function api(endpoint, { method = 'GET', data, binary, signal } = {}) {
 }
 
 function clearSession() {
+  cancelDictation();
+  sessionStorage.removeItem('tahkeem-dictation-consent');
   Object.assign(state, { account: null, authMode: 'login', memo: null, compose: null, editorDirty: false,
     memoLanguage: '', chat: [] });
   state.references.clear();
@@ -210,7 +234,7 @@ function overview(data) {
 }
 
 function searchControl(name, value, placeholder) {
-  return `<div class="search-field">${icon('search',18)}${input(name,value,`type="search" placeholder="${h(placeholder)}" maxlength="140"`)}</div>`;
+  return voiceField('البحث', name, value, `type="search" dir="auto" placeholder="${h(placeholder)}" maxlength="140"`);
 }
 
 function paging(data, name, query) {
@@ -225,7 +249,7 @@ function paging(data, name, query) {
 function memosPage(data, query) {
   return `${heading('مذكراتي','ابحث في مسوداتك والمذكرات المعتمدة والمؤرشفة.',link('مذكرة جديدة','#compose','plus','primary'))}
     <form class="toolbar panel" data-form="memos-search">
-      ${label('البحث',searchControl('q',query.q,'العنوان أو رقم القضية'))}
+      ${searchControl('q',query.q,'العنوان أو رقم القضية')}
       ${label('الحالة',`<select name="status">${option('','كل الحالات',query.status)}
         ${Object.entries(statuses).map(([value,title])=>option(value,title,query.status)).join('')}</select>`)}
       ${submit('بحث','search')}</form>
@@ -249,7 +273,7 @@ function libraryPage(data, query) {
     <nav class="library-tabs" aria-label="أنواع المراجع">
       ${Object.entries(kinds).map(([key,title])=>`<a href="${path('library',{kind:key})}"${kind===key?' aria-current="page"':''}>${h(title)}</a>`).join('')}</nav>
     <form class="toolbar panel" data-form="library-search"><input name="kind" type="hidden" value="${kind}">
-      ${label('البحث',searchControl('q',query.q,'اسم القانون أو رقم المادة أو كلمة مفتاحية'))}
+      ${searchControl('q',query.q,'اسم القانون أو رقم المادة أو كلمة مفتاحية')}
       ${label('التصنيف',`<select name="category">${option('','كل التصنيفات',query.category)}
         ${[...new Set([...(query.category?[query.category]:[]),...data.categories])].map(value=>option(value,value,query.category)).join('')}</select>`)}
       ${submit('بحث','search')}</form>
@@ -298,24 +322,78 @@ function referenceReview(item) {
 function addReferenceDialog(item = {}) {
   openDialog(item.title ? 'إضافة نسخة مدققة' : 'إضافة مرجع قانوني',`<form class="form-grid" data-form="add-reference">
     ${label('نوع المرجع',`<select name="kind">${Object.entries(kinds).map(([value,title])=>option(value,title,item.kind||'article')).join('')}</select>`)}
-    ${label('التصنيف',input('category',item.category,'required maxlength="80"'))}
-    ${label('عنوان المرجع',input('title',item.title,'required maxlength="220"'),true)}
-    ${label('رقم المادة أو الحكم وهويته',input('identity',item.identity,'required maxlength="260"'),true)}
-    ${label('الجهة',input('authority',item.authority,'required maxlength="150"'))}
-    ${label('النسخة أو تاريخ الإصدار',input('edition',item.edition,'required maxlength="150"'))}
-    ${label('الصفحة أو موضع النص',input('locator',item.locator,'required maxlength="120"'))}
+    ${voiceField('التصنيف','category',item.category,'required maxlength="80" dir="auto"')}
+    ${voiceField('عنوان المرجع','title',item.title,'required maxlength="220" dir="auto"',{wide:true})}
+    ${voiceField('رقم المادة أو الحكم وهويته','identity',item.identity,'required maxlength="260" dir="auto"',{wide:true})}
+    ${voiceField('الجهة','authority',item.authority,'required maxlength="150" dir="auto"')}
+    ${voiceField('النسخة أو تاريخ الإصدار','edition',item.edition,'required maxlength="150" dir="auto"')}
+    ${voiceField('الصفحة أو موضع النص','locator',item.locator,'required maxlength="120" dir="auto"')}
     ${label('الرابط الرسمي',input('sourceUrl',item.sourceUrl,'type="url" dir="ltr" required maxlength="2000"'))}
-    ${label('النص المدقق أو وصف مضمون المرجع',textarea('summary',item.summary,'required maxlength="1600"'),true)}
+    ${voiceField('النص المدقق أو وصف مضمون المرجع','summary',item.summary,'required maxlength="1600" dir="auto"',{multiline:true,wide:true,review:'summary'})}
     <label class="checkline field span"><input name="checked" type="checkbox"> راجعت الهوية والنسخة والموضع، وأتيح الاستشهاد بالمرجع.</label>
     <div class="field span">${errorBox}<div>${submit('حفظ المرجع','check')}</div></div></form>`);
 }
 
 function openDialog(title, html) {
+  cancelDictation();
   if (dialog.open) dialog.close();
   dialog.innerHTML = `<header class="panel-head"><h2 id="dialog-title">${h(title)}</h2>
     <button type="button" class="icon-btn" data-action="dialog-close" aria-label="إغلاق النافذة">${icon('x',18)}</button></header>
     <div class="panel-body">${html}</div>`;
   dialog.showModal();
+}
+
+function voiceLanguage(field) {
+  const explicit = field.closest('[data-voice-field]')?.dataset.voiceLanguage;
+  const selected = field.form?.elements.language?.value;
+  return explicit || (selected === 'en' ? 'en' : 'ar');
+}
+
+function reviewMarkup(result, language) {
+  const en = language === 'en';
+  if (!result.excerpts.length) {
+    return note(en ? 'Enter or dictate some text to review.' : 'اكتب نصًا أو أمله لبدء التحليل.');
+  }
+  const groups = [
+    [en ? 'From your text' : 'ورد في النص', result.excerpts],
+    [en ? 'Possible inferences' : 'استنتاجات محتملة', result.inferences],
+    [en ? 'Points to verify' : 'ما يحتاج إلى تحقق', result.verify],
+  ];
+  return `<div class="voice-analysis" lang="${language}" dir="${en ? 'ltr' : 'rtl'}">
+    ${groups.filter(([, entries]) => entries.length).map(([title, entries]) => `<section>
+      <h3>${h(title)}</h3><ul>${entries.map(entry => `<li dir="auto">${h(entry)}</li>`).join('')}</ul>
+    </section>`).join('')}
+  </div>`;
+}
+
+function displayFieldReview(field, requested = false) {
+  const group = field.closest('[data-voice-field]');
+  const key = group?.dataset.voiceReview;
+  if (!key || !field.isConnected) return;
+  const panel = group.querySelector('[data-voice-analysis]');
+  const control = group.querySelector('[data-action="review-field"]');
+  if (requested && !panel.hidden) {
+    panel.hidden = true;
+    control.setAttribute('aria-expanded','false');
+    return;
+  }
+  const language = voiceLanguage(field);
+  panel.innerHTML = reviewMarkup(reviewText(field.value, key, language), language);
+  panel.hidden = false;
+  control.setAttribute('aria-expanded','true');
+}
+
+function displayMemoReview(button) {
+  const form = button.closest('#compose');
+  const entered = formValues(form);
+  const englishOnly = entered.language === 'en';
+  const bilingual = entered.language === 'both';
+  const english = Object.fromEntries(Object.entries(entered)
+    .filter(([key]) => key.startsWith('en-')).map(([key, value]) => [key.slice(3),value]));
+  const primary = reviewMemo(entered, englishOnly ? 'en' : 'ar');
+  const alternate = bilingual ? reviewMemo(english, 'en') : null;
+  openDialog('تحليل مدخلات المذكرة', `${reviewMarkup(primary, englishOnly ? 'en' : 'ar')}
+    ${alternate?.excerpts.length ? `<div class="voice-alternate"><h3>English draft</h3>${reviewMarkup(alternate,'en')}</div>` : ''}`);
 }
 
 function newCompose(query) {
@@ -342,10 +420,13 @@ const caseFields = [
 ];
 
 function caseInputs(data, english = false) {
-  return caseFields.map(([name, ar, en, max, rows, placeholder]) => label(english ? en : ar,
-    textarea(english ? 'en-' + name : name, data[english ? 'en-' + name : name], `dir="${english ? 'ltr' : 'auto'}"
-      maxlength="${max}" rows="${rows}" ${name === 'facts' && !english ? 'required minlength="15"' : ''}
-      ${!english && placeholder ? `placeholder="${h(placeholder)}"` : ''}`), name === 'facts' || name === 'evidence')).join('');
+  return caseFields.map(([key, ar, en, max, rows, placeholder]) => {
+    const name = english ? 'en-' + key : key;
+    return voiceField(english ? en : ar, name, data[name], `dir="${english ? 'ltr' : 'auto'}"
+      maxlength="${max}" rows="${rows}" ${key === 'facts' && !english ? 'required minlength="15"' : ''}
+      ${!english && placeholder ? `placeholder="${h(placeholder)}"` : ''}`,
+    {multiline:true,wide:key === 'facts' || key === 'evidence',language:english ? 'en' : '',review:key});
+  }).join('');
 }
 
 const fileSize = new Intl.NumberFormat('ar-KW', { style: 'unit', unit: 'megabyte', unitDisplay: 'short', maximumFractionDigits: 2 });
@@ -493,12 +574,12 @@ function composePage(query) {
         <section class="panel form-section"><h2>بيانات القضية</h2><div class="form-grid">
           ${label('نوع المذكرة',`<select name="type" required>${memoTypes.map(type=>option(type,type,data.type||memoTypes[0])).join('')}</select>`)}
           ${label('لغة المذكرة',`<select name="language">${Object.entries(languages).map(([value,name])=>option(value,name,data.language)).join('')}</select>`)}
-          ${label('عنوان المذكرة',input('title',data.title,'required maxlength="140" minlength="3" dir="auto" placeholder="عنوان يسهل العثور عليه"'))}
+          ${voiceField('عنوان المذكرة','title',data.title,'required maxlength="140" minlength="3" dir="auto" placeholder="عنوان يسهل العثور عليه"',{review:'title'})}
           ${label('المحكمة',`<select name="court" required>${option('','اختر المحكمة',data.court||'')}${Object.keys(courts).map(court=>option(court,court,data.court)).join('')}</select>`)}
-          ${label('رقم القضية',input('number',data.number,'dir="auto" maxlength="60"'))}
-          ${label('الدائرة',input('circuit',data.circuit,'dir="auto" maxlength="100"'),true)}
-          ${label('مقدم المذكرة وصفته',input('party',data.party,'dir="auto" maxlength="200"'))}
-          ${label('الخصم وصفته',input('opponent',data.opponent,'dir="auto" maxlength="200"'))}
+          ${voiceField('رقم القضية','number',data.number,'dir="auto" maxlength="60"',{review:'number'})}
+          ${voiceField('الدائرة','circuit',data.circuit,'dir="auto" maxlength="100"',{wide:true,review:'circuit'})}
+          ${voiceField('مقدم المذكرة وصفته','party',data.party,'dir="auto" maxlength="200"',{review:'party'})}
+          ${voiceField('الخصم وصفته','opponent',data.opponent,'dir="auto" maxlength="200"',{review:'opponent'})}
         </div></section>
         <section class="panel form-section"><h2>الوقائع والدفوع والطلبات</h2>
           <p class="hint" id="english-entry" hidden>اكتب البيانات بالإنجليزية عند استخدام القالب. يمكنك ترجمة متن عربي بالصياغة الذكية عند توفرها.</p>
@@ -507,10 +588,10 @@ function composePage(query) {
           <summary>مدخلات النسخة الإنجليزية</summary>
           <p class="hint">أدخل نص الحقول المقابلة عند استخدام القالب. تستطيع الصياغة الذكية ترجمة الحقول الفارغة من المدخلات العربية.</p>
           <div class="form-grid" lang="en" dir="ltr">
-            ${label('English title',input('en-title',data['en-title'],'maxlength="140"'))}
-            ${label('Circuit',input('en-circuit',data['en-circuit'],'maxlength="100"'))}
-            ${label('Filing party and capacity',input('en-party',data['en-party'],'maxlength="200"'))}
-            ${label('Opposing party and capacity',input('en-opponent',data['en-opponent'],'maxlength="200"'))}
+            ${voiceField('English title','en-title',data['en-title'],'maxlength="140"',{language:'en',review:'title'})}
+            ${voiceField('Circuit','en-circuit',data['en-circuit'],'maxlength="100"',{language:'en',review:'circuit'})}
+            ${voiceField('Filing party and capacity','en-party',data['en-party'],'maxlength="200"',{language:'en',review:'party'})}
+            ${voiceField('Opposing party and capacity','en-opponent',data['en-opponent'],'maxlength="200"',{language:'en',review:'opponent'})}
             ${caseInputs(data,true)}
           </div>
         </details>
@@ -519,14 +600,14 @@ function composePage(query) {
       <aside class="compose-aside">
         <section class="panel form-section"><h2>المراجع</h2>
           <p class="hint">اختر ما يصلح للمراجعة. تظهر الاستشهادات في المتن بعد إتاحة المرجع لها.</p>
-          <div class="stack"><div class="search-field">${icon('search',18)}${input('sourceQuery','','type="search" aria-label="بحث المراجع" placeholder="المادة أو المبدأ" maxlength="140"')}</div>
+          <div class="stack">${voiceField('بحث المراجع','sourceQuery','','type="search" dir="auto" placeholder="المادة أو المبدأ" maxlength="140"')}
           <div id="compose-references" class="compose-refs" aria-live="polite"><p class="hint">جارٍ تحميل المراجع…</p></div></div>
         </section>
         <section class="panel form-section stack"><h2>طريقة الصياغة</h2>
           <label class="checkline"><input type="radio" name="method" value="template" ${data.method !== 'model'?'checked':''}> قالب مرتب يعتمد على المدخلات</label>
           <label class="checkline"><input type="radio" name="method" value="model" ${data.method === 'model'?'checked':''} ${state.model?'':'disabled'}> تحليل الدفوع والترجمة بالذكاء الاصطناعي</label>
           ${state.model ? '<label class="checkline" id="model-consent" hidden><input type="checkbox" name="allowModel"> أوافق على إرسال النص الذي أدخلته للوقائع والمستندات والدفوع والطلبات إلى خدمة الصياغة. راجع النص واحذف البيانات الحساسة قبل الإرسال.</label>' : '<p class="hint">القوالب متاحة. التحليل والترجمة الآلية يحتاجان إلى خدمة صياغة متصلة.</p>'}
-          ${errorBox}${submit('توليد المسودة','spark')}
+          ${errorBox}${button('تحليل مدخلات المذكرة','review-memo','spark','secondary')}${submit('توليد المسودة','spark')}
         </section>
       </aside>
     </form>`;
@@ -592,14 +673,21 @@ function memoPage(memo) {
       ${badge(memo.method==='model'?'صياغة مساعدة':memo.method==='manual'?'محررة':'قالب')}
       <span class="hint">آخر تحديث ${h(date(memo.updated_at))}</span></div>
       ${memo.needsCitationReview ? note('راجع الإحالات الواردة في النص وطابقها مع المراجع المعتمدة قبل الاعتماد.','warning') : ''}
-      ${label('عنوان المذكرة',input('title',memo.title,`dir="auto" required minlength="3" maxlength="140" ${editing?'':'readonly'}`))}
+      ${editing ? voiceField('عنوان المذكرة','title',memo.title,'dir="auto" required minlength="3" maxlength="140"',
+        {language:documents[0].language,review:'title'}) :
+        label('عنوان المذكرة',input('title',memo.title,'dir="auto" readonly'))}
       ${documents.length > 1 ? `<div class="language-switch" role="group" aria-label="نسخة المذكرة">
         ${documents.map(({language})=>button(languages[language],'memo-language',null,'secondary',
           `data-language="${language}" aria-pressed="${language===activeLanguage}"`)).join('')}</div>` : ''}
-      ${documents.map(({language,body},index)=>`<div data-memo-language="${language}" ${language===activeLanguage?'':'hidden'}>
-        ${label(language==='ar'?'نص المذكرة':'Memorandum text',textarea(index?'alternateBody':'body',body,
-          `class="editor" lang="${language}" dir="${format[language].dir}" required minlength="20" maxlength="${memoBodyLimit}" ${editing?'':'readonly'}`))}
-      </div>`).join('')}
+      ${documents.map(({language,body},index)=>{
+        const title = language === 'ar' ? 'نص المذكرة' : 'Memorandum text';
+        const name = index ? 'alternateBody' : 'body';
+        const attrs = `class="editor" lang="${language}" dir="${format[language].dir}" required minlength="20" maxlength="${memoBodyLimit}"`;
+        return `<div data-memo-language="${language}" ${language===activeLanguage?'':'hidden'}>
+          ${editing ? voiceField(title,name,body,attrs,{multiline:true,language,review:'body'}) :
+            label(title,textarea(name,body,`${attrs} readonly`))}
+        </div>`;
+      }).join('')}
       ${errorBox}<div class="actions">
         ${editing ? submit('حفظ التعديلات','check') : ''}
         ${memo.status === 'review' ? button('اعتماد داخلي','approve-memo','checkCircle','soft') : ''}
@@ -652,7 +740,8 @@ function arbitratorPage() {
         </div>`}
       </div>
       <form class="stack chat-form" data-form="arbitrator">
-        ${label('سؤالك',textarea('question','','dir="auto" rows="3" minlength="4" maxlength="1000" required placeholder="اكتب اسم القانون أو رقم المادة أو سؤالك"'))}
+        ${voiceField('سؤالك','question','','dir="auto" rows="3" minlength="4" maxlength="1000" required placeholder="اكتب اسم القانون أو رقم المادة أو سؤالك"',
+          {multiline:true,review:'question'})}
         ${state.model ? '<label class="checkline"><input type="checkbox" name="allowModel"> أوافق على إرسال السؤال والسؤال السابق إلى خدمة التحليل. استخدم سؤالًا يخلو من البيانات الشخصية.</label>' : ''}
         ${errorBox}<p class="hint" data-chat-busy role="status" hidden>جارٍ البحث في المكتبة…</p>
         <div class="actions">
@@ -737,7 +826,7 @@ function subscriptionPage(data) {
 
 function addClientDialog() {
   openDialog('إضافة عميل',`<form class="stack" data-form="add-client">
-    ${label('اسم العميل أو المكتب',input('name','','required minlength="2" maxlength="100"'))}
+    ${voiceField('اسم العميل أو المكتب','name','','required minlength="2" maxlength="100" dir="auto"')}
     ${label('البريد الإلكتروني',input('email','','type="email" dir="ltr" required maxlength="254"'))}
     ${errorBox}${submit('إنشاء الحساب ورابط الدعوة','plus')}</form>`);
 }
@@ -752,7 +841,7 @@ function renewDialog(client) {
   openDialog(`تسجيل دفعة — ${client.name}`,`<form class="stack" data-form="renew-client" data-id="${client.id}">
     ${label('المدة بالأشهر',input('months','1','type="number" min="1" max="12" required dir="ltr"'))}
     ${label('المبلغ بالدينار الكويتي',input('amount','','inputmode="decimal" maxlength="9" required dir="ltr" placeholder="0.000"'))}
-    ${label('مرجع التحصيل',input('reference','','required minlength="3" maxlength="120" dir="auto"'))}
+    ${voiceField('مرجع التحصيل','reference','','required minlength="3" maxlength="120" dir="auto"')}
     <label class="checkline"><input type="checkbox" name="received" required> أؤكد استلام الدفعة خارج المنصة.</label>
     ${errorBox}${submit('حفظ الدفعة وتمديد الاشتراك','check')}</form>`);
 }
@@ -767,6 +856,7 @@ function readRoute() {
 const queryObject = (query,keys) => Object.fromEntries(keys.map(key=>[key,query.get(key)||'']));
 
 async function renderRoute({ focus = false } = {}) {
+  cancelDictation();
   if (!state.account) return authPage();
   const ownVersion = ++state.version;
   if (dialog.open) dialog.close();
@@ -882,6 +972,7 @@ function formValues(form) {
 
 async function saveMemo(extra = {}) {
   const form = document.querySelector('#editor');
+  if (form && finishDictation(form)) return flash('جارٍ إنهاء الإملاء. احفظ بعد ظهور النص.');
   if (!form?.reportValidity()) return;
   const content = formValues(form);
   const saved = await api(`/memos/${state.memo.id}`,{method:'PATCH',data:{...content,version:state.memo.version,...extra}});
@@ -907,6 +998,7 @@ document.addEventListener('submit',async event=>{
   const form = event.target.closest('[data-form]');
   if (!form) return;
   event.preventDefault();
+  if (finishDictation(form)) return flash('جارٍ إنهاء الإملاء. أعد الإرسال بعد ظهور النص.');
   if (form.dataset.busy === 'true') return;
   form.dataset.busy = 'true';
   const action = form.dataset.form;
@@ -1005,6 +1097,7 @@ document.addEventListener('submit',async event=>{
 });
 
 function toggleMenu(open) {
+  if (open) cancelDictation(app);
   const shellElement = app.querySelector('.shell');
   if (!shellElement) return;
   shellElement.classList.toggle('menu-open',open);
@@ -1012,6 +1105,30 @@ function toggleMenu(open) {
   toggle.setAttribute('aria-expanded',String(open));
   app.querySelector('.work-area').inert = open;
   (open ? app.querySelector('.sidebar-close') : toggle).focus();
+}
+
+function startFieldDictation(control) {
+  const field = control.closest('[data-voice-field]').querySelector('[data-voice-input]');
+  const start = () => toggleDictation(control,voiceLanguage(field),displayFieldReview);
+  if ((!window.SpeechRecognition && !window.webkitSpeechRecognition) || sessionStorage.getItem('tahkeem-dictation-consent')) {
+    start();
+    return;
+  }
+  if (dialog.open) {
+    if (window.confirm('قد يرسل المتصفح صوتك إلى خدمة الإملاء. هل تريد تشغيل الميكروفون؟')) {
+      sessionStorage.setItem('tahkeem-dictation-consent','1');
+      start();
+    }
+    return;
+  }
+  openDialog('الإملاء الصوتي', `<div class="stack"><p>قد يرسل المتصفح صوتك إلى خدمة الإملاء لتحويله إلى نص. راجع الأسماء والأرقام بعد الإملاء.</p>
+    <div class="actions">${button('متابعة وتشغيل الميكروفون','enable-dictation','mic','primary')}
+    ${button('إلغاء','dialog-close',null,'secondary')}</div></div>`);
+  dialog.querySelector('[data-action="enable-dictation"]').addEventListener('click',()=>{
+    sessionStorage.setItem('tahkeem-dictation-consent','1');
+    dialog.close();
+    if (control.isConnected) start();
+  },{once:true});
 }
 
 document.addEventListener('click', async event=>{
@@ -1046,6 +1163,7 @@ document.addEventListener('click', async event=>{
       case 'menu-close':
         toggleMenu(false); break;
       case 'dialog-close':
+        cancelDictation(dialog);
         dialog.close(); break;
       case 'go-search':
         if (state.editorDirty && !window.confirm('لديك تعديلات غير محفوظة. هل تريد فتح المكتبة؟')) break;
@@ -1093,12 +1211,14 @@ document.addEventListener('click', async event=>{
           ${errorBox}${submit(client.enabled?'إيقاف الحساب':'إعادة التفعيل','check')}</form>`);
         break;
       case 'approve-memo':
+        if (finishDictation(app)) return flash('جارٍ إنهاء الإملاء. راجع النص قبل الاعتماد.');
         if (!document.querySelector('#editor').reportValidity()) break;
         openDialog('اعتماد المذكرة داخليًا',`<form class="stack" data-form="approve-memo">
           <label class="checkline"><input type="checkbox" name="reviewed" required> راجعت الوقائع والطلبات وصحة المراجع وسريانها على القضية.</label>
           ${errorBox}${submit('اعتماد المذكرة','checkCircle')}</form>`);
         break;
       case 'memo-language':
+        cancelDictation(app);
         state.memoLanguage=buttonEl.dataset.language;
         app.querySelectorAll('[data-memo-language]').forEach(panel=>{
           panel.hidden=panel.dataset.memoLanguage!==state.memoLanguage;
@@ -1108,11 +1228,26 @@ document.addEventListener('click', async event=>{
         });
         break;
       case 'chat-example': {
+        cancelDictation(app);
         const question=app.querySelector('[data-form="arbitrator"] [name="question"]');
         question.value=buttonEl.dataset.question;
+        question.dispatchEvent(new Event('input',{bubbles:true}));
         question.focus();
         break;
       }
+      case 'dictate':
+        startFieldDictation(buttonEl);
+        break;
+      case 'review-field': {
+        const field = buttonEl.closest('[data-voice-field]').querySelector('[data-voice-input]');
+        if (finishDictation(field.closest('[data-voice-field]'))) break;
+        displayFieldReview(field,true);
+        break;
+      }
+      case 'review-memo':
+        if (finishDictation(app)) return flash('جارٍ إنهاء الإملاء. افتح التحليل بعد ظهور النص.');
+        displayMemoReview(buttonEl);
+        break;
       case 'chat-reset':
         state.chat=[];
         await renderRoute({focus:true});
@@ -1138,6 +1273,12 @@ document.addEventListener('click', async event=>{
 let searchDelay;
 document.addEventListener('input',event=>{
   const field = event.target;
+  const voice = field.closest('[data-voice-field]');
+  const previousReview = voice?.querySelector('[data-voice-analysis]');
+  if (previousReview && !previousReview.hidden) {
+    previousReview.hidden = true;
+    voice.querySelector('[data-action="review-field"]')?.setAttribute('aria-expanded','false');
+  }
   if (field.closest('#editor')) state.editorDirty=true;
   if (!field.closest('#compose')) return;
   if (field.name === 'sourceQuery') {
@@ -1151,6 +1292,12 @@ document.addEventListener('input',event=>{
 
 document.addEventListener('change',event=>{
   const field = event.target;
+  if (field.name === 'language') {
+    cancelDictation(field.form);
+    for (const review of field.form.querySelectorAll('[data-voice-analysis]:not([hidden])')) {
+      displayFieldReview(review.closest('[data-voice-field]').querySelector('[data-voice-input]'));
+    }
+  }
   if (field.matches('input[type="file"][data-memo-id]')) {
     const files = [...field.files];
     field.value = '';
@@ -1168,6 +1315,13 @@ document.addEventListener('change',event=>{
 document.addEventListener('keydown',event=>{
   if (event.key === 'Escape' && app.querySelector('.menu-open')) toggleMenu(false);
 });
+dialog.addEventListener('close',()=>cancelDictation(dialog));
+dialog.addEventListener('cancel',()=>cancelDictation(dialog));
+document.addEventListener('toggle',event=>{
+  if (event.target.id === 'english-copy' && !event.target.open) cancelDictation(event.target);
+},true);
+document.addEventListener('visibilitychange',()=>{ if (document.hidden) cancelDictation(); });
+window.addEventListener('pagehide',()=>cancelDictation());
 
 window.addEventListener('hashchange',()=>{
   if (!state.account) authPage();

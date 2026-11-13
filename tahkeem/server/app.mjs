@@ -28,7 +28,7 @@ export function createApp({ db, origin, setupHash = '', setupUntil, model = null
     res.set({
       'Content-Security-Policy': "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'; object-src 'none'",
       'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'no-referrer',
-      'Permissions-Policy': 'camera=(), microphone=(), geolocation=()', 'X-Frame-Options': 'DENY',
+      'Permissions-Policy': 'camera=(), microphone=(self), geolocation=()', 'X-Frame-Options': 'DENY',
       'X-Robots-Tag': 'noindex, nofollow',
     });
     if (secureCookie) res.set('Strict-Transport-Security', 'max-age=31536000');
