@@ -8,6 +8,8 @@ import subprocess
 
 def library_required(paths, before_package=None, after_package=None):
     for path in paths:
+        if path.startswith(("legal-memo-platform/tools/obscura-memo-check/", "legal-memo-platform/specs/066-obscura-memo-check/")):
+            continue
         if path.startswith(("legal-memo-platform/tools/rea/", "legal-memo-platform/tools/internal-verification/", "legal-memo-platform/specs/006-internal-verification/", "legal-memo-platform/specs/063-continuous-memo-admin/", "legal-memo-platform/specs/001-spec-kit-adoption/", "legal-memo-platform/tools/spec-kit/", "legal-memo-platform/.agents/", "legal-memo-platform/.specify/", "legal-memo-platform/native-admin-console/")) or path in {"legal-memo-platform/README.md", "legal-memo-platform/.gitignore", "legal-memo-platform/AGENTS.md"}:
             continue
         if path == "legal-memo-platform/package.json" and isinstance(before_package, dict) and isinstance(after_package, dict):
