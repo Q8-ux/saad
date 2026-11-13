@@ -21,6 +21,7 @@ const root = document.documentElement;
 return JSON.stringify({
   title: document.title.trim(), lang: root.lang, dir: root.dir,
   found: Boolean(target), frame: rules.frame_url && target ? target.src : null,
+  matches: rules.selector_timeout ? document.querySelectorAll(rules.selector).length : null,
   sources: rules.source_selector ? Array.from(document.querySelectorAll(rules.source_selector))
     .slice(0, 30).map(link => ({href: link.href, label: link.textContent.trim().slice(0, 160)})) : null
 });"""
@@ -53,34 +54,70 @@ def http_status(url, field=None, method="HEAD"):
 
 
 def inspect_dom(check, binary, capture):
-    args = [
-        binary, "fetch", "--quiet", "--obey-robots", "--user-agent", USER_AGENT,
-        "--timeout", "23", "--wait", "1", "--wait-until", "domcontentloaded",
-    ]
+    options = ["--obey-robots", "--user-agent", USER_AGENT]
     # Use the runtime's configured network route if a proxy is supplied.
     proxy = os.environ.get("HTTPS_PROXY") or os.environ.get("https_proxy")
     if proxy:
-        args += ["--proxy", proxy]
-    if capture:
-        args += ["--screenshot", str(capture)]
-    args += [check["url"], "--eval", f"(rules => {{ {DOM} }})({json.dumps(check)})"]
+        options += ["--proxy", proxy]
+    expression = f"(rules => {{ {DOM} }})({json.dumps(check)})"
     try:
-        process = subprocess.run(args, capture_output=True, text=True, timeout=31)
-    except (OSError, subprocess.TimeoutExpired):
-        return None, "انتهت مهلة المتصفح أو تعذر تشغيله."
-    if process.returncode:
-        if "robots.txt" in process.stderr.lower() and "disallow" in process.stderr.lower():
-            return None, "ملف robots.txt يمنع فتح الصفحة آليًا."
-        return None, "تعذر تحميل الصفحة في Obscura."
-    try:
-        data = json.loads(process.stdout)
-        if capture:
-            data = json.loads(data["evaluation"])
+        if check.get("selector_timeout"):
+            raw, error = inspect_dynamic_page(check, [binary, "mcp", *options], expression)
+            if error:
+                return None, error
+        else:
+            args = [binary, "fetch", "--quiet", *options, "--timeout", "23", "--wait", "1",
+                    "--wait-until", "domcontentloaded"]
+            if capture:
+                args += ["--screenshot", str(capture)]
+            process = subprocess.run([*args, check["url"], "--eval", expression],
+                                     capture_output=True, text=True, timeout=31)
+            if process.returncode:
+                if "robots.txt" in process.stderr.lower() and "disallow" in process.stderr.lower():
+                    return None, "ملف robots.txt يمنع فتح الصفحة آليًا."
+                return None, "تعذر تحميل الصفحة في Obscura."
+            raw = process.stdout
+            if capture:
+                raw = json.loads(raw)["evaluation"]
+        data = json.loads(raw)
         if not isinstance(data, dict) or not isinstance(data.get("title"), str):
             raise ValueError("Missing DOM evidence")
-    except (ValueError, TypeError, KeyError):
+    except (OSError, subprocess.TimeoutExpired):
+        return None, "انتهت مهلة المتصفح أو تعذر تشغيله."
+    except (ValueError, TypeError, KeyError, IndexError):
         return None, "تعذرت قراءة نتيجة الصفحة من Obscura."
     return data, None
+
+
+def inspect_dynamic_page(check, command, expression):
+    messages = [
+        {"id": 1, "method": "initialize", "params": {
+            "protocolVersion": "2024-11-05", "capabilities": {},
+            "clientInfo": {"name": "q8-ux-project-checks", "version": "1"},
+        }},
+        {"method": "notifications/initialized"},
+    ]
+    calls = [
+        ("browser_navigate", {"url": check["url"], "waitUntil": "domcontentloaded"}),
+        ("browser_wait_for", {"selector": check["selector"], "timeout": check["selector_timeout"]}),
+        ("browser_evaluate", {"expression": expression}),
+    ]
+    for index, (name, args) in enumerate(calls, start=2):
+        messages.append({"id": index, "method": "tools/call", "params": {"name": name, "arguments": args}})
+    payload = "".join(json.dumps({"jsonrpc": "2.0", **message}) + "\n" for message in messages)
+    process = subprocess.run(command, input=payload, capture_output=True, text=True, timeout=50)
+    if process.returncode:
+        return None, "تعذر تشغيل متصفح Obscura للفحص الديناميكي."
+    replies = {message.get("id"): message for message in map(json.loads, process.stdout.splitlines())}
+    for index in range(2, 5):
+        result = replies[index].get("result", {})
+        if result.get("isError") or "error" in replies[index]:
+            if index == 2 and "robots.txt" in str(result).lower():
+                return None, "ملف robots.txt يمنع فتح الصفحة آليًا."
+            if index == 3:
+                return None, "لم يظهر عنصر الصفحة المتوقع ضمن المهلة."
+            return None, "تعذر فحص الصفحة الديناميكية في Obscura."
+    return replies[4]["result"]["content"][0]["text"], None
 
 
 def run_check(project, check, binary, screenshots):
@@ -139,6 +176,9 @@ def run_check(project, check, binary, screenshots):
     message = "ظهرت العلامات المتوقعة في الصفحة."
     if screenshots and check.get("screenshot") and not image_fields:
         message += " تعذر التقاط الصورة."
+    if data["matches"] is not None:
+        message += f" عدد العناصر المطابقة: {data['matches']}."
+        image_fields["matches"] = data["matches"]
     if data["sources"] is not None:
         links = list({link["href"]: link for link in data["sources"]}.values())
         message += f" جُمعت {len(links)} روابط خارجية من المقال."

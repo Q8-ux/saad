@@ -87,7 +87,7 @@
       },
       {
         "id": "chess-app", "name": "واجهة اللعبة الفعلية",
-        "url": "https://ai-chess-kuwait.onrender.com/", "title": "AI Chess Kuwait"
+        "url": "https://ai-chess-kuwait.onrender.com/", "title": "AI Chess Arena", "selector": "h1"
       }
     ]
   },
@@ -98,7 +98,7 @@
       {
         "id": "store-catalog", "name": "ظهور أصناف الكتالوج",
         "url": "https://q8-ux.github.io/saad/oman-fruits-commerce/", "title": "شركة عمان للفواكه والخضروات",
-        "lang": "ar", "dir": "rtl", "selector": ".product-card"
+        "lang": "ar", "dir": "rtl", "selector": ".product-card", "selector_timeout": 14
       },
       {
         "id": "store-checkout", "name": "صفحة إتمام الطلب",
