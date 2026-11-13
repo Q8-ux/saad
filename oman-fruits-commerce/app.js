@@ -1,7 +1,7 @@
 async function omanCommerceApp(){
 "use strict";
 const CFG=window.OMAN_CONFIG,root=document.getElementById("app"),page=document.body.dataset.page||"home",BASE=CFG?.base||"/saad/oman-fruits-commerce/";
-let db,settings={},catalog=[],categories=[],roles=[],user=null,cart=[],posCart=[],activeCustomer=null,selectedOrder=null,managerTab="overview",salesTab="pos",managerCache={};
+let db,settings={},catalog=[],categories=[],roles=[],user=null,staffDisplayName="موظف المتجر",cart=[],posCart=[],activeCustomer=null,selectedOrder=null,managerTab="overview",salesTab="pos",managerCache={};
 const route=(p="")=>BASE+(p?p.replace(/^\/|\/$/g,"")+"/":"");
 const esc=x=>String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const cash=v=>`${Number(v||0).toFixed(3)} د.ك`;
@@ -50,7 +50,7 @@ async function basic(){
 }
 async function session(){
  const {data,error}=await db.auth.getUser();if(error||!data?.user){user=null;roles=[];return}user=data.user;
- try{const v=await api(db.rpc("my_roles"));roles=Array.isArray(v)?v:[]}catch{roles=[]}
+ try{const v=await api(db.rpc("my_roles"));roles=Array.isArray(v)?v:[]}catch{roles=[]}if(roles.length){try{staffDisplayName=await api(db.rpc("my_employee_name"))||"موظف المتجر"}catch{staffDisplayName=role("manager")?"مدير المتجر":"موظف المتجر"}}
 }
 const brand=()=>`<a class="brand" href="${route()}"><span class="brand-logo">🧺</span><span><strong>${esc(company())}</strong><small>طازجة كل يوم • الكويت</small></span></a>`;
 function header(){return `<div class="topbar">🍃 خضروات وفواكه مختارة بعناية • أسعار محدثة من المتجر</div><header class="header"><div class="container header-row">${brand()}<nav class="header-actions"><a class="btn" href="${route()}">المنتجات</a><a class="btn primary" href="${route("checkout")}">🛒 السلة <b data-cart-count>${cartCount()}</b></a></nav></div></header>`}
@@ -139,7 +139,7 @@ async function viewOrder(id){const o=(managerCache.orders||[]).find(o=>o.id===id
 async function refreshProtected(){if(page==="manager")await renderManager();else await renderSales()}
 async function renderSales(){
  const orders=await fetchOrders();managerCache.orders=orders;
- root.innerHTML=`<div class="dashboard"><aside class="dash-side">${brand()}<nav><button class="dash-nav ${salesTab==="pos"?"active":""}" data-sales-tab="pos">☎️ استقبال مكالمة</button><button class="dash-nav ${salesTab==="orders"?"active":""}" data-sales-tab="orders">🧾 الفواتير</button><button class="dash-nav" id="sales-out">خروج</button></nav></aside><main class="dash-main"><div class="dash-top"><div><h1>استقبال الطلبات الهاتفية</h1><small>الموظف: ${esc(user?.email||"")}</small></div><span class="badge">☎️ للموظفين المصرح لهم فقط</span></div><div id="sales-content"></div></main></div>`;
+ root.innerHTML=`<div class="dashboard"><aside class="dash-side">${brand()}<nav><button class="dash-nav ${salesTab==="pos"?"active":""}" data-sales-tab="pos">☎️ استقبال مكالمة</button><button class="dash-nav ${salesTab==="orders"?"active":""}" data-sales-tab="orders">🧾 الفواتير</button><button class="dash-nav" id="sales-out">خروج</button></nav></aside><main class="dash-main"><div class="dash-top"><div><h1>استقبال الطلبات الهاتفية</h1><small>الموظف: ${esc(staffDisplayName)}</small></div><span class="badge">☎️ للموظفين المصرح لهم فقط</span></div><div id="sales-content"></div></main></div>`;
  qa("[data-sales-tab]").forEach(b=>b.addEventListener("click",()=>{salesTab=b.dataset.salesTab;renderSales()}));q("#sales-out").addEventListener("click",signOut);
  if(salesTab==="pos")renderSalesPos();else renderSalesOrders();
 }
@@ -178,8 +178,8 @@ function renderSalesOrders(){const el=q("#sales-content");el.innerHTML=`<div cla
 async function signOut(){try{await db.auth.signOut();location.href=route("login")}catch(e){err(e)}}
 async function renderManager(){
  const orders=await fetchOrders();managerCache.orders=orders;
- const tabs=[["overview","الرئيسية","📊"],["orders","الفواتير","🧾"],["products","الأسعار والمنتجات","🥬"],["customers","العملاء","👥"],["stock","المخزون","📦"],["accounts","المحاسبة","💰"],["suppliers","الموردون","🚚"],["settings","الإعدادات","⚙️"],["team","الصلاحيات","🔐"]];
- root.innerHTML=`<div class="dashboard"><aside class="dash-side">${brand()}<nav>${tabs.map(([id,t,icon])=>`<button class="dash-nav ${managerTab===id?"active":""}" data-manager-tab="${id}">${icon} ${t}</button>`).join("")}<button class="dash-nav" id="manager-out">تسجيل الخروج</button></nav></aside><main class="dash-main"><div class="dash-top"><div><h1>${esc(tabs.find(x=>x[0]===managerTab)?.[1]||"لوحة التحكم")}</h1><small>مدير المتجر • ${esc(user?.email)}</small></div><a class="btn" href="${route("sales")}">الانتقال للبيع</a></div><section id="manager-content"></section></main></div>`;
+ const tabs=[["overview","الرئيسية","📊"],["orders","الفواتير","🧾"],["products","الأسعار والمنتجات","🥬"],["customers","العملاء","👥"],["stock","المخزون","📦"],["accounts","المحاسبة والميزانية","💰"],["reports","التقارير","📈"],["suppliers","الموردون","🚚"],["settings","الإعدادات","⚙️"],["team","إدارة الموظفين","👥"]];
+ root.innerHTML=`<div class="dashboard"><aside class="dash-side">${brand()}<nav>${tabs.map(([id,t,icon])=>`<button class="dash-nav ${managerTab===id?"active":""}" data-manager-tab="${id}">${icon} ${t}</button>`).join("")}<button class="dash-nav" id="manager-out">تسجيل الخروج</button></nav></aside><main class="dash-main"><div class="dash-top"><div><h1>${esc(tabs.find(x=>x[0]===managerTab)?.[1]||"لوحة التحكم")}</h1><small>${esc(staffDisplayName)} • لوحة الإدارة</small></div><a class="btn" href="${route("sales")}">الانتقال للبيع</a></div><section id="manager-content"></section></main></div>`;
  qa("[data-manager-tab]").forEach(b=>b.addEventListener("click",()=>{managerTab=b.dataset.managerTab;renderManager()}));q("#manager-out").addEventListener("click",signOut);
  const target=q("#manager-content");
  if(managerTab==="overview")await managerOverview(target);
@@ -188,6 +188,7 @@ async function renderManager(){
  if(managerTab==="customers")managerCustomers(target);
  if(managerTab==="stock")managerStock(target);
  if(managerTab==="accounts")await managerAccounting(target);
+ if(managerTab==="reports")await managerReports(target);
  if(managerTab==="suppliers")await managerSuppliers(target);
  if(managerTab==="settings")managerSettings(target);
  if(managerTab==="team")await managerTeam(target);
