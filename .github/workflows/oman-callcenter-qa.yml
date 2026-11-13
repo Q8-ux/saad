@@ -1,0 +1,61 @@
+name: Oman Call Center QA
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'oman-fruits-commerce/**'
+      - '.github/workflows/oman-callcenter-qa.yml'
+  workflow_dispatch:
+permissions: { contents: read }
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify JavaScript syntax and call-center functional paths
+        run: |
+          set -euo pipefail
+          node --check oman-fruits-commerce/app.js
+          node --check oman-fruits-commerce/config.js
+          python3 - <<'PY'
+          from pathlib import Path
+          import json
+          root=Path("oman-fruits-commerce")
+          src=(root/"app.js").read_text()
+          css=(root/"styles.css").read_text()
+          data=json.loads((root/"catalog.json").read_text())
+          assert len(data["products"])==36, "original product list changed"
+          assert sum(len(p["variants"]) for p in data["products"])==42, "price variants changed"
+          for marker in [
+            'if(page==="home"||page==="checkout"){location.replace(route("sales"));return}',
+            'function repeatCustomerOrder(orderId)',
+            'data-repeat-order=',
+            'db.rpc("lookup_customer"',
+            'db.rpc("create_customer"',
+            'db.rpc("pos_create_order"',
+            'db.from("orders").select("id,customer_id,invoice_no,order_items(',
+            'q("#pos-choose-address")',
+            'q("#pos-address-"+k)',
+            'if(!activeCustomer?.id)return toast',
+            'printTwo(o)',
+          ]: assert marker in src, "Missing staff workflow: "+marker
+          assert "call-product-image" in src and "call-product-image" in css
+          assert "claim_first_manager" not in src
+          assert "window.print()" in src
+          print("PASS: private call-center page, phone lookup, secure previous-order reuse, adjustable address and invoice print")
+          PY
+      - name: Inspect hosted site (public URLs only)
+        run: |
+          set -euo pipefail
+          base='https://q8-ux.github.io/saad/oman-fruits-commerce'
+          for asset in '/sales/' '/login/' '/app.js' '/styles.css'; do
+            status='000'
+            for n in 1 2 3 4 5; do
+              status=$(curl -LsS --max-time 15 -o /tmp/oman_response -w '%{http_code}' "$base$asset?run=$GITHUB_RUN_ID" || true)
+              [ "$status" = '200' ] && break
+              sleep 8
+            done
+            echo "$asset HTTP $status"
+            [ "$status" = '200' ] || exit 1
+          done
