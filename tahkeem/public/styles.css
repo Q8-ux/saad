@@ -256,6 +256,8 @@ td{overflow-wrap:anywhere}
 .memo-sources{display:grid;gap:10px}
 .memo-source{overflow-wrap:anywhere;font-size:12px}
 .memo-source p{color:var(--muted);font-size:11px;margin-block:3px}
+.memo-source-text summary{cursor:pointer}
+.memo-source-text p{white-space:pre-wrap;line-height:1.7}
 .guide-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:15px}
 .guide-card{padding:16px;display:grid;gap:7px;justify-items:start}
 .guide-card h2{font-size:15px}
@@ -303,6 +305,8 @@ td{overflow-wrap:anywhere}
   #print p.print-title{text-align:center;font-weight:700;font-size:15pt}
   #print p.print-heading{font-weight:700;margin-top:12pt;break-after:avoid}
   #print p.print-subheading{font-weight:700;break-after:avoid}
+  #print p.print-ground{margin-top:10pt;break-after:avoid}
+  #print p.print-quote{font-size:11pt;line-height:1.65;padding-inline-start:8pt;border-inline-start:1px solid #bcb0c3;break-inside:avoid}
   #print section+section{break-before:page}
 }
 .subscription-notice{margin-bottom:13px}

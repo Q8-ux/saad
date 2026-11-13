@@ -55,6 +55,7 @@ CREATE TABLE IF NOT EXISTS references_catalog (
   approved_at timestamptz,
   created_at timestamptz NOT NULL DEFAULT now()
 );
+ALTER TABLE references_catalog ADD COLUMN IF NOT EXISTS verbatim_text text NOT NULL DEFAULT '';
 
 CREATE TABLE IF NOT EXISTS memos (
   id uuid PRIMARY KEY,

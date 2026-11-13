@@ -19,15 +19,39 @@ export function citationLabel(source) {
   return [source.identity, source.edition, source.locator].join(' — ');
 }
 
+export function citationEntry(source, index) {
+  const text = (source.verbatimText || '').split(/\r?\n/u).map(line => line.trim()).filter(Boolean);
+  return [`〔${index + 1}〕 ${citationLabel(source)}`, ...text.map(line => `«${line}»`)].join('\n');
+}
+
 export function hasUnverifiedCitation(body, sources) {
   const approved = sources.filter(source => source.citable);
   const labels = approved.map(source => legalNormalization(citationLabel(source)));
-  return legalNormalization(body).split(/\r?\n/u).some(line => {
-    const text = line.trim().replace(/^•\s*/u, '');
+  const sourceTexts = approved.map((source, index) => citationEntry(source, index).split('\n').slice(1));
+  const requiredEntries = new Set();
+  const foundEntries = new Set();
+  const lines = body.split(/\r?\n/u);
+  for (let index = 0; index < lines.length; index++) {
+    const line = lines[index].trim().replace(/^•\s*/u, '');
+    const text = legalNormalization(line);
     const entry = /^〔(\d+)〕\s+(.+)$/u.exec(text);
-    if (entry) return labels[Number(entry[1]) - 1] !== entry[2];
-    if (labels.includes(text)) return false;
-    const markers = [...text.matchAll(/〔(\d+)〕/gu)];
-    return markers.some(([, id]) => !approved[Number(id) - 1]) || citation.test(text.replace(/〔\d+〕/gu, ''));
-  });
+    if (entry) {
+      const sourceIndex = Number(entry[1]) - 1;
+      if (labels[sourceIndex] !== entry[2]) return true;
+      const quotes = sourceTexts[sourceIndex];
+      if (quotes.some((quote, offset) => lines[index + offset + 1]?.trim().normalize('NFC') !== quote.normalize('NFC'))) return true;
+      if (quotes.length && /^«.*»$/u.test(lines[index + quotes.length + 1]?.trim() || '')) return true;
+      foundEntries.add(sourceIndex);
+      index += quotes.length;
+      continue;
+    }
+    if (labels.includes(text)) continue;
+    for (const [, number] of text.matchAll(/〔(\d+)〕/gu)) {
+      const sourceIndex = Number(number) - 1;
+      if (!approved[sourceIndex]) return true;
+      if (sourceTexts[sourceIndex].length) requiredEntries.add(sourceIndex);
+    }
+    if (citation.test(text.replace(/〔\d+〕/gu, ''))) return true;
+  }
+  return [...requiredEntries].some(index => !foundEntries.has(index));
 }

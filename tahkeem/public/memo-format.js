@@ -26,9 +26,10 @@ export const format = {
     missingParty: '[يُستكمل اسم مقدم المذكرة وصفته]', missingOpponent: '[يُستكمل اسم الخصم وصفته]',
     facts: 'الوقائع', evidence: 'المستندات والأدلة', objections: 'دفوع الخصم والرد عليها',
     position: 'دفوع الخصم', reply: 'الرد', requests: 'الطلبات',
+    possibleObjections: 'الدفوع المحتملة والرد عليها',
     primary: 'الطلبات الأصلية', alternative: 'الطلبات الاحتياطية',
     missingGrounds: '[تُستكمل الدفوع والأسانيد]', missingRequests: '[تُستكمل الطلبات الأصلية]',
-    authorities: 'الأسانيد القانونية', closing: 'وتفضلوا بقبول فائق الاحترام.',
+    authorities: 'الأسانيد القانونية ونصوص المواد', closing: 'وتفضلوا بقبول فائق الاحترام.',
     order: ['أولاً', 'ثانياً', 'ثالثاً', 'رابعاً', 'خامساً', 'سادساً'],
   },
   en: {
@@ -36,9 +37,10 @@ export const format = {
     missingParty: '[Complete the filing party and capacity]', missingOpponent: '[Complete the opposing party and capacity]',
     facts: 'Facts', evidence: 'Documents and evidence', objections: 'Opposing submissions and reply',
     position: 'Opposing submissions', reply: 'Reply', requests: 'Relief sought',
+    possibleObjections: 'Potential defences and replies',
     primary: 'Primary relief', alternative: 'Alternative relief',
     missingGrounds: '[Complete the grounds and supporting analysis]', missingRequests: '[Complete the primary relief sought]',
-    authorities: 'Legal authorities', closing: 'Respectfully submitted.',
+    authorities: 'Legal authorities and original statutory text', closing: 'Respectfully submitted.',
     order: ['I.', 'II.', 'III.', 'IV.', 'V.', 'VI.'],
   },
 };
@@ -57,8 +59,11 @@ export function memoDocuments(memo) {
 export function memoLineRole(line, index, title, type) {
   if (index === 0 || line === title || line === type || line === types[type]?.en) return 'title';
   if (/^(?:أولاً|ثانياً|ثالثاً|رابعاً|خامساً|سادساً) —|^(?:I|II|III|IV|V|VI)\. |^المراجع المحددة للمراجعة$/u.test(line)) return 'heading';
-  if (Object.values(format).some(copy => [copy.position, copy.reply, copy.primary, copy.alternative].includes(line))) {
+  if (/^〔\p{N}+〕\s/u.test(line) || Object.values(format).some(copy =>
+    [copy.position, copy.reply, copy.possibleObjections, copy.primary, copy.alternative].includes(line))) {
     return 'subheading';
   }
+  if (/^\p{N}+\.\s+[^—\n]{3,64} — .*〔\p{N}+〕$/u.test(line)) return 'ground';
+  if (/^«.*»$/u.test(line)) return 'quote';
   return '';
 }

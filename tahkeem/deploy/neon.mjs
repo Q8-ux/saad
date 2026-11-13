@@ -5,6 +5,7 @@ import { attachmentDownloadPath, attachmentPartPath, attachmentPartSize, attachm
   downloadAttachment } from '../server/attachments.mjs';
 import { modelFromEnvironment } from '../server/model.mjs';
 import { initialize, postgresStore } from '../server/store.mjs';
+import { HttpError } from '../server/security.mjs';
 
 const env = process.env;
 const host = env.NEON_BRANCH_ID && env.NEON_FUNCTION_HOST_SUFFIX
@@ -17,13 +18,20 @@ async function start() {
   if (!origin || !origin.startsWith('https://')) throw new Error('Tahkeem needs an HTTPS origin.');
   const uri = env.DATABASE_URL_UNPOOLED || env.DATABASE_URL;
   if (!uri) throw new Error('PostgreSQL connection not configured.');
-  const db = postgresStore(uri.replace('sslmode=require','sslmode=verify-full'));
-  try {
-    await initialize(db);
-  } catch (error) {
-    await db.close();
-    throw error;
+  const pool = postgresStore(uri.replace('sslmode=require','sslmode=verify-full'));
+  let schemaReady;
+  function prepareDatabase() {
+    schemaReady ??= initialize(pool).catch(error => {
+      schemaReady = null;
+      console.error('Tahkeem database startup failed', error.code || error.name);
+      throw new HttpError(503, 'تعذر الاتصال بقاعدة تحكيم. أعد المحاولة.');
+    });
+    return schemaReady;
   }
+  const db = {
+    async query(...args) { await prepareDatabase(); return pool.query(...args); },
+    async transaction(callback) { await prepareDatabase(); return pool.transaction(callback); },
+  };
   const storage = attachmentStorage(env);
   const app = createApp({ db, origin, setupHash:env.TAHKEEM_SETUP_TOKEN_SHA256, setupUntil:env.TAHKEEM_SETUP_UNTIL,
     model:modelFromEnvironment({ ...env, NODE_ENV:'production' }), storage });

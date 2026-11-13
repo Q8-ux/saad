@@ -1,5 +1,5 @@
 import { courts, format, languages, types } from '../public/memo-format.js';
-import { citationLabel, cleanModelText, legalNormalization } from './legal-text.mjs';
+import { citationEntry, cleanModelText, legalNormalization } from './legal-text.mjs';
 import { askModel } from './model.mjs';
 import { requireThat, textField } from './security.mjs';
 
@@ -68,25 +68,43 @@ export function missingEnglishFields(input) {
   return [];
 }
 
-function render(input, language, authorities, argumentsList) {
+function render(input, language, authorities, argumentsList, applicable) {
   const copy = format[language];
   const type = types[input.type];
   const typeName = language === 'ar' ? input.type : type.en;
   const labelled = (label, value) => value ? `${label} — ${value}` : '';
-  const grounds = numbered(lines(input.grounds));
-  const analysis = numbered(argumentsList.map(item => {
+  const positions = new Map(authorities.map((source, index) => [source.id, index + 1]));
+  const quoted = new Set();
+  function fromReviewedGrounds(items, withText = false) {
+    return items.filter(item => item.ids.every(id => positions.has(id))).map(item => {
+      const numbers = item.ids.map(id => positions.get(id));
+      const text = `${item[language]} ${numbers.map(number => `〔${number}〕`).join(' ')}`;
+      if (!withText) return text;
+      const entries = numbers.filter(number => !quoted.has(number)).map(number => {
+        quoted.add(number);
+        return citationEntry(authorities[number - 1], number - 1);
+      });
+      return [text, ...entries].join('\n');
+    });
+  }
+  const analysis = argumentsList.map(item => {
     const citations = item.sourceIds.map(id => `〔${id.slice(1)}〕`).join(' ');
     return [item.issue, item.analysis, item.application, citations].filter(Boolean).join(' — ');
-  }));
+  });
+  const grounds = numbered([...lines(input.grounds), ...fromReviewedGrounds(applicable.arguments, true), ...analysis]);
+  const possible = numbered(fromReviewedGrounds(applicable.replies));
+  const otherAuthorities = authorities.map((source, index) => quoted.has(index + 1) ? '' : citationEntry(source, index))
+    .filter(Boolean).join('\n\n');
   const sections = [
     [copy.facts, numbered(lines(input.facts))],
     [copy.evidence, numbered(lines(input.evidence))],
-    [language === 'ar' ? type.arGrounds : type.enGrounds, [grounds, analysis].filter(Boolean).join('\n\n') || copy.missingGrounds],
+    [language === 'ar' ? type.arGrounds : type.enGrounds, grounds || copy.missingGrounds],
     [copy.objections, [
       input.opponentGrounds && `${copy.position}\n${numbered(lines(input.opponentGrounds))}`,
       input.reply && `${copy.reply}\n${numbered(lines(input.reply))}`,
+      possible && `${copy.possibleObjections}\n${possible}`,
     ].filter(Boolean).join('\n\n')],
-    [copy.authorities, authorities.map((source, index) => `〔${index + 1}〕 ${citationLabel(source)}`).join('\n')],
+    [copy.authorities, otherAuthorities],
     [copy.requests, [
       `${copy.primary}\n${numbered(lines(input.requests)) || copy.missingRequests}`,
       input.alternativeRequests && `${copy.alternative}\n${numbered(lines(input.alternativeRequests))}`,
@@ -141,7 +159,7 @@ function validatedArguments(items, evidence, refs, language) {
   });
 }
 
-export async function draftBodies(input, sources, model) {
+export async function draftBodies(input, sources, model, applicable = { arguments: [], replies: [] }) {
   const authorities = sources.filter(source => source.citable);
   const versions = input.language === 'both' ? ['ar', 'en'] : [input.language];
   const needed = missingEnglishFields(input);
@@ -176,5 +194,5 @@ export async function draftBodies(input, sources, model) {
     }
   }
   return versions.map(language => render(language === 'en' ? englishDraft(input, translated) : input,
-    language, authorities, analyses[language] || []));
+    language, authorities, analyses[language] || [], applicable));
 }

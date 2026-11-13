@@ -5,7 +5,7 @@ import { draftBodies, missingEnglishFields } from './memo-draft.mjs';
 import { one } from './store.mjs';
 import { HttpError, isUuid, requireThat, textField } from './security.mjs';
 
-export async function generateMemo(store, user, id, input, sources, method, model) {
+export async function generateMemo(store, user, id, input, sources, method, model, applicable) {
   requireThat(isUuid(id), 400, 'معرّف المذكرة غير صالح.');
   const existing = await getMemo(store, user.id, id, false);
   if (existing) return existing;
@@ -13,7 +13,7 @@ export async function generateMemo(store, user, id, input, sources, method, mode
   else requireThat(!missingEnglishFields(input).length, 422,
     'أدخل النص الإنجليزي للحقول المعبأة أو اختر الصياغة الذكية لترجمتها.');
   let bodies;
-  try { bodies = await draftBodies(input, sources, method === 'model' ? model : null); }
+  try { bodies = await draftBodies(input, sources, method === 'model' ? model : null, applicable); }
   catch (error) {
     if (error instanceof HttpError || method !== 'model') throw error;
     throw new HttpError(503, 'تعذرت الصياغة الذكية. أعد المحاولة أو اختر القالب.');
@@ -26,7 +26,8 @@ export async function generateMemo(store, user, id, input, sources, method, mode
     const current = await getMemo(db, user.id, id, false);
     if (current) return current;
     const snapshot = sources.map(item => ({ id: item.id, title: item.title, identity: item.identity,
-      edition: item.edition, locator: item.locator, sourceUrl: item.sourceUrl, citable: item.citable, origin: item.origin, source: item.source }));
+      edition: item.edition, locator: item.locator, sourceUrl: item.sourceUrl, citable: item.citable,
+      origin: item.origin, source: item.source, verbatimText: item.citable ? item.verbatimText : undefined }));
     const row = await one(db, `INSERT INTO memos (id,account_id,title,memo_type,case_number,input,sources,body,method,alternate_body)
       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) ON CONFLICT (id) DO NOTHING RETURNING *`,
     [id, user.id, input.title, input.type, input.number, JSON.stringify(input), JSON.stringify(snapshot), bodies[0], method, bodies[1] ?? null]);
@@ -75,15 +76,21 @@ export async function changeMemo(db, accountId, id, body) {
 export async function memoDocx(memo) {
   const sections = memoDocuments(memo).map(({ language, body, title }) => {
     const rtl = language === 'ar';
-    const textRun = (text, bold = false) => new TextRun({ text, rightToLeft: rtl, bold, boldComplexScript: bold,
-      font: 'Cairo', size: 26, sizeComplexScript: 26, language: { value: language, bidirectional: 'ar-KW' } });
+    const textRun = (text, bold = false, rightToLeft = rtl, size = 26) => new TextRun({
+      text, rightToLeft, bold, boldComplexScript: bold, font: 'Cairo', size, sizeComplexScript: size,
+      language: { value: rightToLeft ? 'ar-KW' : language, bidirectional: 'ar-KW' },
+    });
     const children = body.split('\n').filter(line => line.trim()).map((line, index) => {
       const role = memoLineRole(line, index, title, memo.memo_type);
+      const isQuote = role === 'quote';
+      const rightToLeft = rtl || (isQuote && /\p{Script=Arabic}/u.test(line));
+      const bold = ['title','heading','subheading'].includes(role);
       return new Paragraph({
         ...(role === 'title' ? { heading: HeadingLevel.TITLE } : {}),
-        bidirectional: rtl, alignment: role === 'title' ? AlignmentType.CENTER : rtl ? AlignmentType.RIGHT : AlignmentType.LEFT,
-        keepNext: Boolean(role), spacing: { before: role === 'heading' ? 185 : 0, after: 90, line: 305 },
-        children: [textRun(line, Boolean(role))],
+        bidirectional: rightToLeft, alignment: role === 'title' ? AlignmentType.CENTER : rightToLeft ? AlignmentType.RIGHT : AlignmentType.LEFT,
+        keepNext: bold || role === 'ground', keepLines: isQuote,
+        spacing: { before: role === 'heading' ? 185 : role === 'ground' ? 130 : 0, after: 90, line: 305 },
+        children: [textRun(line, bold, rightToLeft, isQuote ? 23 : 26)],
       });
     });
     if (memo.status !== 'approved') children.unshift(new Paragraph({

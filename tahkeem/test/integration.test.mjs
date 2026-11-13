@@ -173,11 +173,12 @@ test('reference approval and guard against generated citations',async t=>{
   const owner=await post('/api/setup',{code:setup,name:'مالك الاختبار',email:'owner@example.test',password});
   const source=await call('/api/library?kind=article&q='+encodeURIComponent('الإثبات ٣٩'),{cookie:owner.cookie});
   assert.equal(source.status,200);
-  assert.equal(source.body.items.length,3);
-  assert.ok(source.body.items.every(item=>item.kind==='article' && !item.citable));
+  assert.equal(source.body.items.filter(item=>item.origin==='starter' && !item.citable).length,3);
+  assert.ok(source.body.items.some(item=>item.id==='kw-evidence-1' && item.citable));
   const ref={kind:'article',category:'اختبار اصطناعي',title:'مرجع اصطناعي للبرمجيات',
     authority:'اختبار فقط',identity:'المادة الاصطناعية رقم 9001',edition:'عينة اختبار',locator:'ص 1',
-    summary:'محتوى اصطناعي لا يمثل مرجعاً قانونياً حقيقياً.',sourceUrl:'https://moj.gov.kw/',citable:true};
+    summary:'محتوى اصطناعي لا يمثل مرجعاً قانونياً حقيقياً.',verbatimText:'سطر النص الاصطناعي الأول.\nسطر النص الاصطناعي الثاني.',
+    sourceUrl:'https://moj.gov.kw/',citable:true};
   assert.equal((await post('/api/owner/references',ref,owner.cookie)).status,400);
   assert.equal((await post('/api/owner/references',{...ref,checked:true,sourceUrl:'https://example.test'},owner.cookie)).status,400);
   const reference=await post('/api/owner/references',{...ref,checked:true},owner.cookie);
@@ -188,7 +189,13 @@ test('reference approval and guard against generated citations',async t=>{
   assert.equal(good.status,201,JSON.stringify(good.body));
   assert.match(good.body.body,/المادة الاصطناعية رقم 9001/);
   assert.match(good.body.body,/تراجع دلالة الإيصال/);
+  assert.match(good.body.body,/«سطر النص الاصطناعي الأول\.»\n«سطر النص الاصطناعي الثاني\.»/u);
+  assert.doesNotMatch(good.body.body,/محتوى اصطناعي لا يمثل/u);
   assert.equal(good.body.status,'review');
+  const review=(body)=>call(`/api/memos/${good.body.id}`,{method:'PATCH',cookie:owner.cookie,
+    data:{version:1,body,status:'approved',reviewed:true}});
+  assert.equal((await review(good.body.body.replace('الاصطناعي الثاني','المحرّف الثاني'))).status,422);
+  assert.equal((await review(good.body.body)).status,200);
   const bad=await post('/api/memos',{...caseInput,id:randomUUID(),grounds:'إحالة مرفوضة',allowModel:true},owner.cookie);
   assert.equal(bad.status,422);
   assert.equal((await call('/api/overview',{cookie:owner.cookie})).body.counts.open,1);
@@ -196,6 +203,43 @@ test('reference approval and guard against generated citations',async t=>{
   assert.equal(chat.status,200);
   assert.equal(chat.body.mode,'model');
   assert.equal(chat.body.points[0].sourceIds[0],reference.body.id);
+});
+
+test('a Kuwaiti contract rescission claim includes applicable grounds and statutory text in the saved draft', async t => {
+  const {call}=await environment(t);
+  const post=(path,data,cookie)=>call(path,{method:'POST',data,cookie});
+  const owner=await post('/api/setup',{code:setup,name:'مالك الاختبار',email:'owner@example.test',password});
+  const claim={type:'صحيفة دعوى',title:'فسخ عقد توريد وتركيب',court:'المحكمة الكلية',
+    party:'ناصر، مدعٍ',opponent:'مروان، مدعى عليه',facts:'عقد مكتوب لتوريد وتركيب خزائن. حل الموعد ولم يتم التركيب. أُعلن المدعى عليه بإنذار رسمي.',
+    requests:'الحكم بفسخ عقد التوريد وإلزام المدعى عليه برد الدفعة المقدمة.'};
+  const result=await post('/api/memos',claim,owner.cookie);
+  assert.equal(result.status,201,JSON.stringify(result.body));
+  assert.equal(result.body.status,'review');
+  assert.match(result.body.body,/الإخلال الموجب للفسخ[^\n]*〔\d+〕/u);
+  assert.match(result.body.body,/المادة ٢٠٩ من القانون المدني رقم ٦٧ لسنة ١٩٨٠/u);
+  assert.match(result.body.body,/«١- في العقود الملزمة للجانبين، إذا لم يوف أحد المتعاقدين/u);
+  assert.match(result.body.body,/المادة ٢١١ من القانون المدني رقم ٦٧ لسنة ١٩٨٠/u);
+  assert.match(result.body.body,/«١- إذا فسخ العقد، اعتبر كأن لم يكن/u);
+  assert.match(result.body.body,/المادة ٢٩٨/u);
+  assert.match(result.body.body,/المادة ٦٦٦/u);
+  assert.ok(result.body.body.indexOf('المادة ٢٠٩') < result.body.body.indexOf('رد الدفعة المقدّمة'));
+  assert.doesNotMatch(result.body.body,/تُستكمل الدفوع/u);
+  const memo=await call(`/api/memos/${result.body.id}`,{cookie:owner.cookie});
+  assert.equal(memo.body.needsCitationReview,false);
+  const word=await call(`/api/memos/${result.body.id}/word`,{cookie:owner.cookie});
+  assert.equal(word.status,200);
+  assert.equal(word.body.subarray(0,2).toString(),'PK');
+  const unrelated=await post('/api/memos',{...claim,title:'منازعة مختلفة',facts:'ذكر المدعي أنه قدم مستندًا ماليًا للمحكمة.',
+    requests:'طلب إثبات واقعة السداد.'},owner.cookie);
+  assert.equal(unrelated.status,201);
+  assert.doesNotMatch(unrelated.body.body,/المادة ٢٠٩/u);
+  const english={title:'Rescission of a supply and installation contract',party:'Nasser, claimant',opponent:'Marwan, defendant',
+    facts:'A written contract for supply and installation. The work was not performed. Formal notice was served.',
+    requests:'Rescind the contract and refund the advance.'};
+  const bilingual=await post('/api/memos',{...claim,language:'both',english},owner.cookie);
+  assert.equal(bilingual.status,201,JSON.stringify(bilingual.body));
+  assert.match(bilingual.body.alternate_body,/Breach supporting rescission/u);
+  assert.match(bilingual.body.alternate_body,/«١- إذا فسخ العقد/u);
 });
 
 test('imported material keeps article suffix, page and review status', async t => {

@@ -1,5 +1,5 @@
 import { icon } from './icons.js?v=2.3';
-import { courts, format, languages, memoBodyLimit, memoDocuments, memoLineRole, types } from './memo-format.js?v=2.1';
+import { courts, format, languages, memoBodyLimit, memoDocuments, memoLineRole, types } from './memo-format.js?v=2.4';
 import { cancelDictation, finishDictation, toggleDictation } from './dictation.js?v=2.3';
 import { reviewMemo, reviewText } from './text-review.js?v=2.3';
 
@@ -144,8 +144,9 @@ function authPage() {
       ${label('كلمة المرور',input('password','',`type="password" dir="ltr" maxlength="128" required autocomplete="${mode==='login'?'current-password':'new-password'}" ${mode==='login'?'':'minlength="12"'}`))}
       ${errorBox}${submit(mode === 'login' ? 'دخول' : mode === 'setup' ? 'إنشاء حساب المالك' : 'تفعيل حسابي', 'left')}
     </form>
-    ${mode === 'login' && state.setup ? button('تهيئة حساب المالك','setup-mode',null,'subtle') : ''}
+    ${mode === 'login' ? `<div data-setup-entry ${state.setup?'':'hidden'}>${button('تهيئة حساب المالك','setup-mode',null,'subtle')}</div>` : ''}
     ${mode !== 'login' ? button('العودة إلى تسجيل الدخول','login-mode',null,'subtle') : ''}
+    <div data-session-retry aria-live="polite"></div>
     </section></div></main>`;
 }
 
@@ -302,11 +303,12 @@ async function referenceDialog(item) {
   }
   openDialog(item.title,`<div class="stack"><div class="actions">${referenceStatus(item)}${badge(item.category)}</div>
     ${item.identity !== item.title ? `<p>${h(item.identity)}</p>` : ''}${item.summary ? `<p>${h(item.summary)}</p>` : ''}
+    ${item.verbatimText ? `<div class="corpus-text" dir="auto">${h(item.verbatimText)}</div>` : ''}
     <div class="memo-source"><p>${h([item.authority,item.edition,item.locator].filter(Boolean).join(' · '))}</p></div>
     ${item.kind !== 'law' && !item.citable ? note('تحقق من النسخة النافذة وموضع النص قبل إدراج الاستشهاد.','warning') : ''}
     <div class="actions">${external('فتح المصدر الرسمي',item.sourceUrl)}
       ${item.kind !== 'law' ? link('أضفه إلى مسودة',path('compose',{source:item.id}),'plus','soft','data-close-dialog') : ''}</div>
-    ${state.account.role === 'owner' && item.kind !== 'law' ? referenceReview(item) : ''}</div>`);
+    ${state.account.role === 'owner' && ['owner','starter'].includes(item.origin) && item.kind !== 'law' ? referenceReview(item) : ''}</div>`);
 }
 
 function referenceReview(item) {
@@ -330,6 +332,7 @@ function addReferenceDialog(item = {}) {
     ${voiceField('الصفحة أو موضع النص','locator',item.locator,'required maxlength="120" dir="auto"')}
     ${label('الرابط الرسمي',input('sourceUrl',item.sourceUrl,'type="url" dir="ltr" required maxlength="2000"'))}
     ${voiceField('النص المدقق أو وصف مضمون المرجع','summary',item.summary,'required maxlength="1600" dir="auto"',{multiline:true,wide:true,review:'summary'})}
+    ${voiceField('النص الحرفي من المصدر','verbatimText',item.verbatimText,'maxlength="3000" dir="auto"',{multiline:true,wide:true})}
     <label class="checkline field span"><input name="checked" type="checkbox"> راجعت الهوية والنسخة والموضع، وأتيح الاستشهاد بالمرجع.</label>
     <div class="field span">${errorBox}<div>${submit('حفظ المرجع','check')}</div></div></form>`);
 }
@@ -599,7 +602,7 @@ function composePage(query) {
       </div>
       <aside class="compose-aside">
         <section class="panel form-section"><h2>المراجع</h2>
-          <p class="hint">اختر ما يصلح للمراجعة. تظهر الاستشهادات في المتن بعد إتاحة المرجع لها.</p>
+          <p class="hint">تدرج بيانات المرجع المتاح للاستشهاد ونصه الحرفي إن توفر. تُضاف تلقائيًا الأسانيد المتحققة المطابقة لصحيفة فسخ عقد التوريد أو التركيب.</p>
           <div class="stack">${voiceField('بحث المراجع','sourceQuery','','type="search" dir="auto" placeholder="المادة أو المبدأ" maxlength="140"')}
           <div id="compose-references" class="compose-refs" aria-live="polite"><p class="hint">جارٍ تحميل المراجع…</p></div></div>
         </section>
@@ -703,6 +706,7 @@ function memoPage(memo) {
       <section class="panel form-section"><h2>مراجع هذه المذكرة</h2>
       <div class="memo-sources">${memo.sources.length ? memo.sources.map(item=>`<div class="memo-source">
         <strong>${h(item.title)}</strong><p>${h([item.identity,item.edition,item.locator].filter(Boolean).join(' · '))}</p>
+        ${item.verbatimText ? `<details class="memo-source-text"><summary>نص المادة</summary><p dir="auto">${h(item.verbatimText)}</p></details>` : ''}
         ${sourceButton(item,'عرض المصدر')} ${item.citable ? '' : badge('للمراجعة','review')}</div>`).join('') :
         '<p class="hint">لم تُحدّد مراجع لهذه المسودة.</p>'}</div></section>
     </aside></div>`;
@@ -988,8 +992,11 @@ function startPrint() {
   const paper = document.querySelector('#print');
   paper.innerHTML = memoDocuments(memo).map(({language,body,title})=>`<section lang="${language}" dir="${format[language].dir}">
     ${memo.status === 'approved' ? '' : `<p class="print-title">${h(format[language].draft)}</p>`}
-    ${body.split('\n').filter(line=>line.trim()).map((line,index)=>
-      `<p class="print-${memoLineRole(line,index,title,memo.memo_type)||'text'}">${h(line)}</p>`).join('')}
+    ${body.split('\n').filter(line=>line.trim()).map((line,index)=>{
+      const role = memoLineRole(line,index,title,memo.memo_type) || 'text';
+      const direction = language === 'en' && role === 'quote' && /\p{Script=Arabic}/u.test(line) ? ' lang="ar" dir="rtl"' : '';
+      return `<p class="print-${role}"${direction}>${h(line)}</p>`;
+    }).join('')}
     </section>`).join('');
   window.print();
 }
@@ -1336,8 +1343,13 @@ window.addEventListener('beforeunload',event=>{
 });
 
 async function boot() {
+  const version = state.version;
+  if (!state.account && !app.querySelector('.auth-layout')) authPage();
+  const retry = app.querySelector('[data-session-retry]');
+  if (retry) retry.textContent = '';
   try {
-    const result=await api('/session');
+    const result=await api('/session',{signal:AbortSignal.timeout(15_000)});
+    if (version !== state.version) return;
     state.account=result.account;
     state.model=result.modelAvailable;
     state.attachmentsAvailable=result.attachmentsAvailable;
@@ -1345,11 +1357,14 @@ async function boot() {
     if (state.account) {
       if (location.hash.startsWith('#invite=')) history.replaceState(null,'','#overview');
       await renderRoute();
-    } else authPage();
+    } else {
+      const entry = app.querySelector('[data-setup-entry]');
+      if (entry) entry.hidden = !state.setup;
+    }
   } catch(error) {
-    app.innerHTML=`<main id="main" class="loading-screen"><section class="panel form-section stack">
-      ${note(error.message,'error')}<button class="button primary" id="boot-retry">إعادة المحاولة</button></section></main>`;
-    app.querySelector('#boot-retry').addEventListener('click',boot,{once:true});
+    if (version !== state.version || !retry?.isConnected) return;
+    retry.innerHTML=`${note(error.message,'error')}<button type="button" class="button secondary">إعادة المحاولة</button>`;
+    retry.querySelector('button').addEventListener('click',boot,{once:true});
   }
 }
 

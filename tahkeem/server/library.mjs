@@ -9,6 +9,8 @@ export { normalizeSearch } from './search.mjs';
 
 const manifest = JSON.parse(readFileSync(new URL('../data/moj-laws-manifest.json', import.meta.url)));
 const references = JSON.parse(readFileSync(new URL('../data/references.json', import.meta.url)));
+const reviewedArticles = JSON.parse(readFileSync(new URL('../data/reviewed-articles.json', import.meta.url)))
+  .map(ref => ({ ...ref, sourceUrl: sourceUrl(ref.sourceUrl), citable: true, origin: 'reviewed' }));
 const officialHosts = new Set(['moj.gov.kw','www.moj.gov.kw','kijls.moj.gov.kw','www.kijls.moj.gov.kw',
   'kuwaitalyawm.media.gov.kw','eservices.moj.gov.kw','e.gov.kw','www.e.gov.kw','www.cck.moj.gov.kw']);
 
@@ -51,12 +53,14 @@ const officialLaws = manifest.documents.flatMap(entry => {
   }];
 });
 const seeds = references.map(ref => ({ ...ref, sourceUrl: sourceUrl(ref.sourceUrl), citable: false, origin: 'starter' }));
-const fixedItems = [...officialLaws, ...seeds];
+const fixedItems = [...reviewedArticles, ...officialLaws, ...seeds];
+const reviewedById = new Map(reviewedArticles.map(item => [item.id, item]));
 
 function itemFromRow(row) {
   return {
     id: row.id, kind: row.kind, title: row.title, category: row.category, authority: row.authority,
     identity: row.identity, edition: row.edition, locator: row.locator, summary: row.summary,
+    verbatimText: row.verbatim_text,
     sourceUrl: row.source_url, citable: Boolean(row.approved_at) && row.kind !== 'law',
     approvedAt: row.approved_at, origin: 'owner',
   };
@@ -91,6 +95,7 @@ export async function libraryPage(db, { kind, query, category, page, pageSize })
 
 export async function selectedSources(db, ids) {
   if (!ids.length) return [];
+  if (ids.every(id => reviewedById.has(id))) return ids.map(id => reviewedById.get(id));
   const [items, imported] = await Promise.all([catalog(db),corpusByIds(db,ids)]);
   const map = new Map([...items,...imported].map(item => [item.id, item]));
   return ids.map(id => {
@@ -107,12 +112,13 @@ export async function saveReference(db, body) {
     textField(body.category, 'التصنيف', 80, 2), textField(body.authority, 'الجهة', 150, 2),
     textField(body.identity, 'رقم المرجع وهويته', 260, 3), textField(body.edition, 'الإصدار', 150, 2),
     textField(body.locator, 'موضع النص في المصدر', 120, 2), textField(body.summary, 'مضمون المرجع', 1600, 8),
-    sourceUrl(textField(body.sourceUrl, 'الرابط الرسمي', 2000, 12))];
-  requireThat(values.at(-1), 400, 'أدخل رابط HTTPS من مصدر حكومي مدعوم.');
+    sourceUrl(textField(body.sourceUrl, 'الرابط الرسمي', 2000, 12)),
+    textField(body.verbatimText, 'النص الحرفي من المصدر', 3000)];
+  requireThat(values[9], 400, 'أدخل رابط HTTPS من مصدر حكومي مدعوم.');
   requireThat(body.citable !== true || body.checked === true, 400, 'أكد مطابقة هوية المرجع ومضمونه للنسخة الرسمية.');
   const row = await one(db, `INSERT INTO references_catalog
-    (id,kind,title,category,authority,identity,edition,locator,summary,source_url,approved_at)
-    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10, CASE WHEN $11::boolean THEN now() ELSE NULL END) RETURNING *`,
+    (id,kind,title,category,authority,identity,edition,locator,summary,source_url,verbatim_text,approved_at)
+    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11, CASE WHEN $12::boolean THEN now() ELSE NULL END) RETURNING *`,
     [...values, body.citable === true]);
   return itemFromRow(row);
 }

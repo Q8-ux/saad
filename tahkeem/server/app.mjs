@@ -7,6 +7,7 @@ import { arbitratorReply } from './arbitrator.mjs';
 import { attachmentPartSize, beginAttachment, downloadAttachment, listAttachments, removeAttachment, savePart } from './attachments.mjs';
 import { catalog, libraryPage, saveReference, selectedSources, setReferenceApproval } from './library.mjs';
 import { corpusByIds, corpusStats } from './corpus.mjs';
+import { contractGrounds, groundSourceIds } from './contract-grounds.mjs';
 import { memoInput } from './memo-draft.mjs';
 import { changeMemo, generateMemo, getMemo, memoDocx, needsCitationReview } from './memos.mjs';
 import { getSessionAccount, HttpError, isUuid, limit, publicAccount, removeSession, requireThat,
@@ -182,8 +183,9 @@ export function createApp({ db, origin, setupHash = '', setupUntil, model = null
       requireThat(req.body.allowModel === true, 400, 'أكد إرسال ملخص القضية إلى خدمة الصياغة المهيأة.');
       await limit(db, `model:${req.account.id}`, 12);
     }
-    const sources = await selectedSources(db, [...new Set(ids)]);
-    const result = await generateMemo(db, req.account, req.body.id || randomUUID(), input, sources, method, model);
+    const applicable = contractGrounds(input);
+    const sources = await selectedSources(db, [...new Set([...ids, ...groundSourceIds(applicable)])]);
+    const result = await generateMemo(db, req.account, req.body.id || randomUUID(), input, sources, method, model, applicable);
     res.status(201).json(result);
   });
   api.get('/memos/:id', async (req, res) => {
