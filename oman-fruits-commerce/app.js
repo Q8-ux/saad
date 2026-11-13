@@ -92,11 +92,42 @@ async function renderLogin(){
  let mode="signin";qa("[data-auth-mode]").forEach(b=>b.addEventListener("click",()=>{mode=b.dataset.authMode;qa("[data-auth-mode]").forEach(x=>x.classList.toggle("active",x===b));q("#auth-submit").textContent=mode==="signin"?"تسجيل الدخول":"إنشاء الحساب"}));
  q("#auth-form").addEventListener("submit",async e=>{e.preventDefault();const f=formValues(e.currentTarget),b=q("#auth-submit");b.disabled=true;try{if(mode==="signup"){const {data,error}=await db.auth.signUp({email:f.email.trim(),password:f.password});if(error)throw error;if(data?.session){toast("تم إنشاء الحساب، ويجب أن يعيّن المالك صلاحيات العمل قبل الدخول إلى المبيعات.","warn")}else{toast("تم إنشاء طلب الحساب. افتح بريدك الإلكتروني لتأكيد العنوان ثم عد لتسجيل الدخول.")}q("#auth-form").reset()}else{const {error}=await db.auth.signInWithPassword({email:f.email.trim(),password:f.password});if(error)throw error;await session();if(!roles.length){toast("تأكدنا من الحساب، لكنه لم يُعتمد كمدير أو موظف بعد. اطلب تعيين الصلاحية من مالك النظام.","warn");return}location.href=route(role("manager")&&next==="manager"?"manager":"sales")}}catch(ex){let message=String(ex?.message||"");if(/invalid login credentials|email not confirmed|invalid credentials/i.test(message)){toast(/not confirmed/i.test(message)?"يجب تأكيد بريدك الإلكتروني أولًا.":"هذا البريد أو كلمة المرور غير مسجلين أو غير صحيحين. اختر إنشاء حساب عمل إن كانت هذه أول مرة.","warn")}else err(ex)}finally{b.disabled=false}});
 }
+
+function guestPreview(which){
+ const pages=[["sales","☎️ شاشة استقبال الطلبات"],["manager","⚙️ لوحة الإدارة"]];
+ const menu='<div class="row wrap" style="margin:12px 0 20px">'+pages.map(function(x){return '<a class="btn '+(which===x[0]?'primary':'')+'" href="'+route(x[0])+'">'+x[1]+'</a>'}).join("")+'<a class="btn" href="'+route("login")+'">🔐 الدخول التشغيلي</a></div>';
+ const intro='<div class="notice" style="margin-bottom:16px">معاينة عامة بدون كلمة مرور. البيانات الشخصية والفواتير والدفاتر المالية الحقيقية لا تظهر هنا. لا يمكن حفظ تغييرات أو إصدار فاتورة إلا بحساب مخوّل.</div>';
+ const available=catalog.filter(function(p){return p.active && activeVariants(p).length>0});
+ if(which==="sales"){
+   root.innerHTML='<div class="container"><div class="page-title"><h1>☎️ استقبال طلبات عمان — معاينة</h1><p>شاهد خطوات العمل والمنتجات. الحفظ والبحث الحقيقيان يتطلبان حساب الموظف.</p></div>'+menu+intro+'<div class="layout-two"><div><div class="panel"><h3>1 — بيانات المتصل</h3><label class="field">رقم الهاتف<input class="input" id="guest-phone" placeholder="معاينة فقط، لا تدخل بيانات حقيقية"></label><button class="btn" id="guest-find">البحث عن عميل</button><p class="muted" id="guest-client">بيانات العملاء مخفية في وضع المعاينة.</p></div><div class="panel" style="margin-top:15px"><h3>2 — اختيار الأصناف</h3><input class="input" id="guest-search" placeholder="ابحث عن منتج"><div id="guest-products" class="product-grid" style="grid-template-columns:repeat(2,minmax(0,1fr));margin-top:12px"></div></div></div><aside class="panel cart"><h3>3 — سلة تجريبية</h3><div id="guest-cart">لا توجد أصناف</div><div class="summary-row total"><span>الإجمالي</span><strong id="guest-total">0.000 د.ك</strong></div><p class="muted tiny">هذه تجربة داخل المتصفح ولا تُحفظ في قاعدة البيانات.</p></aside></div></div>';
+   const sample=[];let cart=[];const list=q("#guest-products"),cartBox=q("#guest-cart"),tot=q("#guest-total");
+   const renderCart=function(){cartBox.innerHTML=cart.length?cart.map(function(x){return '<div class="summary-row"><span>'+esc(x.name)+' × '+x.qty+'</span><strong>'+cash(x.qty*x.price)+'</strong></div>'}).join(""):'لا توجد أصناف';tot.textContent=cash(cart.reduce(function(a,x){return a+x.qty*x.price},0))};
+   const renderList=function(){const term=q("#guest-search").value.trim();const arr=available.filter(function(p){return p.name_ar.includes(term)});list.innerHTML=arr.map(function(p){const v=activeVariants(p)[0];return '<div class="panel" style="padding:9px"><div class="product-photo" style="height:110px">'+photo(p)+'</div><strong>'+esc(p.name_ar)+'</strong><div class="price">'+cash(v.price_value)+'</div><small>'+esc(v.unit_label)+'</small><button class="btn primary wide" data-guest-add="'+esc(v.id)+'" style="margin-top:9px">إضافة للسلة</button></div>'}).join("")||'<div>لا توجد أصناف مطابقة</div>'};
+   q("#guest-search").addEventListener("input",renderList);
+   q("#guest-find").addEventListener("click",function(){q("#guest-client").textContent="السجل الحقيقي محمي؛ سجّل الدخول لاسترجاع الاسم والعنوان والطلبات السابقة"});
+   list.addEventListener("click",function(e){const b=e.target.closest("[data-guest-add]");if(!b)return;const v=variant(b.dataset.guestAdd);if(!v)return;const x=cart.find(function(k){return k.id===v.id});if(x)x.qty++;else cart.push({id:v.id,qty:1,name:v.product.name_ar,price:num(v.price_value)});renderCart()});renderList();
+ }else{
+   root.innerHTML='<div class="container"><div class="page-title"><h1>⚙️ لوحة إدارة عمان — معاينة</h1><p>أقسام الإدارة متاحة للاستعراض فقط، دون كشف الحسابات أو تعديلها.</p></div>'+menu+intro+'<div class="stats-grid"><div class="stat"><small>الأصناف الموجودة</small><strong>'+catalog.length+'</strong></div><div class="stat"><small>وحدات البيع المعروضة</small><strong>'+available.reduce(function(n,p){return n+activeVariants(p).length},0)+'</strong></div><div class="stat"><small>مبيعات العملاء</small><strong>محجوبة</strong></div><div class="stat"><small>صافي الربح</small><strong>محجوب</strong></div></div><div class="tabs" id="guest-admin-tabs">'+["الرئيسية","إدارة الموظفين","المنتجات","الفواتير","المحاسبة والميزانية","التقارير","الموردون","الإعدادات"].map(function(x,i){return '<button data-guest-tab="'+i+'" class="'+(i===0?'active':'')+'">'+x+'</button>'}).join("")+'</div><div class="panel" id="guest-admin-content"></div></div>';
+   const panes=[
+   '<h3>الرئيسية</h3><p>راجع هيكل المتجر والأقسام من هنا. الأرقام المحاسبية الحقيقية تحتاج صلاحية المدير.</p>',
+   '<h3>إدارة الموظفين</h3><p>إضافة موظف باسمه ومسمّاه الوظيفي، التعديل والإيقاف والحذف متاحة للمدير بعد تسجيل الدخول. لا تظهر أسماء الموظفين أو بريدهم في المعاينة العامة.</p>',
+   '<h3>المنتجات والأسعار</h3><p>أسعار عمان محفوظة منفصلة عن الصور. لديك '+catalog.length+' صنفًا في الكتالوج.</p>',
+   '<h3>الفواتير</h3><p>الأرشيف والطباعة وبيانات العملاء محمية ولا تعرض هنا.</p>',
+   '<h3>المحاسبة والميزانية</h3><p>دفتر القيود والمصروفات والأرصدة محمي. لا توجد أرقام محاسبية وهمية.</p>',
+   '<h3>التقارير</h3><p>تقارير المبيعات والأرباح والتصدير محجوبة عن الزوار.</p>',
+   '<h3>الموردون</h3><p>سجلات الموردين والمشتريات محمية.</p>',
+   '<h3>الإعدادات</h3><p>تعديل الأسعار والموظفين والسياسات وإعدادات الطباعة يتطلب حساب المدير.</p>'
+   ];
+   q("#guest-admin-content").innerHTML=panes[0];
+   q("#guest-admin-tabs").addEventListener("click",function(e){const b=e.target.closest("[data-guest-tab]");if(!b)return;q("#guest-admin-content").innerHTML=panes[Number(b.dataset.guestTab)];qa("[data-guest-tab]").forEach(function(x){x.classList.toggle("active",x===b)})});
+ }
+}
 async function guard(required){
- await session();if(!user){location.href=route("login")+"?next="+encodeURIComponent(required);return false}
- if(!role(required)&&!(required==="sales"&&role("manager"))){root.innerHTML=header()+`<main class="container"><div class="panel auth-card center"><h2>الدخول غير مصرح</h2><p>تم تسجيل الدخول لكن لم تُمنح لهذا الحساب صلاحية ${required==="manager"?"مدير المتجر":"موظف المبيعات"}.</p><p class="muted">المدير الأول يُعيّنه مالك قاعدة البيانات بعد تأكيد البريد. لا توجد طريقة من هذه الصفحة لمنح نفسك صلاحيات.</p><button class="btn" id="signout">تسجيل الخروج</button></div></main>`+footer();q("#signout").addEventListener("click",async()=>{await db.auth.signOut();location.href=route("login")});return false}
+ await session();
+ if(!user||(!role(required)&&!(required==="sales"&&role("manager")))){guestPreview(required);return false}
  return true;
 }
+
 async function init(){
  db=makeClient();loadCart();
  if(page==="login"){await renderLogin();return}
