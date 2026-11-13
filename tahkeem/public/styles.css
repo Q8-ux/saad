@@ -241,7 +241,32 @@ td{overflow-wrap:anywhere}
 .subscription-notice{margin-bottom:13px}
 .breadcrumb>span:not(.date-chip){white-space:nowrap}
 .corpus-text{white-space:pre-wrap;line-height:1.95;padding:13px;background:#faf7fa;border:1px solid var(--line);border-radius:8px;overflow-wrap:anywhere}
-.arbitrator-shortcut{color:var(--purple);background:var(--light-purple)}
+:root {
+  --arbitrator-size: 56px;
+  --arbitrator-offset: calc(16px + env(safe-area-inset-bottom, 0px));
+}
+.arbitrator-launcher {
+  position: fixed;
+  inset-block-end: var(--arbitrator-offset);
+  inset-inline-end: calc(16px + env(safe-area-inset-left, 0px));
+  z-index: 8;
+  display: grid;
+  place-items: center;
+  width: var(--arbitrator-size);
+  height: var(--arbitrator-size);
+  border: 1px solid #ffffff70;
+  border-radius: 50%;
+  background: var(--purple);
+  color: #fff;
+  box-shadow: 0 5px 15px #2d213540;
+}
+.arbitrator-launcher:hover { background: #512d64; }
+.arbitrator-launcher + .workspace {
+  padding-block-end: calc(var(--arbitrator-offset) + var(--arbitrator-size) + 24px);
+}
+#app:has(.arbitrator-launcher) + .toast {
+  bottom: calc(var(--arbitrator-offset) + var(--arbitrator-size) + 12px);
+}
 .translation-panel summary{cursor:pointer;font-size:14px;font-weight:700}
 .translation-panel p,.form-section #english-entry:not([hidden]){margin-block:7px 12px}
 .language-switch{display:flex;gap:7px}

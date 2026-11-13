@@ -162,10 +162,12 @@ function shell(route, pageTitle, content) {
       <div class="breadcrumb"><button class="icon-btn menu-button" type="button" data-action="menu-open" aria-label="فتح القائمة" aria-expanded="false" aria-controls="navigation">${icon('menu',19)}</button>
         <span>تحكيم</span>${icon('chevron',13)}<strong>${h(pageTitle)}</strong></div>
       <div class="top-actions"><span class="date-chip">${icon('calendar',16)}${h(date(Date.now()))}</span>
-        ${account.active ? `<a class="icon-btn arbitrator-shortcut" href="#arbitrator" aria-label="فتح المحكّم الذكي" title="المحكّم الذكي">${icon('spark',18)}</a>` : ''}
         ${account.active ? `<button class="icon-btn" type="button" data-action="go-search" aria-label="بحث المكتبة">${icon('search',18)}</button>` : ''}
         <button class="icon-btn" type="button" data-action="logout" aria-label="تسجيل الخروج">${icon('logout',18)}</button></div>
-    </header><main class="workspace" id="main" tabindex="-1">${content}</main></div></div>`;
+    </header>
+    ${account.active ? `<a class="arbitrator-launcher" href="#arbitrator" aria-label="فتح المحكّم الذكي"
+      title="المحكّم الذكي"${current('arbitrator') ? ' aria-current="page"' : ''}>${icon('spark',25)}</a>` : ''}
+    <main class="workspace" id="main" tabindex="-1">${content}</main></div></div>`;
 }
 
 function statusBadge(status) { return badge(statuses[status] || status, status); }
@@ -1015,6 +1017,11 @@ function toggleMenu(open) {
 document.addEventListener('click', async event=>{
   const buttonEl = event.target.closest('[data-action]');
   const navigation = event.target.closest('a[href^="#"]');
+  if (navigation?.classList.contains('arbitrator-launcher') && location.hash === navigation.hash) {
+    event.preventDefault();
+    app.querySelector('[data-form="arbitrator"] [name="question"]')?.focus();
+    return;
+  }
   if (navigation && state.editorDirty && !window.confirm('لديك تعديلات غير محفوظة. هل تريد مغادرة المذكرة؟')) {
     event.preventDefault();
     return;
