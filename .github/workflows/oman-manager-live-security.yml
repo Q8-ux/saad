@@ -1,0 +1,43 @@
+name: Oman Manager Live RLS
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/oman-manager-live-security.yml'
+      - 'oman-fruits-commerce/database/employee_directory.sql'
+  workflow_dispatch:
+permissions: { contents: read }
+jobs:
+  anonymous-security:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - name: Ensure staff roster and management functions inaccessible anonymously
+        shell: bash
+        run: |
+          set -euo pipefail
+          URL=$(node -e 'global.window={};require("./oman-fruits-commerce/config.js");process.stdout.write(window.OMAN_CONFIG.supabaseUrl)')
+          KEY=$(node -e 'global.window={};require("./oman-fruits-commerce/config.js");process.stdout.write(window.OMAN_CONFIG.publishableKey)')
+          for table in employee_directory user_roles; do
+            CODE=$(curl -sSL --max-time 20 -o /tmp/oman-rls.json -w '%{http_code}' -H "apikey: $KEY" -H "Origin: https://q8-ux.github.io" "$URL/rest/v1/$table?select=*&limit=10")
+            echo "$table HTTP $CODE"
+            if [ "$CODE" = 200 ]; then
+              python3 - <<'PY'
+          import json
+          result=json.load(open('/tmp/oman-rls.json'))
+          assert result==[], "Anonymous viewer can read staff or roles data"
+          PY
+            elif [ "$CODE" = 401 ] || [ "$CODE" = 403 ]; then
+              echo "Access correctly rejected"
+            else
+              cat /tmp/oman-rls.json
+              exit 1
+            fi
+          done
+          for func in manage_employee my_employee_name; do
+            CODE=$(curl -sSL --max-time 20 -o /tmp/oman-rpc.json -w '%{http_code}' -X POST -H "apikey: $KEY" -H 'Content-Type: application/json' --data '{}' "$URL/rest/v1/rpc/$func")
+            echo "RPC $func HTTP $CODE"
+            [ "$CODE" = 401 ] || [ "$CODE" = 403 ] || { cat /tmp/oman-rpc.json; exit 1; }
+          done
+          echo "Anonymous employee directory and manager RPC access denied" >> "$GITHUB_STEP_SUMMARY"
