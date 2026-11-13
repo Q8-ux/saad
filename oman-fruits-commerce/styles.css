@@ -9,3 +9,33 @@
 .photo-atlas{display:block;width:100%;height:100%;background-image:url("./assets/product-atlas.webp");background-repeat:no-repeat;background-size:600% 600%;background-color:#edf0e8;image-rendering:auto}
 .photo-backup{height:100%;width:100%}
 .photo-backup>.photo-atlas{height:100%;width:100%}
+
+
+/* Oman call-center sales workstation: customer phone first, previous-order recall and photo-first selection. */
+.callcenter .layout-two{grid-template-columns:minmax(0,1.4fr) minmax(315px,.8fr);align-items:start}
+.callcenter .layout-two>div:first-child{display:flex;flex-direction:column;gap:16px;min-width:0}
+.callcenter .layout-two>div:first-child>.panel:nth-child(2){order:-1;margin-top:0!important;border:2px solid #9acaa4;background:#fbfff9}
+.callcenter .layout-two>div:first-child>.panel:first-child{order:1}
+.callcenter .layout-two>div:first-child>.panel:nth-child(2) h3{color:#15613b;font-size:21px}
+.callcenter #lookup-phone{font-size:20px;font-weight:700;direction:ltr;text-align:right;letter-spacing:.06em}
+.callcenter #lookup-customer{margin:0 0 4px}
+.callcenter .product-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:12px}
+.callcenter .call-product{padding:0!important;overflow:hidden;display:flex;flex-direction:column;border:1px solid #dce8db}
+.call-product-image{height:142px;overflow:hidden;background:#f3f8f0}
+.call-product-image>img,.call-product-image .photo-atlas,.call-product-image .photo-fallback{display:block;width:100%;height:100%;object-fit:cover;max-height:100%;border:0}
+.call-product-body{display:flex;flex-direction:column;flex:1;gap:6px;padding:10px}
+.call-product-body>strong{font-size:14px;line-height:1.4;min-height:38px}
+.call-product-body .origin{display:block;font-size:11px;color:#74857c}
+.call-product-controls{margin-top:auto!important;flex-direction:column;align-items:stretch}
+.call-product-controls .select{width:100%;font-size:11px;padding:7px 5px;min-width:0}
+.call-product-controls .btn{width:100%}
+.call-order-row{padding:10px;border-radius:10px;background:#f5fbf4;margin:6px 0;gap:12px}
+.call-order-row>div{flex:1}
+.call-address{background:#f7faf6;border:1px solid #dce8db;border-radius:12px;padding:12px;margin:12px 0}
+.call-address h4{margin:0 0 6px;color:#176b46}
+.call-address-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.call-address-grid .field{margin:0}
+.call-address-grid .input{min-width:0}
+.callcenter .cart{top:100px}
+@media(max-width:1050px){.callcenter .layout-two{grid-template-columns:1fr}.callcenter .cart{position:static}.callcenter .product-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}}
+@media(max-width:560px){.callcenter .product-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}.call-product-image{height:130px}.call-address-grid{grid-template-columns:1fr}.callcenter .layout-two>div:first-child>.panel:nth-child(2) h3{font-size:18px}}
