@@ -1,0 +1,38 @@
+name: Oman Manager Console QA
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'oman-fruits-commerce/**'
+      - '.github/workflows/oman-manager-qa.yml'
+  workflow_dispatch:
+permissions: { contents: read }
+jobs:
+  verify-manager:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate secure manager UI and SQL migration
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check oman-fruits-commerce/app.js
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path("oman-fruits-commerce")
+          app=(p/"app.js").read_text(encoding="utf-8")
+          ddl=(p/"database/employee_directory.sql").read_text(encoding="utf-8")
+          assert "function managerReports" in app
+          assert "function managerTeam" in app
+          assert "p_action" in app and 'db.rpc("manage_employee"' in app
+          assert 'db.rpc("my_employee_name")' in app
+          assert 'staffDisplayName' in app and 'الموظف: ${esc(staffDisplayName)}' in app
+          assert 'role("manager")?' in app
+          assert "public.has_role((select auth.uid()), 'manager'::public.app_role)" in ddl
+          assert "delete from public.user_roles" in ddl
+          assert "grant execute on function public.manage_employee" in ddl
+          assert "alter table public.employee_directory enable row level security" in ddl
+          assert "claim_first_manager" not in ddl
+          print("PASS: Arabic named employee dashboard, private reports, manager-only employee mutations")
+          PY
