@@ -28,7 +28,7 @@ jobs:
           assert len(data["products"])==36, "original product list changed"
           assert sum(len(p["variants"]) for p in data["products"])==42, "price variants changed"
           for marker in [
-            'if(page==="home"||page==="checkout"){location.replace(route("sales"));return}',
+            'if(page==="home"||page==="checkout"||page==="order"){location.replace(route("sales"));return}',
             'function repeatCustomerOrder(orderId)',
             'data-repeat-order=',
             'db.rpc("lookup_customer"',
