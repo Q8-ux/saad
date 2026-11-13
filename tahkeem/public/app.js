@@ -28,6 +28,8 @@ const button = (label, action, glyph, tone = 'secondary', attrs = '') =>
 const link = (label, href, glyph, tone = 'secondary', attrs = '') =>
   `<a class="button ${tone}" href="${h(href)}" ${attrs}>${glyph ? icon(glyph,16) : ''}${h(label)}</a>`;
 const external = (label, url) => link(label, url, 'external', 'secondary', 'target="_blank" rel="noopener noreferrer"');
+const sourceButton = (item, title) => item.origin === 'corpus' ? button(title,'reference-detail','book','secondary',
+  `data-id="${h(item.id)}"`) : external(title,item.sourceUrl);
 const label = (title, control, wide = false) => `<label class="field${wide ? ' span' : ''}"><span>${h(title)}</span>${control}</label>`;
 const input = (name, value = '', attrs = '') => `<input name="${name}" value="${h(value)}" ${attrs}>`;
 const textarea = (name, value = '', attrs = '') => `<textarea name="${name}" ${attrs}>${h(value)}</textarea>`;
@@ -190,7 +192,7 @@ function overview(data) {
       <section class="panel">${panelHead('المراجع الكويتية')}
         <ul class="shortcut-list">
         ${shortcut(kinds.law,`${n(data.references.laws)} سجلًا في فهرس المصادر`,'#library?kind=law','book')}
-        ${shortcut(kinds.article,`${n(data.references.articles)} بطاقة مادة للبحث والمراجعة`,'#library?kind=article','file','peach')}
+        ${shortcut(kinds.article,`${n(data.references.articles)} موضع مادة للبحث والمراجعة`,'#library?kind=article','file','peach')}
         ${shortcut('المرافعات والإجراءات','قوالب الصحف والردود والطعون','#procedures','layers','green')}
         ${shortcut('دليل المحاكم','المواقع والاستعلام عبر وزارة العدل','#courts','logo')}
         </ul></section>
@@ -251,7 +253,19 @@ function libraryPage(data, query) {
     ${paging(data,'library',query)}`;
 }
 
-function referenceDialog(item) {
+async function referenceDialog(item) {
+  if (item.origin === 'corpus') {
+    const source = item.body ? item : await api(`/corpus/${encodeURIComponent(item.id)}`);
+    state.references.set(source.id,source);
+    openDialog(source.title,`<div class="stack"><div class="actions">${badge(source.locator)}${badge('نص من الملف','review')}</div>
+      <p>${h(source.identity)}</p>
+      ${note(source.source.textVerified ? 'طُوبق النص مع النسخة المفهرسة. يحتاج السريان إلى مراجعة.' :
+        'نص مستخرج من الملف. راجع الصفحة المصورة وسريان المادة قبل الاعتماد.','warning')}
+      ${source.source.issue ? note('سجل المصدر ملاحظة على هذا الموضع.','warning') : ''}
+      <div class="corpus-text">${h(source.body)}</div>
+      <div class="actions">${link('أضفه إلى مسودة',path('compose',{source:source.id}),'plus','soft','data-close-dialog')}</div></div>`);
+    return;
+  }
   openDialog(item.title,`<div class="stack"><div class="actions">${referenceStatus(item)}${badge(item.category)}</div>
     ${item.identity !== item.title ? `<p>${h(item.identity)}</p>` : ''}${item.summary ? `<p>${h(item.summary)}</p>` : ''}
     <div class="memo-source"><p>${h([item.authority,item.edition,item.locator].filter(Boolean).join(' · '))}</p></div>
@@ -374,6 +388,9 @@ function modelConsent() {
 
 function memoPage(memo) {
   state.memo = memo;
+  memo.sources.filter(item=>item.origin==='corpus').forEach(item=>{
+    if (!state.references.has(item.id)) state.references.set(item.id,item);
+  });
   state.editorDirty = false;
   const editing = memo.status !== 'archived';
   return `${heading('مراجعة المذكرة',memo.title,link('مذكراتي','#memos','right','secondary'))}
@@ -397,7 +414,7 @@ function memoPage(memo) {
       <section class="panel form-section"><h2>مراجع هذه المذكرة</h2>
       <div class="memo-sources">${memo.sources.length ? memo.sources.map(item=>`<div class="memo-source">
         <strong>${h(item.title)}</strong><p>${h([item.identity,item.edition,item.locator].filter(Boolean).join(' · '))}</p>
-        ${external('فتح المصدر',item.sourceUrl)} ${item.citable ? '' : badge('للمراجعة','review')}</div>`).join('') :
+        ${sourceButton(item,'عرض المصدر')} ${item.citable ? '' : badge('للمراجعة','review')}</div>`).join('') :
         '<p class="hint">لم تُحدّد مراجع لهذه المسودة.</p>'}</div></section>
     </aside></div>`;
 }
@@ -747,7 +764,7 @@ document.addEventListener('click', async event=>{
         await api('/logout',{method:'POST',data:{}});
         clearSession(); history.replaceState(null,'','#'); authPage(); break;
       case 'reference-detail':
-        referenceDialog(state.references.get(id)); break;
+        await referenceDialog(state.references.get(id)); break;
       case 'copy-reference':
         addReferenceDialog(state.references.get(id)); break;
       case 'add-reference':

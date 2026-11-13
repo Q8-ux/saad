@@ -2,6 +2,10 @@ import { createHash, randomUUID } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { one } from './store.mjs';
 import { requireThat, textField } from './security.mjs';
+import { corpusByIds, corpusSearch } from './corpus.mjs';
+import { normalizeSearch } from './search.mjs';
+
+export { normalizeSearch } from './search.mjs';
 
 const manifest = JSON.parse(readFileSync(new URL('../data/moj-laws-manifest.json', import.meta.url)));
 const references = JSON.parse(readFileSync(new URL('../data/references.json', import.meta.url)));
@@ -19,14 +23,6 @@ const categoryRules = [
   ['مدني وتجاري', /القانون المدني|التجارة|الشركات|التحكيم/],
   ['دولي واتفاقيات', /اتفاقية|بروتوكول|العهد الدولي/],
 ];
-
-export function normalizeSearch(value) {
-  return String(value ?? '').normalize('NFKC').toLowerCase()
-    .replace(/[\u064B-\u065F\u0670\u0640\u200B-\u200F\u202A-\u202E]/g, '')
-    .replace(/[أإآٱ]/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه')
-    .replace(/[٠-٩۰-۹]/g, digit => String(digit.charCodeAt(0) & 15))
-    .replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
-}
 
 export function sourceUrl(value) {
   try {
@@ -78,10 +74,25 @@ export async function catalog(db, { kind = '', query = '', category = '' } = {})
   });
 }
 
+export async function libraryPage(db, { kind, query, category, page, pageSize }) {
+  const all = await catalog(db, { kind, query });
+  const corpusCategory = 'مجموعة التشريعات';
+  const includeCorpus = (!kind || kind === 'article') && (!category || category === corpusCategory);
+  const local = category ? all.filter(item => item.category === category) : all;
+  const offset = (page-1)*pageSize;
+  const items = local.slice(offset, offset+pageSize);
+  const extra = includeCorpus
+    ? await corpusSearch(db, { query, offset:Math.max(0,offset-local.length), take:pageSize-items.length })
+    : { total:0, items:[] };
+  const categories = [...new Set([...all.map(item => item.category),...(extra.total ? [corpusCategory] : [])])]
+    .sort((a,b) => a.localeCompare(b,'ar'));
+  return { items:[...items,...extra.items], total:local.length+extra.total, page, pageSize, categories };
+}
+
 export async function selectedSources(db, ids) {
   if (!ids.length) return [];
-  const items = await catalog(db);
-  const map = new Map(items.map(item => [item.id, item]));
+  const [items, imported] = await Promise.all([catalog(db),corpusByIds(db,ids)]);
+  const map = new Map([...items,...imported].map(item => [item.id, item]));
   return ids.map(id => {
     const item = map.get(id);
     requireThat(item && ['article', 'judgment'].includes(item.kind), 400, 'أحد المراجع المختارة غير متاح.');

@@ -212,3 +212,4 @@ td{overflow-wrap:anywhere}
 }
 .subscription-notice{margin-bottom:13px}
 .breadcrumb>span:not(.date-chip){white-space:nowrap}
+.corpus-text{white-space:pre-wrap;line-height:1.95;padding:13px;background:#faf7fa;border:1px solid var(--line);border-radius:8px;overflow-wrap:anywhere}

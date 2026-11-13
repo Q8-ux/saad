@@ -14,7 +14,7 @@ if (env.TAHKEEM_SETUP_TOKEN_SHA256 && !/^[a-f0-9]{64}$/.test(env.TAHKEEM_SETUP_T
 const db = postgresStore(env.DATABASE_URL);
 await initialize(db);
 const app = createApp({ db, origin: site.origin, model: modelFromEnvironment(env),
-  setupHash: env.TAHKEEM_SETUP_TOKEN_SHA256, trustProxy: production && Boolean(env.RENDER) });
+  setupHash: env.TAHKEEM_SETUP_TOKEN_SHA256, setupUntil:env.TAHKEEM_SETUP_UNTIL, trustProxy: production && Boolean(env.RENDER) });
 const server = app.listen(port, '0.0.0.0', () => console.log(`Tahkeem listening on port ${port}`));
 
 function stop() {

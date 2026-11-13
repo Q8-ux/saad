@@ -113,7 +113,7 @@ export async function generateMemo(store, user, id, input, sources, method, mode
     const current = await getMemo(db, user.id, id, false);
     if (current) return current;
     const snapshot = sources.map(item => ({ id: item.id, title: item.title, identity: item.identity,
-      edition: item.edition, locator: item.locator, sourceUrl: item.sourceUrl, citable: item.citable }));
+      edition: item.edition, locator: item.locator, sourceUrl: item.sourceUrl, citable: item.citable, origin:item.origin, source:item.source }));
     const row = await one(db, `INSERT INTO memos (id,account_id,title,memo_type,case_number,input,sources,body,method)
       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) ON CONFLICT (id) DO NOTHING RETURNING *`,
     [id, user.id, input.title, input.type, input.number, JSON.stringify(input), JSON.stringify(snapshot),

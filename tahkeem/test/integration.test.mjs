@@ -169,3 +169,41 @@ test('reference approval and guard against generated citations',async t=>{
   assert.equal(bad.status,422);
   assert.equal((await call('/api/overview',{cookie:owner.cookie})).body.counts.open,1);
 });
+
+test('imported material keeps article suffix, page and review status', async t => {
+  const {db,call}=await environment(t);
+  const src=sha('synthetic corpus fingerprint');
+  const corpusId='test-corpus-article-2';
+  const setupResult=await call('/api/setup',{method:'POST',data:{code:setup,name:'مالك الاختبار',
+    email:'owner@example.test',password}});
+  const cookie=setupResult.cookie;
+  async function insert(id,number,searchable) {
+    await db.query(`INSERT INTO corpus_articles
+      (id,document_id,component_id,article_number,number_key,document_title,heading,start_page,end_page,printed_page,
+        text,text_sha256,source_sha256,boundary_review,text_verified,searchable)
+      VALUES ($1,'test-law','law-text',$2,$3,'تشريع افتراضي','عنوان اختباري',12,13,'9',$4,$5,$6,
+        'inferred_from_source_markers',false,$7)`,[id,number,normalizeSearch(number),
+        'متن اصطناعي للفهرس',sha('متن اصطناعي للفهرس'),src,normalizeSearch(searchable)]);
+  }
+  await insert(corpusId,'٢','تشريع افتراضي عنوان اختباري 2');
+  await insert(corpusId+'-repeated','٢ مكرر','تشريع افتراضي عنوان اختباري 2 مكرر');
+  const detail='/api/corpus/'+corpusId;
+  assert.equal((await call(detail,{cookie})).status,404);
+  await db.query('INSERT INTO corpus_imports(source_sha256,article_count,page_count,section_count) VALUES($1,2,25,1)',[src]);
+  const query=await call('/api/library?kind=article&q='+encodeURIComponent('المادة ٢ تشريع افتراضي'),{cookie});
+  assert.equal(query.body.total,1);
+  assert.equal(query.body.items[0].id,corpusId);
+  const repeated=await call('/api/library?kind=article&q='+encodeURIComponent('٢ مكرر'),{cookie});
+  assert.equal(repeated.body.total,1);
+  assert.equal(repeated.body.items[0].id,corpusId+'-repeated');
+  const source=await call(detail,{cookie});
+  assert.equal(source.status,200);
+  assert.equal(source.body.source.pageEnd,13);
+  assert.equal(source.body.source.currentLawVerified,false);
+  assert.equal(source.body.body,'متن اصطناعي للفهرس');
+  assert.equal((await call(detail)).status,401);
+  const memo=await call('/api/memos',{method:'POST',cookie,data:{...baseInput,id:randomUUID(),sourceIds:[corpusId]}});
+  assert.equal(memo.status,201,JSON.stringify(memo.body));
+  assert.equal(memo.body.sources[0].origin,'corpus');
+  assert.doesNotMatch(memo.body.body,/المادة ٢/);
+});

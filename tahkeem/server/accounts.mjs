@@ -27,7 +27,7 @@ export async function createOwner(store, body, setupHash, ip) {
 export async function login(store, body, ip) {
   const email = emailField(body.email);
   const password = textField(body.password, 'كلمة المرور', 128, 1);
-  await limit(store, `signin-ip:${ip}`, 35);
+  await limit(store, `signin-ip:${ip}`, 180);
   await limit(store, `signin-email:${email}`, 12);
   const account = await one(store, 'SELECT *, (access_until > now()) AS subscribed FROM accounts WHERE email=$1', [email]);
   const valid = await verifyPassword(body.password, account?.password_hash);

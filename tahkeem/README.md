@@ -34,3 +34,11 @@
 - [المكتب الفني لمحكمة التمييز، مجلد المرافعات](https://www.moj.gov.kw/AR/Documents/MojDocs2/law108.pdf)
 - [المعهد القضائي، الإصدارات](https://www.kijls.moj.gov.kw/ar/sections/section4/sub3_section4/Releases/Pages/default.aspx)
 - [الكويت اليوم](https://kuwaitalyawm.media.gov.kw/?q=node)
+
+### نشر مستقل واستيراد مرجع التشريعات
+
+نسخة المعاينة الوظيفية تعمل على خدمة HTTPS مستقلة بقاعدة PostgreSQL منفصلة. يجهز `npm run build:neon` مجلد `.neon-build`، ويدخل ملف `index.mjs` في جذر حزمة الوظيفة. يمنح متغير `TAHKEEM_SETUP_TOKEN_SHA256` صلاحية التهيئة الأولى فقط. في وظيفة Neon يُضبط هذا المتغير ضمن بيئة إصدار الوظيفة، ويمكن تحديد وقت انتهاء رمز التهيئة عبر `TAHKEEM_SETUP_UNTIL` بصيغة ISO 8601، وتستمد الوظيفة اتصال PostgreSQL من الفرع.
+
+يجهز الأمر `python3 deploy/export-corpus.py /path/to/kuwait_laws_database.sqlite /private/tahkeem-import` دفعات إدخال قابلة للإعادة. نفذها في قاعدة تحكيم المستقلة، ثم أضف سجل النسخة إلى جدول `corpus_imports` بعد مطابقة العدد والبصمة من `manifest.json`. يظل الاستيراد خارج شجرة GitHub. يرى المشترك الموضع ورقم الصفحة والنص المستخرج بعد تسجيل الدخول. أرقام المواد المكررة تبقى نتائج منفصلة. تعرض هذه النصوص للمراجعة ويظل سريانها غير محقق، وتتوفر للمالك شاشة إدخال نسخة رسمية مدققة للاستشهاد.
+
+[فتح شاشة دخول تحكيم](https://br-still-sunset-b9nw1dq9-tahkeem.compute.c-7.eu-central-1.aws.neon.tech/)

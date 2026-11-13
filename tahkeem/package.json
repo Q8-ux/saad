@@ -3,8 +3,22 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "engines": { "node": ">=22.16 <25" },
-  "scripts": { "start": "node server/index.mjs", "test": "node --test test/*.test.mjs" },
-  "dependencies": { "docx": "9.15.3", "express": "5.3.0", "pg": "8.23.1" },
-  "devDependencies": { "@electric-sql/pglite": "0.5.16" }
+  "engines": {
+    "node": ">=22.16 <25"
+  },
+  "scripts": {
+    "start": "node server/index.mjs",
+    "test": "node --test test/*.test.mjs",
+    "build:neon": "node deploy/build-neon.mjs"
+  },
+  "dependencies": {
+    "docx": "9.15.3",
+    "express": "5.3.0",
+    "pg": "8.23.1"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.5.16",
+    "esbuild": "0.28.2",
+    "serverless-http": "4.0.0"
+  }
 }

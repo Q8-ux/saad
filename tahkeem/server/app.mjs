@@ -2,7 +2,8 @@ import { randomUUID } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import express from 'express';
 import * as accounts from './accounts.mjs';
-import { catalog, saveReference, selectedSources, setReferenceApproval } from './library.mjs';
+import { catalog, libraryPage, saveReference, selectedSources, setReferenceApproval } from './library.mjs';
+import { corpusByIds, corpusStats } from './corpus.mjs';
 import { changeMemo, generateMemo, getMemo, memoDocx, memoInput } from './memos.mjs';
 import { getSessionAccount, HttpError, isUuid, limit, publicAccount, removeSession, requireThat,
   sessionCookie, textField } from './security.mjs';
@@ -11,11 +12,12 @@ import { one } from './store.mjs';
 const publicDir = fileURLToPath(new URL('../public/', import.meta.url));
 const methodsWithBody = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 
-export function createApp({ db, origin, setupHash = '', model = null, trustProxy = false }) {
+export function createApp({ db, origin, setupHash = '', setupUntil, model = null, trustProxy = false }) {
   const app = express();
   app.disable('x-powered-by');
   if (trustProxy) app.set('trust proxy', 1);
   const secureCookie = new URL(origin).protocol === 'https:';
+  const canSetup = () => Boolean(setupHash) && (!setupUntil || Date.parse(setupUntil) > Date.now());
 
   app.use((req, res, next) => {
     res.set({
@@ -53,7 +55,7 @@ export function createApp({ db, origin, setupHash = '', model = null, trustProxy
   api.get('/session', async (req, res) => {
     const account = await getSessionAccount(db, req);
     res.json({ account: publicAccount(account), modelAvailable: Boolean(model),
-      setupAvailable: Boolean(setupHash) && !account && !await accounts.ownerExists(db) });
+      setupAvailable: canSetup() && !account && !await accounts.ownerExists(db) });
   });
 
   function sendSession(res, { account, session }) {
@@ -61,7 +63,7 @@ export function createApp({ db, origin, setupHash = '', model = null, trustProxy
     res.json({ account, modelAvailable: Boolean(model) });
   }
 
-  api.post('/setup', async (req, res) => sendSession(res, await accounts.createOwner(db, req.body, setupHash, req.ip)));
+  api.post('/setup', async (req, res) => sendSession(res, await accounts.createOwner(db, req.body, canSetup() ? setupHash : '', req.ip)));
   api.post('/login', async (req, res) => sendSession(res, await accounts.login(db, req.body, req.ip)));
   api.post('/invite', async (req, res) => sendSession(res, await accounts.acceptInvite(db, req.body, req.ip)));
   api.post('/logout', async (req, res) => {
@@ -91,10 +93,11 @@ export function createApp({ db, origin, setupHash = '', model = null, trustProxy
       count(*) FILTER(WHERE status='approved')::int AS approved FROM memos WHERE account_id=$1`, [req.account.id]);
     const recent = await db.query(`SELECT id,title,memo_type,case_number,status,updated_at
       FROM memos WHERE account_id=$1 AND status <> 'archived' ORDER BY updated_at DESC LIMIT 5`, [req.account.id]);
-    const references = await catalog(db);
+    const [references, corpus] = await Promise.all([catalog(db),corpusStats(db)]);
     res.json({ counts, recent: recent.rows, references: {
       laws: references.filter(ref => ref.kind === 'law').length,
-      articles: references.filter(ref => ref.kind === 'article').length,
+      articles: references.filter(ref => ref.kind === 'article').length + corpus.articles,
+      corpus,
       judgments: references.filter(ref => ref.kind === 'judgment').length,
     } });
   });
@@ -106,11 +109,14 @@ export function createApp({ db, origin, setupHash = '', model = null, trustProxy
     const category = textField(req.query.category, 'التصنيف', 80);
     const page = Number(req.query.page ?? 1);
     requireThat(Number.isInteger(page) && page >= 1 && page <= 1000, 400, 'الصفحة غير صالحة.');
-    const all = await catalog(db, { kind, query });
-    const filtered = category ? all.filter(item => item.category === category) : all;
-    const pageSize = 18;
-    res.json({ items: filtered.slice((page-1)*pageSize, page*pageSize), total: filtered.length, page, pageSize,
-      categories: [...new Set(all.map(item => item.category))].sort((a,b) => a.localeCompare(b, 'ar')) });
+    res.json(await libraryPage(db,{kind,query,category,page,pageSize:18}));
+  });
+
+  api.get('/corpus/:id', async (req, res) => {
+    const id = textField(req.params.id, 'معرّف المرجع', 90, 3);
+    const [record] = await corpusByIds(db,[id],true);
+    requireThat(record,404,'المرجع غير موجود.');
+    res.json(record);
   });
 
   api.get('/memos', async (req, res) => {
