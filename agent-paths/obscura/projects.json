@@ -18,6 +18,12 @@
         "id": "sabeq-admin-preview", "name": "معاينة لوحة الإدارة العامة",
         "url": "https://q8-ux.github.io/saad/sabeq-admin-preview/",
         "title": "مركز إدارة سابق", "lang": "ar", "dir": "rtl", "selector": "#app"
+      },
+      {
+        "id": "sabeq-bolt-login", "name": "صفحة تسجيل الدخول في لوحة Bolt",
+        "url": "https://q8-ux-sabeq-admin-co-u4ma.bolt.host/",
+        "title": "مركز إدارة سابق", "lang": "ar", "dir": "rtl",
+        "selector": "#login-form:has(input[name='username']):has(input[type='password'])"
       }
     ]
   },

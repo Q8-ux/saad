@@ -1,0 +1,98 @@
+name: Sabeq Obscura memo checks
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/sabeq-obscura.yml'
+      - 'legal-memo-platform/tools/obscura-memo-check/**'
+      - 'sabeq-legal/research-source/app/api/legal/memo/**'
+      - 'sabeq-legal/research-source/app/api/integrations/bolt-memos/**'
+      - 'sabeq-legal/research-source/lib/memo-requests.ts'
+      - 'sabeq-legal/research-source/lib/management-data.ts'
+  pull_request:
+    paths:
+      - '.github/workflows/sabeq-obscura.yml'
+      - 'legal-memo-platform/tools/obscura-memo-check/**'
+      - 'agent-paths/obscura/**'
+      - 'sabeq-legal/research-source/app/api/legal/memo/**'
+      - 'sabeq-legal/research-source/app/api/integrations/bolt-memos/**'
+      - 'sabeq-legal/research-source/lib/memo-requests.ts'
+      - 'sabeq-legal/research-source/lib/management-data.ts'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  memo-journey:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            agent-paths/obscura
+            legal-memo-platform/tools/obscura-memo-check
+            sabeq-legal/research-source
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Install locked source dependencies
+        run: npm ci --prefix sabeq-legal/research-source --ignore-scripts --no-audit --no-fund
+      - name: Install Obscura
+        run: bash agent-paths/obscura/install.sh "$RUNNER_TEMP/obscura-bin"
+      - name: Check live public Sabeq pages and Bolt sign-in
+        id: live
+        run: python3 agent-paths/obscura/check.py sabeq --binary "$RUNNER_TEMP/obscura-bin/obscura" --output "$RUNNER_TEMP/sabeq-obscura"
+      - name: Check live browser access to the memo endpoints
+        if: ${{ !cancelled() && (steps.live.outcome == 'success' || steps.live.outcome == 'failure') }}
+        run: |
+          set -o pipefail
+          node --input-type=module <<'JS' 2>&1 | tee "$RUNNER_TEMP/memo-connection.log"
+          const service = 'https://sabeq-legal-public.centrino.chatgpt.site';
+          const checks = [
+            ['إرسال طلب المذكرة', '/api/legal/memo', 'https://q8-ux.github.io'],
+            ['جسر مذكرات Bolt', '/api/integrations/bolt-memos', 'https://q8-ux-sabeq-admin-co-u4ma.bolt.host'],
+          ];
+          await Promise.all(checks.map(async ([name, path, origin]) => {
+            try {
+              const response = await fetch(service + path, {
+                method: 'OPTIONS', redirect: 'error', signal: AbortSignal.timeout(18_000), headers: {
+                  Origin: origin, 'Access-Control-Request-Method': 'POST',
+                  'Access-Control-Request-Headers': 'authorization,content-type',
+                },
+              });
+              const values = key => (response.headers.get(key) || '').toLowerCase().split(',').map(item => item.trim());
+              const ok = response.status === 204 && response.headers.get('access-control-allow-origin') === origin
+                && values('access-control-allow-methods').includes('post')
+                && ['authorization', 'content-type'].every(header => values('access-control-allow-headers').includes(header));
+              console.log(`- ${name} · HTTP ${response.status} · ${ok ? 'نجح فحص اتصال المتصفح' : 'تعذر تأكيد اتصال المتصفح'}`);
+              if (!ok) process.exitCode = 1;
+            } catch {
+              console.error(`- ${name} · تعذر الاتصال ضمن المهلة.`);
+              process.exitCode = 1;
+            }
+          }));
+          JS
+      - name: Verify synthetic memo delivery and the Bolt editor
+        if: ${{ !cancelled() && (steps.live.outcome == 'success' || steps.live.outcome == 'failure') }}
+        run: |
+          set -o pipefail
+          node legal-memo-platform/tools/obscura-memo-check/check.mjs "$RUNNER_TEMP/obscura-bin/obscura" 2>&1 | tee "$RUNNER_TEMP/memo-check.log"
+      - name: Save test summary
+        if: ${{ always() }}
+        run: |
+          if [[ -f "$RUNNER_TEMP/sabeq-obscura/report.md" ]]; then
+            cat "$RUNNER_TEMP/sabeq-obscura/report.md" >> "$GITHUB_STEP_SUMMARY"
+          fi
+          if [[ -f "$RUNNER_TEMP/memo-connection.log" ]]; then
+            printf '\n## اتصال المتصفح بمسارات المذكرات الحية\n\n' >> "$GITHUB_STEP_SUMMARY"
+            cat "$RUNNER_TEMP/memo-connection.log" >> "$GITHUB_STEP_SUMMARY"
+          fi
+          if [[ -f "$RUNNER_TEMP/memo-check.log" ]]; then
+            printf '\n## اختبار المذكرة في البيئة المعزولة\n\n' >> "$GITHUB_STEP_SUMMARY"
+            cat "$RUNNER_TEMP/memo-check.log" >> "$GITHUB_STEP_SUMMARY"
+          fi
