@@ -18,6 +18,19 @@ test('existing memo viewer opens RTL editor with full text and history; staff re
  h.api.setRole('memo_supervisor');await h.api.openMemo(h.memo.id);assert.match(h.node('detail-content').innerHTML,/data-memo-edit/);h.api.editMemo();assert.match(h.node('detail-content').innerHTML,/حفظ نسخة مصححة/);
  h.api.setRole('reviewer');await h.api.openMemo(h.memo.id);assert.doesNotMatch(h.node('detail-content').innerHTML,/data-memo-edit/);
 });
+test('stalled request details and the first draft editor are available only to a reviewer with an eligible request',async()=>{
+ const h=harness();
+ Object.assign(h.memo,{status:'review_pending',error_code:'defense_review',output_text:'',edit:{editable:false,attachable:true,revision:0,hash:'a'.repeat(64)}});
+ await h.api.openMemo(h.memo.id);
+ assert.match(h.node('detail-content').innerHTML,/تدقيق ربط الدفوع/);
+ assert.match(h.node('detail-content').innerHTML,/إرفاق مسودة مراجعة/);
+ h.api.editMemo();
+ assert.match(h.node('detail-content').innerHTML,/data-attach-draft="true"/);
+ assert.match(h.node('detail-content').innerHTML,/حفظ مسودة للمراجعة/);
+ h.api.setRole('reviewer');await h.api.openMemo(h.memo.id);
+ assert.doesNotMatch(h.node('detail-content').innerHTML,/إرفاق مسودة مراجعة/);
+ assert.throws(()=>h.api.editMemo());
+});
 test('review export includes untruncated memo and inputs, downloads locally and makes no write request',async()=>{
  const h=harness();await h.api.exportMemosForReview({textContent:''});assert.equal(h.downloads.length,1);const data=JSON.parse(await h.blobs[0].text());assert.equal(data.format,'sabeq-memo-review-export-1');assert.equal(data.records[0].output_text,h.memo.output_text);assert.equal(data.records[0].input_json,h.memo.input_json);assert.ok(h.calls.every(c=>(c.init.method||'GET')==='GET'));assert.ok(h.calls.every(c=>!c.url.includes('gmail')));assert.ok(!JSON.stringify(data).includes('authorization'));
 });
