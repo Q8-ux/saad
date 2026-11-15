@@ -1,0 +1,4 @@
+interface:
+  display_name: "مسار استوديو تيك توك"
+  short_description: "صناعة ومونتاج الفيديوهات ونشرها وقياس نمو تيك توك"
+  default_prompt: "استخدم $tiktok-video-workflow لإعداد مقطع قصير ومونتاجه وتجهيزه للنشر على تيك توك."
