@@ -87,9 +87,15 @@ export function createStudioWorks({ React, Studio }) {
 
     const archive = tab === 'archive';
     const visible = projects?.filter(work => Boolean(work.archivedAt) === archive) ?? [];
+    const username = verified?.username || account.username;
     return h('main', { className: 'studio-workspaces', dir: 'rtl' },
-      h('header', null, h('div', null, h('h1', null, 'استيديو الكتابة'), verified && h('bdi', null, verified.username)),
-        h('button', { type: 'button', onClick: onSignOut }, 'تسجيل الخروج')),
+      h('header', { className: 'workspace-header' },
+        h('h1', null, 'استيديو الكتابة'),
+        h('div', { className: 'workspace-account', role: 'group', 'aria-label': 'الحساب الحالي' },
+          username && h('div', { className: 'workspace-identity' },
+            h('span', null, 'اسم المستخدم'),
+            h('bdi', null, username)),
+          h('button', { type: 'button', className: 'workspace-sign-out', onClick: onSignOut }, 'تسجيل الخروج'))),
       h('nav', { 'aria-label': 'أقسام أعمالك' },
         h('button', { type: 'button', 'aria-pressed': !archive, disabled: busy, onClick: () => setTab('works') }, 'أعمالي'),
         h('button', { type: 'button', 'aria-pressed': archive, disabled: busy, onClick: () => { setTab('archive'); setNewWork(false); } }, 'الأرشيف'),

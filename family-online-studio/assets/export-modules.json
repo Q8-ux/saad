@@ -2,7 +2,7 @@
   "initial": [
     {
       "file": "assets/app.mjs",
-      "bytes": 297459
+      "bytes": 297453
     },
     {
       "file": "assets/chunks/chunk-WUPY7VFN.mjs",
@@ -120,7 +120,7 @@
     },
     {
       "file": "assets/studio-works.mjs",
-      "bytes": 6745
+      "bytes": 7090
     },
     {
       "file": "assets/studio-request.mjs",
