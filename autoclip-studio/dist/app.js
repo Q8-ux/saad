@@ -1,6 +1,6 @@
 import {newId,formatTime,parseTime,validRange,normalizeServer,videoPlatform,parseProject,exportDimensions,cropRect} from './core.mjs';
 import {translate,languages} from './i18n.mjs';
-import {fixWebmDuration} from './vendor/webm-duration.mjs';
+import {packRecordedWebm} from './webm-export.mjs';
 
 const $ = s => document.querySelector(s);
 const icons={
@@ -81,25 +81,130 @@ export function renderClips(){const list=$('#clip-list');list.replaceChildren();
 export function saveProject(){if(!state.file)throw new Error('restoreRemote');const plan={app:'autoclip-studio',version:1,created:new Date().toISOString(),source:{name:state.file.name,size:state.file.size,duration:state.duration},clips:state.clips.filter(c=>!c.remote).map(({title,start,end,ratio})=>({title,start,end,ratio}))};downloadBlob(new Blob([JSON.stringify(plan,null,2)],{type:'application/json'}),`${safeName(state.file.name.replace(/\.[^.]+$/,''))}.autoclip.json`);toast(t('projectSaved'));}
 function restoreClips(plan){state.clips=plan.clips.map(c=>({...c,id:newId()}));state.editingId=null;renderClips();document.dispatchEvent(new CustomEvent('studio-clips'));}
 
-export async function exportClip(clip){
- if(state.exporting)return;if(!state.file)throw new Error('needVideo');if(!window.MediaRecorder||!HTMLCanvasElement.prototype.captureStream||!(window.AudioContext||window.webkitAudioContext))throw new Error('unsupportedExport');if(clip.end-clip.start>180)throw new Error('longExport');
- const mime=['video/mp4;codecs=avc1.424028,mp4a.40.2','video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/mp4','video/webm'].find(x=>MediaRecorder.isTypeSupported(x));if(!mime)throw new Error('unsupportedExport');
- state.exporting=true;video.pause();state.previewEnd=null;const source=document.createElement('video');source.src=state.url;source.playsInline=true;source.preload='auto';source.style.cssText='position:fixed;bottom:0;left:0;width:1px;height:1px;opacity:.01;pointer-events:none;';document.body.append(source);const Audio=window.AudioContext||window.webkitAudioContext;const ctx=new Audio();const resume=ctx.resume();let stream,recorder,raf,timeout,wake,reason=null,finished=false;
- const cancel=key=>{reason=key||'exportCancelled';if(recorder?.state==='recording')recorder.stop();};state.cancelExport=cancel;
- const hidden=()=>{if(document.hidden)cancel('exportHidden');};document.addEventListener('visibilitychange',hidden);
- openDialog('export-dialog');$('#export-progress').value=0;$('#export-status').textContent='0%';
- try{
-   if(navigator.wakeLock)try{wake=await navigator.wakeLock.request('screen');}catch{}
-   await resume;const ready=waitMedia(source,'loadedmetadata');source.load();await ready;if(reason)throw new Error(reason);
-   if(clip.start>0){const seek=waitMedia(source,'seeked');source.currentTime=clip.start;await seek;}
-   const canvas=document.createElement('canvas');const size=exportDimensions(source.videoWidth,source.videoHeight,clip.ratio);Object.assign(canvas,size);const draw=canvas.getContext('2d',{alpha:false});const rect=cropRect(source.videoWidth,source.videoHeight,canvas.width,canvas.height);
-   const audioSource=ctx.createMediaElementSource(source);const audioOut=ctx.createMediaStreamDestination();audioSource.connect(audioOut);stream=canvas.captureStream(30);for(const track of audioOut.stream.getAudioTracks())stream.addTrack(track);
-   const chunks=[];recorder=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:4_000_000,audioBitsPerSecond:128_000});const stopped=new Promise((resolve,reject)=>{recorder.ondataavailable=e=>{if(e.data.size)chunks.push(e.data);};recorder.onerror=()=>reject(new Error('exportFailed'));recorder.onstop=()=>resolve();});
-   function frame(){if(finished)return;draw.fillStyle='#000';draw.fillRect(0,0,canvas.width,canvas.height);draw.drawImage(source,rect.x,rect.y,rect.w,rect.h,0,0,canvas.width,canvas.height);document.dispatchEvent(new CustomEvent('studio-export-frame',{detail:{ctx:draw,canvas,time:source.currentTime}}));const progress=Math.max(0,Math.min(100,(source.currentTime-clip.start)/(clip.end-clip.start)*100));$('#export-progress').value=progress;$('#export-status').textContent=`${Math.floor(progress)}%`;if(source.currentTime>=clip.end-.015||source.ended){if(recorder.state==='recording')recorder.stop();return;}raf=requestAnimationFrame(frame);}
-   recorder.start(500);await source.play();frame();timeout=setTimeout(()=>cancel('exportFailed'),((clip.end-clip.start)*1.8+30)*1000);await stopped;finished=true;
-   if(reason)throw new Error(reason);source.pause();let blob=new Blob(chunks,{type:recorder.mimeType});if(blob.size<1000)throw new Error('exportFailed');if(mime.includes('webm'))blob=await fixWebmDuration(blob,(clip.end-clip.start)*1000,{logger:false});if(reason)throw new Error(reason);downloadBlob(blob,`${safeName(clip.title)}.${mime.includes('mp4')?'mp4':'webm'}`);toast(t('exportDone'));
- }catch(e){if(recorder?.state==='recording')recorder.stop();toast(t(['exportCancelled','exportHidden','unsupportedExport'].includes(e.message)?e.message:'exportFailed'),true);
- }finally{finished=true;cancelAnimationFrame(raf);clearTimeout(timeout);source.pause();source.removeAttribute('src');source.load();source.remove();stream?.getTracks().forEach(track=>track.stop());await ctx.close().catch(()=>{});if(wake)await wake.release().catch(()=>{});document.removeEventListener('visibilitychange',hidden);$('#export-dialog').close();state.exporting=false;state.cancelExport=null;}
+export async function exportClip(clip) {
+  if (state.exporting) return;
+  if (!state.file) throw new Error('needVideo');
+  if (!window.MediaRecorder || !HTMLCanvasElement.prototype.captureStream ||
+      !(window.AudioContext || window.webkitAudioContext)) throw new Error('unsupportedExport');
+  if (clip.end - clip.start > 180) throw new Error('longExport');
+
+  const mime = ['video/mp4;codecs=avc1.424028,mp4a.40.2', 'video/webm;codecs=vp9,opus',
+    'video/webm;codecs=vp8,opus', 'video/mp4', 'video/webm'].find(type => MediaRecorder.isTypeSupported(type));
+  if (!mime) throw new Error('unsupportedExport');
+
+  state.exporting = true;
+  video.pause();
+  state.previewEnd = null;
+  const source = document.createElement('video');
+  source.src = state.url;
+  source.playsInline = true;
+  source.preload = 'auto';
+  source.style.cssText = 'position:fixed;bottom:0;left:0;width:1px;height:1px;opacity:.01;pointer-events:none;';
+  document.body.append(source);
+
+  const Audio = window.AudioContext || window.webkitAudioContext;
+  const ctx = new Audio();
+  const resume = ctx.resume();
+  let stream, recorder, frameTimer, timeout, wake;
+  let reason = null;
+  let finished = false;
+  const cancel = key => {
+    reason = key || 'exportCancelled';
+    if (recorder?.state === 'recording') recorder.stop();
+  };
+  state.cancelExport = cancel;
+  const hidden = () => { if (document.hidden) cancel('exportHidden'); };
+  document.addEventListener('visibilitychange', hidden);
+  openDialog('export-dialog');
+  $('#export-progress').value = 0;
+  $('#export-status').textContent = '0%';
+
+  try {
+    if (navigator.wakeLock) {
+      try { wake = await navigator.wakeLock.request('screen'); } catch {}
+    }
+    await resume;
+    const ready = waitMedia(source, 'loadedmetadata');
+    source.load();
+    await ready;
+    if (reason) throw new Error(reason);
+    if (clip.start > 0) {
+      const seek = waitMedia(source, 'seeked');
+      source.currentTime = clip.start;
+      await seek;
+    }
+
+    const canvas = document.createElement('canvas');
+    Object.assign(canvas, exportDimensions(source.videoWidth, source.videoHeight, clip.ratio));
+    const draw = canvas.getContext('2d', {alpha: false});
+    const rect = cropRect(source.videoWidth, source.videoHeight, canvas.width, canvas.height);
+    const audioOut = ctx.createMediaStreamDestination();
+    ctx.createMediaElementSource(source).connect(audioOut);
+    const frameRate = 30;
+    stream = canvas.captureStream(frameRate);
+    const videoTrack = stream.getVideoTracks()[0];
+    for (const track of audioOut.stream.getAudioTracks()) stream.addTrack(track);
+
+    const chunks = [];
+    recorder = new MediaRecorder(stream, {mimeType: mime, videoBitsPerSecond: 4_000_000, audioBitsPerSecond: 128_000});
+    const stopped = new Promise((resolve, reject) => {
+      recorder.ondataavailable = event => { if (event.data.size) chunks.push(event.data); };
+      recorder.onerror = () => reject(new Error('exportFailed'));
+      recorder.onstop = resolve;
+    });
+
+    function frame() {
+      if (finished || reason) return;
+      const time = source.currentTime;
+      draw.fillStyle = '#000';
+      draw.fillRect(0, 0, canvas.width, canvas.height);
+      draw.drawImage(source, rect.x, rect.y, rect.w, rect.h, 0, 0, canvas.width, canvas.height);
+      document.dispatchEvent(new CustomEvent('studio-export-frame', {detail: {ctx: draw, canvas, time}}));
+      videoTrack.requestFrame?.();
+      const progress = Math.max(0, Math.min(100, (time - clip.start) / (clip.end - clip.start) * 100));
+      $('#export-progress').value = progress;
+      $('#export-status').textContent = `${Math.floor(progress)}%`;
+      if (time >= clip.end - .015 || source.ended) {
+        if (recorder.state === 'recording') recorder.stop();
+        return;
+      }
+      // The export canvas is detached. Schedule sampling independently of screen paint.
+      frameTimer = setTimeout(frame, 1000 / frameRate);
+    }
+
+    recorder.start(500);
+    await source.play();
+    frame();
+    timeout = setTimeout(() => cancel('exportFailed'), ((clip.end - clip.start) * 1.8 + 30) * 1000);
+    await stopped;
+    finished = true;
+    if (reason) throw new Error(reason);
+    source.pause();
+    let blob = new Blob(chunks, {type: recorder.mimeType});
+    if (blob.size < 1000) throw new Error('exportFailed');
+    if (mime.includes('webm')) blob = await packRecordedWebm(blob, (clip.end - clip.start) * 1000);
+    if (reason) throw new Error(reason);
+    downloadBlob(blob, `${safeName(clip.title)}.${mime.includes('mp4') ? 'mp4' : 'webm'}`);
+    toast(t('exportDone'));
+  } catch (error) {
+    if (recorder?.state === 'recording') recorder.stop();
+    toast(t(['exportCancelled', 'exportHidden', 'unsupportedExport'].includes(error.message) ? error.message : 'exportFailed'), true);
+  } finally {
+    finished = true;
+    clearTimeout(frameTimer);
+    clearTimeout(timeout);
+    source.pause();
+    source.removeAttribute('src');
+    source.load();
+    source.remove();
+    stream?.getTracks().forEach(track => track.stop());
+    await ctx.close().catch(() => {});
+    if (wake) await wake.release().catch(() => {});
+    document.removeEventListener('visibilitychange', hidden);
+    $('#export-dialog').close();
+    state.exporting = false;
+    state.cancelExport = null;
+  }
 }
 
 async function api(path,options={},timeout=20000){if(!state.engine)throw new Error('needEngine');const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),timeout);const external=options.signal;const abort=()=>controller.abort();external?.addEventListener('abort',abort,{once:true});if(external?.aborted)controller.abort();try{const headers=new Headers(options.headers);if(state.token)headers.set('Authorization','Bearer '+state.token);const r=await fetch(state.engine+path,{...options,headers,signal:controller.signal,credentials:'omit',redirect:'error',referrerPolicy:'no-referrer'});if(!r.ok)throw new Error('serverError');return r;}finally{clearTimeout(timer);external?.removeEventListener('abort',abort);}}
