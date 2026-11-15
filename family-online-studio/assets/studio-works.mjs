@@ -1,13 +1,15 @@
 const kinds = {
+  film: 'فيلم',
   series: 'مسلسل',
   play: 'مسرحية',
   'book-ar': 'كتاب عربي',
   'book-en': 'كتاب إنجليزي',
 };
 
-export function createStudioWorks({ React, Studio, apiBase }) {
+export function createStudioWorks({ React, Studio }) {
   const h = React.createElement;
-  return function StudioWorks({ account, token, onSignOut }) {
+  return function StudioWorks({ account, requestStudio, onSignOut }) {
+    const [verified, setVerified] = React.useState(null);
     const [projects, setProjects] = React.useState(null);
     const [active, setActive] = React.useState(null);
     const [tab, setTab] = React.useState('works');
@@ -17,10 +19,9 @@ export function createStudioWorks({ React, Studio, apiBase }) {
     const [reload, setReload] = React.useState(0);
 
     async function request(payload, signal) {
-      const response = await fetch(new URL('/api/projects', apiBase), {
-        headers: { Authorization: `Bearer ${token}`, ...(payload ? { 'Content-Type': 'application/json' } : {}) },
-        credentials: 'omit', cache: 'no-store', signal,
-        ...(payload ? { method: 'POST', body: JSON.stringify(payload) } : {}),
+      const response = await requestStudio('/api/projects', {
+        signal,
+        ...(payload ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) } : {}),
       });
       if (response.status === 401) {
         window.dispatchEvent(new Event('studio-session-expired'));
@@ -29,6 +30,15 @@ export function createStudioWorks({ React, Studio, apiBase }) {
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || 'تعذر تحميل الأعمال.');
       return result;
+    }
+
+    function applyCatalogue(result) {
+      if (result.account?.id !== account.id || !Array.isArray(result.projects)) {
+        window.dispatchEvent(new Event('studio-session-expired'));
+        throw new Error('تعذر التحقق من الحساب.');
+      }
+      setVerified({ id: result.account.id, username: result.account.username || account.username });
+      setProjects(result.projects);
     }
 
     function choose(id) {
@@ -44,12 +54,12 @@ export function createStudioWorks({ React, Studio, apiBase }) {
       setError('');
       request(null, controller.signal).then(result => {
         if (controller.signal.aborted) return;
-        setProjects(result.projects);
+        applyCatalogue(result);
         const requested = new URL(window.location.href).searchParams.get('work');
         if (requested) choose(result.projects.some(work => work.id === requested && !work.archivedAt) ? requested : null);
       }).catch(() => { if (!controller.signal.aborted) setError('تعذر تحميل أعمالك. حاول مرة أخرى.'); });
       return () => controller.abort();
-    }, [token, reload]);
+    }, [requestStudio, reload]);
 
     async function change(payload) {
       setBusy(true);
@@ -57,7 +67,7 @@ export function createStudioWorks({ React, Studio, apiBase }) {
       try {
         const result = await request(payload, AbortSignal.timeout(60000));
         const current = await request(null, AbortSignal.timeout(60000));
-        setProjects(current.projects);
+        applyCatalogue(current);
         if (payload.action === 'create') {
           setNewWork(false);
           choose(result.id);
@@ -67,10 +77,10 @@ export function createStudioWorks({ React, Studio, apiBase }) {
       } finally { setBusy(false); }
     }
 
-    if (active) return h(Studio, {
-      key: active,
+    if (active && verified) return h(Studio, {
+      key: verified.id + ':' + active,
       requestedWork: active,
-      userKey: account.id === 'owner' ? 'external-private-owner' : `external-studio:${account.id}`,
+      userKey: verified.id === 'owner' ? 'external-private-owner' : 'external-studio:' + verified.id,
       onSignOut,
       onWorks: () => { choose(null); setReload(value => value + 1); },
     });
@@ -78,12 +88,12 @@ export function createStudioWorks({ React, Studio, apiBase }) {
     const archive = tab === 'archive';
     const visible = projects?.filter(work => Boolean(work.archivedAt) === archive) ?? [];
     return h('main', { className: 'studio-workspaces', dir: 'rtl' },
-      h('header', null, h('div', null, h('h1', null, 'استيديو الكتابة'), h('bdi', null, account.username)),
-        h('button', { type: 'button', onClick: onSignOut }, 'خروج')),
+      h('header', null, h('div', null, h('h1', null, 'استيديو الكتابة'), verified && h('bdi', null, verified.username)),
+        h('button', { type: 'button', onClick: onSignOut }, 'تسجيل الخروج')),
       h('nav', { 'aria-label': 'أقسام أعمالك' },
         h('button', { type: 'button', 'aria-pressed': !archive, disabled: busy, onClick: () => setTab('works') }, 'أعمالي'),
         h('button', { type: 'button', 'aria-pressed': archive, disabled: busy, onClick: () => { setTab('archive'); setNewWork(false); } }, 'الأرشيف'),
-        !archive && projects && h('button', { type: 'button', className: 'workspace-primary', disabled: busy, onClick: () => setNewWork(value => !value) }, newWork ? 'إغلاق' : 'عمل جديد')),
+        !archive && projects && h('button', { type: 'button', className: 'workspace-primary', disabled: busy, onClick: () => setNewWork(value => !value) }, newWork ? 'إغلاق' : 'مشروع جديد')),
       error && h('p', { role: 'alert' }, error),
       !projects && (error
         ? h('button', { type: 'button', onClick: () => setReload(value => value + 1) }, 'إعادة المحاولة')
@@ -93,9 +103,12 @@ export function createStudioWorks({ React, Studio, apiBase }) {
         const fields = new FormData(event.currentTarget);
         void change({ action: 'create', title: fields.get('title'), kind: fields.get('kind') });
       } },
-      h('label', null, 'عنوان العمل', h('input', { name: 'title', dir: 'auto', required: true, maxLength: 250, disabled: busy })),
-      h('label', null, 'نوع العمل', h('select', { name: 'kind', disabled: busy }, Object.entries(kinds).map(([value, label]) => h('option', { key: value, value }, label)))),
-      h('button', { type: 'submit', className: 'workspace-primary', disabled: busy }, 'إنشاء العمل')),
+      h('label', null, 'عنوان المشروع', h('input', { name: 'title', dir: 'auto', required: true, maxLength: 250, disabled: busy })),
+      h('label', null, 'نوع المشروع', h('select', { name: 'kind', defaultValue: '', required: true, disabled: busy },
+        h('option', { value: '', disabled: true }, 'اختر نوع المشروع'),
+        h('optgroup', { label: 'الأعمال الدرامية' }, ['film', 'series', 'play'].map(value => h('option', { key: value, value }, kinds[value]))),
+        h('optgroup', { label: 'الكتب' }, ['book-ar', 'book-en'].map(value => h('option', { key: value, value }, kinds[value]))))),
+      h('button', { type: 'submit', className: 'workspace-primary', disabled: busy }, 'إنشاء المشروع')),
       projects && (visible.length
         ? h('ul', { 'aria-label': archive ? 'الأعمال المؤرشفة' : 'الأعمال الحالية' }, visible.map(work =>
           h('li', { key: work.id },

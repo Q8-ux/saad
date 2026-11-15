@@ -3,14 +3,15 @@ import assert from 'node:assert/strict';
 import {createStudioLogin} from '../assets/login.mjs';
 
 const apiBase='https://gateway.invalid';
-const key='fo-studio-login-session-v1:'+apiBase;
+const key='fo-studio-account-session-v2:'+apiBase;
+const oldKey='fo-studio-login-session-v1:'+apiBase;
 const originals=Object.fromEntries(['window','sessionStorage','localStorage','fetch'].map(k=>[k,Object.getOwnPropertyDescriptor(globalThis,k)]));
 afterEach(()=>{for(const [k,d] of Object.entries(originals)){if(d)Object.defineProperty(globalThis,k,d);else delete globalThis[k];}});
 function storage(){const values=new Map();return {getItem:k=>values.get(k)??null,setItem:(k,v)=>values.set(k,String(v)),removeItem:k=>values.delete(k),values};}
-function browser(saved=storage()){
+function browser(saved=storage(),tab=storage()){
  const events=new EventTarget();
  globalThis.window={addEventListener:events.addEventListener.bind(events),removeEventListener:events.removeEventListener.bind(events),dispatchEvent:events.dispatchEvent.bind(events)};
- globalThis.sessionStorage=storage();globalThis.localStorage=saved;return saved;
+ globalThis.sessionStorage=tab;globalThis.localStorage=saved;return tab;
 }
 function harness(config={apiBase}){
  let cursor=0;const hooks=[],effects=[],pending=[];
@@ -29,51 +30,91 @@ function harness(config={apiBase}){
  render();
  return {render,nodes,Studio,get tree(){return tree;},unmount(){for(const fn of effects)fn?.();}};
 }
-async function login(h,expiresIn=7200){
- globalThis.fetch=async()=>({ok:true,status:200,json:async()=>({token:'synthetic-test-session',expiresIn})});
+
+const profile={id:'writer-one',username:'synthetic-user'};
+async function fillAndSubmit(h){
  h.nodes().find(n=>n.type==='input'&&n.props.name==='username').props.onChange({target:{value:'synthetic-user'}});
  h.nodes().find(n=>n.type==='input'&&n.props.name==='password').props.onChange({target:{value:'synthetic-password-for-test'}});
  h.render();await h.nodes().find(n=>n.type==='form').props.onSubmit({preventDefault(){}});h.render();
 }
+async function directLogin(h,expiresIn=7200){
+ globalThis.fetch=async()=>Response.json({token:'synthetic-test-session',account:profile,expiresIn});
+ await fillAndSubmit(h);
+}
+const workspace=h=>h.tree.children[0];
 
-test('a new tab requires the existing login form',()=>{browser();const h=harness();assert.equal(h.tree.type,'main');assert.equal(window.__STUDIO_SESSION__,'');});
-test('successful authentication stores the short-lived bearer, never username or password',async()=>{
- const saved=browser(),h=harness();await login(h);assert.equal(h.tree.type,h.Studio);
- const entry=JSON.parse(saved.getItem(key));assert.equal(entry.token,'synthetic-test-session');assert.equal(entry.apiBase,apiBase);assert.ok(entry.expiresAt>Date.now());assert.ok(entry.expiresAt<=Date.now()+7200000);
- assert.deepEqual(Object.keys(entry).sort(),['apiBase','expiresAt','token']);assert.ok(!saved.getItem(key).includes('synthetic-password-for-test'));assert.ok(!saved.getItem(key).includes('synthetic-user'));
+test('legacy unscoped browser sessions cannot open the editor',()=>{
+ const local=storage(),tab=browser(local);
+ local.setItem(oldKey,JSON.stringify({apiBase,token:'shared-session',expiresAt:Date.now()+300000}));
+ const h=harness();
+ assert.equal(h.tree.type,'main');
+ assert.equal(window.__STUDIO_SESSION__,'');
+ assert.equal(local.getItem(oldKey),null);
+ assert.equal(tab.getItem(key),null);
 });
-test('reload or opening another work in a new tab restores the session before rendering Studio',async()=>{
- const saved=browser(),first=harness();await login(first);first.unmount();browser(saved);
- globalThis.fetch=()=>{throw Error('restoration must not resubmit credentials');};
- const restored=harness();assert.equal(restored.tree.type,restored.Studio);assert.equal(window.__STUDIO_SESSION__,'synthetic-test-session');
+test('persists only scoped session data in the current tab',async()=>{
+ const tab=browser(),h=harness();await directLogin(h,86400);
+ assert.equal(workspace(h).props.account.id,'writer-one');
+ const entry=JSON.parse(tab.getItem(key));
+ assert.equal(entry.token,'synthetic-test-session');
+ assert.equal(entry.accountId,'writer-one');
+ assert.ok(entry.expiresAt>Date.now()&&entry.expiresAt<=Date.now()+7200000);
+ assert.equal(localStorage.getItem(key),null);
+ assert.ok(!tab.getItem(key).includes('synthetic-password-for-test'));
+ assert.ok(!tab.getItem(key).includes('synthetic-user'));
 });
-test('expired sessions are discarded and show login',()=>{
- const saved=storage();saved.setItem(key,JSON.stringify({apiBase,token:'expired-test-session',expiresAt:Date.now()-1}));browser(saved);const h=harness();assert.equal(h.tree.type,'main');assert.equal(saved.getItem(key),null);assert.equal(window.__STUDIO_SESSION__,'');
+test('reload reuses the scoped session in this tab and another tab starts at login',async()=>{
+ const tab=browser(),first=harness();await directLogin(first);first.unmount();
+ browser(storage(),tab);
+ const restored=harness();
+ assert.equal(workspace(restored).props.account.id,profile.id);
+ browser(localStorage);
+ assert.equal(harness().tree.type,'main');
 });
-test('explicit sign-out removes the persisted session',async()=>{
- const saved=browser(),h=harness();await login(h);h.tree.props.onSignOut();h.render();assert.equal(h.tree.type,'main');assert.equal(saved.getItem(key),null);assert.equal(window.__STUDIO_SESSION__,'');
+test('expired sessions are discarded',()=>{
+ const tab=browser();
+ tab.setItem(key,JSON.stringify({apiBase,token:'expired-test-session',accountId:profile.id,expiresAt:Date.now()-1}));
+ const h=harness();assert.equal(h.tree.type,'main');assert.equal(tab.getItem(key),null);
 });
-test('the existing expiry event clears storage and locks the editor',async()=>{
- const saved=browser(),h=harness();await login(h);window.dispatchEvent(new Event('studio-session-expired'));h.render();assert.equal(h.tree.type,'main');assert.equal(saved.getItem(key),null);assert.equal(window.__STUDIO_SESSION__,'');
+test('the legacy transport must verify the account before rendering or storing a session',async()=>{
+ const tab=browser(),h=harness();let proof;
+ globalThis.fetch=async(url,options)=>{
+  if(url.pathname==='/api/auth'){
+   const input=JSON.parse(options.body);
+   const raw=Buffer.from(input.code.split(':')[1],'base64url');
+   proof=JSON.parse(raw.toString())[2];
+   return Response.json({token:'transport-session'});
+  }
+  assert.equal(url.search,'?studioRelay=account');
+  assert.equal(options.body.get('session'),proof);
+  assert.equal(options.body.get('path'),'/api/projects');
+  assert.equal(options.headers.Authorization,'Bearer transport-session');
+  return Response.json({error:'missing-account'},{status:401});
+ };
+ await fillAndSubmit(h);
+ assert.equal(h.tree.type,'main');assert.equal(tab.getItem(key),null);
 });
-test('a session cannot be reused for a different API',async()=>{
- const saved=browser(),first=harness();await login(first);first.unmount();browser(saved);const other=harness({apiBase:'https://other.invalid'});assert.equal(other.tree.type,'main');assert.equal(window.__STUDIO_SESSION__,'');
+test('sign-out revokes the account session and clears the current tab',async()=>{
+ const tab=browser(),h=harness();let proof,last;
+ globalThis.fetch=async(url,options)=>{
+  if(url.pathname==='/api/auth'){
+   proof=JSON.parse(Buffer.from(JSON.parse(options.body).code.split(':')[1],'base64url').toString())[2];
+   return Response.json({token:'transport-session'});
+  }
+  assert.equal(options.body.get('session'),proof);
+  last=options.body.get('path');return Response.json({account:profile,projects:[]});
+ };
+ await fillAndSubmit(h);
+ assert.equal(workspace(h).props.account.id,profile.id);
+ assert.equal(last,'/api/projects');
+ workspace(h).props.onSignOut();h.render();
+ assert.equal(last,'/api/auth/logout');
+ assert.equal(h.tree.type,'main');
+ assert.equal(tab.getItem(key),null);
+ assert.equal(window.__STUDIO_SESSION__,'');
 });
-test('unavailable browser storage does not block ordinary authentication',async()=>{
- browser({getItem(){throw Error('blocked');},setItem(){throw Error('blocked');},removeItem(){throw Error('blocked');}});const h=harness();await login(h);assert.equal(h.tree.type,h.Studio);assert.equal(window.__STUDIO_SESSION__,'synthetic-test-session');
-});
-test('a failed login never creates a remembered session',async()=>{
- const saved=browser(),h=harness();globalThis.fetch=async()=>({ok:false,status:401,json:async()=>({error:'invalid'})});await h.nodes().find(n=>n.type==='form').props.onSubmit({preventDefault(){}});h.render();assert.equal(h.tree.type,'main');assert.equal(saved.getItem(key),null);
-});
-test('the remembered lifetime never exceeds the gateway session ceiling',async()=>{
- const saved=browser(),h=harness();await login(h,86400);assert.ok(JSON.parse(saved.getItem(key)).expiresAt<=Date.now()+7200000);
-});
-test('logout in another tab locks this editor as well',async()=>{
- const saved=browser(),h=harness();await login(h);saved.removeItem(key);const event=new Event('storage');Object.defineProperties(event,{key:{value:key},newValue:{value:null}});window.dispatchEvent(event);h.render();assert.equal(h.tree.type,'main');assert.equal(window.__STUDIO_SESSION__,'');
-});
-test('a valid tab-scoped session migrates without extending its expiry',()=>{
- const saved=browser(),expiresAt=Date.now()+300000;sessionStorage.setItem(key,JSON.stringify({apiBase,token:'legacy-tab-session',expiresAt}));const h=harness();assert.equal(h.tree.type,h.Studio);assert.equal(JSON.parse(saved.getItem(key)).expiresAt,expiresAt);assert.equal(sessionStorage.getItem(key),null);
-});
-test('an expired tab-scoped session is never migrated',()=>{
- const saved=browser();sessionStorage.setItem(key,JSON.stringify({apiBase,token:'expired-tab-session',expiresAt:Date.now()-1}));const h=harness();assert.equal(h.tree.type,'main');assert.equal(saved.getItem(key),null);assert.equal(sessionStorage.getItem(key),null);
+test('session-expired clears the scoped session and the transport',async()=>{
+ const tab=browser(),h=harness();await directLogin(h);
+ window.dispatchEvent(new Event('studio-session-expired'));h.render();
+ assert.equal(h.tree.type,'main');assert.equal(tab.getItem(key),null);assert.equal(window.__STUDIO_REQUEST__,undefined);
 });
