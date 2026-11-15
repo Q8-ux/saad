@@ -88,8 +88,8 @@ export async function exportClip(clip) {
       !(window.AudioContext || window.webkitAudioContext)) throw new Error('unsupportedExport');
   if (clip.end - clip.start > 180) throw new Error('longExport');
 
-  const mime = ['video/mp4;codecs=avc1.424028,mp4a.40.2', 'video/webm;codecs=vp9,opus',
-    'video/webm;codecs=vp8,opus', 'video/mp4', 'video/webm'].find(type => MediaRecorder.isTypeSupported(type));
+  const mime = ['video/mp4;codecs=avc1.424028,mp4a.40.2', 'video/webm;codecs=vp8,opus',
+    'video/webm;codecs=vp9,opus', 'video/mp4', 'video/webm'].find(type => MediaRecorder.isTypeSupported(type));
   if (!mime) throw new Error('unsupportedExport');
 
   state.exporting = true;
@@ -165,15 +165,15 @@ export async function exportClip(clip) {
       $('#export-progress').value = progress;
       $('#export-status').textContent = `${Math.floor(progress)}%`;
       if (time >= clip.end - .015 || source.ended) {
+        clearInterval(frameTimer);
         if (recorder.state === 'recording') recorder.stop();
-        return;
       }
-      // The export canvas is detached. Schedule sampling independently of screen paint.
-      frameTimer = setTimeout(frame, 1000 / frameRate);
     }
 
-    recorder.start(500);
+    // A single finalized recording also avoids fragmented clusters in streaming WebM.
+    recorder.start();
     await source.play();
+    frameTimer = setInterval(frame, 1000 / frameRate);
     frame();
     timeout = setTimeout(() => cancel('exportFailed'), ((clip.end - clip.start) * 1.8 + 30) * 1000);
     await stopped;
@@ -191,7 +191,7 @@ export async function exportClip(clip) {
     toast(t(['exportCancelled', 'exportHidden', 'unsupportedExport'].includes(error.message) ? error.message : 'exportFailed'), true);
   } finally {
     finished = true;
-    clearTimeout(frameTimer);
+    clearInterval(frameTimer);
     clearTimeout(timeout);
     source.pause();
     source.removeAttribute('src');
