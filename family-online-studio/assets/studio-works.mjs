@@ -14,9 +14,11 @@ export function createStudioWorks({ React, Studio }) {
     const [active, setActive] = React.useState(null);
     const [tab, setTab] = React.useState('works');
     const [error, setError] = React.useState('');
+    const [notice, setNotice] = React.useState('');
     const [busy, setBusy] = React.useState(false);
     const [newWork, setNewWork] = React.useState(false);
     const [reload, setReload] = React.useState(0);
+    const [deleteTarget, setDeleteTarget] = React.useState(null);
 
     async function request(payload, signal) {
       const response = await requestStudio('/api/projects', {
@@ -46,7 +48,14 @@ export function createStudioWorks({ React, Studio }) {
       if (id) url.searchParams.set('work', id);
       else url.searchParams.delete('work');
       window.history.replaceState(null, '', url.pathname + url.search + url.hash);
+      setDeleteTarget(null);
       setActive(id);
+    }
+
+    function selectTab(next) {
+      setTab(next);
+      setDeleteTarget(null);
+      if (next === 'archive') setNewWork(false);
     }
 
     React.useEffect(() => {
@@ -64,10 +73,19 @@ export function createStudioWorks({ React, Studio }) {
     async function change(payload) {
       setBusy(true);
       setError('');
+      setNotice('');
       try {
         const result = await request(payload, AbortSignal.timeout(60000));
+        if (payload.action === 'delete') {
+          if (result.id !== payload.id) throw new Error('تعذر التحقق من حذف المشروع.');
+          setProjects(items => items.filter(work => work.id !== payload.id));
+          setDeleteTarget(null);
+          setNotice('تم حذف المشروع.');
+          return;
+        }
         const current = await request(null, AbortSignal.timeout(60000));
         applyCatalogue(current);
+        setDeleteTarget(null);
         if (payload.action === 'create') {
           setNewWork(false);
           choose(result.id);
@@ -97,10 +115,11 @@ export function createStudioWorks({ React, Studio }) {
             h('bdi', null, username)),
           h('button', { type: 'button', className: 'workspace-sign-out', onClick: onSignOut }, 'تسجيل الخروج'))),
       h('nav', { 'aria-label': 'أقسام أعمالك' },
-        h('button', { type: 'button', 'aria-pressed': !archive, disabled: busy, onClick: () => setTab('works') }, 'أعمالي'),
-        h('button', { type: 'button', 'aria-pressed': archive, disabled: busy, onClick: () => { setTab('archive'); setNewWork(false); } }, 'الأرشيف'),
+        h('button', { type: 'button', 'aria-pressed': !archive, disabled: busy, onClick: () => selectTab('works') }, 'أعمالي'),
+        h('button', { type: 'button', 'aria-pressed': archive, disabled: busy, onClick: () => selectTab('archive') }, 'الأرشيف'),
         !archive && projects && h('button', { type: 'button', className: 'workspace-primary', disabled: busy, onClick: () => setNewWork(value => !value) }, newWork ? 'إغلاق' : 'مشروع جديد')),
       error && h('p', { role: 'alert' }, error),
+      notice && h('p', { role: 'status' }, notice),
       !projects && (error
         ? h('button', { type: 'button', onClick: () => setReload(value => value + 1) }, 'إعادة المحاولة')
         : h('p', { role: 'status' }, 'جارٍ فتح مساحة أعمالك…')),
@@ -116,13 +135,26 @@ export function createStudioWorks({ React, Studio }) {
         h('optgroup', { label: 'الكتب' }, ['book-ar', 'book-en'].map(value => h('option', { key: value, value }, kinds[value]))))),
       h('button', { type: 'submit', className: 'workspace-primary', disabled: busy }, 'إنشاء المشروع')),
       projects && (visible.length
-        ? h('ul', { 'aria-label': archive ? 'الأعمال المؤرشفة' : 'الأعمال الحالية' }, visible.map(work =>
-          h('li', { key: work.id },
+        ? h('ul', { 'aria-label': archive ? 'الأعمال المؤرشفة' : 'الأعمال الحالية' }, visible.map(work => {
+          const confirming = deleteTarget === work.id;
+          const promptId = 'workspace-delete-' + work.id;
+          return h('li', { key: work.id },
             h('div', null, h('strong', { dir: 'auto' }, work.title), h('small', null, kinds[work.kind])),
             h('div', { className: 'workspace-actions' },
               !archive && h('button', { type: 'button', disabled: busy, onClick: () => choose(work.id) }, 'فتح'),
               h('button', { type: 'button', disabled: busy, 'aria-label': `${archive ? 'استعادة' : 'أرشفة'} ${work.title}`,
-                onClick: () => void change({ action: archive ? 'restore' : 'archive', id: work.id }) }, archive ? 'استعادة' : 'أرشفة')))))
+                onClick: () => void change({ action: archive ? 'restore' : 'archive', id: work.id }) }, archive ? 'استعادة' : 'أرشفة'),
+              h('button', { type: 'button', className: 'workspace-danger', disabled: busy, 'aria-label': 'حذف ' + work.title,
+                'aria-expanded': confirming, 'aria-controls': confirming ? promptId : undefined,
+                onClick: () => setDeleteTarget(confirming ? null : work.id) }, 'حذف')),
+            confirming && h('div', { id: promptId, className: 'workspace-delete-prompt', role: 'group', 'aria-labelledby': promptId + '-title' },
+              h('p', { id: promptId + '-title' }, 'حذف مشروع «', h('bdi', null, work.title), '»؟'),
+              h('p', null, 'سيُزال المشروع من أعمالك وأرشيفك.'),
+              h('div', { className: 'workspace-actions' },
+                h('button', { type: 'button', autoFocus: true, disabled: busy, onClick: () => setDeleteTarget(null) }, 'إلغاء'),
+                h('button', { type: 'button', className: 'workspace-danger workspace-danger-confirm', disabled: busy,
+                  onClick: () => void change({ action: 'delete', id: work.id }) }, 'تأكيد الحذف'))));
+        }))
         : h('p', { className: 'workspace-empty' }, archive ? 'أرشيفك فارغ.' : 'ابدأ بإضافة أول عمل.')));
   };
 }
