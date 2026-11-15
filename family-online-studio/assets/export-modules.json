@@ -2,7 +2,7 @@
   "initial": [
     {
       "file": "assets/app.mjs",
-      "bytes": 296703
+      "bytes": 297154
     },
     {
       "file": "assets/chunks/chunk-WUPY7VFN.mjs",
@@ -22,7 +22,7 @@
     },
     {
       "file": "assets/chunks/chunk-6ONU323F.mjs",
-      "bytes": 2124
+      "bytes": 2131
     },
     {
       "file": "assets/chunks/chunk-YJOTW2OM.mjs",
@@ -48,7 +48,7 @@
     },
     {
       "file": "assets/chunks/book-studio-DHXOY43D.mjs",
-      "bytes": 26982
+      "bytes": 27503
     },
     {
       "file": "assets/chunks/chunk-UT3BRTEO.mjs",
@@ -76,7 +76,7 @@
     },
     {
       "file": "assets/chunks/library-assistant-J2LCETFR.mjs",
-      "bytes": 17491
+      "bytes": 17479
     },
     {
       "file": "assets/chunks/chunk-N7RR3IYA.mjs",
@@ -113,6 +113,14 @@
     {
       "file": "assets/video-use/studio.mjs",
       "bytes": 17864
+    },
+    {
+      "file": "assets/writer-solo.mjs",
+      "bytes": 16579
+    },
+    {
+      "file": "assets/studio-works.mjs",
+      "bytes": 5977
     }
   ]
 }

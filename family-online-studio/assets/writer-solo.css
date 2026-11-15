@@ -1,0 +1,42 @@
+.writer-solo-dialog {
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  width: min(37rem, calc(100% - 1.5rem));
+  max-height: calc(100dvh - 1.5rem);
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 1.4rem;
+  border: 1px solid #c6d3d2;
+  border-radius: 18px;
+  background: #f8faf9;
+  color: #173139;
+  font: 1.1rem/1.6 Amiri, serif;
+}
+.writer-solo-dialog[data-theme='dark'] { background: #18282d; color: #f3faf9; border-color: #596e73; }
+.writer-solo-dialog::backdrop { background: #0d222aa8; }
+.writer-solo-dialog header { display: flex; align-items: center; justify-content: space-between; gap: .8rem; }
+.writer-solo-dialog h2 { font: 650 1.26rem/1.4 system-ui, sans-serif; }
+.writer-solo-work { margin-block: .6rem .15rem; font-size: 1.35rem; font-weight: bold; text-align: start; overflow-wrap: anywhere; }
+.writer-solo-dialog label { display: grid; gap: .3rem; margin-block: .8rem; }
+.writer-solo-actions { display: flex; gap: .6rem; flex-wrap: wrap; }
+.writer-solo-dialog button, .writer-solo-actions a, .writer-solo-dialog select, .writer-solo-dialog textarea {
+  color: inherit;
+  background: transparent;
+  border: 1px solid #889fa3;
+  border-radius: 9px;
+  font: inherit;
+  padding: .35rem .65rem;
+  min-height: 44px;
+}
+.writer-solo-dialog button:not([hidden]), .writer-solo-actions a { display: inline-flex; align-items: center; cursor: pointer; }
+.writer-solo-dialog :focus-visible { outline: 2px solid #218094; outline-offset: 2px; }
+.writer-solo-dialog .writer-solo-primary { color: #fff; background: #265664; border-color: #265664; }
+.writer-solo-dialog textarea { width: 100%; max-height: 18rem; display: block; margin-block: .5rem; resize: vertical; }
+.writer-solo-dialog textarea[hidden] { display: none; }
+.writer-solo-dialog input { max-width: 100%; font: inherit; }
+.writer-solo-dialog details { border-top: 1px solid #8da4aa70; }
+.writer-solo-dialog summary { min-height: 44px; padding-block: .4rem; cursor: pointer; font-weight: bold; }
+.writer-solo-dialog details > a { text-decoration: underline; }
+.writer-solo-dialog li { margin-inline-start: 1rem; list-style-type: disc; margin-block-end: .4rem; }
+.writer-solo-dialog [role='status']:not(:empty) { margin-block: .55rem; }
