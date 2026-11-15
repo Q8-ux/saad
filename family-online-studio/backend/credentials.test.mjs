@@ -13,7 +13,7 @@ async function fixture(t,values=env){
  const server=createGateway(config,async(url,init)=>{
   calls.push({url,init});
   const h=init.headers,body=Buffer.from(init.body),hash=createHash('sha256').update(body).digest('hex');
-  assert.equal(h['x-studio-signature'],createHmac('sha256',config.bridgeKey).update([h['x-studio-time'],h['x-studio-nonce'],h['x-studio-method'],h['x-studio-route'],h['Content-Type'],hash].join('\n')).digest('hex'));
+  assert.equal(h['x-studio-signature'],createHmac('sha256',config.bridgeKey).update([h['x-studio-time'],h['x-studio-nonce'],h['x-studio-method'],h['x-studio-route'],h['Content-Type'],hash,'studio-accounts-v1',h['x-studio-account']].join('\n')).digest('hex'));
   return Response.json({synthetic:true});
  });
  server.listen(0,'127.0.0.1');await once(server,'listening');
@@ -72,4 +72,21 @@ test('malformed input and repeated failures never issue sessions',async t=>{
  for(const input of [null,[],{username:[],password},{username,password:[]},{username,password:'x'.repeat(161)}])assert.equal((await f.login(input)).status,401);
  let last;for(let i=0;i<5;i++)last=await f.login({username,password:'wrong'});
  assert.equal(last.status,429);assert.equal(f.calls.length,0);
+});
+
+test('the gateway derives the signed account from authentication and ignores request identity',async t=>{
+ const editorPassword='synthetic-second-writer-secret';
+ const records=[{id:'owner',username,passwordHash},{id:'writer-two',username:'Second',passwordHash:await hashPassword(editorPassword)}];
+ const f=await fixture(t,{...env,STUDIO_ACCOUNTS_JSON:JSON.stringify(records)});
+ const owner=await (await f.login({username,password})).json();
+ const editor=await (await f.login({username:'second',password:editorPassword})).json();
+ assert.equal(owner.account.id,'owner');assert.equal(editor.account.id,'writer-two');
+ assert.equal((await f.login({username,password:editorPassword})).status,401);
+ for(const {account,token} of [owner,editor]){
+  const projects=await f.request('/api/projects',{headers:{Authorization:'Bearer '+token,'x-studio-account':'untrusted-client-header'}});
+  assert.equal(projects.status,200);
+  assert.equal(f.calls.at(-1).init.headers['x-studio-account'],account.id);
+ }
+ const withDuplicate=await fixture(t,{...env,STUDIO_ACCOUNTS_JSON:JSON.stringify([...records,records[0]])});
+ assert.equal((await fetch(withDuplicate.base+'/health')).status,503);
 });
