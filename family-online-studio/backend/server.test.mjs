@@ -79,4 +79,3 @@ test('legacy password mode verifies through the signed private server and revoke
   assert.equal((await fetch(base+'/api/manuscript',{headers:{Origin:origin,Authorization:'Bearer '+oldToken}})).status,401);
  }finally{await new Promise(resolve=>server.close(resolve));}
 });
-

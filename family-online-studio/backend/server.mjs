@@ -2,31 +2,48 @@ import http from 'node:http';
 import {createHash,createHmac,randomUUID,timingSafeEqual} from 'node:crypto';
 import {pathToFileURL} from 'node:url';
 import {AuthError,createSmsAuth} from './sms-auth.mjs';
-import {validPasswordHash,verifyPassword} from './credentials.mjs';
+import {loadAccounts,usernameKey,validPasswordHash,verifyPassword} from './credentials.mjs';
 
 const hash=value=>createHash('sha256').update(value).digest('hex');
 const same=(a,b)=>{const x=Buffer.from(a||''),y=Buffer.from(b||'');return x.length===y.length&&timingSafeEqual(x,y);};
-const routes=new Map([['/api/manuscript',['GET','PUT']],['/api/versions',['GET','POST']],['/api/scenarist',['GET','POST']],['/api/scenarist/refine',['POST']],['/api/transcribe',['POST']]]);
+const routes=new Map([['/api/projects',['GET','POST']],['/api/manuscript',['GET','PUT']],['/api/versions',['GET','POST']],['/api/scenarist',['GET','POST']],['/api/scenarist/refine',['POST']],['/api/transcribe',['POST']]]);
 const maxBytes=9_000_000;
 export function createGateway(config,fetchImpl=fetch){
  const {allowedOrigin,upstreamOrigin,siteToken,bridgeKey,accessHash,sessionSecret}=config;
  const credentialsOnly=config.authMode==='credentials';
- const credentialsReady=typeof config.username==='string'&&config.username.length>0&&config.username.length<=80&&validPasswordHash(config.passwordHash);
+ const accounts=config.accounts??(usernameKey(config.username)&&validPasswordHash(config.passwordHash)?[{id:'owner',username:config.username,passwordHash:config.passwordHash}]:[]);
+ const accountsByName=new Map(accounts.map(account=>[usernameKey(account.username),account]));
+ const accountsById=new Map(accounts.map(account=>[account.id,account]));
+ const credentialsReady=accounts.length>0;
  const openAccess=config.authMode==='open';
  const passwordOnly=config.authMode==='password';
  const remotePassword=passwordOnly&&config.passwordVerification==='upstream';
- const sessionTag=credentialsOnly?'studio-credentials-session-v1\n'+hash((config.username||'')+'\n'+(config.passwordHash||''))+'\n':openAccess?'studio-open-session\n':passwordOnly?'studio-password-session\n':'studio-session\n';
+ const legacyTag=openAccess?'studio-open-session\n':passwordOnly?'studio-password-session\n':'studio-session\n';
+ const accountTag=account=>'studio-credentials-session-v2\n'+hash(account.id+'\n'+account.passwordHash)+'\n';
  const sms=createSmsAuth(config,fetchImpl);
  const ready=!!(allowedOrigin&&upstreamOrigin&&siteToken&&bridgeKey&&(credentialsOnly?credentialsReady:(openAccess||remotePassword||(passwordOnly?accessHash:(accessHash||sms.credentialsReady))))&&sessionSecret);
  if(ready&&(!/^https:\/\//.test(allowedOrigin)||!/^https:\/\//.test(upstreamOrigin)))throw new Error('HTTPS configuration required');
  const pacing=new Map();
  function limited(key,limit){const now=Date.now(),old=pacing.get(key);if(pacing.size>2000){for(const [id,v]of pacing)if(v.exp<now)pacing.delete(id);if(pacing.size>2000)return true;}if(!old||old.exp<now){pacing.set(key,{n:1,exp:now+60000});return false;}old.n++;return old.n>limit;}
- function session(){const data=Buffer.from(JSON.stringify({exp:Math.floor(Date.now()/1000)+7200,nonce:randomUUID()})).toString('base64url');return data+'.'+createHmac('sha256',sessionSecret).update(sessionTag+data).digest('base64url');}
- function authenticated(value){const [data,sig,...extra]=(value||'').replace(/^Bearer /,'').split('.');if(!data||!sig||extra.length)return false;const correct=createHmac('sha256',sessionSecret).update(sessionTag+data).digest('base64url');if(!same(sig,correct))return false;try{const p=JSON.parse(Buffer.from(data,'base64url').toString());return Number.isInteger(p.exp)&&p.exp>Math.floor(Date.now()/1000);}catch{return false;}}
- async function upstreamRequest(method,route,body,type){
+ function session(account){const data=Buffer.from(JSON.stringify({exp:Math.floor(Date.now()/1000)+7200,nonce:randomUUID(),sub:account?.id})).toString('base64url');return data+'.'+createHmac('sha256',sessionSecret).update((account?accountTag(account):legacyTag)+data).digest('base64url');}
+ function authenticated(value){
+  const [data,sig,...extra]=(value||'').replace(/^Bearer /,'').split('.');
+  if(!data||!sig||data.length>1024||extra.length)return null;
+  try{
+   const p=JSON.parse(Buffer.from(data,'base64url').toString());
+   if(!Number.isInteger(p.exp)||p.exp<=Math.floor(Date.now()/1000))return null;
+   const account=credentialsOnly?accountsById.get(p.sub):null;
+   if(credentialsOnly&&!account)return null;
+   const correct=createHmac('sha256',sessionSecret).update((account?accountTag(account):legacyTag)+data).digest('base64url');
+   return same(sig,correct)?{account}:null;
+  }catch{return null;}
+ }
+ async function upstreamRequest(method,route,body,type,account){
   const stamp=String(Date.now()),nonce=randomUUID();
-  const signature=createHmac('sha256',bridgeKey).update([stamp,nonce,method,route,type,hash(body)].join('\n')).digest('hex');
-  return fetchImpl(new URL('/api/external-studio',upstreamOrigin),{method:'POST',headers:{'OAI-Sites-Authorization':'Bearer '+siteToken,'Content-Type':type,'x-studio-time':stamp,'x-studio-nonce':nonce,'x-studio-method':method,'x-studio-route':route,'x-studio-signature':signature},body,signal:AbortSignal.timeout(85000)});
+  const selection=[stamp,nonce,method,route,type,hash(body)];
+  if(account)selection.push('studio-accounts-v1',account.id);
+  const signature=createHmac('sha256',bridgeKey).update(selection.join('\n')).digest('hex');
+  return fetchImpl(new URL('/api/external-studio',upstreamOrigin),{method:'POST',headers:{'OAI-Sites-Authorization':'Bearer '+siteToken,'Content-Type':type,'x-studio-time':stamp,'x-studio-nonce':nonce,'x-studio-method':method,'x-studio-route':route,'x-studio-signature':signature,...(account?{'x-studio-account':account.id}:{})},body,signal:AbortSignal.timeout(85000)});
  }
  async function bytes(req){const parts=[];let size=0;for await(const part of req){size+=part.length;if(size>maxBytes){const error=new Error('too_large');error.status=413;throw error;}parts.push(part);}return Buffer.concat(parts);}
  return http.createServer(async(req,res)=>{
@@ -67,11 +84,12 @@ export function createGateway(config,fetchImpl=fetch){
     const raw=await bytes(req);if(raw.length>2048)return send(413,{error:'حجم طلب غير صالح.'});
     if(credentialsOnly){
      let input;try{input=JSON.parse(raw);}catch{return send(400,{error:'طلب غير صالح.'});}
-     const username=input?.username,password=input?.password;
-     if(typeof username!=='string'||username.length>80||typeof password!=='string'||!password||password.length>160)return send(401,{error:'اسم المستخدم أو كلمة المرور غير صحيحة.'});
-     const passwordMatches=await verifyPassword(password,config.passwordHash);
-     if(!same(username.trim(),config.username)||!passwordMatches)return send(401,{error:'اسم المستخدم أو كلمة المرور غير صحيحة.'});
-     return send(200,{token:session(),expiresIn:7200});
+     const username=usernameKey(input?.username),password=input?.password;
+     if(!username||typeof password!=='string'||!password||password.length>160)return send(401,{error:'اسم المستخدم أو كلمة المرور غير صحيحة.'});
+     const account=accountsByName.get(username);
+     const passwordMatches=await verifyPassword(password,account?.passwordHash??accounts[0].passwordHash);
+     if(!account||!passwordMatches)return send(401,{error:'اسم المستخدم أو كلمة المرور غير صحيحة.'});
+     return send(200,{token:session(account),expiresIn:7200,account:{id:account.id,username:account.username}});
     }
     if(openAccess)return send(200,{token:session(),expiresIn:7200});
     let code;try{code=JSON.parse(raw).code;}catch{return send(400,{error:'طلب غير صالح.'});}
@@ -84,11 +102,12 @@ export function createGateway(config,fetchImpl=fetch){
     }else if(!same(hash(code),accessHash))return send(401,{error:passwordOnly?'كلمة المرور غير صحيحة.':'رمز الدخول غير صحيح.'});
     return send(200,{token:session(),expiresIn:7200});
    }
-   if(!authenticated(req.headers.authorization))return send(401,{error:credentialsOnly?'أدخل اسم المستخدم وكلمة المرور للدخول إلى الاستوديو.':openAccess?'جارٍ تجديد الاتصال بالاستوديو.':passwordOnly?'أدخل كلمة المرور للدخول إلى الاستوديو.':'انتهت جلسة الدخول. تحقّق من هاتفك للدخول مجدداً.'});
+   const signedIn=authenticated(req.headers.authorization);
+   if(!signedIn)return send(401,{error:credentialsOnly?'أدخل اسم المستخدم وكلمة المرور للدخول إلى الاستوديو.':openAccess?'جارٍ تجديد الاتصال بالاستوديو.':passwordOnly?'أدخل كلمة المرور للدخول إلى الاستوديو.':'انتهت جلسة الدخول. تحقّق من هاتفك للدخول مجدداً.'});
    if(!routes.get(u.pathname)?.includes(req.method))return send(404,{error:'not_found'});
    if(limited('request:'+peer,100))return send(429,{error:'طلبات كثيرة؛ انتظر قليلاً.'});
    const body=await bytes(req),route=u.pathname+u.search,type=req.headers['content-type']||'';
-   const upstream=await upstreamRequest(req.method,route,body,type);
+   const upstream=await upstreamRequest(req.method,route,body,type,signedIn.account);
    const ct=upstream.headers.get('content-type')||'';
    if(!ct.includes('application/json'))return send(502,{error:'تعذر الوصول إلى المساحة الخاصة. أعد المحاولة بعد قليل.'});
    res.writeHead(upstream.status,{...headers,'Content-Type':'application/json; charset=utf-8'});res.end(Buffer.from(await upstream.arrayBuffer()));
@@ -96,7 +115,7 @@ export function createGateway(config,fetchImpl=fetch){
  });
 }
 // Production requires both credentials; obsolete open/password/SMS settings cannot bypass them.
-export function fromEnvironment(env=process.env){return {authMode:'credentials',username:env.STUDIO_USERNAME,passwordHash:env.STUDIO_PASSWORD_HASH,allowedOrigin:env.STUDIO_ALLOWED_ORIGIN,upstreamOrigin:env.STUDIO_UPSTREAM_ORIGIN,siteToken:env.STUDIO_SITE_TOKEN,bridgeKey:env.STUDIO_BRIDGE_KEY,sessionSecret:env.STUDIO_SESSION_SECRET};}
+export function fromEnvironment(env=process.env){return {authMode:'credentials',accounts:loadAccounts(env),allowedOrigin:env.STUDIO_ALLOWED_ORIGIN,upstreamOrigin:env.STUDIO_UPSTREAM_ORIGIN,siteToken:env.STUDIO_SITE_TOKEN,bridgeKey:env.STUDIO_BRIDGE_KEY,sessionSecret:env.STUDIO_SESSION_SECRET};}
 if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href){
  const server=createGateway(fromEnvironment());server.requestTimeout=100000;server.headersTimeout=15000;server.listen(Number(process.env.PORT)||10000,'0.0.0.0');
  console.log('Private studio gateway listening.');
