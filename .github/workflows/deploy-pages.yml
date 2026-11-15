@@ -45,6 +45,7 @@ on:
       - 'ai-video-studio/**'
       - 'animation-studio/**'
       - 'autoclip-studio/**'
+      - 'kab-kat/**'
       - 'frame-studio/**'
       - 'muhami-next/**'
       - 'workforce-platform/apps/web/**'
@@ -301,6 +302,18 @@ jobs:
             python family-online-studio/deployment/preserve.py --add-to-build
           fi
           test ! -e "$studio/backend"
+      - name: Build Kab Kat for GitHub Pages
+        if: hashFiles('kab-kat/source/package-lock.json') != ''
+        shell: bash
+        run: |
+          if [[ ! -s _site/kab-kat/index.html ]]; then
+            npm ci --prefix kab-kat/source --no-audit --no-fund
+            npm run --prefix kab-kat/source build
+            mkdir -p _site/kab-kat
+            cp -a kab-kat/source/dist/. _site/kab-kat/
+          fi
+          test -s _site/kab-kat/index.html
+          test -s _site/kab-kat/OPEN-CUT-LICENSE.txt
       - uses: actions/upload-pages-artifact@v3
         with: { path: _site, retention-days: 30 }
       - name: Deploy

@@ -1,0 +1,36 @@
+{
+  "name": "kab-kat",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "prepare:opencut": "node scripts/prepare-opencut.mjs",
+    "dev": "npm run prepare:opencut && vite",
+    "build": "npm run prepare:opencut && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@fontsource-variable/cairo": "5.3.0",
+    "@hugeicons/core-free-icons": "3.3.0",
+    "@hugeicons/react": "1.1.6",
+    "class-variance-authority": "0.7.1",
+    "clsx": "2.1.1",
+    "culori": "4.0.2",
+    "eventemitter3": "5.0.4",
+    "lucide-react": "0.562.0",
+    "mediabunny": "1.41.0",
+    "nanoid": "5.1.9",
+    "opencut-wasm": "0.2.10",
+    "radix-ui": "1.4.3",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "sonner": "2.0.7",
+    "soundtouchjs": "0.3.0",
+    "tailwind-merge": "3.5.0",
+    "zustand": "5.0.12"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "5.1.4",
+    "vite": "7.3.1"
+  }
+}
