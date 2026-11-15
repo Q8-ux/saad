@@ -31,6 +31,10 @@
 .studio-workspaces button:disabled { cursor: default; opacity: .55; }
 .studio-workspaces button[aria-pressed='true'] { background: #e8eff2; border-color: #4e6d7e; }
 .studio-workspaces .workspace-primary { background: #1d4a60; color: #fff; border-color: #1d4a60; }
+.studio-workspaces .workspace-danger { color: #812e35; border-color: #bd858a; }
+.studio-workspaces .workspace-danger-confirm { background: #812e35; color: #fff; border-color: #812e35; }
+.workspace-delete-prompt { flex: 1 0 100%; min-width: 0; padding-block-start: .7rem; border-block-start: 1px solid #e4d2d4; }
+.workspace-delete-prompt p { margin: 0 0 .5rem; overflow-wrap: anywhere; }
 .studio-workspaces :focus-visible { outline: 2px solid #176683; outline-offset: 2px; }
 .studio-workspaces form { display: grid; gap: .8rem; max-width: 34rem; margin-block: 1.2rem; }
 .studio-workspaces label { display: grid; gap: .3rem; }
