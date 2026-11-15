@@ -84,7 +84,58 @@ $('export-storyboard').onclick=()=>{const rows=[['رقم','عنوان','مدة',
 $('export-prompts').onclick=()=>download('masar-prompts.txt',state.scenes.map((s,i)=>'مشهد '+(i+1)+' — '+s.title+'\nالأسلوب: '+state.style+'\nالمشهد: '+s.visual+'\nالتعليق: '+s.narration+'\nمدة: '+s.duration+' ثانية').join('\n\n---\n\n'));
 $('import-json').onchange=async e=>{const f=e.target.files[0];if(!f)return;if(f.size>10e6)return toast('ملف المشروع كبير جدًا');try{const obj=JSON.parse(await f.text());if(!Array.isArray(obj.scenes)||!obj.scenes.length||typeof obj.title!=='string')throw Error('صيغة غير صحيحة');if(!confirm('استيراد المشروع سيستبدل البيانات الحالية. هل أكملت النسخ الاحتياطي؟'))return;state={...base(),...obj,marketing:{...base().marketing,...obj.marketing}};selected=0;playhead=0;Object.entries(bindings).forEach(([id,k])=>$(id).value=state[k]);Object.entries(fields).forEach(([id,k])=>$(id).value=state.marketing[k]||'');save();references();sceneList();loadScene();draw();kpis();toast('تم الاستيراد')}catch(e){toast('ملف المشروع غير صالح: '+e.message)}};
 $('mobile-menu').onclick=()=>$('sidebar').classList.toggle('open');
-$$('.nav-link').forEach(a=>a.addEventListener('click',()=>{$$('.nav-link').forEach(b=>b.classList.remove('active'));a.classList.add('active');$('sidebar').classList.remove('open');$('header-title').textContent=a.textContent.trim()}));
+const navLinks = $$('.nav-link');
+function activateNav(link) {
+  for (const item of navLinks) {
+    item.classList.toggle('active', item === link);
+    if (item === link) item.setAttribute('aria-current', 'location');
+    else item.removeAttribute('aria-current');
+  }
+  $('header-title').textContent = link.textContent.trim();
+}
+function syncNav() {
+  const link = navLinks.find(item => item.hash === window.location.hash);
+  if (link) activateNav(link);
+}
+for (const link of navLinks) {
+  link.addEventListener('click', () => {
+    activateNav(link);
+    $('sidebar').classList.remove('open');
+  });
+}
+window.addEventListener('hashchange', syncNav);
+syncNav();
+
+const motionVideo = $('motion-demo-video');
+if (motionVideo) {
+  const cues = $$('#motion-prompt [data-motion-time]').reverse();
+  const mediaError = $('motion-demo-error');
+
+  function updateMotionCue() {
+    const activeCue = cues.find(cue => Number(cue.dataset.motionTime) <= motionVideo.currentTime + 0.03);
+    for (const cue of cues) {
+      if (cue === activeCue) cue.setAttribute('aria-current', 'true');
+      else cue.removeAttribute('aria-current');
+    }
+  }
+
+  for (const cue of cues) {
+    cue.addEventListener('click', async () => {
+      try {
+        motionVideo.currentTime = Number(cue.dataset.motionTime);
+        updateMotionCue();
+        motionVideo.scrollIntoView({ block: 'nearest', behavior: 'instant' });
+        await motionVideo.play();
+      } catch (error) {
+        if (error.name !== 'AbortError') mediaError.hidden = false;
+      }
+    });
+  }
+  motionVideo.addEventListener('seeked', updateMotionCue);
+  motionVideo.addEventListener('timeupdate', updateMotionCue);
+  motionVideo.addEventListener('error', () => { mediaError.hidden = false; });
+  motionVideo.addEventListener('playing', () => { mediaError.hidden = true; });
+}
 
 // Remote render is opt-in; do not persist the credential or silently send project data.
 let renderJobId=null,renderBase='',renderKey='',renderTimer=null;

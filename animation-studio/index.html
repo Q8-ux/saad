@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#080b1e">
   <meta name="description" content="مسار الرسوم المتحركة: مساحة عربية لتخطيط وتحريك وتسجيل وإخراج وتسويق القصص المتحركة وربط مسارات سعد الإبداعية.">
   <title>مسار الرسوم المتحركة | SAAD Animation Studio</title>
-  <link rel="stylesheet" href="./style.css?v=2">
+  <link rel="stylesheet" href="./style.css?v=3">
 </head>
 <body>
 <div class="ambient ambient-one" aria-hidden="true"></div><div class="ambient ambient-two" aria-hidden="true"></div>
@@ -20,6 +20,7 @@
       <a class="nav-link active" href="#workspace" data-nav="workspace"><span>◈</span> الاستوديو الرئيسي</a>
       <a class="nav-link" href="#story" data-nav="story"><span>▣</span> القصة والسيناريو</a>
       <a class="nav-link" href="#scenes" data-nav="scenes"><span>◫</span> المشاهد والتحريك</a>
+      <a class="nav-link" href="#motion-prompt" data-nav="motion-prompt"><span aria-hidden="true">▶</span> معاينة خارج الستوري</a>
       <a class="nav-link" href="#audio" data-nav="audio"><span>◉</span> الصوت والتعليق</a>
       <a class="nav-link" href="#assets" data-nav="assets"><span>✳</span> الجرافيك والتصميم</a>
       <a class="nav-link" href="#research" data-nav="research"><span>⌕</span> البحث والمراجع</a>
@@ -99,6 +100,40 @@
           </div>
         </div>
       </div>
+      <section class="panel motion-demo" id="motion-prompt" aria-labelledby="motion-demo-title">
+        <header class="motion-demo-title">
+          <p class="motion-demo-tool" lang="en" dir="ltr">Motion Prompt</p>
+          <h2 id="motion-demo-title">خارج الستوري</h2>
+          <p class="motion-demo-episode">الحلقة الأولى «الصورة»</p>
+          <p class="muted">معاينة إخراجية للمشهد الأول في مطبخ عواطف.</p>
+        </header>
+        <div class="motion-demo-screen">
+          <video id="motion-demo-video" src="./projects/kharej-alstory/episode-01.mp4"
+            poster="./projects/kharej-alstory/episode-01.webp" width="720" height="1280"
+            controls playsinline preload="metadata" aria-label="معاينة افتتاحية الحلقة الأولى من خارج الستوري"></video>
+        </div>
+        <div class="motion-demo-controls">
+          <h3>الحركات في المقطع</h3>
+          <p class="muted">اضغط على الحركة للمشاهدة من بدايتها.</p>
+          <ol class="motion-cues">
+            <li><button type="button" class="motion-cue" data-motion-time="1.54">
+              <span><strong>نقل التركيز</strong><small>من فرن عواطف إلى الهاتف</small></span>
+              <span class="motion-cue-time" dir="ltr">00:01.5</span>
+            </button></li>
+            <li><button type="button" class="motion-cue" data-motion-time="7.71">
+              <span><strong>تجميد الصورة</strong><small>ابتسامة جود عند ورود الاتصال</small></span>
+              <span class="motion-cue-time" dir="ltr">00:07.7</span>
+            </button></li>
+            <li><button type="button" class="motion-cue" data-motion-time="9.63">
+              <span><strong>ظهور العنوان من أسفل</strong><small>تتر «خارج الستوري»</small></span>
+              <span class="motion-cue-time" dir="ltr">00:09.6</span>
+            </button></li>
+          </ol>
+          <p id="motion-demo-error" class="motion-demo-error" role="status" hidden>تعذّر تشغيل المعاينة. يمكنك تنزيل المقطع.</p>
+          <a class="ghost-btn compact" href="./projects/kharej-alstory/episode-01.mp4"
+            download="Kharej_AlStory_E01_MotionPrompt.mp4">تنزيل المقطع MP4</a>
+        </div>
+      </section>
       <section class="split-head" id="audio"><div><span class="eyebrow">VOICE / SOUND / WAVEFORM</span><h2>استوديو الصوت</h2><p class="muted">رفع تعليق صوتي، تسجيل ميكروفون، واستماع تجريبي للنص قبل التصدير.</p></div><span class="section-chip">03 / الصوت</span></section>
       <div class="grid-two">
         <div class="panel stack"><div class="panel-heading"><strong>تسجيل ورفع الصوت</strong><span class="tag status-local">محلي</span></div><label class="upload-target">اسحب الملف هنا أو اختر ملف صوت<input type="file" id="audio-file" accept="audio/*"></label><audio id="audio-player" controls preload="metadata"></audio><p id="audio-file-name" class="muted">لم يتم تحميل صوت بعد</p><div class="action-line"><button class="small-btn" id="mic-start">● بدء التسجيل</button><button class="ghost-btn compact" id="mic-stop" disabled>إيقاف</button><button class="ghost-btn compact" id="mic-download" disabled>تنزيل التسجيل</button></div><p class="note">المقاطع الصوتية لا تُحفظ داخل النسخة الاحتياطية JSON. نزّل الملف واحتفظ به؛ الإذن مطلوب للميكروفون.</p></div>
@@ -140,6 +175,6 @@
   </div>
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
-<script src="./app.js" defer></script>
+<script src="./app.js?v=3" defer></script>
 </body>
 </html>

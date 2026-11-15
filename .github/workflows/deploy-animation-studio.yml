@@ -37,9 +37,9 @@ jobs:
             echo "No previous pages artifact. Refusing partial publish to avoid overwriting other sites."
             exit 1
           fi
-          mkdir -p _site/animation-studio
+          mkdir -p _site/animation-studio/projects
           cp animation-studio/index.html animation-studio/style.css animation-studio/app.js _site/animation-studio/
-          cp -R animation-studio/projects _site/animation-studio/projects
+          cp -R animation-studio/projects/. _site/animation-studio/projects/
           test -s _site/animation-studio/index.html
           test -s _site/animation-studio/app.js
           test -s _site/animation-studio/style.css
