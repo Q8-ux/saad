@@ -290,6 +290,17 @@ jobs:
       - name: Verify Waqaya V2 fast release
         if: (steps.waqaya.outputs.only == 'true') && steps.nlk.outputs.only != 'true'
         run: python waqaya-v2/deployment/publish.py verify
+      - name: Keep Writing Studio in the Pages package
+        shell: bash
+        run: |
+          studio=_site/family-online-studio
+          installer=_site/family-online-iphone
+          if [[ ! -s "$studio/index.html" || ! -s "$studio/assets/app.mjs" ||
+                ! -s "$studio/assets/login.mjs" || ! -s "$installer/index.html" ||
+                ! -s "$installer/manifest.webmanifest" ]]; then
+            python family-online-studio/deployment/preserve.py --add-to-build
+          fi
+          test ! -e "$studio/backend"
       - uses: actions/upload-pages-artifact@v3
         with: { path: _site, retention-days: 30 }
       - name: Deploy

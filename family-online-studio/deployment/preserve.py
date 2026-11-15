@@ -1,4 +1,4 @@
-"""Overlay this app on the last successful Pages artifact; preserve other sites."""
+"""Add the studio to a Pages build while preserving the other sites."""
 import argparse
 import hashlib
 import io
@@ -103,7 +103,8 @@ def overlay(destination):
     target.mkdir()
     shutil.copy2(SOURCE / 'index.html', target / 'index.html')
     shutil.copytree(SOURCE / 'assets', target / 'assets')
-    if not (target / 'assets' / 'app.mjs').is_file():
+    if not all((target / 'assets' / filename).is_file()
+               for filename in ('app.mjs', 'login.mjs')):
         raise RuntimeError('Incomplete screenplay application.')
     web_source = SOURCE.parent / WEB_APP
     web_target = destination / WEB_APP
@@ -119,14 +120,20 @@ def overlay(destination):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--fixture', type=Path)
+    source = parser.add_mutually_exclusive_group()
+    source.add_argument('--fixture', type=Path)
+    source.add_argument('--add-to-build', action='store_true',
+                        help='Add the studio to a Pages directory that is already assembled.')
     parser.add_argument('--destination', type=Path, default=Path('_site'))
     args = parser.parse_args()
-    token = os.environ.get('GH_TOKEN')
-    if not args.fixture and not token:
-        raise RuntimeError('GH_TOKEN is required for publication.')
-    data = args.fixture.read_bytes() if args.fixture else prior_artifact(token)
-    restore(data, args.destination)
+    if not args.add_to_build:
+        token = os.environ.get('GH_TOKEN')
+        if not args.fixture and not token:
+            raise RuntimeError('GH_TOKEN is required for publication.')
+        data = args.fixture.read_bytes() if args.fixture else prior_artifact(token)
+        restore(data, args.destination)
+    elif not (args.destination / 'index.html').is_file():
+        raise RuntimeError('The assembled Pages directory has no root index.')
     overlay(args.destination)
 
 if __name__ == '__main__':
