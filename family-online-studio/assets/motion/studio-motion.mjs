@@ -1,6 +1,6 @@
 import { createPlayer, normalizeProject, recordingFormat, recordVideo, downloadBlob } from './motion-core.mjs';
 
-const WORKS = { barcode: 'باركود', 'outside-story': 'خارج الستوري', 'family-online': 'عائلة أونلاين' };
+const WORKS = { barcode: 'باركود', 'outside-story': 'خارج الستوري', 'family-online': 'مسرحية من الأرشيف' };
 const FONT = 'Amiri, Tahoma, serif';
 let activeDialog;
 

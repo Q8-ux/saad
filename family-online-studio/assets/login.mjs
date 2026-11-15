@@ -1,6 +1,8 @@
 export function createStudioLogin({React,Studio,config}){
  const h=React.createElement;
  const apiBase=String(config.apiBase||''),sessionKey='fo-studio-login-session-v1:'+apiBase;
+ const Workspace=React.lazy(()=>import('./studio-works.mjs').then(({createStudioWorks})=>({default:createStudioWorks({React,Studio,apiBase})})));
+ const accountFrom=value=>value&&/^[a-z0-9][a-z0-9-]{0,31}$/u.test(value.id||'')?{id:value.id,username:typeof value.username==='string'?value.username.slice(0,80):''}:null;
  function forgetSession(){try{localStorage.removeItem(sessionKey);}catch{}try{sessionStorage.removeItem(sessionKey);}catch{}}
  function readSession(){
   let raw;try{raw=localStorage.getItem(sessionKey);}catch{}
@@ -9,24 +11,24 @@ export function createStudioLogin({React,Studio,config}){
    const saved=JSON.parse(raw||'null');
    if(saved&&saved.apiBase===apiBase&&typeof saved.token==='string'&&saved.token&&Number.isFinite(saved.expiresAt)&&saved.expiresAt>Date.now()){
     try{localStorage.setItem(sessionKey,raw);sessionStorage.removeItem(sessionKey);}catch{}
-    return saved.token;
+    return {token:saved.token,account:accountFrom({id:saved.accountId})};
    }
   }catch{}
-  forgetSession();return '';
+  forgetSession();return {token:'',account:null};
  }
- function rememberSession(token,expiresIn){
+ function rememberSession(token,expiresIn,account){
   const seconds=Number(expiresIn),lifetime=Number.isFinite(seconds)&&seconds>0?Math.min(seconds,7200):7200;
-  const saved=JSON.stringify({apiBase,token,expiresAt:Date.now()+lifetime*1000});
+  const saved=JSON.stringify({apiBase,token,...(account?{accountId:account.id}:{}),expiresAt:Date.now()+lifetime*1000});
   try{localStorage.setItem(sessionKey,saved);}catch{try{sessionStorage.setItem(sessionKey,saved);}catch{}}
  }
  return function ProtectedStudio(){
-  const [token,setToken]=React.useState(()=>{const saved=readSession();window.__STUDIO_SESSION__=saved;return saved;}),[busy,setBusy]=React.useState(false),[error,setError]=React.useState('');
+  const [session,setSession]=React.useState(()=>{const saved=readSession();window.__STUDIO_SESSION__=saved.token;return saved;}),[busy,setBusy]=React.useState(false),[error,setError]=React.useState('');
   const [username,setUsername]=React.useState(''),[password,setPassword]=React.useState('');
   const request=React.useRef(null),passwordInput=React.useRef(null);
-  function lock(message=''){
+  function lock(message='',clearStored=true){
    request.current?.abort();request.current=null;
-   forgetSession();
-   window.__STUDIO_SESSION__='';setToken('');setPassword('');setBusy(false);setError(message);
+   if(clearStored)forgetSession();
+   window.__STUDIO_SESSION__='';setSession({token:'',account:null});setPassword('');setBusy(false);setError(message);
   }
   async function signIn(event){
    event.preventDefault();
@@ -42,8 +44,9 @@ export function createStudioLogin({React,Studio,config}){
     const data=await response.json();
     if(!response.ok||typeof data.token!=='string'||!data.token)throw new Error(response.status===401?'اسم المستخدم أو كلمة المرور غير صحيحة.':data.error||'تعذر تسجيل الدخول. حاول مرة أخرى.');
     if(controller.signal.aborted)return;
-    rememberSession(data.token,data.expiresIn);
-    window.__STUDIO_SESSION__=data.token;setToken(data.token);setPassword('');
+    const account=accountFrom(data.account);
+    rememberSession(data.token,data.expiresIn,account);
+    window.__STUDIO_SESSION__=data.token;setSession({token:data.token,account});setPassword('');
    }catch(e){if(!controller.signal.aborted){setError(e.name==='TimeoutError'?'استغرق الاتصال وقتًا أطول. حاول مرة أخرى.':e.message||'تعذر الاتصال. حاول مرة أخرى.');setPassword('');passwordInput.current?.focus();}}
    finally{if(request.current===controller){request.current=null;setBusy(false);}}
   }
@@ -51,15 +54,15 @@ export function createStudioLogin({React,Studio,config}){
    try{localStorage.removeItem('fo-studio-sms-device');}catch{}
    const expired=()=>lock('انتهت جلسة الدخول. أدخل بياناتك للمتابعة.');
    const logout=()=>lock();
-   const storageChanged=event=>{if(event.key===sessionKey&&!event.newValue)lock();};
+   const storageChanged=event=>{if(event.key===sessionKey)lock('',false);};
    window.addEventListener('studio-session-expired',expired);
    window.addEventListener('studio-sign-out',logout);
    window.addEventListener('storage',storageChanged);
    return()=>{window.removeEventListener('studio-session-expired',expired);window.removeEventListener('studio-sign-out',logout);window.removeEventListener('storage',storageChanged);request.current?.abort();request.current=null;};
   },[]);
-  return token?h(Studio,{userKey:'external-private-owner',onSignOut:()=>lock()}):h('main',{className:'external-login',dir:'rtl'},h('section',{'aria-labelledby':'studio-login-title'},
+  return session.token?(session.account?h(React.Suspense,{fallback:h('main',{className:'loading-screen',role:'status'},'جارٍ فتح استيديو الكتابة…')},h(Workspace,{key:session.account.id,token:session.token,account:session.account,onSignOut:()=>lock()})):h(Studio,{userKey:'external-private-owner',onSignOut:()=>lock()})):h('main',{className:'external-login',dir:'rtl'},h('section',{'aria-labelledby':'studio-login-title'},
    h('img',{src:new URL('./studio/pen-mark.webp',import.meta.url).href,width:80,height:80,alt:'',className:'studio-loading-mark'}),
-   h('p',{className:'eyebrow'},'مساحتك، حكايتك.'),h('h1',{id:'studio-login-title'},'استوديو الكتابة'),
+   h('h1',{id:'studio-login-title'},'استيديو الكتابة'),
    h('p',null,'سجّل الدخول لفتح أعمالك ومتابعة الكتابة.'),
    h('form',{onSubmit:signIn,'aria-busy':busy},
     h('label',{htmlFor:'studio-username'},'اسم المستخدم'),

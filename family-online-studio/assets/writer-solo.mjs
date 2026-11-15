@@ -3,8 +3,8 @@ const GUIDE_URL = 'https://github.com/Q8-ux/saad/tree/main/screenplay-drama-engi
 const MAX_DRAFT_BYTES = 24 * 1024 * 1024;
 
 const formats = {
-  series: { label: 'المسلسل', unit: 'الحلقة', template: 'Right-to-Left Screenplay', extension: 'fdx' },
-  film: { label: 'الفيلم', unit: 'الفصل', template: 'Right-to-Left Screenplay', extension: 'fdx' },
+  series: { label: 'المسلسل', unit: 'الحلقة', template: 'Arabic French-Style Screenplay', extension: 'fdx' },
+  film: { label: 'الفيلم', unit: 'الفصل', template: 'Arabic French-Style Screenplay', extension: 'fdx' },
   play: { label: 'المسرحية', unit: 'الفصل', template: 'Stageplay', extension: 'fdx' },
   book: { label: 'الكتاب', unit: 'القسم', template: 'Book', extension: 'txt' },
 };
@@ -212,7 +212,10 @@ export function openWriterSolo({ getWork, activeId, trigger }) {
   title.dir = 'auto';
   const explanation = make('p', `نزّل نسخة للعمل، ثم افتحها في WriterSolo. القالب المناسب لهذا النوع هو `);
   const template = make('bdi', format.template);
-  explanation.append(template, ' .');
+  explanation.append(template, '.');
+  const frenchTemplate = ['series', 'film'].includes(work.kind)
+    ? make('p', 'في نافذة Import، اختر هذا القالب ضمن Document Template وأزل تحديد Import file settings لتطبيقه.')
+    : null;
 
   const scope = make('select');
   const scopes = availableWriterSoloScopes(work, activeId);
@@ -298,7 +301,9 @@ export function openWriterSolo({ getWork, activeId, trigger }) {
   const list = make('ul');
   for (const rule of writingRules(work.kind)) list.append(make('li', rule));
   guide.append(list, link('مسار الكتابة على GitHub', GUIDE_URL));
-  dialog.append(header, title, explanation, scopeLabel, actions, status, review, guide);
+  dialog.append(header, title, explanation);
+  if (frenchTemplate) dialog.append(frenchTemplate);
+  dialog.append(scopeLabel, actions, status, review, guide);
 
   const terminate = () => dialog.close();
   const observer = new env.MutationObserver(() => {

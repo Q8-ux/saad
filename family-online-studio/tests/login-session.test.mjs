@@ -17,6 +17,7 @@ function harness(config={apiBase}){
  function Studio(){}
  const React={
   createElement:(type,props,...children)=>({type,props:props||{},children}),
+  Suspense:Symbol('Suspense'),lazy:loader=>({loader}),
   useState(initial){const i=cursor++;if(!(i in hooks))hooks[i]=typeof initial==='function'?initial():initial;return [hooks[i],v=>{hooks[i]=typeof v==='function'?v(hooks[i]):v;}];},
   useRef(initial){const i=cursor++;if(!(i in hooks))hooks[i]={current:initial};return hooks[i];},
   useEffect(callback){const i=cursor++;if(!(i in hooks)){hooks[i]=true;pending.push(()=>{effects[i]=callback();});}}

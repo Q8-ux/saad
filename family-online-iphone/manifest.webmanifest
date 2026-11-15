@@ -1,7 +1,7 @@
 {
  "id":"/saad/family-online-iphone/",
- "name":"استوديو الكتابة",
- "short_name":"استوديو الكتابة",
+ "name":"استيديو الكتابة",
+ "short_name":"استيديو الكتابة",
  "description":"محرر المشاهد والشخصيات ومساعد السينارست بالعربية",
  "lang":"ar","dir":"rtl",
  "start_url":"./?app=iphone&v=1","scope":"./",
