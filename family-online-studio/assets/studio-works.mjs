@@ -14,6 +14,19 @@ const metricLabels = {
 };
 const number = new Intl.NumberFormat('ar-KW');
 
+export function describeStudioNetworkFailure(failure, creating = false) {
+  if (failure?.name === 'AbortError') return failure;
+  const raw = String(failure?.message || '');
+  const isConnectionError = failure instanceof TypeError || /failed to fetch|load failed|networkerror|network request failed/iu.test(raw);
+  const timedOut = failure?.name === 'TimeoutError';
+  if (!isConnectionError && !timedOut) return failure;
+  return new Error(creating
+    ? 'انقطع الاتصال أثناء طلب الإنشاء. ربما حُفظ المشروع بالفعل؛ اضغط «إعادة الاتصال وتحديث أعمالي» وتحقق من القائمة قبل تكرار الإنشاء.'
+    : timedOut
+      ? 'تأخر رد خادم الأعمال. اضغط «إعادة الاتصال وتحديث أعمالي» للتحقق من حالة المشاريع.'
+      : 'تعذر الاتصال بخادم الأعمال. اضغط «إعادة الاتصال وتحديث أعمالي»؛ إذا استمر العطل فقد تكون البوابة غير متاحة.');
+}
+
 export function createStudioWorks({ React, Studio }) {
   const h = React.createElement;
   return function StudioWorks({ account, requestStudio, onSignOut }) {
@@ -34,16 +47,21 @@ export function createStudioWorks({ React, Studio }) {
     const [importBusy, setImportBusy] = React.useState(false);
     const fileInput = React.useRef(null);
 
+    async function safeStudioRequest(path, options, creating = false) {
+      try { return await requestStudio(path, options); }
+      catch (failure) { throw describeStudioNetworkFailure(failure, creating); }
+    }
+
     async function request(payload, signal) {
-      const response = await requestStudio('/api/projects', {
+      const response = await safeStudioRequest('/api/projects', {
         signal,
         ...(payload ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) } : {}),
-      });
+      }, payload?.action === 'create');
       if (response.status === 401) {
         window.dispatchEvent(new Event('studio-session-expired'));
         throw new Error('انتهت جلسة الدخول.');
       }
-      const result = await response.json();
+      const result = await response.json().catch(() => { throw new Error('استجاب الخادم بصيغة غير صالحة. أعد الاتصال وتحديث أعمالك.'); });
       if (!response.ok) throw new Error(result.error || 'تعذر تحميل الأعمال.');
       return result;
     }
@@ -99,7 +117,7 @@ export function createStudioWorks({ React, Studio }) {
         payload.set('language', 'ar');
         payload.set('names', '');
       } else payload.set('file', file, file.name);
-      const response = await requestStudio(media ? '/api/transcribe' : '/api/import-document', {
+      const response = await safeStudioRequest(media ? '/api/transcribe' : '/api/import-document', {
         method: 'POST', body: payload, signal: AbortSignal.timeout(media ? 120000 : 180000),
       });
       if (response.status === 401) {
@@ -135,14 +153,14 @@ export function createStudioWorks({ React, Studio }) {
 
     async function writeImportedManuscript(projectId, document, format) {
       const path = '/api/manuscript?work=' + encodeURIComponent(projectId);
-      const initialResponse = await requestStudio(path, { cache: 'no-store', signal: AbortSignal.timeout(60000) });
+      const initialResponse = await safeStudioRequest(path, { cache: 'no-store', signal: AbortSignal.timeout(60000) });
       if (initialResponse.status === 401) {
         window.dispatchEvent(new Event('studio-session-expired'));
         throw new Error('انتهت جلسة الدخول.');
       }
       const initial = await initialResponse.json();
       if (!initialResponse.ok || !Number.isSafeInteger(initial.revision)) throw new Error(initial.error || 'تعذر تجهيز مساحة الملف.');
-      const savedResponse = await requestStudio(path, {
+      const savedResponse = await safeStudioRequest(path, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         signal: AbortSignal.timeout(60000),
@@ -178,10 +196,12 @@ export function createStudioWorks({ React, Studio }) {
         resetCreateForm();
         choose(createdId);
       } catch (failure) {
-        if (createdId && importPlan && createMode === 'file') {
-          try { await request({ action: 'delete', id: createdId }, AbortSignal.timeout(30000)); } catch { /* A clear retry message is safer than hiding the original failure. */ }
+        if (createdId) {
+          setError('أنشئ المشروع، لكن لم يُؤكد إكمال الاستيراد أو تحديث القائمة. أعد الاتصال وراجع المشروع قبل إعادة المحاولة.');
+          setNotice('لم يُحذف المشروع تلقائيًا حفاظًا على محتواه إذا كان الحفظ قد اكتمل.');
+        } else {
+          setError(failure.message || 'تعذر إنشاء المشروع. حاول مرة أخرى.');
         }
-        setError(failure.message || 'تعذر إنشاء المشروع. حاول مرة أخرى.');
       } finally { setBusy(false); }
     }
 
@@ -200,7 +220,7 @@ export function createStudioWorks({ React, Studio }) {
         applyCatalogue(result);
         const requested = new URL(window.location.href).searchParams.get('work');
         if (requested) choose(result.projects.some(work => work.id === requested && !work.archivedAt) ? requested : null);
-      }).catch(() => { if (!controller.signal.aborted) setError('تعذر تحميل أعمالك. حاول مرة أخرى.'); });
+      }).catch(failure => { if (!controller.signal.aborted) setError(describeStudioNetworkFailure(failure).message || 'تعذر تحميل أعمالك. حاول مرة أخرى.'); });
       return () => controller.abort();
     }, [requestStudio, reload]);
 
@@ -253,6 +273,10 @@ export function createStudioWorks({ React, Studio }) {
         h('button', { type: 'button', 'aria-pressed': archive, disabled: busy, onClick: () => selectTab('archive') }, 'الأرشيف'),
         !archive && projects && h('button', { type: 'button', className: 'workspace-primary', disabled: busy || importBusy, onClick: toggleNewWork }, newWork ? 'إغلاق' : 'مشروع جديد')),
       error && h('p', { role: 'alert' }, error),
+      error && projects && h('button', {
+        type: 'button', disabled: busy || importBusy,
+        onClick: () => setReload(value => value + 1),
+      }, 'إعادة الاتصال وتحديث أعمالي'),
       notice && h('p', { role: 'status' }, notice),
       !projects && (error
         ? h('button', { type: 'button', onClick: () => setReload(value => value + 1) }, 'إعادة المحاولة')
@@ -263,8 +287,8 @@ export function createStudioWorks({ React, Studio }) {
       } },
       h('fieldset', { className: 'workspace-create-mode', disabled: busy || importBusy },
         h('legend', null, 'كيف تريد بدء المشروع؟'),
-        h('button', { type: 'button', 'aria-pressed': createMode === 'empty', onClick: () => { setCreateMode('empty'); clearImport(); } }, 'مشروع فارغ'),
-        h('button', { type: 'button', 'aria-pressed': createMode === 'file', onClick: () => setCreateMode('file') }, 'البدء من ملف')),
+        h('button', { type: 'button', 'aria-pressed': createMode === 'empty', onClick: () => { setCreateMode('empty'); clearImport(); setError(''); } }, 'مشروع فارغ'),
+        h('button', { type: 'button', 'aria-pressed': createMode === 'file', onClick: () => { setCreateMode('file'); setError(''); } }, 'البدء من ملف')),
       createMode === 'file' && h('section', { className: 'workspace-import', 'aria-label': 'استيراد ملف الكتابة' },
         h('label', { className: 'workspace-import-drop', onDragOver: event => event.preventDefault(), onDrop: event => {
           event.preventDefault();
@@ -286,6 +310,8 @@ export function createStudioWorks({ React, Studio }) {
           importPlan.warnings.map((warning, index) => h('p', { key: index, className: 'workspace-import-warning' }, warning)),
           kind && kind !== importPlan.recommendedKind && h('p', { className: 'workspace-import-note' }, 'سيُعاد توزيع المحتوى وفق نوع المشروع الذي اخترته عند الإنشاء.'),
           h('p', { className: 'workspace-import-note' }, 'يُحلل الملف مؤقتًا، ثم يُحفظ النص المنظّم داخل حسابك فقط؛ لا تظهر مسارات كتابة أو تُطبق إلا عند طلبك.'))),
+      createMode === 'file' && !importPlan && !importBusy && h('p', { role: 'status', className: 'workspace-import-note' },
+        'يلزم رفع ملف وتحليله لتفعيل «إنشاء المشروع واستيراد الملف». لإنشاء مشروع دون ملف اختر «مشروع فارغ» أعلاه.'),
       h('label', null, 'عنوان المشروع', h('input', { name: 'title', dir: 'auto', required: true, maxLength: 250, disabled: busy || importBusy, value: title, onChange: event => setTitle(event.target.value) })),
       h('label', null, 'نوع المشروع', h('select', { name: 'kind', value: kind, required: true, disabled: busy || importBusy, onChange: event => setKind(event.target.value) },
         h('option', { value: '', disabled: true }, 'اختر نوع المشروع'),
