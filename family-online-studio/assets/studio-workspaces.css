@@ -38,10 +38,95 @@
 .studio-workspaces :focus-visible { outline: 2px solid #176683; outline-offset: 2px; }
 .studio-workspaces form { display: grid; gap: .8rem; max-width: 34rem; margin-block: 1.2rem; }
 .studio-workspaces label { display: grid; gap: .3rem; }
+.workspace-create {
+  padding: 1rem;
+  background: #fff;
+  border: 1px solid #dce4e7;
+  border-radius: .85rem;
+  box-shadow: 0 10px 30px rgb(23 49 63 / 6%);
+}
+.workspace-create-mode {
+  display: flex;
+  gap: .55rem;
+  flex-wrap: wrap;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.workspace-create-mode legend { width: 100%; margin-block-end: .3rem; font-weight: 700; }
+.workspace-create-mode button { flex: 1 1 9rem; }
+.workspace-import {
+  display: grid;
+  gap: .75rem;
+  padding: .8rem;
+  border: 1px solid #c8d8dc;
+  border-radius: .75rem;
+  background: #f7faf9;
+}
+.workspace-import-drop {
+  position: relative;
+  min-height: 7rem;
+  place-content: center;
+  text-align: center;
+  padding: 1rem;
+  border: 2px dashed #73939d;
+  border-radius: .7rem;
+  background: #fff;
+  cursor: pointer;
+}
+.workspace-import-drop:hover { border-color: #176683; background: #f2f8f8; }
+.workspace-import-drop strong { color: #174f61; font-size: 1.05rem; }
+.workspace-import-drop span { color: #536773; font-size: .82rem; }
+.workspace-file-input {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  min-inline-size: 0 !important;
+  min-block-size: 0 !important;
+  padding: 0 !important;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0 !important;
+}
+.workspace-import-drop:focus-within { outline: 2px solid #176683; outline-offset: 2px; }
+.workspace-import-summary {
+  display: grid;
+  gap: .65rem;
+  padding: .8rem;
+  background: #fff;
+  border: 1px solid #dce4e7;
+  border-radius: .65rem;
+}
+.workspace-import-heading { display: flex; align-items: center; justify-content: space-between; gap: .7rem; }
+.workspace-import-heading > div { min-width: 0; }
+.workspace-import-heading strong, .workspace-import-heading small { display: block; overflow-wrap: anywhere; }
+.workspace-import-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(6.8rem, 1fr));
+  gap: .5rem;
+  margin: 0;
+}
+.workspace-import-metrics div { padding: .5rem; border-radius: .5rem; background: #edf4f3; }
+.workspace-import-metrics dt { color: #536773; font-size: .76rem; }
+.workspace-import-metrics dd { margin: 0; color: #153f50; font-weight: 700; font-size: 1.1rem; }
+.workspace-import-warning, .workspace-import-note, .workspace-import-review { margin: 0; font-size: .86rem; }
+.workspace-import-warning { color: #7b4b19; }
+.workspace-import-note { color: #47616c; }
+.workspace-import-review { color: #36545e; }
 .studio-workspaces ul { display: grid; list-style: none; margin: 1.2rem 0; padding: 0; gap: .65rem; }
 .studio-workspaces li { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .6rem; padding: .85rem 1rem; background: #fff; border: 1px solid #dce4e7; border-radius: .7rem; }
 .studio-workspaces li strong, .studio-workspaces li small { display: block; overflow-wrap: anywhere; }
 .workspace-empty { margin-top: 1.25rem; }
+
+@media screen and (max-width: 560px) {
+  .studio-workspaces { width: min(100% - 1rem, 51rem); }
+  .workspace-create { padding: .75rem; }
+  .workspace-import { padding: .6rem; }
+  .workspace-import-heading { align-items: start; }
+  .workspace-import-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
 
 @media screen and (max-width: 1100px) {
   .studio:is([data-script-kind='series'], [data-script-kind='film']) :is(.script-paper .script-block, .reader-paper .screenplay-row) {

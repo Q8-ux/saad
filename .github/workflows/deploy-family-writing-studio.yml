@@ -33,7 +33,10 @@ jobs:
         run: |
           node --check family-online-studio/assets/app.mjs
           node --check family-online-studio/assets/login.mjs
+          node --check family-online-studio/assets/studio-works.mjs
+          node --check family-online-studio/assets/manuscript-import.mjs
           node --test family-online-studio/tests/login-session.test.mjs
+          node --test family-online-studio/tests/manuscript-import.test.mjs
           node --check family-online-studio/assets/studio-command-menu.mjs
           node --check family-online-studio/backend/server.mjs
           node --test family-online-studio/tests/sms-auth.test.mjs
