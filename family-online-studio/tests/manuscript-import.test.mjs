@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
+import { describeStudioNetworkFailure } from '../assets/studio-works.mjs';
 import { deflateRawSync } from 'node:zlib';
 import {
   extractDocxText,
@@ -208,4 +209,22 @@ test('HTML and subtitle formats are cleaned before structural analysis', async (
   const srt = await importManuscriptFile({ name: 'scene.srt', type: 'text/plain', size: 200, text: async () => '1\n00:00:01,000 --> 00:00:02,000\nالمشهد 1\nسعد: أهلاً' });
   assert.equal(srt.metrics.dialogues, 1);
   assert.doesNotMatch(srt.sourceText, /00:00/u);
+});
+
+test('new-project workflow translates unavailable gateway errors and avoids ambiguous duplicate creation', async () => {
+  const network = describeStudioNetworkFailure(new TypeError('Failed to fetch'), true);
+  assert.match(network.message, /ربما حُفظ المشروع بالفعل/u);
+  assert.match(network.message, /قبل تكرار الإنشاء/u);
+  const readFailure = describeStudioNetworkFailure(new TypeError('Failed to fetch'));
+  assert.match(readFailure.message, /تعذر الاتصال بخادم الأعمال/u);
+  assert.doesNotMatch(readFailure.message, /Failed to fetch/u);
+  assert.match(describeStudioNetworkFailure(Object.assign(new Error('timeout'), { name: 'TimeoutError' })).message, /تأخر رد خادم الأعمال/u);
+  const regular = new Error('خطأ في التحقق من البيانات');
+  assert.equal(describeStudioNetworkFailure(regular), regular);
+
+  const source = await readFile(new URL('../assets/studio-works.mjs', import.meta.url), 'utf8');
+  assert.match(source, /يلزم رفع ملف وتحليله/u);
+  assert.match(source, /إعادة الاتصال وتحديث أعمالي/u);
+  assert.match(source, /لم يُحذف المشروع تلقائيًا/u);
+  assert.doesNotMatch(source, /action: 'delete', id: createdId/u);
 });
