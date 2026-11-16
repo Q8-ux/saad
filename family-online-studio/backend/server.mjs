@@ -127,7 +127,17 @@ export function createGateway(config,fetchImpl=fetch){
    const upstream=await upstreamRequest(req.method,route,body,type,signedIn.account);
    const ct=upstream.headers.get('content-type')||'';
    if(!ct.includes('application/json'))return send(502,{error:'تعذر الوصول إلى المساحة الخاصة. أعد المحاولة بعد قليل.'});
-   res.writeHead(upstream.status,{...headers,'Content-Type':'application/json; charset=utf-8'});res.end(Buffer.from(await upstream.arrayBuffer()));
+   const responseBody=Buffer.from(await upstream.arrayBuffer());
+   if(credentialsOnly&&signedIn.account&&u.pathname==='/api/projects'){
+    try{
+     const catalogue=JSON.parse(responseBody.toString('utf8'));
+     if(catalogue?.account?.id===signedIn.account.id){
+      catalogue.account={...catalogue.account,username:signedIn.account.username};
+      return send(upstream.status,catalogue);
+     }
+    }catch{/* Preserve the upstream response if it is not a catalogue payload. */}
+   }
+   res.writeHead(upstream.status,{...headers,'Content-Type':'application/json; charset=utf-8'});res.end(responseBody);
   }catch(e){if(res.headersSent)return res.end();if(e instanceof AuthError)return send(e.status,{error:e.message,...(e.retryAfter?{retryAfter:e.retryAfter}:{})});send(e.status===413?413:502,{error:e.status===413?'الملف كبير جداً.':'لم يكتمل الاتصال. مسودتك المحلية لا تزال متاحة.'});}
  });
 }

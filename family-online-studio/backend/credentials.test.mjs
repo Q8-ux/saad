@@ -15,7 +15,9 @@ async function fixture(t,values=env){
   calls.push({url,init});
   const h=init.headers,body=Buffer.from(init.body),hash=createHash('sha256').update(body).digest('hex');
   assert.equal(h['x-studio-signature'],createHmac('sha256',config.bridgeKey).update([h['x-studio-time'],h['x-studio-nonce'],h['x-studio-method'],h['x-studio-route'],h['Content-Type'],hash,'studio-accounts-v1',h['x-studio-account']].join('\n')).digest('hex'));
-  return Response.json({synthetic:true});
+  return Response.json(h['x-studio-route']==='/api/projects'
+   ?{account:{id:h['x-studio-account'],username:'obsolete-upstream-name'},projects:[]}
+   :{synthetic:true});
  });
  server.listen(0,'127.0.0.1');await once(server,'listening');
  t.after(()=>new Promise(resolve=>server.close(resolve)));
@@ -92,6 +94,7 @@ test('the gateway derives the signed account from authentication and ignores req
  for(const {account,token} of [owner,editor]){
   const projects=await f.request('/api/projects',{headers:{Authorization:'Bearer '+token,'x-studio-account':'untrusted-client-header'}});
   assert.equal(projects.status,200);
+  assert.deepEqual((await projects.json()).account,{id:account.id,username:account.username});
   assert.equal(f.calls.at(-1).init.headers['x-studio-account'],account.id);
  }
  const withDuplicate=await fixture(t,{...env,STUDIO_ACCOUNTS_JSON:JSON.stringify([...records,records[0]])});
