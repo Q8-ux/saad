@@ -17,10 +17,14 @@ test('WriterSolo is an internal full-screen workspace without an external redire
     assert.match(javascript, new RegExp(label, 'u'));
   }
   assert.match(javascript, /أدوات تنسيق السيناريو/u);
-  assert.match(app, /writer-workspace-Y6EFKEVU\.mjs\?v=solo-ar-2/u);
+  assert.match(javascript, /خط عريض للفقرة/u);
+  assert.match(javascript, /تصغير حجم النص/u);
+  assert.match(javascript, /تكبير حجم النص/u);
+  assert.match(app, /writer-workspace-Y6EFKEVU\.mjs\?v=solo-ar-3/u);
   assert.match(style, /\.writer-workspace-bar/u);
   assert.match(style, /\.writer-solo-dock/u);
   assert.match(style, /\.writer-solo-panel/u);
+  assert.match(style, /\.writer-solo-mode \.writing-canvas > \.editor-toolbar,[\s\S]*\.writer-solo-mode > \.book-tools[\s\S]*display: none/u);
   assert.match(style, /@media \(max-width: 900px\)/u);
   assert.doesNotMatch(javascript + index, /writersolo\.com/u);
   assert.doesNotMatch(index, /writer-solo\.mjs|writer-solo\.css/u);

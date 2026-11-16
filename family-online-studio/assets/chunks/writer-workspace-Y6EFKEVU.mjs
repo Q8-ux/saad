@@ -167,8 +167,62 @@ function WriterWorkspace({title, status, groups, onExit}) {
     fallback?.click();
   };
 
+  const nativeEditorControl = selector =>
+    rootRef.current?.closest(".studio")?.querySelector(selector);
+
+  const clickNativeEditorControl = selector => {
+    const control = nativeEditorControl(selector);
+    if (control instanceof HTMLButtonElement && !control.disabled) control.click();
+  };
+
+  const adjustEditorZoom = direction => {
+    const select = nativeEditorControl(
+      '.editor-toolbar select[aria-label="حجم النص"], .book-tools select[aria-label="حجم نص الكتاب"]'
+    );
+    if (!(select instanceof HTMLSelectElement)) return;
+    const values = [...select.options]
+      .map(option => Number(option.value || option.textContent))
+      .filter(Number.isFinite);
+    const current = Number(select.value);
+    const currentIndex = Math.max(0, values.indexOf(current));
+    const next = values[Math.min(values.length - 1, Math.max(0, currentIndex + direction))];
+    if (!Number.isFinite(next) || next === current) return;
+    select.value = String(next);
+    select.dispatchEvent(new Event("change", {bubbles: true}));
+  };
+
+  const menuGroups = groups.map(group => {
+    if (group.id === "edit" && !isBook) {
+      return {
+        ...group,
+        actions: group.actions.concat([
+          {
+            id: "bold",
+            label: "خط عريض للفقرة",
+            onSelect: () => clickNativeEditorControl('.editor-toolbar button[aria-label="خط عريض للفقرة"]'),
+          },
+          {
+            id: "italic",
+            label: "خط مائل للفقرة",
+            onSelect: () => clickNativeEditorControl('.editor-toolbar button[aria-label="خط مائل للفقرة"]'),
+          },
+        ]),
+      };
+    }
+    if (group.id === "view") {
+      return {
+        ...group,
+        actions: group.actions.concat([
+          {id: "zoom-out", label: "تصغير حجم النص", onSelect: () => adjustEditorZoom(-1)},
+          {id: "zoom-in", label: "تكبير حجم النص", onSelect: () => adjustEditorZoom(1)},
+        ]),
+      };
+    }
+    return group;
+  });
+
   const runAction = id => {
-    const action = findAction(groups, id);
+    const action = findAction(menuGroups, id);
     if (action) selectAction(action);
   };
 
@@ -207,20 +261,20 @@ function WriterWorkspace({title, status, groups, onExit}) {
   ];
 
   const panelGroups = (() => {
-    if (activeDock === "menu") return groups;
-    if (activeDock === "project") return groups.filter(group => group.id === "file");
-    if (activeDock === "tools") return groups.filter(group => group.id === "tools");
+    if (activeDock === "menu") return menuGroups;
+    if (activeDock === "project") return menuGroups.filter(group => group.id === "file");
+    if (activeDock === "tools") return menuGroups.filter(group => group.id === "tools");
     if (activeDock === "analysis") {
-      return groups.filter(group => group.id === "production").concat([
-        {id: "analysis-tools", label: "تقارير المستند", actions: [findAction(groups, "center")].filter(Boolean)},
+      return menuGroups.filter(group => group.id === "production").concat([
+        {id: "analysis-tools", label: "تقارير المستند", actions: [findAction(menuGroups, "center")].filter(Boolean)},
       ]);
     }
     if (activeDock === "cards") {
-      const actions = ["board", "structure", "french", "versions"].map(id => findAction(groups, id)).filter(Boolean);
+      const actions = ["board", "structure", "french", "versions"].map(id => findAction(menuGroups, id)).filter(Boolean);
       return [{id: "cards-tools", label: "تنظيم القصة", actions}];
     }
     if (activeDock === "comments") {
-      const actions = [findAction(groups, "notes")].filter(Boolean);
+      const actions = [findAction(menuGroups, "notes")].filter(Boolean);
       return [{id: "comments-tools", label: "ملاحظات المشروع", actions}];
     }
     return [];
@@ -249,7 +303,7 @@ function WriterWorkspace({title, status, groups, onExit}) {
           jsx("nav", {
             className: "writer-workspace-menus",
             "aria-label": "قوائم السولو العربي",
-            children: groups.map(group => jsxs("div", {
+            children: menuGroups.map(group => jsxs("div", {
               className: "writer-workspace-menu",
               children: [
                 jsx("button", {
@@ -344,7 +398,7 @@ function WriterWorkspace({title, status, groups, onExit}) {
               className: "writer-panel-help",
               children: [
                 jsx("h3", {children: "الكتابة داخل مشروعك"}),
-                jsx("p", {children: "استخدم شريط التنسيق لتبديل نوع الفقرة، وافتح القوائم للحفظ والاستيراد والتصدير وتنظيم المشاهد."}),
+                jsx("p", {children: "استخدم القائمة الأفقية لنوع المحتوى، وافتح «تحرير» و«عرض» للتنسيق والحجم، و«ملف» للحفظ والتصدير."}),
                 jsx("button", {type: "button", className: "writer-panel-primary", onClick: openHelp, children: "الاختصارات ودليل الاستخدام"}),
               ],
             }) : activeDock === "account" ? jsxs("section", {
