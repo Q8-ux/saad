@@ -15,7 +15,8 @@
 .external-login input{box-sizing:border-box;width:100%;min-height:52px;padding:12px 14px;border:1px solid #92a79f;border-radius:10px;background:#fff;color:#172b3a;font:400 19px/1.5 system-ui,sans-serif;text-align:left}
 .external-login input:focus-visible{outline:3px solid #087f7c;outline-offset:3px}
 .external-login .remember-login{display:flex;align-items:center;gap:10px;margin-top:14px!important;font-size:17px;font-weight:600;cursor:pointer}
-.external-login .remember-login input{width:22px;min-height:22px;height:22px;margin:0;accent-color:#216e67;flex:0 0 auto}
+.external-login .show-password{display:flex;align-items:center;gap:10px;margin-top:4px!important;font-size:16px;font-weight:600;cursor:pointer;color:#435b54}
+.external-login .remember-login input,.external-login .show-password input{width:22px;min-height:22px;height:22px;margin:0;accent-color:#216e67;flex:0 0 auto}
 .external-login .remember-login-note{margin:0;color:#566760;font-size:15px;line-height:1.8}
 .external-login form label:not(:first-child){margin-top:12px}
 .external-login form .primary{width:100%;margin-top:14px;border:0;cursor:pointer;font-family:inherit}

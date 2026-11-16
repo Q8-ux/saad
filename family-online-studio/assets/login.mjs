@@ -45,7 +45,7 @@ export function createStudioLogin({React,Studio,config}){
  }
  return function ProtectedStudio(){
   const [session,setSession]=React.useState(()=>activate(readSession())),[busy,setBusy]=React.useState(false),[error,setError]=React.useState('');
-  const [username,setUsername]=React.useState(''),[password,setPassword]=React.useState(''),[remember,setRemember]=React.useState(false);
+  const [username,setUsername]=React.useState(''),[password,setPassword]=React.useState(''),[remember,setRemember]=React.useState(false),[showPassword,setShowPassword]=React.useState(false);
   const request=React.useRef(null),passwordInput=React.useRef(null);
   function lock(message=''){
    request.current?.abort();request.current=null;
@@ -54,6 +54,7 @@ export function createStudioLogin({React,Studio,config}){
   }
   function signOut(){
    if(session?.proof)void studioRequest(apiBase,session,'/api/auth/logout',{method:'POST',signal:AbortSignal.timeout(15_000)}).catch(()=>{});
+   setUsername('');setShowPassword(false);
    lock();
   }
   async function signIn(event){
@@ -86,7 +87,7 @@ export function createStudioLogin({React,Studio,config}){
   React.useEffect(()=>{
    try{localStorage.removeItem('fo-studio-sms-device');}catch{}
    const expired=()=>lock('انتهت جلسة الدخول. أدخل بياناتك للمتابعة.');
-   const logout=()=>lock();
+   const logout=()=>{setUsername('');setShowPassword(false);lock();};
    window.addEventListener('studio-session-expired',expired);
    window.addEventListener('studio-sign-out',logout);
    return()=>{window.removeEventListener('studio-session-expired',expired);window.removeEventListener('studio-sign-out',logout);request.current?.abort();request.current=null;};
@@ -99,11 +100,14 @@ export function createStudioLogin({React,Studio,config}){
     h('label',{htmlFor:'studio-username'},'اسم المستخدم'),
     h('input',{id:'studio-username',name:'username',type:'text',dir:'ltr',autoComplete:'username',autoCapitalize:'none',spellCheck:false,maxLength:80,required:true,value:username,disabled:busy,onChange:e=>setUsername(e.target.value)}),
     h('label',{htmlFor:'studio-password'},'كلمة المرور'),
-    h('input',{id:'studio-password',name:'password',type:'password',dir:'ltr',autoComplete:'current-password',maxLength:160,required:true,value:password,ref:passwordInput,disabled:busy,onChange:e=>setPassword(e.target.value)}),
+    h('input',{id:'studio-password',name:'password',type:showPassword?'text':'password',dir:'ltr',autoComplete:'current-password',maxLength:160,required:true,value:password,ref:passwordInput,disabled:busy,onChange:e=>setPassword(e.target.value)}),
+    h('label',{className:'show-password',htmlFor:'studio-show-password'},
+     h('input',{id:'studio-show-password',name:'show-password',type:'checkbox',checked:showPassword,disabled:busy,onChange:e=>setShowPassword(Boolean(e.target.checked))}),
+     h('span',null,'إظهار كلمة المرور')),
     h('label',{className:'remember-login',htmlFor:'studio-remember'},
      h('input',{id:'studio-remember',name:'remember',type:'checkbox',checked:remember,disabled:busy,onChange:e=>setRemember(Boolean(e.target.checked))}),
      h('span',null,'حفظ تسجيل الدخول على هذا الجهاز')),
-    h('p',{className:'remember-login-note'},'استخدم هذا الخيار على جهازك الخاص فقط.'),
+    h('p',{className:'remember-login-note'},'بعد أول دخول ناجح لن تحتاج إلى كتابة كلمة المرور كل مرة على هذا الجهاز الخاص.'),
     error&&h('p',{id:'studio-login-error',role:'alert',className:'error-text'},error),
     h('button',{type:'submit',className:'primary',disabled:busy},busy?'جارٍ التحقق…':'تسجيل الدخول'))));
  };

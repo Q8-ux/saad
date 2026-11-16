@@ -140,6 +140,8 @@ test('sign-out revokes the account session and clears the current tab',async()=>
  assert.equal(h.tree.type,'main');
  assert.equal(tab.getItem(key),null);
  assert.equal(window.__STUDIO_SESSION__,'');
+ assert.equal(h.nodes().find(n=>n.type==='input'&&n.props.name==='username').props.value,'');
+ assert.equal(h.nodes().find(n=>n.type==='input'&&n.props.name==='show-password').props.checked,false);
 });
 test('sign-out clears a remembered session from local storage',async()=>{
  const local=storage(),tab=browser(local),h=harness();
