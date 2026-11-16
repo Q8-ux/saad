@@ -7,6 +7,8 @@ on:
     paths:
       - family-online-studio/backend/Dockerfile
       - family-online-studio/backend/server.mjs
+      - family-online-studio/backend/document-import.mjs
+      - family-online-studio/backend/document-import.test.mjs
       - family-online-studio/backend/credentials.mjs
       - family-online-studio/backend/sms-auth.mjs
       - .github/workflows/publish-family-writing-gateway-image.yml
@@ -34,6 +36,7 @@ jobs:
         run: |
           node --test \
             family-online-studio/backend/credentials.test.mjs \
+            family-online-studio/backend/document-import.test.mjs \
             family-online-studio/backend/server.test.mjs
 
       - name: Set up Docker Buildx

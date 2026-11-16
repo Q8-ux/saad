@@ -8,13 +8,14 @@ test('private gateway authenticates sessions, restricts routes and signs binary 
  const origin='https://writer.example',code='synthetic-private-entry-code-123456';
  const config={allowedOrigin:origin,upstreamOrigin:'https://private.example',siteToken:'synthetic-site-token',bridgeKey:'synthetic-signing-key',accessHash:hash(code),sessionSecret:'synthetic-session-key'};
  let calls=0,upstreamHtml=false;
+ let imported;
  const server=createGateway(config,async(url,init)=>{
   calls++;assert.equal(String(url),'https://private.example/api/external-studio');
   const h=init.headers,body=Buffer.from(init.body);assert.equal(h['OAI-Sites-Authorization'],'Bearer synthetic-site-token');
   assert.equal(h['x-studio-signature'],createHmac('sha256',config.bridgeKey).update([h['x-studio-time'],h['x-studio-nonce'],h['x-studio-method'],h['x-studio-route'],h['Content-Type'],hash(body)].join('\n')).digest('hex'));
   assert.ok(!('oai-authenticated-user-id' in h));assert.ok(!('cookie' in h));
   return upstreamHtml?new Response('<html>private wall</html>',{headers:{'Content-Type':'text/html'}}):Response.json({ok:true,synthetic:true});
- });
+ },async input=>{imported=input;return{text:'المشهد 1\nسعد: مرحبًا',format:'PDF',usedOcr:true,warnings:['راجع النص']};});
  server.listen(0,'127.0.0.1');await once(server,'listening');const base='http://127.0.0.1:'+server.address().port;
  const send=(p,options={})=>fetch(base+p,{...options,headers:{Origin:origin,...options.headers}});
  try{
@@ -26,6 +27,9 @@ test('private gateway authenticates sessions, restricts routes and signs binary 
   const login=await send('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code})});assert.equal(login.status,200);const {token}=await login.json();
   assert.ok(token&&!token.includes(code));const headers={Authorization:'Bearer '+token,'oai-authenticated-user-id':'forged'};
   assert.equal((await send('/api/manuscript',{headers})).status,200);assert.equal(calls,1);
+  const document=new FormData();document.set('file',new Blob([Buffer.from('%PDF-1.7 synthetic')],{type:'application/pdf'}),'script.pdf');
+  const importedResponse=await send('/api/import-document',{method:'POST',headers,body:document});assert.equal(importedResponse.status,200);
+  const importedJson=await importedResponse.json();assert.equal(importedJson.usedOcr,true);assert.equal(importedJson.text,'المشهد 1\nسعد: مرحبًا');assert.equal(imported.filename,'script.pdf');assert.equal(calls,1);
   assert.equal((await send('/api/unknown',{headers})).status,404);assert.equal(calls,1);
   const binary=new FormData();binary.set('audio',new Blob([new Uint8Array([0,1,2,200,255])],{type:'audio/webm'}),'synthetic.webm');
   assert.equal((await send('/api/transcribe',{method:'POST',headers,body:binary})).status,200);assert.equal(calls,2);

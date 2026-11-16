@@ -1,4 +1,4 @@
-import { importManuscriptFile, prepareImportedDocument, summarizeImportedDocument } from './manuscript-import.mjs?v=6ddd1b7fb058';
+import { importManuscriptFile, prepareImportedDocument, summarizeImportedDocument } from './manuscript-import.mjs?v=6413959c25b5';
 
 const kinds = {
   film: 'فيلم',
@@ -92,13 +92,37 @@ export function createStudioWorks({ React, Studio }) {
       if (fileInput.current) fileInput.current.value = '';
     }
 
+    async function extractUploadedFile(file, { media = false } = {}) {
+      const payload = new FormData();
+      if (media) {
+        payload.set('audio', file, file.name);
+        payload.set('language', 'ar');
+        payload.set('names', '');
+      } else payload.set('file', file, file.name);
+      const response = await requestStudio(media ? '/api/transcribe' : '/api/import-document', {
+        method: 'POST', body: payload, signal: AbortSignal.timeout(media ? 120000 : 180000),
+      });
+      if (response.status === 401) {
+        window.dispatchEvent(new Event('studio-session-expired'));
+        throw new Error('انتهت جلسة الدخول.');
+      }
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'تعذر تحليل الملف.');
+      if (typeof result.text !== 'string' || !result.text.trim()) throw new Error('لم يُعثر على نص قابل للقراءة داخل الملف.');
+      return {
+        text: result.text,
+        format: media ? 'تفريغ تسجيل صوتي' : (result.format || 'نص مستخرج'),
+        warnings: media ? ['استُخرج النص من التسجيل آليًا؛ راجع أسماء الشخصيات وعلامات الحوار قبل الحفظ.'] : result.warnings,
+      };
+    }
+
     async function inspectFile(file) {
       if (!file) return;
       setImportBusy(true);
       setError('');
       setNotice('');
       try {
-        const plan = await importManuscriptFile(file, { preferredKind: kind });
+        const plan = await importManuscriptFile(file, { preferredKind: kind, extractFile: extractUploadedFile });
         setImportPlan(plan);
         setTitle(plan.title);
         setKind(plan.recommendedKind);
@@ -247,9 +271,9 @@ export function createStudioWorks({ React, Studio }) {
           if (!busy && !importBusy) void inspectFile(event.dataTransfer.files?.[0]);
         } },
           h('strong', null, importBusy ? 'جارٍ قراءة الملف وتوزيعه…' : importPlan ? 'اختيار ملف آخر' : 'رفع ملف الكتابة'),
-          h('span', null, 'Word DOCX، Final Draft FDX، Fountain، TXT، Markdown، أو نسخة JSON'),
+          h('span', null, 'PDF وWord وملفات الكتب والعروض والجداول والصور والتسجيلات والنصوص'),
           h('input', { ref: fileInput, className: 'workspace-file-input', type: 'file',
-            accept: '.docx,.fdx,.fountain,.txt,.md,.markdown,.json', disabled: busy || importBusy,
+            accept: '.pdf,.doc,.docx,.odt,.rtf,.wps,.epub,.pages,.ppt,.pptx,.odp,.key,.xls,.xlsx,.ods,.numbers,.fdx,.fountain,.txt,.md,.markdown,.html,.htm,.xml,.csv,.tsv,.srt,.vtt,.json,.png,.jpg,.jpeg,.webp,.bmp,.tif,.tiff,.heic,.mp3,.mp4,.m4a,.wav,.webm,.ogg,.mpeg,.mpga,application/pdf,text/*,image/*,audio/*,video/mp4', disabled: busy || importBusy,
             onChange: event => void inspectFile(event.target.files?.[0]) })),
         importPlan && h('article', { className: 'workspace-import-summary' },
           h('div', { className: 'workspace-import-heading' },
@@ -261,7 +285,7 @@ export function createStudioWorks({ React, Studio }) {
             h('div', { key }, h('dt', null, metricLabels[key] || key), h('dd', null, number.format(value))))),
           importPlan.warnings.map((warning, index) => h('p', { key: index, className: 'workspace-import-warning' }, warning)),
           kind && kind !== importPlan.recommendedKind && h('p', { className: 'workspace-import-note' }, 'سيُعاد توزيع المحتوى وفق نوع المشروع الذي اخترته عند الإنشاء.'),
-          h('p', { className: 'workspace-import-note' }, 'الملف نفسه لا يُرفع إلى مساحة مشتركة؛ يُحفظ النص المنظّم داخل حسابك فقط.'))),
+          h('p', { className: 'workspace-import-note' }, 'يُحلل الملف مؤقتًا، ثم يُحفظ النص المنظّم داخل حسابك فقط؛ لا تظهر مسارات كتابة أو تُطبق إلا عند طلبك.'))),
       h('label', null, 'عنوان المشروع', h('input', { name: 'title', dir: 'auto', required: true, maxLength: 250, disabled: busy || importBusy, value: title, onChange: event => setTitle(event.target.value) })),
       h('label', null, 'نوع المشروع', h('select', { name: 'kind', value: kind, required: true, disabled: busy || importBusy, onChange: event => setKind(event.target.value) },
         h('option', { value: '', disabled: true }, 'اختر نوع المشروع'),

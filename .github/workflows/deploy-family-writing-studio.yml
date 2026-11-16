@@ -39,6 +39,8 @@ jobs:
           node --test family-online-studio/tests/manuscript-import.test.mjs
           node --check family-online-studio/assets/studio-command-menu.mjs
           node --check family-online-studio/backend/server.mjs
+          node --check family-online-studio/backend/document-import.mjs
+          node --test family-online-studio/backend/document-import.test.mjs
           node --test family-online-studio/tests/sms-auth.test.mjs
           node --test family-online-studio/tests/motion.test.mjs
           node --test family-online-studio/tests/video-use.test.mjs

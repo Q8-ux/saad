@@ -166,7 +166,46 @@ test('new-project interface exposes review-first file import and account-scoped 
   assert.match(works, /prepareImportedDocument/u);
   assert.match(works, /\/api\/manuscript\?work=/u);
   assert.match(works, /النص المنظّم داخل حسابك فقط/u);
+  assert.match(works, /\.pdf/u);
+  assert.match(works, /\/api\/import-document/u);
+  assert.match(works, /\/api\/transcribe/u);
+  assert.doesNotMatch(works, /المفاصل الخمسة عشر|الفصول الأربعة/u);
   assert.doesNotMatch(works, /localStorage|sessionStorage/u);
   assert.match(styles, /\.workspace-import-summary/u);
   assert.match(styles, /\.workspace-file-input/u);
+});
+
+test('PDF and image files use the authenticated extractor then enter the same distribution engine', async () => {
+  const file = { name: 'episode.pdf', type: 'application/pdf', size: 4500 };
+  let received;
+  const plan = await importManuscriptFile(file, { extractFile: async (value, details) => {
+    received = { value, details };
+    return { text: 'الحلقة 1\nالمشهد 1 - داخلي - بيت - ليل\nسعد: وصلت', format: 'PDF', warnings: ['مراجعة OCR'] };
+  } });
+  assert.equal(received.value, file);
+  assert.equal(received.details.media, false);
+  assert.equal(plan.recommendedKind, 'series');
+  assert.equal(plan.metrics.scenes, 1);
+  assert.equal(plan.metrics.dialogues, 1);
+  assert.ok(plan.warnings.includes('مراجعة OCR'));
+});
+
+test('audio files are transcribed through the supplied extractor without showing route choices', async () => {
+  let media = false;
+  const plan = await importManuscriptFile({ name: 'idea.m4a', type: 'audio/mp4', size: 3000 }, { extractFile: async (_file, details) => {
+    media = details.media;
+    return { text: 'المشهد 1\nنورة: هذه فكرة مسجلة', format: 'تفريغ تسجيل صوتي' };
+  } });
+  assert.equal(media, true);
+  assert.equal(plan.metrics.dialogues, 1);
+});
+
+test('HTML and subtitle formats are cleaned before structural analysis', async () => {
+  const html = await importManuscriptFile({ name: 'draft.html', type: 'text/html', size: 200, text: async () => '<h1>الفصل الأول</h1><p>فقرة أولى</p>' });
+  assert.equal(html.recommendedKind, 'book-ar');
+  assert.match(html.sourceText, /فقرة أولى/u);
+  assert.doesNotMatch(html.sourceText, /<p>/u);
+  const srt = await importManuscriptFile({ name: 'scene.srt', type: 'text/plain', size: 200, text: async () => '1\n00:00:01,000 --> 00:00:02,000\nالمشهد 1\nسعد: أهلاً' });
+  assert.equal(srt.metrics.dialogues, 1);
+  assert.doesNotMatch(srt.sourceText, /00:00/u);
 });
