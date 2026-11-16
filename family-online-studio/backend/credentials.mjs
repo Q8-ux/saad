@@ -4,7 +4,9 @@ import {promisify} from 'node:util';
 const scrypt=promisify(derive);
 const encoded=/^scrypt\$[a-f0-9]{32}\$[a-f0-9]{128}$/;
 export const validPasswordHash=value=>typeof value==='string'&&encoded.test(value);
-export const usernameKey=value=>typeof value==='string'&&value.length<=80?value.trim().toLowerCase():'';
+// Usernames are case-insensitive and an optional dot is only a visual separator.
+// The stored username remains unchanged for display and account ownership.
+export const usernameKey=value=>typeof value==='string'&&value.length<=80?value.trim().toLowerCase().replaceAll('.',''):'';
 
 export function loadAccounts(env){
  if(env.STUDIO_ACCOUNTS_JSON===undefined){
