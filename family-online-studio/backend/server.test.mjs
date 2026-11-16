@@ -60,18 +60,22 @@ test('password-only mode accepts a short configured secret and never contacts SM
 test('legacy password mode verifies through the signed private server and revokes old sessions',async()=>{
  const origin='https://writer.example',password='7432',key='synthetic-session-key';
  const config={authMode:'password',passwordVerification:'upstream',allowedOrigin:origin,upstreamOrigin:'https://private.example',siteToken:'synthetic-token',bridgeKey:'synthetic-bridge-key',sessionSecret:key};
- let unavailable=false;
+ let unavailable=false,approvedExpiresIn;
  const server=createGateway(config,async(url,init)=>{
   assert.equal(String(url),'https://private.example/api/external-studio');assert.equal(init.headers['x-studio-route'],'/api/password-login');
   const input=JSON.parse(Buffer.from(init.body).toString());
   if(unavailable)return Response.json({error:'temporarily unavailable'},{status:503});
-  return input.password===password?Response.json({verified:true}):Response.json({error:'incorrect'},{status:401});
+  return input.password===password?Response.json({verified:true,...(approvedExpiresIn===undefined?{}:{expiresIn:approvedExpiresIn})}):Response.json({error:'incorrect'},{status:401});
  });
  server.listen(0,'127.0.0.1');await once(server,'listening');const base='http://127.0.0.1:'+server.address().port;
- const login=code=>fetch(base+'/api/auth',{method:'POST',headers:{Origin:origin,'Content-Type':'application/json'},body:JSON.stringify({code})});
+ const login=(code,remember)=>fetch(base+'/api/auth',{method:'POST',headers:{Origin:origin,'Content-Type':'application/json'},body:JSON.stringify({code,...(remember===undefined?{}:{remember})})});
  try{
   assert.equal((await fetch(base+'/health')).status,200);
-  const correct=await login(password);assert.equal(correct.status,200);assert.ok((await correct.json()).token);
+  const correct=await login(password);assert.equal(correct.status,200);const standard=await correct.json();assert.ok(standard.token);assert.equal(standard.expiresIn,7200);
+  approvedExpiresIn=2592000;const remembered=await login(password,true);assert.equal(remembered.status,200);const rememberedData=await remembered.json();assert.equal(rememberedData.expiresIn,2592000);
+  const rememberedPayload=JSON.parse(Buffer.from(rememberedData.token.split('.')[0],'base64url').toString());assert.ok(rememberedPayload.exp-Math.floor(Date.now()/1000)>=2591998);
+  approvedExpiresIn=999999999;const clamped=await login(password,true);assert.equal((await clamped.json()).expiresIn,7200);
+  assert.equal((await login(password,'yes')).status,400);
   assert.equal((await login('wrong')).status,401);
   unavailable=true;const failed=await login(password);assert.equal(failed.status,503);assert.equal((await failed.json()).token,undefined);
   const body=Buffer.from(JSON.stringify({exp:Math.floor(Date.now()/1000)+7200,nonce:'old-synthetic-session'})).toString('base64url');

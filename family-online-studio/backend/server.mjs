@@ -8,6 +8,10 @@ const hash=value=>createHash('sha256').update(value).digest('hex');
 const same=(a,b)=>{const x=Buffer.from(a||''),y=Buffer.from(b||'');return x.length===y.length&&timingSafeEqual(x,y);};
 const routes=new Map([['/api/projects',['GET','POST']],['/api/manuscript',['GET','PUT']],['/api/versions',['GET','POST']],['/api/scenarist',['GET','POST']],['/api/scenarist/refine',['POST']],['/api/transcribe',['POST']]]);
 const maxBytes=9_000_000;
+const standardSessionSeconds=7200;
+const rememberedSessionSeconds=30*24*60*60;
+const sessionSeconds=remember=>remember===true?rememberedSessionSeconds:standardSessionSeconds;
+const validRemember=input=>input?.remember===undefined||typeof input.remember==='boolean';
 export function createGateway(config,fetchImpl=fetch){
  const {allowedOrigin,upstreamOrigin,siteToken,bridgeKey,accessHash,sessionSecret}=config;
  const credentialsOnly=config.authMode==='credentials';
@@ -25,7 +29,11 @@ export function createGateway(config,fetchImpl=fetch){
  if(ready&&(!/^https:\/\//.test(allowedOrigin)||!/^https:\/\//.test(upstreamOrigin)))throw new Error('HTTPS configuration required');
  const pacing=new Map();
  function limited(key,limit){const now=Date.now(),old=pacing.get(key);if(pacing.size>2000){for(const [id,v]of pacing)if(v.exp<now)pacing.delete(id);if(pacing.size>2000)return true;}if(!old||old.exp<now){pacing.set(key,{n:1,exp:now+60000});return false;}old.n++;return old.n>limit;}
- function session(account){const data=Buffer.from(JSON.stringify({exp:Math.floor(Date.now()/1000)+7200,nonce:randomUUID(),sub:account?.id})).toString('base64url');return data+'.'+createHmac('sha256',sessionSecret).update((account?accountTag(account):legacyTag)+data).digest('base64url');}
+ function session(account,ttlSeconds=standardSessionSeconds){
+  const ttl=ttlSeconds===rememberedSessionSeconds?rememberedSessionSeconds:standardSessionSeconds;
+  const data=Buffer.from(JSON.stringify({exp:Math.floor(Date.now()/1000)+ttl,nonce:randomUUID(),sub:account?.id})).toString('base64url');
+  return data+'.'+createHmac('sha256',sessionSecret).update((account?accountTag(account):legacyTag)+data).digest('base64url');
+ }
  function authenticated(value){
   const [data,sig,...extra]=(value||'').replace(/^Bearer /,'').split('.');
   if(!data||!sig||data.length>1024||extra.length)return null;
@@ -89,18 +97,27 @@ export function createGateway(config,fetchImpl=fetch){
      const account=accountsByName.get(username);
      const passwordMatches=await verifyPassword(password,account?.passwordHash??accounts[0].passwordHash);
      if(!account||!passwordMatches)return send(401,{error:'اسم المستخدم أو كلمة المرور غير صحيحة.'});
-     return send(200,{token:session(account),expiresIn:7200,account:{id:account.id,username:account.username}});
+     if(!validRemember(input))return send(400,{error:'طلب غير صالح.'});
+     const expiresIn=sessionSeconds(input.remember);
+     return send(200,{token:session(account,expiresIn),expiresIn,account:{id:account.id,username:account.username}});
     }
-    if(openAccess)return send(200,{token:session(),expiresIn:7200});
-    let code;try{code=JSON.parse(raw).code;}catch{return send(400,{error:'طلب غير صالح.'});}
+    let input;try{input=JSON.parse(raw);}catch{return send(400,{error:'طلب غير صالح.'});}
+    if(!input||Array.isArray(input)||typeof input!=='object'||!validRemember(input))return send(400,{error:'طلب غير صالح.'});
+    const requestedExpiresIn=sessionSeconds(input.remember);
+    if(openAccess)return send(200,{token:session(undefined,requestedExpiresIn),expiresIn:requestedExpiresIn});
+    let code=input.code;
     if(passwordOnly&&typeof code==='string')code=code.trim().replace(/[٠-٩]/g,c=>String(c.charCodeAt(0)-1632)).replace(/[۰-۹]/g,c=>String(c.charCodeAt(0)-1776));
     if(typeof code!=='string'||code.length<(passwordOnly?4:20)||code.length>160)return send(401,{error:passwordOnly?'كلمة المرور غير صحيحة.':'رمز الدخول غير صحيح.'});
     if(remotePassword){
      const verified=await upstreamRequest('POST','/api/password-login',Buffer.from(JSON.stringify({password:code})),'application/json');
      if(verified.status===401)return send(401,{error:'كلمة المرور غير صحيحة.'});
-     if(!verified.ok||!verified.headers.get('content-type')?.includes('application/json')||(await verified.json()).verified!==true)return send(503,{error:'تعذر إكمال الدخول. حاول مرة أخرى.'});
+     if(!verified.ok||!verified.headers.get('content-type')?.includes('application/json'))return send(503,{error:'تعذر إكمال الدخول. حاول مرة أخرى.'});
+     const approval=await verified.json();
+     if(approval.verified!==true)return send(503,{error:'تعذر إكمال الدخول. حاول مرة أخرى.'});
+     const approvedExpiresIn=approval.expiresIn===rememberedSessionSeconds?rememberedSessionSeconds:standardSessionSeconds;
+     return send(200,{token:session(undefined,approvedExpiresIn),expiresIn:approvedExpiresIn});
     }else if(!same(hash(code),accessHash))return send(401,{error:passwordOnly?'كلمة المرور غير صحيحة.':'رمز الدخول غير صحيح.'});
-    return send(200,{token:session(),expiresIn:7200});
+    return send(200,{token:session(undefined,requestedExpiresIn),expiresIn:requestedExpiresIn});
    }
    const signedIn=authenticated(req.headers.authorization);
    if(!signedIn)return send(401,{error:credentialsOnly?'أدخل اسم المستخدم وكلمة المرور للدخول إلى الاستوديو.':openAccess?'جارٍ تجديد الاتصال بالاستوديو.':passwordOnly?'أدخل كلمة المرور للدخول إلى الاستوديو.':'انتهت جلسة الدخول. تحقّق من هاتفك للدخول مجدداً.'});

@@ -7,6 +7,7 @@ import {createGateway,fromEnvironment} from './server.mjs';
 
 const origin='https://writer.example',username='synthetic-writer',password='synthetic-test-password';
 const passwordHash=await hashPassword(password);
+const tokenExpiry=token=>JSON.parse(Buffer.from(token.split('.')[0],'base64url').toString()).exp;
 const env={STUDIO_ALLOWED_ORIGIN:origin,STUDIO_UPSTREAM_ORIGIN:'https://private.example',STUDIO_SITE_TOKEN:'synthetic-token',STUDIO_BRIDGE_KEY:'synthetic-bridge-key',STUDIO_SESSION_SECRET:'synthetic-session-key',STUDIO_USERNAME:username,STUDIO_PASSWORD_HASH:passwordHash};
 async function fixture(t,values=env){
  const config=fromEnvironment(values),calls=[];
@@ -42,12 +43,18 @@ test('production requires both credentials before any signed manuscript request'
  assert.equal(f.calls.length,0);
  const signedIn=await f.login({username,password});assert.equal(signedIn.status,200);
  const {token,expiresIn}=await signedIn.json();assert.ok(token);assert.equal(expiresIn,7200);
+ const normalRemaining=tokenExpiry(token)-Math.floor(Date.now()/1000);assert.ok(normalRemaining>=7198&&normalRemaining<=7200);
  assert.ok(!token.includes(password));
  assert.equal((await f.request('/api/manuscript?work=barcode',{headers:{Authorization:'Bearer '+token}})).status,200);
  assert.equal(f.calls.length,1);assert.equal(f.calls[0].init.headers['x-studio-route'],'/api/manuscript?work=barcode');
  assert.ok(!Buffer.from(f.calls[0].init.body).includes(Buffer.from(password)));
  assert.equal((await f.request('/api/manuscript',{headers:{Authorization:'Bearer '+token+'x'}})).status,401);
  const forbidden=await f.request('/api/manuscript',{headers:{Origin:'https://other.example',Authorization:'Bearer '+token}});assert.equal(forbidden.status,403);
+ const rememberedResponse=await f.login({username,password,remember:true});assert.equal(rememberedResponse.status,200);
+ const remembered=await rememberedResponse.json();assert.equal(remembered.expiresIn,2592000);
+ const rememberedRemaining=tokenExpiry(remembered.token)-Math.floor(Date.now()/1000);assert.ok(rememberedRemaining>=2591998&&rememberedRemaining<=2592000);
+ const explicitDefault=await (await f.login({username,password,remember:false})).json();assert.equal(explicitDefault.expiresIn,7200);
+ assert.equal((await f.login({username,password,remember:'yes'})).status,400);
 });
 test('old automatic/password sessions and expired sessions cannot access protected data',async t=>{
  const f=await fixture(t),expiry=Math.floor(Date.now()/1000)+7200;

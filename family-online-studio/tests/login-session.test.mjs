@@ -32,14 +32,15 @@ function harness(config={apiBase}){
 }
 
 const profile={id:'writer-one',username:'synthetic-user'};
-async function fillAndSubmit(h){
+async function fillAndSubmit(h,{remember=false}={}){
  h.nodes().find(n=>n.type==='input'&&n.props.name==='username').props.onChange({target:{value:'synthetic-user'}});
  h.nodes().find(n=>n.type==='input'&&n.props.name==='password').props.onChange({target:{value:'synthetic-password-for-test'}});
+ if(remember)h.nodes().find(n=>n.type==='input'&&n.props.name==='remember').props.onChange({target:{checked:true}});
  h.render();await h.nodes().find(n=>n.type==='form').props.onSubmit({preventDefault(){}});h.render();
 }
-async function directLogin(h,expiresIn=7200){
+async function directLogin(h,expiresIn=7200,options){
  globalThis.fetch=async()=>Response.json({token:'synthetic-test-session',account:profile,expiresIn});
- await fillAndSubmit(h);
+ await fillAndSubmit(h,options);
 }
 const workspace=h=>h.tree.children[0];
 
@@ -63,6 +64,30 @@ test('persists only scoped session data in the current tab',async()=>{
  assert.ok(!tab.getItem(key).includes('synthetic-password-for-test'));
  assert.ok(!tab.getItem(key).includes('synthetic-user'));
 });
+test('remember-login stores only the scoped session in local storage for up to thirty days',async()=>{
+ const local=storage(),tab=browser(local),h=harness();let input;
+ globalThis.fetch=async(_url,options)=>{
+  input=JSON.parse(options.body);
+  return Response.json({token:'remembered-test-session',account:profile,expiresIn:45*24*60*60});
+ };
+ await fillAndSubmit(h,{remember:true});
+ assert.equal(input.remember,true);
+ const relay=JSON.parse(Buffer.from(input.code.split(':')[1],'base64url').toString());
+ assert.equal(relay[3],true);
+ assert.equal(tab.getItem(key),null);
+ const entry=JSON.parse(local.getItem(key));
+ assert.equal(entry.token,'remembered-test-session');
+ assert.ok(entry.expiresAt>Date.now()+29*24*60*60*1000&&entry.expiresAt<=Date.now()+30*24*60*60*1000);
+ assert.ok(!local.getItem(key).includes('synthetic-password-for-test'));
+ assert.ok(!local.getItem(key).includes('synthetic-user'));
+});
+test('a remembered session opens in a new tab on the same device',async()=>{
+ const local=storage();browser(local);
+ const first=harness();await directLogin(first,30*24*60*60,{remember:true});first.unmount();
+ browser(local,storage());
+ const restored=harness();
+ assert.equal(workspace(restored).props.account.id,profile.id);
+});
 test('reload reuses the scoped session in this tab and another tab starts at login',async()=>{
  const tab=browser(),first=harness();await directLogin(first);first.unmount();
  browser(storage(),tab);
@@ -82,7 +107,10 @@ test('the legacy transport must verify the account before rendering or storing a
   if(url.pathname==='/api/auth'){
    const input=JSON.parse(options.body);
    const raw=Buffer.from(input.code.split(':')[1],'base64url');
-   proof=JSON.parse(raw.toString())[2];
+   const relay=JSON.parse(raw.toString());
+   assert.equal(relay.length,3);
+   assert.equal(input.remember,false);
+   proof=relay[2];
    return Response.json({token:'transport-session'});
   }
   assert.equal(url.search,'?studioRelay=account');
@@ -112,6 +140,14 @@ test('sign-out revokes the account session and clears the current tab',async()=>
  assert.equal(h.tree.type,'main');
  assert.equal(tab.getItem(key),null);
  assert.equal(window.__STUDIO_SESSION__,'');
+});
+test('sign-out clears a remembered session from local storage',async()=>{
+ const local=storage(),tab=browser(local),h=harness();
+ globalThis.fetch=async()=>Response.json({token:'remembered-test-session',account:profile,expiresIn:2592000});
+ await fillAndSubmit(h,{remember:true});
+ assert.ok(local.getItem(key));
+ workspace(h).props.onSignOut();h.render();
+ assert.equal(local.getItem(key),null);assert.equal(tab.getItem(key),null);
 });
 test('session-expired clears the scoped session and the transport',async()=>{
  const tab=browser(),h=harness();await directLogin(h);
