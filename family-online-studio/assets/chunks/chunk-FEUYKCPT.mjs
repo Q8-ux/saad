@@ -1,0 +1,1 @@
+import{e as r,i}from"./chunk-KQKL2YCS.mjs";function u(s,t,a={}){let e=r(),o=e?"/api/scenarist/refine?studioVoice="+t:t==="library"?"/api/library-assistant":"/api/voice/"+t;return i(s)(o,{...a,method:e||t!=="status"?"POST":"GET"})}export{u as a};

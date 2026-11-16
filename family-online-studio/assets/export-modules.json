@@ -2,31 +2,55 @@
   "initial": [
     {
       "file": "assets/app.mjs",
-      "bytes": 300237
+      "bytes": 266102
     },
     {
-      "file": "assets/chunks/chunk-6BTMRW6Z.mjs",
-      "bytes": 13220
+      "file": "assets/chunks/chunk-3MNS2YWJ.mjs",
+      "bytes": 10225
     },
     {
-      "file": "assets/chunks/chunk-N6EJLX5A.mjs",
-      "bytes": 21516
+      "file": "assets/chunks/chunk-53JBATYG.mjs",
+      "bytes": 8225
     },
     {
-      "file": "assets/chunks/chunk-ZIWFLNI5.mjs",
-      "bytes": 5794
+      "file": "assets/chunks/chunk-4ZDBOF3N.mjs",
+      "bytes": 13254
     },
     {
-      "file": "assets/chunks/chunk-TNRCEDF4.mjs",
-      "bytes": 30292
+      "file": "assets/chunks/chunk-QO4XDGA3.mjs",
+      "bytes": 4374
     },
     {
-      "file": "assets/chunks/chunk-2AUHUWSL.mjs",
-      "bytes": 2275
+      "file": "assets/chunks/chunk-LPQTZJNU.mjs",
+      "bytes": 12839
     },
     {
-      "file": "assets/chunks/chunk-YJOTW2OM.mjs",
+      "file": "assets/chunks/chunk-JGUFELKC.mjs",
+      "bytes": 976
+    },
+    {
+      "file": "assets/chunks/chunk-Y4VJKQ7R.mjs",
+      "bytes": 4827
+    },
+    {
+      "file": "assets/chunks/chunk-QPCCHE25.mjs",
       "bytes": 59485
+    },
+    {
+      "file": "assets/chunks/chunk-OL7JBH3F.mjs",
+      "bytes": 3955
+    },
+    {
+      "file": "assets/chunks/chunk-ANDDHMXF.mjs",
+      "bytes": 22528
+    },
+    {
+      "file": "assets/chunks/chunk-PPA6V4PI.mjs",
+      "bytes": 8626
+    },
+    {
+      "file": "assets/chunks/chunk-KQKL2YCS.mjs",
+      "bytes": 2160
     },
     {
       "file": "assets/chunks/chunk-2V77MTNA.mjs",
@@ -35,64 +59,92 @@
   ],
   "deferred": [
     {
-      "file": "assets/chunks/book-exports-7BTIVIUG.mjs",
-      "bytes": 11367
+      "file": "assets/chunks/writer-exchange-SRX7NQ2B.mjs",
+      "bytes": 11852
     },
     {
-      "file": "assets/chunks/book-studio-FEXOEDV6.mjs",
-      "bytes": 28846
+      "file": "assets/chunks/writer-tools-NYVEU55I.mjs",
+      "bytes": 25903
     },
     {
-      "file": "assets/chunks/chunk-XDT52TWE.mjs",
-      "bytes": 2362
+      "file": "assets/chunks/writer-workspace-Y6EFKEVU.mjs",
+      "bytes": 2614
     },
     {
-      "file": "assets/chunks/html2canvas-ABGFJWJ3.mjs",
-      "bytes": 202424
+      "file": "assets/chunks/scenarist-panel-N6EJOH3B.mjs",
+      "bytes": 11835
     },
     {
-      "file": "assets/chunks/purify.es-KZCYCWOQ.mjs",
-      "bytes": 30173
+      "file": "assets/chunks/work-structure-VFREAWQ5.mjs",
+      "bytes": 4603
     },
     {
-      "file": "assets/chunks/index.es-JC5LCQCP.mjs",
-      "bytes": 159757
+      "file": "assets/chunks/work-memory-UJ7QA2W5.mjs",
+      "bytes": 6125
     },
     {
-      "file": "assets/chunks/pdf-export-A2KJQYG2.mjs",
-      "bytes": 6818
-    },
-    {
-      "file": "assets/chunks/speech-studio-XOVS37Q6.mjs",
-      "bytes": 11614
-    },
-    {
-      "file": "assets/chunks/library-assistant-LF5B5M7M.mjs",
-      "bytes": 17479
-    },
-    {
-      "file": "assets/chunks/chunk-OMA4BNWE.mjs",
-      "bytes": 251
-    },
-    {
-      "file": "assets/chunks/book-pdf-LFEZJBZD.mjs",
+      "file": "assets/chunks/book-pdf-WVYAEGB6.mjs",
       "bytes": 4688
+    },
+    {
+      "file": "assets/chunks/book-exports-7BY32V57.mjs",
+      "bytes": 11396
     },
     {
       "file": "assets/chunks/chunk-IRJ4PDZI.mjs",
       "bytes": 4529
     },
     {
-      "file": "assets/chunks/chunk-3DP46V56.mjs",
+      "file": "assets/chunks/book-studio-DV2IZPGZ.mjs",
+      "bytes": 33680
+    },
+    {
+      "file": "assets/chunks/chunk-LXSFHGVO.mjs",
+      "bytes": 2367
+    },
+    {
+      "file": "assets/chunks/chunk-OVN3AOZC.mjs",
       "bytes": 2402
     },
     {
-      "file": "assets/chunks/chunk-73QQN2DX.mjs",
+      "file": "assets/chunks/html2canvas-ZCXBAUU5.mjs",
+      "bytes": 202424
+    },
+    {
+      "file": "assets/chunks/purify.es-CIU6YPGY.mjs",
+      "bytes": 30173
+    },
+    {
+      "file": "assets/chunks/index.es-PCGJ37G7.mjs",
+      "bytes": 159757
+    },
+    {
+      "file": "assets/chunks/pdf-export-LPAATPHL.mjs",
+      "bytes": 6852
+    },
+    {
+      "file": "assets/chunks/chunk-UFTA6XVG.mjs",
       "bytes": 418755
     },
     {
-      "file": "assets/chunks/chunk-3YV2JGDK.mjs",
+      "file": "assets/chunks/chunk-ZJSQS3NT.mjs",
       "bytes": 272
+    },
+    {
+      "file": "assets/chunks/speech-studio-DCO7UOZ3.mjs",
+      "bytes": 11683
+    },
+    {
+      "file": "assets/chunks/library-assistant-I5KUSPHA.mjs",
+      "bytes": 17549
+    },
+    {
+      "file": "assets/chunks/chunk-FEUYKCPT.mjs",
+      "bytes": 246
+    },
+    {
+      "file": "assets/chunks/project-center-HQMDDUDU.mjs",
+      "bytes": 15651
     }
   ]
 }
