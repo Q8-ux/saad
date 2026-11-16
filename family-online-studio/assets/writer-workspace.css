@@ -437,31 +437,9 @@
   padding-inline-start: 344px;
 }
 
-.writer-solo-mode .editor-toolbar,
-.writer-solo-mode .book-tools {
-  color: #d8e5e9;
-  background: #1b3441;
-  border-color: #3c5662;
-  box-shadow: 0 8px 24px #07151c52;
-}
-
-.writer-solo-mode .editor-toolbar select,
-.writer-solo-mode .book-tools select {
-  color: #eaf2f4;
-  background-color: #244653;
-  border-color: #55717c;
-}
-
-.writer-solo-mode .editor-toolbar .icon-button,
-.writer-solo-mode .book-tools .icon-button {
-  color: #c9d8dd;
-}
-
-.writer-solo-mode .editor-toolbar .icon-button:hover,
-.writer-solo-mode .editor-toolbar .icon-button.active,
-.writer-solo-mode .book-tools .icon-button:hover {
-  color: #fff;
-  background: #31515e;
+.writer-solo-mode .writing-canvas > .editor-toolbar,
+.writer-solo-mode > .book-tools {
+  display: none;
 }
 
 .writer-solo-mode .script-paper,
@@ -602,14 +580,6 @@
     padding: 14px max(10px, env(safe-area-inset-right)) 88px max(10px, env(safe-area-inset-left));
   }
 
-  .writer-solo-mode .editor-toolbar {
-    top: 0;
-    margin-bottom: 14px;
-  }
-
-  .writer-solo-mode .book-tools {
-    padding-inline: 9px;
-  }
 }
 
 @media (max-width: 520px) {
