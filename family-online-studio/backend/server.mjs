@@ -3,16 +3,17 @@ import {createHash,createHmac,randomUUID,timingSafeEqual} from 'node:crypto';
 import {pathToFileURL} from 'node:url';
 import {AuthError,createSmsAuth} from './sms-auth.mjs';
 import {loadAccounts,usernameKey,validPasswordHash,verifyPassword} from './credentials.mjs';
+import {extractDocument,MAX_IMPORT_BYTES} from './document-import.mjs';
 
 const hash=value=>createHash('sha256').update(value).digest('hex');
 const same=(a,b)=>{const x=Buffer.from(a||''),y=Buffer.from(b||'');return x.length===y.length&&timingSafeEqual(x,y);};
 const routes=new Map([['/api/projects',['GET','POST']],['/api/manuscript',['GET','PUT']],['/api/versions',['GET','POST']],['/api/scenarist',['GET','POST']],['/api/scenarist/refine',['POST']],['/api/transcribe',['POST']]]);
-const maxBytes=9_000_000;
+const maxBytes=9_000_000,importMaxBytes=MAX_IMPORT_BYTES+1_000_000;
 const standardSessionSeconds=7200;
 const rememberedSessionSeconds=30*24*60*60;
 const sessionSeconds=remember=>remember===true?rememberedSessionSeconds:standardSessionSeconds;
 const validRemember=input=>input?.remember===undefined||typeof input.remember==='boolean';
-export function createGateway(config,fetchImpl=fetch){
+export function createGateway(config,fetchImpl=fetch,documentExtractor=extractDocument){
  const {allowedOrigin,upstreamOrigin,siteToken,bridgeKey,accessHash,sessionSecret}=config;
  const credentialsOnly=config.authMode==='credentials';
  const accounts=config.accounts??(usernameKey(config.username)&&validPasswordHash(config.passwordHash)?[{id:'owner',username:config.username,passwordHash:config.passwordHash}]:[]);
@@ -25,6 +26,7 @@ export function createGateway(config,fetchImpl=fetch){
  const legacyTag=openAccess?'studio-open-session\n':passwordOnly?'studio-password-session\n':'studio-session\n';
  const accountTag=account=>'studio-credentials-session-v2\n'+hash(account.id+'\n'+account.passwordHash)+'\n';
  const sms=createSmsAuth(config,fetchImpl);
+ let activeImports=0;
  const ready=!!(allowedOrigin&&upstreamOrigin&&siteToken&&bridgeKey&&(credentialsOnly?credentialsReady:(openAccess||remotePassword||(passwordOnly?accessHash:(accessHash||sms.credentialsReady))))&&sessionSecret);
  if(ready&&(!/^https:\/\//.test(allowedOrigin)||!/^https:\/\//.test(upstreamOrigin)))throw new Error('HTTPS configuration required');
  const pacing=new Map();
@@ -53,7 +55,7 @@ export function createGateway(config,fetchImpl=fetch){
   const signature=createHmac('sha256',bridgeKey).update(selection.join('\n')).digest('hex');
   return fetchImpl(new URL('/api/external-studio',upstreamOrigin),{method:'POST',headers:{'OAI-Sites-Authorization':'Bearer '+siteToken,'Content-Type':type,'x-studio-time':stamp,'x-studio-nonce':nonce,'x-studio-method':method,'x-studio-route':route,'x-studio-signature':signature,...(account?{'x-studio-account':account.id}:{})},body,signal:AbortSignal.timeout(85000)});
  }
- async function bytes(req){const parts=[];let size=0;for await(const part of req){size+=part.length;if(size>maxBytes){const error=new Error('too_large');error.status=413;throw error;}parts.push(part);}return Buffer.concat(parts);}
+ async function bytes(req,limit=maxBytes){const parts=[];let size=0;for await(const part of req){size+=part.length;if(size>limit){const error=new Error('too_large');error.status=413;throw error;}parts.push(part);}return Buffer.concat(parts);}
  return http.createServer(async(req,res)=>{
   const origin=req.headers.origin;
   const headers={'Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer','Vary':'Origin'};
@@ -65,7 +67,8 @@ export function createGateway(config,fetchImpl=fetch){
    if(!ready)return send(503,{error:'لم يُفعّل اتصال المساحة الخاصة بعد.'});
    if(origin!==allowedOrigin)return send(403,{error:'origin'});
    if(req.method==='OPTIONS'){res.writeHead(204,headers);return res.end();}
-   if(Number(req.headers['content-length']||0)>maxBytes)return send(413,{error:'الملف كبير جداً.'});
+   const requestLimit=u.pathname==='/api/import-document'?importMaxBytes:maxBytes;
+   if(Number(req.headers['content-length']||0)>requestLimit)return send(413,{error:'الملف كبير جداً.'});
    const peer=(req.headers['x-forwarded-for']||req.socket.remoteAddress||'unknown').split(',').at(-1).trim();
    if(u.pathname==='/api/auth/options'&&req.method==='GET'){
     if(credentialsOnly)return send(200,{mode:'credentials',smsConfigured:false,channel:'username-password'});
@@ -121,6 +124,26 @@ export function createGateway(config,fetchImpl=fetch){
    }
    const signedIn=authenticated(req.headers.authorization);
    if(!signedIn)return send(401,{error:credentialsOnly?'أدخل اسم المستخدم وكلمة المرور للدخول إلى الاستوديو.':openAccess?'جارٍ تجديد الاتصال بالاستوديو.':passwordOnly?'أدخل كلمة المرور للدخول إلى الاستوديو.':'انتهت جلسة الدخول. تحقّق من هاتفك للدخول مجدداً.'});
+   if(u.pathname==='/api/import-document'&&req.method==='POST'){
+    if(limited('document-import:'+peer,4))return send(429,{error:'طلبات تحليل كثيرة؛ انتظر دقيقة ثم أعد المحاولة.'});
+    if(activeImports>=2)return send(503,{error:'محرك التحليل مشغول الآن؛ أعد المحاولة بعد قليل.'});
+    const type=req.headers['content-type']||'';
+    if(!type.toLowerCase().startsWith('multipart/form-data;'))return send(415,{error:'ارفع الملف من زر الاستيراد داخل الاستوديو.'});
+    activeImports++;
+    try{
+     const raw=await bytes(req,importMaxBytes);
+     const form=await new Request('http://gateway.invalid/upload',{method:'POST',headers:{'Content-Type':type},body:raw}).formData();
+     const file=form.get('file');
+     if(!file||typeof file.arrayBuffer!=='function'||typeof file.name!=='string')return send(400,{error:'لم يصل ملف صالح للتحليل.'});
+     if(file.size>MAX_IMPORT_BYTES)return send(413,{error:'حجم الملف أكبر من ٢٥ ميغابايت.'});
+     const result=await documentExtractor({buffer:Buffer.from(await file.arrayBuffer()),filename:file.name,mimeType:file.type});
+     if(typeof result?.text!=='string'||!result.text.trim()||Buffer.byteLength(result.text)>2_000_000)return send(422,{error:'لم يُرجع محرك التحليل نصًا صالحًا.'});
+     return send(200,{text:result.text,format:result.format,usedOcr:result.usedOcr===true,warnings:Array.isArray(result.warnings)?result.warnings.slice(0,8):[],...(Number.isInteger(result.pages)?{pages:result.pages}:{}),...(Number.isInteger(result.processedPages)?{processedPages:result.processedPages}:{})});
+    }catch(error){
+     const status=[413,415,422,503,504].includes(error?.status)?error.status:422;
+     return send(status,{error:error?.status&&error.message?error.message:'تعذر تحليل الملف.'});
+    }finally{activeImports--;}
+   }
    if(!routes.get(u.pathname)?.includes(req.method))return send(404,{error:'not_found'});
    if(limited('request:'+peer,100))return send(429,{error:'طلبات كثيرة؛ انتظر قليلاً.'});
    const body=await bytes(req),route=u.pathname+u.search,type=req.headers['content-type']||'';

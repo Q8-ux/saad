@@ -1,5 +1,7 @@
 const MAX_TEXT_BYTES = 2_000_000;
 const MAX_DOCX_BYTES = 10_000_000;
+const MAX_EXTERNAL_BYTES = 25_000_000;
+const MAX_MEDIA_BYTES = 8_000_000;
 const MAX_DOCX_ENTRY_BYTES = 4_000_000;
 const MAX_SCENES = 400;
 const MAX_CHARACTERS = 100;
@@ -9,6 +11,9 @@ const SCRIPT_KINDS = new Set(['film', 'series', 'play']);
 const BOOK_KINDS = new Set(['book-ar', 'book-en']);
 const BLOCK_TYPES = new Set(['dialogue', 'action', 'sound', 'song', 'heading', 'transition']);
 const BOOK_BLOCK_TYPES = new Set(['paragraph', 'heading', 'list-item', 'quote']);
+const TEXT_EXTENSIONS = new Set(['txt', 'md', 'markdown', 'html', 'htm', 'xml', 'csv', 'tsv', 'srt', 'vtt']);
+const EXTERNAL_EXTENSIONS = new Set(['pdf', 'doc', 'odt', 'rtf', 'wps', 'epub', 'pages', 'ppt', 'pptx', 'odp', 'key', 'xls', 'xlsx', 'ods', 'numbers', 'png', 'jpg', 'jpeg', 'webp', 'bmp', 'tif', 'tiff', 'heic']);
+const MEDIA_EXTENSIONS = new Set(['mp3', 'mp4', 'm4a', 'wav', 'webm', 'ogg', 'mpeg', 'mpga']);
 const encoder = new TextEncoder();
 const decoder = new TextDecoder('utf-8', { fatal: false });
 
@@ -23,7 +28,7 @@ function text(value, maximum = 30_000) {
 }
 
 function normalized(value) {
-  return text(value, MAX_TEXT_BYTES).replace(/^\uFEFF/u, '').replace(/\r\n?/gu, '\n').normalize('NFC');
+  return text(value, MAX_TEXT_BYTES).replace(/^\uFEFF/u, '').replace(/\r\n?/gu, '\n').replace(/[\u061c\u200e\u200f\u202a-\u202e\u2066-\u2069]/gu, '').normalize('NFC');
 }
 
 function wordCount(value) {
@@ -42,6 +47,23 @@ function ensureTextSize(value) {
 function extension(name = '') {
   const match = /\.([^.]+)$/u.exec(name.toLowerCase());
   return match?.[1] || '';
+}
+
+function plainMarkup(value) {
+  if (/<!DOCTYPE|<!ENTITY|<\?xml-stylesheet|<xi:include|<xinclude/iu.test(value)) throw new Error('يحتوي الملف تعريفات خارجية غير مسموحة.');
+  return decodeXml(value
+    .replace(/<(?:br|hr)\b[^>]*\/?\s*>/giu, '\n')
+    .replace(/<\/?(?:p|div|li|h[1-6]|tr|section|article)\b[^>]*>/giu, '\n')
+    .replace(/<[^>]+>/gu, ' '))
+    .replace(/[ \t]+\n/gu, '\n').replace(/[ \t]{2,}/gu, ' ').replace(/\n{3,}/gu, '\n\n').trim();
+}
+
+function captionText(value) {
+  return value.split(/\r?\n/u).filter(line => {
+    const item = line.trim();
+    return item && !/^WEBVTT(?:\s|$)/iu.test(item) && !/^\d+$/u.test(item)
+      && !/^\d{1,2}:\d{2}(?::\d{2})?[,.]\d{3}\s+-->\s+/u.test(item);
+  }).map(line => line.replace(/<[^>]+>/gu, '').trim()).join('\n');
 }
 
 function fileStem(name = '') {
@@ -595,7 +617,23 @@ export function prepareImportedDocument(plan, { title, kind }) {
 export async function importManuscriptFile(file, options = {}) {
   if (!file || typeof file.name !== 'string') throw new Error('اختر ملفًا من جهازك.');
   const ext = extension(file.name);
-  if (!['txt', 'md', 'markdown', 'fountain', 'fdx', 'json', 'docx'].includes(ext)) throw new Error('صيغة الملف غير مدعومة. استخدم DOCX أو FDX أو Fountain أو TXT أو MD أو JSON.');
+  const mime = String(file.type || '').toLowerCase();
+  const localFormat = TEXT_EXTENSIONS.has(ext) || ['fountain', 'fdx', 'json', 'docx'].includes(ext) || mime.startsWith('text/');
+  const externallyExtracted = EXTERNAL_EXTENSIONS.has(ext) || MEDIA_EXTENSIONS.has(ext) || (ext === 'docx' && file.size > MAX_DOCX_BYTES)
+    || mime === 'application/pdf' || mime.startsWith('image/') || mime.startsWith('audio/') || mime === 'video/mp4' || !localFormat;
+  if (externallyExtracted) {
+    const maximum = MEDIA_EXTENSIONS.has(ext) || mime.startsWith('audio/') || mime === 'video/mp4' ? MAX_MEDIA_BYTES : MAX_EXTERNAL_BYTES;
+    if (file.size > maximum) throw new Error(`حجم الملف أكبر من الحد المسموح (${maximum === MAX_MEDIA_BYTES ? '٨' : '٢٥'} ميغابايت).`);
+    if (typeof options.extractFile !== 'function') throw new Error('يحتاج هذا النوع إلى محرك التحليل الآمن في الاستوديو. أعد المحاولة من الموقع المنشور.');
+    const extracted = await options.extractFile(file, { media: MEDIA_EXTENSIONS.has(ext) || mime.startsWith('audio/') || mime === 'video/mp4' });
+    if (!extracted || typeof extracted.text !== 'string') throw new Error('لم يُرجع محرك التحليل نصًا صالحًا.');
+    const plan = parseManuscriptText(extracted.text, { fileName: file.name, preferredKind: options.preferredKind, format: extracted.format || 'نص مستخرج' });
+    plan.warnings = [...(Array.isArray(extracted.warnings) ? extracted.warnings : []), ...plan.warnings].slice(0, 12);
+    return plan;
+  }
+  if (!TEXT_EXTENSIONS.has(ext) && !['fountain', 'fdx', 'json', 'docx'].includes(ext) && !mime.startsWith('text/')) {
+    throw new Error('تعذر تحديد صيغة الملف. استخدم PDF أو ملفًا مكتبيًا أو نصيًا أو صورة أو تسجيلًا صوتيًا.');
+  }
   if (ext === 'docx') {
     if (file.size > MAX_DOCX_BYTES) throw new Error('حجم ملف Word أكبر من ١٠ ميغابايت.');
     const extracted = await extractDocxText(await file.arrayBuffer());
@@ -621,5 +659,14 @@ export async function importManuscriptFile(file, options = {}) {
     const document = raw?.kind === 'book' ? normalizeBookDocument(raw) : normalizeScriptDocument(raw);
     return planFor(document, { fileName: file.name, format: 'نسخة استيديو JSON', confidence: 'high', warnings: [] });
   }
-  return parseManuscriptText(source, { fileName: file.name, preferredKind: options.preferredKind, format: ext === 'md' || ext === 'markdown' ? 'Markdown' : 'نص' });
+  const prepared = ext === 'html' || ext === 'htm' || ext === 'xml' ? plainMarkup(source)
+    : ext === 'srt' || ext === 'vtt' ? captionText(source)
+      : source;
+  const format = ext === 'md' || ext === 'markdown' ? 'Markdown'
+    : ext === 'html' || ext === 'htm' ? 'HTML'
+      : ext === 'xml' ? 'XML'
+        : ext === 'csv' || ext === 'tsv' ? 'جدول نصي'
+          : ext === 'srt' || ext === 'vtt' ? 'نص ترجمة'
+            : 'نص';
+  return parseManuscriptText(prepared, { fileName: file.name, preferredKind: options.preferredKind, format });
 }
