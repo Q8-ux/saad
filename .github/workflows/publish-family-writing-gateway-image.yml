@@ -24,6 +24,9 @@ concurrency:
 
 env:
   IMAGE_NAME: ghcr.io/q8-ux/family-writing-gateway
+  # Render still points at this historical tag. Keep it as a documented
+  # compatibility alias until the service source can be changed to :latest.
+  RENDER_COMPAT_TAG: 1f4dd4e03cfd62f71870354f9b90f637323e4233
 
 jobs:
   test-and-publish:
@@ -49,7 +52,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and publish immutable image
+      - name: Build and publish image
         uses: docker/build-push-action@v6
         with:
           context: family-online-studio/backend
@@ -60,6 +63,7 @@ jobs:
           tags: |
             ${{ env.IMAGE_NAME }}:${{ github.sha }}
             ${{ env.IMAGE_NAME }}:latest
+            ${{ env.IMAGE_NAME }}:${{ env.RENDER_COMPAT_TAG }}
           labels: |
             org.opencontainers.image.source=https://github.com/${{ github.repository }}
             org.opencontainers.image.revision=${{ github.sha }}
