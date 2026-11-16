@@ -2,7 +2,7 @@
   "initial": [
     {
       "file": "assets/app.mjs",
-      "bytes": 266102
+      "bytes": 266126
     },
     {
       "file": "assets/chunks/chunk-3MNS2YWJ.mjs",
@@ -68,7 +68,7 @@
     },
     {
       "file": "assets/chunks/writer-workspace-Y6EFKEVU.mjs",
-      "bytes": 2614
+      "bytes": 16721
     },
     {
       "file": "assets/chunks/scenarist-panel-N6EJOH3B.mjs",
@@ -96,7 +96,7 @@
     },
     {
       "file": "assets/chunks/book-studio-DV2IZPGZ.mjs",
-      "bytes": 33680
+      "bytes": 33692
     },
     {
       "file": "assets/chunks/chunk-LXSFHGVO.mjs",
