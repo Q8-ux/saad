@@ -100,3 +100,17 @@ test('the gateway derives the signed account from authentication and ignores req
  const withDuplicate=await fixture(t,{...env,STUDIO_ACCOUNTS_JSON:JSON.stringify([...records,records[0]])});
  assert.equal((await fetch(withDuplicate.base+'/health')).status,503);
 });
+
+test('an optional dot in a username resolves to the same isolated account',async t=>{
+ const doctorPassword='synthetic-doctor-secret';
+ const doctor={id:'dr-nourah',username:'DrNourah',passwordHash:await hashPassword(doctorPassword)};
+ const f=await fixture(t,{...env,STUDIO_ACCOUNTS_JSON:JSON.stringify([doctor])});
+ for(const alias of ['DrNourah','Dr.nourah','dr.NOURAH']){
+  const response=await f.login({username:alias,password:doctorPassword});
+  assert.equal(response.status,200);
+  assert.deepEqual((await response.json()).account,{id:'dr-nourah',username:'DrNourah'});
+ }
+ const collision={id:'another-doctor',username:'Dr.Nourah',passwordHash:await hashPassword('synthetic-collision-secret')};
+ const rejected=await fixture(t,{...env,STUDIO_ACCOUNTS_JSON:JSON.stringify([doctor,collision])});
+ assert.equal((await fetch(rejected.base+'/health')).status,503);
+});
