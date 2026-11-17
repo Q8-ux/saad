@@ -86,6 +86,44 @@ test('continue this scene appends blocks without creating a duplicate scene',asy
  assert.match(result.message,/أُضيفت 2 فقرات/u);
 });
 
+test('targeted spoken scene numbers take priority over selected scene without altering others',async()=>{
+ const readDoc=structuredClone(SCRIPT);
+ readDoc.scenes.push({...readDoc.scenes[0],id:'scene2',title:'المشهد ٢',blocks:[{id:'b2',type:'action',text:'المشهد الثاني محفوظ.'}]});
+ const h=harness({readDoc});
+ const result=await executeScriptContinuation({
+   message:'كمل المشهد الأول من الملف',
+   files:h.files,workId:'series',request:h.request,preferredSceneId:'scene2',
+   uuid:()=>String(crypto.randomUUID())
+ });
+ const doc=h.calls.find(call=>call.method==='PUT').body.doc;
+ assert.equal(doc.scenes.length,2);
+ assert.equal(doc.scenes[0].blocks.length,3);
+ assert.equal(doc.scenes[1].blocks.length,1);
+ assert.equal(doc.scenes[1].blocks[0].text,'المشهد الثاني محفوظ.');
+ assert.equal(h.calls[1].body.sceneId,'scene1');
+ assert.equal(result.sceneNumber,1);
+});
+test('this scene means the scene actually selected in the editor',async()=>{
+ const readDoc=structuredClone(SCRIPT);
+ readDoc.scenes.push({...readDoc.scenes[0],id:'scene2',title:'المشهد الثاني',blocks:[{id:'b2',type:'action',text:'المنتصف.'}]});
+ const h=harness({readDoc});
+ const result=await executeScriptContinuation({
+   message:'كمل هذا المشهد',files:h.files,workId:'series',
+   request:h.request,preferredSceneId:'scene1',
+   uuid:()=>String(crypto.randomUUID())
+ });
+ assert.equal(h.calls[1].body.sceneId,'scene1');
+ assert.equal(result.sceneId,'scene1');
+ assert.equal(result.sceneNumber,1);
+});
+test('invalid explicitly named scene is rejected rather than silently edited elsewhere',async()=>{
+ const h=harness();
+ await assert.rejects(executeScriptContinuation({
+   message:'أكمل المشهد 22 من الملف',files:h.files,workId:'series',request:h.request
+ }),/رقم المشهد المطلوب غير موجود/u);
+ assert.deepEqual(h.calls.map(call=>call.method),['GET']);
+});
+
 test('user explicitly asking for an opinion is not overridden by the no-commentary instruction',()=>{
  const prompt=makeDirectTaskMessage('ما رأيك في ترتيب المشاهد؟',[{name:'outline.txt',text:'الأحداث'}]);
  assert.ok(prompt.startsWith('ما رأيك'));
