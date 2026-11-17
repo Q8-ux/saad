@@ -37,6 +37,8 @@ jobs:
           node --check family-online-studio/assets/manuscript-import.mjs
           node --test family-online-studio/tests/login-session.test.mjs
           node --test family-online-studio/tests/manuscript-import.test.mjs
+          node --check family-online-studio/assets/chunks/chunk-LPQTZJNU.mjs
+          node --test family-online-studio/tests/studio-microphone.test.mjs
           node --check family-online-studio/assets/studio-command-menu.mjs
           node --check family-online-studio/backend/server.mjs
           node --check family-online-studio/backend/document-import.mjs
