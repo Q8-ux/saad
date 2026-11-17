@@ -1,6 +1,7 @@
 let sequence = 0;
 const focusable = panel => [...panel.querySelectorAll('button, a[href], [tabindex="0"]')]
-  .filter(node => !node.disabled && node.getAttribute('aria-disabled') !== 'true' && !node.closest('[hidden]'));
+  .filter(node => !node.disabled && node.getAttribute('aria-disabled') !== 'true' && !node.closest('[hidden]') &&
+    !node.matches('button[data-command-category]:not([data-command-selected])'));
 
 export function mountCommandMenu(studio) {
   const panel = studio.querySelector('.topbar .top-actions');
@@ -9,6 +10,33 @@ export function mountCommandMenu(studio) {
   const before = new Map(['id','role','aria-modal','aria-labelledby','tabindex','inert','data-command-drawer'].map(name => [name,panel.getAttribute(name)]));
   const make = (tag, name, content) => { const node=doc.createElement(tag);node.className=name;if(content)node.textContent=content;return node; };
   const trigger=make('button','studio-command-toggle'),icon=make('span','studio-command-icon','☰');
+  const shortcuts=make('div','studio-quick-navigation');
+  shortcuts.setAttribute('role','group');
+  shortcuts.setAttribute('aria-label','التنقل السريع بالحساب');
+  const worksButton=make('button','studio-quick-works','أعمالي');
+  worksButton.type='button';
+  worksButton.setAttribute('aria-label','أعمالي وتبديل المشاريع');
+  const exitButton=make('button','studio-quick-logout','تسجيل الخروج');
+  exitButton.type='button';
+  exitButton.setAttribute('aria-label','تسجيل الخروج من الاستديو');
+  shortcuts.append(worksButton,exitButton);
+  const findWorks=()=>[...panel.querySelectorAll(':scope > button')]
+    .find(button=>button.classList.contains('works-launch') || /^(المشاريع|أعمالي)$/.test(button.textContent.trim()));
+  const findLogout=()=>[...panel.querySelectorAll(':scope > button')]
+    .find(button=>/^(خروج|تسجيل الخروج)$/.test(button.textContent.trim()));
+  const openWorks=()=>{
+    const source=findWorks();
+    if(source?.isConnected&&!source.disabled)source.click();
+  };
+  const signOut=()=>{
+    const unsafe=studio.querySelector('.save-warning, .book-alert, .save-indicator.offline, .save-indicator.conflict, .save-indicator.saving, .status-save.offline, .status-save.conflict');
+    if(unsafe&&doc.defaultView.confirm&&!doc.defaultView.confirm('قد توجد تعديلات لم تُحفظ. هل تريد تسجيل الخروج رغم ذلك؟'))return;
+    const source=findLogout();
+    if(source?.isConnected&&!source.disabled)source.click();
+    else doc.defaultView.dispatchEvent(new Event('studio-sign-out'));
+  };
+  worksButton.addEventListener('click',openWorks);
+  exitButton.addEventListener('click',signOut);
   icon.setAttribute('aria-hidden','true');trigger.type='button';trigger.dir='rtl';
   trigger.append(icon,make('span','','القائمة'));
   trigger.setAttribute('aria-label','فتح قائمة الأوامر');trigger.setAttribute('aria-haspopup','dialog');trigger.setAttribute('aria-expanded','false');
@@ -58,6 +86,7 @@ export function mountCommandMenu(studio) {
       if(visible)matchCount++;
     }
     groupBar.dataset.empty=matchCount?'false':'true';
+    if(opened)panel.scrollTop=0;
     if(!matchCount){
       const fallback=panel.querySelector(':scope > button[data-command-category="write"]');
       if(fallback){fallback.setAttribute('data-command-selected','');selectedGroup='write';for(const [id,tab] of groupButtons)tab.setAttribute('aria-pressed',id==='write'?'true':'false');}
@@ -69,6 +98,7 @@ export function mountCommandMenu(studio) {
     if(!opened)return;
     opened=false;panel.classList.remove('command-menu-open');panel.inert=true;studio.classList.remove('command-menu-open');
     backdrop.hidden=true;trigger.setAttribute('aria-expanded','false');trigger.setAttribute('aria-label','فتح قائمة الأوامر');
+    panel.scrollTop=0;
     for(const [node,value] of inertNodes)node.inert=value;inertNodes=[];
     if(restoreFocus&&trigger.isConnected)trigger.focus({preventScroll:true});
   }
@@ -81,7 +111,7 @@ export function mountCommandMenu(studio) {
     }
     backdrop.hidden=false;panel.inert=false;panel.classList.add('command-menu-open');studio.classList.add('command-menu-open');
     trigger.setAttribute('aria-expanded','true');trigger.setAttribute('aria-label','إغلاق قائمة الأوامر');
-    (focusable(panel).find(button=>button!==closeButton)||closeButton).focus({preventScroll:true});
+    (groupButtons.get(selectedGroup)||closeButton).focus({preventScroll:true});
   }
   function sync() {
     if(disposed)return;
@@ -128,10 +158,13 @@ export function mountCommandMenu(studio) {
   const onFocus=event=>{if(opened&&!panel.contains(event.target)&&event.target!==trigger)(focusable(panel)[0]||panel).focus();};
   trigger.addEventListener('click',toggle);backdrop.addEventListener('click',()=>close());closeButton.addEventListener('click',()=>close());
   panel.addEventListener('click',onCommand,true);doc.addEventListener('keydown',onKey,true);doc.addEventListener('focusin',onFocus);
-  doc.body.append(trigger);studio.append(backdrop);sync();
+  doc.body.append(trigger,shortcuts);studio.append(backdrop);sync();
   return {panel,trigger,open,close,sync,destroy(){
     close(false);disposed=true;saveSource?.classList.remove('studio-command-original-save');
     saveProxy?.remove();groupBar.remove();header.remove();backdrop.remove();trigger.remove();
+    worksButton.removeEventListener('click',openWorks);
+    exitButton.removeEventListener('click',signOut);
+    shortcuts.remove();
     delete studio.dataset.commandMenuReady;studio.classList.remove('command-menu-open');
     for(const [name,value] of before)if(value===null)panel.removeAttribute(name);else panel.setAttribute(name,value);
     panel.removeEventListener('click',onCommand,true);doc.removeEventListener('keydown',onKey,true);doc.removeEventListener('focusin',onFocus);
