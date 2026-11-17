@@ -1,0 +1,132 @@
+/* Compact, unobtrusive menus for documents and screenplay editing.
+   Screen-only: Word, PDF and print styles are not modified. */
+@media screen {
+  .studio .topbar .top-actions[data-command-drawer] .studio-command-groups {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    padding: 0 0 13px;
+    margin: 0 0 8px;
+    border-bottom: 1px solid var(--line, #d5dfda);
+    flex: none;
+  }
+  .studio .topbar .top-actions[data-command-drawer] .studio-command-group {
+    appearance: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 9px 7px;
+    min-height: 44px;
+    min-width: 0;
+    border-radius: 9px;
+    background: var(--soft, #f5f7f1);
+    color: var(--text, #173b3b);
+    border: 1px solid var(--line, #d5dfda);
+    font: 600 15px/1.5 StudioMenuCairo, Tahoma, sans-serif;
+  }
+  .studio .topbar .top-actions[data-command-drawer] .studio-command-group[aria-pressed="true"] {
+    color: #fff;
+    border-color: var(--accent, #087f7c);
+    background: var(--accent, #087f7c);
+  }
+  .studio .topbar .top-actions[data-command-drawer] > button[data-command-category]:not([data-command-selected]) {
+    display: none !important;
+  }
+  .studio .topbar .top-actions[data-command-drawer] .studio-command-group:focus-visible {
+    outline: 3px solid var(--accent, #087f7c);
+    outline-offset: 3px;
+  }
+
+  /* One navigation selector replaces a crowded tab ribbon, at every viewport. */
+  .studio .viewbar .view-tabs[data-compact-tabs="true"] { display: none !important; }
+  .studio-workspace-picker {
+    display: flex;
+    gap: 9px;
+    align-items: center;
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: 460px;
+    padding: 0 4px;
+    color: var(--text, #173b3b);
+    font: 600 15px/1.4 Cairo, Tahoma, sans-serif;
+  }
+  .studio-workspace-picker span {white-space: nowrap;}
+  .studio-workspace-picker select {
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 44px;
+    max-width: 100%;
+    border: 1px solid var(--line, #d5dfda);
+    border-radius: 10px;
+    color: var(--text, #173b3b);
+    background: var(--surface, #fff);
+    font: 600 16px/1.5 Cairo, Tahoma, sans-serif;
+    padding: 8px 12px;
+    cursor: pointer;
+  }
+
+  /* Tools are always available, but only if their named menu is expanded. */
+  .studio .studio-format-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    align-self: flex-start;
+    gap: 9px;
+    min-height: 44px;
+    margin: 8px 0;
+    border: 1px solid var(--line, #d5dfda);
+    border-radius: 11px;
+    padding: 8px 14px;
+    background: var(--surface, #fff);
+    color: var(--text, #173b3b);
+    font: 600 15px/1.5 Cairo, Tahoma, sans-serif;
+    cursor: pointer;
+  }
+  .studio .studio-format-toggle::after { content: "⌄"; font-size: 19px; }
+  .studio .studio-format-toggle[aria-expanded="true"]::after {content: "⌃";}
+  .studio .studio-format-toggle:focus-visible, .studio-workspace-picker select:focus-visible {
+    outline: 3px solid var(--accent, #087f7c);
+    outline-offset: 2px;
+  }
+  .studio .editor-toolbar[data-compact-toolbar="true"]:not(.studio-toolbar-expanded),
+  .studio .viewbar .view-tools[data-compact-toolbar="true"]:not(.studio-toolbar-expanded) {
+    display: none !important;
+  }
+  .studio .book-tools[data-compact-toolbar="true"]:not(.studio-toolbar-expanded) > :not(nav):not(.book-save) {
+    display: none !important;
+  }
+  .studio .book-tools[data-compact-toolbar="true"] { flex-wrap: wrap; }
+  .studio .book-tools[data-compact-toolbar="true"] > nav {min-width: 0;}
+  .studio .book-tools[data-compact-toolbar="true"].studio-toolbar-expanded {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+  }
+
+  /* Editing tools only appear on the paragraph being edited or selected. */
+  .studio .book-edit-block:not(:focus-within):not(:hover) .book-block-tools,
+  .studio .script-block:not(.block-selected):not(:focus-within):not(:hover) .block-actions {
+    display: none !important;
+  }
+}
+@media screen and (max-width: 600px) {
+  .studio .topbar .top-actions[data-command-drawer] .studio-command-groups {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .studio .viewbar .studio-workspace-picker { width: 100%; max-width: none; }
+  .studio .studio-format-toggle { font-size: 14px; max-width: 100%; }
+  .studio .viewbar .studio-format-toggle {flex: 0 0 auto;}
+  .studio .book-tools[data-compact-toolbar="true"] > nav {
+    display: flex;
+    flex: 1 1 100%;
+    overflow-x: auto;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .studio .studio-format-toggle, .studio .studio-command-group {transition: none !important;}
+}
+@media print {
+  .studio .studio-format-toggle,
+  .studio-workspace-picker,
+  .studio-command-groups {display: none !important;}
+}
