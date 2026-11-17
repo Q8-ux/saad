@@ -49,8 +49,8 @@ function oneSceneNumber(message) {
 }
 function createBlock(source,doc,uuid) {
   if(!source||!BLOCK_TYPES.has(source.type)||typeof source.text!=='string')return null;
-  const text=source.text.trim().slice(0,30000);
-  if(!text)return null;
+  const text=source.text.trim();
+  if(!text||text.length>30000)return null;
   const block={id:'ai_block_'+uuid(),type:source.type,text};
   if(source.type==='dialogue'){
     const name=String(source.speaker||'').trim().slice(0,120);
@@ -102,10 +102,12 @@ export async function executeScriptContinuation({message,files,workId,request,si
   if(typeof answer==='string') {
     try{answer=JSON.parse(answer);}catch{answer=null;}
   }
-  const blocks=Array.isArray(answer?.proposal?.blocks)
-    ? answer.proposal.blocks.map(block=>createBlock(block,doc,uuid)).filter(Boolean)
-    : [];
-  if(!blocks.length)throw new Error('لم ينتج المحرك مشهدًا صالحًا للإدراج. لم يُغيَّر المخطوط.');
+  const proposedBlocks=Array.isArray(answer?.proposal?.blocks)?answer.proposal.blocks:[];
+  const blocks=proposedBlocks.map(block=>createBlock(block,doc,uuid));
+  if(!blocks.length||blocks.some(block=>!block)||blocks.length>1500||
+    (continueCurrentScene&&referenceScene.blocks.length+blocks.length>1500)){
+    throw new Error('لم ينتج المحرك مشهدًا مكتمل البنية ضمن حدود المخطوط. لم يُغيَّر النص.');
+  }
   const proposedTitle=cleanSceneTitle(answer.proposal.title);
   const newId=continueCurrentScene?referenceScene.id:'scene_'+uuid();
   const scene=continueCurrentScene
