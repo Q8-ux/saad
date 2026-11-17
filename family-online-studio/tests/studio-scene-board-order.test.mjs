@@ -105,5 +105,6 @@ test('reader editor and Word/PDF export use one position number, never a stale n
   assert.match(source,/Em\(cleanScenes\(Oe\)\)/);
   assert.match(source,/Uf\(cleanScenes\(v\)\)/);
   assert.match(source,/Uf\(cleanScenes\(v\),Ae\)/);
+  assert.match(source,/clean=cleanScenes\(m\)/);
   assert.match(source,/children:\[m\+1," — ",sceneTitle\(f.title\)\|\|"بلا عنوان"\]/);
 });
