@@ -172,7 +172,7 @@ test('new-project interface exposes review-first file import and account-scoped 
   assert.match(works, /إعادة تفريغ الصوت دون تسجيل جديد/u);
   assert.match(works, /prepareImportedDocument/u);
   assert.match(works, /\/api\/manuscript\?work=/u);
-  assert.match(works, /النص المنظّم داخل حسابك فقط/u);
+  assert.match(works, /النص المستخرج يخضع لمراجعتك قبل الحفظ/u);
   assert.match(works, /\.pdf/u);
   assert.match(works, /\/api\/import-document/u);
   assert.match(works, /\/api\/transcribe/u);
