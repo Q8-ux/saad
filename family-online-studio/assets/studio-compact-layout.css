@@ -332,3 +332,109 @@
   .studio .scene-word-export,
   .studio .reader-edit-scene-top {display: none !important;}
 }
+
+
+/* Storyboard editing: one editable position per scene, bound to actual order. */
+@media screen {
+  .studio .scene-card > header {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .studio .scene-position-picker {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    min-width: 0;
+    color: var(--muted, #566873);
+    font: 600 13px/1.4 Cairo, Tahoma, sans-serif;
+  }
+  .studio .scene-position-picker select {
+    min-height: 40px;
+    min-width: 62px;
+    border: 1px solid var(--line, #c9d7de);
+    border-radius: 9px;
+    background: var(--surface, #fff);
+    color: var(--text, #173b3b);
+    padding: 5px 9px;
+    font: 600 15px/1.4 Cairo, Tahoma, sans-serif;
+    cursor: pointer;
+  }
+  .studio .scene-board-details {
+    margin: 10px 0;
+    border: 1px solid var(--line, #d5dfda);
+    border-radius: 11px;
+    background: var(--soft, #f7f8f7);
+  }
+  .studio .scene-board-details > summary {
+    cursor: pointer;
+    padding: 10px 13px;
+    color: var(--accent-ink, #076d69);
+    font: 600 14px/1.5 Cairo, Tahoma, sans-serif;
+  }
+  .studio .scene-board-details[open] > summary {
+    border-bottom: 1px solid var(--line, #d5dfda);
+  }
+  .studio .scene-board-fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    padding: 13px;
+  }
+  .studio .scene-board-fields > label {
+    min-width: 0;
+    display: grid;
+    align-content: start;
+    gap: 5px;
+    font: 600 13px/1.5 Cairo, Tahoma, sans-serif;
+  }
+  .studio .scene-board-fields :is(input, select, textarea) {
+    width: 100%;
+    min-width: 0;
+    min-height: 43px;
+    border: 1px solid var(--line, #c9d7de);
+    border-radius: 9px;
+    background: var(--surface, #fff);
+    color: var(--text, #173b3b);
+    padding: 8px 10px;
+    font: 400 15px/1.7 Cairo, Tahoma, sans-serif;
+  }
+  .studio .scene-board-fields textarea {
+    resize: vertical;
+    min-height: 90px;
+  }
+  .studio .scene-board-fields .scene-board-wide { grid-column: 1 / -1; }
+  .studio .scene-board-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    padding: 0 13px 13px;
+  }
+  .studio .scene-board-actions button {
+    min-height: 44px;
+    padding: 9px 12px;
+    background: var(--surface, #fff);
+    border: 1px solid var(--accent, #087f7c);
+    border-radius: 10px;
+    color: var(--accent-ink, #076d69);
+    font: 600 13px/1.5 Cairo, Tahoma, sans-serif;
+    cursor: pointer;
+  }
+  .studio .scene-position-picker select:focus-visible,
+  .studio .scene-board-details summary:focus-visible,
+  .studio .scene-board-fields :is(input,select,textarea):focus-visible,
+  .studio .scene-board-actions button:focus-visible {
+    outline: 3px solid var(--accent, #087f7c);
+    outline-offset: 2px;
+  }
+}
+@media screen and (max-width: 620px) {
+  .studio .scene-board-fields { grid-template-columns: minmax(0, 1fr); }
+  .studio .scene-board-fields .scene-board-wide { grid-column: auto; }
+  .studio .scene-position-picker { flex: 1 1 auto; justify-content: flex-start; }
+}
+@media print {
+  .studio .scene-position-picker,
+  .studio .scene-board-details {display: none !important;}
+}
