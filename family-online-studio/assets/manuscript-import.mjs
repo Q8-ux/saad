@@ -79,8 +79,8 @@ function metadataFrom(value, name = '') {
     const line = lines[index].trim();
     const titleMatch = /^(?:title|العنوان|اسم العمل)\s*[:：]\s*(.+)$/iu.exec(line);
     const authorMatch = /^(?:author|written by|المؤلف|تأليف|كتابة)\s*[:：]\s*(.+)$/iu.exec(line);
-    if (titleMatch && !title) { title = titleMatch[1].trim(); ignored.add(index); }
-    if (authorMatch && !author) { author = authorMatch[1].trim(); ignored.add(index); }
+    if (titleMatch && !title) { title = titleMatch[1].trim().replace(/[،؛]+$/u, '').trim(); ignored.add(index); }
+    if (authorMatch && !author) { author = authorMatch[1].trim().replace(/[،؛]+$/u, '').trim(); ignored.add(index); }
   }
   if (!title) {
     const first = lines.findIndex(line => line.trim());
@@ -165,7 +165,7 @@ export function normalizeSpokenManuscript(input) {
   source = source.replace(/(?:^|\n)\s*(?:حوار\s+)?(?:الشخصية|المتحدث)\s+([\p{Script=Arabic}\p{Mark}][\p{Script=Arabic}\p{Mark}\s]{1,60}?)\s+(?:تقول|يقول|قالت|قال|ترد|يرد|تسأل|يسأل)\s*[:：]?\s*/gu, '\n$1: ');
   source = source.replace(/(?:^|\n)\s*حوار\s+([\p{Script=Arabic}\p{Mark}][\p{Script=Arabic}\p{Mark}\s]{1,50}?)\s*[:：]\s*/gu, '\n$1: ');
   source = source.replace(/(?:^|[،؛.!?\n])\s*([\p{Script=Arabic}\p{Mark}]{2,35})\s+(?:تقول|يقول|قالت|قال|ترد|يرد|تسأل|يسأل)\s*[:：]?\s*/gu,
-    (_match, _boundary, speaker) => '\n' + speaker + ': ');
+    (_match, speaker) => '\n' + speaker + ': ');
   return source.replace(/[ \t]+\n/gu, '\n').replace(/\n{3,}/gu, '\n\n').trim();
 }
 
