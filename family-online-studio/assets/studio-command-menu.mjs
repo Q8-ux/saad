@@ -67,6 +67,16 @@ export function mountCommandMenu(studio) {
     groupButtons.set(group.id,tab);
     groupBar.append(tab);
   }
+  const bookFormat=make('button','studio-command-book-format','Writer Toolbar | تنسيق الكتاب');
+  bookFormat.type='button';
+  bookFormat.dataset.commandGroup='write';
+  const openBookFormat=()=>{
+    const toolbar=studio.querySelector('.book-tools');
+    const toggle=toolbar?.previousElementSibling;
+    if(toggle?.classList.contains('studio-format-toggle')&&toggle.getAttribute('aria-expanded')!=='true')toggle.click();
+    (toggle?.classList.contains('studio-format-toggle')?toggle:toolbar)?.scrollIntoView({block:'start',behavior:'smooth'});
+  };
+  bookFormat.addEventListener('click',openBookFormat);
   const sectionProxies=new Map();
   function syncSections(){
     const items=[...studio.querySelectorAll('.viewbar .view-tabs > button, .book-tools nav[aria-label="عرض الكتاب"] > button')];
@@ -143,6 +153,9 @@ export function mountCommandMenu(studio) {
     studio.dataset.commandMenuReady='true';
     if(header.parentElement!==panel)panel.prepend(header);
     if(groupBar.parentElement!==panel)header.after(groupBar);
+    if(studio.classList.contains('book-studio')) {
+      if(bookFormat.parentElement!==panel)panel.append(bookFormat);
+    } else bookFormat.remove();
     syncSections();
     const source=studio.querySelector('.save-controls .save-now, .book-tools .book-save');
     if(source!==saveSource) {
@@ -194,6 +207,8 @@ export function mountCommandMenu(studio) {
     saveProxy?.remove();
     for(const proxy of sectionProxies.values())proxy.remove();
     sectionProxies.clear();
+    bookFormat.removeEventListener('click',openBookFormat);
+    bookFormat.remove();
     groupBar.remove();header.remove();backdrop.remove();trigger.remove();
     worksButton.removeEventListener('click',openWorks);
     exitButton.removeEventListener('click',signOut);
