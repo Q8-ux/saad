@@ -17,6 +17,52 @@ export function mountCommandMenu(studio) {
   const header=make('div','studio-command-heading'),title=make('h2','','قائمة الأوامر'),closeButton=make('button','studio-command-close','×');
   title.id=id+'-title';closeButton.type='button';closeButton.setAttribute('aria-label','إغلاق قائمة الأوامر');
   header.append(title,closeButton);panel.setAttribute('aria-labelledby',title.id);
+  const groups=[
+    {id:'work',label:'الأعمال'},
+    {id:'write',label:'الكتابة'},
+    {id:'voice',label:'الصوت'},
+    {id:'files',label:'الملفات'},
+    {id:'help',label:'المساعدة'},
+  ];
+  const groupBar=make('div','studio-command-groups');
+  groupBar.setAttribute('role','group');
+  groupBar.setAttribute('aria-label','أقسام الأوامر');
+  let selectedGroup='work';
+  const groupButtons=new Map();
+  for(const group of groups){
+    const tab=make('button','studio-command-group',group.label);
+    tab.type='button';
+    tab.dataset.group=group.id;
+    tab.setAttribute('aria-pressed',group.id===selectedGroup?'true':'false');
+    tab.addEventListener('click',()=>{selectedGroup=group.id;updateGroups();});
+    groupButtons.set(group.id,tab);
+    groupBar.append(tab);
+  }
+  function category(button){
+    const label=(button.getAttribute('aria-label')||button.textContent||'').trim();
+    if(button.classList.contains('studio-command-save')||/حفظ|تصدير|طباعة|تنزيل|استيراد/.test(label))return 'files';
+    if(/مشروع جديد|المشاريع|أعمالي|إدارة المشاريع|خروج|تسجيل الخروج/.test(label))return 'work';
+    if(/صوت|استوديو الصوت|الميكروفون|الاستماع|تسجيل/.test(label))return 'voice';
+    if(/مساعدة|اختصار|الإعدادات/.test(label))return 'help';
+    return 'write';
+  }
+  function updateGroups(){
+    if(disposed)return;
+    for(const [id,tab] of groupButtons)tab.setAttribute('aria-pressed',id===selectedGroup?'true':'false');
+    let matchCount=0;
+    for(const button of panel.querySelectorAll(':scope > button')){
+      const group=category(button);
+      button.dataset.commandCategory=group;
+      const visible=group===selectedGroup;
+      button.toggleAttribute('data-command-selected',visible);
+      if(visible)matchCount++;
+    }
+    groupBar.dataset.empty=matchCount?'false':'true';
+    if(!matchCount){
+      const fallback=panel.querySelector(':scope > button[data-command-category="write"]');
+      if(fallback){fallback.setAttribute('data-command-selected','');selectedGroup='write';for(const [id,tab] of groupButtons)tab.setAttribute('aria-pressed',id==='write'?'true':'false');}
+    }
+  }
   const backdrop=make('div','studio-command-backdrop');backdrop.hidden=true;backdrop.setAttribute('aria-hidden','true');
   let opened=false,disposed=false,saveSource,saveProxy,signature='',inertNodes=[];
   function close(restoreFocus=true) {
@@ -41,15 +87,16 @@ export function mountCommandMenu(studio) {
     if(disposed)return;
     studio.dataset.commandMenuReady='true';
     if(header.parentElement!==panel)panel.prepend(header);
+    if(groupBar.parentElement!==panel)header.after(groupBar);
     const source=studio.querySelector('.save-controls .save-now, .book-tools .book-save');
     if(source!==saveSource) {
       saveSource?.classList.remove('studio-command-original-save');
       saveProxy?.remove();saveProxy=undefined;signature='';saveSource=source;
     }
-    if(!source)return;
+    if(!source){updateGroups();return;}
     source.classList.add('studio-command-original-save');
     const next=source.outerHTML;
-    if(next===signature&&saveProxy?.parentElement===panel)return;
+    if(next===signature&&saveProxy?.parentElement===panel){updateGroups();return;}
     signature=next;
     if(!saveProxy) {
       saveProxy=doc.createElement('button');saveProxy.type='button';
@@ -63,11 +110,12 @@ export function mountCommandMenu(studio) {
     saveProxy.setAttribute('aria-label',source.getAttribute('aria-label')||source.textContent.trim());
     if(source.hasAttribute('aria-busy'))saveProxy.setAttribute('aria-busy',source.getAttribute('aria-busy'));
     else saveProxy.removeAttribute('aria-busy');
+    updateGroups();
   }
   const toggle=()=>opened?close():open();
   const onCommand=event=>{
     const button=event.target.closest('button, a[href]');
-    if(button&&panel.contains(button)&&!button.disabled)close();
+    if(button&&panel.contains(button)&&!button.disabled&&!button.closest('.studio-command-groups'))close();
   };
   const onKey=event=>{
     if(!opened)return;
@@ -83,7 +131,7 @@ export function mountCommandMenu(studio) {
   doc.body.append(trigger);studio.append(backdrop);sync();
   return {panel,trigger,open,close,sync,destroy(){
     close(false);disposed=true;saveSource?.classList.remove('studio-command-original-save');
-    saveProxy?.remove();header.remove();backdrop.remove();trigger.remove();
+    saveProxy?.remove();groupBar.remove();header.remove();backdrop.remove();trigger.remove();
     delete studio.dataset.commandMenuReady;studio.classList.remove('command-menu-open');
     for(const [name,value] of before)if(value===null)panel.removeAttribute(name);else panel.setAttribute(name,value);
     panel.removeEventListener('click',onCommand,true);doc.removeEventListener('keydown',onKey,true);doc.removeEventListener('focusin',onFocus);
