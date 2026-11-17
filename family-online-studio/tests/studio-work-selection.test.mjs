@@ -70,8 +70,8 @@ test('selecting another work from inside the editor updates the outer account se
 
 test('opening a book keeps its requested ID and does not reuse a screenplay', () => {
   const result=renderSelection({work:'w-book-foreign-1',query:'barcode'});
-  assert.equal(result.rendered.element,'BookEditor');
-  assert.equal(result.rendered.props.workKey,'w-book-foreign-1');
+  assert.equal(result.rendered.props.children.element,'BookEditor');
+  assert.equal(result.rendered.props.children.props.workKey,'w-book-foreign-1');
 });
 
 test('authenticated project list owns project changes and does not select a default on login', () => {
