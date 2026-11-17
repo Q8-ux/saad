@@ -40,6 +40,9 @@ jobs:
           node --check family-online-studio/assets/chunks/chunk-LPQTZJNU.mjs
           node --test family-online-studio/tests/studio-microphone.test.mjs
           node --check family-online-studio/assets/studio-command-menu.mjs
+          node --check family-online-studio/assets/studio-compact-layout.mjs
+          node --test family-online-studio/tests/studio-compact-layout.test.mjs
+          node --check family-online-studio/assets/studio-command-menu.mjs
           node --check family-online-studio/backend/server.mjs
           node --check family-online-studio/backend/document-import.mjs
           node --test family-online-studio/backend/document-import.test.mjs
