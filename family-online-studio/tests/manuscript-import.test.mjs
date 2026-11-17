@@ -7,6 +7,7 @@ import {
   extractDocxText,
   importManuscriptFile,
   parseManuscriptText,
+  normalizeSpokenManuscript,
   prepareImportedDocument,
   summarizeImportedDocument,
 } from '../assets/manuscript-import.mjs';
@@ -163,7 +164,12 @@ test('new-project interface exposes review-first file import and account-scoped 
     readFile(new URL('../assets/studio-works.mjs', import.meta.url), 'utf8'),
     readFile(new URL('../assets/studio-workspaces.css', import.meta.url), 'utf8'),
   ]);
-  assert.match(works, /البدء من ملف/u);
+  assert.match(works, /📎 رفع ملف/u);
+  assert.match(works, /🎙️ تسجيل صوتي/u);
+  assert.match(works, /✍️ كتابة/u);
+  assert.match(works, /getUserMedia/u);
+  assert.match(works, /MediaRecorder/u);
+  assert.match(works, /إعادة تفريغ الصوت دون تسجيل جديد/u);
   assert.match(works, /prepareImportedDocument/u);
   assert.match(works, /\/api\/manuscript\?work=/u);
   assert.match(works, /النص المنظّم داخل حسابك فقط/u);
@@ -227,4 +233,56 @@ test('new-project workflow translates unavailable gateway errors and avoids ambi
   assert.match(source, /إعادة الاتصال وتحديث أعمالي/u);
   assert.match(source, /لم يُحذف المشروع تلقائيًا/u);
   assert.doesNotMatch(source, /action: 'delete', id: createdId/u);
+});
+
+
+test('spoken Arabic episode, scene, character and action cues become a structured screenplay', () => {
+  const transcript = 'عنوان المشروع خارج الستوري، المؤلف سعد، الحلقة الأولى، المشهد الأول داخلي البيت ليل، وصف المشهد تدخل عواطف البيت، عواطف تقول: وين فاطمة؟ المشهد الثاني خارجي الشارع نهار، فاطمة تقول: أنا وصلت';
+  const normalized = normalizeSpokenManuscript(transcript);
+  assert.match(normalized, /الحلقة 1/u);
+  assert.match(normalized, /المشهد 1/u);
+  assert.match(normalized, /المشهد 2/u);
+  assert.match(normalized, /عواطف: وين فاطمة/u);
+  assert.match(normalized, /فاطمة: أنا وصلت/u);
+  const plan = parseManuscriptText(normalized, { fileName: 'recording.webm' });
+  assert.equal(plan.recommendedKind, 'series');
+  assert.equal(plan.metrics.units, 1);
+  assert.equal(plan.metrics.scenes, 2);
+  assert.equal(plan.metrics.dialogues, 2);
+  assert.equal(plan.document.characters.length, 2);
+  assert.equal(plan.title, 'خارج الستوري');
+  assert.equal(plan.author, 'سعد');
+  assert.ok(plan.document.scenes[0].blocks.some(block => block.type === 'action' && block.text.includes('تدخل عواطف')));
+  assert.equal(plan.document.scenes[0].unitId, plan.document.units[0].id);
+  assert.equal(plan.document.scenes[1].unitId, plan.document.units[0].id);
+});
+
+test('spoken audio imports through protected transcription flow and does not send source content to GitHub', async () => {
+  const transcript = 'الحلقة الأولى المشهد الأول داخلي المكتب نهار، الشخصية عبد الله يقول: وصلنا، المشهد الثاني خارجي الشارع ليل، حوار نورة: اتفقنا';
+  const plan = await importManuscriptFile({name:'recording.webm',type:'audio/webm',size:900},
+    { extractFile: async (file, options) => {
+      assert.equal(file.name,'recording.webm');
+      assert.equal(options.media,true);
+      return {text:transcript,format:'تفريغ صوت',warnings:['راجع الأسماء']};
+    }});
+  assert.equal(plan.recommendedKind,'series');
+  assert.equal(plan.metrics.scenes,2);
+  assert.equal(plan.metrics.dialogues,2);
+  assert.deepEqual(plan.document.characters.map(x=>x.name),['عبد الله','نورة']);
+  assert.ok(plan.warnings.includes('راجع الأسماء'));
+  const document = prepareImportedDocument(plan,{title:'مسلسل تجريبي',kind:'series'});
+  assert.equal(document.scenes.length,2);
+  assert.equal(document.title,'مسلسل تجريبي');
+});
+
+test('new-project voice recorder UI enforces manual stop, mic cleanup, and authenticated media upload',async()=>{
+  const works = await readFile(new URL('../assets/studio-works.mjs',import.meta.url),'utf8');
+  assert.match(works,/recorder\.start\(500\)/u);
+  assert.match(works,/stream\.getTracks\(\)\.forEach\(track => track\.stop\(\)\)/u);
+  assert.match(works,/studio-session-expired/u);
+  assert.match(works,/audio\/webm/u);
+  assert.match(works,/setDraftText/u);
+  assert.match(works,/normalizeSpokenManuscript\(draftText\)/u);
+  assert.match(works,/recordState !== 'idle'/u);
+  assert.match(works,/fileInput\.current\?\.click\(\)/u);
 });
