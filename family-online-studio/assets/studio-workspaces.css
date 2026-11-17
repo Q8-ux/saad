@@ -154,3 +154,28 @@
   .studio:is([data-script-kind='series'], [data-script-kind='film']) .reader-paper .screenplay-dialogue > :is(.screenplay-speaker, .screenplay-text) { grid-row: auto; grid-column: 1; }
   .studio:is([data-script-kind='series'], [data-script-kind='film']) .reader-paper :is(.screenplay-heading, .screenplay-transition) > .screenplay-text { grid-column: 1 / -1; }
 }
+
+
+/* Accessible three-way project creation and voice capture (mobile-first). */
+.workspace-new-actions { display: flex; align-items: center; flex-wrap: wrap; gap: .45rem; }
+.studio-workspaces .workspace-mic-shortcut { white-space: nowrap; color: #134758; border-color: #608695; background: #eff7f9; }
+.workspace-written { display: grid; gap: .65rem; padding: .85rem; border: 1px solid #c9dadd; background: #f7faf9; border-radius: .7rem; }
+.studio-workspaces textarea {
+  display: block; width: 100%; min-height: 10rem; max-width: 100%; resize: vertical;
+  font: inherit; line-height: 1.8; color: #152a36; background: #fff;
+  padding: .75rem; border: 1px solid #bac7cd; border-radius: .55rem;
+}
+.workspace-import-drop { display: grid; gap: .5rem; justify-items: center; }
+.workspace-import-drop button { width: min(100%, 22rem); background: #e8eff2; border-color: #608695; }
+.workspace-record-controls { display: flex; align-items: center; flex-wrap: wrap; gap: .7rem; }
+.studio-workspaces .workspace-record-stop { background: #7e3036; border-color: #7e3036; color: #fff; }
+.workspace-record-controls span { color: #244452; font-variant-numeric: tabular-nums; }
+.workspace-voice { background: #f7fafb; }
+.studio-workspaces .workspace-mic-shortcut:focus-visible,
+.studio-workspaces textarea:focus-visible { outline: 2px solid #176683; outline-offset: 2px; }
+@media screen and (max-width: 560px) {
+  .workspace-new-actions { width: 100%; }
+  .workspace-new-actions button { flex: 1 1 auto; }
+  .workspace-create-mode button { flex: 1 1 7rem; }
+  .workspace-record-controls button { width: 100%; }
+}
