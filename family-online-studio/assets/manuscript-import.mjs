@@ -136,6 +136,39 @@ function detectKind(value) {
   return arabicRatio(value) >= 0.2 ? 'book-ar' : 'book-en';
 }
 
+/**
+ * Turns explicit spoken episode, scene and character cues into editable lines.
+ * Ambiguous transcript portions remain text; the parser never invents scenes.
+ */
+export function normalizeSpokenManuscript(input) {
+  let source = normalized(input).trim();
+  if (!source) return source;
+  const numbers = new Map([
+    ['الأول', '1'], ['الأولى', '1'], ['اول', '1'], ['اولى', '1'],
+    ['الثاني', '2'], ['الثانية', '2'], ['الثالث', '3'], ['الثالثة', '3'],
+    ['الرابع', '4'], ['الرابعة', '4'], ['الخامس', '5'], ['الخامسة', '5'],
+    ['السادس', '6'], ['السادسة', '6'], ['السابع', '7'], ['السابعة', '7'],
+    ['الثامن', '8'], ['الثامنة', '8'], ['التاسع', '9'], ['التاسعة', '9'],
+    ['العاشر', '10'], ['العاشرة', '10'],
+  ]);
+  source = source.replace(/\b(الحلقة|الحلقه|المشهد|مشهد)\s+(?:رقم\s+)?(الأول|الأولى|اول|اولى|الثاني|الثانية|الثالث|الثالثة|الرابع|الرابعة|الخامس|الخامسة|السادس|السادسة|السابع|السابعة|الثامن|الثامنة|التاسع|التاسعة|العاشر|العاشرة)\b/gu,
+    (_match, type, number) => type + ' ' + numbers.get(number));
+  source = source.replace(/(الحلقة|الحلقه|المشهد|مشهد)\s+(?:رقم\s+)?([٠-٩۰-۹]+)/gu,
+    (_match, type, digits) => type + ' ' + digits.replace(/[٠-٩۰-۹]/gu, digit =>
+      String(digit.charCodeAt(0) - (digit.charCodeAt(0) <= 0x0669 ? 0x0660 : 0x06f0))));
+  // ASR often emits a single paragraph. Split at explicit labels and numbered headings.
+  source = source.replace(/(?:^|[\s،؛.!?])(?=(?:عنوان\s+(?:المشروع|العمل)|اسم\s+(?:المشروع|العمل)|المؤلف|تأليف|الحلقة\s+\d+|الحلقه\s+\d+|المشهد\s+\d+|مشهد\s+\d+|وصف\s+(?:المشهد|الحركة)|حوار\s+|الشخصية\s+))/gu,
+    boundary => boundary.trim() ? boundary.trim() + '\n' : '\n');
+  source = source.replace(/(?:^|\n)\s*(?:عنوان\s+(?:المشروع|العمل)|اسم\s+(?:المشروع|العمل))\s*[:：]?\s*/gu, '\nالعنوان: ');
+  source = source.replace(/(?:^|\n)\s*(?:المؤلف|تأليف)\s*[:：]?\s*/gu, '\nالمؤلف: ');
+  source = source.replace(/(?:^|\n)\s*(?:وصف\s+(?:المشهد|الحركة)|الوصف)\s*[:：]?\s*/gu, '\nوصف: ');
+  source = source.replace(/(?:^|\n)\s*(?:حوار\s+)?(?:الشخصية|المتحدث)\s+([\p{Script=Arabic}\p{Mark}][\p{Script=Arabic}\p{Mark}\s]{1,60}?)\s+(?:تقول|يقول|قالت|قال|ترد|يرد|تسأل|يسأل)\s*[:：]?\s*/gu, '\n$1: ');
+  source = source.replace(/(?:^|\n)\s*حوار\s+([\p{Script=Arabic}\p{Mark}][\p{Script=Arabic}\p{Mark}\s]{1,50}?)\s*[:：]\s*/gu, '\n$1: ');
+  source = source.replace(/(?:^|[،؛.!?\n])\s*([\p{Script=Arabic}\p{Mark}]{2,35})\s+(?:تقول|يقول|قالت|قال|ترد|يرد|تسأل|يسأل)\s*[:：]?\s*/gu,
+    (_match, _boundary, speaker) => '\n' + speaker + ': ');
+  return source.replace(/[ \t]+\n/gu, '\n').replace(/\n{3,}/gu, '\n\n').trim();
+}
+
 function sceneDetails(raw, number) {
   const cleaned = raw.trim().replace(/^\.(?!\.)/u, '').replace(/^(?:المشهد|مشهد)\s*(?:رقم\s*)?[\d٠-٩]*\s*[:.\-–—]?\s*/iu, '').trim();
   const timeMatch = /(?:^|[\s\-–—])((?:ليل|نهار|صباح|مساء|فجر|day|night|morning|evening))(?:$|[\s\-–—])/iu.exec(` ${cleaned} `);
@@ -243,6 +276,13 @@ function parseScript(value, options = {}) {
       const type = sound ? 'sound' : song ? 'song' : transition || line.startsWith('>') ? 'transition' : 'heading';
       const content = sound?.[1] || song?.[1] || transition?.[1] || line.replace(/^(?:>|##+)\s*/u, '') || line;
       addBlock(ensureScene(), type, content);
+      blockCount += 1;
+      continue;
+    }
+    const spokenAction = /^(?:وصف|حركة|أحداث)\s*[:：]\s*(.+)$/u.exec(line);
+    if (spokenAction) {
+      flush();
+      addBlock(ensureScene(), 'action', spokenAction[1]);
       blockCount += 1;
       continue;
     }
@@ -625,9 +665,11 @@ export async function importManuscriptFile(file, options = {}) {
     const maximum = MEDIA_EXTENSIONS.has(ext) || mime.startsWith('audio/') || mime === 'video/mp4' ? MAX_MEDIA_BYTES : MAX_EXTERNAL_BYTES;
     if (file.size > maximum) throw new Error(`حجم الملف أكبر من الحد المسموح (${maximum === MAX_MEDIA_BYTES ? '٨' : '٢٥'} ميغابايت).`);
     if (typeof options.extractFile !== 'function') throw new Error('يحتاج هذا النوع إلى محرك التحليل الآمن في الاستوديو. أعد المحاولة من الموقع المنشور.');
-    const extracted = await options.extractFile(file, { media: MEDIA_EXTENSIONS.has(ext) || mime.startsWith('audio/') || mime === 'video/mp4' });
+    const media = MEDIA_EXTENSIONS.has(ext) || mime.startsWith('audio/') || mime === 'video/mp4';
+    const extracted = await options.extractFile(file, { media });
     if (!extracted || typeof extracted.text !== 'string') throw new Error('لم يُرجع محرك التحليل نصًا صالحًا.');
-    const plan = parseManuscriptText(extracted.text, { fileName: file.name, preferredKind: options.preferredKind, format: extracted.format || 'نص مستخرج' });
+    const interpreted = media ? normalizeSpokenManuscript(extracted.text) : extracted.text;
+    const plan = parseManuscriptText(interpreted, { fileName: file.name, preferredKind: options.preferredKind, format: extracted.format || 'نص مستخرج' });
     plan.warnings = [...(Array.isArray(extracted.warnings) ? extracted.warnings : []), ...plan.warnings].slice(0, 12);
     return plan;
   }
