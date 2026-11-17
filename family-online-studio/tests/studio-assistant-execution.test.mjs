@@ -135,7 +135,7 @@ test('no write occurs for invalid AI output, unsupported books or unselected wor
  await assert.rejects(executeScriptContinuation({
   message:'أكمل المسلسل',files:empty.files,workId:'series',
   request:empty.request
- }),/لم ينتج المحرك مشهدًا/u);
+ }),/لم ينتج المحرك مشهدًا مكتمل البنية/u);
  assert.equal(empty.calls.some(x=>x.method==='PUT'),false);
  const book=harness({readDoc:{kind:'book',scenes:[]}});
  await assert.rejects(executeScriptContinuation({
@@ -147,6 +147,18 @@ test('no write occurs for invalid AI output, unsupported books or unselected wor
   message:'أكمل المسلسل',files:book.files,workId:'auto',
   request:book.request
  }),/اختر العمل المطلوب/u);
+});
+
+test('an invalid generated block cannot be silently dropped and saved as an incomplete scene',async()=>{
+ const malformed=harness({proposal:{title:'مشهد ناقص',summary:'',blocks:[
+  {type:'dialogue',text:'جملة صالحة',speaker:'فاطمة'},
+  {type:'dialogue',text:'   ',speaker:'فاطمة'}
+ ]}});
+ await assert.rejects(executeScriptContinuation({
+  message:'أكمل المسلسل',files:malformed.files,workId:'series',
+  request:malformed.request,uuid:()=>String(crypto.randomUUID())
+ }),/مكتمل البنية/u);
+ assert.equal(malformed.calls.some(call=>call.method==='PUT'),false);
 });
 
 test('revision conflict never reports a successful save',async()=>{
