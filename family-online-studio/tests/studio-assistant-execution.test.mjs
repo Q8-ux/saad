@@ -183,11 +183,21 @@ test('text and voice assistant run the same explicit write task, not the read-on
  const source=await readFile(new URL('../assets/chunks/library-assistant-I5KUSPHA.mjs',import.meta.url),'utf8');
  assert.match(source,/isExplicitScriptExecution as isExecution/);
  assert.match(source,/executeScriptContinuation as runExecution/);
- assert.match(source,/execute=isExecution\(r,files\)/);
- assert.match(source,/runExecution\(\{message:r,files,workId,/);
- assert.match(source,/file[s]?.length\?directTask\(r,files\):r/);
- assert.match(source,/onTranscript:\(i,d,o,c\)=>\{if\(p.current&&d==="user"&&!c&&isExecution\(o,files\)\)/);
+ assert.match(source,/execute=isExecution\(r,activeFiles\)/);
+ assert.match(source,/runExecution\(\{message:r,files:activeFiles,workId,/);
+ assert.match(source,/activeFiles.length\?directTask\(r,activeFiles\):r/);
+ assert.match(source,/onTranscript:\(i,d,o,c\)=>\{if\(p.current&&d==="user"&&!c&&isExecution\(o,filesRef.current\)\)/);
  assert.match(source,/w\("ينفذ الأمر على المخطوط…"\)/u);
  assert.match(source,/m\.current=null/);
  assert.match(source,/if\(p.current&&!i.signal.aborted\)u\(turns=>/);
+});
+
+test('voice execution observes the latest attachments and refreshes the scene after a confirmed save',async()=>{
+ const library=await readFile(new URL('../assets/chunks/library-assistant-I5KUSPHA.mjs',import.meta.url),'utf8');
+ const editor=await readFile(new URL('../assets/app.mjs',import.meta.url),'utf8');
+ assert.match(library,/filesRef\.current=files/);
+ assert.match(library,/isExecution\(o,filesRef\.current\)/);
+ assert.match(library,/studio-manuscript-updated/);
+ assert.match(editor,/addEventListener\("studio-manuscript-updated",update\)/);
+ assert.match(editor,/Ne\.current!=="saved"/);
 });
