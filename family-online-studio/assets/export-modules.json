@@ -2,7 +2,7 @@
   "initial": [
     {
       "file": "assets/app.mjs",
-      "bytes": 272038
+      "bytes": 272034
     },
     {
       "file": "assets/chunks/chunk-3MNS2YWJ.mjs",
@@ -136,7 +136,7 @@
     },
     {
       "file": "assets/chunks/library-assistant-I5KUSPHA.mjs",
-      "bytes": 22782
+      "bytes": 16192
     },
     {
       "file": "assets/chunks/chunk-FEUYKCPT.mjs",
@@ -149,6 +149,10 @@
     {
       "file": "assets/chunks/scene-execution.mjs",
       "bytes": 74970
+    },
+    {
+      "file": "assets/chunks/studio-realtime.mjs",
+      "bytes": 9692
     }
   ]
 }

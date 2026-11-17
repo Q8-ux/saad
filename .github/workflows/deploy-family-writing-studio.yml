@@ -43,6 +43,8 @@ jobs:
           node --check family-online-studio/assets/studio-compact-layout.mjs
           node --test family-online-studio/tests/studio-compact-layout.test.mjs
           node --test family-online-studio/tests/studio-work-selection.test.mjs
+          node --check family-online-studio/assets/chunks/studio-realtime.mjs
+          node --test family-online-studio/tests/studio-live-voice.test.mjs
           node --check family-online-studio/assets/chunks/library-assistant-I5KUSPHA.mjs
           node --check family-online-studio/assets/chunks/assistant-attachments.mjs
           node --test family-online-studio/tests/studio-assistant-attachments.test.mjs
@@ -71,5 +73,6 @@ jobs:
       - name: Deploy
         id: deploy
         uses: actions/deploy-pages@v4
+
 
 

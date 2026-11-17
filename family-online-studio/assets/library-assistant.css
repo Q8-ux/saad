@@ -67,3 +67,14 @@
 @media print {
   .library-attachments {display: none !important;}
 }
+
+/* Keep microphone actions reachable with Android browser chrome and large text. */
+.library-assistant{overflow-y:auto;overscroll-behavior:contain;scroll-padding-block:12px}
+.library-assistant>header,.library-controls,.library-basis,.library-attachments,.library-live{flex-shrink:0}
+.library-live .library-live-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:0 0 14px}
+.library-live-actions>.primary{min-height:48px;flex:1;max-width:340px;font-weight:700}
+.library-assistant:has(.library-live)>header p{display:none}
+.library-live-actions>.button,.library-live-actions>.library-end{padding-inline:9px;font-size:15px;min-width:0}
+.library-error{flex-shrink:0;padding:10px 12px;border-radius:9px;background:#fff0eb;overflow-wrap:anywhere}
+.library-notice{flex-shrink:0;overflow-wrap:anywhere}
+@media(max-width:600px){.library-live .library-live-actions{margin-bottom:10px}.library-live{margin-top:6px}.library-live p{font-size:14px}.library-live small{font-size:12px}.library-assistant>header{padding-block:10px}.library-controls{padding-top:8px}}
