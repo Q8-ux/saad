@@ -418,6 +418,8 @@ export function createStudioWorks({ React, Studio }) {
       requestedWork: active,
       userKey: verified.id === 'owner' ? 'external-private-owner' : 'external-studio:' + verified.id,
       onSignOut,
+      // Keep the outer work selection authoritative when switching inside an editor.
+      onSelectedWork: id => { if (typeof id === 'string' && id.trim()) choose(id); },
       onWorks: () => { choose(null); setReload(value => value + 1); },
     });
 
