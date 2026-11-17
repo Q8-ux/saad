@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "status": "planning_only",
+  "duration_seconds_estimated": 150.0,
+  "video_rendered": false,
+  "audio_generated": false,
+  "images_generated": false,
+  "published": false,
+  "unverified_claims": [],
+  "assets_pending": [
+    "s1",
+    "s2",
+    "s3",
+    "s4",
+    "s5",
+    "s6",
+    "s7"
+  ]
+}
