@@ -46,9 +46,9 @@ test('entry includes compact styles after existing styles and preserves all expo
     source('../assets/studio-command-menu.mjs'),
     source('../README.md')
   ]);
-  assert.match(html, /studio-command-menu\.mjs\?v=20261117-navigation4/);
+  assert.match(html, /studio-command-menu\.mjs\?v=20261117-navigation5/);
   assert.match(html, /studio-compact-layout\.mjs\?v=20261117-compact1/);
-  assert.match(html, /studio-compact-layout\.css\?v=20261117-navigation2/);
+  assert.match(html, /studio-compact-layout\.css\?v=20261117-navigation5/);
   assert.ok(html.indexOf('studio-compact-layout.css') > html.indexOf('studio-french.css'));
   assert.match(menu, /studio-command-save/);
   assert.match(readme, /Word/u);
@@ -106,7 +106,7 @@ test('sidebar acts after React handlers and exposes French, Writer Toolbar, Writ
   assert.match(app, /Writer Toolbar \| شريط التنسيق/);
   assert.match(app, /requestAnimationFrame\(\(\)=>requestAnimationFrame/);
   assert.match(app, /رايت سولو العربي/);
-  assert.match(html, /studio-command-menu\.mjs\?v=20261117-navigation4/);
+  assert.match(html, /studio-command-menu\.mjs\?v=20261117-navigation5/);
 });
 
 test('landing project selection is explicitly opt-in; previous ?work never auto-opens', async () => {
@@ -127,4 +127,16 @@ test('book editor exposes its Writer Toolbar in the same writing sidebar', async
   assert.match(menu, /bookFormat\.dataset\.commandGroup='write'/);
   assert.match(menu, /openBookFormat/);
   assert.match(menu, /toolbar\?\.previousElementSibling/);
+});
+
+
+test('empty sidebar section remains selected and explains absent controls instead of silently switching', async () => {
+  const [menu,css] = await Promise.all([
+    source('../assets/studio-command-menu.mjs'),
+    source('../assets/studio-compact-layout.css'),
+  ]);
+  assert.match(menu,/emptyCategory\.hidden=matchCount>0/);
+  assert.match(menu,/لا توجد أدوات في هذا القسم لهذا النوع من العمل/u);
+  assert.doesNotMatch(menu,/selectedGroup='write';for\(const \[id,tab\]/);
+  assert.match(css,/\.studio-command-empty\[hidden\]/);
 });
