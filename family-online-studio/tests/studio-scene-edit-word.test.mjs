@@ -21,7 +21,7 @@ test('scene board and first line of each reader scene expose Edit',()=>{
 test('top of both editor and read view exports the entire current work as Word using existing exporter',()=>{
   const instances=app.match(/className:"scene-word-export"/g)||[];
   assert.equal(instances.length,2);
-  assert.match(app,/className:"scene-word-export",disabled:S,onClick:\(\)=>\{S\|\|\(z\(!0\),Em\(v\)/);
+  assert.match(app,/className:"scene-word-export",disabled:S,onClick:\(\)=>\{S\|\|\(z\(!0\),Em\(cleanScenes\(v\)\)/);
   assert.match(app,/جارٍ تجهيز Word…/u);
   assert.match(app,/تصدير العمل Word/u);
   assert.match(app,/مستند Word/u);
