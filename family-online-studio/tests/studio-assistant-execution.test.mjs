@@ -72,6 +72,26 @@ test('an explicit screenplay command generates a new scene and persists only wit
  assert.doesNotMatch(result.message,/رأيي|أقترح|هل تريد/u);
 });
 
+test('continue this scene appends blocks without creating a duplicate scene',async()=>{
+ const h=harness();
+ const result=await executeScriptContinuation({
+  message:'كمل المشهد',files:h.files,workId:'series',request:h.request,uuid:()=>String(crypto.randomUUID())
+ });
+ const saved=h.calls.find(call=>call.method==='PUT').body.doc;
+ assert.equal(saved.scenes.length,1);
+ assert.equal(saved.scenes[0].id,'scene1');
+ assert.equal(saved.scenes[0].blocks.length,3);
+ assert.equal(saved.scenes[0].blocks[0].text,'كيف حالك؟');
+ assert.equal(saved.scenes[0].blocks[1].text,'تفتح فاطمة الباب.');
+ assert.match(result.message,/أُضيفت 2 فقرات/u);
+});
+
+test('user explicitly asking for an opinion is not overridden by the no-commentary instruction',()=>{
+ const prompt=makeDirectTaskMessage('ما رأيك في ترتيب المشاهد؟',[{name:'outline.txt',text:'الأحداث'}]);
+ assert.ok(prompt.startsWith('ما رأيك'));
+ assert.doesNotMatch(prompt,/دون مقدمة أو تقييم أو نصائح/u);
+});
+
 test('no write occurs for invalid AI output, unsupported books or unselected work',async()=>{
  const empty=harness({proposal:{title:'',summary:'',blocks:[]}});
  await assert.rejects(executeScriptContinuation({
