@@ -62,7 +62,7 @@ export function mountCommandMenu(studio) {
     tab.type='button';
     tab.dataset.group=group.id;
     tab.setAttribute('aria-pressed',group.id===selectedGroup?'true':'false');
-    tab.addEventListener('click',()=>{selectedGroup=group.id;updateGroups();});
+    tab.addEventListener('click',()=>{selectedGroup=group.id;updateGroups();panel.scrollTop=0;});
     groupButtons.set(group.id,tab);
     groupBar.append(tab);
   }
@@ -86,7 +86,6 @@ export function mountCommandMenu(studio) {
       if(visible)matchCount++;
     }
     groupBar.dataset.empty=matchCount?'false':'true';
-    if(opened)panel.scrollTop=0;
     if(!matchCount){
       const fallback=panel.querySelector(':scope > button[data-command-category="write"]');
       if(fallback){fallback.setAttribute('data-command-selected','');selectedGroup='write';for(const [id,tab] of groupButtons)tab.setAttribute('aria-pressed',id==='write'?'true':'false');}
