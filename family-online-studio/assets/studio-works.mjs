@@ -377,8 +377,13 @@ export function createStudioWorks({ React, Studio }) {
       request(null, controller.signal).then(result => {
         if (controller.signal.aborted) return;
         applyCatalogue(result);
-        const requested = new URL(window.location.href).searchParams.get('work');
-        if (requested) choose(result.projects.some(work => work.id === requested && !work.archivedAt) ? requested : null);
+        // The authenticated entry always starts at "أعمالي", even when an
+        // old link or a previous editor session left a ?work= parameter.
+        const landing = new URL(window.location.href);
+        if (landing.searchParams.has('work')) {
+          landing.searchParams.delete('work');
+          window.history.replaceState(null, '', landing.pathname + landing.search + landing.hash);
+        }
       }).catch(failure => { if (!controller.signal.aborted) setError(describeStudioNetworkFailure(failure).message || 'تعذر تحميل أعمالك. حاول مرة أخرى.'); });
       return () => controller.abort();
     }, [requestStudio, reload]);
