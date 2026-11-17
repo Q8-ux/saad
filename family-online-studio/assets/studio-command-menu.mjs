@@ -54,6 +54,9 @@ export function mountCommandMenu(studio) {
     {id:'help',label:'المساعدة'},
   ];
   const groupBar=make('div','studio-command-groups');
+  const emptyCategory=make('p','studio-command-empty','لا توجد أدوات في هذا القسم لهذا النوع من العمل.');
+  emptyCategory.hidden=true;
+  emptyCategory.setAttribute('role','status');
   groupBar.setAttribute('role','group');
   groupBar.setAttribute('aria-label','أقسام الأوامر');
   let selectedGroup='work';
@@ -122,10 +125,7 @@ export function mountCommandMenu(studio) {
       if(visible)matchCount++;
     }
     groupBar.dataset.empty=matchCount?'false':'true';
-    if(!matchCount){
-      const fallback=panel.querySelector(':scope > button[data-command-category="write"]');
-      if(fallback){fallback.setAttribute('data-command-selected','');selectedGroup='write';for(const [id,tab] of groupButtons)tab.setAttribute('aria-pressed',id==='write'?'true':'false');}
-    }
+    emptyCategory.hidden=matchCount>0;
   }
   const backdrop=make('div','studio-command-backdrop');backdrop.hidden=true;backdrop.setAttribute('aria-hidden','true');
   let opened=false,disposed=false,saveSource,saveProxy,signature='',inertNodes=[];
@@ -153,6 +153,7 @@ export function mountCommandMenu(studio) {
     studio.dataset.commandMenuReady='true';
     if(header.parentElement!==panel)panel.prepend(header);
     if(groupBar.parentElement!==panel)header.after(groupBar);
+    if(emptyCategory.parentElement!==panel)groupBar.after(emptyCategory);
     if(studio.classList.contains('book-studio')) {
       if(bookFormat.parentElement!==panel)panel.append(bookFormat);
     } else bookFormat.remove();
@@ -209,7 +210,7 @@ export function mountCommandMenu(studio) {
     sectionProxies.clear();
     bookFormat.removeEventListener('click',openBookFormat);
     bookFormat.remove();
-    groupBar.remove();header.remove();backdrop.remove();trigger.remove();
+    emptyCategory.remove();groupBar.remove();header.remove();backdrop.remove();trigger.remove();
     worksButton.removeEventListener('click',openWorks);
     exitButton.removeEventListener('click',signOut);
     shortcuts.remove();
