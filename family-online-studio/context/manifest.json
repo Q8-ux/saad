@@ -1,7 +1,7 @@
 {
   "revision": "project-context-1",
   "project": "writing-studio",
-  "sourceCommit": "726d064d263ab302c7256d1a90579bb6725aafca",
+  "sourceCommit": "4f5bc793203428ed5bd442fbf732503dd5259c2d",
   "scope": "current-manuscript-and-selected-scene",
   "workIdentitySource": "server-request-url",
   "crossWorkMemory": false,
@@ -15,11 +15,15 @@
     },
     {
       "path": "lib/scenarist.ts",
-      "sha256": "c7600f5c941f1a5cd3e17dae1726c56109eb1d187682ca2165ea88e1b4f88b41"
+      "sha256": "2b28a849c084cf35169f082d19eb5069a2e2acee65b1cc4c57412756f270830b"
+    },
+    {
+      "path": "lib/scene-execution.ts",
+      "sha256": "45ad65f5741796da25b6ddb07c20373af476aeaf69c58e73769381d46e8727dd"
     },
     {
       "path": "app/api/scenarist/route.ts",
-      "sha256": "ab81ca880afc79a58070a15b17422deb1523815fbf8f16d3106716cc0e1c72d5"
+      "sha256": "ad6cac6b21d4d8efac9546fd860db9530cffaa84b86d31689c93990fa4fc0eaa"
     }
   ],
   "checks": {
@@ -27,10 +31,22 @@
     "knowledgeMemory": "passed",
     "studioContracts": "passed",
     "workerBuild": "passed",
-    "liveModelCalls": 0
+    "liveModelCalls": 0,
+    "sceneExecution": "passed",
+    "publicAttachmentAndExecutionTests": 17,
+    "authenticatedBrowserTest": "sign-in-required"
   },
   "publication": "succeeded",
   "snapshotPolicy": "generic-context-module-only; no manuscripts, seeds, credentials or private build archives",
-  "deployedVersion": "appgprj_6acf275cd3a4819188adb07ac6bee0be~appgver_fa9954dd2a0c81919bd0bbe2f23ec1fc",
-  "deploymentId": "appgdep_6ae3b092b5448191b04f90d9f44e2daa"
+  "deployedVersion": "appgprj_6acf275cd3a4819188adb07ac6bee0be~appgver_b54c374cfe088191b3d3e8a077dd93f0",
+  "deploymentId": "appgdep_6afc82ce23f48191a30adf9e98d7527c",
+  "sceneExecution": {
+    "revision": "attachment-scene-execution-2",
+    "optionalNotes": true,
+    "directSave": true,
+    "batchSave": "single-revision-guarded-write",
+    "targeting": "episode-relative-numbers-or-explicit-scene-ids",
+    "attachmentCharacterLimit": 400000,
+    "snapshot": true
+  }
 }

@@ -712,3 +712,33 @@ export async function importManuscriptFile(file, options = {}) {
             : 'نص';
   return parseManuscriptText(prepared, { fileName: file.name, preferredKind: options.preferredKind, format });
 }
+
+// Read attachments as source text, preserving editorial instructions and headings.
+// Project creation continues to use importManuscriptFile and its structured plan.
+export async function readAssistantAttachmentFile(file, options = {}) {
+  if (!file || typeof file.name !== 'string') throw new Error('اختر ملفًا من جهازك.');
+  const ext = extension(file.name), mime = String(file.type || '').toLowerCase();
+  const local = TEXT_EXTENSIONS.has(ext) || ['fountain', 'fdx', 'json', 'docx'].includes(ext) || mime.startsWith('text/');
+  const media = MEDIA_EXTENSIONS.has(ext) || mime.startsWith('audio/') || mime === 'video/mp4';
+  let result;
+  if (!local || EXTERNAL_EXTENSIONS.has(ext) || media || (ext === 'docx' && file.size > MAX_DOCX_BYTES)) {
+    if (file.size > (media ? MAX_MEDIA_BYTES : MAX_EXTERNAL_BYTES)) throw new Error('حجم الملف أكبر من الحد المسموح.');
+    if (typeof options.extractFile !== 'function') throw new Error('تعذر الاتصال بمحرك قراءة المرفقات.');
+    const extracted = await options.extractFile(file, { media });
+    result = { text: extracted.text, format: extracted.format || 'نص مستخرج', warnings: extracted.warnings || [] };
+  } else {
+    if (file.size > (ext === 'docx' ? MAX_DOCX_BYTES : MAX_TEXT_BYTES)) throw new Error('الملف كبير؛ قسّمه ثم أعد إرفاقه.');
+    if (ext === 'docx') result = { ...await extractDocxText(await file.arrayBuffer()), format: 'Word (DOCX)', warnings: [] };
+    else if (ext === 'fdx' || ext === 'json') {
+      const plan = await importManuscriptFile(file, options), doc = plan.document;
+      result = {text: doc.kind === 'book' ? doc.chapters.map(c => [c.title, ...c.blocks.map(b => b.text)].join('\n')).join('\n\n')
+        : [doc.title, ...doc.scenes.flatMap((s, i) => [doc.units.find(u => u.id === s.unitId)?.title || '', `المشهد ${i + 1}: ${s.title}`, ...s.blocks.map(b => (b.type === 'dialogue' ? (doc.characters.find(c => c.id === b.characterId)?.name || b.label || '') + ': ' : '') + b.text)])].join('\n\n'), format: plan.format || ext, warnings: plan.warnings || []};
+    } else {
+      const raw = normalized(await file.text());
+      result = { text: ['html','htm','xml'].includes(ext) ? plainMarkup(raw) : ['srt','vtt'].includes(ext) ? captionText(raw) : raw, format: ext || 'نص', warnings: [] };
+    }
+  }
+  result.text = normalized(String(result.text || '')); ensureTextSize(result.text);
+  return { name: file.name.slice(0,250), text: result.text, format: result.format, warnings: result.warnings.slice(0,12) };
+}
+

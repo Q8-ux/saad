@@ -2,7 +2,7 @@
   "initial": [
     {
       "file": "assets/app.mjs",
-      "bytes": 266126
+      "bytes": 272038
     },
     {
       "file": "assets/chunks/chunk-3MNS2YWJ.mjs",
@@ -72,7 +72,7 @@
     },
     {
       "file": "assets/chunks/scenarist-panel-N6EJOH3B.mjs",
-      "bytes": 11835
+      "bytes": 92174
     },
     {
       "file": "assets/chunks/work-structure-VFREAWQ5.mjs",
@@ -136,7 +136,7 @@
     },
     {
       "file": "assets/chunks/library-assistant-I5KUSPHA.mjs",
-      "bytes": 17549
+      "bytes": 22782
     },
     {
       "file": "assets/chunks/chunk-FEUYKCPT.mjs",
@@ -145,6 +145,10 @@
     {
       "file": "assets/chunks/project-center-HQMDDUDU.mjs",
       "bytes": 15651
+    },
+    {
+      "file": "assets/chunks/scene-execution.mjs",
+      "bytes": 74970
     }
   ]
 }
