@@ -46,7 +46,7 @@ test('entry includes compact styles after existing styles and preserves all expo
     source('../assets/studio-command-menu.mjs'),
     source('../README.md')
   ]);
-  assert.match(html, /studio-command-menu\.mjs\?v=20261117-navigation2/);
+  assert.match(html, /studio-command-menu\.mjs\?v=20261117-navigation3/);
   assert.match(html, /studio-compact-layout\.mjs\?v=20261117-compact1/);
   assert.match(html, /studio-compact-layout\.css\?v=20261117-navigation2/);
   assert.ok(html.indexOf('studio-compact-layout.css') > html.indexOf('studio-french.css'));
@@ -83,4 +83,38 @@ test('touch drawer scrolls while dynamically hidden actions are excluded from ke
   assert.match(css, /overflow-y: auto !important/);
   assert.match(css, /-webkit-overflow-scrolling: touch/);
   assert.match(css, /overscroll-behavior-y: contain !important/);
+});
+
+
+test('sidebar acts after React handlers and exposes French, Writer Toolbar, WriterSolo and original work sections', async () => {
+  const [menu,app,html] = await Promise.all([
+    source('../assets/studio-command-menu.mjs'),
+    source('../assets/app.mjs'),
+    source('../index.html'),
+  ]);
+  assert.match(menu, /id:'sections',label:'الأقسام'/);
+  assert.match(menu, /syncSections\(\)/);
+  assert.match(menu, /dataset\.commandGroup='sections'/);
+  assert.match(menu, /source\.click\(\)/);
+  assert.match(menu, /queueMicrotask\(\(\)=>\{if\(opened\)close\(false\);\}\)/);
+  assert.doesNotMatch(menu, /closest\('\.studio-command-groups'\)\)close\(\)/);
+  assert.match(app, /studio-french-menu-action/);
+  assert.match(app, /النمط الفرنسي: تشغيل/);
+  assert.match(app, /النمط الفرنسي: إيقاف/);
+  assert.match(app, /onClick:\(\)=>\{Ld\(\);x\("script"\)\}/);
+  assert.match(app, /writer-toolbar-launch/);
+  assert.match(app, /Writer Toolbar \| شريط التنسيق/);
+  assert.match(app, /requestAnimationFrame\(\(\)=>requestAnimationFrame/);
+  assert.match(app, /رايت سولو العربي/);
+  assert.match(html, /studio-command-menu\.mjs\?v=20261117-navigation3/);
+});
+
+test('landing project selection is explicitly opt-in; previous ?work never auto-opens', async () => {
+  const works = await source('../assets/studio-works.mjs');
+  const login = await source('../assets/login.mjs');
+  assert.match(works, /landing\.searchParams\.delete\('work'\)/);
+  assert.doesNotMatch(works, /if \(requested\) choose\(/);
+  assert.match(works, /onWorks: \(\) => \{ choose\(null\); setReload/);
+  assert.match(works, /onClick: \(\) => choose\(work\.id\)/);
+  assert.match(login, /studio-works\.mjs\?v=20261117-navigation3/);
 });
