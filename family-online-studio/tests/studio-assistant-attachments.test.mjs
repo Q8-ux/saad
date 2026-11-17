@@ -12,7 +12,7 @@ const css = await readFile(new URL('../assets/library-assistant.css',import.meta
 test('assistant file input is available in both writing and live modes',()=>{
   assert.match(chunk,/className:"library-attachments"/);
   assert.match(chunk,/type:"file",accept:acceptedFiles,multiple:!0/);
-  assert.match(chunk,/className:"library-attach-button"/);
+  assert.match(chunk,/className:"button library-attach-button"/);
   assert.match(chunk,/children:\["📎 ",fileBusy\?/u);
   assert.ok(chunk.indexOf('className:"library-attachments"') < chunk.indexOf('h==="live"&&(0,t.jsxs)("section"'));
   assert.ok(chunk.indexOf('className:"library-attachments"') < chunk.indexOf('h==="text"&&(0,t.jsxs)("form"'));
