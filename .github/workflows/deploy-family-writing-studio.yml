@@ -43,6 +43,9 @@ jobs:
           node --check family-online-studio/assets/studio-compact-layout.mjs
           node --test family-online-studio/tests/studio-compact-layout.test.mjs
           node --test family-online-studio/tests/studio-work-selection.test.mjs
+          node --check family-online-studio/assets/chunks/library-assistant-I5KUSPHA.mjs
+          node --check family-online-studio/assets/chunks/assistant-attachments.mjs
+          node --test family-online-studio/tests/studio-assistant-attachments.test.mjs
           node --test family-online-studio/tests/studio-scene-edit-word.test.mjs
           node --check family-online-studio/assets/scene-board-order.mjs
           node --test family-online-studio/tests/studio-scene-board-order.test.mjs
