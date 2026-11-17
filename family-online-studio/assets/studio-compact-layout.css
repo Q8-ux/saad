@@ -237,3 +237,98 @@
     display: none !important;
   }
 }
+
+
+/* Scene-first editing: compact edit shortcuts alongside scene numbers.
+   The print stylesheet excludes app controls and leaves Word/PDF layouts intact. */
+@media screen {
+  .studio .scene-link-row {
+    display: flex;
+    align-items: stretch;
+    gap: 6px;
+    min-width: 0;
+    margin-block-end: 6px;
+  }
+  .studio .scene-link-row > .scene-link {
+    flex: 1 1 auto;
+    min-width: 0;
+    width: auto;
+    margin: 0;
+  }
+  .studio .scene-link-row > .scene-edit-shortcut,
+  .studio .scene-card-edit,
+  .studio .scene-word-export {
+    appearance: none;
+    min-height: 44px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--accent, #087f7c);
+    color: var(--accent-ink, #076d69);
+    background: var(--accent-light, #e3f2ee);
+    font: 600 14px/1.5 Cairo, Tahoma, sans-serif;
+    cursor: pointer;
+    white-space: nowrap;
+    touch-action: manipulation;
+  }
+  .studio .scene-link-row > .scene-edit-shortcut {
+    align-self: center;
+    min-width: 60px;
+  }
+  .studio .scene-card-edit {
+    width: max-content;
+    max-width: 100%;
+    margin-block: 7px;
+  }
+  .studio .scene-word-export {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    border-color: #476e93;
+    color: #17466f;
+    background: #eaf1f9;
+  }
+  .studio .scene-word-export:disabled {
+    cursor: wait;
+    opacity: .6;
+  }
+  .studio .scene-link-row > .scene-edit-shortcut:focus-visible,
+  .studio .scene-card-edit:focus-visible,
+  .studio .scene-word-export:focus-visible {
+    outline: 3px solid var(--accent, #087f7c);
+    outline-offset: 2px;
+  }
+  .studio .reader-scene > .reader-edit-scene-top {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    margin: 0 0 8px;
+    padding: 7px 13px;
+    border: 1px solid var(--accent, #087f7c);
+    border-radius: 9px;
+    background: var(--accent-light, #e3f2ee);
+    color: var(--accent-ink, #076d69);
+    font: 600 14px/1.5 Cairo, Tahoma, sans-serif;
+    cursor: pointer;
+  }
+  .studio .reader-toolbar {
+    flex-wrap: wrap;
+  }
+}
+@media screen and (max-width: 620px) {
+  .studio .scene-link-row > .scene-edit-shortcut {
+    min-width: 58px;
+    padding: 8px 9px;
+    font-size: 13px;
+  }
+  .studio .scene-word-export {
+    flex: 1 1 auto;
+    justify-content: center;
+    white-space: normal;
+  }
+}
+@media print {
+  .studio .scene-link-row > .scene-edit-shortcut,
+  .studio .scene-card-edit,
+  .studio .scene-word-export,
+  .studio .reader-edit-scene-top {display: none !important;}
+}
