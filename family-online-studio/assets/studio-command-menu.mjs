@@ -48,6 +48,7 @@ export function mountCommandMenu(studio) {
   const groups=[
     {id:'work',label:'الأعمال'},
     {id:'write',label:'الكتابة'},
+    {id:'sections',label:'الأقسام'},
     {id:'voice',label:'الصوت'},
     {id:'files',label:'الملفات'},
     {id:'help',label:'المساعدة'},
@@ -66,7 +67,32 @@ export function mountCommandMenu(studio) {
     groupButtons.set(group.id,tab);
     groupBar.append(tab);
   }
+  const sectionProxies=new Map();
+  function syncSections(){
+    const items=[...studio.querySelectorAll('.viewbar .view-tabs > button, .book-tools nav[aria-label="عرض الكتاب"] > button')];
+    for(const [source,proxy] of sectionProxies){
+      if(items.includes(source)&&source.isConnected)continue;
+      proxy.remove();
+      sectionProxies.delete(source);
+    }
+    for(const source of items){
+      let proxy=sectionProxies.get(source);
+      if(!proxy){
+        proxy=make('button','studio-command-section');
+        proxy.type='button';
+        proxy.dataset.commandGroup='sections';
+        proxy.addEventListener('click',()=>{if(source.isConnected&&!source.disabled)source.click();});
+        panel.append(proxy);
+        sectionProxies.set(source,proxy);
+      }
+      const label=source.textContent.trim()||source.getAttribute('aria-label')||'قسم';
+      if(proxy.textContent!==label)proxy.textContent=label;
+      proxy.disabled=source.disabled;
+      proxy.setAttribute('aria-current',source.getAttribute('aria-current')||'false');
+    }
+  }
   function category(button){
+    if(button.dataset.commandGroup)return button.dataset.commandGroup;
     const label=(button.getAttribute('aria-label')||button.textContent||'').trim();
     if(button.classList.contains('studio-command-save')||/حفظ|تصدير|طباعة|تنزيل|استيراد/.test(label))return 'files';
     if(/مشروع جديد|المشاريع|أعمالي|إدارة المشاريع|خروج|تسجيل الخروج/.test(label))return 'work';
@@ -117,6 +143,7 @@ export function mountCommandMenu(studio) {
     studio.dataset.commandMenuReady='true';
     if(header.parentElement!==panel)panel.prepend(header);
     if(groupBar.parentElement!==panel)header.after(groupBar);
+    syncSections();
     const source=studio.querySelector('.save-controls .save-now, .book-tools .book-save');
     if(source!==saveSource) {
       saveSource?.classList.remove('studio-command-original-save');
@@ -144,7 +171,11 @@ export function mountCommandMenu(studio) {
   const toggle=()=>opened?close():open();
   const onCommand=event=>{
     const button=event.target.closest('button, a[href]');
-    if(button&&panel.contains(button)&&!button.disabled&&!button.closest('.studio-command-groups'))close();
+    // Let React's delegated onClick handle the command before making its
+    // parent inert. Closing during capture prevented some menu actions.
+    if(button&&panel.contains(button)&&!button.disabled&&!button.closest('.studio-command-groups')){
+      queueMicrotask(()=>{if(opened)close(false);});
+    }
   };
   const onKey=event=>{
     if(!opened)return;
@@ -160,7 +191,10 @@ export function mountCommandMenu(studio) {
   doc.body.append(trigger,shortcuts);studio.append(backdrop);sync();
   return {panel,trigger,open,close,sync,destroy(){
     close(false);disposed=true;saveSource?.classList.remove('studio-command-original-save');
-    saveProxy?.remove();groupBar.remove();header.remove();backdrop.remove();trigger.remove();
+    saveProxy?.remove();
+    for(const proxy of sectionProxies.values())proxy.remove();
+    sectionProxies.clear();
+    groupBar.remove();header.remove();backdrop.remove();trigger.remove();
     worksButton.removeEventListener('click',openWorks);
     exitButton.removeEventListener('click',signOut);
     shortcuts.remove();
