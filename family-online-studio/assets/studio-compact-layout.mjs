@@ -21,16 +21,18 @@ export function mountCompactLayout(studio) {
     if (nodes.has(toolbar)) return;
     const id = toolbar.id || 'studio-compact-toolbar-' + (++compactSequence);
     if (!toolbar.id) toolbar.id = id;
-    const toggle = make('button', 'studio-format-toggle', 'تنسيق النص وأدوات Word');
+    const viewControls = toolbar.classList.contains('view-tools');
+    const label = viewControls ? 'خيارات العرض' : 'تنسيق النص وأدوات Word';
+    const toggle = make('button', 'studio-format-toggle', label);
     toggle.type = 'button';
     toggle.setAttribute('aria-controls', id);
     toggle.setAttribute('aria-expanded', 'false');
-    toggle.setAttribute('aria-label', 'إظهار تنسيق النص وأدوات Word');
+    toggle.setAttribute('aria-label', 'إظهار ' + label);
     toolbar.setAttribute('data-compact-toolbar', 'true');
     const onClick = () => {
       const expanded = toggle.getAttribute('aria-expanded') !== 'true';
       toggle.setAttribute('aria-expanded', String(expanded));
-      toggle.setAttribute('aria-label', expanded ? 'إخفاء تنسيق النص وأدوات Word' : 'إظهار تنسيق النص وأدوات Word');
+      toggle.setAttribute('aria-label', (expanded ? 'إخفاء ' : 'إظهار ') + label);
       toolbar.classList.toggle('studio-toolbar-expanded', expanded);
     };
     toggle.addEventListener('click', onClick);
@@ -94,7 +96,7 @@ export function mountCompactLayout(studio) {
     }
     const tabs = studio.querySelector('.viewbar .view-tabs');
     if (tabs) mountViewMenu(tabs);
-    for (const toolbar of studio.querySelectorAll('.editor-toolbar, .book-tools')) mountToolbar(toolbar);
+    for (const toolbar of studio.querySelectorAll('.editor-toolbar, .book-tools, .viewbar .view-tools')) mountToolbar(toolbar);
     for (const [target, value] of nodes) if (target === tabs && value.update) value.update();
   }
   let queued = false;
