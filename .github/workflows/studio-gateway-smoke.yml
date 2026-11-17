@@ -1,0 +1,77 @@
+name: Studio gateway health and CORS smoke test
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/studio-gateway-smoke.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Check health, auth configuration, CORS and authorization boundaries (no customer data)
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+
+          const root = 'https://family-writing-gateway.onrender.com';
+          const origin = 'https://q8-ux.github.io';
+          const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+          async function request(path, options = {}) {
+            let lastFailure;
+            for (let attempt = 1; attempt <= 3; attempt++) {
+              try {
+                const response = await fetch(root + path, {
+                  redirect: 'manual',
+                  cache: 'no-store',
+                  ...options,
+                  signal: AbortSignal.timeout(90000),
+                });
+                console.log(path, 'attempt', attempt, 'status', response.status);
+                if (![502, 503, 504].includes(response.status) || attempt === 3) return response;
+                lastFailure = new Error(path + ' returned HTTP ' + response.status);
+              } catch (error) {
+                lastFailure = error;
+                console.log(path, 'attempt', attempt, 'connection error', error.name);
+              }
+              await pause(8000);
+            }
+            throw lastFailure;
+          }
+
+          const health = await request('/health');
+          assert.equal(health.status, 200, 'Gateway must be ready');
+          assert.equal((await health.json()).status, 'ready');
+
+          const auth = await request('/api/auth/options', {headers: {Origin: origin}});
+          assert.equal(auth.status, 200, 'Login options should be available');
+          assert.equal(auth.headers.get('access-control-allow-origin'), origin);
+          const authOptions = await auth.json();
+          assert.equal(authOptions.mode, 'credentials', 'Account login must remain enabled');
+          console.log('Authentication configuration: credentials');
+
+          const preflight = await request('/api/projects', {
+            method: 'OPTIONS',
+            headers: {
+              Origin: origin,
+              'Access-Control-Request-Method': 'POST',
+              'Access-Control-Request-Headers': 'authorization,content-type',
+            },
+          });
+          assert.equal(preflight.status, 204, 'Project preflight must succeed');
+          assert.equal(preflight.headers.get('access-control-allow-origin'), origin);
+          assert.match(preflight.headers.get('access-control-allow-headers') || '', /Authorization/i);
+
+          const blocked = await request('/api/projects', {headers: {Origin: origin}});
+          assert.equal(blocked.status, 401, 'Unauthenticated projects must remain private');
+          assert.equal(blocked.headers.get('access-control-allow-origin'), origin);
+          console.log('PASS: healthy gateway, CORS and auth boundary; private project create not tested');
+          NODE
