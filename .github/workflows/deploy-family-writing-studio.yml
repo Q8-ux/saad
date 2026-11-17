@@ -42,6 +42,7 @@ jobs:
           node --check family-online-studio/assets/studio-command-menu.mjs
           node --check family-online-studio/assets/studio-compact-layout.mjs
           node --test family-online-studio/tests/studio-compact-layout.test.mjs
+          node --test family-online-studio/tests/studio-landing.test.mjs
           node --check family-online-studio/assets/studio-command-menu.mjs
           node --check family-online-studio/backend/server.mjs
           node --check family-online-studio/backend/document-import.mjs
