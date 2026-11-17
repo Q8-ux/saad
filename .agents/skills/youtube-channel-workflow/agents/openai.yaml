@@ -1,0 +1,4 @@
+interface:
+  display_name: "مسار صناعة قنوات يوتيوب"
+  short_description: "من اكتشاف المجال إلى السكربت والمونتاج وقياس النتائج"
+  default_prompt: "استخدم $youtube-channel-workflow لتجهيز فكرة قناة عربية وحزمة إنتاج أول فيديو من البحث حتى خطة النشر."
