@@ -54,3 +54,33 @@ test('entry includes compact styles after existing styles and preserves all expo
   assert.match(readme, /Word/u);
   assert.match(readme, /PDF/u);
 });
+
+
+test('Works and Logout remain visibly accessible in all editor views without bypassing existing account actions', async () => {
+  const code = await source('../assets/studio-command-menu.mjs');
+  const css = await source('../assets/studio-compact-layout.css');
+  assert.match(code, /studio-quick-navigation/);
+  assert.match(code, /studio-quick-works/);
+  assert.match(code, /studio-quick-logout/);
+  assert.match(code, /worksButton\.addEventListener\('click',openWorks\)/);
+  assert.match(code, /exitButton\.addEventListener\('click',signOut\)/);
+  assert.match(code, /source\.click\(\)/);
+  assert.match(code, /studio-sign-out/);
+  assert.match(code, /قد توجد تعديلات لم تُحفظ/u);
+  assert.match(css, /\.studio-quick-navigation/);
+  assert.match(css, /position: fixed/);
+  assert.match(css, /@media print/);
+});
+
+test('touch drawer scrolls while dynamically hidden actions are excluded from keyboard focus', async () => {
+  const code = await source('../assets/studio-command-menu.mjs');
+  const css = await source('../assets/studio-compact-layout.css');
+  assert.match(code, /button\[data-command-category\]:not\(\[data-command-selected\]\)/);
+  assert.match(code, /panel\.scrollTop=0/);
+  assert.match(code, /selectedGroup=group\.id;updateGroups\(\);panel\.scrollTop=0/);
+  assert.doesNotMatch(code, /if\(opened\)panel\.scrollTop=0/);
+  assert.match(css, /touch-action: pan-y !important/);
+  assert.match(css, /overflow-y: auto !important/);
+  assert.match(css, /-webkit-overflow-scrolling: touch/);
+  assert.match(css, /overscroll-behavior-y: contain !important/);
+});
