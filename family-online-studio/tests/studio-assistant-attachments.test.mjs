@@ -91,8 +91,8 @@ test('attachment context clearly marks excerpts and treats files as untrusted so
 });
 
 test('writing sends file excerpts and voice channel receives them as realtime input text',()=>{
-  assert.match(chunk,/files\.length\?directTask\(r,files\):r/);
-  assert.match(chunk,/execute=isExecution\(r,files\)/);
+  assert.match(chunk,/activeFiles.length\?directTask\(r,activeFiles\):r/);
+  assert.match(chunk,/execute=isExecution\(r,activeFiles\)/);
   assert.match(chunk,/message:question,history:d/);
   assert.match(chunk,/attachments:files\.length\?\[fileContext\(files,10500\)\]:\[\]/);
   assert.match(chunk,/attachContext\(e\)\{/);
