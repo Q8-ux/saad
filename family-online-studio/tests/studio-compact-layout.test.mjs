@@ -48,7 +48,7 @@ test('entry includes compact styles after existing styles and preserves all expo
   ]);
   assert.match(html, /studio-command-menu\.mjs\?v=20261117-navigation5/);
   assert.match(html, /studio-compact-layout\.mjs\?v=20261117-compact1/);
-  assert.match(html, /studio-compact-layout\.css\?v=20261117-navigation5/);
+  assert.match(html, /studio-compact-layout\.css\?v=20261117-scenes1/);
   assert.ok(html.indexOf('studio-compact-layout.css') > html.indexOf('studio-french.css'));
   assert.match(menu, /studio-command-save/);
   assert.match(readme, /Word/u);
