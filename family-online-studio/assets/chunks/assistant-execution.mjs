@@ -9,7 +9,7 @@ import {cleanSceneTitle} from '../scene-board-order.mjs';
 
 const SCRIPT_KINDS=new Set(['series','play','film']);
 const BLOCK_TYPES=new Set(['dialogue','action','sound','song','heading','transition']);
-const DIRECTIVE=/\b(?:أكمل|اكمل|كمل|كمّل|استكمل|واصل|تابع|اكتب|أضف|اضف|نفّذ|نفذ|أتم|اتم|أنجز|انجز)\b/u;
+const DIRECTIVE=/(?:^|[^\p{L}])(?:أكمل|اكمل|كمل|كمّل|استكمل|واصل|تابع|اكتب|أضف|اضف|نفّذ|نفذ|أتم|اتم|أنجز|انجز)(?=$|[^\p{L}])/u;
 const SCRIPT_TERMS=/(?:المسلسل|مسلسل|الحلقة|الحلقه|المشهد|مشهد|السيناريو|الحوار|المسرحية|المسرحيه|الفيلم)/u;
 const OPINION_TERMS=/(?:ما\s+رأيك|رأيك|حلّل|حلل|قيّم|قيم|راجع|انتقد|اقترح|نصيحة|نصيحه)/u;
 
@@ -111,5 +111,5 @@ export async function executeScriptContinuation({message,files,workId,request,si
     throw new Error('لم يؤكد الخادم حفظ المشهد؛ تحقق من المشروع قبل إعادة التنفيذ.');
   }
   return {workId,sceneId:newId,sceneNumber:updated.scenes.length,blocks:blocks.length,revision:saved.revision,
-    message:'أُضيف المشهد '+updated.scenes.length+' إلى «'+doc.title+'» وحُفظ. يمكنك مواصلة بقية العمل بأمر جديد.'};
+    message:'أُضيف المشهد '+updated.scenes.length+' إلى «'+doc.title+'» وحُفظ.'};
 }
