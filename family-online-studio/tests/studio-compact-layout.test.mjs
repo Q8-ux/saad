@@ -116,7 +116,7 @@ test('landing project selection is explicitly opt-in; previous ?work never auto-
   assert.doesNotMatch(works, /if \(requested\) choose\(/);
   assert.match(works, /onWorks: \(\) => \{ choose\(null\); setReload/);
   assert.match(works, /onClick: \(\) => choose\(work\.id\)/);
-  assert.match(login, /studio-works\.mjs\?v=20261117-navigation3/);
+  assert.match(login, /studio-works\.mjs\?v=20261117-workfix1/);
 });
 
 
