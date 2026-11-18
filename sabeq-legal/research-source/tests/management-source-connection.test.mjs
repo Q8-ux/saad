@@ -10,6 +10,7 @@ function harness({authenticated=false}={}){
   const sqlite=new DatabaseSync(':memory:');
   sqlite.exec(readFileSync(new URL('tests/fixtures/management-source-tables.sql',root),'utf8'));
   sqlite.exec(readFileSync(new URL('drizzle/0005_icy_dark_phoenix.sql',root),'utf8'));
+  sqlite.exec(readFileSync(new URL('drizzle/0006_sadad_payments.sql',root),'utf8'));
   sqlite.exec(readFileSync(new URL('drizzle/0011_saved_memo_revisions.sql',root),'utf8'));
   const db={prepare(sql){let args=[];return{bind(...values){args=values;return this;},async first(){return sqlite.prepare(sql).get(...args)||null;},async all(){return{results:sqlite.prepare(sql).all(...args)};},async run(){return sqlite.prepare(sql).run(...args);}};}};
   // Authentication routes and encrypted-vault isolation are covered by the full native management suite.
