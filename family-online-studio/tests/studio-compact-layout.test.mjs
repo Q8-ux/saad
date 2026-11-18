@@ -116,7 +116,7 @@ test('landing project selection is explicitly opt-in; previous ?work never auto-
   assert.doesNotMatch(works, /if \(requested\) choose\(/);
   assert.match(works, /onWorks: \(\) => \{ choose\(null\); setReload/);
   assert.match(works, /onClick: \(\) => choose\(work\.id\)/);
-  assert.match(login, /studio-works\.mjs\?v=20261117-workfix1/);
+  assert.match(login, /studio-works\.mjs\?v=[^\s\x22\x27]+/);
 });
 
 
@@ -140,3 +140,4 @@ test('empty sidebar section remains selected and explains absent controls instea
   assert.doesNotMatch(menu,/selectedGroup='write';for\(const \[id,tab\]/);
   assert.match(css,/\.studio-command-empty\[hidden\]/);
 });
+
