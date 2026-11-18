@@ -40,8 +40,8 @@ export async function archiveAndExtract(file,extract,request,options={}){
  catch(error){await recordExtractionFailure(original.id,error,request);const failure=new Error('الأصل محفوظ في «ملفاتي المرفوعة». '+(error?.message||'لم يكتمل التحليل.'));Object.assign(failure,{attachmentId:original.id,originalSaved:true});throw failure;}
 }
 export async function linkStoredAttachment(id,workId,request,options={}){return send(request,{action:'link',id,workId},options.signal);}
-export async function readStoredText(item,request,options={}){const result=await data(request,ENDPOINT+'?id='+encodeURIComponent(item.id)+'&text=1',{signal:options.signal});return {name:result.attachment.name,text:result.text,format:result.attachment.format,warnings:[],attachmentId:result.attachment.id,originalSaved:true};}
-export async function readStoredOriginal(item,request,options={}){const response=await request(ENDPOINT+'?id='+encodeURIComponent(item.id)+'&download=1',{signal:options.signal});if(!response.ok){const result=await response.json().catch(()=>({}));throw Error(result.error||'تعذر تحميل الملف الأصلي.');}const blob=await response.blob();return new File([blob],item.name,{type:item.mime||'application/octet-stream'});}
+export async function readStoredText(item,request,options={}){const result=await data(request,ENDPOINT+'?id='+encodeURIComponent(item.id)+'&text=1',{signal:options.signal});if(result.text.length>400000)throw Error('النسخة كاملة محفوظة؛ نزّلها لتقسيمها إلى أجزاء لا تتجاوز ٤٠٠ ألف حرف للتحليل.');return {name:result.attachment.name,text:result.text,format:result.attachment.format,warnings:[],attachmentId:result.attachment.id,originalSaved:result.attachment.originalSaved,provenance:result.attachment.provenance,savedAttachment:result.attachment};}
+export async function readStoredOriginal(item,request,options={}){const response=await request(ENDPOINT+'?id='+encodeURIComponent(item.id)+'&download=1',{signal:options.signal});if(!response.ok){const result=await response.json().catch(()=>({}));throw Error(result.error||'تعذر تحميل الملف المحفوظ.');}const blob=await response.blob();return new File([blob],item.name,{type:item.mime||'application/octet-stream'});}
 export async function downloadStoredOriginal(item,request){const file=await readStoredOriginal(item,request),url=URL.createObjectURL(file),a=document.createElement('a');a.href=url;a.download=item.name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
 /** @param {any[]} sources @param {any} request @param {any} options */
 export async function savePastedSources(sources,request,options={}){
@@ -50,6 +50,14 @@ export async function savePastedSources(sources,request,options={}){
  }return saved;
 }
 export async function listStoredAttachments(request,{query='',cursor=0,signal}={}){return data(request,ENDPOINT+'?q='+encodeURIComponent(query)+'&cursor='+cursor,{cache:'no-store',signal});}
+/** Resumes a durable, account-scoped cursor. Aborting never discards a saved row. */
+export async function recoverStoredAttachments(request,{signal,onProgress=()=>{},restart=false}={}){
+ let first=true;
+ for(;;){signal?.throwIfAborted();const result=await send(request,{action:'recover-stored',...(first&&restart?{restart:true}:{})},signal);first=false;
+  const progress=result.recovery;if(!progress||typeof progress.done!=='boolean'||!Number.isSafeInteger(progress.scanned)||!Number.isSafeInteger(progress.recovered))throw Error('تعذر قراءة نتيجة استعادة النصوص القديمة.');
+  onProgress(progress);if(progress.done)return progress;
+ }
+}
 export function readableImportedSource(plan){
  if(typeof plan.sourceText==='string'&&plan.sourceText.trim())return plan.sourceText;
  const doc=plan.document;if(doc.kind==='book')return [doc.title,...[...(doc.frontMatter||[]),...doc.chapters].flatMap(s=>[s.title,...s.blocks.map(b=>b.text)])].join('\n\n');

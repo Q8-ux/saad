@@ -1,5 +1,5 @@
-import {saveOriginalFile,saveExtractedText,recordExtractionFailure,linkStoredAttachment,readStoredOriginal,readableImportedSource} from './studio-file-store.mjs?v=20261118-files1';
-import {createSavedAttachmentsView} from './studio-file-archive.mjs?v=20261118-files1';
+import {saveOriginalFile,saveExtractedText,recordExtractionFailure,linkStoredAttachment,readStoredOriginal,readableImportedSource} from './studio-file-store.mjs?v=20261118-recovery1';
+import {createSavedAttachmentsView} from './studio-file-archive.mjs?v=20261118-recovery1';
 import { importManuscriptFile, parseManuscriptText, normalizeSpokenManuscript, prepareImportedDocument, summarizeImportedDocument } from './manuscript-import.mjs?v=20261117-voice1';
 
 const kinds = {
@@ -271,7 +271,7 @@ export function createStudioWorks({ React, Studio }) {
       };
     }
 
-    async function inspectFile(file) {
+    async function inspectFile(file, savedAttachment=null) {
       if (!file) { setError('اختر ملفًا لبدء التحليل.'); return; }
       if (busy || importBusy) return;
       setSelectedFile(file);
@@ -281,15 +281,15 @@ export function createStudioWorks({ React, Studio }) {
       setNotice('');
       let original;
       try {
-        original=await saveOriginalFile(file,(path,options)=>window.__STUDIO_REQUEST__(path,options),{onProgress:setNotice});setImportAttachment(original);
+        original=savedAttachment||await saveOriginalFile(file,(path,options)=>window.__STUDIO_REQUEST__(path,options),{onProgress:setNotice});setImportAttachment(original);
         const plan = await importManuscriptFile(file, { extractFile: extractUploadedFile });
-        await saveExtractedText(original.id,{text:readableImportedSource(plan),format:plan.format},(path,options)=>window.__STUDIO_REQUEST__(path,options));
+        if(!savedAttachment||savedAttachment.textState!=='ready')await saveExtractedText(original.id,{text:readableImportedSource(plan),format:plan.format},(path,options)=>window.__STUDIO_REQUEST__(path,options));
         setImportPlan(plan);
         setTitle(previous => previous.trim() || (plan.title.startsWith('تسجيل-') ? 'مشروع صوتي جديد' : plan.title));
         setKind(previous => previous || plan.recommendedKind);
-        setNotice('حُفظ الملف الأصلي والنص المستخرج في حسابك. اكتمل استخراج المحتوى وتوزيعه. راجع عدد الحلقات والمشاهد والشخصيات والحوارات ثم أنشئ المشروع.');
+        setNotice((savedAttachment?'النسخة المحفوظة جاهزة لإعادة الاستخدام. ':'حُفظ الملف الأصلي والنص المستخرج في حسابك. ')+'اكتمل استخراج المحتوى وتوزيعه. راجع عدد الحلقات والمشاهد والشخصيات والحوارات ثم أنشئ المشروع.');
       } catch (failure) {
-        if(original){await recordExtractionFailure(original.id,failure,(path,options)=>window.__STUDIO_REQUEST__(path,options));setError('الأصل محفوظ في «ملفاتي المرفوعة». '+(failure.message||'لم يكتمل التحليل.'));}else setError(failure.message||'لم يُؤكد حفظ الملف الأصلي. أعد المحاولة.');
+        if(original){if(!savedAttachment)await recordExtractionFailure(original.id,failure,(path,options)=>window.__STUDIO_REQUEST__(path,options));setError((original.originalSaved?'الأصل محفوظ':'النسخة المستعادة محفوظة')+' في «ملفاتي المرفوعة». '+(failure.message||'لم يكتمل التحليل.'));}else setError(failure.message||'لم يُؤكد حفظ الملف الأصلي. أعد المحاولة.');
       } finally {
         setImportBusy(false);
         setRecordState('idle');
@@ -466,7 +466,7 @@ export function createStudioWorks({ React, Studio }) {
             title: 'بدء مشروع بتسجيل صوتي', 'aria-label': 'بدء مشروع بالميكروفون',
             onClick: () => recordState === 'recording' ? stopRecording() : void startRecording(),
           }, recordState === 'recording' ? '■ إيقاف الصوت' : '🎙️ تسجيل صوتي'))),
-      h(SavedAttachments,{request:(path,options)=>window.__STUDIO_REQUEST__(path,options),disabled:busy||importBusy,onUse:async source=>{const file=await readStoredOriginal({id:source.attachmentId,name:source.name,mime:'application/octet-stream'},(path,options)=>window.__STUDIO_REQUEST__(path,options));setNewWork(true);setCreateMode('file');await inspectFile(file);},onRetry:async item=>{const file=await readStoredOriginal(item,(path,options)=>window.__STUDIO_REQUEST__(path,options));setNewWork(true);setCreateMode('file');await inspectFile(file);}}),
+      h(SavedAttachments,{request:(path,options)=>window.__STUDIO_REQUEST__(path,options),disabled:busy||importBusy,onUse:async source=>{const file=await readStoredOriginal(source.savedAttachment||( {id:source.attachmentId,name:source.name,mime:'application/octet-stream'}),(path,options)=>window.__STUDIO_REQUEST__(path,options));setNewWork(true);setCreateMode('file');await inspectFile(file,source.savedAttachment);},onRetry:async item=>{const file=await readStoredOriginal(item,(path,options)=>window.__STUDIO_REQUEST__(path,options));setNewWork(true);setCreateMode('file');await inspectFile(file,item);}}),
       error && h('p', { role: 'alert' }, error),
       error && projects && h('button', {
         type: 'button', disabled: busy || importBusy,

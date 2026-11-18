@@ -1,7 +1,7 @@
 {
   "revision": "project-context-1",
   "project": "writing-studio",
-  "sourceCommit": "b3bf059595f00f76b4a0ebf363464e4c49270569",
+  "sourceCommit": "9b2b90ecc53389a655b308212ec98e131a816ce9",
   "scope": "current-manuscript-and-selected-scene",
   "workIdentitySource": "server-request-url",
   "crossWorkMemory": false,
@@ -59,15 +59,15 @@
     },
     {
       "path": "lib/attachment-store.ts",
-      "sha256": "9823aff6f9678f7bc681e6cb40482efb0274973e417d8f0766c951a55e08248f"
+      "sha256": "ed7f3740e448ce35edc9bb6ff221dbca6a190023e1b71130be77b7fd4f61ba8e"
     },
     {
       "path": "lib/attachment-store-client.mjs",
-      "sha256": "d938cc51a25a592f0fac2ec7adc5cd542e8c02a03f1eb7ac870d8ce8b4fcd8a8"
+      "sha256": "3314d6b10f2235931a3ef97d1032a54273235ed6ed1e77e757fa97a1f48add78"
     },
     {
       "path": "lib/attachment-archive-view.mjs",
-      "sha256": "d6e30a8626da2fab337e614f748aab8c740f650791a89720a85fb4ebed1de7ac"
+      "sha256": "e96f852d5f831dbea1a78beb7aab47b2aaa624553c97e1f8bb662932f1fc6fa2"
     },
     {
       "path": "lib/studio-http.ts",
@@ -79,7 +79,11 @@
     },
     {
       "path": "db/schema.ts",
-      "sha256": "9de5537cd22a162e777733c32d86172d1bf4f35ad12d1f48092e32a5bb18ce93"
+      "sha256": "fda7b6a5e9e6d036eaed9c4b4e209ca31f7c18bc82656abf416916708e16aaef"
+    },
+    {
+      "path": "lib/attachment-recovery.ts",
+      "sha256": "67a0710d6b70d58b796bb66f6a3a8a2299de685c5790c896d53a1b7529261c17"
     }
   ],
   "checks": {
@@ -103,12 +107,14 @@
     "attachmentArchive": "passed-signed-bridge-SQLite-and-Miniflare-R2",
     "publicArchiveAndImportTests": 71,
     "archiveBrowserUi": "passed-synthetic-save-list-reuse",
-    "historicalOriginalsRecovered": false
+    "historicalOriginalsRecovered": false,
+    "historicalAttachmentRecovery": "passed-Miniflare-R2-and-SQLite-current-and-version-recovery",
+    "historicalArchiveUi": "passed-synthetic-auto-start-provenance-reuse-rescan-search",
+    "publicRecoveryChecks": 81,
+    "liveHistoricalAccount": "not-authenticated"
   },
   "publication": "succeeded",
   "snapshotPolicy": "generic-review-modules-only; no manuscripts, seeds, credentials or private build archives",
-  "deployedVersion": "appgprj_6acf275cd3a4819188adb07ac6bee0be~appgver_1c8bc1caeab48191914cb1227f1b05a0",
-  "deploymentId": "appgdep_6afd769efb0c8191a8676473bd325870",
   "sceneExecution": {
     "revision": "attachment-scene-execution-2",
     "optionalNotes": true,
@@ -142,7 +148,7 @@
     "liveHistoricalBatchExecuted": false
   },
   "attachmentArchive": {
-    "revision": "durable-attachments-1",
+    "revision": "durable-attachments-2",
     "originalStored": true,
     "extractedTextStored": true,
     "accountScoped": true,
@@ -155,7 +161,20 @@
     "projectImportRetained": true,
     "persistBeforeExtraction": true,
     "failedExtractionKeepsOriginal": true,
-    "legacyBinaryBackfill": false
-  }
+    "legacyBinaryBackfill": false,
+    "legacyTextBackfill": true,
+    "recoveredOriginalFlag": false,
+    "recoveryResumesAfterInterruption": true,
+    "manuscriptMutatedByRecovery": false,
+    "recoveryInputs": [
+      "stored-current-manuscript",
+      "stored-historical-version",
+      "explicit-retained-source-text"
+    ],
+    "autoRecoveryTrigger": "authenticated-archive-component-mount",
+    "recoveryDeduplication": "work-and-payload-sha256",
+    "provenanceVisible": true
+  },
+  "deployedVersion": "appgprj_6acf275cd3a4819188adb07ac6bee0be~appgver_523c8d7e76c081919358f1dafe1275ec",
+  "deploymentId": "appgdep_6afdba7bb61881919a803e3df8fc91ad"
 }
-
