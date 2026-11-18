@@ -1,11 +1,11 @@
-import { makeRelayLogin, studioRequest } from './studio-request.mjs?v=remember-session-1';
+import { makeRelayLogin, studioRequest } from './studio-request.mjs?v=20261118-files1';
 
 export function createStudioLogin({React,Studio,config}){
  const h=React.createElement;
  const apiBase=String(config.apiBase||''),sessionKey='fo-studio-account-session-v2:'+apiBase;
  const previousKey='fo-studio-login-session-v1:'+apiBase;
  const sessionLifetime=7200,rememberedLifetime=30*24*60*60;
- const Workspace=React.lazy(()=>import('./studio-works.mjs?v=20261117-workfix1').then(({createStudioWorks})=>({default:createStudioWorks({React,Studio})})));
+ const Workspace=React.lazy(()=>import('./studio-works.mjs?v=20261118-files1').then(({createStudioWorks})=>({default:createStudioWorks({React,Studio})})));
  const accountFrom=value=>value&&/^[a-z0-9][a-z0-9-]{0,31}$/u.test(value.id||'')?{id:value.id,username:typeof value.username==='string'?value.username.slice(0,80):''}:null;
  function forgetSession(){
   try{sessionStorage.removeItem(sessionKey);sessionStorage.removeItem(previousKey);}catch{}
@@ -112,3 +112,4 @@ export function createStudioLogin({React,Studio,config}){
     h('button',{type:'submit',className:'primary',disabled:busy},busy?'جارٍ التحقق…':'تسجيل الدخول'))));
  };
 }
+

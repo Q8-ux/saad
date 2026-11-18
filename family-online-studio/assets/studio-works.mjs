@@ -1,3 +1,5 @@
+import {saveOriginalFile,saveExtractedText,recordExtractionFailure,linkStoredAttachment,readStoredOriginal,readableImportedSource} from './studio-file-store.mjs?v=20261118-files1';
+import {createSavedAttachmentsView} from './studio-file-archive.mjs?v=20261118-files1';
 import { importManuscriptFile, parseManuscriptText, normalizeSpokenManuscript, prepareImportedDocument, summarizeImportedDocument } from './manuscript-import.mjs?v=20261117-voice1';
 
 const kinds = {
@@ -29,6 +31,7 @@ export function describeStudioNetworkFailure(failure, creating = false) {
 
 export function createStudioWorks({ React, Studio }) {
   const h = React.createElement;
+  const SavedAttachments=createSavedAttachmentsView(React);
   return function StudioWorks({ account, requestStudio, onSignOut }) {
     const [verified, setVerified] = React.useState(null);
     const [projects, setProjects] = React.useState(null);
@@ -43,6 +46,7 @@ export function createStudioWorks({ React, Studio }) {
     const [title, setTitle] = React.useState('');
     const [kind, setKind] = React.useState('');
     const [createMode, setCreateMode] = React.useState('text');
+    const [importAttachment,setImportAttachment]=React.useState(null);
     const [importPlan, setImportPlan] = React.useState(null);
     const [importBusy, setImportBusy] = React.useState(false);
     const [draftText, setDraftText] = React.useState('');
@@ -105,7 +109,7 @@ export function createStudioWorks({ React, Studio }) {
     }
 
     function clearImport() {
-      setImportPlan(null);
+      setImportPlan(null);setImportAttachment(null);
       setSelectedFile(null);
       if (fileInput.current) fileInput.current.value = '';
     }
@@ -271,18 +275,21 @@ export function createStudioWorks({ React, Studio }) {
       if (!file) { setError('اختر ملفًا لبدء التحليل.'); return; }
       if (busy || importBusy) return;
       setSelectedFile(file);
-      setImportPlan(null);
+      setImportPlan(null);setImportAttachment(null);
       setImportBusy(true);
       setError('');
       setNotice('');
+      let original;
       try {
+        original=await saveOriginalFile(file,(path,options)=>window.__STUDIO_REQUEST__(path,options),{onProgress:setNotice});setImportAttachment(original);
         const plan = await importManuscriptFile(file, { extractFile: extractUploadedFile });
+        await saveExtractedText(original.id,{text:readableImportedSource(plan),format:plan.format},(path,options)=>window.__STUDIO_REQUEST__(path,options));
         setImportPlan(plan);
         setTitle(previous => previous.trim() || (plan.title.startsWith('تسجيل-') ? 'مشروع صوتي جديد' : plan.title));
         setKind(previous => previous || plan.recommendedKind);
-        setNotice('اكتمل استخراج المحتوى وتوزيعه. راجع عدد الحلقات والمشاهد والشخصيات والحوارات ثم أنشئ المشروع.');
+        setNotice('حُفظ الملف الأصلي والنص المستخرج في حسابك. اكتمل استخراج المحتوى وتوزيعه. راجع عدد الحلقات والمشاهد والشخصيات والحوارات ثم أنشئ المشروع.');
       } catch (failure) {
-        setError(failure.message || 'تعذر قراءة الملف. اضغط إعادة التحليل أو اختر ملفًا آخر.');
+        if(original){await recordExtractionFailure(original.id,failure,(path,options)=>window.__STUDIO_REQUEST__(path,options));setError('الأصل محفوظ في «ملفاتي المرفوعة». '+(failure.message||'لم يكتمل التحليل.'));}else setError(failure.message||'لم يُؤكد حفظ الملف الأصلي. أعد المحاولة.');
       } finally {
         setImportBusy(false);
         setRecordState('idle');
@@ -300,7 +307,7 @@ export function createStudioWorks({ React, Studio }) {
         setTitle(previous => previous.trim() || parsed.title);
         setKind(previous => previous || parsed.recommendedKind);
         setNotice('تم تقسيم النص إلى أقسام ومشاهد وشخصيات. يمكنك مراجعته قبل الإنشاء.');
-      } catch (failure) { setImportPlan(null); setError(failure.message || 'تعذر تحليل النص.'); }
+      } catch (failure) { setImportPlan(null);setImportAttachment(null); setError(failure.message || 'تعذر تحليل النص.'); }
     }
 
     async function writeImportedManuscript(projectId, document, format) {
@@ -349,6 +356,7 @@ export function createStudioWorks({ React, Studio }) {
         if (!result.id) throw new Error('لم يُرجع الخادم معرّف المشروع الجديد.');
         createdId = result.id;
         if (document) await writeImportedManuscript(createdId, document, plan.format);
+        if(importAttachment?.id)await linkStoredAttachment(importAttachment.id,createdId,(path,options)=>window.__STUDIO_REQUEST__(path,options));
         const current = await request(null, AbortSignal.timeout(60000));
         applyCatalogue(current);
         setNewWork(false);
@@ -458,6 +466,7 @@ export function createStudioWorks({ React, Studio }) {
             title: 'بدء مشروع بتسجيل صوتي', 'aria-label': 'بدء مشروع بالميكروفون',
             onClick: () => recordState === 'recording' ? stopRecording() : void startRecording(),
           }, recordState === 'recording' ? '■ إيقاف الصوت' : '🎙️ تسجيل صوتي'))),
+      h(SavedAttachments,{request:(path,options)=>window.__STUDIO_REQUEST__(path,options),disabled:busy||importBusy,onUse:async source=>{const file=await readStoredOriginal({id:source.attachmentId,name:source.name,mime:'application/octet-stream'},(path,options)=>window.__STUDIO_REQUEST__(path,options));setNewWork(true);setCreateMode('file');await inspectFile(file);},onRetry:async item=>{const file=await readStoredOriginal(item,(path,options)=>window.__STUDIO_REQUEST__(path,options));setNewWork(true);setCreateMode('file');await inspectFile(file);}}),
       error && h('p', { role: 'alert' }, error),
       error && projects && h('button', {
         type: 'button', disabled: busy || importBusy,
@@ -485,7 +494,7 @@ export function createStudioWorks({ React, Studio }) {
           placeholder: 'مثال: عنوان المشروع: خارج الستوري\nالحلقة الأولى\nالمشهد الأول - داخلي - المنزل - ليل\nعواطف: وين فاطمة؟\nوصف: تدخل فاطمة إلى الغرفة.',
           value: draftText, disabled: busy || importBusy, onChange: event => {
             setDraftText(event.target.value);
-            setImportPlan(null);
+            setImportPlan(null);setImportAttachment(null);
           } }),
         h('button', { type: 'button', disabled: busy || importBusy || !draftText.trim(),
           onClick: inspectWrittenText }, 'تحليل النص وتوزيعه'),
@@ -565,3 +574,4 @@ export function createStudioWorks({ React, Studio }) {
         : h('p', { className: 'workspace-empty' }, archive ? 'أرشيفك فارغ.' : 'ابدأ بإضافة أول عمل.')));
   };
 }
+

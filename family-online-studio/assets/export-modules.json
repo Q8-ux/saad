@@ -2,7 +2,7 @@
   "initial": [
     {
       "file": "assets/app.mjs",
-      "bytes": 272442
+      "bytes": 272453
     },
     {
       "file": "assets/chunks/chunk-3MNS2YWJ.mjs",
@@ -50,7 +50,7 @@
     },
     {
       "file": "assets/chunks/chunk-KQKL2YCS.mjs",
-      "bytes": 2161
+      "bytes": 2248
     },
     {
       "file": "assets/chunks/chunk-2V77MTNA.mjs",
@@ -72,7 +72,7 @@
     },
     {
       "file": "assets/chunks/scenarist-panel-N6EJOH3B.mjs",
-      "bytes": 93970
+      "bytes": 94954
     },
     {
       "file": "assets/chunks/work-structure-VFREAWQ5.mjs",
@@ -136,11 +136,11 @@
     },
     {
       "file": "assets/chunks/library-assistant-I5KUSPHA.mjs",
-      "bytes": 17919
+      "bytes": 19596
     },
     {
       "file": "assets/chunks/chunk-FEUYKCPT.mjs",
-      "bytes": 247
+      "bytes": 265
     },
     {
       "file": "assets/chunks/project-center-HQMDDUDU.mjs",
@@ -160,11 +160,19 @@
     },
     {
       "file": "assets/chunks/assistant-execution.mjs",
-      "bytes": 7862
+      "bytes": 7863
     },
     {
       "file": "assets/chunks/assistant-attachments.mjs",
-      "bytes": 4843
+      "bytes": 4844
+    },
+    {
+      "file": "assets/studio-file-store.mjs",
+      "bytes": 7612
+    },
+    {
+      "file": "assets/studio-file-archive.mjs",
+      "bytes": 3676
     }
   ]
 }

@@ -51,6 +51,7 @@ jobs:
           node --check family-online-studio/assets/chunks/assistant-execution.mjs
           node --test family-online-studio/tests/studio-assistant-execution.test.mjs
           node --test family-online-studio/tests/script-analysis.test.mjs
+          node --test family-online-studio/tests/studio-file-store.test.mjs
           node --test family-online-studio/tests/studio-scene-edit-word.test.mjs
           node --check family-online-studio/assets/scene-board-order.mjs
           node --test family-online-studio/tests/studio-scene-board-order.test.mjs
@@ -74,6 +75,7 @@ jobs:
       - name: Deploy
         id: deploy
         uses: actions/deploy-pages@v4
+
 
 
 

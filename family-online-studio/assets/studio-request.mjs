@@ -15,7 +15,7 @@ export async function studioRequest(apiBase, session, path, options = {}) {
   if (url.origin !== base.origin || !url.pathname.startsWith('/api/') || url.hash) throw new Error('طلب غير صالح.');
   const headers = new Headers(options.headers);
   headers.set('Authorization', 'Bearer ' + session.token);
-  if (!session.proof) return fetch(url, { ...options, headers, credentials: 'omit', cache: 'no-store' });
+  if (!session.proof || (url.pathname === '/api/import-document' && (options.method || 'GET').toUpperCase() === 'POST')) return fetch(url, { ...options, headers, credentials: 'omit', cache: 'no-store' });
 
   const original = new Request(url, { ...options, headers });
   const envelope = new FormData();
@@ -35,3 +35,4 @@ export async function studioRequest(apiBase, session, path, options = {}) {
     signal: options.signal,
   });
 }
+
