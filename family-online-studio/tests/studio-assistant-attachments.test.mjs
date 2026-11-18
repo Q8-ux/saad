@@ -14,7 +14,7 @@ test('assistant file input is available in both writing and live modes',()=>{
   assert.match(chunk,/type:"file",accept:acceptedFiles,multiple:!0/);
   assert.match(chunk,/className:"button library-attach-button"/);
   assert.match(chunk,/children:\["📎 ",fileBusy\?/u);
-  assert.match(chunk, /attachments:files.length\?\[fileContext\(files,10500\)\]:\[\]/);
+  assert.match(chunk, /attachments:\(files.length\|\|pastedSource.trim\(\)\)\?\[fileContext/);
   assert.ok(chunk.indexOf('className:"library-attachments"') < chunk.indexOf('h==="text"&&(0,t.jsxs)("form"'));
   assert.equal(MAX_ASSISTANT_FILES,3);
   assert.match(ASSISTANT_ACCEPT,/\.pdf/);
@@ -94,12 +94,13 @@ test('writing sends file excerpts and voice channel receives them as realtime in
   assert.match(chunk,/activeFiles.length\?directTask\(r,activeFiles\):r/);
   assert.match(chunk,/execute=isExecution\(r,activeFiles\)/);
   assert.match(chunk,/message:question,history:d/);
-  assert.match(chunk,/attachments:files\.length\?\[fileContext\(files,10500\)\]:\[\]/);
+  assert.match(chunk,/attachments:\(files\.length\|\|pastedSource\.trim\(\)\)\?\[fileContext/);
   assert.match(chunk,/import\{RealtimeConversation as P\}from"\.\/studio-realtime\.mjs/);
   assert.match(chunk,/m\.current\.attachContext\(fileContext\(\[stored\],4000\)\)/);
   assert.match(chunk,/fileAbort\.current\?\.abort\(\)/);
   assert.match(chunk,/setFiles\(list=>list\.filter\(x=>x\.id!==item\.id\)\)/);
   assert.match(chunk,/D\(\),w\("أزيل المرفق/);
-  assert.match(chunk,/disabled:f\|\|_\|\|!x\|\|fileBusy\|\|\(!q\.trim\(\)&&!files\.length\)/);
+  assert.match(chunk,/disabled:f\|\|_\|\|fileBusy\|\|\(!q\.trim\(\)&&!files\.length&&!pastedSource\.trim\(\)\)/);
 });
+
 

@@ -33,8 +33,8 @@ test('multiple requested scenes receive separate generations and one guarded sav
  for(const index of [0,1,2,3])assert.deepEqual(saved.doc.scenes[index],SCRIPT.scenes[index]);assert.deepEqual(saved.doc.scenes.map(s=>[s.id,s.title]),SCRIPT.scenes.map(s=>[s.id,s.title]));
  assert.deepEqual(result.sceneIds,['s5','s6']);assert.equal(result.revision,6);assert.match(result.message,/2 مشاهد/);assert.doesNotMatch(result.message,/أقترح|هل تريد/);
 });
-test('a file alone completes the scene selected in the editor',async()=>{
- const h=harness();await executeScriptContinuation({message:'',files,workId:'series',preferredSceneId:'s2',request:h.request});const body=h.calls.find(c=>c.method==='POST').body;assert.equal(body.sceneId,'s2');assert.equal(body.message,'أكمل المشهد مباشرة اعتمادًا على الملفات المرفقة.');assert.equal(h.calls.at(-1).body.doc.scenes[1].blocks.length,2);
+test('an explicit completion still generates for the selected scene',async()=>{
+ const h=harness();await executeScriptContinuation({message:'كمل المشهد',files,workId:'series',preferredSceneId:'s2',request:h.request});const body=h.calls.find(c=>c.method==='POST').body;assert.equal(body.sceneId,'s2');assert.equal(body.message,'كمل المشهد');assert.equal(h.calls.at(-1).body.doc.scenes[1].blocks.length,2);
 });
 test('revision replaces only the requested scene and retains author notes outside the creative text',async()=>{
  const h=harness({action:'replace_scene'});await executeScriptContinuation({message:'عدّل المشهد الأول',notes:'اختصر الجملة',files,workId:'series',preferredSceneId:'s1',request:h.request});const body=h.calls.find(c=>c.method==='POST').body;assert.equal(body.notes,'اختصر الجملة');const saved=h.calls.at(-1).body.doc;assert.equal(saved.scenes[0].blocks.length,1);assert.deepEqual(saved.scenes[1],SCRIPT.scenes[1]);assert.ok(!JSON.stringify(saved.scenes).includes('اختصر الجملة'));
@@ -55,5 +55,6 @@ test('duplicate targets are rejected; rewriting a paragraph keeps its linked not
 });
 test('text and voice use the same executor, current attachments and optional notes; confirmed saves refresh the editor',async()=>{
  const library=await readFile(new URL('../assets/chunks/library-assistant-I5KUSPHA.mjs',import.meta.url),'utf8'),editor=await readFile(new URL('../assets/app.mjs',import.meta.url),'utf8');
- assert.match(library,/execute=isExecution\(r,activeFiles\)/);assert.match(library,/runExecution\(\{message:r,files:activeFiles,workId,notes:notesRef.current/);assert.match(library,/isExecution\(o,filesRef.current\)/);assert.match(library,/ملاحظات إضافية \(اختيارية\)/u);assert.match(library,/studio-manuscript-updated/);assert.match(editor,/studio-manuscript-updated/);assert.match(editor,/if\(m==="execute"\)/);
+ assert.match(library,/execute=isExecution\(r,activeFiles\)/);assert.match(library,/runExecution\(\{message:r,files:activeFiles,workId,notes:notesRef.current/);assert.match(library,/isExecution\(o,\[\.\.\.filesRef.current/);assert.match(library,/ملاحظات إضافية \(اختيارية\)/u);assert.match(library,/studio-manuscript-updated/);assert.match(editor,/studio-manuscript-updated/);assert.match(editor,/if\(m==="execute"\)/);
 });
+

@@ -2,11 +2,11 @@
   "initial": [
     {
       "file": "assets/app.mjs",
-      "bytes": 272034
+      "bytes": 272442
     },
     {
       "file": "assets/chunks/chunk-3MNS2YWJ.mjs",
-      "bytes": 10225
+      "bytes": 10226
     },
     {
       "file": "assets/chunks/chunk-53JBATYG.mjs",
@@ -18,15 +18,15 @@
     },
     {
       "file": "assets/chunks/chunk-QO4XDGA3.mjs",
-      "bytes": 4374
+      "bytes": 4375
     },
     {
       "file": "assets/chunks/chunk-LPQTZJNU.mjs",
-      "bytes": 12839
+      "bytes": 13439
     },
     {
       "file": "assets/chunks/chunk-JGUFELKC.mjs",
-      "bytes": 976
+      "bytes": 977
     },
     {
       "file": "assets/chunks/chunk-Y4VJKQ7R.mjs",
@@ -38,23 +38,23 @@
     },
     {
       "file": "assets/chunks/chunk-OL7JBH3F.mjs",
-      "bytes": 3955
+      "bytes": 3956
     },
     {
       "file": "assets/chunks/chunk-ANDDHMXF.mjs",
-      "bytes": 22528
+      "bytes": 22529
     },
     {
       "file": "assets/chunks/chunk-PPA6V4PI.mjs",
-      "bytes": 8626
+      "bytes": 8627
     },
     {
       "file": "assets/chunks/chunk-KQKL2YCS.mjs",
-      "bytes": 2160
+      "bytes": 2161
     },
     {
       "file": "assets/chunks/chunk-2V77MTNA.mjs",
-      "bytes": 605
+      "bytes": 606
     }
   ],
   "deferred": [
@@ -72,7 +72,7 @@
     },
     {
       "file": "assets/chunks/scenarist-panel-N6EJOH3B.mjs",
-      "bytes": 92174
+      "bytes": 93970
     },
     {
       "file": "assets/chunks/work-structure-VFREAWQ5.mjs",
@@ -92,7 +92,7 @@
     },
     {
       "file": "assets/chunks/chunk-IRJ4PDZI.mjs",
-      "bytes": 4529
+      "bytes": 4530
     },
     {
       "file": "assets/chunks/book-studio-DV2IZPGZ.mjs",
@@ -136,11 +136,11 @@
     },
     {
       "file": "assets/chunks/library-assistant-I5KUSPHA.mjs",
-      "bytes": 16192
+      "bytes": 17919
     },
     {
       "file": "assets/chunks/chunk-FEUYKCPT.mjs",
-      "bytes": 246
+      "bytes": 247
     },
     {
       "file": "assets/chunks/project-center-HQMDDUDU.mjs",
@@ -152,7 +152,19 @@
     },
     {
       "file": "assets/chunks/studio-realtime.mjs",
-      "bytes": 9692
+      "bytes": 9693
+    },
+    {
+      "file": "assets/script-analysis.mjs",
+      "bytes": 18518
+    },
+    {
+      "file": "assets/chunks/assistant-execution.mjs",
+      "bytes": 7862
+    },
+    {
+      "file": "assets/chunks/assistant-attachments.mjs",
+      "bytes": 4843
     }
   ]
 }

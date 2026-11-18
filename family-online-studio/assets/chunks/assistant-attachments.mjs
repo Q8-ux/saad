@@ -1,3 +1,4 @@
+import {searchScriptSources} from '../script-analysis.mjs';
 // Ephemeral source material for the user's writing and live voice assistant.
 // Files are extracted with the existing authenticated studio gateway and are
 // never written into a manuscript or browser storage.
@@ -53,7 +54,7 @@ export async function extractAssistantFile(file, request, options={}) {
 
 // A hard budget keeps the file excerpt within the assistant's existing message
 // contract. Long documents are explicitly identified as excerpts, not full reads.
-export function attachmentContext(attachments, totalBudget=4600) {
+export function attachmentContext(attachments, totalBudget=4600, query="") {
   const files=Array.isArray(attachments)?attachments.slice(0,MAX_ASSISTANT_FILES):[];
   if(!files.length)return '';
   let remaining=Math.max(0,Math.floor(totalBudget));
@@ -61,7 +62,7 @@ export function attachmentContext(attachments, totalBudget=4600) {
   remaining-=parts[0].length;
   for(let i=0;i<files.length;i++){
     const item=files[i];
-    const source=cleanedText(item.text);
+    const source=query?searchScriptSources([item],query,{limit:8,budget:Math.max(100,totalBudget)}).map(h=>[h.unit,h.scene,h.speaker,h.text].filter(Boolean).join(' · ')).join('\n\n'):cleanedText(item.text);
     const name=String(item.name||'ملف').replace(/[<>{}]/gu,'').slice(0,100);
     const header='[المرفق '+(i+1)+': '+name+']';
     const allowance=Math.max(0,Math.min(remaining-header.length-75, Math.floor(remaining/(files.length-i))-header.length-75));
@@ -74,6 +75,7 @@ export function attachmentContext(attachments, totalBudget=4600) {
 }
 export function assistantMessageWithFiles(question,files,max=5700) {
   const q=cleanedText(question).slice(0,1200);
-  const context=attachmentContext(files,Math.max(0,max-q.length-140));
+  const context=attachmentContext(files,Math.max(0,max-q.length-140),q);
   return (q||'حلّل الملفات المرفقة، واذكر ما هو غير واضح.')+(context?'\n\n'+context:'');
 }
+

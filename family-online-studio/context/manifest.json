@@ -1,7 +1,7 @@
 {
   "revision": "project-context-1",
   "project": "writing-studio",
-  "sourceCommit": "472c8b46361fa5521faa375cc6c7eeac9d5ba8dd",
+  "sourceCommit": "03790b70d64907fb991dbc6130f387ece657b396",
   "scope": "current-manuscript-and-selected-scene",
   "workIdentitySource": "server-request-url",
   "crossWorkMemory": false,
@@ -15,7 +15,7 @@
     },
     {
       "path": "lib/scenarist.ts",
-      "sha256": "2b28a849c084cf35169f082d19eb5069a2e2acee65b1cc4c57412756f270830b"
+      "sha256": "53da00219b138ef6b9c00f2ed001ed6d7637afc6d55fc3880968f7fe5a3fb428"
     },
     {
       "path": "lib/scene-execution.ts",
@@ -23,7 +23,7 @@
     },
     {
       "path": "app/api/scenarist/route.ts",
-      "sha256": "ad6cac6b21d4d8efac9546fd860db9530cffaa84b86d31689c93990fa4fc0eaa"
+      "sha256": "48e772dcfbf3d87f0ea560deff776276f2e5de1a3cb4db046f729569f56b6de7"
     },
     {
       "path": "lib/realtime-client.ts",
@@ -40,6 +40,22 @@
     {
       "path": "app/library-assistant.css",
       "sha256": "30fdb6557e551fe84af270af6cde542d314ac79d3b8acbd92933d1b98b7b5533"
+    },
+    {
+      "path": "lib/script-analysis.mjs",
+      "sha256": "09387b3e7f8bd191b9bbb4f14a50fa69f41df629681c6e131715384945146753"
+    },
+    {
+      "path": "lib/server-store.ts",
+      "sha256": "f8436e51cdd5f8d259b3aa902a7e75fb72d32afcce839a9dab459b63b7d0cdaa"
+    },
+    {
+      "path": "app/scenarist-panel.tsx",
+      "sha256": "d177f7dfae3e185d277ea1a9596e08dca53f3495e4437e510dabb61639099f9b"
+    },
+    {
+      "path": "app/studio.tsx",
+      "sha256": "b796cc3fc8fee521c370f17e76e9bf263dd30550f830fe9df838df132e8e5be2"
     }
   ],
   "checks": {
@@ -54,12 +70,17 @@
     "liveVoiceClient": "passed",
     "speechAndRealtimeServerContracts": "passed",
     "voiceAttachmentExecutionTests": 27,
-    "voiceBrowserUi": "passed-synthetic-media-390x640-320x480"
+    "voiceBrowserUi": "passed-synthetic-media-390x640-320x480",
+    "sourceAnalysis": "passed",
+    "storedSourceMigration": "passed-synthetic-SQLite-and-revision-guard",
+    "publicSourceAnalysisTests": 36,
+    "pastedScriptBrowser": "passed-real-component-synthetic-storage",
+    "historicalLiveAccount": "blocked-personal-verification"
   },
   "publication": "succeeded",
   "snapshotPolicy": "generic-review-modules-only; no manuscripts, seeds, credentials or private build archives",
-  "deployedVersion": "appgprj_6acf275cd3a4819188adb07ac6bee0be~appgver_f8e0289a0ed881919fa7f0bbdd2826ed",
-  "deploymentId": "appgdep_6afcdf3c18c08191a289ed0db1496f18",
+  "deployedVersion": "appgprj_6acf275cd3a4819188adb07ac6bee0be~appgver_ce144ee7899081919c35fbc32fb18b1b",
+  "deploymentId": "appgdep_6afd689046b0819183f4669c2c998529",
   "sceneExecution": {
     "revision": "attachment-scene-execution-2",
     "optionalNotes": true,
@@ -76,5 +97,21 @@
     "disconnectGraceSeconds": 10,
     "realDeviceMicrophoneTest": false,
     "liveProviderCalls": 0
+  },
+  "sourceAnalysis": {
+    "revision": "source-distribution-1",
+    "fullExtractedText": true,
+    "input": [
+      "upload",
+      "paste"
+    ],
+    "layout": "french",
+    "search": "complete-source-with-located-excerpts",
+    "modelNeededForDistribution": false,
+    "storedImportMigration": "current-text-on-authenticated-read",
+    "sourceDeduplication": true,
+    "automaticSnapshot": true,
+    "liveHistoricalBatchExecuted": false
   }
 }
+
