@@ -15,6 +15,21 @@ export const team = [
 
 export const mediaVideos = [
   {
+    src: "/media/sabeq-reel-df46p_2crry.mp4",
+    poster: "/media/sabeq-reel-df46p_2crry.jpg",
+    title: "إدارة وتحصيل المديونيات",
+  },
+  {
+    src: "/media/sabeq-reel-dfxbydrirci.mp4",
+    poster: "/media/sabeq-reel-dfxbydrirci.jpg",
+    title: "دعوى المسؤولية وحقوق المساهمين — د. خليفة محمد الخليفة",
+  },
+  {
+    src: "/media/sabeq-reel-dfnhrm2j_hx.mp4",
+    poster: "/media/sabeq-reel-dfnhrm2j_hx.jpg",
+    title: "ترخيص المؤثرين في قطر — المحامي مشعل متعب",
+  },
+  {
     src: "/media/sabeq-khalifa-01.mp4",
     poster: "/media/sabeq-khalifa-01.jpg",
     title: "المحامي د. خليفة محمد الخليفة",

@@ -1,0 +1,39 @@
+{
+  "account": "sabik_legal",
+  "checkedAt": "2026-11-19",
+  "videos": [
+    {
+      "id": "Df46P_2CrRY",
+      "source": "https://www.instagram.com/sabik_legal/reel/Df46P_2CrRY/",
+      "publishedAt": "2026-11-18T16:15:29+00:00",
+      "title": "إدارة وتحصيل المديونيات",
+      "src": "/media/sabeq-reel-df46p_2crry.mp4",
+      "poster": "/media/sabeq-reel-df46p_2crry.jpg",
+      "durationSeconds": 78.145,
+      "videoSha256": "5196dcdb2ba73c80510e11f710fa199fd49033d44f9f4b720daecff3f4606491",
+      "posterSha256": "e9f26b3b5776d269282dec8c2d20b25518b5a0b20f32d2aaeab7312933a9775a"
+    },
+    {
+      "id": "DfxByDRirCi",
+      "source": "https://www.instagram.com/sabik_legal/reel/DfxByDRirCi/",
+      "publishedAt": "2026-11-15T14:47:02+00:00",
+      "title": "دعوى المسؤولية وحقوق المساهمين — د. خليفة محمد الخليفة",
+      "src": "/media/sabeq-reel-dfxbydrirci.mp4",
+      "poster": "/media/sabeq-reel-dfxbydrirci.jpg",
+      "durationSeconds": 77.505,
+      "videoSha256": "f851ddfd791b74b0ee71c268c0363d0fc755e0f5cbd7fcee9f141faad74f954f",
+      "posterSha256": "79c1f652b273d3036937d63a343bd95af689aeb77bf33649335dc5e7d91660c6"
+    },
+    {
+      "id": "DfnHrm2j_HX",
+      "source": "https://www.instagram.com/sabik_legal/reel/DfnHrm2j_HX/",
+      "publishedAt": "2026-11-11T18:26:28+00:00",
+      "title": "ترخيص المؤثرين في قطر — المحامي مشعل متعب",
+      "src": "/media/sabeq-reel-dfnhrm2j_hx.mp4",
+      "poster": "/media/sabeq-reel-dfnhrm2j_hx.jpg",
+      "durationSeconds": 307.0,
+      "videoSha256": "cf0dc1a85b6fb148658c3a3c928abc85d83e5bba24cd7e9dc0f94ff14b133434",
+      "posterSha256": "3c88010f90f22c1f2a7ebcb4dcb46d7dd2c1854847b51d7e5a0ab9ffab8149bd"
+    }
+  ]
+}
