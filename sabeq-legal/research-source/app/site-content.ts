@@ -15,8 +15,8 @@ export const team = [
 
 export const mediaVideos = [
   {
-    src: "/media/sabeq-medical-errors-71e88a01.mp4",
-    poster: "/media/sabeq-medical-errors-71e88a01.jpg",
+    src: "/media/sabeq-medical-errors-clean-509536db.mp4",
+    poster: "/media/sabeq-medical-errors-clean-509536db.jpg",
     title: "توعية قانونية بشأن الأخطاء الطبية",
   },
   {
