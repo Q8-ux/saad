@@ -51,7 +51,7 @@ test("reset tokens are one-time server-hashed, expire, and cannot be exchanged a
 test("approved-account entry supports chosen passwords and the PKCE account alternative",()=>{
  const start=login.indexOf('function loginScreen('),end=login.indexOf('async function signIn(',start);
  assert.ok(start>=0&&end>start);
- const entry=login.slice(start,end);assert.match(entry,/data-action="sign-in"/);assert.match(entry,/data-action="switch-account"/);
+ const entry=login.slice(start,end);assert.doesNotMatch(entry,/data-action="sign-in"/);assert.match(entry,/data-action="switch-account"/);
  assert.match(entry,/data-form="password-login"/);assert.match(entry,/type="password"/);assert.doesNotMatch(entry,/minlength=/);
  assert.match(login,/sabeq-admin-proof/);assert.match(login,/sabeq-admin-state/);assert.match(login,/SHA-256/);assert.match(login,/new URLSearchParams\(\{challenge,state,console:consoleName\}\)/);
  assert.match(login,/api\('exchange',\{code,verifier\}\)/);
