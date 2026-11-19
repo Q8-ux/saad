@@ -114,3 +114,8 @@ for(const [label,source] of entrySources){
  });
 }
 
+
+
+test('GitHub and management mirror ship the identical ready forms client',()=>{
+ assert.equal(js,entrySources[1][1]);assert.match(js,/forms:'الصيغ الجاهزة'/);assert.match(js,/api\('ready-forms'\)/);
+});

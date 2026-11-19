@@ -1,3 +1,4 @@
+import { ensureReadyForms } from "./ready-forms";
 import { env } from "cloudflare:workers";
 import { getD1 } from "@/db";
 import { RequestError } from "./request-security";
@@ -88,6 +89,7 @@ export async function ensureApprovedTemplates() {
     const stored = { ...definitions[kind], referenceStyle: referenceStyles[kind].catalog };
     await db.prepare(`INSERT INTO legal_drafting_templates (id,kind,version,title,source_filename,source_sha256,source_object_key,page_count,definition_json,status,approved_by,approved_at) VALUES (?,?,?,?,?,?,?,?,?,'approved','project_owner',?) ON CONFLICT(id) DO NOTHING`).bind(source.id,source.kind,source.version,source.title,source.sourceFilename,source.sourceSha256,key,source.pageCount,JSON.stringify(stored),source.approvedAt).run();
   }
+  await ensureReadyForms();
 }
 export async function loadApprovedTemplate(kind:"claim"|"appeal") {
   await ensureApprovedTemplates();

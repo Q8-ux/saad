@@ -9,8 +9,8 @@ const input={caseType:'مدني',court:'المحكمة الكلية',courtCircui
 const content={facts:input.facts,requests:input.requests,grounds:'',legalResearchNotes:'لا توجد مصادر موثقة كافية؛ يتولى المساعد والمجموعة استكمال البحث.',factualNotes:[],fields:{}};
 
 test('both reviewed originals persist byte-for-byte in R2 and authoritative definitions in actual SQLite, idempotently',async t=>{
- const h=templateHarness();t.after(h.cleanup);await h.templates.ensureApprovedTemplates();assert.equal(h.objects.size,2);assert.equal(h.sql('SELECT count(*) AS n FROM legal_drafting_templates')[0].n,2);
- for(const row of h.sql('SELECT * FROM legal_drafting_templates')){const original=h.objects.get(row.source_object_key);assert.equal(createHash('sha256').update(original.bytes).digest('hex'),row.source_sha256);assert.equal(row.status,'approved');const def=JSON.parse(row.definition_json);assert.ok(def.clauses.processServer);assert.equal(def.kind,row.kind);}
+ const h=templateHarness();t.after(h.cleanup);await h.templates.ensureApprovedTemplates();assert.equal(h.objects.size,2);assert.equal(h.sql("SELECT count(*) AS n FROM legal_drafting_templates WHERE status='approved'")[0].n,2);
+ for(const row of h.sql("SELECT * FROM legal_drafting_templates WHERE status='approved'")){const original=h.objects.get(row.source_object_key);assert.equal(createHash('sha256').update(original.bytes).digest('hex'),row.source_sha256);assert.equal(row.status,'approved');const def=JSON.parse(row.definition_json);assert.ok(def.clauses.processServer);assert.equal(def.kind,row.kind);}
  h.sql("UPDATE legal_drafting_templates SET title='عنوان محفوظ من الإدارة' WHERE kind='claim'");await h.templates.ensureApprovedTemplates();assert.equal(h.writes,2);assert.equal((await h.templates.loadApprovedTemplate('claim')).info.title,'عنوان محفوظ من الإدارة');
  h.sql("UPDATE legal_drafting_templates SET status='withdrawn' WHERE kind='claim'");await assert.rejects(h.templates.loadApprovedTemplate('claim'),/القالب المعتمد غير متاح/);
 });

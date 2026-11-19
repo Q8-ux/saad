@@ -631,3 +631,16 @@ test('global service switches preserve billing configuration and consultation ad
 
 
 test('revoked service sessions and corrupt stored permission values fail closed',async()=>{const h=harness();try{const users=h.load('lib/user-management.ts'),helper=h.load('lib/service-settings.ts');for(const value of ['bad-json','null','[]','{"memo":"false"}'])assert.ok(Object.values(users.userPermissions(value)).every(allowed=>allowed===false));assert.ok(Object.values(users.userPermissions()).every(Boolean));const created=await users.updateManagedUser({action:'create',name:'عميل اختبار الإلغاء',email:'revoked@example.test'});const session=await h.load('lib/public-auth.ts').createPublicSession(created.id);await users.updateManagedUser({id:created.id,permissions:{memo:false,assistant:true,consultation:true,library:true}});await assert.rejects(helper.requireServiceEnabled('assistant',request('session',session.token)),error=>error.status===401);await helper.requireServiceEnabled('assistant');}finally{h.close();}});
+
+test('office ready forms are administrator-only, blank and independent from memo requests and public templates',async()=>{const h=harness();try{
+ const routes=h.load('app/api/management/[...path]/route.ts');
+ assert.equal((await routes.GET(request('ready-forms'))).status,401);
+ assert.equal(h.sqlite.prepare('SELECT COUNT(*) n FROM legal_drafting_templates').get().n,0);
+ configureAdministrator(h);const session=await adminLogin(h);
+ const response=await routes.GET(request('ready-forms',session.token));assert.equal(response.status,200);const data=await response.json();
+ assert.equal(data.forms.length,8);assert.ok(data.forms.every(f=>f.status==='draft'&&f.caseDataIncluded===false&&f.originalFileStored===false));
+ const manager=(await(await routes.GET(request('session',session.token))).json()).manager;assert.ok(manager.sections.includes('forms'));
+ assert.equal(h.sqlite.prepare('SELECT COUNT(*) n FROM management_memo_requests').get().n,0);
+ const supervisorPassword=memoSupervisorConfiguration(h);const supervisor=await(await routes.POST(request('password-login',null,{username:'ahmad',password:supervisorPassword}))).json();
+ assert.equal((await routes.GET(request('ready-forms',supervisor.token))).status,403);
+}finally{h.close();}});

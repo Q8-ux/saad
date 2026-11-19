@@ -7,7 +7,7 @@ export const dashboardChecks=[
  // Full agent/template integration is verified in the canonical release; this public mirror excludes private form sources.
  {id:'memo-article-text',files:['tests/article-text-in-memos.test.mjs','tests/memo-completeness.test.mjs','tests/reference-pleading-style.test.mjs','tests/legal-drafting-routes.test.mjs']},
  {id:'admin-permissions-and-failures',files:['tests/management.test.mjs','tests/email-worker-transport.test.mjs','tests/gmail.test.mjs']},
- {id:'admin-service-contract',files:['tests/admin-bridge-contract.test.mjs','tests/management-source-connection.test.mjs','tests/admin-source-status.test.mjs','tests/admin-memo-link.test.mjs']},
+ {id:'admin-service-contract',files:['tests/admin-bridge-contract.test.mjs','tests/management-source-connection.test.mjs','tests/admin-source-status.test.mjs','tests/admin-memo-link.test.mjs','tests/ready-forms.test.mjs']},
  {id:'programmer-client',files:['tests/programmer-client.test.mjs']},
 ];
 export function runDashboardChecks(execute=spawnSync,cwd=path.resolve(fileURLToPath(new URL('..',import.meta.url)))){

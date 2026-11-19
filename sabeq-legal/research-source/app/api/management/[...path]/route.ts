@@ -1,3 +1,4 @@
+import { listReadyForms } from "@/lib/ready-forms";
 import { engineeringPathStatus } from "@/lib/engineering-paths";
 import { siteAction, servicesAction, bookingsAction } from "@/lib/site-controls";
 import { listManagedUsers, updateManagedUser } from "@/lib/user-management";
@@ -51,6 +52,7 @@ async function managementGet(request: Request) {
     if (action === "mailboxes") return managementJson(await mailboxAction(null, manager.email, Number(url.searchParams.get("offset") || 0)));
     if (action === "session") return managementJson({ manager: managerProfile(manager) });
     if (action === "snapshot") return managementJson(await managerSnapshot(manager.email));
+    if (action === "ready-forms") return managementJson({ forms: await listReadyForms() });
     if (action === "memos") return managementJson(await managerMemos(url));
     if (action === "memo-revision") return managementJson(await readMemoRevision(url));
     if (action === "inbox") return managementJson(await managerInbox(url));

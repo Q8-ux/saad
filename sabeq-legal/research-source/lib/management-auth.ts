@@ -24,7 +24,7 @@ const MEMO_SUPERVISOR_SECTIONS = ["memos", "bookings", "inbox"];
 const OPERATOR_SECTIONS = ["overview", "memos", "inbox", "notifications", "users", "legislation", "commands", "updates"];
 export function managerProfile(manager: Manager) {
   return { email: manager.email, name: manager.name, ...(manager.username ? { username: manager.username } : {}), role: manager.role,
-    sections: manager.role === "operator" ? [] : manager.role === "memo_supervisor" ? [...MEMO_SUPERVISOR_SECTIONS] : [...OPERATOR_SECTIONS, "site", "services", "bookings", "programmer", "paths", "payments", "mailboxes", "whatsapp", "mail"] };
+    sections: manager.role === "operator" ? [] : manager.role === "memo_supervisor" ? [...MEMO_SUPERVISOR_SECTIONS] : [...OPERATOR_SECTIONS, "forms", "site", "services", "bookings", "programmer", "paths", "payments", "mailboxes", "whatsapp", "mail"] };
 }
 export function assertManagerAction(manager: Manager, action: string, method: "GET" | "POST") {
   if (manager.role === "administrator") return;
