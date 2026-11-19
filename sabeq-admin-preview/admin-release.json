@@ -108,6 +108,7 @@
     "authenticatedLiveRegistrationVerified": false,
     "liveEmailDeliveryVerified": false,
     "featureTestsPassed": 11,
-    "nativeReleaseTestsPassed": 383
+    "nativeReleaseTestsPassed": 383,
+    "githubClientTestsPassed": 33
   }
 }
