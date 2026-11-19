@@ -1,3 +1,4 @@
+import './live-memo-arrival.cases.mjs';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
@@ -10,7 +11,8 @@ test('admin memo section reads protected shared database rather than Bolt',()=>{
 test('memo records expose source and manual sync without inventing records',()=>{
   assert.match(js,/مصدر الطلبات الحالي: قاعدة بيانات الموقع الرسمية المشتركة/);
   assert.match(js,/مزامنة الطلبات الآن/);
-  assert.match(js,/memoArchiveError=data\.officialError;renderMemos\(data\.officialAvailable,data\.officialError\)/);
+  assert.match(js,/api\('memos\?'\+params\+'&source=current'\)/);
+  assert.match(js,/id="memo-live-list"/);
   assert.match(js,/await api\('memos\?id='\+encodeURIComponent\(id\)\)/);
 });
 
@@ -52,9 +54,9 @@ function verifyEntryProof(f,url){
  assert.equal(url.searchParams.has('verifier'),false);
 }
 for(const [label,source] of entrySources){
- test(label+': signed-out entry offers scoped password sign-in and account sign-in without data reads',()=>{
+ test(label+': signed-out entry retains password sign-in and account switching without data reads',()=>{
   const f=entryFixture(source);
-  assert.match(f.node('app').innerHTML,/data-action="sign-in"/);
+  assert.doesNotMatch(f.node('app').innerHTML,/data-action="sign-in"/);
   assert.match(f.node('app').innerHTML,/data-action="switch-account"/);
   assert.match(f.node('app').innerHTML,/data-form="password-login"/);assert.match(f.node('app').innerHTML,/name="username"/);assert.match(f.node('app').innerHTML,/type="password"/);
   assert.equal(f.calls.length,0);
@@ -93,7 +95,7 @@ for(const [label,source] of entrySources){
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(f.calls.length,0);
   assert.match(f.node('app').innerHTML,/طلب الدخول لا يطابق هذه الجلسة/);
-  assert.match(f.node('app').innerHTML,/data-action="sign-in"/);
+  assert.doesNotMatch(f.node('app').innerHTML,/data-action="sign-in"/);
  });
  test(label+': a denied account can switch accounts without password instructions',()=>{
   const f=entryFixture(source,'https://q8-ux.github.io/saad/sabeq-admin-preview/?login_error=not_authorized');

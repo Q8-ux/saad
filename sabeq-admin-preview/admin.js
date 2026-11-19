@@ -26,12 +26,13 @@
   const empty = (title, copy='') => `<div class="empty">${icon('memos')}<h3>${esc(title)}</h3>${copy?`<p>${esc(copy)}</p>`:''}</div>`;
   const panel = (title,body,action='') => `<section class="panel"><div class="panel-head"><h3>${esc(title)}</h3>${action}</div>${body}</section>`;
   const input = (name,label,value='',options='') => `<label class="field"><span>${esc(label)}</span><input name="${esc(name)}" value="${esc(value)}" ${options}></label>`;
-  let token='',manager=null,section='overview',snapshot=null,wa=null,mail=null,gmail=null,gmailInboxRows=[],verificationMail=null,mailboxData=null,paymentsData=null,rows=[],offset=0,query='',memoStatus='',memoView='all',recoveryReport=null,memoArchiveAvailable=false,memoArchiveError='',pendingMemoId='',hasMore=false,busy=false,toastTimer;
+  let token='',manager=null,section='overview',snapshot=null,wa=null,mail=null,gmail=null,gmailInboxRows=[],verificationMail=null,mailboxData=null,paymentsData=null,rows=[],offset=0,query='',memoStatus='',memoView='all',recoveryReport=null,memoArchiveAvailable=false,memoArchiveError='',pendingMemoId='',hasMore=false,busy=false,autoRefreshBusy=false,refreshRevision=0,toastTimer;
   try { token=sessionStorage.getItem(SESSION)||''; } catch { /* storage is checked when signing in */ }
   async function api(path,body,method,signal) {
-    const response=await fetch(API+path,{method:method || (body?'POST':'GET'),headers:{...(token?{Authorization:'Bearer '+token}:{}),...(body?{'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{}),credentials:'omit',cache:'no-store',referrerPolicy:'no-referrer',signal:signal?AbortSignal.any([signal,AbortSignal.timeout(35_000)]):AbortSignal.timeout(30_000)});
+    const requestToken=token;
+    const response=await fetch(API+path,{method:method || (body?'POST':'GET'),headers:{...(requestToken?{Authorization:'Bearer '+requestToken}:{}),...(body?{'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{}),credentials:'omit',cache:'no-store',referrerPolicy:'no-referrer',signal:signal?AbortSignal.any([signal,AbortSignal.timeout(35_000)]):AbortSignal.timeout(30_000)});
     const data=await response.json().catch(()=>({error:'لم تصل استجابة قابلة للقراءة.'}));
-    if(response.status===401 && !['exchange','password-login','password-recovery-request','password-recovery-confirm'].includes(path)) {token='';manager=null;sessionStorage.removeItem(SESSION);loginScreen('انتهت الجلسة. سجّل الدخول للمتابعة.');}
+    if(response.status===401 && token===requestToken && !['exchange','password-login','password-recovery-request','password-recovery-confirm'].includes(path)) {token='';manager=null;sessionStorage.removeItem(SESSION);loginScreen('انتهت الجلسة. سجّل الدخول للمتابعة.');}
     if(!response.ok)throw Error(data.error||'تعذر الاتصال بخدمة الإدارة.');
     return data;
   }
@@ -89,7 +90,7 @@
   function memoParams(){return new URLSearchParams({offset:String(offset),q:query,status:memoStatus,view:memoView}).toString();}
   async function load() {
     if(!token||busy)return;
-    busy=true;
+    busy=true;refreshRevision++;
     content().innerHTML=heading()+'<div class="skeleton" role="status">جارٍ تحميل البيانات الفعلية…</div>';
     try {
       if(section==='overview'||section==='notifications'){snapshot=await api('snapshot');renderSnapshot();}
@@ -161,7 +162,8 @@
     link.href=url;link.download='sabeq-memos-for-review-'+new Date().toISOString().slice(0,10)+'.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
     toast('تم تصدير '+n(records.length)+' مذكرة كاملة إلى جهازك. لم تُرسل بالبريد.');
   }
-  function renderMemos(available,error){content().innerHTML=heading()+memoExportControls()+`<div class="banner ok" role="status">مصدر الطلبات الحالي: قاعدة بيانات الموقع الرسمية المشتركة. المعروض ${n(rows.filter(row=>row.source!=='official').length)} طلبًا في الصفحة الحالية. <button type="button" data-action="refresh">مزامنة الطلبات الآن</button></div>`+filters(true)+connectionNotice(available,error)+panel(memoView==='generated'?'المذكرات المولدة':'سجل طلبات التوليد',rows.length?`<div class="table-scroll" tabindex="0" role="region" aria-label="جدول السجلات — مرر أفقياً على الجوال"><table><thead><tr><th>العميل / الطلب</th><th>القضية</th><th>الحالة</th><th>وقت الاستلام</th></tr></thead><tbody>${rows.map(row=>`<tr><td><button class="text-button" data-memo="${esc(row.id)}">${esc(row.client_name||'طلب مذكرة')}</button><small><bdi>${esc(row.email||'لم يُسجل بريد للطلب')}</bdi></small></td><td>${esc(row.case_type||'غير محدد')}<small>${esc(row.case_number||'بدون رقم قضية')} · ${esc(memoOrigin(row))} · ${esc(states[row.visitor_type]||'سجل محفوظ')}</small></td><td>${badge(row.status)}</td><td>${date(row.created_at)}</td></tr>`).join('')}</tbody></table></div>`:empty(memoView==='generated'?'لا توجد مذكرات مولدة تطابق البحث.':'لا توجد طلبات مطابقة في المصادر المتاحة.'))+pager()+memoRecoveryPanel();}
+  function memoListHTML(){return `<div class="banner ok" role="status">فحص الطلبات الجديدة كل ٥ ثوانٍ. مصدر الطلبات الحالي: قاعدة بيانات الموقع الرسمية المشتركة. المعروض ${n(rows.filter(row=>row.source!=='official').length)} طلبًا في الصفحة الحالية. <button type="button" data-action="refresh">مزامنة الطلبات الآن</button></div>`+connectionNotice(memoArchiveAvailable,memoArchiveError)+panel(memoView==='generated'?'المذكرات المولدة':'سجل طلبات التوليد',rows.length?`<div class="table-scroll" tabindex="0" role="region" aria-label="جدول السجلات — مرر أفقياً على الجوال"><table><thead><tr><th>العميل / الطلب</th><th>القضية</th><th>الحالة</th><th>وقت الاستلام</th></tr></thead><tbody>${rows.map(row=>`<tr><td><button class="text-button" data-memo="${esc(row.id)}">${esc(row.client_name||'طلب مذكرة')}</button><small><bdi>${esc(row.email||'لم يُسجل بريد للطلب')}</bdi></small></td><td>${esc(row.case_type||'غير محدد')}<small>${esc(row.case_number||'بدون رقم قضية')} · ${esc(memoOrigin(row))} · ${esc(states[row.visitor_type]||'سجل محفوظ')}</small></td><td>${badge(row.status)}</td><td>${date(row.created_at)}</td></tr>`).join('')}</tbody></table></div>`:empty(memoView==='generated'?'لا توجد مذكرات مولدة تطابق البحث.':'لا توجد طلبات مطابقة في المصادر المتاحة.'))+pager();}
+  function renderMemos(){content().innerHTML=heading()+memoExportControls()+filters(true)+`<div id="memo-live-list">${memoListHTML()}</div>`+memoRecoveryPanel();}
   function renderInbox(available){content().innerHTML=heading()+filters(false)+connectionNotice(available)+`<div class="banner ok">رسائل نموذج الموقع مستقلة عن البريد الإلكتروني. إعداد صندوق البريد ومفتاح مزوده متاحان في «ربط البريد».</div>`+panel('الوارد',rows.length?`<div class="table-scroll" tabindex="0" role="region" aria-label="جدول السجلات — مرر أفقياً على الجوال"><table><thead><tr><th>المرسل والموضوع</th><th>المصدر</th><th>الحالة</th><th>الاستلام</th></tr></thead><tbody>${rows.map((row,i)=>`<tr><td><button class="text-button" data-message="${i}">${esc(row.subject||'بدون عنوان')}</button><small>${esc(row.sender)} · <bdi>${esc(row.email||'')}</bdi></small></td><td>${esc(({contact:'نموذج الموقع',email:'البريد الإلكتروني',official:'الموقع الرسمي'})[row.source]||row.source)}</td><td>${badge(row.status)}</td><td>${date(row.received_at)}</td></tr>`).join('')}</tbody></table></div>`:empty('لا توجد رسائل محفوظة في هذه الصفحة.'))+pager();}
   function renderCommands(){content().innerHTML=heading()+panel('أمر متابعة جديد',`<form class="panel-body" data-form="command">${input('title','عنوان الأمر','','required minlength="3" maxlength="240"')}<label class="field"><span>تفاصيل المتابعة</span><textarea name="details" rows="3" maxlength="6000"></textarea></label><div class="toolbar"><select name="priority" aria-label="الأولوية"><option value="normal">أولوية عادية</option><option value="urgent">عاجل</option></select><button class="primary" type="submit">تسجيل الأمر</button></div><p class="muted">الأمر تكليف للمتابعة داخل المكتب. لا يشغّل أوامر برمجية أو يرسل رسائل تلقائياً.</p></form>`)+panel('سجل الأوامر',rows.length?rows.map(row=>`<article class="command"><div class="command-head"><h3>${esc(row.title)} ${row.priority==='urgent'?badge('عاجل','warning'):''}</h3><select data-command-status="${esc(row.id)}" aria-label="حالة ${esc(row.title)}">${['pending','running','blocked','completed'].map(s=>`<option value="${s}" ${s===row.status?'selected':''}>${states[s]}</option>`).join('')}</select></div><p>${esc(row.details)}</p><small>آخر تحديث ${date(row.updated_at)} · <bdi>${esc(row.created_by)}</bdi></small></article>`).join(''):empty('لم تسجل أوامر متابعة بعد.'));}
   function renderWhatsApp(){content().innerHTML=heading()+`<div class="grid"><div>`+panel('إعدادات الاتصال — Configuration',`<form class="panel-body" data-form="whatsapp"><div class="key-state">${icon('shield')}${wa.hasApiKey?'مفتاح الربط محفوظ على الخادم بصورة مشفرة':'لم يُحفظ مفتاح ربط بعد'}</div>${input('baseUrl','عنوان بوابة OpenWA',wa.baseUrl,'required type="url" dir="ltr" placeholder="https://whatsapp.example.com" maxlength="2000"')}${input('apiKey',wa.hasApiKey?'مفتاح API جديد — اتركه فارغاً للاحتفاظ بالمحفوظ':'مفتاح API','','type="password" dir="ltr" autocomplete="new-password" maxlength="500"')}${input('sessionId','معرف جلسة المكتب — Session ID',wa.sessionId,'dir="ltr" maxlength="80" placeholder="UUID"')}${input('officePhone','رقم واتساب المكتب',wa.officePhone,'type="tel" dir="ltr" maxlength="40"')}<label class="checkbox"><input name="enabled" type="checkbox" ${wa.enabled?'checked':''}><span>تفعيل استقبال أحداث هذه الجلسة في لوحة الإدارة</span></label><button class="primary" type="submit">حفظ الإعدادات</button></form>`)+panel('حالة الربط — Integration',`<div class="panel-body"><div class="source-row"><div><strong>حالة الجلسة</strong><small>${wa.testedAt?'آخر اختبار '+date(wa.testedAt):'احفظ الإعدادات ثم اختبر الاتصال.'}</small></div>${badge(wa.connectionStatus)}</div><div class="actions"><button data-wa="test">اختبار الإعدادات المحفوظة</button><button data-wa="create">إنشاء جلسة المكتب</button><button data-wa="start">بدء ربط الجلسة</button><button data-wa="qr">عرض رمز QR</button></div><div id="wa-sessions"></div><p class="service-status">اختبار الاتصال يقرأ الجلسات فقط. الإرسال الآلي ورموز تحقق العملاء غير مفعّلين من هذه الشاشة.</p></div>`)+`</div><div>`+panel('استقبال الأحداث — Webhook',`<div class="panel-body"><p>استقبال حالة الاتصال، وصول رسالة أو فشل التسليم في مركز التنبيهات. تُحفظ بيانات الحدث العامة دون نص محادثة العميل أو مرفقاته.</p><label class="field"><span>رابط الاستقبال</span><input value="${esc(wa.webhookUrl)}" readonly dir="ltr"></label><p>${wa.webhookConfigured?badge('تم تسجيل الربط'):badge('لم يُسجل Webhook','warning')}</p><button data-wa="webhook" class="secondary">ربط استقبال التنبيهات</button></div>`)+panel('خطوات تشغيل رقم المكتب',`<div class="panel-body"><ol class="step-list"><li>أدخل عنوان بوابة OpenWA ومفتاحها ثم احفظ.</li><li>اختبر الاتصال واختر الجلسة الموجودة، أو أنشئ جلسة للمكتب.</li><li>ابدأ ربط الجلسة ثم اعرض QR وامسحه من الأجهزة المرتبطة في هاتف المكتب.</li><li>اختبر مجدداً للتأكد من ظهور «متصل»، ثم اربط استقبال الأحداث.</li></ol><p class="service-status">OpenWA اتصال غير رسمي بواتساب. اختيار رقم التشغيل ومسح QR من مسؤول المكتب.</p></div>`)+`</div></div>`;}
@@ -374,19 +376,38 @@
       if(!token){loginScreen();return;}manager=(await api('session')).manager;shell();await load();await openPendingMemo();
     }catch(error){token='';manager=null;try{sessionStorage.removeItem(SESSION);}catch{}loginScreen(error.message||'تعذر التحقق من الدخول.');}
   }
-  setInterval(async()=>{
-    if(!token||!manager||busy||document.hidden||dialog.open||document.activeElement?.matches?.('input,textarea,select')||!['overview','notifications','memos'].includes(section))return;
-    const target=section,params=memoParams();
+  async function refreshLive() {
+    if(!token||!manager||busy||autoRefreshBusy||document.hidden||!['overview','notifications','memos'].includes(section))return;
+    if(section!=='memos'&&(dialog.open||document.activeElement?.matches?.('input,textarea,select')))return;
+    const target=section,params=memoParams(),session=token,account=manager,revision=refreshRevision;
+    const current=()=>token===session&&manager===account&&section===target&&refreshRevision===revision&&!busy;
+    autoRefreshBusy=true;
     try{
       if(target==='memos'){
-        const data=await api('memos?'+params);
-        if(!manager||target!==section||busy||dialog.open||document.activeElement?.matches?.('input,textarea,select')||params!==memoParams())return;
-        rows=data.memos;hasMore=data.hasMore;memoArchiveAvailable=data.officialAvailable;memoArchiveError=data.officialError;renderMemos(data.officialAvailable,data.officialError);
+        const data=await api('memos?'+params+'&source=current');
+        if(!current()||params!==memoParams()||document.hidden)return;
+        // shortcut: loaded archive rows refresh on manual reload; add archive polling if that source becomes active.
+        const archived=rows.filter(row=>row.source==='official');
+        rows=[...data.memos,...archived].sort((a,b)=>String(b.created_at||'').localeCompare(String(a.created_at||'')));
+        hasMore=data.hasMore||(archived.length>0&&hasMore);
+        const list=document.getElementById('memo-live-list');
+        const html=memoListHTML();
+        if(list){if(list.innerHTML!==html)list.innerHTML=html;}else renderMemos();
       }else{
-        snapshot=await api('snapshot');if(!manager||target!==section||busy)return;renderSnapshot();
+        const data=await api('snapshot');
+        if(!current()||document.hidden||dialog.open||document.activeElement?.matches?.('input,textarea,select'))return;
+        snapshot=data;renderSnapshot();
       }
       const last=document.getElementById('last-updated');if(last)last.textContent='آخر تحديث: '+date(new Date().toISOString());
-    }catch{/* preserve visible data until manual retry */}
-  },45_000);
+    }catch{
+      if(current()){
+        const last=document.getElementById('last-updated');
+        if(last)last.textContent='تعذر التحديث التلقائي؛ البيانات المعروضة محفوظة وستتم إعادة المحاولة.';
+      }
+    }finally{autoRefreshBusy=false;}
+  }
+  setInterval(()=>{if(section==='memos')return refreshLive();},5_000);
+  setInterval(()=>{if(section!=='memos')return refreshLive();},45_000);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)return refreshLive();});
   void boot();
 })();

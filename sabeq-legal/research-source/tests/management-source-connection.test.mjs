@@ -10,7 +10,7 @@ function harness({authenticated=false}={}){
   const sqlite=new DatabaseSync(':memory:');
   sqlite.exec(readFileSync(new URL('tests/fixtures/management-source-tables.sql',root),'utf8'));
   sqlite.exec(readFileSync(new URL('drizzle/0005_icy_dark_phoenix.sql',root),'utf8'));
-  sqlite.exec(readFileSync(new URL('drizzle/0011_saved_memo_revisions.sql',root),'utf8'));
+  sqlite.exec(readFileSync(new URL('drizzle/0010_special_scalphunter.sql',root),'utf8'));
   const db={prepare(sql){let args=[];return{bind(...values){args=values;return this;},async first(){return sqlite.prepare(sql).get(...args)||null;},async all(){return{results:sqlite.prepare(sql).all(...args)};},async run(){return sqlite.prepare(sql).run(...args);}};}};
   // Authentication routes and encrypted-vault isolation are covered by the full native management suite.
   const dependencies={'@/db':{getD1:()=>db},'@/lib/gmail':{sendSavedDraft:async()=>{}},'@/lib/management-auth':{digest:async value=>createHash('sha256').update(value).digest('hex'),base64url:value=>Buffer.from(value).toString('base64url'),sealConfig:async value=>JSON.stringify(value),openConfig:async value=>JSON.parse(value)},'@/lib/management-integrations':{SERVICE_ORIGIN:'https://sabeq-legal-public.centrino.chatgpt.site'},'@/lib/request-security':{RequestError:class extends Error{}}};
@@ -76,4 +76,15 @@ test('the generated view keeps saved historical memos and applies its filter bef
  h.sqlite.prepare("INSERT INTO service_records (id,user_id,service_type,title,output_text) VALUES ('old-test','synthetic-user','memo_archive','أرشيف اصطناعي','نص أرشيف اختبار.')").run();
  const result=await data.managerMemos(new URL('https://test.invalid/api/management/memos?view=generated'));
  assert.deepEqual(new Set(result.memos.map(r=>r.id)),new Set([id,'legacy:old-test']));assert.equal(result.hasMore,false);
+}finally{h.close();}});
+
+
+test('an accepted request reaches the shared list while running and its final no-output state replaces it',async()=>{const h=harness();try{
+ const ledger=h.load('lib/memo-requests.ts'),data=h.load('lib/management-data.ts');
+ const id=await ledger.startMemoRequest({clientName:'طلب مزامنة اصطناعي'},null,'https://q8-ux.github.io');
+ const url=new URL('https://test.invalid/api/management/memos?source=current&view=all');
+ const running=await data.managerMemos(url);assert.equal(running.memos[0].id,id);assert.equal(running.memos[0].status,'running');
+ await ledger.finishMemoRequest(id,'needs_information','','fact_clarification');
+ const finished=await data.managerMemos(url);assert.equal(finished.memos.length,1);assert.equal(finished.memos[0].id,id);assert.equal(finished.memos[0].status,'needs_information');assert.equal(Number(finished.memos[0].has_output),0);
+ assert.ok(!Object.hasOwn(finished.memos[0],'input_json'));assert.ok(!Object.hasOwn(finished.memos[0],'output_text'));
 }finally{h.close();}});

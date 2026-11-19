@@ -1,13 +1,13 @@
 {
   "revision": "independent-admin-18-account-entry",
-  "backendSource": "59092caf21919597d2ccc6db1cd20bb12ac5f21c",
+  "backendSource": "713bddc82d1a987fa798ffc78d9d323a7897a9ee",
   "sourceRepository": "https://github.com/Q8-ux/saad",
   "paymentVisibility": "admin-only-by-default",
   "paymentsLink": "#payments",
   "programmerLink": "#programmer",
   "programmerScope": "advice-and-explicit-follow-up",
   "fccGateway": "requires-independent-configured-service",
-  "backendVersion": 184,
+  "backendVersion": 226,
   "projectProviderConfigured": true,
   "liveInferenceVerified": false,
   "localChecksPassed": 270,
@@ -68,5 +68,18 @@
   "adminPasswordForm": false,
   "adminEntryAuthentication": "existing-platform-identity-and-server-authorization",
   "adminEntryValidation": "24-targeted-tests;both-ui-syntax-checks",
-  "adminEntryPublishedAt": "2026-11-09"
+  "adminEntryPublishedAt": "2026-11-09",
+  "memoSync": {
+    "revision": "current-memo-poll-20261119",
+    "intervalMs": 5000,
+    "source": "shared-current-database",
+    "keepsOpenEditor": true,
+    "preservesSearchInputs": true,
+    "catchesUpOnVisibility": true,
+    "nonOverlapping": true,
+    "archiveRefresh": "manual",
+    "clientRegressionTestsPassed": 28,
+    "nativeReleaseTestsPassed": 371,
+    "authenticatedLiveArrivalVerified": false
+  }
 }
