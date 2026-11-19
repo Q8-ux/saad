@@ -1,13 +1,13 @@
 {
   "revision": "independent-admin-18-account-entry",
-  "backendSource": "00b1211ee361d2ad80a7497c2d640edc64aa6b26",
+  "backendSource": "b29baa1f872eb8e20d5324926bee10571abc018f",
   "sourceRepository": "https://github.com/Q8-ux/saad",
   "paymentVisibility": "admin-only-by-default",
   "paymentsLink": "#payments",
   "programmerLink": "#programmer",
   "programmerScope": "advice-and-explicit-follow-up",
   "fccGateway": "requires-independent-configured-service",
-  "backendVersion": 227,
+  "backendVersion": 228,
   "projectProviderConfigured": true,
   "liveInferenceVerified": false,
   "localChecksPassed": 270,
@@ -94,5 +94,20 @@
     "clientTestsPassed": 7,
     "nativeReleaseTestsPassed": 372,
     "liveDatabaseVerified": true
+  },
+  "userEmailLink": {
+    "revision": "user-email-20261119",
+    "sharedUserStore": "public_users",
+    "usersPollIntervalMs": 5000,
+    "provider": "resend",
+    "configurationSection": "#mail",
+    "enabledByDefault": false,
+    "requiresOfficeRecipients": true,
+    "notificationContent": "event-and-record-reference-only",
+    "providerAcceptanceIsDelivery": false,
+    "authenticatedLiveRegistrationVerified": false,
+    "liveEmailDeliveryVerified": false,
+    "featureTestsPassed": 11,
+    "nativeReleaseTestsPassed": 383
   }
 }
