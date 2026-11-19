@@ -15,6 +15,11 @@ export const team = [
 
 export const mediaVideos = [
   {
+    src: "/media/sabeq-medical-errors-71e88a01.mp4",
+    poster: "/media/sabeq-medical-errors-71e88a01.jpg",
+    title: "توعية قانونية بشأن الأخطاء الطبية",
+  },
+  {
     src: "/media/sabeq-reel-df46p_2crry.mp4",
     poster: "/media/sabeq-reel-df46p_2crry.jpg",
     title: "إدارة وتحصيل المديونيات",
