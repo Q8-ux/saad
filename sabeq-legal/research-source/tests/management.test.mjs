@@ -497,7 +497,7 @@ test('a direct Payments bookmark cannot fetch dashboard records before sign-in',
   const node=id=>{if(!nodes.has(id))nodes.set(id,{innerHTML:'',textContent:'',addEventListener(){},replaceChildren(){}});return nodes.get(id);};
   const context=vm.createContext({URL,URLSearchParams,crypto:webcrypto,document:{getElementById:node,addEventListener(){}},location:{href:'https://q8-ux.github.io/saad/sabeq-admin-preview/#'+hash,pathname:'/saad/sabeq-admin-preview/'},history:{replaceState(){}},sessionStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v),removeItem:k=>storage.delete(k)},setInterval(){},setTimeout,clearTimeout,fetch:async()=>{requests++;throw Error('unexpected request before login');}});
   vm.runInContext(readFileSync(root+'/public/management/admin.js','utf8').replace('void boot();','globalThis.bootPromise=boot();'),context);await context.bootPromise;
-  assert.equal(requests,0);assert.match(node('app').innerHTML,/الدخول بالحساب الإداري/);assert.ok(!node('app').innerHTML.includes('name="clientSecret"'));
+  assert.equal(requests,0);assert.match(node('app').innerHTML,/data-form="password-login"/);assert.doesNotMatch(node('app').innerHTML,/data-action="sign-in"/);assert.ok(!node('app').innerHTML.includes('name="clientSecret"'));
   assert.equal(storage.get('sabeq-admin-section'),hash==='payments'?'payments':undefined);
  }
 });
