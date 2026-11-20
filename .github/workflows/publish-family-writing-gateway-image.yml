@@ -11,6 +11,9 @@ on:
       - family-online-studio/backend/document-import.test.mjs
       - family-online-studio/backend/credentials.mjs
       - family-online-studio/backend/sms-auth.mjs
+      - family-online-studio/backend/search-runtime.mjs
+      - family-online-studio/backend/search-runtime.test.mjs
+      - family-online-studio/backend/search/**
       - .github/workflows/publish-family-writing-gateway-image.yml
   workflow_dispatch:
 
@@ -40,6 +43,7 @@ jobs:
           node --test \
             family-online-studio/backend/credentials.test.mjs \
             family-online-studio/backend/document-import.test.mjs \
+            family-online-studio/backend/search-runtime.test.mjs \
             family-online-studio/backend/server.test.mjs
 
       - name: Set up Docker Buildx

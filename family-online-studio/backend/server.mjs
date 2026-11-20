@@ -4,6 +4,7 @@ import {pathToFileURL} from 'node:url';
 import {AuthError,createSmsAuth} from './sms-auth.mjs';
 import {loadAccounts,usernameKey,validPasswordHash,verifyPassword} from './credentials.mjs';
 import {extractDocument,MAX_IMPORT_BYTES} from './document-import.mjs';
+import {createSearchRuntime} from './search-runtime.mjs';
 
 const hash=value=>createHash('sha256').update(value).digest('hex');
 const same=(a,b)=>{const x=Buffer.from(a||''),y=Buffer.from(b||'');return x.length===y.length&&timingSafeEqual(x,y);};
@@ -13,7 +14,8 @@ const standardSessionSeconds=7200;
 const rememberedSessionSeconds=30*24*60*60;
 const sessionSeconds=remember=>remember===true?rememberedSessionSeconds:standardSessionSeconds;
 const validRemember=input=>input?.remember===undefined||typeof input.remember==='boolean';
-export function createGateway(config,fetchImpl=fetch,documentExtractor=extractDocument){
+export function createGateway(config,fetchImpl=fetch,documentExtractor=extractDocument,searchFactory=createSearchRuntime){
+ const search=searchFactory({key:config.searchKey||'',fetchImpl});
  const {allowedOrigin,upstreamOrigin,siteToken,bridgeKey,accessHash,sessionSecret}=config;
  const credentialsOnly=config.authMode==='credentials';
  const accounts=config.accounts??(usernameKey(config.username)&&validPasswordHash(config.passwordHash)?[{id:'owner',username:config.username,passwordHash:config.passwordHash}]:[]);
@@ -56,7 +58,7 @@ export function createGateway(config,fetchImpl=fetch,documentExtractor=extractDo
   return fetchImpl(new URL('/api/external-studio',upstreamOrigin),{method:'POST',headers:{'OAI-Sites-Authorization':'Bearer '+siteToken,'Content-Type':type,'x-studio-time':stamp,'x-studio-nonce':nonce,'x-studio-method':method,'x-studio-route':route,'x-studio-signature':signature,...(account?{'x-studio-account':account.id}:{})},body,signal:AbortSignal.timeout(85000)});
  }
  async function bytes(req,limit=maxBytes){const parts=[];let size=0;for await(const part of req){size+=part.length;if(size>limit){const error=new Error('too_large');error.status=413;throw error;}parts.push(part);}return Buffer.concat(parts);}
- return http.createServer(async(req,res)=>{
+ const server=http.createServer(async(req,res)=>{
   const origin=req.headers.origin;
   const headers={'Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer','Vary':'Origin'};
   if(origin===allowedOrigin){headers['Access-Control-Allow-Origin']=allowedOrigin;headers['Access-Control-Allow-Methods']='GET,PUT,POST,OPTIONS';headers['Access-Control-Allow-Headers']='Authorization,Content-Type';headers['Access-Control-Max-Age']='600';}
@@ -64,6 +66,13 @@ export function createGateway(config,fetchImpl=fetch,documentExtractor=extractDo
   try{
    const u=new URL(req.url,'https://gateway.invalid');
    if(u.pathname==='/health'&&req.method==='GET')return send(ready?200:503,{status:ready?'ready':'configuration_required'});
+   if(u.pathname==='/_internal/search'){
+    if(req.method!=='POST'||origin||!search.configured()||!same(req.headers.authorization,'Bearer '+config.searchKey))return send(403,{error:'forbidden'});
+    if(limited('internal-search',120))return send(429,{error:'busy'});
+    const raw=await bytes(req,12000);let body;try{body=JSON.parse(raw);}catch{return send(400,{error:'input'});}
+    if(!body||body.model!=='studio-search-270m-i2s-q8emb-v1'||!Array.isArray(body.input)||!body.input.length||body.input.length>2||body.input.some(t=>typeof t!=='string'||!t.trim()||t.length>650))return send(400,{error:'input'});
+    try{return send(200,await search.embeddings(body));}catch{return send(503,{error:'search_unavailable'});}
+   }
    if(!ready)return send(503,{error:'لم يُفعّل اتصال المساحة الخاصة بعد.'});
    if(origin!==allowedOrigin)return send(403,{error:'origin'});
    if(req.method==='OPTIONS'){res.writeHead(204,headers);return res.end();}
@@ -136,7 +145,7 @@ export function createGateway(config,fetchImpl=fetch,documentExtractor=extractDo
      const file=form.get('file');
      if(!file||typeof file.arrayBuffer!=='function'||typeof file.name!=='string')return send(400,{error:'لم يصل ملف صالح للتحليل.'});
      if(file.size>MAX_IMPORT_BYTES)return send(413,{error:'حجم الملف أكبر من ٢٥ ميغابايت.'});
-     const result=await documentExtractor({buffer:Buffer.from(await file.arrayBuffer()),filename:file.name,mimeType:file.type});
+     const result=await search.forImport(async()=>documentExtractor({buffer:Buffer.from(await file.arrayBuffer()),filename:file.name,mimeType:file.type}));
      if(typeof result?.text!=='string'||!result.text.trim()||Buffer.byteLength(result.text)>2_000_000)return send(422,{error:'لم يُرجع محرك التحليل نصًا صالحًا.'});
      return send(200,{text:result.text,format:result.format,usedOcr:result.usedOcr===true,warnings:Array.isArray(result.warnings)?result.warnings.slice(0,8):[],...(Number.isInteger(result.pages)?{pages:result.pages}:{}),...(Number.isInteger(result.processedPages)?{processedPages:result.processedPages}:{})});
     }catch(error){
@@ -163,9 +172,10 @@ export function createGateway(config,fetchImpl=fetch,documentExtractor=extractDo
    res.writeHead(upstream.status,{...headers,'Content-Type':'application/json; charset=utf-8'});res.end(responseBody);
   }catch(e){if(res.headersSent)return res.end();if(e instanceof AuthError)return send(e.status,{error:e.message,...(e.retryAfter?{retryAfter:e.retryAfter}:{})});send(e.status===413?413:502,{error:e.status===413?'الملف كبير جداً.':'لم يكتمل الاتصال. مسودتك المحلية لا تزال متاحة.'});}
  });
+ server.on('close',()=>search.close());return server;
 }
 // Production requires both credentials; obsolete open/password/SMS settings cannot bypass them.
-export function fromEnvironment(env=process.env){return {authMode:'credentials',accounts:loadAccounts(env),allowedOrigin:env.STUDIO_ALLOWED_ORIGIN,upstreamOrigin:env.STUDIO_UPSTREAM_ORIGIN,siteToken:env.STUDIO_SITE_TOKEN,bridgeKey:env.STUDIO_BRIDGE_KEY,sessionSecret:env.STUDIO_SESSION_SECRET};}
+export function fromEnvironment(env=process.env){return {authMode:'credentials',accounts:loadAccounts(env),allowedOrigin:env.STUDIO_ALLOWED_ORIGIN,upstreamOrigin:env.STUDIO_UPSTREAM_ORIGIN,siteToken:env.STUDIO_SITE_TOKEN,bridgeKey:env.STUDIO_BRIDGE_KEY,sessionSecret:env.STUDIO_SESSION_SECRET,searchKey:env.STUDIO_SEARCH_KEY};}
 if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href){
  const server=createGateway(fromEnvironment());server.requestTimeout=100000;server.headersTimeout=15000;server.listen(Number(process.env.PORT)||10000,'0.0.0.0');
  console.log('Private studio gateway listening.');
