@@ -2,7 +2,7 @@
   "initial": [
     {
       "file": "assets/app.mjs",
-      "bytes": 272465
+      "bytes": 272463
     },
     {
       "file": "assets/chunks/chunk-3MNS2YWJ.mjs",
@@ -136,7 +136,7 @@
     },
     {
       "file": "assets/chunks/library-assistant-I5KUSPHA.mjs",
-      "bytes": 19605
+      "bytes": 20161
     },
     {
       "file": "assets/chunks/chunk-FEUYKCPT.mjs",
@@ -173,6 +173,10 @@
     {
       "file": "assets/studio-file-archive.mjs",
       "bytes": 6166
+    },
+    {
+      "file": "assets/chunks/library-search.mjs",
+      "bytes": 7132
     }
   ]
 }

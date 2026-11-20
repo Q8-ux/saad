@@ -1,7 +1,7 @@
 {
   "revision": "project-context-1",
   "project": "writing-studio",
-  "sourceCommit": "9b2b90ecc53389a655b308212ec98e131a816ce9",
+  "sourceCommit": "0a4f69078076e9e68a000015587c2bb6fe43e5b2",
   "scope": "current-manuscript-and-selected-scene",
   "workIdentitySource": "server-request-url",
   "crossWorkMemory": false,
@@ -35,11 +35,11 @@
     },
     {
       "path": "app/library-assistant.tsx",
-      "sha256": "519442d8547d47ba8acad95eb681426a47a261e544726020a1ffe3ac3921901f"
+      "sha256": "447326e20c82bd5c4e42d6f61d647ef92bbf8df2e759855ee43ad617a69abb5a"
     },
     {
       "path": "app/library-assistant.css",
-      "sha256": "30fdb6557e551fe84af270af6cde542d314ac79d3b8acbd92933d1b98b7b5533"
+      "sha256": "74f2ca4007e911c27cc614bd6c17b599efec01fe5af4c34f4c4ad4c6a0ed747b"
     },
     {
       "path": "lib/script-analysis.mjs",
@@ -84,6 +84,26 @@
     {
       "path": "lib/attachment-recovery.ts",
       "sha256": "67a0710d6b70d58b796bb66f6a3a8a2299de685c5790c896d53a1b7529261c17"
+    },
+    {
+      "path": "lib/library-assistant.ts",
+      "sha256": "b98a52319dd7a42442c544558591df4d468cd26cd91e41cba4fe29b7cc02795c"
+    },
+    {
+      "path": "lib/library-server.ts",
+      "sha256": "423735486995b1d1f08ce8ae0b67984e31a5be06454484db9abca37dddbd81d3"
+    },
+    {
+      "path": "lib/semantic-search.ts",
+      "sha256": "7e0e91ccf9befbcf20496d1a2cf5dc8f90c4c18ce63fdd2918b234cb23be027d"
+    },
+    {
+      "path": "app/api/library-assistant/route.ts",
+      "sha256": "753f78363321e6205528d895738cbb6694988e89aa92ea873527cc50f9f6f807"
+    },
+    {
+      "path": "app/library-search.tsx",
+      "sha256": "4acf918f1cbbc8b67088a99c0999b7f13c54faef6ff9935584df456c28e76b58"
     }
   ],
   "checks": {
@@ -175,6 +195,17 @@
     "recoveryDeduplication": "work-and-payload-sha256",
     "provenanceVisible": true
   },
-  "deployedVersion": "appgprj_6acf275cd3a4819188adb07ac6bee0be~appgver_523c8d7e76c081919358f1dafe1275ec",
-  "deploymentId": "appgdep_6afdba7bb61881919a803e3df8fc91ad"
+  "deployedVersion": "appgprj_6acf275cd3a4819188adb07ac6bee0be~appgver_885ecedb91688191abf8c817d8ddfac7",
+  "deploymentId": "appgdep_6b0037aeb4308191a6faf615f202457b",
+  "workSearch": {
+    "revision": "semantic-search-1",
+    "privateAccountIndex": true,
+    "manuscriptMutated": false,
+    "attachmentTextIncluded": true,
+    "engineNameVisible": false,
+    "lexicalFallback": true,
+    "progressAndResume": true,
+    "uiTest": "synthetic-data",
+    "liveAuthorIndexExecuted": false
+  }
 }
