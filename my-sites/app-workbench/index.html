@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0d1523">
+  <meta name="description" content="مختبر عربي لفحص ملفات أندرويد وWindows داخل الجهاز، وفهم الفرق بين فحص الميزة محليًا والتحقق من الخادم.">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>مختبر التطبيقات | أندرويد والكمبيوتر</title>
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+  <script src="vendor/jszip.min.js" defer></script>
+  <script src="app.mjs" type="module"></script>
+</head>
+<body>
+  <a class="skip" href="#main">انتقل إلى المحتوى</a>
+  <aside class="sidebar">
+    <a class="brand" href="#inspect" aria-label="مختبر التطبيقات، الرئيسية"><span class="brand-mark" aria-hidden="true">⌘</span><span>مختبر التطبيقات<small>مساحة العمل الشخصية</small></span></a>
+    <p class="nav-label">مساحة العمل</p>
+    <nav aria-label="القائمة الرئيسية">
+      <a href="#inspect" data-view="inspect" aria-current="page"><span aria-hidden="true">▤</span> فحص التطبيق</a>
+      <a href="#demo" data-view="demo"><span aria-hidden="true">◈</span> تجربة الفكرة</a>
+      <a href="#analysis" data-view="analysis"><span aria-hidden="true">▣</span> تحليل الفيديو</a>
+    </nav>
+    <div class="sidebar-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3 4 6v6c0 5 8 9 8 9s8-4 8-9V6z"/><path d="m8 12 3 3 5-6"/></svg><strong>الملف يبقى على جهازك</strong><p>تُقرأ الملفات داخل المتصفح ولا تُرفع إلى خادم.</p></div>
+    <a class="source-link" href="https://github.com/Q8-ux/saad/tree/main/my-sites/app-workbench" target="_blank" rel="noopener noreferrer">المشروع على GitHub</a>
+  </aside>
+  <main id="main" tabindex="-1">
+    <header class="topbar"><span>أدواتي <span class="divider">/</span> التطبيقات</span><span class="device-pill" id="deviceLabel">متصفح الويب</span></header>
+    <section id="view-inspect" class="view" aria-labelledby="inspectTitle">
+      <div class="page-heading"><div><p class="eyebrow">أندرويد + الكمبيوتر</p><h1 id="inspectTitle">افهم التطبيق قبل تعديله</h1><p class="lede">افحص ملفك، تعرّف على بنيته، وحدّد الخطوة التالية بوضوح.</p></div><span class="version">الإصدار الأول</span></div>
+      <div class="context-strip"><span class="context-icon" aria-hidden="true">i</span><p>الفيديو يشرح تعديل فحص محلي في تطبيق أندرويد. هنا يمكنك <strong>فحص الملفات وتجربة المبدأ</strong>؛ تطبيق التعديل على برنامج حقيقي يحتاج تحليل ملفه وإعادة بنائه.</p><a href="#analysis">قراءة التحليل</a></div>
+      <div class="workspace-grid">
+        <section class="panel upload-panel" aria-labelledby="uploadTitle">
+          <div class="panel-header"><h2 id="uploadTitle">ملف التطبيق</h2><span class="tag">فحص داخل الجهاز</span></div>
+          <div class="dropzone" id="dropzone">
+            <svg class="upload-icon" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 41H13a11 11 0 0 1-1-22 20 20 0 0 1 38-1 12 12 0 0 1 1 24h-5"/><path d="M32 51V27m-9 9 9-9 9 9"/></svg>
+            <h3>اسحب الملف إلى هنا</h3><p>أو اختره من الهاتف أو الكمبيوتر</p>
+            <button class="button primary" id="chooseFile" type="button">اختيار ملف التطبيق</button>
+            <input id="fileInput" type="file" accept=".apk,.exe,.dll,.msix,.appx" class="sr-only" aria-label="ملف التطبيق">
+            <div class="formats" dir="ltr"><span>APK</span><span>EXE / DLL</span><span>MSIX / APPX</span></div>
+            <small>حتى 100 ميغابايت لكل ملف</small>
+          </div>
+          <div class="sample-row"><span>تريد تجربة الفحص؟</span><button id="sampleAndroid" class="text-button" type="button">نموذج أندرويد</button><button id="sampleWindows" class="text-button" type="button">نموذج Windows</button></div>
+          <p class="fine">النماذج ملفات اختبار بنيوية مصطنعة؛ لا تُثبّت ولا تُشغّل.</p>
+          <div class="status-box" id="status" role="status" aria-live="polite" hidden></div>
+          <button id="cancelScan" type="button" class="text-button cancel" hidden>إلغاء الفحص</button>
+        </section>
+        <aside class="panel scope-panel" aria-labelledby="scopeTitle"><div class="panel-header"><h2 id="scopeTitle">ماذا سيظهر لك؟</h2></div><ul class="scope-list"><li><span class="scope-number">أ</span><div><strong>نوع الملف وبنيته</strong><p>حزمة أندرويد أو برنامج Windows، مع الملفات والأقسام المتاحة.</p></div></li><li><span class="scope-number">ب</span><div><strong>مؤشرات قابلة للمراجعة</strong><p>ملفات DEX، معمارية البرنامج، وآثار التوقيع دون الجزم بصحته.</p></div></li><li><span class="scope-number">ج</span><div><strong>تقرير قابل للتنزيل</strong><p>نتائج فعلية مع بصمة الملف وحدود الفحص والخطوة التالية.</p></div></li></ul><div class="scope-footer">الفحص لا يشغّل الملف ولا يغيّر الأصل.</div></aside>
+      </div>
+      <section class="panel result-panel" id="reportPanel" aria-labelledby="reportTitle" hidden>
+        <div class="panel-header report-heading"><div><p class="eyebrow" id="reportKind"></p><h2 id="reportTitle" tabindex="-1">نتيجة الفحص</h2></div><div class="button-row"><button class="button secondary" id="exportMarkdown" type="button">تنزيل التقرير</button><button class="button quiet" id="exportJson" type="button">JSON</button></div></div>
+        <p id="syntheticNotice" class="sample-notice" hidden>هذا نموذج اختبار مصطنع. النتيجة لا تخص تطبيقًا حقيقيًا ولا تثبت قابلية تثبيته.</p>
+        <p class="file-heading" id="fileName" dir="auto"></p><dl class="result-facts" id="reportFacts"></dl>
+        <div class="signals" id="signalList"></div>
+        <div class="result-bottom"><section><h3>حدود النتيجة</h3><ul id="reportNotes"></ul></section><section class="next-step"><h3>الخطوة التالية</h3><p id="nextStep"></p></section></div>
+        <details><summary>جرد الملفات والأقسام</summary><label class="search-label" for="entrySearch">بحث في الجرد</label><input id="entrySearch" type="search" placeholder="اسم ملف أو قسم" autocomplete="off"><div class="table-wrap"><table><thead><tr><th scope="col">الاسم</th><th scope="col">الحجم</th></tr></thead><tbody id="entries"></tbody></table></div><p id="entryCount" class="fine"></p></details>
+        <div class="hash-line"><span>بصمة SHA-256</span><code id="fileHash" dir="ltr"></code></div>
+      </section>
+      <div class="bottom-invitation"><div><strong>لماذا قد لا يكفي تغيير القيمة؟</strong><p>جرّب الفرق بين قرار محلي وردّ خادم مُحاكى.</p></div><a class="button secondary" href="#demo">فتح التجربة</a></div>
+    </section>
+    <section id="view-demo" class="view" aria-labelledby="demoTitle" hidden>
+      <div class="page-heading"><div><p class="eyebrow">نموذج تعليمي تفاعلي</p><h1 id="demoTitle">التعديل المحلي وحدوده</h1><p class="lede">غيّر قيمة واحدة في كود النموذج، وشاهد أثرها على الميزة.</p></div></div>
+      <div class="context-strip"><span class="context-icon" aria-hidden="true">i</span><p>هذه تجربة على كود أنشأناه للشرح. التغيير هنا يخص النموذج فقط؛ ليس تعديلاً لملف تطبيقك.</p></div>
+      <div class="demo-grid"><section class="panel"><div class="panel-header"><h2>مصدر النموذج</h2><div class="segmented" role="group" aria-label="لغة النموذج"><button type="button" id="demoAndroid" aria-pressed="true">أندرويد</button><button type="button" id="demoWindows" aria-pressed="false">Windows</button></div></div><p id="codeLanguage" class="fine"></p><pre class="code-panel" dir="ltr"><code id="demoCode"></code></pre><div class="demo-actions"><button type="button" id="applyDemo" class="button primary">تغيير القيمة إلى true</button><button type="button" id="resetDemo" class="button quiet">إعادة الضبط</button><button type="button" id="downloadDemo" class="button secondary">تنزيل كود النموذج</button></div><p class="fine">تنزيل الكود لا ينتج ملف APK أو EXE جاهزًا. يلزم دمجه وبناؤه في مشروعك.</p></section>
+      <section class="panel preview-panel"><div class="panel-header"><h2>نتيجة التنفيذ</h2><span class="tag">نموذج تجريبي</span></div><div class="feature-preview"><div class="feature-emblem" aria-hidden="true">◈</div><h3>ميزة تصدير التقرير</h3><span id="featureState" class="feature-state">غير متاحة</span><p id="demoReason"></p><button id="runFeature" type="button" class="button primary" disabled>تنفيذ ميزة النموذج</button></div><label class="switch-row"><input type="checkbox" id="serverCheck"><span><strong>تحقق من الخادم</strong><small>رد ثابت مُحاكى: غير مُصرّح. لا يوجد اتصال بخادم حقيقي.</small></span></label><p id="featureOutput" role="status" aria-live="polite" class="demo-output"></p></section></div>
+      <div class="panel learning-note"><h2>ما الذي تثبته التجربة؟</h2><p>قد يغيّر فحص محلي ظهور ميزة في تطبيق يقرر الإتاحة داخل جهازك. عندما يتخذ الخادم القرار، لا يكفي تغيير القيمة المحلية لمنح خدمة أو محتوى لا يرسله الخادم.</p></div>
+    </section>
+    <section id="view-analysis" class="view" aria-labelledby="analysisTitle" hidden>
+      <div class="page-heading"><div><p class="eyebrow">الفيديو المرجعي</p><h1 id="analysisTitle">ما الذي يحدث في المقطع؟</h1><p class="lede">مراجعة بصرية لمقطع مدته نحو 3 دقائق و42 ثانية.</p></div><a href="https://x.com/Ebrahim_Tech/status/2123536023854456887" class="button secondary" target="_blank" rel="noopener noreferrer">المنشور الأصلي</a></div>
+      <div class="analysis-layout"><section class="panel"><div class="panel-header"><h2>تسلسل ما ظهر على الشاشة</h2><span class="tag">تحليل بصري</span></div><ol class="timeline"><li><time>00:16</time><div><strong>عرض قيد داخل محرر صوت</strong><p>تظهر نافذة تجربة واشتراك قبل بدء التعديل.</p></div></li><li><time>00:30–01:26</time><div><strong>فتح نسخة APK بأداة MT Manager</strong><p>تظهر معالجة تتعلق بفحص التوقيع، ثم استعراض ملفات الحزمة وفتح محرر DEX.</p></div></li><li><time>01:40–02:36</time><div><strong>البحث والتعديل داخل كود محلي</strong><p>يظهر بحث مرتبط بالشراء ثم تعديل تعليمة تعيد قيمة منطقية داخل دالة. هذا تغيير في كود تطبيق محدد.</p></div></li><li><time>02:50–03:36</time><div><strong>الحفظ وإعادة التثبيت والتجربة</strong><p>تُكتب التغييرات في ملف DEX ثم يظهر تثبيت نسخة التطبيق وتجربة وظيفة صوتية.</p></div></li></ol><p class="fine">تستند المراجعة إلى لقطات موزعة على المقطع ولقطات مرحلة التعديل. لم يُفرّغ الصوت أو يُتحقق من البرنامج المعدّل خارج الفيديو.</p></section>
+      <aside class="panel conclusion"><p class="eyebrow">الاستنتاج العملي</p><h2>طريقة تخص التطبيق</h2><p>المقطع لا يثبت وجود طريقة عامة لفتح جميع البرامج أو اشتراكات الخادم. نجاح واجهة معدلة لا يثبت عمل كل وظائف التطبيق.</p><hr><h3>على أندرويد</h3><p>التعديل الحقيقي يحتاج APK محددًا، وتحليل الدالة، وإعادة بناء وتوقيع واختبار.</p><h3>على Windows</h3><p>ملفات EXE وDLL تختلف عن DEX. يلزم تحديد بنية البرنامج والكود المسؤول عن الميزة قبل اختيار طريقة التعديل.</p></aside></div>
+      <section class="panel source-panel"><h2>مراجع فنية</h2><div class="reference-links"><a href="https://developer.android.com/studio/publish/app-signing" target="_blank" rel="noopener noreferrer">Android: توقيع التطبيقات</a><a href="https://developer.android.com/google/play/billing/security" target="_blank" rel="noopener noreferrer">Google Play: التحقق من المشتريات</a><a href="https://developer.android.com/tools/apkanalyzer" target="_blank" rel="noopener noreferrer">Android: تحليل ملفات APK</a><a href="https://learn.microsoft.com/en-us/windows/win32/debug/pe-format" target="_blank" rel="noopener noreferrer">Microsoft: بنية ملفات PE</a></div></section>
+    </section>
+    <footer>مختبر التطبيقات <span>فحص بنيوي وتجربة تعليمية على ملفاتك ومشاريعك المصرح بتعديلها.</span></footer>
+  </main>
+  <noscript><p class="noscript">فعّل JavaScript لتشغيل الفحص داخل جهازك.</p></noscript>
+</body>
+</html>
