@@ -163,6 +163,7 @@
       390,
       768,
       1024,
+      1350,
       1440
     ],
     "article_layout_css_px": [
@@ -170,7 +171,7 @@
       390
     ],
     "horizontal_overflow_observed": false,
-    "medium_header": "Navigation moves to a second row from 981 to 1180 px; brand remains on one line",
+    "medium_header": "Navigation moves to a second row from 981 to 1439 px; brand remains on one line. Extended after live review at 1350 px.",
     "browser_actions": [
       "Search خشونة updates result count",
       "Open خشونة الركبة at 1/8 with navy/ivory palette",

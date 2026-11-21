@@ -64,5 +64,5 @@ dialog::backdrop{background:rgba(41,63,80,.82)}
 .hamad-brand-scope .brand-copy{font-family:var(--hamad-body-font);font-weight:400}
 html body [lang=en],html body [lang=en] *,html body .brand small[dir=ltr],html body .joint-caption small[dir=ltr],html body .brand-en-formal{font-family:var(--hamad-english-formal-font)!important}
 .hamad-brand-scope .brand-en-formal{direction:ltr;unicode-bidi:isolate}
-@media(min-width:981px) and (max-width:1180px){.header-inner{flex-wrap:wrap;gap:12px 22px}.main-header .brand{flex:1;font-size:23px}.main-header .brand>span{white-space:nowrap}.main-header nav{order:3;flex:1 0 100%;justify-content:space-between;font-size:20px;gap:14px}.header-book{font-size:20px;padding-inline:16px}}
+@media(min-width:981px) and (max-width:1439px){.header-inner{flex-wrap:wrap;gap:12px 22px}.main-header .brand{flex:1;font-size:23px}.main-header .brand>span{white-space:nowrap}.main-header nav{order:3;flex:1 0 100%;justify-content:space-between;font-size:20px;gap:14px}.header-book{font-size:20px;padding-inline:16px}}
 @media print{html body{background:#fff!important}.logo{print-color-adjust:exact}.main-header,.main-footer{display:none!important}.explorer-section,.clinic-section{background:#fff}}
