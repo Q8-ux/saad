@@ -314,8 +314,43 @@ jobs:
           fi
           test -s _site/kab-kat/index.html
           test -s _site/kab-kat/OPEN-CUT-LICENSE.txt
-      - uses: actions/upload-pages-artifact@v3
-        with: { path: _site, retention-days: 30 }
+      - name: Archive GitHub Pages artifact
+        shell: bash
+        run: |
+          tar --dereference --hard-dereference --directory _site \
+            --exclude=.git --exclude=.github -cf "$RUNNER_TEMP/artifact.tar" .
+      - uses: actions/upload-artifact@v4
+        id: pages-artifact
+        with:
+          name: github-pages
+          path: ${{ runner.temp }}/artifact.tar
+          retention-days: 30
+          if-no-files-found: error
+          overwrite: true
+      - name: Wait for Pages artifact metadata
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PAGES_ARTIFACT_ID: ${{ steps.pages-artifact.outputs.artifact-id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          stable=0
+          for attempt in {1..20}; do
+            artifact_id="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/artifacts" \
+              --jq '[.artifacts[] | select(.name == "github-pages" and .expired == false and .size_in_bytes > 0) | .id] | if length == 1 then .[0] else empty end')" || artifact_id=""
+            if [[ -n "$PAGES_ARTIFACT_ID" && "$artifact_id" == "$PAGES_ARTIFACT_ID" ]]; then
+              stable=$((stable + 1))
+              if [[ "$stable" -ge 3 ]]; then
+                echo "Pages artifact $artifact_id is ready."
+                exit 0
+              fi
+            else
+              stable=0
+            fi
+            sleep 2
+          done
+          echo "::error::The uploaded Pages artifact metadata did not become uniquely available."
+          exit 1
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
