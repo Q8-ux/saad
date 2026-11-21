@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import "./interface-taste.css";
+import "./interface-routes.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.sabeq.legal"),

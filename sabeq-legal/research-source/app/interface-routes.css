@@ -1,0 +1,44 @@
+/* Sabeq's existing palette; calm task controls shared by both builds. */
+:root {
+  --sabeq-action: #006594;
+  --sabeq-focus: #0b667e;
+  --sabeq-enter-duration: 220ms;
+  --sabeq-state-duration: 160ms;
+  --sabeq-ease: cubic-bezier(.22,1,.36,1);
+}
+html[data-theme="dark"] { --sabeq-focus: #82e0ea; }
+.site-shell { caret-color: var(--sabeq-focus); }
+.site-shell ::selection { background: var(--blue-soft); color: var(--ink); }
+.site-shell [hidden] { display: none !important; }
+.site-shell .modal { scrollbar-gutter: stable; }
+.site-shell .modal-backdrop:not([hidden]) .modal { animation: sabeq-dialog-enter var(--sabeq-enter-duration) var(--sabeq-ease); }
+.site-shell .nav-dropdown { animation: sabeq-menu-enter var(--sabeq-enter-duration) var(--sabeq-ease); transform-origin: top right; }
+.site-shell[dir="ltr"] .nav-dropdown { transform-origin: top left; }
+@keyframes sabeq-dialog-enter { from { opacity: .8; transform: translateY(8px) scale(.985); } to { opacity: 1; transform: none; } }
+@keyframes sabeq-menu-enter { from { opacity: .8; transform: translateY(-5px); } to { opacity: 1; transform: none; } }
+.site-shell :is(button,a,input,textarea,select) { transition: background-color var(--sabeq-state-duration), border-color var(--sabeq-state-duration); }
+.memo-progress { margin-block: 22px 26px; }
+.memo-progress-track { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 12px; margin: 0; padding: 0; list-style: none; }
+.memo-progress-track li { display: flex; gap: 10px; align-items: flex-start; min-width: 0; padding: 14px; border-radius: 12px; background: var(--panel-soft); color: var(--muted); border: 1px solid var(--line); transition: background-color var(--sabeq-state-duration), border-color var(--sabeq-state-duration); }
+.memo-progress-track li[data-status="active"] { border-color: var(--sabeq-focus); color: var(--ink); background: var(--blue-soft); }
+.memo-progress-badge { display: grid; place-items: center; width: 32px; height: 32px; flex: 0 0 32px; border-radius: 50%; background: var(--panel-bg); color: var(--ink); font-variant-numeric: tabular-nums; font-size: 17px; }
+.memo-progress-track li:is([data-status="active"],[data-status="complete"]) .memo-progress-badge { background: var(--sabeq-action); color: #fff; }
+.memo-progress-copy { min-width: 0; }
+.memo-progress-copy strong { display: block; font-size: 18px; font-weight: 700; line-height: 1.6; }
+.memo-progress-copy small { display: block; font-size: 15px; line-height: 1.7; color: var(--muted); margin-top: 4px; }
+.memo-generation-pending { border-color: var(--line); font-variant-numeric: tabular-nums; }
+.site-shell .memo-actions { gap: 12px; }
+.site-shell .memo-actions > .button { min-height: 48px; }
+@media (max-width: 600px) {
+  .memo-progress-track { grid-template-columns: 1fr; gap: 8px; }
+  .memo-progress-track li { padding: 10px 12px; align-items: center; }
+  .memo-progress-copy { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+  .memo-progress-copy small { margin: 0; }
+  .memo-actions { flex-wrap: wrap; }
+  .memo-actions > .button { flex: 1 1 180px; justify-content: center; white-space: normal; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .site-shell .modal-backdrop .modal,.site-shell .nav-dropdown { animation: none; }
+  .site-shell :is(button,a,input,textarea,select),.memo-progress-track li { transition: none; }
+}
+

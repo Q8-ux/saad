@@ -1,0 +1,17 @@
+/* Preserve the approved management palette and Cairo. */
+:root { --sabeq-control-focus: #0b667e; --sabeq-control-ease: cubic-bezier(.22,1,.36,1); }
+body { caret-color: var(--sabeq-control-focus); }
+::selection { background: #dceef4; color: var(--navy); }
+:is(button,a,input,textarea,select,[tabindex]):focus-visible { outline: 3px solid var(--sabeq-control-focus); outline-offset: 3px; }
+button { min-height: 44px; }
+:is(input,textarea,select) { min-width: 0; max-width: 100%; }
+:is(h1,h2,h3,p,label,button) { overflow-wrap: anywhere; }
+input::placeholder,textarea::placeholder { color: var(--muted); opacity: 1; }
+dialog { scrollbar-gutter: stable; max-height: calc(100dvh - 32px); overflow: auto; }
+dialog[open] { animation: sabeq-control-dialog 220ms var(--sabeq-control-ease); }
+dialog::backdrop { background: rgb(9 47 61 / 65%); }
+.dialog-close { min-width: 44px; min-height: 44px; }
+#notice { max-width: min(640px,calc(100vw - 32px)); overflow-wrap: anywhere; }
+@keyframes sabeq-control-dialog { from { opacity: .8; transform: translateY(6px) scale(.985); } to { opacity: 1; transform: none; } }
+@media(prefers-reduced-motion:reduce) { dialog[open] { animation: none; } }
+

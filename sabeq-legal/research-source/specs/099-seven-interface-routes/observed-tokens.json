@@ -1,0 +1,24 @@
+{
+  "observed_at": "2026-11-21",
+  "method": "computed CSS from the supported live browser; Designlang CLI attempted but local browser unavailable",
+  "source": "https://q8-ux.github.io/saad/sabeq-legal/",
+  "direction": "rtl",
+  "palette": {
+    "navy": "#071d2a",
+    "navy2": "#0b2d40",
+    "blue": "#0e7dba",
+    "action": "#006594",
+    "ink": "#102331",
+    "muted": "#526674",
+    "line": "#dbe5eb",
+    "surface": "#ffffff",
+    "soft": "#f4f8fa",
+    "focus": "#0b667e"
+  },
+  "fonts": {
+    "hosted_source": "Al Mohanad — preserved existing local assets",
+    "github_public": "Cairo — preserved existing approved Pages override",
+    "management": "Cairo — preserved existing local assets"
+  },
+  "scope": "Observed website tokens are not a replacement for independently approved logo or branding settings."
+}

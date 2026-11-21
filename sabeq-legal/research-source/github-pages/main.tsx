@@ -1,14 +1,13 @@
-import "../../motion/sabeq-motion.css";
-import "../../motion/sabeq-entry.mjs";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import SabeqSite from "../app/sabeq-site";
 import siteStyles from "../app/globals.css?inline";
 import interfaceStyles from "../app/interface-taste.css?inline";
+import routeStyles from "../app/interface-routes.css?inline";
 
 const style = document.createElement("style");
 style.dataset.sabeqStyles = "true";
-style.textContent = `${siteStyles}\n${interfaceStyles}`;
+style.textContent = `${siteStyles}\n${interfaceStyles}\n${routeStyles}`;
 document.head.appendChild(style);
 
 createRoot(document.getElementById("root")!).render(

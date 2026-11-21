@@ -1,6 +1,9 @@
 import { resolveLegalDraftingRoute, legalRouteQuestion } from "@/lib/legal-drafting-routes";
 "use client";
 import { AssistantMemoAction } from "./assistant-memo-action";
+import MemoProgress from "./memo-progress";
+import SiteEntryMotion from "./site-entry-motion";
+import { manageDialogFocus } from "@/lib/dialog-focus";
 
 import type { SitePublicSettings } from "@/lib/site-controls";
 
@@ -231,6 +234,9 @@ export default function SabeqSite() {
   const [language, setLanguage] = useState<Language>("ar");
   const [theme, setTheme] = useState<ColorTheme>("light");
   const [mobileMenu, setMobileMenu] = useState(false);
+  const siteRef = useRef<HTMLDivElement>(null);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
+  const menuTriggerRef = useRef<HTMLButtonElement>(null);
   const [modal, setModal] = useState<ModalName>(null);
   const [pendingService, setPendingService] = useState<ServiceModal | null>(null);
   const [authToken, setAuthToken] = useState("");
@@ -314,6 +320,32 @@ export default function SabeqSite() {
     return () => { document.body.style.overflow = ""; };
   }, [modal, mobileMenu]);
 
+  useEffect(() => {
+    if (!mobileMenu) return;
+    const menu = mobileMenuRef.current;
+    const trigger = menuTriggerRef.current;
+    const frame = window.requestAnimationFrame(() => menu?.querySelector<HTMLButtonElement>("button")?.focus());
+    const keydown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") { event.preventDefault(); setMobileMenu(false); trigger?.focus(); }
+    };
+    const leave = (event: Event) => {
+      if (!menu?.contains(event.target as Node) && !trigger?.contains(event.target as Node)) setMobileMenu(false);
+    };
+    const desktop = window.matchMedia("(min-width: 901px)");
+    const resize = () => { if (desktop.matches) setMobileMenu(false); };
+    document.addEventListener("keydown", keydown);
+    document.addEventListener("pointerdown", leave);
+    document.addEventListener("focusin", leave);
+    desktop.addEventListener("change", resize);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      document.removeEventListener("keydown", keydown);
+      document.removeEventListener("pointerdown", leave);
+      document.removeEventListener("focusin", leave);
+      desktop.removeEventListener("change", resize);
+    };
+  }, [mobileMenu]);
+
   function scrollTo(id: string) {
     window.dispatchEvent(new CustomEvent("sabeq-analytics-section", { detail: id }));
     setMobileMenu(false);
@@ -385,7 +417,8 @@ export default function SabeqSite() {
   }
 
   return (
-    <div className="site-shell" dir={t.dir}>
+    <div className="site-shell" dir={t.dir} ref={siteRef}>
+      <SiteEntryMotion root={siteRef} />
       <a className="skip-link" href="#main-content">{tr(language, "الانتقال إلى المحتوى")}</a>
       <header className="site-header">
         <div className="container">
@@ -403,7 +436,7 @@ export default function SabeqSite() {
               <button className="theme-toggle" type="button" onClick={() => setTheme((current) => current === "light" ? "dark" : "light")} aria-label={themeLabel} title={themeLabel} aria-pressed={theme === "dark"}>
                 {theme === "light" ? <Moon size={20} /> : <Sun size={20} />}
               </button>
-              <button className="menu-toggle" onClick={() => setMobileMenu(true)} aria-label={language === "ar" ? "فتح القائمة" : language === "en" ? "Open menu" : "مینو کھولیں"} aria-expanded={mobileMenu} aria-controls="mobile-navigation"><Menu /></button>
+              <button className="menu-toggle" ref={menuTriggerRef} onClick={() => setMobileMenu(true)} aria-label={language === "ar" ? "فتح القائمة" : language === "en" ? "Open menu" : "مینو کھولیں"} aria-expanded={mobileMenu} aria-controls="mobile-navigation"><Menu /></button>
             </div>
           </div>
           <nav className="header-nav" aria-label={language === "ar" ? "القائمة الرئيسية" : language === "en" ? "Primary navigation" : "مرکزی مینو"}>
@@ -413,8 +446,8 @@ export default function SabeqSite() {
       </header>
 
       {mobileMenu && (
-        <div className="nav-dropdown" id="mobile-navigation" role="dialog" aria-label={language === "ar" ? "القائمة" : language === "en" ? "Menu" : "مینو"}>
-          <div className="nav-dropdown-head"><strong>{t.brand}</strong><button className="icon-button" onClick={() => setMobileMenu(false)} aria-label={language === "ar" ? "إغلاق القائمة" : language === "en" ? "Close menu" : "مینو بند کریں"}><X /></button></div>
+        <div className="nav-dropdown" ref={mobileMenuRef} id="mobile-navigation" role="dialog" aria-label={language === "ar" ? "القائمة" : language === "en" ? "Menu" : "مینو"}>
+          <div className="nav-dropdown-head"><strong>{t.brand}</strong><button className="icon-button" onClick={() => { setMobileMenu(false); menuTriggerRef.current?.focus(); }} aria-label={language === "ar" ? "إغلاق القائمة" : language === "en" ? "Close menu" : "مینو بند کریں"}><X /></button></div>
           <nav>{t.nav.map((item, index) => <button key={item} onClick={() => scrollTo(sectionIds[index])}>{item}</button>)}</nav>
           {authUser && <div className="drawer-account"><i><UserRound size={20} /></i><span><strong>{authUser.name}</strong><small dir="ltr">{authUser.email}</small></span><button type="button" onClick={signOut} aria-label={language === "ar" ? "تسجيل الخروج" : language === "en" ? "Sign out" : "سائن آؤٹ"}><LogOut size={18} /></button></div>}
         </div>
@@ -605,7 +638,14 @@ function MediaViewer({ video, language }: { video: {src:string;poster:string;tit
 }
 
 function ModalShell({ children, language, onClose, large = false, media = false, active = true }: { children: ReactNode; language: Language; onClose: () => void; large?: boolean; media?: boolean; active?: boolean }) {
-  return <div className="modal-backdrop" hidden={!active} onMouseDown={onClose}><div className={`modal${large ? " modal-large" : ""}${media ? " modal-media" : ""}`} role="dialog" aria-modal="true" onMouseDown={(event) => event.stopPropagation()}><button className="icon-button modal-close" onClick={onClose} aria-label={tr(language, "إغلاق")}><X /></button>{children}</div></div>;
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const closeRef = useRef(onClose);
+  closeRef.current = onClose;
+  useEffect(() => {
+    if (!active || !dialogRef.current) return;
+    return manageDialogFocus(dialogRef.current, () => closeRef.current());
+  }, [active]);
+  return <div className="modal-backdrop" hidden={!active} onMouseDown={onClose}><div ref={dialogRef} tabIndex={-1} className={`modal${large ? " modal-large" : ""}${media ? " modal-media" : ""}`} role="dialog" aria-modal="true" aria-label={large ? copy[language].memoModal : copy[language].brand} onMouseDown={(event) => event.stopPropagation()}><button className="icon-button modal-close" onClick={onClose} aria-label={tr(language, "إغلاق")}><X /></button>{children}</div></div>;
 }
 
 function AuthGate({ language, service, onAuthenticated }: { language: Language; service: ServiceModal | null; onAuthenticated: (session: { token: string; user: PublicUser }) => void }) {
@@ -1564,7 +1604,7 @@ function MemoWizard({ t, language, token, initialData = null, assistantSession, 
         <p>{memoData.conversationSummary}</p><pre className="memo-transcript-readonly">{memoData.conversationTranscript}</pre>
         {memoData.conversationTranscript.length > 30000 && <p role="alert">{tr(language, "التفريغ طويل. صدّر النسخة الكاملة ثم اختصر النص إلى 30,000 حرف قبل التوليد؛ لن يُحذف جزء منه تلقائياً.")}</p>}
       </details>}
-      {assistantReview ? <p className="form-notice">{language === "ar" ? "راجع البيانات المنقولة وعدّل ما يلزم، ثم وافق وولّد المذكرة من هذه الصفحة." : language === "en" ? "Review the transferred details, edit if needed, then approve and generate here." : "منتقل تفصیلات دیکھیں، ضرورت ہو تو درست کریں، پھر یہیں منظوری دے کر یادداشت تیار کریں۔"}</p> : <div className="steps journey-steps" aria-label={t.memoModal}>{journeySteps.map((item, index) => <div key={item} className={index === step ? "active" : index < step ? "done" : ""}><i>{index < step ? <Check size={14} /> : index + 1}</i><span>{item}</span></div>)}</div>}
+      {assistantReview ? <p className="form-notice">{language === "ar" ? "راجع البيانات المنقولة وعدّل ما يلزم، ثم وافق وولّد المذكرة من هذه الصفحة." : language === "en" ? "Review the transferred details, edit if needed, then approve and generate here." : "منتقل تفصیلات دیکھیں، ضرورت ہو تو درست کریں، پھر یہیں منظوری دے کر یادداشت تیار کریں۔"}</p> : <MemoProgress labels={journeySteps} current={step} label={t.memoModal} language={language} />}
 
       {step > 0 && <ProceduralPositionView position={recognisedPosition} language={language} />}
       <form ref={memoFormRef} key={voiceFormVersion} noValidate onSubmit={submit} onChange={event => { if ((event.target as HTMLElement).getAttribute("name")) setMemoApproved(false); }}>
@@ -1672,4 +1712,5 @@ function FormNotice({ status, t }: { status: string; t: SiteCopy }) {
   if (status !== "success" && status !== "error") return null;
   return <p className={`form-notice ${status}`}>{status === "success" ? t.sent : t.error}</p>;
 }
+
 

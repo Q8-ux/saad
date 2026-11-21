@@ -1,7 +1,7 @@
 {
   "release": "2026-11-02-control-accounts-and-email-tests",
-  "clientSource": "a4efb21485dc4eccc059a9156a4f186842370297",
-  "backendSource": "59092caf21919597d2ccc6db1cd20bb12ac5f21c",
+  "clientSource": "e1184b3fe790e891eabb36acaef786b24c9191ec",
+  "backendSource": "e1184b3fe790e891eabb36acaef786b24c9191ec",
   "assistant": "indirect-intake-completeness-1",
   "voice": "gulf-male-voice-4",
   "tools": "legal-tools-1",
@@ -100,8 +100,8 @@
   "citationAudit": "source-markers-reviewed-before-display;source-trace-retained-outside-court-document",
   "typecheck": "20-existing-Workers-CSS-query-diagnostics;no-new-journey-diagnostic",
   "ssrHarness": "pre-existing-cloudflare-esm-import-failure-reproduced-on-baseline",
-  "nativePublishedAt": "2026-11-02T04:50:11.834982+00:00",
-  "nativeDeployment": "appgdep_6ae8166573f481918d4c01ddff2c12f0",
+  "nativePublishedAt": "2026-11-21T20:00:47.264423+00:00",
+  "nativeDeployment": "appgdep_6b01f853e6608191b444091079fecd7b",
   "publicationChecks": "9-scoped-release-tests-and-5-motion-tests-pass",
   "legislationArchive": "2026-04-01-separate-from-primary-2026-10-05",
   "legislationWorkbench": "manager-search-articles-originals-and-report",
@@ -242,5 +242,30 @@
     "limitPerHour": 5,
     "createsVisitorOrOTP": false,
     "liveAttempt": "pending-secure-administrator-session"
+  },
+  "interfaceRoutes": {
+    "revision": "seven-interface-routes-20261121",
+    "nativeVersion": 229,
+    "source": "e1184b3fe790e891eabb36acaef786b24c9191ec",
+    "paths": [
+      "Taste",
+      "Impeccable",
+      "Designlang",
+      "React Bits",
+      "GSAP",
+      "Transitions",
+      "Playwright"
+    ],
+    "siteChecksPassed": 383,
+    "focusedChecksPassed": 61,
+    "pagesVariantChecksPassed": 29,
+    "realPaymentTested": false,
+    "liveModelGenerationTested": false,
+    "livePrivateMemoOpened": false,
+    "measuredTokens": "research-source/specs/099-seven-interface-routes/observed-tokens.json",
+    "verification": "research-source/specs/099-seven-interface-routes/coverage.md",
+    "originalMediaAndFontsUnchanged": true,
+    "localBrowserCli": "unavailable; supported browser and Playwright surface used",
+    "pagesCustomizationsPreserved": true
   }
 }
