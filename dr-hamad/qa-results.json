@@ -3,7 +3,7 @@
     "javascript_syntax": "passed: app.js experience.js site.js",
     "carousel_vm": "passed: 11 × 8, all 88 slides, boundaries, medical/archive filters, search, empty state",
     "html": "passed: local asset references, fragment targets, unique IDs, single H1 on each document",
-    "font_files": "verified name tables for Al-Mohanad Regular, Bold, Extra Bold; Arabic alef present in all three",
+    "font_files": "Current Cairo regular/bold/extra-bold WOFF assets with existing SIL Open Font License; joined Arabic and computed family visually inspected. Exact reference-image font not identified.",
     "browser_sizes_css_px": [
       320,
       390,
@@ -146,6 +146,48 @@
       "Reduced-motion rules reviewed in source; OS preference emulation not exercised",
       "No real booking, native share sheet, clipboard permission flow or PDF export was performed",
       "No medical content or clinical outcome was evaluated or altered"
+    ]
+  },
+  "identity_review_2026_11_21": {
+    "reference": "Original owner-supplied 1536 x 1536 JPEG; byte-identical SHA-256 59bb43f9ef7050d466a4db55c0625a4b0578609b2f368eba77ea32d81c4fd1f9",
+    "palette": [
+      "#BAD8E8",
+      "#E7E0D3",
+      "#FCFBF8",
+      "#293F50"
+    ],
+    "typography": "Cairo 400/700/900 for Arabic; Arial/system sans for English; implementation match rather than identification of source-image font",
+    "logo": "Original plain metallic H displayed by CSS crop; no redrawing or generated image",
+    "main_layout_css_px": [
+      320,
+      390,
+      768,
+      1024,
+      1440
+    ],
+    "article_layout_css_px": [
+      320,
+      390
+    ],
+    "horizontal_overflow_observed": false,
+    "medium_header": "Navigation moves to a second row from 981 to 1180 px; brand remains on one line",
+    "browser_actions": [
+      "Search خشونة updates result count",
+      "Open خشونة الركبة at 1/8 with navy/ivory palette",
+      "Main and article logo/font/palette checked in screenshots"
+    ],
+    "automated_checks": [
+      "Existing 88-slide regression suite",
+      "Existing Kuwait clinic-notice expiry suite",
+      "Single H1, unique IDs, valid fragment anchors and linked local styles",
+      "Reference-byte equality, metadata SHA-256 and valid wave SVG"
+    ],
+    "first_party_console_errors_observed": [],
+    "limits": [
+      "Fixed-width same-origin preview iframes, not physical-device testing",
+      "Exact font in raster reference remains unidentified",
+      "Existing reduced-motion animation rules retained; OS preference emulation not performed",
+      "JPEG reference display crop is not an official vector or transparent logo original"
     ]
   }
 }

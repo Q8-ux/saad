@@ -1,79 +1,68 @@
-:root {
-  /* Dr Hamad print/social brand identity tokens. Type families approved 2026-11-06. Not imported by production site. */
-  --hamad-brand-navy: #17324D;
-  --hamad-brand-slate: #657883;
-  --hamad-brand-silver: #A9BAC3;
-  --hamad-brand-ice: #F1F8FA;
-  --hamad-brand-white: #FFFFFF;
-  /* Approved: Noto Kufi Arabic (headlines), Noto Sans Arabic (body), Liberation Serif (formal English). */
-  --hamad-heading-font: "Noto Kufi Arabic", "Noto Sans Arabic", sans-serif;
-  --hamad-body-font: "Noto Sans Arabic", sans-serif;
-  --hamad-english-formal-font: "Liberation Serif", Georgia, serif;
-  --hamad-heading-weight: 700;
-  --hamad-subheading-weight: 600;
-  --hamad-body-weight: 400;
+/* Owner-approved reference: 21 November 2026. Exact labelled palette. */
+:root{
+ --hamad-brand-navy:#293F50;
+ --hamad-brand-sky:#BAD8E8;
+ --hamad-brand-beige:#E7E0D3;
+ --hamad-brand-ivory:#FCFBF8;
+ --hamad-heading-font:Cairo,Tahoma,Arial,sans-serif;
+ --hamad-body-font:Cairo,Tahoma,Arial,sans-serif;
+ --hamad-english-formal-font:Arial,sans-serif;
+ --ink:var(--hamad-brand-navy);
+ --teal:var(--hamad-brand-navy);
+ --sea:var(--hamad-brand-sky);
+ --ice:var(--hamad-brand-ivory);
+ --silver:var(--hamad-brand-beige);
+ --muted:var(--hamad-brand-navy);
+ --ground:var(--hamad-brand-sky);
+ --edge:rgba(41,63,80,.18);
+ --interface-focus:var(--hamad-brand-navy);
+ --interface-beige:var(--hamad-brand-beige)
 }
-.hamad-brand-scope {
-  color: var(--hamad-brand-navy);
-  background: var(--hamad-brand-ice);
-  font-family: var(--hamad-body-font);
-  direction: rtl;
+html body{--muted:var(--hamad-brand-navy);color:var(--hamad-brand-navy)}
+.logo{
+ background-image:url('../assets/brand-reference-20261121.jpg')!important;
+ background-size:460% 460%!important;
+ background-position:30.4% 7.5%!important;
+ background-repeat:no-repeat!important;
+ background-color:var(--hamad-brand-ivory);
+ border-radius:10%;
 }
-.hamad-brand-scope .brand-title {
-  font-family: var(--hamad-heading-font);
-  font-weight: var(--hamad-heading-weight);
-}
-.hamad-brand-scope .brand-subtitle {
-  font-family: var(--hamad-heading-font);
-  font-weight: var(--hamad-subheading-weight);
-}
-.hamad-brand-scope .brand-copy {
-  font-family: var(--hamad-body-font);
-  font-weight: var(--hamad-body-weight);
-}
-.hamad-brand-scope .brand-en-formal {
-  font-family: var(--hamad-english-formal-font);
-  font-weight: 700;
-  direction: ltr;
-  unicode-bidi: isolate;
-}
-.hamad-brand-scope .brand-muted { color: var(--hamad-brand-slate); }
-.hamad-brand-scope .brand-rule { border-color: var(--hamad-brand-silver); }
-
-/* 2026-11-06: Approved social carousel palette from the supplied identity card. */
-.hamad-social-carousel {
-  --hamad-social-beige: #F2E7B8;
-  --hamad-social-sage: #C7DCCB;
-  --hamad-social-forest: #2D4238;
-  --hamad-social-ivory: #FCFBF8;
-  color: var(--hamad-social-forest);
-  background: var(--hamad-social-ivory);
-  font-family: "Cairo", sans-serif; /* requires real loaded Cairo font to be guaranteed */
-  direction: rtl;
-}
-.hamad-social-carousel .card-soft {background: var(--hamad-social-sage);}
-.hamad-social-carousel .highlight-soft {background: var(--hamad-social-beige);}
-
-/* Optional second palette: blue + beige from owner-supplied medical carousel.
-   Only navy/silver are existing official color tokens; sky and beige samples are approximate. */
-.hamad-social-carousel[data-palette="sky-blue-beige"] {
-  --hamad-social-beige: #E6D8CB;
-  --hamad-social-sage: #B5DAED;
-  --hamad-social-forest: #17324D;
-  --hamad-social-ivory: #FAF9F7;
-  --hamad-social-sky-accent: #9AD6F2;
-  --hamad-social-silver: #A9BAC3;
-}
-.hamad-social-carousel[data-palette="sky-blue-beige"] .accent-line {
-  border-color: var(--hamad-social-sky-accent);
-}
-
-/* Third optional social palette: burgundy/maroon sample, approximate image-derived values.
- * Silver H logo asset is never recolored. No automatic import to production site. */
-.hamad-social-carousel[data-palette="maroon-warm"] {
-  --hamad-social-beige: #E7CCC1;
-  --hamad-social-sage: #B97867;
-  --hamad-social-forest: #522E42;
-  --hamad-social-ivory: #FBF5F1;
-  --hamad-social-clay: #B97867;
-}
+.main-header,.main-header nav.is-open{background:var(--hamad-brand-ivory);border-color:var(--hamad-brand-beige)}
+.brand,.main-header nav a,.hero-copy h1,.hero-copy h1>span,.eyebrow,.doctor-specialty,.hero-lead,.hero-location{color:var(--hamad-brand-navy)}
+.button-primary,.header-book,.round-explore,.clinic-strip,.main-footer{background:var(--hamad-brand-navy);color:var(--hamad-brand-ivory)}
+.button-primary{font-size:clamp(22px,1.8vw,28px)}
+.button-primary:hover,.header-book:hover{background:var(--hamad-brand-navy);box-shadow:0 0 0 3px var(--hamad-brand-beige)}
+.hero-orbit{background:var(--hamad-brand-beige)}
+.joint-caption{background:var(--hamad-brand-ivory);color:var(--hamad-brand-navy);border-color:var(--hamad-brand-sky)}
+.library-tools,.article-entry,.clinic-card,.tile-title{background:var(--hamad-brand-ivory);color:var(--hamad-brand-navy)}
+.explorer-section,.clinic-section{background:rgba(231,224,211,.82)}
+.library-tools input{background:var(--hamad-brand-ivory);color:var(--hamad-brand-navy);border-color:var(--hamad-brand-beige)}
+.library-status,.topic-search-field input::placeholder,.empty{color:var(--hamad-brand-navy)}
+#clear-search{background:var(--hamad-brand-beige);color:var(--hamad-brand-navy)}
+.category-filter button{color:var(--hamad-brand-navy)}
+.category-filter button[aria-pressed=true]{background:var(--hamad-brand-navy);color:var(--hamad-brand-ivory);box-shadow:inset 0 0 0 1px var(--hamad-brand-navy)}
+.tabs button[aria-pressed=true]{color:var(--hamad-brand-navy);border-color:var(--hamad-brand-navy)}
+.dots button::before{background:var(--hamad-brand-beige)}
+.dots button.active::before{background:var(--hamad-brand-navy);box-shadow:0 0 0 3px var(--hamad-brand-sky)}
+#toast:not(:empty){background:var(--hamad-brand-ivory);color:var(--hamad-brand-navy);border-color:var(--hamad-brand-sky)}
+.empty{background:var(--hamad-brand-ivory);border-color:var(--hamad-brand-beige)}
+dialog,.post-details,.post-actions button{color:var(--hamad-brand-navy);background-color:var(--hamad-brand-ivory)}
+dialog::backdrop{background:rgba(41,63,80,.82)}
+.post-actions{border-color:var(--hamad-brand-beige)}
+.post-actions button[aria-pressed=true]{color:var(--hamad-brand-navy);box-shadow:inset 0 -2px var(--hamad-brand-sky)}
+.slide,.slide.light,.slide.teal{--bg:var(--hamad-brand-ivory);--ink:var(--hamad-brand-navy);--accent:var(--hamad-brand-navy);--panel:var(--hamad-brand-sky);--corner:var(--hamad-brand-sky);--grid:var(--hamad-brand-beige);background-color:var(--bg);color:var(--ink)}
+.slide.warm{--bg:var(--hamad-brand-beige);--ink:var(--hamad-brand-navy);--accent:var(--hamad-brand-navy);--panel:var(--hamad-brand-ivory);--corner:var(--hamad-brand-sky);--grid:var(--hamad-brand-ivory);background-color:var(--bg);color:var(--ink)}
+.slide.dark{--bg:var(--hamad-brand-navy);--ink:var(--hamad-brand-ivory);--accent:var(--hamad-brand-sky);--panel:var(--hamad-brand-navy);--corner:var(--hamad-brand-sky);--grid:var(--hamad-brand-sky);background-color:var(--bg);color:var(--ink)}
+.slide.dark .english-badge,.slide.dark .account-badge{border-color:var(--hamad-brand-sky)}
+.article-original .article-kind,.article-original p{color:var(--hamad-brand-navy)}
+.slide .top-strip{background:var(--hamad-brand-sky)}
+.slide .corner-line{border-color:var(--hamad-brand-beige)}
+.slide .text-card{color:var(--hamad-brand-navy);background:var(--hamad-brand-ivory)}
+.main-footer .brand,.main-footer a,.main-footer p,.main-footer strong{color:var(--hamad-brand-ivory)}
+.hamad-brand-scope{color:var(--hamad-brand-navy);background:var(--hamad-brand-ivory);font-family:var(--hamad-body-font);direction:rtl}
+.hamad-brand-scope .brand-title{font-family:var(--hamad-heading-font);font-weight:700}
+.hamad-brand-scope .brand-copy{font-family:var(--hamad-body-font);font-weight:400}
+html body [lang=en],html body [lang=en] *,html body .brand small[dir=ltr],html body .joint-caption small[dir=ltr],html body .brand-en-formal{font-family:var(--hamad-english-formal-font)!important}
+.hamad-brand-scope .brand-en-formal{direction:ltr;unicode-bidi:isolate}
+@media(min-width:981px) and (max-width:1180px){.header-inner{flex-wrap:wrap;gap:12px 22px}.main-header .brand{flex:1;font-size:23px}.main-header .brand>span{white-space:nowrap}.main-header nav{order:3;flex:1 0 100%;justify-content:space-between;font-size:20px;gap:14px}.header-book{font-size:20px;padding-inline:16px}}
+@media print{html body{background:#fff!important}.logo{print-color-adjust:exact}.main-header,.main-footer{display:none!important}.explorer-section,.clinic-section{background:#fff}}

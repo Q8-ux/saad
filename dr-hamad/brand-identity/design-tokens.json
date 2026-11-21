@@ -1,98 +1,71 @@
 {
   "name": "مسار الهوية البصرية للدكتور حمد",
   "name_en": "Dr Hamad Brand Identity Path",
-  "version": "1.4.0",
-  "date": "2026-11-06",
-  "source": "user-supplied reference images",
+  "version": "2.0.0",
+  "date": "2026-11-21",
+  "source": "Owner-approved reference image 1000417339.jpg",
   "palette": {
     "navy": {
-      "hex": "#17324D",
-      "role": "primary headlines and high-contrast text",
-      "status": "verified-from-reference-label"
+      "hex": "#293F50",
+      "role": "primary text and actions",
+      "status": "explicit-hex-label-in-approved-image"
     },
-    "slate": {
-      "hex": "#657883",
-      "role": "secondary typography",
-      "status": "verified-from-reference-label"
+    "skyBlue": {
+      "hex": "#BAD8E8",
+      "role": "main background and accents",
+      "status": "explicit-hex-label-in-approved-image"
     },
-    "silver": {
-      "hex": "#A9BAC3",
-      "role": "borders and supporting elements",
-      "status": "verified-from-reference-label"
+    "warmBeige": {
+      "hex": "#E7E0D3",
+      "role": "curves, panels and highlights",
+      "status": "explicit-hex-label-in-approved-image"
     },
-    "ice": {
-      "hex": "#F1F8FA",
-      "role": "light backgrounds",
-      "status": "verified-from-reference-label"
+    "ivory": {
+      "hex": "#FCFBF8",
+      "role": "warm light surfaces",
+      "status": "explicit-hex-label-in-approved-image"
     }
   },
   "accentColors": {
     "skyBlue": {
-      "hex": null,
-      "status": "visual-only-not-finalized"
+      "hex": "#BAD8E8",
+      "status": "approved-2026-11-21"
     },
     "warmBeige": {
-      "hex": null,
-      "status": "visual-only-not-finalized"
+      "hex": "#E7E0D3",
+      "status": "approved-2026-11-21"
     }
   },
   "type": {
     "arabicHeadline": {
-      "family": "Noto Kufi Arabic",
+      "family": "Cairo",
       "recommendedWeights": [
-        600,
-        700
+        700,
+        900
       ],
-      "status": "approved-by-owner-2026-11-06",
-      "usage": "Arabic titles and high-priority headings"
+      "status": "verified-existing-font; visual-match-implementation; exact-reference-family-unidentified"
     },
     "arabicBody": {
-      "family": "Noto Sans Arabic",
+      "family": "Cairo",
       "recommendedWeights": [
-        400,
-        500,
-        600
+        400
       ],
-      "status": "approved-by-owner-2026-11-06",
-      "usage": "Arabic descriptions, captions, educational copy"
+      "status": "verified-existing-font; visual-match-implementation"
     },
     "englishFormal": {
-      "family": "Liberation Serif",
+      "family": "Arial",
       "recommendedWeights": [
         400,
         700
       ],
-      "status": "approved-by-owner-2026-11-06",
-      "usage": "English physician name, signature, formal bilingual identity"
+      "status": "system-sans-serif-implementation; exact-reference-family-unidentified"
     },
-    "exactSourceWeights": "not specified in reference imagery",
     "policy": {
-      "status": "historical-with-current-override-see-latestSocialTypographyDecision",
-      "scope": "all new social posts, carousels, stories, highlights, print and branding designs",
       "arabicDirection": "rtl",
       "englishDirection": "ltr",
-      "exactFontWeightVerified": false,
-      "note": "Historical Noto family selection. Superseded for new Arabic carousel typography by later Noor request, pending original file. Existing live site is unchanged."
-    },
-    "latestSocialTypographyDecision": {
-      "requestedFamily": "Noor",
-      "fontBinaryAvailable": false,
-      "updated": "2026-11-06",
-      "candidateLibraries": [
-        "(AH) Manal",
-        "29LT Azer",
-        "Al-Mohanad"
-      ],
-      "legacyFonts": [
-        "Noto Kufi Arabic",
-        "Noto Sans Arabic",
-        "Liberation Serif"
-      ],
-      "policy": "Noor requested but original font missing; do not claim exact Noor typesetting; test received alternatives without auto approving",
-      "fontPath": "./font-path/README.md",
-      "latestRequest": "Cairo for new carousel designs",
-      "latestRequestDate": "2026-11-06",
-      "priorTrial": "Manal"
+      "exactReferenceFontIdentified": false,
+      "sourceFamilyCaveat": "The approved image does not name its fonts; Cairo is an implementation match, not an identification of the embedded raster lettering.",
+      "scope": "current website and future Dr Hamad identity work; no automatic regeneration of prior exported media"
     }
   },
   "signature": {
@@ -110,7 +83,10 @@
       "round H seal"
     ],
     "officialVectorAvailable": false,
-    "rebuildWithoutSourceProhibited": true
+    "rebuildWithoutSourceProhibited": true,
+    "activeVariant": "plain metallic H from owner reference, without circular seal",
+    "sourceImage": "../assets/brand-reference-20261121.jpg",
+    "implementation": "CSS display crop of the unchanged original reference image; no logo redrawing or generation"
   },
   "sizes": {
     "instagramPortrait": [
@@ -141,14 +117,13 @@
     "keepArabicSlogan": "حركة أفضل .. حياة أفضل"
   },
   "socialPalette": {
-    "name": "ألوان الكاروسيل الطبي — المرجع المعتمد الأحدث",
-    "approvedFrom": "user supplied palette image 2026-11-06",
-    "priority": "latest approved palette for new social graphics",
-    "beige": "#F2E7B8",
-    "sage": "#C7DCCB",
-    "forest": "#2D4238",
+    "name": "السماوي والبيج والكحلي — الهوية المعتمدة 21 نوفمبر 2026",
+    "approvedFrom": "Owner-approved reference image 1000417339.jpg",
+    "sky": "#BAD8E8",
+    "beige": "#E7E0D3",
     "ivory": "#FCFBF8",
-    "instructions": "No vivid yellow, purple or copper. Existing core identity palette remains documented but do not apply it to new graphics where this approved social palette is requested."
+    "navy": "#293F50",
+    "priority": "current"
   },
   "socialPaletteVariants": {
     "sage-beige": {
@@ -193,15 +168,20 @@
     }
   },
   "socialPalettePolicy": {
-    "mode": "parallel-approved-visual-variants",
-    "selection": "one palette per series, no uncontrolled mixing",
-    "typography": "Cairo requested for new carousels",
+    "mode": "one-active-palette",
+    "selection": "Use the 2026-11-21 four-color palette by default; older variants are historical options only",
+    "typography": "Cairo is the available implementation match; image source font unidentified",
     "content": "Arabic-only, except Dr.hamads; omit doctor signature and credentials from educational slides; compact and uncluttered.",
     "approvedVisualVariants": [
-      "sage-beige",
-      "sky-blue-beige",
-      "maroon-warm"
+      "sky-blue-beige-20261121"
     ],
-    "logo": "same original metallic silver H across all themes"
+    "logo": "unchanged original metallic H; no circular frame by default"
+  },
+  "activeIdentity": {
+    "approved": "2026-11-21",
+    "reference": "../assets/brand-reference-20261121.jpg",
+    "referenceSha256": "59bb43f9ef7050d466a4db55c0625a4b0578609b2f368eba77ea32d81c4fd1f9",
+    "palettePriority": "this palette supersedes older green, maroon and sampled blue palettes unless the owner explicitly requests a historical theme",
+    "motion": "Preserve calm animated waves and mesh; honor reduced-motion preference"
   }
 }

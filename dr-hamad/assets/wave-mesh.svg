@@ -11,10 +11,10 @@
 @keyframes mesh-sway{from{transform:translate(-25px,-22px)}to{transform:translate(30px,28px)}}
 @media(prefers-reduced-motion:reduce){.wave-back,.wave-front,.wave-line,.mesh{animation:none}}
 </style>
-<rect width="1600" height="1200" fill="#d9e8f0"/>
-<path class="wave-back" fill="#a9cadd" opacity=".50" d="M-350 155C90 10 335 580 810 310S1390 20 1970 250L1970 650C1420 455 1190 690 755 585S120 300-350 490Z"/>
-<path class="wave-front" fill="#8fb6cd" opacity=".23" d="M-350 925C180 1135 390 530 915 725S1480 1120 1970 820L1970 1320H-350Z"/>
-<g class="mesh" stroke="#668ca5" stroke-width="1.15" opacity=".18">
+<rect width="1600" height="1200" fill="#BAD8E8"/>
+<path class="wave-back" fill="#E7E0D3" opacity=".50" d="M-350 155C90 10 335 580 810 310S1390 20 1970 250L1970 650C1420 455 1190 690 755 585S120 300-350 490Z"/>
+<path class="wave-front" fill="#FCFBF8" opacity=".23" d="M-350 925C180 1135 390 530 915 725S1480 1120 1970 820L1970 1320H-350Z"/>
+<g class="mesh" stroke="#293F50" stroke-width="1.15" opacity=".12">
 <path d="M-400 -300C-60 -430 200 -150 550 -300S1110 -450 1450 -300S1880 -170 2100 -350"/>
 <path d="M-400 -210C-60 -340 200 -60 550 -210S1110 -360 1450 -210S1880 -80 2100 -260"/>
 <path d="M-400 -120C-60 -250 200 30 550 -120S1110 -270 1450 -120S1880 10 2100 -170"/>
@@ -65,7 +65,7 @@
 <path d="M2100 -300C2215 0 1975 300 2100 600S2225 1120 2100 1500"/>
 <path d="M2200 -300C2315 0 2075 300 2200 600S2325 1120 2200 1500"/>
 </g>
-<g class="wave-line" stroke="#719db7" stroke-width="1.5" opacity=".26">
+<g class="wave-line" stroke="#293F50" stroke-width="1.5" opacity=".14">
 <path d="M-350 840C180 1050 390 445 915 640S1480 1035 1970 735"/>
 <path d="M-350 858C180 1068 390 463 915 658S1480 1053 1970 753"/>
 <path d="M-350 876C180 1086 390 481 915 676S1480 1071 1970 771"/>

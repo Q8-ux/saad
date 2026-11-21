@@ -2,17 +2,17 @@
 
 Public website: https://q8-ux.github.io/saad/dr-hamad/
 
-An Arabic RTL website for د. حمد ساكت العنزي, separate from the existing Instagram preview. Uses the existing approved circular H seal and the supplied Al-Mohanad Regular, Bold and Extra Bold TTF assets. Existing Cairo assets and their SIL Open Font License remain in the repository. Palette: navy, medical teal, silver, ice and white.
+An Arabic RTL website for د. حمد ساكت العنزي, separate from the existing Instagram preview. Uses the plain metallic H from the owner-approved reference and the existing Cairo Regular, Bold and Extra Bold WOFF assets under their included SIL Open Font License. Active palette: sky blue #BAD8E8, warm beige #E7E0D3, ivory #FCFBF8 and navy #293F50.
 
 The doctor introduction and official clinic details come from the user's supplied doctor message: Al Razi Hospital, specialized clinics B, clinic 6, Tuesday morning. Appointment links go directly to https://ask.moh.gov.kw. No appointments are processed by this website.
 
 The movement/replacement explorer remains an original SVG educational schematic of knee and hip movement, replacement components and five illustrative assembly stages. It is not a validated biomechanical simulation, a 3D model or surgical instruction. Visitor controls use native buttons, ranges and requestAnimationFrame. Motion starts only when the visitor requests it and respects reduced-motion preferences.
 
-Retains all 11 existing carousels, 8 slides each, including prior supplied archive content. No carousel wording changed. Search, categories, saved posts, deep links, sharing, keyboard navigation and swipes are available. Light, navy and pale teal themes stay within the approved main website palette. Saved posts stay in browser local storage.
+Retains all 11 existing carousels, 8 slides each, including prior supplied archive content. No carousel wording changed. Search, categories, saved posts, deep links, sharing, keyboard navigation and swipes are available. Light, navy and warm themes use the active main website palette. Saved posts stay in browser local storage.
 
 The previous article “توقيت استبدال مفصل الركبة” remains linked to its existing public Site. Its source text was not recovered and has not been replaced or redated. The separate local editorial article “خشونة الركبة… من فهم الألم إلى قرار العلاج” provides primary references and its own current editorial date, distinctly from the research publication dates. References include NICE NG226, Cochrane 2024, IDEA JAMA 2013 and AAOS OrthoInfo. External AAOS animations are linked to the publisher; media has not been copied.
 
-No fabricated portrait, testimonials, outcomes, qualifications, live availability, AI diagnosis, analytics or patient-data forms. The static website has no external dependencies; Al-Mohanad font files are served locally.
+No fabricated portrait, testimonials, outcomes, qualifications, live availability, AI diagnosis, analytics or patient-data forms. The static website has no external dependencies; Cairo font files are served locally.
 
 ## Verification
 
@@ -20,7 +20,7 @@ No fabricated portrait, testimonials, outcomes, qualifications, live availabilit
 - `node verify.cjs`: all 88 slides, navigation bounds, medical/archive filters, search and empty state.
 - Local HTML checks: referenced assets, internal fragment targets, unique IDs, one H1 on each document.
 - Browser QA at 320, 390, 768 and 1440 CSS px, plus mobile article reading. See `qa-results.json` for performed checks and limits.
-- Actual Al-Mohanad Arabic glyph rendering is checked in the browser.
+- Arabic font rendering is checked in the browser.
 
 Deployment restores the current successful Pages artifact, overlays only `dr-hamad/`, and checks every unrelated published file remains byte-identical. The existing Instagram demo and unrelated projects remain separate.
 
@@ -40,8 +40,12 @@ The inline player in `#tv-interview` embeds `w8qWv5NMbrw`, “مستشفى ال�
 
 ## Interface refinement — 21 November 2026
 
-Uses the existing Al-Mohanad assets across the website and article; the font preload matches the actual face. `interface.css` keeps the current navy, blue, silver and restrained beige identity and improves visible focus, touch targets, search legibility, empty states and reduced-motion behavior. SVG carousel controls avoid missing font glyphs.
+`interface.css` improves visible focus, touch targets, search legibility, empty states and reduced-motion behavior. SVG carousel controls avoid missing font glyphs. The latest approved identity below governs colors and typography; the font preload matches the active Cairo face.
 
 Search now has a labelled clear button and an accessible live result count. The library view buttons use pressed-state semantics. Saving distinguishes persistent browser storage from a session-only fallback when storage fails. Closing a carousel restores focus even when its source tile was replaced during a save/filter render. Mobile navigation closes on outside click, focus departure, Escape, link activation and viewport changes. Brief CSS transitions use the existing stack without an additional animation library.
 
 All 11 carousels and their 88 slide texts, medical article content, clinic facts, appointment destination, video and joint-explorer logic are retained. Additional regression assertions run through `node dr-hamad/verify.cjs`.
+
+## Active reference identity — 21 November 2026
+
+The owner approved the supplied reference image and its explicit four-color palette: #BAD8E8, #E7E0D3, #FCFBF8 and #293F50. The current site uses Cairo as an available visual implementation match; the exact font in the raster reference is unidentified. The plain metallic H is displayed directly from the unchanged reference image through CSS cropping, replacing the circular seal in the active interface. The existing wave and mesh background continues in the new palette with reduced-motion support. See brand-identity/README.md for the current governing specification.
