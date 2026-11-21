@@ -2,7 +2,7 @@
 
 Public website: https://q8-ux.github.io/saad/dr-hamad/
 
-An Arabic RTL website for د. حمد ساكت العنزي, separate from the existing Instagram preview. Uses the existing approved circular H seal and Cairo Regular, Bold and Extra Bold WOFF assets; the SIL Open Font License is included. Palette: navy, medical teal, silver, ice and white.
+An Arabic RTL website for د. حمد ساكت العنزي, separate from the existing Instagram preview. Uses the existing approved circular H seal and the supplied Al-Mohanad Regular, Bold and Extra Bold TTF assets. Existing Cairo assets and their SIL Open Font License remain in the repository. Palette: navy, medical teal, silver, ice and white.
 
 The doctor introduction and official clinic details come from the user's supplied doctor message: Al Razi Hospital, specialized clinics B, clinic 6, Tuesday morning. Appointment links go directly to https://ask.moh.gov.kw. No appointments are processed by this website.
 
@@ -12,7 +12,7 @@ Retains all 11 existing carousels, 8 slides each, including prior supplied archi
 
 The previous article “توقيت استبدال مفصل الركبة” remains linked to its existing public Site. Its source text was not recovered and has not been replaced or redated. The separate local editorial article “خشونة الركبة… من فهم الألم إلى قرار العلاج” provides primary references and its own current editorial date, distinctly from the research publication dates. References include NICE NG226, Cochrane 2024, IDEA JAMA 2013 and AAOS OrthoInfo. External AAOS animations are linked to the publisher; media has not been copied.
 
-No fabricated portrait, testimonials, outcomes, qualifications, live availability, AI diagnosis, analytics or patient-data forms. The static website has no external dependencies; Cairo font files are served locally.
+No fabricated portrait, testimonials, outcomes, qualifications, live availability, AI diagnosis, analytics or patient-data forms. The static website has no external dependencies; Al-Mohanad font files are served locally.
 
 ## Verification
 
@@ -20,7 +20,7 @@ No fabricated portrait, testimonials, outcomes, qualifications, live availabilit
 - `node verify.cjs`: all 88 slides, navigation bounds, medical/archive filters, search and empty state.
 - Local HTML checks: referenced assets, internal fragment targets, unique IDs, one H1 on each document.
 - Browser QA at 320, 390, 768 and 1440 CSS px, plus mobile article reading. See `qa-results.json` for performed checks and limits.
-- Actual Cairo Arabic and Latin glyph rendering is checked in the browser.
+- Actual Al-Mohanad Arabic glyph rendering is checked in the browser.
 
 Deployment restores the current successful Pages artifact, overlays only `dr-hamad/`, and checks every unrelated published file remains byte-identical. The existing Instagram demo and unrelated projects remain separate.
 
@@ -37,3 +37,11 @@ The user-supplied image is displayed in the home-page news notice and opens at f
 ## Kuwait television interview
 
 The inline player in `#tv-interview` embeds `w8qWv5NMbrw`, “مستشفى الرازي يحقق نقلة نوعية في جراحات الركبة”, published 22 July 2026 by the official NewsKTV1 ministry news channel. The original video description names Dr Hamad Alenzi, orthopaedic surgeon at Al Razi; the runtime metadata reports `OK` and `playableInEmbed: true`. The video is 1,160 seconds long. Source: https://www.youtube.com/watch?v=w8qWv5NMbrw. The official ministry directory https://media.gov.kw/SocialMedia.aspx lists @newsktv1. The original video is embedded with privacy-enhanced YouTube, lazy loading, inline playback and fullscreen. It is not downloaded or rehosted.
+
+## Interface refinement — 21 November 2026
+
+Uses the existing Al-Mohanad assets across the website and article; the font preload matches the actual face. `interface.css` keeps the current navy, blue, silver and restrained beige identity and improves visible focus, touch targets, search legibility, empty states and reduced-motion behavior. SVG carousel controls avoid missing font glyphs.
+
+Search now has a labelled clear button and an accessible live result count. The library view buttons use pressed-state semantics. Saving distinguishes persistent browser storage from a session-only fallback when storage fails. Closing a carousel restores focus even when its source tile was replaced during a save/filter render. Mobile navigation closes on outside click, focus departure, Escape, link activation and viewport changes. Brief CSS transitions use the existing stack without an additional animation library.
+
+All 11 carousels and their 88 slide texts, medical article content, clinic facts, appointment destination, video and joint-explorer logic are retained. Additional regression assertions run through `node dr-hamad/verify.cjs`.

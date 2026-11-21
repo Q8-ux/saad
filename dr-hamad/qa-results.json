@@ -82,5 +82,70 @@
       "browser": "Inline player loads title and controls; clicking play retains host page URL",
       "limits": "Media stream remained buffering in the managed preview browser; continuous audiovisual playback is not verified."
     }
+  },
+  "interface_review_2026_11_21": {
+    "scope": "Typography and interface refinements on the dedicated dr-hamad website and article",
+    "source_routes": [
+      "frontend art direction",
+      "interface audit and polish",
+      "small CSS transitions",
+      "browser verification"
+    ],
+    "stack": "Existing static HTML, CSS and JavaScript; no added runtime animation framework",
+    "font": "Existing supplied Al-Mohanad font assets; regular name table and Arabic glyph coverage checked; rendered Mohanad family and joined Arabic inspected",
+    "main_page_layout": [
+      {
+        "viewport": 320,
+        "contentWidth": 305,
+        "horizontalOverflow": false
+      },
+      {
+        "viewport": 390,
+        "contentWidth": 375,
+        "horizontalOverflow": false
+      },
+      {
+        "viewport": 768,
+        "contentWidth": 753,
+        "horizontalOverflow": false
+      },
+      {
+        "viewport": 1440,
+        "contentWidth": 1425,
+        "horizontalOverflow": false
+      }
+    ],
+    "article_layout_css_px": [
+      320,
+      390
+    ],
+    "article_horizontal_overflow": false,
+    "browser_actions": [
+      "Keyboard menu open and Escape close",
+      "Search الرياضة gives 1 of 11",
+      "Clear search restores 11 of 11",
+      "Archive category gives 3 of 11",
+      "Carousel opens at 1/8 and reaches 8/8 with next disabled",
+      "Persistent save displays success and survives a reload",
+      "Removing the only saved post returns focus to search",
+      "Saving from the full library and closing restores focus to the replacement visible tile",
+      "All eight slide selectors measure 44 by 44 CSS px"
+    ],
+    "automated_checks": [
+      "JavaScript syntax",
+      "All 88 slides and original navigation/filter tests",
+      "Filter announcements and clear-search recovery",
+      "Storage-denied session fallback",
+      "Focus recovery after the grid replaces the original tile",
+      "Existing clinic notice expiry tests"
+    ],
+    "first_party_console_errors_observed": [],
+    "limits": [
+      "Responsive checks use actual fixed-width same-origin iframe documents in the supported preview, not physical devices",
+      "Preview text matches source except that unchanged assets and Three.js vendor imports resolve to their existing published URLs",
+      "Reduced-motion rules reviewed in source; OS preference emulation not exercised",
+      "No real booking, native share sheet, clipboard permission flow or PDF export was performed",
+      "No medical content or clinical outcome was evaluated or altered"
+    ]
   }
 }
