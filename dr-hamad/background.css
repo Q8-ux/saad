@@ -1,0 +1,14 @@
+/* A coherent blue canvas with slow wave and mesh motion in the local SVG. */
+html{background:#d9e8f0}
+html body{
+ --muted:#354f60;
+ background-color:#d9e8f0!important;
+ background-image:none!important;
+ position:relative;
+ isolation:isolate;
+}
+html body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:#d9e8f0 url('assets/wave-mesh.svg?v=20261121-waves1') center center/cover no-repeat}
+.main-header{background:#e3eef5;border-bottom-color:#a9bfce}
+.library-tools,.article-entry,.clinic-card{background:#edf4f8}
+.explorer-section,.clinic-section{background:rgba(217,232,240,.78)}
+@media print{html,html body{background:#fff!important;background-image:none!important}html body::before{display:none}.main-header,.library-tools,.article-entry,.clinic-card,.explorer-section,.clinic-section{background:#fff}}
