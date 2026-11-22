@@ -1,0 +1,28 @@
+name: Oman Backend Connectivity Probe
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/oman-backend-probe.yml']
+  workflow_dispatch:
+permissions: { contents: read }
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compare Lovable Cloud and native Supabase endpoints
+        shell: bash
+        run: |
+          set -euo pipefail
+          URL=$(node -e 'global.window={};require("./oman-fruits-commerce/config.js");process.stdout.write(window.OMAN_CONFIG.supabaseUrl)')
+          KEY=$(node -e 'global.window={};require("./oman-fruits-commerce/config.js");process.stdout.write(window.OMAN_CONFIG.publishableKey)')
+          for origin in "$URL" "https://icdsvitqrzbhsjvzfkum.supabase.co"; do
+            echo "Backend URL: $origin"
+            for route in /rest/v1/products?select=id,name_ar\&limit=1 /auth/v1/settings; do
+              code=$(curl -sS -L --max-time 15 -o /tmp/oman-probe.txt -w '%{http_code}' -H "apikey: $KEY" -H "Origin: https://q8-ux.github.io" "$origin$route" || true)
+              echo "$route => $code"
+              head -c 160 /tmp/oman-probe.txt | tr '\n' ' ' || true
+              echo
+            done
+          done
