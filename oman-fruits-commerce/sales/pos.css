@@ -96,3 +96,33 @@ body:has(.pos-preview){background:#f5f7f3}
 @media(max-width:750px){.pos-preview .pos-layout{grid-template-columns:1fr}.pos-preview .pos-top-inner{padding:15px;gap:9px}.pos-preview .pos-top-nav{order:3;width:100%;overflow:auto;flex-wrap:nowrap}.pos-preview .pos-top-nav a{white-space:nowrap}.pos-preview .pos-identity strong{font-size:21px}.pos-preview .pos-employee-chip{font-size:14px}.pos-preview .pos-heading{display:block}.pos-preview .pos-live-state{display:inline-block;margin-top:14px}.pos-preview .pos-catalog-panel{grid-row:auto}.pos-preview .pos-cart-panel{grid-column:auto}.pos-preview .pos-products-grid{max-height:none}}
 @media(max-width:490px){.pos-preview .pos-main{padding:12px}.pos-preview .pos-identity{min-width:0}.pos-preview .pos-mark{width:41px;height:41px;font-size:22px}.pos-preview .pos-identity strong{font-size:19px}.pos-preview .pos-identity small{font-size:13px}.pos-preview .pos-employee-chip{display:none}.pos-preview .pos-heading h1{font-size:28px}.pos-preview .pos-panel-head h2{font-size:23px}.pos-preview .pos-products-grid{grid-template-columns:1fr 1fr;gap:8px}.pos-preview .pos-product-image{height:130px}.pos-preview .pos-product-info{padding:9px}.pos-preview .pos-product-info h3{font-size:17px;min-height:75px}.pos-preview .pos-product-price{font-size:19px}.pos-preview .pos-unit-select{font-size:13px;padding:5px}.pos-preview .pos-btn-add{font-size:15px;padding:7px}}
 @media print{.pos-preview{display:none!important}}
+
+
+/* The authenticated point-of-sale screen uses the same legible design language. */
+body:has(#sales-content){font-size:18px;background:#f7f8f3}
+body:has(#sales-content) .dashboard{grid-template-columns:255px minmax(0,1fr)}
+body:has(#sales-content) .dash-main{padding:26px}
+body:has(#sales-content) .dash-top h1{font-size:33px}
+body:has(#sales-content) .dash-top small{font-size:18px}
+body:has(#sales-content) .dash-side .brand strong{font-size:21px}
+body:has(#sales-content) .dash-nav{font-size:18px;padding:15px}
+body:has(#sales-content) .callcenter .layout-two{display:grid;grid-template-columns:minmax(280px,.95fr) minmax(420px,1.55fr) minmax(325px,1fr);gap:15px}
+body:has(#sales-content) .callcenter .layout-two>div:first-child{display:contents}
+body:has(#sales-content) .callcenter .layout-two>div:first-child>.panel:first-child{grid-column:2;grid-row:1}
+body:has(#sales-content) .callcenter .layout-two>div:first-child>.panel:nth-child(2){grid-column:1;grid-row:1;order:unset;margin-top:0!important}
+body:has(#sales-content) .callcenter .layout-two>aside.cart{grid-column:3;grid-row:1;top:28px}
+body:has(#sales-content) .callcenter .panel h3{font-size:24px}
+body:has(#sales-content) .callcenter .muted{font-size:16px}
+body:has(#sales-content) .callcenter .field label{font-size:18px}
+body:has(#sales-content) .callcenter .field input,body:has(#sales-content) .callcenter .field select,body:has(#sales-content) .callcenter .input{font-size:18px;min-height:48px}
+body:has(#sales-content) .callcenter .btn{min-height:48px;font-size:17px}
+body:has(#sales-content) .callcenter .btn.small{min-height:43px;font-size:16px}
+body:has(#sales-content) .callcenter .product-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:14px}
+body:has(#sales-content) .callcenter .call-product-image{height:170px}
+body:has(#sales-content) .callcenter .call-product-body>strong{font-size:20px;min-height:58px}
+body:has(#sales-content) .callcenter .call-product-body .origin{font-size:15px}
+body:has(#sales-content) .callcenter .call-product-controls .select{min-height:47px;font-size:16px}
+body:has(#sales-content) .callcenter .cart .summary-row strong{font-size:20px}
+@media(max-width:1500px){body:has(#sales-content) .dashboard{grid-template-columns:215px minmax(0,1fr)}body:has(#sales-content) .callcenter .layout-two{grid-template-columns:minmax(250px,.85fr) minmax(380px,1.35fr) minmax(275px,1fr)}}
+@media(max-width:1220px){body:has(#sales-content) .callcenter .layout-two{grid-template-columns:1fr 1.2fr}body:has(#sales-content) .callcenter .layout-two>div:first-child>.panel:nth-child(2){grid-column:1;grid-row:1}body:has(#sales-content) .callcenter .layout-two>div:first-child>.panel:first-child{grid-column:2;grid-row:1}body:has(#sales-content) .callcenter .layout-two>aside.cart{grid-column:1/-1;grid-row:2;position:static}}
+@media(max-width:800px){body:has(#sales-content) .dashboard{grid-template-columns:1fr}body:has(#sales-content) .callcenter .layout-two{grid-template-columns:1fr}body:has(#sales-content) .callcenter .layout-two>div:first-child>.panel:nth-child(2){grid-column:1;grid-row:1}body:has(#sales-content) .callcenter .layout-two>div:first-child>.panel:first-child{grid-column:1;grid-row:2}body:has(#sales-content) .callcenter .layout-two>aside.cart{grid-column:1;grid-row:3}}
