@@ -34,9 +34,14 @@ jobs:
               page.on('pageerror', e=>errors.push(e.message));
               // Force the backend to be unavailable to simulate Cloudflare 1016.
               await page.route('https://c--bd9ae430-2847-495f-9e07-72dd6eb16982-prod.lovable.cloud/**',route=>route.fulfill({status:530,contentType:'text/plain',body:'error code: 1016'}));
-              await page.goto(origin+segment,{waitUntil:'domcontentloaded',timeout:45000});
+              const response=await page.goto(origin+segment+'?test='+Date.now(),{waitUntil:'domcontentloaded',timeout:45000});
+              console.log('PAGE',segment,'HTTP',response?.status(),'URL',page.url());
+              await page.waitForTimeout(5000);
+              console.log('BODY:',(await page.locator('body').innerText()).slice(0,1100));
+              console.log('APP SRC:',await page.evaluate(()=>Array.from(document.scripts).map(x=>x.src).filter(Boolean)));
+              console.log('PAGE ERRORS:',errors);
               const heading=segment.startsWith('sales')?'استقبال طلبات عمان — معاينة':'لوحة إدارة عمان — معاينة';
-              await page.getByRole('heading',{name:heading}).waitFor({timeout:30000});
+              await page.getByRole('heading',{name:heading}).waitFor({timeout:12000});
               await page.screenshot({path:'test-artifacts/'+segment.replace('/','')+'.png',fullPage:true});
               assert(!(await page.locator('body').innerText()).includes('تعذر تحميل المتجر'),'Unexpected backend error UI');
               assert.equal(errors.length,0,'Page JS errors: '+errors.join('; '));
