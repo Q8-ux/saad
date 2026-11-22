@@ -96,3 +96,32 @@ test('Heretic uses the existing verified text-only contract without leaking secr
   }), error => error.kind === 'configuration');
   assert.equal(invoked, 0);
 });
+
+test('Meta Model API enforces standard non-training models, in-memory cache, and server-only secrets', async () => {
+  assert.throws(() => textProviderConfig({ LEGAL_AI_PROVIDER: 'meta' }), error => error.kind === 'configuration');
+  for (const trainingModel of ['muse-spark-1.3-contributor', 'meta/muse-wonder:contributor', 'contributor']) {
+    assert.throws(() => textProviderConfig({ LEGAL_AI_PROVIDER: 'meta', MODEL_API_KEY: 'synthetic-meta-secret', META_MODEL: trainingModel }), error => error.kind === 'configuration');
+  }
+  const metaCfg = textProviderConfig({ LEGAL_AI_PROVIDER: 'meta', MODEL_API_KEY: 'synthetic-meta-secret' });
+  assert.equal(metaCfg.model, 'muse-spark-1.3');
+  assert.equal(metaCfg.endpoint, 'https://api.meta.ai/v1/chat/completions');
+  const summary = textProviderSummary({ LEGAL_AI_PROVIDER: 'openai', OPENAI_API_KEY: 'synthetic-openai', LEGAL_AI_FALLBACK_PROVIDER: 'meta', MODEL_API_KEY: 'synthetic-meta-secret' });
+  assert.equal(summary.textFallbackProvider, 'meta');
+  assert.doesNotMatch(JSON.stringify(summary), /synthetic-meta-secret/);
+
+  const res = await compatibleTextResponse(init(), metaCfg, async (url, request) => {
+    assert.equal(url, 'https://api.meta.ai/v1/chat/completions');
+    assert.equal(request.redirect, 'manual');
+    assert.equal(request.headers.Authorization, 'Bearer synthetic-meta-secret');
+    const body = JSON.parse(request.body);
+    assert.equal(body.model, 'muse-spark-1.3');
+    assert.equal(body.max_completion_tokens, 16000);
+    assert.equal(body.max_tokens, undefined);
+    assert.equal(body.prompt_cache_retention, 'in_memory');
+    assert.equal(body.user, undefined);
+    assert.equal(body.safety_identifier, undefined);
+    assert.doesNotMatch(request.body, /synthetic-meta-secret/);
+    return complete('{"facts":"وقائع اختبار اصطناعية فقط."}');
+  });
+  assert.equal((await res.json()).status, 'completed');
+});

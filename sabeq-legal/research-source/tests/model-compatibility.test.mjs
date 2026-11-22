@@ -348,3 +348,56 @@ test('Heretic GGUF reaches the actual native legal text adapter with synthetic-o
   }), '{"facts":"وقائع افتراضية فقط."}');
   assert.equal(calls.length, 1);
 });
+
+test('Meta Model API serves both memo drafting and legal assistant intake with privacy guards', async () => {
+  const calls = [];
+  const memoSchema = { type: 'object', additionalProperties: false, required: ['facts'], properties: { facts: { type: 'string' } } };
+  const { api } = client('gpt-4.1-mini', async (url, init) => {
+    calls.push({ url, init });
+    assert.equal(url, 'https://api.meta.ai/v1/chat/completions');
+    assert.equal(init.redirect, 'manual');
+    assert.equal(init.headers.Authorization, 'Bearer synthetic-meta-key');
+    const request = JSON.parse(init.body);
+    assert.equal(request.model, 'muse-spark-1.3');
+    assert.equal(request.prompt_cache_retention, 'in_memory');
+    assert.equal(request.user, undefined);
+    assert.equal(request.safety_identifier, undefined);
+    assert.doesNotMatch(init.body, /synthetic-meta-key/);
+    const marker = 'أعد JSON فقط مطابقًا لهذا المخطط، دون شرح أو Markdown:\n';
+    const sys = request.messages[0].content;
+    const idx = sys.lastIndexOf(marker);
+    function syntheticJson(schema) {
+      if (schema.anyOf) return syntheticJson(schema.anyOf[0]);
+      if (schema.enum) return schema.enum[0];
+      const types = Array.isArray(schema.type) ? schema.type : [schema.type];
+      if (types.includes('object')) return Object.fromEntries(Object.entries(schema.properties || {}).map(([k, child]) => [k, syntheticJson(child)]));
+      if (types.includes('array')) return [];
+      if (types.includes('boolean')) return false;
+      if (types.includes('integer') || types.includes('number')) return schema.minimum ?? 0;
+      return 'استلمت تفاصيل النزاع المبدئية.';
+    }
+    const content = idx >= 0 ? JSON.stringify(syntheticJson(JSON.parse(sys.slice(idx + marker.length)))) : 'نص اختبار فقط.';
+    return Response.json({ choices: [{ finish_reason: 'stop', message: { content } }] });
+  }, {
+    LEGAL_AI_PROVIDER: 'meta',
+    MODEL_API_KEY: 'synthetic-meta-key',
+    META_MODEL: 'muse-spark-1.3',
+  });
+
+  const drafted = await api.generateText({
+    instructions: 'لا تختلق مادة قانونية أو حكمًا.',
+    input: 'وقائع اختبارية لا تخص أي عميل.',
+    schema: memoSchema,
+  });
+  assert.equal(drafted, '{"facts":"استلمت تفاصيل النزاع المبدئية."}');
+  await api.deriveLegalResearchPlan('وقائع اختبار اصطناعية.');
+  const intakeState = await api.conductLegalIntake({
+    language: 'ar',
+    messages: [{ role: 'user', content: 'لدي نزاع حول عقد توريد تجاري للاختبار.' }],
+    evidence: '',
+  });
+  assert.match(intakeState.assistantMessage, /استلمت تفاصيل النزاع/);
+  await api.analyzeMemoDictation('وقائع اختبار اصطناعية.');
+  await api.runLegalTool({ action: 'summary', text: 'وقائع اصطناعية', language: 'ar', evidence: '', passageIds: [] });
+  assert.equal(calls.length, 5);
+});
