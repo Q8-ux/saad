@@ -93,7 +93,68 @@ async function renderLogin(){
  q("#auth-form").addEventListener("submit",async e=>{e.preventDefault();const f=formValues(e.currentTarget),b=q("#auth-submit");b.disabled=true;try{if(mode==="signup"){const {data,error}=await db.auth.signUp({email:f.email.trim(),password:f.password});if(error)throw error;if(data?.session){toast("تم إنشاء الحساب، ويجب أن يعيّن المالك صلاحيات العمل قبل الدخول إلى المبيعات.","warn")}else{toast("تم إنشاء طلب الحساب. افتح بريدك الإلكتروني لتأكيد العنوان ثم عد لتسجيل الدخول.")}q("#auth-form").reset()}else{const {error}=await db.auth.signInWithPassword({email:f.email.trim(),password:f.password});if(error)throw error;await session();if(!roles.length){toast("تأكدنا من الحساب، لكنه لم يُعتمد كمدير أو موظف بعد. اطلب تعيين الصلاحية من مالك النظام.","warn");return}location.href=route(role("manager")&&next==="manager"?"manager":"sales")}}catch(ex){let message=String(ex?.message||"");if(/invalid login credentials|email not confirmed|invalid credentials/i.test(message)){toast(/not confirmed/i.test(message)?"يجب تأكيد بريدك الإلكتروني أولًا.":"هذا البريد أو كلمة المرور غير مسجلين أو غير صحيحين. اختر إنشاء حساب عمل إن كانت هذه أول مرة.","warn")}else err(ex)}finally{b.disabled=false}});
 }
 
+
+function guestSalesDashboard(){
+ const available=catalog.filter(p=>p.active&&activeVariants(p).length);
+ let activeCat="all",query="",draft=[],delivery=0;
+ root.innerHTML='<main class="pos-preview" dir="rtl">'
+ +'<header class="pos-top"><div class="pos-top-inner"><div class="pos-identity"><span class="pos-mark" aria-hidden="true">🌿</span><div><strong>شركة عمان للفواكه والخضروات</strong><small>نظام استقبال الطلبات الهاتفية</small></div></div><nav class="pos-top-nav" aria-label="التنقل"><a class="pos-nav-current" href="#pos-client">☎️ استقبال مكالمة</a><a href="#pos-client">العملاء</a><a href="#pos-history">الطلبات السابقة</a><a href="#pos-cart">سلة الطلب</a></nav><span class="pos-employee-chip">👤 موظف الاستقبال</span></div></header>'
+ +'<div class="pos-main"><div class="pos-heading"><div><span class="pos-eyebrow">مكتب الطلبات الهاتفية</span><h1>استقبال طلبات عمان — معاينة</h1><p>من استقبال الاتصال إلى اختيار الأصناف ومراجعة الفاتورة، في شاشة واحدة.</p></div><div class="pos-live-state"><span class="pos-indicator"></span> وضع معاينة آمن</div></div>'
+ +'<div class="pos-security-note" role="status"><strong>نسخة للاستعراض دون تسجيل دخول</strong> — المنتجات وأسعارها من كتالوج عمان؛ لا تُعرض بيانات العملاء الحقيقية ولا تُحفظ أي طلبات. لا تُدخل معلومات عملاء حقيقية في هذه المعاينة.</div>'
+ +'<div class="pos-layout">'
+ +'<section class="pos-panel pos-client-panel" id="pos-client"><div class="pos-panel-head"><span class="pos-heading-icon">☎️</span><div><span class="pos-step">الخطوة ١</span><h2>بيانات المتصل</h2></div></div><div class="pos-panel-body"><label class="pos-label" for="pos-phone">رقم الهاتف</label><div class="pos-phone-wrap"><input id="pos-phone" type="tel" inputmode="tel" autocomplete="off" placeholder="اكتب الرقم للبحث التجريبي"><button class="pos-btn pos-search-btn" id="pos-find" type="button">🔎 بحث</button></div><p class="pos-hint" id="pos-client-message" aria-live="polite">استرجاع بيانات العملاء الفعلية يتطلب اتصالًا آمنًا بقاعدة البيانات.</p>'
+ +'<div class="pos-fields"><label class="pos-label" for="pos-person">اسم العميل <span>للمعاينة فقط</span></label><input id="pos-person" autocomplete="off" placeholder="اسم تجريبي"><label class="pos-label" for="pos-address">عنوان التوصيل <span>للمعاينة فقط</span></label><textarea id="pos-address" rows="3" placeholder="المحافظة، المنطقة، القطعة، الشارع، المنزل"></textarea></div>'
+ +'<div class="pos-history" id="pos-history"><div class="pos-subtitle"><h3>↻ الطلبات السابقة</h3><span class="pos-demo-tag">مثال توضيحي</span></div><p>يمكن إعادة أصناف طلب سابق إلى السلة وتعديلها قبل الحفظ.</p><div class="pos-history-example"><div><strong>طلب تجريبي سابق</strong><small>الأصناف بأسعار عمان الحالية</small></div><button id="pos-repeat" type="button" class="pos-btn pos-btn-soft">إعادة نفس الطلب</button></div><div id="pos-repeat-status" class="pos-hint" aria-live="polite"></div></div></div></section>'
+ +'<section class="pos-panel pos-catalog-panel" id="pos-products"><div class="pos-panel-head"><span class="pos-heading-icon">🥬</span><div><span class="pos-step">الخطوة ٢</span><h2>أصناف المنتجات</h2></div><span id="pos-result-count" class="pos-count"></span></div><div class="pos-panel-body"><label for="pos-search" class="pos-search-input"><span aria-hidden="true">🔎</span><input type="search" id="pos-search" placeholder="ابحث عن الفاكهة أو الخضار أو المنشأ"></label><div class="pos-categories" id="pos-category-tabs" role="group" aria-label="أقسام المنتجات"><button type="button" class="is-active" data-pos-category="all">الكل</button><button type="button" data-pos-category="fruits">🍎 الفواكه</button><button type="button" data-pos-category="vegetables">🥬 الخضروات</button><button type="button" data-pos-category="nuts">🥜 المكسرات</button><button type="button" data-pos-category="sweets">🍬 الحلويات</button></div><div class="pos-products-grid" id="pos-products-grid"></div></div></section>'
+ +'<aside class="pos-panel pos-cart-panel" id="pos-cart"><div class="pos-panel-head"><span class="pos-heading-icon">🛒</span><div><span class="pos-step">الخطوة ٣</span><h2>سلة الطلب</h2></div><span id="pos-cart-count" class="pos-count">0</span></div><div class="pos-panel-body"><div id="pos-cart-items" aria-live="polite"></div><label class="pos-label" for="pos-fee">رسوم التوصيل (د.ك) <span>قيمة تجريبية قابلة للتعديل</span></label><input type="number" id="pos-fee" min="0" step="0.001" value="0.000" inputmode="decimal"><div class="pos-sum-line"><span>قيمة الأصناف</span><strong id="pos-subtotal">0.000 د.ك</strong></div><div class="pos-sum-line"><span>التوصيل</span><strong id="pos-fee-display">0.000 د.ك</strong></div><div class="pos-grand-total"><span>الإجمالي التقديري</span><strong id="guest-total">0.000 د.ك</strong></div><button id="pos-save" class="pos-btn pos-btn-primary pos-btn-block" type="button">✓ حفظ الطلب</button><button id="pos-print" class="pos-btn pos-btn-outline pos-btn-block" type="button">🖨️ طباعة فاتورة تجريبية بنسختين</button><p class="pos-hint">الاستعراض فقط. حفظ الطلبات الحقيقية يحتاج خادم بيانات يعمل وتسجيل دخول الموظف.</p></div></aside>'
+ +'</div></div></main>';
+ const cardContainer=q("#pos-products-grid"),itemsContainer=q("#pos-cart-items");
+ const count=q("#pos-result-count"),draftCount=q("#pos-cart-count");
+ function paintProducts(){
+  const filtered=available.filter(p=>(activeCat==="all"||p.category_id===activeCat)&&(!query||(p.name_ar+" "+(p.origin||"")).toLowerCase().includes(query)));
+  count.textContent=filtered.length+" صنف";
+  cardContainer.innerHTML=filtered.map(p=>{
+   const v=activeVariants(p)[0];
+   return '<article class="pos-product-card"><div class="pos-product-image">'+photo(p)+'</div><div class="pos-product-info"><div class="pos-product-category">'+esc(catName(p))+(p.origin?" • "+esc(p.origin):"")+'</div><h3>'+esc(p.name_ar)+'</h3><div class="pos-product-price" data-pos-preview-price="'+esc(p.id)+'">'+cash(v.price_value)+'</div><label class="pos-unit-label">وحدة البيع<select class="pos-unit-select" data-pos-preview-variant="'+esc(p.id)+'">'+activeVariants(p).map(x=>'<option value="'+esc(x.id)+'">'+esc(x.unit_label)+' — '+cash(x.price_value)+'</option>').join("")+'</select></label><button class="pos-btn pos-btn-add" type="button" data-guest-add="'+esc(p.id)+'">+ إضافة للسلة</button></div></article>';
+  }).join("")||'<p class="pos-empty">لا توجد منتجات مطابقة للبحث.</p>';
+ }
+ function paintCart(){
+  draft=draft.filter(x=>x.qty>0);
+  const subtotal=draft.reduce((sum,x)=>sum+x.qty*num(variant(x.id)?.price_value),0);
+  itemsContainer.innerHTML=draft.length?draft.map((x,i)=>{
+   const v=variant(x.id);if(!v)return "";
+   return '<div class="pos-cart-row"><div class="pos-cart-name"><strong>'+esc(v.product.name_ar)+'</strong><small>'+esc(v.unit_label)+' • '+cash(v.price_value)+'</small></div><div class="pos-qty"><button type="button" aria-label="إنقاص الكمية" data-pos-preview-minus="'+i+'">−</button><span>'+x.qty+'</span><button type="button" aria-label="زيادة الكمية" data-pos-preview-plus="'+i+'">+</button></div><strong class="pos-line-total">'+cash(x.qty*num(v.price_value))+'</strong><button class="pos-remove" type="button" aria-label="حذف الصنف" data-pos-preview-remove="'+i+'">×</button></div>';
+  }).join(""):'<div class="pos-cart-empty">🧺<p>السلة فارغة</p><small>اختر الأصناف من القائمة لإعداد طلب تجريبي.</small></div>';
+  const qty=draft.reduce((sum,x)=>sum+x.qty,0);
+  draftCount.textContent=qty+" صنف";
+  q("#pos-subtotal").textContent=cash(subtotal);
+  q("#pos-fee-display").textContent=cash(delivery);
+  q("#guest-total").textContent=cash(subtotal+delivery);
+ }
+ q("#pos-search").addEventListener("input",e=>{query=e.target.value.trim().toLowerCase();paintProducts()});
+ q("#pos-category-tabs").addEventListener("click",e=>{const btn=e.target.closest("[data-pos-category]");if(!btn)return;activeCat=btn.dataset.posCategory;qa("[data-pos-category]",root).forEach(x=>x.classList.toggle("is-active",x===btn));paintProducts()});
+ cardContainer.addEventListener("change",e=>{const sel=e.target.closest("[data-pos-preview-variant]");if(!sel)return;const v=variant(sel.value),out=q('[data-pos-preview-price="'+sel.dataset.posPreviewVariant+'"]',cardContainer);if(v&&out)out.textContent=cash(v.price_value)});
+ cardContainer.addEventListener("click",e=>{const b=e.target.closest("[data-guest-add]");if(!b)return;const p=prod(b.dataset.guestAdd),select=q('[data-pos-preview-variant="'+b.dataset.guestAdd+'"]',cardContainer),v=variant(select?.value);if(!p||!v||!v.published)return;const row=draft.find(x=>x.id===v.id);if(row)row.qty+=1;else draft.push({id:v.id,qty:1});paintCart();toast("أُضيف "+p.name_ar+" إلى السلة التجريبية")});
+ itemsContainer.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;let idx=Number(b.dataset.posPreviewMinus??b.dataset.posPreviewPlus??b.dataset.posPreviewRemove);if(!Number.isInteger(idx)||!draft[idx])return;if(b.hasAttribute("data-pos-preview-minus"))draft[idx].qty--;else if(b.hasAttribute("data-pos-preview-plus"))draft[idx].qty++;else if(b.hasAttribute("data-pos-preview-remove"))draft.splice(idx,1);paintCart()});
+ q("#pos-fee").addEventListener("input",e=>{const n=Number(e.target.value);delivery=Number.isFinite(n)&&n>=0?n:0;paintCart()});
+ q("#pos-find").addEventListener("click",()=>{const phone=q("#pos-phone").value.trim(),text=q("#pos-client-message");text.textContent=phone?"هذه معاينة فقط: لا يجري استعلام عن الرقم، ولا تُعرض بيانات أي عميل. ادخل للحساب التشغيلي عند استعادة الخادم.":"اكتب رقمًا تجريبيًا لمعاينة خطوة البحث؛ لا تستخدم رقم عميل حقيقي."});
+ q("#pos-repeat").addEventListener("click",()=>{
+  if(draft.length&&!confirm("سيتم استبدال السلة الحالية بطلب تجريبي. متابعة؟"))return;
+  draft=["oman-004","oman-009","oman-024"].map(slug=>{const p=available.find(x=>x.slug===slug);return p?{id:activeVariants(p)[0].id,qty:1}:null}).filter(Boolean);
+  q("#pos-repeat-status").textContent="تمت إعادة ثلاثة أصناف تجريبية بأسعار اليوم؛ يمكنك تعديلها قبل الحفظ.";
+  paintCart();
+ });
+ q("#pos-save").addEventListener("click",()=>toast("هذه معاينة فقط. لا يمكن حفظ الطلب الفعلي حتى تعمل قاعدة البيانات ويُسجل الموظف دخوله.","warn"));
+ q("#pos-print").addEventListener("click",()=>{
+  if(!draft.length){toast("أضف أصنافًا إلى السلة أولًا","warn");return}
+  const subtotal=draft.reduce((sum,x)=>sum+x.qty*num(variant(x.id)?.price_value),0);
+  const items=draft.map(x=>{const v=variant(x.id);return {name_snapshot:v.product.name_ar,unit_snapshot:v.unit_label,unit_price:num(v.price_value),qty:x.qty,line_total:x.qty*num(v.price_value)}});
+  printTwo({invoice_no:"معاينة فقط",created_at:new Date().toISOString(),customer_snapshot:{name:"مثال توضيحي غير حقيقي",phone:"—",address:{}},order_items:items,subtotal:subtotal,discount:0,delivery_fee:delivery,tax:0,total:subtotal+delivery,paid:0,payment_method:"نموذج تجريبي"});
+ });
+ paintProducts();paintCart();
+}
 function guestPreview(which){
+ if(which==="sales"){guestSalesDashboard();return}
  const pages=[["sales","☎️ شاشة استقبال الطلبات"],["manager","⚙️ لوحة الإدارة"]];
  const menu='<div class="row wrap" style="margin:12px 0 20px">'+pages.map(function(x){return '<a class="btn '+(which===x[0]?'primary':'')+'" href="'+route(x[0])+'">'+x[1]+'</a>'}).join("")+'<a class="btn" href="'+route("login")+'">🔐 الدخول التشغيلي</a></div>';
  const intro='<div class="notice" style="margin-bottom:16px">معاينة عامة بدون كلمة مرور. البيانات الشخصية والفواتير والدفاتر المالية الحقيقية لا تظهر هنا. لا يمكن حفظ تغييرات أو إصدار فاتورة إلا بحساب مخوّل.</div>';
@@ -217,7 +278,7 @@ async function viewOrder(id){const o=(managerCache.orders||[]).find(o=>o.id===id
 async function refreshProtected(){if(page==="manager")await renderManager();else await renderSales()}
 async function renderSales(){
  const orders=await fetchOrders();managerCache.orders=orders;
- root.innerHTML=`<div class="dashboard"><aside class="dash-side">${brand()}<nav><button class="dash-nav ${salesTab==="pos"?"active":""}" data-sales-tab="pos">☎️ استقبال مكالمة</button><button class="dash-nav ${salesTab==="orders"?"active":""}" data-sales-tab="orders">🧾 الفواتير</button>${role("manager")?`<a class="dash-nav manager-link" href="${route("manager")}">⚙️ لوحة المدير</a>`:""}<button class="dash-nav" id="sales-out">خروج</button></nav></aside><main class="dash-main"><div class="dash-top"><div><h1>استقبال الطلبات الهاتفية</h1><small>الموظف: ${esc(staffDisplayName)}</small></div><span class="badge">☎️ للموظفين المصرح لهم فقط</span></div><div id="sales-content"></div></main></div>`;
+ root.innerHTML=`<div class="dashboard"><aside class="dash-side">${brand()}<nav><button class="dash-nav ${salesTab==="pos"?"active":""}" data-sales-tab="pos">☎️ استقبال مكالمة</button><button class="dash-nav ${salesTab==="orders"?"active":""}" data-sales-tab="orders">🧾 الفواتير</button><button class="dash-nav" id="sales-out">خروج</button></nav></aside><main class="dash-main"><div class="dash-top"><div><h1>استقبال الطلبات الهاتفية</h1><small>الموظف: ${esc(staffDisplayName)}</small></div><span class="badge">☎️ للموظفين المصرح لهم فقط</span></div><div id="sales-content"></div></main></div>`;
  qa("[data-sales-tab]").forEach(b=>b.addEventListener("click",()=>{salesTab=b.dataset.salesTab;renderSales()}));q("#sales-out").addEventListener("click",signOut);
  if(salesTab==="pos")renderSalesPos();else renderSalesOrders();
 }
