@@ -1,0 +1,56 @@
+name: Package Oman Fruits Website ZIP
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/oman-export-zip.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Build complete website ZIP
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s oman-fruits-commerce/app.js
+          test -s oman-fruits-commerce/assets/product-atlas.webp
+          test -s oman-fruits-commerce/catalog.json
+          mkdir -p downloads
+          cat > oman-fruits-commerce/INSTALLATION_NOTES.txt <<'NOTES'
+          Oman Fruits and Vegetables - site source export
+          Includes: sales UI, manager UI, login UI, product image atlas,
+          catalog and static resources, database migration scripts and docs.
+          This archive does NOT include live customers, invoices, database records,
+          staff credentials, email credentials or private API keys.
+          Online order saving and employee administration need the existing
+          production database and authorized roles; static preview opens offline
+          only when served through a local web server, not file:// directly.
+          To serve locally: python3 -m http.server 8000 (from a directory
+          containing "saad/oman-fruits-commerce" or adjust config.js base).
+          Repository: https://github.com/Q8-ux/saad/tree/main/oman-fruits-commerce
+          NOTES
+          zip -r -9 downloads/oman-fruits-commerce-complete.zip oman-fruits-commerce -x '*/.DS_Store' '*/node_modules/*'
+          unzip -t downloads/oman-fruits-commerce-complete.zip
+          unzip -l downloads/oman-fruits-commerce-complete.zip | tail -5
+          sha256sum downloads/oman-fruits-commerce-complete.zip > downloads/oman-fruits-commerce-complete.zip.sha256
+      - name: Commit downloadable archive to GitHub
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add downloads/oman-fruits-commerce-complete.zip downloads/oman-fruits-commerce-complete.zip.sha256
+          git commit -m 'Publish current Oman Fruits site ZIP download'
+          git push origin HEAD:main
+      - name: Upload Actions artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: oman-fruits-commerce-complete
+          path: downloads/oman-fruits-commerce-complete.zip
