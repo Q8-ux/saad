@@ -31,7 +31,7 @@ export async function requestManagementRecovery(data: Record<string, unknown>) {
   const email = account && (
     mappedRecoveryEmail(account.id, runtime.MANAGEMENT_RECOVERY_EMAILS) ||
     (account.role === "administrator" && typeof runtime.MANAGEMENT_OWNER_EMAIL === "string" &&
-      /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(runtime.MANAGEMENT_OWNER_EMAIL.trim())
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(runtime.MANAGEMENT_OWNER_EMAIL.trim())
       ? runtime.MANAGEMENT_OWNER_EMAIL.trim().toLowerCase() : "")
   );
   if (!account || !email) return generic;
