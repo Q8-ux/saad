@@ -128,16 +128,48 @@ async function guard(required){
  return true;
 }
 
+async function loadPreviewCatalog(){
+ const response=await fetch(BASE+"catalog.json",{cache:"no-store"});
+ if(!response.ok)throw Error("تعذر تحميل كتالوج المنتجات من GitHub");
+ const source=await response.json();
+ if(!Array.isArray(source.products))throw Error("ملف المنتجات غير صالح");
+ categories=[{id:"fruits",name_ar:"الفواكه"},{id:"vegetables",name_ar:"الخضروات"},{id:"nuts",name_ar:"المكسرات"},{id:"sweets",name_ar:"الحلويات"}];
+ catalog=source.products.map((p,i)=>({
+   id:p.id,slug:p.id,name_ar:p.name_ar,origin:p.origin,emoji:"🍏",
+   active:true,category_id:/بامية|بطاطا|ذرة/.test(p.name_ar)?"vegetables":/فستق|اللوز/.test(p.name_ar)?"nuts":/الحلوى/.test(p.name_ar)?"sweets":"fruits",
+   product_variants:(p.variants||[]).map((v,j)=>({
+     id:p.id+"-"+j,unit_label:v.unit,price_value:v.price_fils===null?0:v.price_fils/1000,
+     published:!!(v.confirmed&&v.active&&v.price_fils!==null),track_stock:false,stock_qty:0,sort:j
+   }))
+ }));
+ settings={company_name:"شركة عمان للفواكه والخضروات",opening_entered:false};
+}
 async function init(){
- db=makeClient();loadCart();
+ loadCart();
+ if(page==="home"||page==="checkout"||page==="order"){location.replace(route("sales"));return}
+ if(page==="sales"||page==="manager"){
+   // Always render the no-login read-only preview from the public static catalog.
+   // Backend DNS/Cloudflare 1016 errors must never blank these pages.
+   await loadPreviewCatalog();
+   guestPreview(page);
+   // A valid authenticated session may upgrade the preview to the actual work screen.
+   // The underlying database enforces role-based access and RLS on every action.
+   try{
+     db=makeClient();
+     const check=Promise.all([basic(),session()]);
+     await Promise.race([check,new Promise((_,reject)=>setTimeout(()=>reject(Error("الخادم غير متاح")),5500))]);
+     if(role(page)||(page==="sales"&&role("manager"))){
+       if(page==="sales")await renderSales();else await renderManager();
+     }
+   }catch(e){
+     console.warn("Oman backend unavailable: read-only preview remains accessible.",e?.message||e);
+   }
+   return;
+ }
+ db=makeClient();
  if(page==="login"){await renderLogin();return}
  await basic();
- if(page==="home"||page==="checkout"||page==="order"){location.replace(route("sales"));return}
- else if(page==="checkout")renderCheckout();
- else if(page==="order")await renderTracking();
- else if(page==="sales"){if(await guard("sales"))await renderSales()}
- else if(page==="manager"){if(await guard("manager"))await renderManager()}
- else home();
+ home();
  document.addEventListener("click",async e=>{
  const b=e.target.closest("button");if(!b)return;
  if(b.dataset.addVariant){const v=q(`[data-product-variant="${b.dataset.addVariant}"]`);if(v)addCart(v.value)}
