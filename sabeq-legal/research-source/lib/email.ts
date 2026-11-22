@@ -166,6 +166,20 @@ export async function sendTestEmail(recipient: unknown, expectedSender: unknown)
   }
 }
 
+/** Sends a short-lived reset code only to the server-approved recovery address. */
+export async function sendManagementRecoveryCodeEmail(to: string, username: string, code: string) {
+  const config = await verificationEmailDelivery();
+  if (!config.apiKey?.trim() || !config.fromEmail?.trim()) throw new EmailDeliveryError("configuration", "missing_settings");
+  const destination = cleanEmail(to).trim().toLowerCase();
+  const expiry = "صالح لمدة عشر دقائق ولمرة واحدة فقط.";
+  return deliverEmail(config.apiKey, {
+    from: config.fromEmail, to: [destination],
+    subject: "رمز استعادة كلمة مرور إدارة سابق القانونية",
+    text: "تم طلب استعادة كلمة مرور لوحة الإدارة للحساب " + username + ".\nرمز التحقق: " + code + "\n" + expiry + "\nإذا لم تطلب استعادة كلمة المرور فتجاهل هذه الرسالة.",
+    html: '<div dir="rtl" style="font:17px/1.9 Tahoma,Arial,sans-serif;padding:25px"><h2>استعادة كلمة مرور إدارة سابق</h2><p>تم طلب استعادة دخول الحساب ' + escapeHtml(username) + '.</p><p style="font-size:30px;font-weight:bold;letter-spacing:8px" dir="ltr">' + escapeHtml(code) + '</p><p>' + expiry + '</p><p>إذا لم تطلب استعادة كلمة المرور فتجاهل هذه الرسالة.</p></div>',
+  });
+}
+
 /** Password recovery links are only sent to a server-side pre-approved address. */
 export async function sendManagementRecoveryEmail(to: string, username: string, token: string) {
   const config = await verificationEmailDelivery();
