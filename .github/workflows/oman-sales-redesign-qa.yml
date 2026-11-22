@@ -78,3 +78,4 @@ jobs:
           name: oman-employee-pos-redesign-screenshots
           path: test-artifacts/
           if-no-files-found: ignore
+# post-deploy verification of large Arabic typography and cart
