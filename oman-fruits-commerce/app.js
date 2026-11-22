@@ -166,8 +166,23 @@ async function init(){
    }
    return;
  }
+ if(page==="login"){
+   try{
+     db=makeClient();
+     const response=await fetch(CFG.supabaseUrl+"/auth/v1/settings",{
+       method:"GET",headers:{"apikey":CFG.publishableKey},
+       signal:AbortSignal.timeout(5500),cache:"no-store"
+     });
+     if(!response.ok)throw Error("خدمة المصادقة غير متاحة: "+response.status);
+     await renderLogin();
+   }catch(e){
+     root.innerHTML='<main class="container"><div class="page-title"><h1>خادم تسجيل الدخول متوقف مؤقتًا</h1><div class="notice">خدمة قاعدة البيانات الخارجية تواجه مشكلة اتصال (1016). المتجر موجود على GitHub Pages لكن لا يمكن تسجيل الدخول أو حفظ الطلبات الحقيقية حتى تعود الخدمة.</div><p class="muted">لا تحتاج إلى تغيير كلمة المرور أو تكرار إنشاء الحساب؛ المشكلة من جهة الاستضافة الخارجية.</p><div class="row wrap"><a class="btn primary" href="'+route("sales")+'">شاشة المبيعات للمعاينة</a><a class="btn" href="'+route("manager")+'">لوحة المدير للمعاينة</a><button class="btn" id="retry-auth" type="button">إعادة فحص الاتصال</button></div></div></main>';
+     q("#retry-auth")?.addEventListener("click",()=>location.reload());
+     console.warn("Oman login backend unreachable",e?.message||e);
+   }
+   return;
+ }
  db=makeClient();
- if(page==="login"){await renderLogin();return}
  await basic();
  home();
  document.addEventListener("click",async e=>{
@@ -379,6 +394,6 @@ document.addEventListener("click",async e=>{
  if(b.dataset.revokeStaff){if(!confirm("هل ترغب في سحب صلاحية الموظف؟"))return;try{await api(db.rpc("revoke_staff",{_user_id:b.dataset.revokeStaff}));toast("سُحبت الصلاحية");await renderManager()}catch(x){err(x)}}
  if(b.dataset.managerTab && page==="manager"&&b.closest("#manager-content")){managerTab=b.dataset.managerTab;renderManager()}
 });
-init().catch(e=>{root.innerHTML=`<div class="container"><div class="page-title"><h1>تعذر تحميل المتجر</h1><div class="error-box">${esc(e.message)}</div><p>تحقق من اتصال الإنترنت ثم حدّث الصفحة.</p><a class="btn" href="${route()}">العودة للصفحة الرئيسية</a></div></div>`;err(e)});
+init().catch(e=>{root.innerHTML=`<div class="container"><div class="page-title"><h1>تعذر تحميل المتجر</h1><div class="error-box">${esc(e.message)}</div><p>إذا استمر الخطأ، راجع حالة خادم الموقع؛ قد يكون خطأ الاتصال من الاستضافة الخلفية وليس من الإنترنت لديك.</p><a class="btn" href="${route()}">العودة للصفحة الرئيسية</a></div></div>`;err(e)});
 }
 omanCommerceApp();
