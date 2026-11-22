@@ -61,7 +61,11 @@ jobs:
             login.on('pageerror',e=>loginErrors.push(e.message));
             await login.route('https://c--bd9ae430-2847-495f-9e07-72dd6eb16982-prod.lovable.cloud/**',route=>route.fulfill({status:530,contentType:'text/plain',body:'error code: 1016'}));
             await login.goto(origin+'login/?test='+Date.now(),{waitUntil:'domcontentloaded',timeout:45000});
-            await login.getByRole('heading',{name:'خادم تسجيل الدخول متوقف مؤقتًا'}).waitFor({timeout:30000});
+            await login.waitForTimeout(2500);
+            console.log('LOGIN BODY:',(await login.locator('body').innerText()).slice(0,1800));
+            console.log('LOGIN ERRORS:',loginErrors);
+            console.log('LOGIN SOURCES:',await login.evaluate(()=>Array.from(document.scripts).map(x=>x.src)));
+            await login.getByRole('heading',{name:'خادم تسجيل الدخول متوقف مؤقتًا'}).waitFor({timeout:12000});
             assert.equal(loginErrors.length,0,'Login page JS errors: '+loginErrors.join('; '));
             await login.screenshot({path:'test-artifacts/login-outage.png',fullPage:true});
             await login.close();
