@@ -47,7 +47,7 @@ small{color:#55727c}
     if(!response.ok){message.textContent='انتهت جلسة المشرف أو تعذر التحقق منها.';detail.hidden=false;return;}
     const data=await response.json();
     const manager=data.manager||{};
-    if(manager.role!=='operator'||String(manager.username||'').toLowerCase()!=='ahmad'){
+    if(!['operator','memo_supervisor'].includes(manager.role)||!['ahmad','ahmed'].includes(String(manager.username||'').toLowerCase())){
       message.textContent='هذه الجلسة ليست لحساب أحمد المشرف.';
       detail.hidden=false;
       return;

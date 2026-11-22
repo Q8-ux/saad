@@ -56,3 +56,89 @@ const observer = new MutationObserver(() => {
 observer.observe(document.getElementById('root') || document.body, { childList: true, subtree: true });
 new MutationObserver(mount).observe(document.body, { attributes: true, attributeFilter: ['data-language'] });
 mount();
+
+function mountVerifyChallengeModal() {
+  if (typeof window === 'undefined' || typeof URLSearchParams === 'undefined') return;
+  const params = new URLSearchParams(window.location.search);
+  let challengeId = (params.get('verify_challenge') || '').trim();
+  const email = (params.get('email') || '').trim().toLowerCase();
+  const name = (params.get('name') || 'العميل').trim();
+  const phone = (params.get('phone') || '00000000').trim();
+  if (!challengeId || !email || document.getElementById('sabeq-verify-link-modal')) return;
+
+  const apiBase = 'https://sabeq-legal-public.centrino.chatgpt.site';
+  const backdrop = document.createElement('div');
+  backdrop.id = 'sabeq-verify-link-modal';
+  backdrop.className = 'modal-backdrop';
+  backdrop.dir = 'rtl';
+  backdrop.innerHTML = '<div class="modal" role="dialog" aria-modal="true" aria-labelledby="sabeq-verify-link-title"><button type="button" class="icon-button modal-close" aria-label="إغلاق">×</button><div class="modal-content auth-gate"><h2></h2><p data-desc></p><form data-verify-form><label class="field"><span>رمز التحقق (6 أرقام)</span><input class="verification-code" name="code" required inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" minlength="6" maxlength="6" dir="ltr"></label><button class="button button-primary button-block" type="submit">تحقق وتابع</button><button class="text-button auth-edit" type="button" data-resend>إرسال رمز جديد إلى البريد</button></form><p class="auth-notice" data-notice aria-live="polite" hidden></p></div></div>';
+  backdrop.querySelector('h2').id = 'sabeq-verify-link-title';
+  backdrop.querySelector('h2').textContent = 'تفعيل الحساب برمز البريد';
+  backdrop.querySelector('[data-desc]').textContent = `أدخل الرمز المرسل من noreply@sabeq.legal إلى ${email}`;
+
+  const notice = backdrop.querySelector('[data-notice]');
+  const setNotice = (msg, ok = false) => {
+    notice.hidden = !msg;
+    notice.textContent = msg;
+    notice.className = ok ? 'auth-notice success' : 'auth-notice';
+  };
+  const close = () => {
+    const url = new URL(window.location.href);
+    ['verify_challenge', 'email', 'name', 'phone'].forEach(k => url.searchParams.delete(k));
+    window.history.replaceState(null, '', url.pathname + url.search + url.hash);
+    backdrop.remove();
+  };
+  backdrop.querySelector('.modal-close').addEventListener('click', close);
+
+  backdrop.querySelector('[data-resend]').addEventListener('click', async event => {
+    const btn = event.currentTarget;
+    btn.disabled = true;
+    setNotice('جارٍ إرسال رمز جديد...');
+    try {
+      const res = await fetch(`${apiBase}/api/auth/request-code`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: name.length >= 2 ? name : 'العميل', phone: phone.length >= 6 ? phone : '00000000', email, language: 'ar' })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.challengeId) throw new Error(data.error || 'تعذر إرسال رمز جديد حالياً.');
+      challengeId = data.challengeId;
+      setNotice('تم إرسال رمز جديد إلى بريدك الإلكتروني.', true);
+    } catch (err) {
+      setNotice(err.message || 'تعذر إرسال رمز جديد حالياً.');
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  backdrop.querySelector('[data-verify-form]').addEventListener('submit', async event => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const code = String(new FormData(form).get('code') || '').trim();
+    submitBtn.disabled = true;
+    setNotice('جارٍ التحقق...');
+    try {
+      const res = await fetch(`${apiBase}/api/auth/verify-code`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ challengeId, email, code })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.token) throw new Error(data.error || 'تعذر التحقق من الرمز.');
+      window.localStorage.setItem('sabeq-session-token', data.token);
+      setNotice('تم تفعيل حسابك بنجاح. جارٍ المتابعة...', true);
+      const url = new URL(window.location.href);
+      ['verify_challenge', 'email', 'name', 'phone'].forEach(k => url.searchParams.delete(k));
+      window.location.replace(url.pathname + url.search + url.hash);
+    } catch (err) {
+      setNotice(err.message || 'تعذر التحقق من الرمز.');
+      submitBtn.disabled = false;
+    }
+  });
+
+  document.body.appendChild(backdrop);
+  backdrop.querySelector('input[name="code"]')?.focus();
+}
+
+mountVerifyChallengeModal();
