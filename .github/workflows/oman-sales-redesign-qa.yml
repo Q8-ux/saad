@@ -59,6 +59,7 @@ jobs:
               await page.locator('[data-guest-add]').first().click();
               assert(!(await page.locator('#guest-total').innerText()).startsWith('0.000'),'Cart add failed');
               await page.locator('[data-pos-preview-plus]').first().click();
+              page.once('dialog',dialog=>dialog.accept());
               await page.locator('#pos-repeat').click();
               assert((await page.locator('.pos-cart-row').count())>=2,'Reorder example missing');
               assert((await page.locator('#pos-repeat-status').innerText()).includes('تمت إعادة'),'Reorder status missing');
