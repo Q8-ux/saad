@@ -193,6 +193,16 @@ export async function managementRecoveryAccount(username: string) {
   return account ? { id: account.id, username: account.username, role: account.role } : null;
 }
 
+export async function managementRecoveryCodeProof(username: string, code: string) {
+  const roster = await accountRoster();
+  const account = roster.accounts.find(row => row.username === normalizeManagementUsername(username) && row.enabled);
+  if (!account) return null;
+  const key = await crypto.subtle.importKey("raw", encoder.encode(account.pepper), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  const value = "management-recovery-code-v1:" + account.id + ":" + code;
+  const tag = toHex(new Uint8Array(await crypto.subtle.sign("HMAC", key, encoder.encode(value))));
+  return { accountId: account.id, tokenHash: "recovery-code:" + tag };
+}
+
 export async function resetManagementPasswordWithProof(accountId: string, password: string) {
   if (typeof password !== "string" || password.length < 1 || password.length > 256) throw new RequestError("أدخل كلمة المرور الجديدة.", 400);
   const roster = await accountRoster();
