@@ -2,7 +2,7 @@
   "initial": [
     {
       "file": "assets/app.mjs",
-      "bytes": 272463
+      "bytes": 272646
     },
     {
       "file": "assets/chunks/chunk-3MNS2YWJ.mjs",
@@ -55,6 +55,18 @@
     {
       "file": "assets/chunks/chunk-2V77MTNA.mjs",
       "bytes": 606
+    },
+    {
+      "file": "assets/chunks/studio-delivery-ui.mjs",
+      "bytes": 3221
+    },
+    {
+      "file": "assets/chunks/delivery-chunk-UA47PRZ5.mjs",
+      "bytes": 916
+    },
+    {
+      "file": "assets/chunks/delivery-chunk-YPEMDYKW.mjs",
+      "bytes": 605
     }
   ],
   "deferred": [
@@ -96,7 +108,7 @@
     },
     {
       "file": "assets/chunks/book-studio-DV2IZPGZ.mjs",
-      "bytes": 33692
+      "bytes": 33905
     },
     {
       "file": "assets/chunks/chunk-LXSFHGVO.mjs",
@@ -177,6 +189,58 @@
     {
       "file": "assets/chunks/library-search.mjs",
       "bytes": 7132
+    },
+    {
+      "file": "assets/chunks/delivery-html2canvas-CWY3MBHA.mjs",
+      "bytes": 202433
+    },
+    {
+      "file": "assets/chunks/delivery-purify.es-CL7VBXUJ.mjs",
+      "bytes": 30182
+    },
+    {
+      "file": "assets/chunks/delivery-index.es-ZLMYJTLQ.mjs",
+      "bytes": 159775
+    },
+    {
+      "file": "assets/chunks/delivery-pdf-export-J5XLA35D.mjs",
+      "bytes": 6863
+    },
+    {
+      "file": "assets/chunks/delivery-book-pdf-U33XOW23.mjs",
+      "bytes": 4699
+    },
+    {
+      "file": "assets/chunks/delivery-chunk-AFRJO5RP.mjs",
+      "bytes": 418791
+    },
+    {
+      "file": "assets/chunks/delivery-chunk-O4MYYO2D.mjs",
+      "bytes": 272
+    },
+    {
+      "file": "assets/chunks/delivery-book-exports-OTNEXFUB.mjs",
+      "bytes": 348
+    },
+    {
+      "file": "assets/chunks/delivery-chunk-CHGVDPLE.mjs",
+      "bytes": 24613
+    },
+    {
+      "file": "assets/chunks/delivery-chunk-KYJREQWC.mjs",
+      "bytes": 3558
+    },
+    {
+      "file": "assets/chunks/delivery-chunk-DFF755EX.mjs",
+      "bytes": 6776
+    },
+    {
+      "file": "assets/chunks/delivery-chunk-VZ7IBJG2.mjs",
+      "bytes": 59494
+    },
+    {
+      "file": "assets/chunks/delivery-studio-delivery-KNLCL4OP.mjs",
+      "bytes": 6593
     }
   ]
 }

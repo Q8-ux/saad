@@ -65,6 +65,10 @@ jobs:
           node --test family-online-studio/tests/video-use.test.mjs
           python3 family-online-studio/tests/video-use-engine.test.py
           node family-online-studio/deployment/validate.mjs --ready
+      - name: Verify Writing Studio document automation
+        run: |
+          python -m pip install './family-online-studio/agent-harness[test]'
+          CLI_ANYTHING_FORCE_INSTALLED=1 python -m pytest family-online-studio/agent-harness/cli_anything/writing_studio/tests -q
       - uses: actions/configure-pages@v5
       - name: Preserve other published projects
         env:

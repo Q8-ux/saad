@@ -1,7 +1,7 @@
 {
   "revision": "project-context-1",
   "project": "writing-studio",
-  "sourceCommit": "0a4f69078076e9e68a000015587c2bb6fe43e5b2",
+  "sourceCommit": "47a32c1ebf5eac60168ecb8288b9ae082890a114",
   "scope": "current-manuscript-and-selected-scene",
   "workIdentitySource": "server-request-url",
   "crossWorkMemory": false,
@@ -55,7 +55,7 @@
     },
     {
       "path": "app/studio.tsx",
-      "sha256": "b796cc3fc8fee521c370f17e76e9bf263dd30550f830fe9df838df132e8e5be2"
+      "sha256": "4053a06b38835c0e9147e9e451d42536267f5ed7e4c2e0e48be936fdadac7904"
     },
     {
       "path": "lib/attachment-store.ts",
@@ -195,8 +195,8 @@
     "recoveryDeduplication": "work-and-payload-sha256",
     "provenanceVisible": true
   },
-  "deployedVersion": "appgprj_6acf275cd3a4819188adb07ac6bee0be~appgver_885ecedb91688191abf8c817d8ddfac7",
-  "deploymentId": "appgdep_6b0037aeb4308191a6faf615f202457b",
+  "deployedVersion": "appgprj_6acf275cd3a4819188adb07ac6bee0be~appgver_5b24ea80332c81918f7d1dac85dd3589",
+  "deploymentId": "appgdep_6b02ad5c62b481919867dffa75ecb3f1",
   "workSearch": {
     "revision": "semantic-search-1",
     "privateAccountIndex": true,
@@ -207,5 +207,16 @@
     "progressAndResume": true,
     "uiTest": "synthetic-data",
     "liveAuthorIndexExecuted": false
+  },
+  "documentAutomation": {
+    "revision": "cli-anything-writing-studio-1",
+    "nativeExports": true,
+    "browserPackage": true,
+    "episodeSeparation": true,
+    "books": true,
+    "authorManuscriptModified": false,
+    "tests": 25,
+    "liveAccountTested": false,
+    "deviceDownloadTested": false
   }
 }

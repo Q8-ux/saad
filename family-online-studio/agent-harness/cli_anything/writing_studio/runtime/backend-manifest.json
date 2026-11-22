@@ -1,0 +1,45 @@
+{
+  "backend": "writing-studio-native",
+  "sourceFiles": [
+    {
+      "path": "lib/studio-delivery.ts",
+      "sha256": "e3579a72e9243c6849fa6507ad83a77660147b23aca930f69cd6153500cfe2f6"
+    },
+    {
+      "path": "lib/exports.ts",
+      "sha256": "d14436537fdc955d73cf8111f1ccc2d95954761f2221b16700b7f58aad29e41d"
+    },
+    {
+      "path": "lib/pdf-export.ts",
+      "sha256": "8005795e3e013a9d75ebf149296667f7a29d3fbb4e9e77701192df6d5ab35d4f"
+    },
+    {
+      "path": "lib/book-exports.ts",
+      "sha256": "71592dca1b4358cd15e0d6fd8659f712962fe81c57cd0b334891827b2ebf9480"
+    },
+    {
+      "path": "lib/book-pdf.ts",
+      "sha256": "05975f5f86598bb3b86a7a9cb9533d3870b995c552bd4dee4ac1fea49cf83c61"
+    },
+    {
+      "path": "lib/arabic-pdf-text.ts",
+      "sha256": "7ff13316ef2173f9d07d8774059e461036194989a61b1c41fce1acdbd57954df"
+    },
+    {
+      "path": "lib/manuscript.ts",
+      "sha256": "3a5f009a2f2248b8f8dc71e69f8c73f07571aece2fd6fe2a882a4cf40c8d2b99"
+    },
+    {
+      "path": "lib/book.ts",
+      "sha256": "0b86611b5155149d9f0378d80cea4fc7add05da71c44757efd6c34f2ae04dde6"
+    },
+    {
+      "path": "lib/scene-board-order.mjs",
+      "sha256": "11310b0213605f3ccaa4a67dee2baf2563bbc659479e45a85681f3c1ab16420f"
+    },
+    {
+      "path": "scripts/studio-cli-backend.mjs",
+      "sha256": "b5b18cf4bfc2f96db57fae2eb476cf8e4b5c107824ab075676e39e5d3a97cd29"
+    }
+  ]
+}
