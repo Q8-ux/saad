@@ -1,21 +1,27 @@
 {
   "feature": 102,
   "base_native_commit": "1b7693297f9bd307b4ade33891d6101f686c06e0",
-  "native_source_commit": "66fe41b496b4d3f6bf530caee97e96f7f593d1da",
-  "native_version": 234,
+  "native_source_commit": "6b3dc83a97f2bf8d79d10fea00a2576c69dd959c",
+  "native_version": 235,
   "environment_revision": 32,
-  "deployment_id": "appgdep_6b043cc774688191944d8de9c5398c68",
-  "deployment_succeeded_at": "2026-11-23T13:17:15.911672+00:00",
-  "patch_sha256": "fe3216790480555721e4c5ccd227195350f3bf21feb0a33ca088583ad8c719b1",
-  "patch_bytes": 78811,
+  "deployment_id": "appgdep_6b04534817bc81919b81d845ddd29191",
+  "deployment_succeeded_at": "2026-11-23T14:53:17.965198+00:00",
+  "patch_sha256": "b86b5ae9fc38448779767dceac127a099cb9299e28ec8b650c84194ff1dbde3d",
+  "patch_bytes": 94759,
   "internal_checks": {
     "sources": 42,
-    "memo": 260,
-    "access": 117,
-    "total": 419,
-    "passed": 419
+    "memo": 262,
+    "access": 118,
+    "total": 422,
+    "passed": 422
   },
-  "provider_live_test": "pending_owner_secret_input",
+  "provider_live_test": "pending_owner_retry_after_availability_repair",
   "office_memos_rewritten": false,
-  "legal_prompts_changed": false
+  "legal_prompts_changed": false,
+  "availability_repair": {
+    "diagnostics": "bounded_private_error_body_fixed_arabic_messages",
+    "additional_paid_model": "meta-llama/llama-3.3-70b-instruct",
+    "automatic_model_switch": false,
+    "privacy_policy_weakened": false
+  }
 }
