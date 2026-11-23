@@ -18,6 +18,10 @@
   "protectedMemoFiles": 87,
   "modelInstructionsUnchanged": true,
   "sourceMirrorIsRuntime": false,
-  "realCaseRetried": false
+  "realCaseRetried": false,
+  "publicMirrorConditionalWrite": "atomic UPDATE RETURNING id; same preservation conditions",
+  "publicMirrorDependencyClosureCompleted": true,
+  "publicMirrorChecksPassed": 39,
+  "isolatedSyntheticMemoStatus": 200,
+  "isolatedSyntheticSavedTextMatched": true
 }
-

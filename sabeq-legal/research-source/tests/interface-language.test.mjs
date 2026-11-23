@@ -34,6 +34,7 @@ function modules(states = {}, globals = {}) {
     const js = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, jsx: ts.JsxEmit.ReactJSX, esModuleInterop: true } }).outputText;
     vm.runInNewContext(js, { exports, require(name) {
       if (name === 'cloudflare:workers') return { env: { OPENAI_API_KEY: 'synthetic' } };
+      if (name === '@/db') return { getD1(){ throw Error('Unexpected database access in UI rendering test'); }, getDb(){ throw Error('Unexpected database access in UI rendering test'); } };
       if (name.startsWith('@/') || name.startsWith('.')) {
         const path = name.startsWith('@/') ? resolve(root,name.slice(2)) : resolve(dirname(file),name);
         if (path.endsWith('.json')) return JSON.parse(readFileSync(path,'utf8'));
