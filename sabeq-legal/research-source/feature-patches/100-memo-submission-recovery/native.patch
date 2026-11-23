@@ -1,0 +1,747 @@
+diff --git a/app/api/legal/memo/route.ts b/app/api/legal/memo/route.ts
+index e0e18a5..7e2aba7 100644
+--- a/app/api/legal/memo/route.ts
++++ b/app/api/legal/memo/route.ts
+@@ -59,6 +59,7 @@ export async function POST(request: Request) {
+   let managementRequestId = "";
+   let paymentLease: PaymentLease | undefined;
+   let draftingInstructions = "";
++  let requestStage = "access";
+   try {
+     assertSameOrigin(request);
+     const signal = AbortSignal.any([request.signal, AbortSignal.timeout(240_000)]);
+@@ -68,6 +69,7 @@ export async function POST(request: Request) {
+     };
+     const user = await requireMemoUserOrGuest(request);
+     await requireServiceEnabled("memo", request);
++    requestStage = "input_validation";
+     const raw = await readJsonObject(request, 200_000);
+     // Memo sign-in is temporarily disabled for the pilot. The previous guest
+     // limit was too low for a normal test flow (retrying after document review
+@@ -75,11 +77,14 @@ export async function POST(request: Request) {
+     if (user) await enforceUserServiceLimit(user, "memo");
+     const { caseType, clientName, court, courtCircuit, caseNumber, otherParty, partyRole, allParties, facts, requests, legalIssues, conversationTranscript, conversationSummary, assistantResearch, extraFields, documentKind, caseStage, legalRoute, preparationNotes } = validateMemoInput(raw);
+     draftingInstructions=legalRouteInstructions(legalRoute);
++    requestStage = "payment";
+     const entitlement = await reserveMemoPayment(raw);
+     if (entitlement.result) return privateJson(entitlement.result);
+     paymentLease = entitlement.lease;
+     await enforceRateLimit(request, paymentLease ? `legal-memo-paid:${paymentLease.id}` : "legal-memo", 12, "hour");
++    requestStage = "saving";
+     managementRequestId = await startMemoRequest({ ...extraFields, clientName, court, courtCircuit, caseNumber, caseType, partyRole, otherParty, allParties, facts, requests, legalIssues, documentKind, caseStage, legalRoute:legalRouteSummary(legalRoute) }, user, request.headers.get("origin") || new URL(request.url).origin);
++    requestStage = "generation";
+     const matter=assessMatterFacts(facts+" "+requests+" "+allParties);
+     if(!matter.ready && raw.draftMode !== availableEvidenceMode) {
+       await finishMemoRequest(managementRequestId, "needs_information", "", "fact_clarification");
+@@ -231,9 +236,14 @@ export async function POST(request: Request) {
+       const caseQuality=caseQualitySummary(checkedPlan,caseAudit,content,sources.length);
+       if(caseQuality.status==="incomplete") return pendingSourceReview(["incomplete_defense_coverage"]);
+       signal.throwIfAborted();
++      requestStage = "saving";
+       await finishMemoRequest(managementRequestId, "needs_review", finalMemo, "draft_generated");
+-      if(user) await recordServiceActivity({userId:user.id,serviceType:"memo",title:`${document.title} — ${clientName}`,inputText:JSON.stringify({...memoInput,legalIssues}),outputText:finalMemo,metadata:{managementRequestId,sourceCount:sources.length,caseNumber,template:template.info,documentKind:document.kind,legalRoute:legalRouteSummary(legalRoute),pageSections:document.pages.length}});
++      if(user) {
++        try { await recordServiceActivity({userId:user.id,serviceType:"memo",title:`${document.title} — ${clientName}`,inputText:JSON.stringify({...memoInput,legalIssues}),outputText:finalMemo,metadata:{managementRequestId,sourceCount:sources.length,caseNumber,template:template.info,documentKind:document.kind,legalRoute:legalRouteSummary(legalRoute),pageSections:document.pages.length}}); }
++        catch { console.error("memo_account_archive_failed", { stage: "saved_draft_preserved", requestId: managementRequestId }); }
++      }
+       const responseData = {requestId:managementRequestId,caseQuality,legalRoute:legalRouteSummary(legalRoute),legalDraftingRouteRevision,sourceCoverage:legalSourceCoverage(evidence),memo:finalMemo,document,template:template.info,sourceVerification:officialVerificationSummary(),memoControlRevision,defenseRevision,engineRevision:memoCompletenessRevision,pleadingStyleRevision,analysis:{sourceCount:sources.length,lawCount:sources.filter(s=>s.kind==="legislation").length,cassationCount:sources.filter(s=>s.kind==="cassation").length,sources,missingSources:!sources.length,researchNotice:caseQuality.status==="incomplete"?caseQuality.notices.join(" "):"",...(agentAudit?{agentAudit}:{})}};
++      requestStage = "payment";
+       await completeMemoPayment(paymentLease, responseData);
+       return privateJson(responseData);
+     }
+@@ -278,10 +288,10 @@ export async function POST(request: Request) {
+   } catch (error) {
+     if (managementRequestId) await finishMemoRequest(managementRequestId, request.signal.aborted ? "cancelled" : "failed", "", error instanceof RequestError ? `request_${error.status}` : "generation_failed").catch(() => undefined);
+     const openAIError = openAIErrorResponse(error, "تعذر توليد المذكرة حالياً. يرجى المحاولة لاحقاً.");
+-    if (openAIError) return privateJson({ error: openAIError.message, ...(managementRequestId ? { requestId: managementRequestId } : {}), serviceCode: openAIError.code, upstreamStatus: openAIError.upstreamStatus }, openAIError.status);
+-    if (error instanceof RequestError && "stage" in error && "missingFacts" in error) return privateJson({ error: error.message, stage: error.stage, missingFacts: error.missingFacts, ...("legalRoute" in error ? {legalRoute:error.legalRoute} : {}) }, error.status);
+-    if (error instanceof RequestError) return errorResponse(error);
+-    return privateJson({ error: "تعذر توليد المذكرة حالياً. يرجى المحاولة لاحقاً." }, 503);
++    if (openAIError) return privateJson({ error: openAIError.message, ...(managementRequestId ? { requestId: managementRequestId } : {}), stage: requestStage, serviceCode: openAIError.code, upstreamStatus: openAIError.upstreamStatus }, openAIError.status);
++    if (error instanceof RequestError && "stage" in error && "missingFacts" in error) return privateJson({ error: error.message, stage: error.stage, missingFacts: error.missingFacts, ...(managementRequestId ? {requestId:managementRequestId} : {}), ...("legalRoute" in error ? {legalRoute:error.legalRoute} : {}) }, error.status);
++    if (error instanceof RequestError) return privateJson({ error: error.message, stage: requestStage, ...(managementRequestId ? {requestId:managementRequestId} : {}) }, error.status);
++    return privateJson({ error: "تعذر توليد المذكرة حالياً. يرجى المحاولة لاحقاً.", stage: requestStage, ...(managementRequestId ? {requestId:managementRequestId} : {}) }, 503);
+   } finally {
+     await releaseMemoPayment(paymentLease).catch(() => undefined);
+   }
+diff --git a/app/sabeq-site.tsx b/app/sabeq-site.tsx
+index 1fc780c..2cc37f7 100644
+--- a/app/sabeq-site.tsx
++++ b/app/sabeq-site.tsx
+@@ -9,6 +9,7 @@ import type { SitePublicSettings } from "@/lib/site-controls";
+ 
+ import { ASSISTANT_MESSAGE_LIMIT, assistantInputCopy, validateAssistantInput } from "@/lib/assistant-input";
+ import { runMemoGeneration, MemoGenerationStopped, memoGenerationCopy } from "@/lib/memo-generation";
++import { MemoSubmissionSession, MemoSubmissionError, readMemoServiceJson, memoSubmissionCopy, type MemoRequestStage } from "@/lib/memo-submission";
+ import { newPaymentAttempt, loadPaymentAttempt, rememberPaymentAttempt, clearPaymentAttempt, paymentCopy, type SadadCheckout } from "@/lib/sadad-client";
+ import { readSSE } from "@/lib/intake-stream";
+ import { cleanIntakeContext } from "@/lib/intake-context";
+@@ -1036,8 +1037,10 @@ function MemoWizard({ t, language, token, initialData = null, assistantSession,
+   const fromAssistant = Boolean(memoData.conversationTranscript?.trim());
+   const [step, setStep] = useState(() => initialMemoStep(fromAssistant));
+   const assistantReview = fromAssistant && step === 1;
+-  const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
++  const [status, setStatus] = useState<"idle" | "loading" | "error" | "review">("idle");
+   const [memoError, setMemoError] = useState("");
++  const [memoFailure, setMemoFailure] = useState<MemoSubmissionError | null>(null);
++  const submissionSession = useRef(new MemoSubmissionSession());
+   const [memoApproved, setMemoApproved] = useState(false);
+   const [generationSeconds, setGenerationSeconds] = useState(0);
+   const generationRequest = useRef<AbortController | null>(null);
+@@ -1451,7 +1454,10 @@ function MemoWizard({ t, language, token, initialData = null, assistantSession,
+ 
+   async function submit(event: FormEvent<HTMLFormElement>) {
+     event.preventDefault();
+-    if (!active || voiceEntryBusy || storyBusy || generationRequest.current) return;
++    if (!active || voiceEntryBusy || storyBusy || generationRequest.current || !submissionSession.current.begin()) return;
++    let failureStage: MemoRequestStage = "preparation";
++    setStatus("idle"); setMemoError(""); setMemoFailure(null);
++    try {
+     const stepData = Object.fromEntries(Array.from(new FormData(event.currentTarget).entries(), ([key, value]) => [key, String(value)]));
+     let nextFacts = facts, nextRequests = requests;
+     let documentData: Record<string, string> = {};
+@@ -1495,18 +1501,18 @@ function MemoWizard({ t, language, token, initialData = null, assistantSession,
+     const preparationController = new AbortController();
+     storyRequest.current = preparationController; setStoryBusy(true); setMemoError("");
+     try {
+-      const response = await memoFetch("/api/legal/prepare-memo", token, {
+-        method: "POST", headers: { "Content-Type": "application/json" },
+-        signal: AbortSignal.any([preparationController.signal, AbortSignal.timeout(75000)]),
+-        body: JSON.stringify({ ...nextData, interfaceLanguage: language }),
+-      });
+-      const prepared = await readServiceJson<{ input?: Record<string, string>; error?: string }>(response);
++      nextData = await submissionSession.current.prepare(nextData, async () => {
++        const response = await memoFetch("/api/legal/prepare-memo", token, {
++          method: "POST", headers: { "Content-Type": "application/json" },
++          signal: AbortSignal.any([preparationController.signal, AbortSignal.timeout(75000)]),
++          body: JSON.stringify({ ...nextData, interfaceLanguage: language }),
++        });
++        return readMemoServiceJson<{ input?: Record<string, string>; error?: string }>(response, "preparation");
++      }, step === 2);
+       if (preparationController.signal.aborted || !generationMounted.current) return;
+-      if (!response.ok || !prepared.input) throw new Error(prepared.error || t.error);
+-      nextData = prepared.input;
+       setMemoData(nextData); setFacts(nextData.facts || ""); setRequests(nextData.requests || "");
+     } catch (error) {
+-      if (!preparationController.signal.aborted) { setStatus("error"); setMemoError(interfaceError(error, language, t.error)); }
++      if (!preparationController.signal.aborted) reportSubmissionFailure(error, "preparation");
+       return;
+     } finally {
+       if (storyRequest.current === preparationController) storyRequest.current = null;
+@@ -1537,6 +1543,7 @@ function MemoWizard({ t, language, token, initialData = null, assistantSession,
+     try {
+       const { caseStory: _story, ...memoInput } = nextData;
+       const input: Record<string, unknown> = { ...memoInput, interfaceLanguage: language, outputLanguage: "ar" };
++      failureStage = "payment";
+       const policyResponse = await memoFetch("/api/payments/sadad", token, { signal: controller.signal });
+       const currentPolicy = await readServiceJson<{ required: boolean; publicCheckoutEnabled: boolean; priceFils: number; ready: boolean; environment: string; error?: string }>(policyResponse);
+       if (!policyResponse.ok || typeof currentPolicy.required !== "boolean") throw new Error(currentPolicy.error || payUi.policyError);
+@@ -1568,14 +1575,15 @@ function MemoWizard({ t, language, token, initialData = null, assistantSession,
+         }
+       }
+       setCheckingPayment(false);
++      failureStage = "generation";
+       const data = await runMemoGeneration(async (signal) => {
+       const response = await memoFetch("/api/legal/memo", token, {
+         method: "POST", signal,
+         headers: { "Content-Type": "application/json" },
+         body: JSON.stringify(input),
+       });
+-      const data = await readServiceJson<{ memo?: string; document?: PleadingDocument; caseQuality?: {status:string;notices:string[]}; error?: string; analysis?: { sourceCount: number; lawCount: number; cassationCount: number; sources: Array<{ marker: string; title: string; reference: string; kind: "cassation" | "legislation"; officialSource: string; sourceUrl?: string; libraryUpdatedAt?: string | null }> } }>(response);
+-      if (!response.ok || !data.memo) throw new Error(data.error || t.error);
++      const data = await readMemoServiceJson<{ memo?: string; document?: PleadingDocument; caseQuality?: {status:string;notices:string[]}; error?: string; analysis?: { sourceCount: number; lawCount: number; cassationCount: number; sources: Array<{ marker: string; title: string; reference: string; kind: "cassation" | "legislation"; officialSource: string; sourceUrl?: string; libraryUpdatedAt?: string | null }> } }>(response, "generation");
++      if (typeof data.memo !== "string" || !data.memo.trim()) throw new MemoSubmissionError("", "generation", "", response.status);
+       return data;
+       }, controller);
+       if (!generationMounted.current || generationRequest.current !== controller) return;
+@@ -1586,12 +1594,23 @@ function MemoWizard({ t, language, token, initialData = null, assistantSession,
+       setStatus("idle");
+     } catch (error) {
+       if (!generationMounted.current || generationRequest.current !== controller) return;
+-      setStatus("error");
+-      setMemoError(error instanceof MemoGenerationStopped ? (error.reason === "timeout" ? generationUi.timeout : generationUi.cancelled) : interfaceError(error, language, t.error));
++      if (error instanceof MemoGenerationStopped) {
++        setStatus("error"); setMemoError(error.reason === "timeout" ? generationUi.timeout : generationUi.cancelled);
++      } else reportSubmissionFailure(error, failureStage);
+     } finally {
+       setCheckingPayment(false);
+       if (generationRequest.current === controller) generationRequest.current = null;
+     }
++    } catch (error) {
++      if (generationMounted.current) reportSubmissionFailure(error, failureStage);
++    } finally { submissionSession.current.end(); }
++  }
++
++  function reportSubmissionFailure(error: unknown, stage: MemoRequestStage) {
++    const failure = error instanceof MemoSubmissionError ? error : new MemoSubmissionError(error instanceof Error ? error.message : "", stage);
++    setMemoFailure(failure);
++    setStatus(failure.savedForReview ? "review" : "error");
++    setMemoError(interfaceError(failure, language, memoSubmissionCopy(language, failure.stage).failure));
+   }
+ 
+   if (memo) return <div className="memo-result" lang={language} dir={language === "en" ? "ltr" : "rtl"}><MemoOfficeReviewNotice paymentStatus={checkout?.status} language={language} /><p role="note" className="form-notice">{memoApprovalNotice[language]}</p>{memoQuality && <div className="form-notice" role="status"><strong>{language === "ar" ? (memoQuality.status === "incomplete" ? "المذكرة غير مكتملة: توجد وقائع أو أسانيد تحتاج استكمالًا" : "اجتازت المسودة مراجعة الاتساق الآلية وتحتاج مراجعة قانونية") : language === "en" ? (memoQuality.status === "incomplete" ? "Incomplete draft: facts or legal sources need review" : "Draft passed automated consistency review; legal review is required") : (memoQuality.status === "incomplete" ? "مسودہ نامکمل ہے؛ حقائق یا قانونی ماخذ کی جانچ درکار ہے" : "مسودے کی خودکار مطابقت جانچ مکمل؛ قانونی جائزہ ضروری ہے")}</strong>{language === "ar" && <ul>{memoQuality.notices.map((notice,index)=><li key={index}>{notice}</li>)}</ul>}</div>}<div className="modal-icon"><FileCheck2 /></div><h2>{memoDocument ? interfaceLabel(memoDocument.title, language) : tr(language, "المذكرة القانونية")}</h2>{memoAnalysis && <div className="memo-analysis-summary"><strong><Sparkles size={18} /> {tr(language, "مصادر استشهدت بها المسودة")}</strong><span>{tr(language, "مراجع تشريعية مستشهد بها")}: {memoAnalysis.lawCount}</span><span>{tr(language, "استشهادات بمبادئ وأحكام تمييز")}: {memoAnalysis.cassationCount}</span><small>{tr(language, "لا يُدرج النظام مادة أو حكماً غير موجود في المكتبة الموثقة، وتبقى المراجعة النهائية للمجموعة.")}</small><ul>{memoAnalysis.sources.map(source => <li key={source.marker}><strong>{source.marker} — {source.title}</strong><span>{source.officialSource} · {source.reference}</span>{source.sourceUrl ? <a href={source.sourceUrl} target="_blank" rel="noopener noreferrer">{tr(language, "فتح المصدر الأصلي")}</a> : <small>{tr(language, "نص من المكتبة المرفوعة؛ لا يتوفر رابط عام للأصل.")}</small>}{source.libraryUpdatedAt && <small>{tr(language, "تحديث الفهرسة")}: {source.libraryUpdatedAt.slice(0, 10)} — {tr(language, "لا يثبت سريان النص.")}</small>}</li>)}</ul></div>}<>{memoDocument ? <PleadingPreview document={memoDocument} text={memo} language={language}/> : <pre lang="ar" dir="rtl">{memo}</pre>}</><div className="memo-result-tools" aria-label={tr(language, "أدوات المذكرة")}><button type="button" onClick={editGeneratedMemo}><Pencil size={18} />{tr(language, "تعديل")}</button><button type="button" onClick={archiveGeneratedMemo} disabled={archiving}><Archive size={18} />{archiving ? tr(language, "جارٍ الأرشفة") : tr(language, "أرشفة")}</button><button type="button" className="danger" onClick={deleteGeneratedMemo}><Trash2 size={18} />{tr(language, "حذف")}</button><button type="button" onClick={exportGeneratedMemo}><Download size={18} />{tr(language, "تصدير كملف")}</button><button type="button" onClick={() => void printGeneratedMemo()}><Printer size={18} />{tr(language, "طباعة")}</button></div>{resultNotice && <p role="status" className={`form-notice ${resultNotice.kind}`}>{resultNotice.message}</p>}</div>;
+@@ -1704,7 +1723,7 @@ function MemoWizard({ t, language, token, initialData = null, assistantSession,
+         </div>
+         <div className="memo-actions">{step > 0 && !assistantReview ? <button type="button" className="button button-outline" disabled={status === "loading"} onClick={() => { captureDraft(); setMemoApproved(false); setStep(step - 1); }}>{t.previous}</button> : <span />}<button className="button button-primary" disabled={voiceEntryBusy || status === "loading" || analysisStatus === "loading" || storyBusy}>{storyBusy ? (language === "ar" ? "جارٍ فهم الوقائع والطلبات…" : language === "en" ? "Understanding facts and requests…" : "حقائق اور مطالبات سمجھ رہا ہوں…") : status === "loading" ? (checkingPayment ? payUi.checking : t.loading) : assistantReview ? (language === "ar" ? ((paymentPolicy?.required || checkout) ? "أوافق وأتابع للدفع والتوليد" : "أوافق وأولّد المذكرة") : language === "en" ? "Approve and generate memorandum" : "منظور کرکے یادداشت تیار کریں") : step === 2 ? (paymentPolicy?.publicCheckoutEnabled && paymentPolicy.required) || checkout ? checkout ? payUi.verify : payUi.pay : t.generate : step === 0 && documents.length === 0 ? ui.continueManual : t.next}<ArrowLeft size={17} /></button></div>
+         {status === "loading" && <div className="memo-generation-pending"><p role="status" aria-live="polite">{checkingPayment ? payUi.checking : generationUi.pending}</p><span>{generationSeconds} {generationUi.seconds}</span><small>{checkingPayment ? payUi.safety : generationUi.limit}</small><button type="button" className="button button-outline" onClick={() => generationRequest.current?.abort()}>{generationUi.cancel}</button></div>}
+-        {status === "error" && <p className="form-notice error">{memoError || t.error}</p>}
++        {(status === "error" || status === "review") && <div className={`form-notice${status === "error" ? " error" : ""}`} role={status === "error" ? "alert" : "status"}>{status === "review" && <strong>{memoSubmissionCopy(language, memoFailure?.stage || "source_review").review}</strong>}<p>{memoError || t.error}</p>{memoFailure && <p>{memoSubmissionCopy(language, memoFailure.stage).stageLabel}: {memoSubmissionCopy(language, memoFailure.stage).stage}{memoFailure.requestId && <><br />{memoSubmissionCopy(language, memoFailure.stage).reference}: <bdi>{memoFailure.requestId}</bdi></>}</p>}</div>}
+       </form>
+       {active && paymentOpen && checkout && paymentAttempt.current && <MemoPaymentDialog payment={checkout} paymentToken={paymentAttempt.current.paymentToken} language={language} request={memoFetch} onPayment={setCheckout} onClose={() => setPaymentOpen(false)} />}
+     </div>
+diff --git a/lib/memo-requests.ts b/lib/memo-requests.ts
+index 71d3066..0f93643 100644
+--- a/lib/memo-requests.ts
++++ b/lib/memo-requests.ts
+@@ -10,8 +10,11 @@ export async function startMemoRequest(input: Record<string, unknown>, user: { i
+   return id;
+ }
+ export async function finishMemoRequest(id: string, status: "needs_information" | "needs_review" | "generated" | "failed" | "cancelled", output = "", code = "") {
+-  await getD1().prepare("UPDATE management_memo_requests SET status = ?, output_text = ?, error_code = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?")
+-    .bind(status, output.slice(0, 140_000), code.slice(0, 80), id).run();
++  // Persist atomically: a later empty failure cannot erase a saved result, and
++  // an automatic completion cannot replace the supervisor's saved revision.
++  const saved = await getD1().prepare("UPDATE management_memo_requests SET status = ?, output_text = ?, error_code = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND error_code <> 'manual_revision' AND (trim(output_text) = '' OR ? <> '')")
++    .bind(status, output.slice(0, 140_000), code.slice(0, 80), id, output.trim()).run();
++  if (saved.meta.changes !== 1) return;
+   await notifyMemoEvent(id, "updated");
+   if (output.trim() && (status === "generated" || status === "needs_review")) {
+     try { await sendSavedDraft(id); }
+diff --git a/lib/memo-submission.ts b/lib/memo-submission.ts
+new file mode 100644
+index 0000000..0f2bb6f
+--- /dev/null
++++ b/lib/memo-submission.ts
+@@ -0,0 +1,76 @@
++// Transport and session state only. This module never writes or revises a memo.
++export type MemoRequestStage = "preparation" | "input_validation" | "access" | "payment" | "generation" | "saving" | "source_review" | "defense_review" | "document_review" | "legal_route_review" | "fact_clarification";
++const stages: MemoRequestStage[] = ["preparation", "input_validation", "access", "payment", "generation", "saving", "source_review", "defense_review", "document_review", "legal_route_review", "fact_clarification"];
++const reviews = new Set<MemoRequestStage>(["source_review", "defense_review", "document_review", "legal_route_review", "fact_clarification"]);
++
++export class MemoSubmissionError extends Error {
++  constructor(message: string, public stage: MemoRequestStage, public requestId = "", public status = 0) {
++    super(message); this.name = "MemoSubmissionError";
++  }
++  get savedForReview() { return this.status === 422 && !!this.requestId && reviews.has(this.stage); }
++}
++
++function caseKey(input: Record<string, string>) {
++  // importMemoDraft removes blank optional fields between steps.
++  return JSON.stringify(Object.keys(input).filter(key => input[key]?.trim()).sort().map(key => [key, input[key]]));
++}
++
++export class MemoSubmissionSession {
++  private busy = false;
++  private preparedKey = "";
++  begin() { if (this.busy) return false; this.busy = true; return true; }
++  end() { this.busy = false; }
++  async prepare(input: Record<string, string>, operation: () => Promise<{ input?: Record<string, string> }>, reviewedInput = false) {
++    // Final review adds form defaults; send the reviewed fields unchanged and
++    // let the existing server validator check them instead of extracting again.
++    if ((reviewedInput && this.preparedKey) || caseKey(input) === this.preparedKey) return input;
++    const prepared = await operation();
++    if (!prepared.input || typeof prepared.input !== "object" || Array.isArray(prepared.input) || Object.values(prepared.input).some(value => typeof value !== "string")) {
++      throw new MemoSubmissionError("", "preparation");
++    }
++    this.preparedKey = caseKey(prepared.input);
++    return prepared.input;
++  }
++}
++
++export async function readMemoServiceJson<T extends { error?: string }>(response: Response, fallbackStage: MemoRequestStage): Promise<T> {
++  let data: Record<string, unknown>;
++  try {
++    const value: unknown = JSON.parse(await response.text());
++    if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("invalid_response");
++    data = value as Record<string, unknown>;
++  } catch (error) {
++    if (error instanceof Error && /AbortError|TimeoutError/.test(error.name)) throw error;
++    throw new MemoSubmissionError("", fallbackStage, "", response.status);
++  }
++  if (!response.ok) {
++    const stage = stages.includes(data.stage as MemoRequestStage) ? data.stage as MemoRequestStage : fallbackStage;
++    const id = typeof data.requestId === "string" && /^[a-zA-Z0-9_-]{8,80}$/.test(data.requestId) ? data.requestId : "";
++    throw new MemoSubmissionError(typeof data.error === "string" ? data.error : "", stage, id, response.status);
++  }
++  return data as T;
++}
++
++export function memoSubmissionCopy(language: string, stage: MemoRequestStage) {
++  const index = language === "en" ? 1 : language === "ur" ? 2 : 0;
++  const labels: Record<MemoRequestStage, string[]> = {
++    preparation: ["تجهيز البيانات", "Preparing case information", "مقدمے کی معلومات کی تیاری"],
++    input_validation: ["التحقق من البيانات", "Checking case information", "معلومات کی جانچ"],
++    access: ["التحقق من الجلسة", "Checking your session", "نشست کی جانچ"],
++    payment: ["التحقق من الدفع", "Checking payment", "ادائیگی کی جانچ"],
++    generation: ["إرسال طلب المذكرة", "Submitting the memorandum request", "یادداشت کی درخواست جمع کرنا"],
++    saving: ["حفظ المذكرة", "Saving the memorandum", "یادداشت محفوظ کرنا"],
++    source_review: ["مراجعة الأسانيد", "Reviewing legal sources", "قانونی ماخذ کا جائزہ"],
++    defense_review: ["مراجعة الدفوع", "Reviewing arguments", "دلائل کا جائزہ"],
++    document_review: ["مراجعة المذكرة", "Reviewing the memorandum", "یادداشت کا جائزہ"],
++    legal_route_review: ["مراجعة مسار القضية", "Reviewing the case route", "مقدمے کے راستے کا جائزہ"],
++    fact_clarification: ["استكمال الوقائع", "Completing case facts", "حقائق کی تکمیل"],
++  };
++  return {
++    stage: labels[stage][index],
++    stageLabel: ["مرحلة الطلب", "Request stage", "درخواست کا مرحلہ"][index],
++    reference: ["رقم الطلب", "Request number", "درخواست نمبر"][index],
++    review: ["طلبك محفوظ للمراجعة", "Your request is saved for review", "درخواست جائزے کے لیے محفوظ ہے"][index],
++    failure: ["تعذر إكمال هذه الخطوة. بياناتك ومرفقاتك ما زالت هنا؛ لم يُعد النظام إرسال طلب التوليد تلقائيًا.", "This step could not be completed. Your information and attachments are still here; the generation request was not retried automatically.", "یہ مرحلہ مکمل نہیں ہو سکا۔ معلومات اور منسلکات یہاں موجود ہیں؛ تیاری کی درخواست خودکار طور پر دوبارہ نہیں بھیجی گئی۔"][index],
++  };
++}
+diff --git a/scripts/check-dashboard-quality.mjs b/scripts/check-dashboard-quality.mjs
+index a90a83d..6f590b1 100644
+--- a/scripts/check-dashboard-quality.mjs
++++ b/scripts/check-dashboard-quality.mjs
+@@ -3,6 +3,7 @@ import {fileURLToPath,pathToFileURL} from 'node:url';
+ import path from 'node:path';
+ 
+ export const dashboardChecks=[
++ {id:'memo-submission-recovery',files:['tests/memo-core-preserved.test.mjs','tests/memo-submission.test.mjs','tests/memo-ledger-recovery.test.mjs','tests/interface-language.test.mjs']},
+  {id:'case-context',files:['tests/project-context.test.mjs','tests/dashboard-quality.test.mjs']},
+  {id:'memo-article-text',files:['tests/article-text-in-memos.test.mjs','tests/memo-completeness.test.mjs','tests/reference-pleading-style.test.mjs','tests/legal-drafting-routes.test.mjs','tests/agent-pipeline.test.mjs']},
+  {id:'admin-permissions-and-failures',files:['tests/management.test.mjs','tests/email-worker-transport.test.mjs','tests/gmail.test.mjs','tests/user-email-link.test.mjs','tests/user-list-live.test.mjs']},
+diff --git a/scripts/check-memo-core-preserved.mjs b/scripts/check-memo-core-preserved.mjs
+new file mode 100644
+index 0000000..af30afc
+--- /dev/null
++++ b/scripts/check-memo-core-preserved.mjs
+@@ -0,0 +1,20 @@
++import {readFileSync} from 'node:fs';
++import {createHash} from 'node:crypto';
++import {resolve,dirname} from 'node:path';
++import {fileURLToPath} from 'node:url';
++import ts from 'typescript';
++const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
++const digest=value=>createHash('sha256').update(value).digest('hex');
++export function instructionDigest(source){
++  const ast=ts.createSourceFile('route.ts',source,ts.ScriptTarget.Latest,true),instructions=[];
++  function visit(node){if(ts.isPropertyAssignment(node)&&node.name.getText(ast)==='instructions')instructions.push(node.initializer.getText(ast));ts.forEachChild(node,visit);}
++  visit(ast);return digest(JSON.stringify(instructions));
++}
++export function checkMemoCore(){
++  const manifest=JSON.parse(readFileSync(resolve(root,'specs/100-memo-submission-recovery/protected-core.json'),'utf8'));
++  const changed=Object.entries(manifest.files).filter(([file,hash])=>digest(readFileSync(resolve(root,file)))!==hash).map(([file])=>file);
++  if(instructionDigest(readFileSync(resolve(root,'app/api/legal/memo/route.ts'),'utf8'))!==manifest.memoInstructionsSha256)changed.push('memo model instructions');
++  if(changed.length)throw Error('Protected memo source changed: '+changed.join(', '));
++  return {baseCommit:manifest.baseCommit,protectedFiles:Object.keys(manifest.files).length,instructionsUnchanged:true};
++}
++if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url))console.log(JSON.stringify(checkMemoCore()));
+diff --git a/specs/100-memo-submission-recovery/plan.md b/specs/100-memo-submission-recovery/plan.md
+new file mode 100644
+index 0000000..1742545
+--- /dev/null
++++ b/specs/100-memo-submission-recovery/plan.md
+@@ -0,0 +1,7 @@
++# الخطة
++1. طبقة مستقلة في lib/memo-submission.ts لتذكر التحضير داخل الجلسة، والقفل، وقراءة ردود الخدمة وأخطاء المراجعة الآمنة. ربطها بالواجهة القائمة فقط.
++2. تعديل حفظ سجل الطلب بشكل ذري لمنع الفشل الفارغ من محو نتيجة محفوظة، وحماية manual_revision من وصول آلي متأخر.
++3. إضافة بيانات التشخيص في غلاف أخطاء API، وعزل فشل الأرشفة الثانوية بعد حفظ الأصل؛ لا تعديل لخوارزمية المحرك.
++4. توثيق بصمات مكونات الصياغة المحمية وتعليمات النموذج قبل التعديل، ثم مطابقتها قبل النشر.
++5. لا تغيير بنية قاعدة البيانات. لا إرسال رسائل اختبار إلى أشخاص أو خصم مالي حقيقي. لا إعادة توليد مذكرات سابقة.
++6. اختبار ونشر محدود مع توثيق الفرق بين تجربة اصطناعية وواقعة المستخدم غير الملتقطة من المتصفح.
+diff --git a/specs/100-memo-submission-recovery/protected-core.json b/specs/100-memo-submission-recovery/protected-core.json
+new file mode 100644
+index 0000000..7da8df6
+--- /dev/null
++++ b/specs/100-memo-submission-recovery/protected-core.json
+@@ -0,0 +1,93 @@
++{
++  "baseCommit": "e1184b3fe790e891eabb36acaef786b24c9191ec",
++  "files": {
++    "app/pleading-preview.tsx": "1352d146c8057251beb520990af1247255f0f55e242cd11d78bc875ce8928ad9",
++    "data/drafting-templates/appeal-reference-style.json": "792a5d2a576abb90b40bbe1a2468237db815c1da2d9ccdfdcbbf3a006b6822ca",
++    "data/drafting-templates/appeal-source.json": "654b4cb387f54039d3b9c9c6d92e35b97a9fd37580ef6489267c9f49bc8569c6",
++    "data/drafting-templates/claim-source.json": "34dcc8d68dca184dd20ce626b4d136a856ab2c2bcd7784966c75e9102f355cfc",
++    "data/drafting-templates/memorandum-reference-style.json": "40445d2db6bc60b9d474c58d51133ead050ad8e1c2306b85dd990cdb649e4277",
++    "lib/admin-service-auth.ts": "ed48be04bba6c11bed150548888f70d7f1e7a2a85c6c0cc04e5d8089265dabff",
++    "lib/analytics-contract.ts": "c26cb67b4f7c2d42a4c4c47cf1d71b5154507a88af219db19a85143adaf51bcd",
++    "lib/analytics-store.ts": "c6501a7ea474933a3120dd7cb975dfe42dc4ceeb93ab76eea2fc91a1279edc68",
++    "lib/appeal-reference-style.ts": "a675e32e7d39af570d8f3a61c79cbfc1696949f04cacdac6430b6ea7081c20fc",
++    "lib/approved-templates.ts": "9ca127185a86906205abd9c8816e117b1f29b29ddfec31754b55509be3cba47a",
++    "lib/assistant-input.ts": "42537bfaa2d72500c31877bd343416096b99fad835b8982d449683803fc4ed62",
++    "lib/bound-article-reviews.ts": "0e5ff95c2f19808f545e3e6ba2f69318a90957d68aa1b1748010faf2a4fddc03",
++    "lib/bound-draft.ts": "12d30b4561624d76b7b4d845cada45eed3e8091164c2eda389e23d38cc0c604a",
++    "lib/bound-legislation-core.ts": "bc7e3c6cdcadb46f58fa84d82122052d1f1c4af85648f4301a72e23a67d2790c",
++    "lib/bound-legislation.ts": "18310fff4c99a17c749d2a4fdf6e1a8b2bfbb8b41d3af76e78915aeaa3ad66c9",
++    "lib/case-reasoning.ts": "d654f4263a65f255512f38f46d53e1f7a77903ef4b413e588494a1b7f65ec59e",
++    "lib/council-defense-review.ts": "da088b7636c5b9f7c9783d7ab68e93a63346be6e055198fc9583cfd50d74ae06",
++    "lib/dialog-focus.ts": "3ef05df8111714cfcd54d861c2039f4c352fdae7b699e0be7bf7204e5c261eaf",
++    "lib/document-limits.ts": "c3cfd1f823c0a7d8201726e3352bcad8ebe9bb222204e7c3fa62b058673d8cb5",
++    "lib/document-upload.ts": "846d05a1c762625451d73b66260f36fe427c14a7d8a9833b103daa6894e72f22",
++    "lib/email.ts": "1df20051bd8f9f69edc45ce4c1715c78f6883a201060875d6a5271b7af842293",
++    "lib/engineering-paths.ts": "711e94491010ece7afb29addd8e74967f43c121dbffe15a03df3dee33d950e0f",
++    "lib/gemini.ts": "81c54d9ccd56450b83d15be07ba082bcad6e212bf5ec6ac988ccf6511788fed7",
++    "lib/gmail.ts": "f1b735976e1b0aa2dd38e2fbbace4bd44a571bf449ada1a800bd10cbbe3de66d",
++    "lib/intake-analysis.ts": "709908a534350aae9a44bfaf22341b0049f5bd203cc336b893181e44b30299fb",
++    "lib/intake-context.ts": "6334fcde1a5bcac953f46db065f1addc78c77b28402bc0a9420ab0db201b319d",
++    "lib/intake-readiness.ts": "d8de3c28771d6af1445627744866cbb980b86ded18a9d85ae69a2fd129a1756a",
++    "lib/intake-stream.ts": "2904e9d9964d63a62c381ee3092a1bd8f45136e7c5fdc8b1c3c8001a995fa357",
++    "lib/interface-language.ts": "fe403658bc549d8cde099cc398d0e29567d58165d7ef4091597c0399dcee9aea",
++    "lib/judgment-evidence.ts": "6ebe106c82257e18b69b7de1a09cfa2c3c4205d18e599c83622fc7319b7f8df5",
++    "lib/legal-citation-review.ts": "153ab3f3fad5404c7bab51505dc85438da5abb3f3548d6b903dfa65fba779efe",
++    "lib/legal-drafting-routes.ts": "a3783c743eb630b7bf317193eb52cb029e74a4be51fad8e25d21d1ab3312d182",
++    "lib/legal-language.ts": "bfccdc73bfd4911c4fa4ce4dc0a4fcbe28ccaf599682e89da719e8d812b99c29",
++    "lib/legal-search.ts": "d2150c2df8ddee7203946ddfce6ce12ffe574cc8b0ffd18615534f61392ca5f2",
++    "lib/legal-source-coverage.ts": "3b8fcef001d8102068abbbeaea0b70010a215c92f464558edb39efb1fb4d7f9f",
++    "lib/legal-tools.ts": "c64afd67f52a57fa78908bb7b4781cf6d50eecfc9964f46e5fdf284ca00d3058",
++    "lib/legal-voice-client.ts": "3ab3d2d601495961e96f5212d753fa2b50c8255d77daad1a4d785d829a984265",
++    "lib/legal-voice.ts": "8a07b594863f4f4ba913d536b22adc1bd0aad55eee85dbb414263b48ace321d2",
++    "lib/legislation-audit.ts": "261fc66d039463efb793f9efe5281888aadce4030e0d198ea0d8572d8204857e",
++    "lib/legislation-edition-import.ts": "e2f6ff44699ed46e7d21b38725af87edf5b89099b7e3d7202333d8774007cc4e",
++    "lib/legislation-workbench.ts": "8af36dd63fd7b92829c04332ee8eb24d5789127a400c1e568b8587cb66655fad",
++    "lib/llama-openrouter.ts": "2c844e9b84f83fad8512b9ed75a71752587b75047dbcb50efe53d7da071d674e",
++    "lib/management-auth.ts": "7a4e86aba05e8255fdfd27ba0ff05e5a5f05fe4e7411c463c7229a1c6d9c5416",
++    "lib/management-data.ts": "fb4827668511044521b15a2e6e1efeee7b2c4b8bc1c8238163d1f1bfe41d234c",
++    "lib/management-integrations.ts": "fc95c0b8f9d2674c480ce0762fc863522fd7480f5e33a409342de7e1b4be37ba",
++    "lib/management-mailboxes.ts": "097b2c9e0fef756daf3b0d6e34a3a8033e9715a0763e8b60b69554cdbc90d06c",
++    "lib/management-memo-revisions.ts": "9a4801e3e0bc43c1175e4598dbfa73bd6fc359e26e234a9e9b8d6e7f4d04950c",
++    "lib/management-password.ts": "51a9dbe38c17f44d340eecbc2ba3c56e93d2f2128c38dd3d7bb61785b75d2dce",
++    "lib/management-programmer.ts": "5c0e61e35cc6d42c1175b67df01f23fa18761e755a36b8e5b9d2122fca76ca00",
++    "lib/management-vault.ts": "c3aa601bbb5f4e52732e4532f6e1f4a4fa86e1240ad469cc0f7310c324a574ee",
++    "lib/matter-facts.ts": "0ce27bef393c81bc08f21163199f0cd8fb5e69b87eec56dc3b6d509cea9b2f04",
++    "lib/memo-dictation.ts": "19bdfcc6850c726b10e4326607d5e2adc275cbe68ffec1958ead0238e68160e1",
++    "lib/memo-generation.ts": "6ec181582a79ae062fa857420d24ffc7a9bb0c63bbce8febb1e901cb60b14d99",
++    "lib/memo-handoff.ts": "04f9c69fbdc428d1f13a77ca9b118b9c4544bb3befc59436eed563918a428725",
++    "lib/memo-input.ts": "70f71864b3357debb20c9273fc3914663acecb241a9e918d0ea1c29653cc744f",
++    "lib/memo-journey.ts": "665942caed777277e262726ee5c47756095f1a96c052a4ed775561c9ed238d21",
++    "lib/memo-language.ts": "17b0111e1a37ae1061ca7a71c156c3d22bddf467611414f9b3c7681179f33e5f",
++    "lib/memo-preparation.ts": "8abe7bf2fadad029ba83c312de94aecd2098addf0241d0a03b8659b9c5f827bc",
++    "lib/memorandum-reference-style.ts": "e7f8571cc6a3e54decd7e2412686682c84c364c18d026368576ef8351dc377ca",
++    "lib/meta-secondary-review.ts": "f9ff717f1576e8a9567eff1ea66584c8e856ddda19e0a298b9b52b67baa55627",
++    "lib/notification-email.ts": "153065953f4b4515cc3fb56980ecf5b143fe20068ae7892ccd9d32049d9f3e43",
++    "lib/official-legislation.ts": "10bc306dbb9e9e131fdce3dc42dda10bde2527f4cee65fe3846446dc20500675",
++    "lib/openai.ts": "01bf8d7a835927e56445f38e83f0a4a77240da7fb166d67da3512a2232838f24",
++    "lib/pcm-player.ts": "0aef905ff3d119ab2b42a8babd52c7bf6677ca7f04e3c523ee1b2031e4f0712c",
++    "lib/pleading-document.ts": "4685c9976457d531bed09be9d49955ee8f62d1f2c816ca40a745c53f89e94013",
++    "lib/pleading-docx.ts": "42c35426adb90bfece25f1645cd8540a29a44296330948739919e4121de59a68",
++    "lib/procedural-position.ts": "664705633644a27496d62892ccfd278c9eb89e416d21070cb472faac9cd9745f",
++    "lib/project-context.ts": "8e1aedecffbada70add4d5f5773634ecf2a951e5eebe6a199110e85b436e435a",
++    "lib/public-auth.ts": "7dbfb90b0aaf17c7b35d314f062b6534c77ec814b4e53b35b35b0cabdfd09b7e",
++    "lib/ready-forms.ts": "339bdc6b5b755c07366345f45cf5de92f5e303f2c85571bb56c20d9824009a73",
++    "lib/request-security.ts": "7898ef7e9ecd2137ed737042c9b0b85f0d1508fa76fee044fe8f3d93458ba7ee",
++    "lib/reviewed-archive-core.ts": "b4c53941961ddbe0a42f978e0c46229cb603b920df10e5c947191290987dc97c",
++    "lib/reviewed-bound-search.ts": "0b1de3a9fe0db7bf7565b714086f14037255f17e569d6c3601695a5e49a30f4a",
++    "lib/reviewed-judgments.ts": "898e538e47ad9d58fe5400b1a1e0cbac14697a826fc633ca36ec4705eb457b85",
++    "lib/runtime-urls.ts": "d66bf3a01648db3bc772ab41c2b1a9b59e07347a380815231dd3724c3a2d1b88",
++    "lib/sabeq-agent-bridge.ts": "ebb059146078e391fb2ac7aa0ed5351a1474bb04928ff40745dafa9a5facb28c",
++    "lib/sadad-client.ts": "871cd639946d2353824a8471db8c282256aee061f8d3a89c26cb35ab95e1d994",
++    "lib/sadad-payments.ts": "0f7b54855b95279dd4a4fbb15695981ed29460c7fb12b859eccb2130a94e7bad",
++    "lib/service-records.ts": "d205f608247c794359b93bbaa5e0aa8c2703fa55fd6832a01e0820c5f6d80978",
++    "lib/service-settings.ts": "2afc7a6e38736c07dbc97e04a436d31e8a91ee60faeed3e17f5e253a7a79318c",
++    "lib/site-controls.ts": "f4737d70b158fab76d9506af868dcae1b8a1e27e9cc07741f8376f57b410b64a",
++    "lib/statutory-authority-coverage.ts": "7ae5bece15768576a615d23eb757c3f5e0a5bd633e6d560e1b7095b976d67e0c",
++    "lib/statutory-text.ts": "15a5e895c53521ae682bac77202b96ea8db53cea3ed02520b42c68bc2ae867ed",
++    "lib/text-providers.ts": "7b1fca6354b9577e81b69070bf98af7bed8a99490c707736759b104a7ecb9c48",
++    "lib/user-management.ts": "053af9b49dde6ab8cfc9ab13fe6dd991f3bedacfa3b23479394fdafa9f8ff2fc",
++    "lib/verification-email-settings.ts": "4c11f56b8d37bc751dcff04c1df6132bed41a9cc875bede52ac7fb022e3add63",
++    "lib/visitor-analytics.ts": "bc21043f01a5c4fbf32aef0b27ff54b8de3460279408bafee8012bcdc037c99d"
++  },
++  "memoInstructionsSha256": "7afce2c8b8bb071c6d1fa4701c5ebd288e6c03188b52954df7f622cb025dc592"
++}
+diff --git a/specs/100-memo-submission-recovery/spec.md b/specs/100-memo-submission-recovery/spec.md
+new file mode 100644
+index 0000000..cc37ba1
+--- /dev/null
++++ b/specs/100-memo-submission-recovery/spec.md
+@@ -0,0 +1,20 @@
++# إصلاح إرسال طلب المذكرة وحفظ نتيجة المراجعة
++
++## الطلب والنطاق
++إصلاح رسالة الفشل العامة عند اعتماد التوليد، وربط السبب برقم الطلب المحفوظ، دون تغيير تحديثات الصياغة والنماذج والمصادر والقوالب والتصدير أو تجاوز المراجعة القانونية. المصدر الأساسي e1184b3fe790e891eabb36acaef786b24c9191ec، النسخة المنشورة 229.
++
++## الأدلة والحدود
++سجلات الفترة المبلغ عنها تعرض نجاح prepare-memo دون طلب توليد لاحق. لا تحتوي الصورة على معرّف يمكن ربطه باستثناء متصفح بعينه. اختبار اصطناعي مستقل وصل إلى memo ثم أعاد 422/source_review؛ لا يُنسب هذا الاختبار إلى واقعة المستخدم. عيوب الكود المؤكدة: إعادة التحضير في كل ضغطة، إبقاء حالة خطأ قديمة عند الانتقال، إسقاط stage/requestId من خطأ الواجهة، واستبدال output_text بنص فارغ عند فشل لاحق.
++
++## المتطلبات ومعايير القبول
++- FR1: تحضير نسخة الوقائع مرة واحدة في الجلسة؛ العودة لتحرير الوقائع تعيد التحضير عند تغييرها. في شاشة المراجعة النهائية تُرسل الحقول الظاهرة وتصحيحاتها كما اعتمدها المستخدم ويتحقق منها الخادم القائم، دون إعادة استخلاص بسبب قيم عناصر النموذج الافتراضية. لا تخزين جديد لبيانات القضية في المتصفح أو المستودع.
++- FR2: قفل متزامن يمنع ضغطتين أثناء التحضير والتوليد، ويُحرر عند الإخفاق أو الإلغاء أو العودة المبكرة.
++- FR3: عرض رسالة محلية واضحة مع مرحلة الفشل ورقم الطلب إن أعاده الخادم. حالة source_review/defense_review تبقى طلب مراجعة محفوظًا، ولا تدّعي وجود نص مكتمل.
++- FR4: لا إعادة تلقائية لطلب التوليد أو الدفع؛ تبقى المرفقات والمدخلات ومحاولة الدفع الحالية محفوظة وفق التدفق القائم.
++- FR5: فشل لاحق فارغ لا يمسح نصًا محفوظًا ولا يخفض حالته أو يستبدل سببه. وصول توليد متأخر لا يستبدل مراجعة بشرية محفوظة.
++- FR6: فشل نسخ الأرشيف الثانوي بعد حفظ المذكرة لا يحول نجاح الحفظ الأصلي إلى فشل توليد. أخطاء الدفع لا تُبتلع.
++- FR7: لا تغييرات في البرومبتات أو النماذج أو التحقق القانوني أو المحتوى أو المصادقة أو الأسعار أو إعدادات البريد.
++- FR8: اختبارات انحدار سلوكية، بناء النسختين، فحص الواجهة ببيانات اصطناعية، نشر المصدر ثم واجهة GitHub مع الحفاظ على تخصيصاتها ومشاريع المستودع الأخرى.
++
++## الافتراضات
++يمكن أن يكون الاستثناء الأصلي في المتصفح أو في الاتصال قبل وصول التوليد، ولا يُدّعى تحديده من سجلات الخادم وحدها. أسانيد غير مكتملة تظل بحاجة لمراجعة مختص؛ هذا الإصلاح لا ينشئ مصادر أو يضعف بوابة المراجعة.
+diff --git a/specs/100-memo-submission-recovery/tasks.md b/specs/100-memo-submission-recovery/tasks.md
+new file mode 100644
+index 0000000..1336a08
+--- /dev/null
++++ b/specs/100-memo-submission-recovery/tasks.md
+@@ -0,0 +1,8 @@
++# المهام
++- [x] T001 تثبيت بصمات المحرك وإثبات انحدار محو النص المحفوظ قبل الإصلاح.
++- [x] T002 إضافة طبقة إرسال/تحضير وعرض مرحلة الفشل ورقم الطلب وإزالة الخطأ القديم.
++- [x] T003 حماية سجل المذكرة من الفشل الفارغ والنتائج الآلية المتأخرة بعد التحرير البشري.
++- [x] T004 تحسين غلاف خطأ API وعزل فشل نسخ الأرشيف الثانوية فقط.
++- [x] T005 اجتياز الاختبارات والبناء وفحص بصمات المحتوى.
++- [ ] T006 نشر المصدر وواجهة GitHub وفحص الواجهة الاصطناعية المنشورة وتوثيق النسخة والفحوص والحدود المتبقية.
++- [ ] T007 منع إعادة التحضير بسبب القيم الافتراضية التي تضيفها شاشة المراجعة النهائية؛ التحقق من طلب تحضير واحد ثم توليد واحد في السجلات الحية.
+diff --git a/specs/100-memo-submission-recovery/validation.md b/specs/100-memo-submission-recovery/validation.md
+new file mode 100644
+index 0000000..77ed916
+--- /dev/null
++++ b/specs/100-memo-submission-recovery/validation.md
+@@ -0,0 +1,12 @@
++# دليل الفحص
++
++- قبل الإصلاح: اختبارا محو النص المحفوظ ووصول التوليد الآلي بعد المراجعة البشرية يفشلان؛ حالة المراجعة دون نص تنجح.
++- بعد الإصلاح: 32 اختبارًا مركّزًا للواجهة والنقل والسجل نجحت، و29 اختبارًا على نسخة واجهة GitHub مع الحفاظ على تخصيصاتها الستة نجحت. بناء GitHub نجح.
++- فحص البصمات: 87 ملفًا من مكونات المحرك والقوالب والمصادر والتصدير مطابق تمامًا لنسخة 229؛ خصائص instructions في API مطابقة أيضًا. يشمل الفرق غلاف الإرسال والحفظ ومعالجة الأخطاء فقط.
++- أُصلحت بيئة اختبار العرض القائمة لدعم الملف mjs المستورد بالفعل، ومحاكاة meta.changes بعقد D1 الحقيقي، وفحص ترتيب المراجعة ثم الحفظ ثم الأرشيف بعد وضع الأرشفة الثانوية في try/catch. لم تُضعف توقعات المحتوى القانوني أو المصادقة أو الدفع.
++- المعاينة المؤقتة خارج موقع الإنتاج لم تُنفذ: رفضها فحص الموافقة الآلي بسبب احتمال تصدير المصدر إلى خدمة معاينة أخرى. أُوقفت، ويستكمل الفحص عبر النشر المأذون على موقع سابق نفسه.
++- اجتازت بوابات الجودة الست وفحوص الإصدار الداخلية: مصادر 42، مذكرات 243، وصول 112، بإجمالي 397؛ بناء Worker وواجهة GitHub نجحا. نسخة المصدر العام اجتازت 29 اختبار واجهة/نقل و8 اختبارات سجل مشترك مستقلة.
++- أعيد إنتاج الرسالة نفسها فعليًا في النسخة القديمة: تقديم نموذج فارغ ثم تصحيح الوقائع والانتقال بنجاح إلى شاشة المراجعة يُبقي حالة error القديمة ويعرض النص العام رغم نجاح التحضير. التعديل يعيد الحالة إلى idle عند بدء المحاولة ويحتفظ بسبب الفشل الجديد فقط.
++- النشر وفحص النسخة الجديدة الحي يُوثقان بعد اكتمالهما. لا يُعد اختبار source_review الاصطناعي مذكرة قانونية مكتملة ولا إثباتًا لفحص بيانات القضية الشخصية.
++- نشر الإصلاح الأول في النسخة 230 أكد اختفاء الخطأ القديم بعد تصحيح الإدخال، ووصول التوليد إلى مراجعة الأسانيد. كشف الفحص الحي طلب تحضير إضافيًا مدته 45ms بسبب قيم حقول المراجعة الافتراضية؛ أضيف اختبار مستقل وإصلاح يمرر الحقول المعتمدة للخادم مباشرة دون إعادة استخلاص. فحوص النسخة النهائية والتأكد من عدد الطلبات تُستكمل قبل إعلان الإكمال.
++- اجتاز الإصلاح النهائي 399 فحصًا داخليًا: مصادر 42، مذكرات 245، وصول 112. نجحت بوابات الجودة الست والبناء الأصلي؛ نجح بناء واجهة GitHub و31 اختبار واجهة/نقل. فحص عدد الطلبات بعد النشر النهائي يبقى مسجلاً في مهمة T007 حتى رصده حيًا.
+diff --git a/tests/agent-pipeline.test.mjs b/tests/agent-pipeline.test.mjs
+index 2383f99..655efd8 100644
+--- a/tests/agent-pipeline.test.mjs
++++ b/tests/agent-pipeline.test.mjs
+@@ -145,6 +145,16 @@ test('memo route invokes agents after auth and retains actual approved document
+  }}});
+  const response=await route.POST(request());assert.equal(response.status,200);const value=await response.json();assert.equal(value.document.kind,'claim');assert.equal(value.analysis.sources[0].sourceUrl,evidence[0].sourceUrl);assert.equal(value.template.sourceFilename,(await h.templates.loadApprovedTemplate('claim')).info.sourceFilename);assert.doesNotMatch(value.memo,/المساعد|ملاحظات المراجعة|نتيجة التحليل/);
+ });
++test('secondary archive failure cannot discard an already saved memorandum',async t=>{
++ const h=templateHarness();t.after(h.cleanup);const saved=[];let completed=0;
++ const route=memoRoute(h,{auth:async()=>({id:'synthetic-user'}),record:async()=>{throw Error('synthetic archive outage');},complete:async()=>{completed++;},pipeline:{agentPipelineEnabled:()=>true,generateAgentPleading:async()=>({content:{...content},audit:{}})},ledger:{startMemoRequest:async()=> 'synthetic-saved-memo',finishMemoRequest:async(...row)=>saved.push(row)}});
++ const response=await route.POST(request());assert.equal(response.status,200);const data=await response.json();assert.equal(completed,1);assert.equal(data.requestId,'synthetic-saved-memo');assert.equal(saved.at(-1)[2],data.memo);assert.ok(saved.every(row=>row[1]!=='failed'));
++});
++test('payment completion failure remains visible with the saved request reference',async t=>{
++ const h=templateHarness();t.after(h.cleanup);
++ const route=memoRoute(h,{complete:async()=>{throw Error('synthetic payment outage');},pipeline:{agentPipelineEnabled:()=>true,generateAgentPleading:async()=>({content:{...content},audit:{}})},ledger:{startMemoRequest:async()=> 'synthetic-payment-memo',finishMemoRequest:async()=>{}}});
++ const response=await route.POST(request());assert.equal(response.status,503);const data=await response.json();assert.equal(data.requestId,'synthetic-payment-memo');assert.equal(data.stage,'payment');assert.doesNotMatch(JSON.stringify(data),/synthetic payment outage/);
++});
+ test('auth failure cannot reach agents; enabled worker failure is not silently bypassed',async t=>{
+  const h=templateHarness();t.after(h.cleanup);let calls=0;
+  const pipeline={agentPipelineEnabled:()=>true,generateAgentPleading:async()=>{calls++;throw Error('secret provider details');}};
+diff --git a/tests/case-reasoning.test.mjs b/tests/case-reasoning.test.mjs
+index c2fc18b..f91b725 100644
+--- a/tests/case-reasoning.test.mjs
++++ b/tests/case-reasoning.test.mjs
+@@ -36,8 +36,8 @@ test('missing sources stay incomplete even if model claims every issue addressed
+ });
+ test('every output path is audited before archive and source correction preserves generated requests',()=>{
+  const route=readFileSync(new URL('../app/api/legal/memo/route.ts',import.meta.url),'utf8');
+- const audit=route.indexOf('const auditText = await generateText'),parse=route.indexOf('parseGroundedCaseAudit(auditText'),archive=route.indexOf('if(user) await recordServiceActivity');
+- assert.ok(audit>=0&&parse>audit&&archive>parse);
++ const audit=route.indexOf('const auditText = await generateText'),parse=route.indexOf('parseGroundedCaseAudit(auditText'),saved=route.indexOf('await finishMemoRequest(managementRequestId, "needs_review", finalMemo'),archive=route.indexOf('await recordServiceActivity(');
++ assert.ok(audit>=0&&parse>audit&&saved>parse&&archive>saved);
+  assert.match(route,/return finish\(parsePleadingContent\(revised\),true\)/);
+  assert.doesNotMatch(route,/content.requests=memoInput.requests/);
+  assert.match(route,/casePlan:checkedPlan/);assert.match(route,/caseQuality,[^\n]*sourceCoverage/);
+diff --git a/tests/interface-language.test.mjs b/tests/interface-language.test.mjs
+index a8e3b63..eebb7f5 100644
+--- a/tests/interface-language.test.mjs
++++ b/tests/interface-language.test.mjs
+@@ -1,6 +1,6 @@
+ import { test } from 'node:test';
+ import assert from 'node:assert/strict';
+-import { readFileSync, existsSync } from 'node:fs';
++import { readFileSync, existsSync, statSync } from 'node:fs';
+ import { createRequire } from 'node:module';
+ import { resolve, dirname } from 'node:path';
+ import vm from 'node:vm';
+@@ -37,7 +37,7 @@ function modules(states = {}, globals = {}) {
+       if (name.startsWith('@/') || name.startsWith('.')) {
+         const path = name.startsWith('@/') ? resolve(root,name.slice(2)) : resolve(dirname(file),name);
+         if (path.endsWith('.json')) return JSON.parse(readFileSync(path,'utf8'));
+-        const target = [path+'.ts',path+'.tsx',path+'/index.ts'].find(existsSync);
++        const target = [path,path+'.ts',path+'.tsx',path+'/index.ts'].find(candidate => existsSync(candidate) && statSync(candidate).isFile());
+         if (!target) throw new Error('Missing test module: '+path);
+         return load(target);
+       }
+@@ -53,6 +53,14 @@ const copy = load('app/site-content.ts').copy;
+ const sample = {title:'مذكرة بدفاع', kind:'memorandum', template:{id:'synthetic',version:1,kind:'claim',title:'صحيفة الدعوى',sourceFilename:'approved-template.doc',sourceSha256:'synthetic',approvedAt:'2026-01-01'},paper:'A4',border:true,pages:[{title:'مذكرة بدفاع',court:'المحكمة الكلية',blocks:[{text:'وقائع اصطناعية للاختبار فقط. الرقم 0012/2026'}]}],reviewNotes:[],approval:''};
+ const props = language => ({language,t:copy[language],token:'',initialSession:null,onSession(){},openBooking(){},startMemo(){}});
+ const outsideMemo = html => html.replace(/<iframe\b[^>]*>[\s\S]*?<\/iframe>/g,'').replace(/<pre lang="ar" dir="rtl">[\s\S]*?<\/pre>/g,'');
++test('saved review keeps its record reference visible in every interface language', () => {
++  for(const language of ['ar','en','ur']) {
++    const {MemoWizard}=modules({step:2,status:'review',memoError:language==='ar'?'طلب اصطناعي يحتاج مراجعة':'Synthetic request requires review',memoFailure:{stage:'source_review',requestId:'synthetic-request-123',savedForReview:true}})('app/sabeq-site.tsx');
++    const html=renderToStaticMarkup(React.createElement(MemoWizard,props(language)));
++    assert.ok(html.includes('synthetic-request-123'));assert.ok(html.includes('role="status"'));
++    assert.ok(html.includes(modules()('lib/memo-submission.ts').memoSubmissionCopy(language,'source_review').review));
++  }
++});
+ test('all languages retain one footer policy link and omit repeated privacy notices in tools', () => {
+   for (const language of ['ar','en','ur']) {
+     const components=modules({language})('app/sabeq-site.tsx');
+diff --git a/tests/management-source-connection.test.mjs b/tests/management-source-connection.test.mjs
+index 35c8ddf..2046116 100644
+--- a/tests/management-source-connection.test.mjs
++++ b/tests/management-source-connection.test.mjs
+@@ -11,7 +11,7 @@ function harness({authenticated=false}={}){
+   sqlite.exec(readFileSync(new URL('tests/fixtures/management-source-tables.sql',root),'utf8'));
+   sqlite.exec(readFileSync(new URL('drizzle/0005_icy_dark_phoenix.sql',root),'utf8'));
+   sqlite.exec(readFileSync(new URL('drizzle/0010_special_scalphunter.sql',root),'utf8'));
+-  const db={prepare(sql){let args=[];return{bind(...values){args=values;return this;},async first(){return sqlite.prepare(sql).get(...args)||null;},async all(){return{results:sqlite.prepare(sql).all(...args)};},async run(){return sqlite.prepare(sql).run(...args);}};}};
++  const db={prepare(sql){let args=[];return{bind(...values){args=values;return this;},async first(){return sqlite.prepare(sql).get(...args)||null;},async all(){return{results:sqlite.prepare(sql).all(...args)};},async run(){const result=sqlite.prepare(sql).run(...args);return{success:true,meta:{changes:Number(result.changes)}};}};}};
+   // Authentication routes and encrypted-vault isolation are covered by the full native management suite.
+   const dependencies={'@/lib/notification-email':{notifyMemoEvent:async()=>{}},'@/db':{getD1:()=>db},'@/lib/gmail':{sendSavedDraft:async()=>{}},'@/lib/management-auth':{digest:async value=>createHash('sha256').update(value).digest('hex'),base64url:value=>Buffer.from(value).toString('base64url'),sealConfig:async value=>JSON.stringify(value),openConfig:async value=>JSON.parse(value)},'@/lib/management-integrations':{SERVICE_ORIGIN:'https://sabeq-legal-public.centrino.chatgpt.site'},'@/lib/request-security':{RequestError:class extends Error{}}};
+   function load(file){const exports={};vm.runInNewContext(ts.transpileModule(readFileSync(new URL(file,root),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{exports,require:name=>{if(name==='@/lib/management-data')return load('lib/management-data.ts');if(name==='@/lib/management-memo-revisions')return load('lib/management-memo-revisions.ts');if(!dependencies[name])throw Error('Unexpected test dependency: '+name);return dependencies[name];},crypto:webcrypto,TextEncoder,URL,URLSearchParams,AbortSignal,Request,Response,Headers,fetch:async url=>authenticated&&String(url)==='https://tuhxdirrffnxtosqaoiq.supabase.co/functions/v1/admin-verify'?Response.json({valid:true,role:'admin',must_change_password:false}):new Response('Not found',{status:404})});return exports;}
+diff --git a/tests/memo-core-preserved.test.mjs b/tests/memo-core-preserved.test.mjs
+new file mode 100644
+index 0000000..00fc8a0
+--- /dev/null
++++ b/tests/memo-core-preserved.test.mjs
+@@ -0,0 +1,6 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import {checkMemoCore} from '../scripts/check-memo-core-preserved.mjs';
++test('latest model configuration, drafting, legal review and export sources retain their baseline bytes',()=>{
++  const result=checkMemoCore();assert.ok(result.protectedFiles>50);assert.equal(result.instructionsUnchanged,true);
++});
+diff --git a/tests/memo-ledger-recovery.test.mjs b/tests/memo-ledger-recovery.test.mjs
+new file mode 100644
+index 0000000..dcc37c1
+--- /dev/null
++++ b/tests/memo-ledger-recovery.test.mjs
+@@ -0,0 +1,41 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import { emailHarness } from './fixtures/user-email-harness.mjs';
++
++test('a late empty failure preserves the exact saved memo, state and reason', async () => {
++  const h=emailHarness();
++  try {
++    const ledger=h.load('lib/memo-requests.ts');
++    const id=await ledger.startMemoRequest({facts:'وقائع اصطناعية للاختبار فقط'},null,'https://q8-ux.github.io');
++    const memo='نص اصطناعي محفوظ\n0012/2026 — لا يعاد توليده';
++    await ledger.finishMemoRequest(id,'needs_review',memo,'draft_generated');
++    const before={...h.sqlite.prepare('SELECT * FROM management_memo_requests WHERE id=?').get(id)};
++    await ledger.finishMemoRequest(id,'failed','','generation_failed');
++    const after={...h.sqlite.prepare('SELECT * FROM management_memo_requests WHERE id=?').get(id)};
++    assert.deepEqual(after,before);
++  } finally { h.close(); }
++});
++
++test('a late automatic result cannot overwrite an existing human revision', async () => {
++  const h=emailHarness();
++  try {
++    const ledger=h.load('lib/memo-requests.ts');
++    const id=await ledger.startMemoRequest({facts:'وقائع اصطناعية'},null,'https://q8-ux.github.io');
++    h.sqlite.prepare("UPDATE management_memo_requests SET output_text=?,status='needs_review',error_code='manual_revision' WHERE id=?").run('مراجعة بشرية اصطناعية محفوظة',id);
++    await ledger.finishMemoRequest(id,'needs_review','نتيجة آلية اصطناعية متأخرة','draft_generated');
++    const row=h.sqlite.prepare('SELECT output_text,error_code FROM management_memo_requests WHERE id=?').get(id);
++    assert.equal(row.output_text,'مراجعة بشرية اصطناعية محفوظة');
++    assert.equal(row.error_code,'manual_revision');
++  } finally { h.close(); }
++});
++
++test('an unsuccessful request without text still records its real review stage', async () => {
++  const h=emailHarness();
++  try {
++    const ledger=h.load('lib/memo-requests.ts');
++    const id=await ledger.startMemoRequest({facts:'وقائع اصطناعية'},null,'https://q8-ux.github.io');
++    await ledger.finishMemoRequest(id,'needs_review','','source_review');
++    const row=h.sqlite.prepare('SELECT status,output_text,error_code FROM management_memo_requests WHERE id=?').get(id);
++    assert.equal(row.status,'needs_review');assert.equal(row.output_text,'');assert.equal(row.error_code,'source_review');
++  } finally { h.close(); }
++});
+diff --git a/tests/memo-submission.test.mjs b/tests/memo-submission.test.mjs
+new file mode 100644
+index 0000000..9c4066a
+--- /dev/null
++++ b/tests/memo-submission.test.mjs
+@@ -0,0 +1,70 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import { load } from './template-harness.mjs';
++const {MemoSubmissionSession,MemoSubmissionError,readMemoServiceJson,memoSubmissionCopy}=load('../lib/memo-submission.ts');
++
++test('review and submission reuse exactly the prepared case without another provider request',async()=>{
++  const session=new MemoSubmissionSession();let calls=0;
++  const input={facts:'وقائع اصطناعية',requests:'طلبات اصطناعية'};
++  const send=async()=>{calls++;return {input:{...input,draftMode:'available_evidence'}};};
++  const reviewed=await session.prepare(input,send);
++  const submitted=await session.prepare({...reviewed},send);
++  assert.deepEqual(submitted,reviewed);assert.equal(calls,1);
++  await session.prepare({...reviewed,requests:'طلبات صححها المستخدم'},async()=>{calls++;return {input:{...reviewed,requests:'طلبات صححها المستخدم'}};});
++  assert.equal(calls,2,'A real case edit invalidates the prepared snapshot');
++});
++
++test('field ordering does not trigger extraction and failed preparation is never cached',async()=>{
++  const session=new MemoSubmissionSession();let calls=0;
++  await assert.rejects(session.prepare({facts:'synthetic'},async()=>{calls++;throw Error('synthetic outage');}));
++  const prepared=await session.prepare({facts:'synthetic'},async()=>{calls++;return{input:{facts:'synthetic',requests:'synthetic relief'}};});
++  await session.prepare({requests:prepared.requests,facts:prepared.facts},async()=>{throw Error('must not reprepare');});
++  assert.equal(calls,2);
++});
++
++test('blank optional fields removed between review steps do not reprepare the same case',async()=>{
++  const session=new MemoSubmissionSession();let calls=0;
++  await session.prepare({facts:'synthetic'},async()=>{calls++;return{input:{facts:'synthetic',courtCircuit:'',caseNumber:'  '}};});
++  await session.prepare({facts:'synthetic'},async()=>{calls++;throw Error('must not reprepare');});
++  assert.equal(calls,1);
++});
++
++test('final review form defaults and deliberate field corrections do not trigger a second preparation',async()=>{
++  const session=new MemoSubmissionSession();let calls=0;
++  const prepared=await session.prepare({facts:'synthetic facts'},async()=>{calls++;return{input:{facts:'synthetic facts',requests:'synthetic relief',caseType:'دعوى مدنية'}};});
++  const reviewed={...prepared,caseType:'مدني',documentKind:'auto',court:'محكمة راجعها المستخدم'};
++  const submitted=await session.prepare(reviewed,async()=>{throw Error('must not extract after approval');},true);
++  assert.deepEqual(submitted,reviewed);assert.equal(calls,1);
++});
++
++test('a final screen without an earlier prepared case still performs the required preparation',async()=>{
++  const session=new MemoSubmissionSession();let calls=0;
++  await session.prepare({facts:'synthetic facts'},async()=>{calls++;return{input:{facts:'synthetic facts'}};},true);
++  assert.equal(calls,1);
++});
++
++test('a synchronous guard blocks duplicate clicks before React renders and can be released on every exit',()=>{
++  const session=new MemoSubmissionSession();assert.equal(session.begin(),true);assert.equal(session.begin(),false);
++  session.end();assert.equal(session.begin(),true);session.end();
++});
++
++test('saved source review retains its original message, stage and record ID',async()=>{
++  await assert.rejects(readMemoServiceJson(Response.json({error:'أسانيد اصطناعية تحتاج مراجعة',stage:'source_review',requestId:'synthetic-request-123'},{status:422}),'generation'),error=>{
++    assert.equal(error.requestId,'synthetic-request-123');assert.equal(error.stage,'source_review');assert.equal(error.status,422);assert.equal(error.savedForReview,true);assert.equal(error.message,'أسانيد اصطناعية تحتاج مراجعة');return true;
++  });
++});
++
++test('an unknown or non-JSON response never becomes a successful or saved memorandum',async()=>{
++  for(const body of ['<html>502 upstream sensitive details</html>','null','[]'])await assert.rejects(readMemoServiceJson(new Response(body,{status:502}),'preparation'),error=>error instanceof MemoSubmissionError&&!error.savedForReview&&!error.message.includes('sensitive'));
++  await assert.rejects(new MemoSubmissionSession().prepare({facts:'synthetic'},async()=>({input:{facts:{bad:'shape'}}})),error=>error.stage==='preparation');
++});
++
++test('untrusted stage or identifier is not presented as a valid saved reference',async()=>{
++  await assert.rejects(readMemoServiceJson(Response.json({error:'تعذر الطلب',stage:'<script>',requestId:'https://sensitive.example/token'},{status:503}),'generation'),error=>error.stage==='generation'&&error.requestId===''&&!error.savedForReview);
++});
++
++test('successful transport preserves the exact Arabic memo bytes and localized notices have no provider diagnostics',async()=>{
++  const memo='نص اصطناعي\n  0012/2026  ';
++  assert.equal((await readMemoServiceJson(Response.json({memo}),'generation')).memo,memo);
++  for(const language of ['ar','en','ur']){const ui=memoSubmissionCopy(language,'source_review');assert.ok(ui.reference&&ui.review&&ui.failure);if(language==='en')assert.doesNotMatch(JSON.stringify(ui),/[\u0600-\u06ff]/);}
++});
+diff --git a/tests/user-email-link.test.mjs b/tests/user-email-link.test.mjs
+index d2c8ba1..89414bc 100644
+--- a/tests/user-email-link.test.mjs
++++ b/tests/user-email-link.test.mjs
+@@ -47,7 +47,7 @@ test('memo events notify office and only the verified owner without copying lega
+  await ledger.finishMemoRequest(id,'needs_review','نص قضية خاص اصطناعي');await ledger.finishMemoRequest(id,'needs_review','نص قضية خاص اصطناعي');
+  assert.equal(h.network.length,4);for(const call of h.network){const payload=JSON.parse(call.init.body);assert.ok(!JSON.stringify(payload).includes('وقائع خاصة'));assert.ok(!JSON.stringify(payload).includes('نص قضية'));assert.ok(!JSON.stringify(payload).includes('اسم خاص'));assert.ok(payload.text.includes(id));}
+  const guest=await ledger.startMemoRequest({clientName:'ضيف'},null,'https://q8-ux.github.io');assert.equal(h.sqlite.prepare('SELECT COUNT(*) n FROM notification_email_deliveries WHERE record_id=?').get(guest).n,1);
+- h.sqlite.prepare("UPDATE public_users SET email_verified_at='' WHERE id='synthetic-user'").run();await ledger.finishMemoRequest(id,'failed','','synthetic_failure');assert.equal(h.network.length,6,'An unverified owner receives no user notification');
++ h.sqlite.prepare("UPDATE public_users SET email_verified_at='' WHERE id='synthetic-user'").run();await ledger.finishMemoRequest(id,'failed','','synthetic_failure');assert.equal(h.network.length,5,'A late failure cannot replace a saved draft or emit a false failure notification');
+ }finally{h.close();}});
+ 
+ test('retry cancels a removed recipient and disabled notifications create no historical backlog',async()=>{const h=emailHarness();try{
+diff --git a/tools/internal-verification/verify.py b/tools/internal-verification/verify.py
+index 1a4427e..d9a5f9a 100644
+--- a/tools/internal-verification/verify.py
++++ b/tools/internal-verification/verify.py
+@@ -127,8 +127,8 @@ def check_plan(profile):
+     if profile == "site":
+         return [
+             node("sources", ["tests/official-errata.test.mjs", "tests/bound-article-reviews.test.mjs", "tests/bound-article-review-source.test.mjs", "tests/bound-legislation.test.mjs", "tests/reviewed-judgments.test.mjs", "tests/legislation-workbench.test.mjs", "tests/legal-source-coverage.test.mjs"]),
+-            node("memo", ["tests/model-compatibility.test.mjs", "tests/grounded-audit-excerpts.test.mjs", "tests/indirect-intake.test.mjs", "tests/procedural-position.test.mjs", "tests/memo-journey.test.mjs", "tests/payment-dialog.test.mjs", "tests/agent-pipeline.test.mjs", "tests/reviewed-coverage-expansion.test.mjs", "tests/memo-path-strengthening.test.mjs", "tests/case-reasoning.test.mjs", "tests/defense-strength.test.mjs", "tests/memo-reference-language.test.mjs", "tests/inline-authorities.test.mjs", "tests/article-text-in-memos.test.mjs", "tests/memo-generation-control.test.mjs", "tests/connected-intake.test.mjs", "tests/memo-responsive-generation.test.mjs"]),
+-            node("access", ["tests/management.test.mjs", "tests/analytics-consent.test.mjs", "tests/programmer-client.test.mjs", "tests/user-email-link.test.mjs", "tests/user-list-live.test.mjs"], timeout=360),
++            node("memo", ["tests/model-compatibility.test.mjs", "tests/grounded-audit-excerpts.test.mjs", "tests/indirect-intake.test.mjs", "tests/procedural-position.test.mjs", "tests/memo-journey.test.mjs", "tests/payment-dialog.test.mjs", "tests/agent-pipeline.test.mjs", "tests/reviewed-coverage-expansion.test.mjs", "tests/memo-path-strengthening.test.mjs", "tests/case-reasoning.test.mjs", "tests/defense-strength.test.mjs", "tests/memo-reference-language.test.mjs", "tests/inline-authorities.test.mjs", "tests/article-text-in-memos.test.mjs", "tests/memo-generation-control.test.mjs", "tests/connected-intake.test.mjs", "tests/memo-responsive-generation.test.mjs", "tests/memo-submission.test.mjs", "tests/memo-core-preserved.test.mjs"]),
++            node("access", ["tests/management.test.mjs", "tests/analytics-consent.test.mjs", "tests/programmer-client.test.mjs", "tests/user-email-link.test.mjs", "tests/user-list-live.test.mjs", "tests/memo-ledger-recovery.test.mjs"], timeout=360),
+         ]
+     if profile == "backend":
+         return [node("api-and-sources", ["test/api-policy.test.js", "test/legal-library.test.js"])]

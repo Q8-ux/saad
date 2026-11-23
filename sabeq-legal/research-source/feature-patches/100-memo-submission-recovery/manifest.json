@@ -1,0 +1,23 @@
+{
+  "baseNativeCommit": "e1184b3fe790e891eabb36acaef786b24c9191ec",
+  "nativeCommit": "68757bab51403ff789655a2bc428fdf876664a16",
+  "nativeVersion": 231,
+  "nativeDeployment": "appgdep_6b041e253c708191b048b8e7f348d0bc",
+  "nativePublishedAt": "2026-11-23T11:06:33.219533+00:00",
+  "nativePatchSha256": "6b85997df07a7b58591912d4a70c5567a8ee8c66e8ae990003f2bd65ebd1a673",
+  "nativePatchBytes": 73931,
+  "publicAsset": {
+    "path": "sabeq-legal/assets/index-Ccg1FPn3.js",
+    "bytes": 607698,
+    "sha256": "248da88d0258fb973d560373dbf9d9b73eb4c577c7f91802fddd3b34d2303e99",
+    "gitSha": "0eef2dccf095a14aeb60e3c0fe2d9898fd932a60"
+  },
+  "internalChecks": 399,
+  "githubVariantChecks": 31,
+  "sharedLedgerChecks": 8,
+  "protectedMemoFiles": 87,
+  "modelInstructionsUnchanged": true,
+  "sourceMirrorIsRuntime": false,
+  "realCaseRetried": false
+}
+

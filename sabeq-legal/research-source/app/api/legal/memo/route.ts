@@ -59,6 +59,7 @@ export async function POST(request: Request) {
   let managementRequestId = "";
   let paymentLease: PaymentLease | undefined;
   let draftingInstructions = "";
+  let requestStage = "access";
   try {
     assertSameOrigin(request);
     const signal = AbortSignal.any([request.signal, AbortSignal.timeout(240_000)]);
@@ -68,6 +69,7 @@ export async function POST(request: Request) {
     };
     const user = await requireMemoUserOrGuest(request);
     await requireServiceEnabled("memo", request);
+    requestStage = "input_validation";
     const raw = await readJsonObject(request, 200_000);
     // Memo sign-in is temporarily disabled for the pilot. The previous guest
     // limit was too low for a normal test flow (retrying after document review
@@ -75,11 +77,14 @@ export async function POST(request: Request) {
     if (user) await enforceUserServiceLimit(user, "memo");
     const { caseType, clientName, court, courtCircuit, caseNumber, otherParty, partyRole, allParties, facts, requests, legalIssues, conversationTranscript, conversationSummary, assistantResearch, extraFields, documentKind, caseStage, legalRoute, preparationNotes } = validateMemoInput(raw);
     draftingInstructions=legalRouteInstructions(legalRoute);
+    requestStage = "payment";
     const entitlement = await reserveMemoPayment(raw);
     if (entitlement.result) return privateJson(entitlement.result);
     paymentLease = entitlement.lease;
     await enforceRateLimit(request, paymentLease ? `legal-memo-paid:${paymentLease.id}` : "legal-memo", 12, "hour");
+    requestStage = "saving";
     managementRequestId = await startMemoRequest({ ...extraFields, clientName, court, courtCircuit, caseNumber, caseType, partyRole, otherParty, allParties, facts, requests, legalIssues, documentKind, caseStage, legalRoute:legalRouteSummary(legalRoute) }, user, request.headers.get("origin") || new URL(request.url).origin);
+    requestStage = "generation";
     const matter=assessMatterFacts(facts+" "+requests+" "+allParties);
     if(!matter.ready && raw.draftMode !== availableEvidenceMode) {
       await finishMemoRequest(managementRequestId, "needs_information", "", "fact_clarification");
@@ -231,9 +236,14 @@ export async function POST(request: Request) {
       const caseQuality=caseQualitySummary(checkedPlan,caseAudit,content,sources.length);
       if(caseQuality.status==="incomplete") return pendingSourceReview(["incomplete_defense_coverage"]);
       signal.throwIfAborted();
+      requestStage = "saving";
       await finishMemoRequest(managementRequestId, "needs_review", finalMemo, "draft_generated");
-      if(user) await recordServiceActivity({userId:user.id,serviceType:"memo",title:`${document.title} — ${clientName}`,inputText:JSON.stringify({...memoInput,legalIssues}),outputText:finalMemo,metadata:{managementRequestId,sourceCount:sources.length,caseNumber,template:template.info,documentKind:document.kind,legalRoute:legalRouteSummary(legalRoute),pageSections:document.pages.length}});
+      if(user) {
+        try { await recordServiceActivity({userId:user.id,serviceType:"memo",title:`${document.title} — ${clientName}`,inputText:JSON.stringify({...memoInput,legalIssues}),outputText:finalMemo,metadata:{managementRequestId,sourceCount:sources.length,caseNumber,template:template.info,documentKind:document.kind,legalRoute:legalRouteSummary(legalRoute),pageSections:document.pages.length}}); }
+        catch { console.error("memo_account_archive_failed", { stage: "saved_draft_preserved", requestId: managementRequestId }); }
+      }
       const responseData = {requestId:managementRequestId,caseQuality,legalRoute:legalRouteSummary(legalRoute),legalDraftingRouteRevision,sourceCoverage:legalSourceCoverage(evidence),memo:finalMemo,document,template:template.info,sourceVerification:officialVerificationSummary(),memoControlRevision,defenseRevision,engineRevision:memoCompletenessRevision,pleadingStyleRevision,analysis:{sourceCount:sources.length,lawCount:sources.filter(s=>s.kind==="legislation").length,cassationCount:sources.filter(s=>s.kind==="cassation").length,sources,missingSources:!sources.length,researchNotice:caseQuality.status==="incomplete"?caseQuality.notices.join(" "):"",...(agentAudit?{agentAudit}:{})}};
+      requestStage = "payment";
       await completeMemoPayment(paymentLease, responseData);
       return privateJson(responseData);
     }
@@ -278,10 +288,10 @@ export async function POST(request: Request) {
   } catch (error) {
     if (managementRequestId) await finishMemoRequest(managementRequestId, request.signal.aborted ? "cancelled" : "failed", "", error instanceof RequestError ? `request_${error.status}` : "generation_failed").catch(() => undefined);
     const openAIError = openAIErrorResponse(error, "تعذر توليد المذكرة حالياً. يرجى المحاولة لاحقاً.");
-    if (openAIError) return privateJson({ error: openAIError.message, ...(managementRequestId ? { requestId: managementRequestId } : {}), serviceCode: openAIError.code, upstreamStatus: openAIError.upstreamStatus }, openAIError.status);
-    if (error instanceof RequestError && "stage" in error && "missingFacts" in error) return privateJson({ error: error.message, stage: error.stage, missingFacts: error.missingFacts, ...("legalRoute" in error ? {legalRoute:error.legalRoute} : {}) }, error.status);
-    if (error instanceof RequestError) return errorResponse(error);
-    return privateJson({ error: "تعذر توليد المذكرة حالياً. يرجى المحاولة لاحقاً." }, 503);
+    if (openAIError) return privateJson({ error: openAIError.message, ...(managementRequestId ? { requestId: managementRequestId } : {}), stage: requestStage, serviceCode: openAIError.code, upstreamStatus: openAIError.upstreamStatus }, openAIError.status);
+    if (error instanceof RequestError && "stage" in error && "missingFacts" in error) return privateJson({ error: error.message, stage: error.stage, missingFacts: error.missingFacts, ...(managementRequestId ? {requestId:managementRequestId} : {}), ...("legalRoute" in error ? {legalRoute:error.legalRoute} : {}) }, error.status);
+    if (error instanceof RequestError) return privateJson({ error: error.message, stage: requestStage, ...(managementRequestId ? {requestId:managementRequestId} : {}) }, error.status);
+    return privateJson({ error: "تعذر توليد المذكرة حالياً. يرجى المحاولة لاحقاً.", stage: requestStage, ...(managementRequestId ? {requestId:managementRequestId} : {}) }, 503);
   } finally {
     await releaseMemoPayment(paymentLease).catch(() => undefined);
   }

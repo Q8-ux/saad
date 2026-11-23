@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync, statSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { resolve, dirname } from 'node:path';
 import vm from 'node:vm';
@@ -37,7 +37,7 @@ function modules(states = {}, globals = {}) {
       if (name.startsWith('@/') || name.startsWith('.')) {
         const path = name.startsWith('@/') ? resolve(root,name.slice(2)) : resolve(dirname(file),name);
         if (path.endsWith('.json')) return JSON.parse(readFileSync(path,'utf8'));
-        const target = [path+'.ts',path+'.tsx',path+'/index.ts'].find(existsSync);
+        const target = [path,path+'.ts',path+'.tsx',path+'/index.ts'].find(candidate => existsSync(candidate) && statSync(candidate).isFile());
         if (!target) throw new Error('Missing test module: '+path);
         return load(target);
       }
@@ -53,6 +53,14 @@ const copy = load('app/site-content.ts').copy;
 const sample = {title:'مذكرة بدفاع', kind:'memorandum', template:{id:'synthetic',version:1,kind:'claim',title:'صحيفة الدعوى',sourceFilename:'approved-template.doc',sourceSha256:'synthetic',approvedAt:'2026-01-01'},paper:'A4',border:true,pages:[{title:'مذكرة بدفاع',court:'المحكمة الكلية',blocks:[{text:'وقائع اصطناعية للاختبار فقط. الرقم 0012/2026'}]}],reviewNotes:[],approval:''};
 const props = language => ({language,t:copy[language],token:'',initialSession:null,onSession(){},openBooking(){},startMemo(){}});
 const outsideMemo = html => html.replace(/<iframe\b[^>]*>[\s\S]*?<\/iframe>/g,'').replace(/<pre lang="ar" dir="rtl">[\s\S]*?<\/pre>/g,'');
+test('saved review keeps its record reference visible in every interface language', () => {
+  for(const language of ['ar','en','ur']) {
+    const {MemoWizard}=modules({step:2,status:'review',memoError:language==='ar'?'طلب اصطناعي يحتاج مراجعة':'Synthetic request requires review',memoFailure:{stage:'source_review',requestId:'synthetic-request-123',savedForReview:true}})('app/sabeq-site.tsx');
+    const html=renderToStaticMarkup(React.createElement(MemoWizard,props(language)));
+    assert.ok(html.includes('synthetic-request-123'));assert.ok(html.includes('role="status"'));
+    assert.ok(html.includes(modules()('lib/memo-submission.ts').memoSubmissionCopy(language,'source_review').review));
+  }
+});
 test('all languages retain one footer policy link and omit repeated privacy notices in tools', () => {
   for (const language of ['ar','en','ur']) {
     const components=modules({language})('app/sabeq-site.tsx');

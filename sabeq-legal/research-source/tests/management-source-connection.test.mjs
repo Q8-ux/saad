@@ -11,7 +11,7 @@ function harness({authenticated=false}={}){
   sqlite.exec(readFileSync(new URL('tests/fixtures/management-source-tables.sql',root),'utf8'));
   sqlite.exec(readFileSync(new URL('drizzle/0005_icy_dark_phoenix.sql',root),'utf8'));
   sqlite.exec(readFileSync(new URL('drizzle/0011_saved_memo_revisions.sql',root),'utf8'));
-  const db={prepare(sql){let args=[];return{bind(...values){args=values;return this;},async first(){return sqlite.prepare(sql).get(...args)||null;},async all(){return{results:sqlite.prepare(sql).all(...args)};},async run(){return sqlite.prepare(sql).run(...args);}};}};
+  const db={prepare(sql){let args=[];return{bind(...values){args=values;return this;},async first(){return sqlite.prepare(sql).get(...args)||null;},async all(){return{results:sqlite.prepare(sql).all(...args)};},async run(){const result=sqlite.prepare(sql).run(...args);return {success:true,meta:{changes:Number(result.changes)}};}};}};
   // Authentication routes and encrypted-vault isolation are covered by the full native management suite.
   const dependencies={'@/db':{getD1:()=>db},'@/lib/gmail':{sendSavedDraft:async()=>{}},'@/lib/management-auth':{digest:async value=>createHash('sha256').update(value).digest('hex'),base64url:value=>Buffer.from(value).toString('base64url'),sealConfig:async value=>JSON.stringify(value),openConfig:async value=>JSON.parse(value)},'@/lib/management-integrations':{SERVICE_ORIGIN:'https://sabeq-legal-public.centrino.chatgpt.site'},'@/lib/request-security':{RequestError:class extends Error{}}};
   function load(file){const exports={};vm.runInNewContext(ts.transpileModule(readFileSync(new URL(file,root),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{exports,require:name=>{if(name==='@/lib/management-data')return load('lib/management-data.ts');if(name==='@/lib/management-memo-revisions')return load('lib/management-memo-revisions.ts');if(!dependencies[name])throw Error('Unexpected test dependency: '+name);return dependencies[name];},crypto:webcrypto,TextEncoder,URL,URLSearchParams,AbortSignal,Request,Response,Headers,fetch:async url=>authenticated&&String(url)==='https://tuhxdirrffnxtosqaoiq.supabase.co/functions/v1/admin-verify'?Response.json({valid:true,role:'admin',must_change_password:false}):new Response('Not found',{status:404})});return exports;}
@@ -88,3 +88,16 @@ test('an accepted request reaches the shared list while running and its final no
  const finished=await data.managerMemos(url);assert.equal(finished.memos.length,1);assert.equal(finished.memos[0].id,id);assert.equal(finished.memos[0].status,'needs_information');assert.equal(Number(finished.memos[0].has_output),0);
  assert.ok(!Object.hasOwn(finished.memos[0],'input_json'));assert.ok(!Object.hasOwn(finished.memos[0],'output_text'));
 }finally{h.close();}});
+
+test('late empty failure retains a saved memorandum in the shared dashboard',async()=>{const h=harness();try{
+ const ledger=h.load('lib/memo-requests.ts'),data=h.load('lib/management-data.ts');
+ const id=await ledger.startMemoRequest({clientName:'اختبار اصطناعي'},null,'https://q8-ux.github.io');
+ const text='نص اصطناعي محفوظ دون إعادة توليد.';await ledger.finishMemoRequest(id,'needs_review',text,'draft_generated');
+ await ledger.finishMemoRequest(id,'failed','','generation_failed');
+ const row=(await data.managerMemos(new URL('https://test.invalid/api/management/memos?id='+id))).memo;
+ assert.equal(row.output_text,text);assert.equal(row.status,'needs_review');assert.equal(row.error_code,'draft_generated');
+ h.sqlite.prepare("UPDATE management_memo_requests SET output_text=?,error_code='manual_revision' WHERE id=?").run('تحرير بشري اصطناعي',id);
+ await ledger.finishMemoRequest(id,'needs_review','توليد آلي متأخر','draft_generated');
+ assert.equal(h.sqlite.prepare('SELECT output_text FROM management_memo_requests WHERE id=?').get(id).output_text,'تحرير بشري اصطناعي');
+}finally{h.close();}});
+
