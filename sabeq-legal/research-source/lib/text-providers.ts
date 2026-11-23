@@ -26,7 +26,7 @@ export function textProviderConfig(runtime: TextProviderEnvironment, provider = 
     meta: { apiKey: runtime.MODEL_API_KEY || runtime.META_API_KEY, model: runtime.META_MODEL || "muse-spark-1.3", endpoint: "https://api.meta.ai/v1/chat/completions" },
     groq: { apiKey: runtime.GROQ_API_KEY, model: runtime.GROQ_MODEL || "qwen/qwen3.8-27b", endpoint: "https://api.groq.com/openai/v1/chat/completions" },
     nvidia: { apiKey: runtime.NVIDIA_API_KEY, model: runtime.NVIDIA_MODEL || "", endpoint: "https://integrate.api.nvidia.com/v1/chat/completions" },
-    openrouter: { apiKey: runtime.OPENROUTER_API_KEY, model: runtime.OPENROUTER_MODEL || "", endpoint: "https://openrouter.ai/api/v1/chat/completions" },
+    openrouter: { apiKey: runtime.OPENROUTER_API_KEY, model: runtime.OPENROUTER_MODEL || runtime.OPENROUTER_FREE_MODEL || "", endpoint: "https://openrouter.ai/api/v1/chat/completions" },
     heretic: { apiKey: runtime.HERETIC_API_KEY, model: runtime.HERETIC_MODEL || "", endpoint: hereticEndpoint(runtime.HERETIC_CHAT_COMPLETIONS_URL) },
   };
   if (!Object.hasOwn(choices, provider)) throw new TextProviderError("configuration");
@@ -35,22 +35,35 @@ export function textProviderConfig(runtime: TextProviderEnvironment, provider = 
   const model = selected.model.trim();
   if (requireKey && !apiKey || !/^[a-zA-Z0-9._:/-]{1,180}$/.test(model) ||
       provider === "meta" && /(?:^|[-_:/])contributor(?:$|[-_:/])/i.test(model) ||
-      provider === "openrouter" && !model.endsWith(":free") ||
+      provider === "openrouter" && runtime.OPENROUTER_ALLOW_PAID !== "true" && !model.endsWith(":free") ||
       provider === "heretic" && !selected.endpoint) throw new TextProviderError("configuration");
   return { provider: provider as TextProvider, apiKey: apiKey || "", model, endpoint: selected.endpoint! };
+}
+
+export function textFallbackConfigs(runtime: TextProviderEnvironment, primaryProvider = runtime.LEGAL_AI_PROVIDER?.trim() || "openai", intake = false) {
+  const seen = new Set<string>([primaryProvider]);
+  const configs: Array<ReturnType<typeof textProviderConfig>> = [];
+  for (const raw of (runtime.LEGAL_AI_FALLBACK_PROVIDER || "").split(",")) {
+    const candidate = raw.trim();
+    if (!candidate || seen.has(candidate)) continue;
+    seen.add(candidate);
+    const candidateRuntime = candidate === "openrouter" && !runtime.OPENROUTER_MODEL?.trim() && !runtime.OPENROUTER_FREE_MODEL?.trim()
+      ? { ...runtime, OPENROUTER_MODEL: "meta-llama/llama-3.3-70b-instruct:free" }
+      : runtime;
+    try { configs.push(textProviderConfig(candidateRuntime, candidate, intake)); } catch { /* Unconfigured alternates are skipped without breaking active providers. */ }
+  }
+  return configs;
 }
 
 export function textProviderSummary(runtime: TextProviderEnvironment) {
   const provider = runtime.LEGAL_AI_PROVIDER?.trim() || "openai";
   let model: string | null = null;
   let configured = false;
-  let fallback: string | null = null;
   try { const config = textProviderConfig(runtime, undefined, false, false); model = config.model; configured = Boolean(config.apiKey); } catch { /* Configuration only; not a live provider probe. */ }
-  const alternate = runtime.LEGAL_AI_FALLBACK_PROVIDER?.trim();
-  if (alternate && alternate !== provider) {
-    try { fallback = textProviderConfig(runtime, alternate).provider; } catch { /* An absent alternate never changes the primary. */ }
-  }
-  return { textProvider: provider, textModel: model, textProviderConfigured: configured, textFallbackProvider: fallback, textFallbackPolicy: fallback ? "explicit-rejection-once" : null, textProviderRevision: "free-llm-routing-1" };
+  const fallbacks = textFallbackConfigs(runtime, provider).map(item => item.provider);
+  const fallback = fallbacks[0] || null;
+  const policy = fallbacks.length > 1 ? "explicit-rejection-chain" : fallbacks.length === 1 ? "explicit-rejection-once" : null;
+  return { textProvider: provider, textModel: model, textProviderConfigured: configured, textFallbackProvider: fallback, textFallbackProviders: fallbacks, textFallbackPolicy: policy, textProviderRevision: "free-llm-routing-1" };
 }
 
 // Text only. File IDs, audio and image payloads stay with their existing client.
@@ -64,13 +77,19 @@ export async function compatibleTextResponse(init: RequestInit, config: ReturnTy
   const tokenBudget = config.provider === "meta"
     ? { max_completion_tokens: tokenLimit, prompt_cache_retention: "in_memory" }
     : { max_tokens: tokenLimit };
+  const extraHeaders = config.provider === "openrouter"
+    ? { "HTTP-Referer": "https://www.sabeq.legal/", "X-Title": "Sabeq Legal" }
+    : {};
+  const privacyOptions = config.provider === "openrouter"
+    ? { provider: { data_collection: "deny" } }
+    : {};
   let response: Response;
   try {
     init.signal?.throwIfAborted();
     response = await transport(config.endpoint, {
       method: "POST", redirect: "manual",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${config.apiKey}` },
-      body: JSON.stringify({ model: config.model, messages: [{ role: "system", content: instructions }, { role: "user", content: body.input }], ...tokenBudget, stream: false, ...(schema ? { response_format: { type: "json_object" } } : {}) }),
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${config.apiKey}`, ...extraHeaders },
+      body: JSON.stringify({ model: config.model, messages: [{ role: "system", content: instructions }, { role: "user", content: body.input }], ...tokenBudget, ...privacyOptions, stream: false, ...(schema ? { response_format: { type: "json_object" } } : {}) }),
       signal: init.signal,
     });
   } catch (error) {

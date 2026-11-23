@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { load } from './template-harness.mjs';
-const { compatibleTextResponse, textProviderConfig, textProviderSummary } = load('../lib/text-providers.ts');
+const { compatibleTextResponse, textFallbackConfigs, textProviderConfig, textProviderSummary } = load('../lib/text-providers.ts');
 const config = textProviderConfig({ LEGAL_AI_PROVIDER: 'groq', GROQ_API_KEY: 'synthetic-private-groq' });
 const schema = { type: 'object', required: ['facts'], additionalProperties: false, properties: { facts: { type: 'string' } } };
 const init = (extra = {}) => ({ body: JSON.stringify({ instructions: 'لا تختلق مصدرًا.', input: 'وقائع اصطناعية فقط.', text: { format: { schema } }, ...extra }) });
@@ -121,6 +121,37 @@ test('Meta Model API enforces standard non-training models, in-memory cache, and
     assert.equal(body.user, undefined);
     assert.equal(body.safety_identifier, undefined);
     assert.doesNotMatch(request.body, /synthetic-meta-secret/);
+    return complete('{"facts":"وقائع اختبار اصطناعية فقط."}');
+  });
+  assert.equal((await res.json()).status, 'completed');
+});
+
+test('OpenRouter works alongside existing fallback providers and enforces data_collection=deny', async () => {
+  const runtime = {
+    LEGAL_AI_PROVIDER: 'openai',
+    OPENAI_API_KEY: 'synthetic-openai-secret',
+    LEGAL_AI_FALLBACK_PROVIDER: 'gemini,openrouter',
+    GEMINI_API_KEY: 'synthetic-gemini-secret',
+    OPENROUTER_API_KEY: 'synthetic-openrouter-secret',
+  };
+  const chain = textFallbackConfigs(runtime);
+  assert.deepEqual(Array.from(chain, item => item.provider), ['gemini', 'openrouter']);
+  assert.equal(chain[1].model, 'meta-llama/llama-3.3-70b-instruct:free');
+  const summary = textProviderSummary(runtime);
+  assert.equal(summary.textFallbackProvider, 'gemini');
+  assert.deepEqual(Array.from(summary.textFallbackProviders), ['gemini', 'openrouter']);
+  assert.equal(summary.textFallbackPolicy, 'explicit-rejection-chain');
+  assert.doesNotMatch(JSON.stringify(summary), /synthetic-(?:openai|gemini|openrouter)-secret/);
+
+  const res = await compatibleTextResponse(init(), chain[1], async (url, request) => {
+    assert.equal(url, 'https://openrouter.ai/api/v1/chat/completions');
+    assert.equal(request.redirect, 'manual');
+    assert.equal(request.headers.Authorization, 'Bearer synthetic-openrouter-secret');
+    assert.equal(request.headers['X-Title'], 'Sabeq Legal');
+    const body = JSON.parse(request.body);
+    assert.equal(body.model, 'meta-llama/llama-3.3-70b-instruct:free');
+    assert.deepEqual(body.provider, { data_collection: 'deny' });
+    assert.doesNotMatch(request.body, /synthetic-openrouter-secret/);
     return complete('{"facts":"وقائع اختبار اصطناعية فقط."}');
   });
   assert.equal((await res.json()).status, 'completed');

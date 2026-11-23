@@ -10,7 +10,7 @@ import { readSSE, partialAssistantMessage } from "./intake-stream";
 import { cleanIntakeContext, cleanCaseOrientation, proceduralFacts, isLegalChoiceQuestion, hasAsked, inferQuestionKey, knownTopicsFromMessages, normalizeQuestion, readQuestionMemory, updateQuestionMemory, validIntakeQuestion, type CaseOrientation, type QuestionMemory } from "./intake-context";
 import { env } from "cloudflare:workers";
 import { geminiTextResponse, GeminiServiceError } from "./gemini";
-import { compatibleTextResponse, textProviderConfig, TextProviderError, type TextProviderEnvironment } from "./text-providers";
+import { compatibleTextResponse, textFallbackConfigs, textProviderConfig, TextProviderError, type TextProviderEnvironment } from "./text-providers";
 import { prepareCaseContext, projectContextInstructions } from "./project-context";
 
 type OpenAIEnvironment = TextProviderEnvironment;
@@ -126,9 +126,9 @@ function getTextEnvironment(intake = false) {
   catch { throw new OpenAIServiceError("configuration"); }
 }
 
-async function textModelFetch(init: RequestInit, attempts = 3) {
+async function textModelFetch(init: RequestInit, attempts = 3, allowFallback = attempts > 1, intake = false) {
   const runtime = env as unknown as OpenAIEnvironment;
-  const primary = getTextEnvironment();
+  const primary = getTextEnvironment(intake);
   const budget = Math.max(1, Math.min(attempts, 3));
   async function run(config: ReturnType<typeof textProviderConfig>, count: number, request: RequestInit): Promise<Response> {
     if (request.signal?.aborted) throw new OpenAIServiceError("timeout");
@@ -158,24 +158,36 @@ async function textModelFetch(init: RequestInit, attempts = 3) {
       response = new Response(null, { status: error.upstreamStatus! });
     }
     if (init.signal?.aborted) throw new OpenAIServiceError("timeout");
-    const alternate = runtime.LEGAL_AI_FALLBACK_PROVIDER?.trim();
-    if (budget <= 1 || !alternate || alternate === primary.provider) {
-      if (primary.provider === "openai") return response;
-      throw new OpenAIServiceError(response.status === 429 ? "rate_limit" : "upstream", response.status === 429 ? 429 : 503, response.status);
-    }
-    let fallback: ReturnType<typeof textProviderConfig>;
-    try { fallback = textProviderConfig(runtime, alternate); }
-    catch {
+    const fallbacks = allowFallback ? textFallbackConfigs(runtime, primary.provider, intake) : [];
+    if (!fallbacks.length) {
       if (primary.provider === "openai") return response;
       throw new OpenAIServiceError(response.status === 429 ? "rate_limit" : "upstream", response.status === 429 ? 429 : 503, response.status);
     }
     const { model: _model, reasoning: _reasoning, ...body } = JSON.parse(String(init.body));
-    console.warn("Text provider fallback started", { from: primary.provider, to: fallback.provider, upstreamStatus: response.status });
-    return await run(fallback, 1, {
-      ...init, redirect: "manual",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${fallback.apiKey}` },
-      body: JSON.stringify({ ...body, model: fallback.model, ...(fallback.provider === "openai" ? responseModelOptions(fallback.model) : {}), store: false }),
-    });
+    let previousProvider = primary.provider;
+    let lastStatus = response.status;
+    for (let index = 0; index < fallbacks.length; index += 1) {
+      const fallback = fallbacks[index];
+      if (init.signal?.aborted) throw new OpenAIServiceError("timeout");
+      console.warn("Text provider fallback started", { from: previousProvider, to: fallback.provider, upstreamStatus: lastStatus });
+      try {
+        const candidateResponse = await run(fallback, 1, {
+          ...init, redirect: "manual",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${fallback.apiKey}` },
+          body: JSON.stringify({ ...body, model: fallback.model, ...(fallback.provider === "openai" ? responseModelOptions(fallback.model) : {}), store: false }),
+        });
+        if (candidateResponse.ok || ![429, 502, 503, 504].includes(candidateResponse.status) || index === fallbacks.length - 1) return candidateResponse;
+        previousProvider = fallback.provider;
+        lastStatus = candidateResponse.status;
+      } catch (fallbackError) {
+        if (init.signal?.aborted || !(fallbackError instanceof GeminiServiceError || fallbackError instanceof TextProviderError) || ![429, 502, 503, 504].includes(fallbackError.upstreamStatus || 0) || index === fallbacks.length - 1) {
+          throw fallbackError;
+        }
+        previousProvider = fallback.provider;
+        lastStatus = fallbackError.upstreamStatus!;
+      }
+    }
+    return response;
   } catch (error) {
     if (init.signal?.aborted) throw new OpenAIServiceError("timeout");
     if (error instanceof GeminiServiceError || error instanceof TextProviderError) throw new OpenAIServiceError(error.kind, error.status, error.upstreamStatus);
@@ -692,7 +704,7 @@ caseType لطبيعة الحق (مدني، تجاري، عمالي، أسرة، 
       input: JSON.stringify({ explicitProceduralFacts: statedProcedure, language: input.language, ...preparedContext, currentState, questionMemory: memory, verifiedLegalSources: input.evidence || "لا توجد نصوص قانونية مطابقة متاحة؛ لا تنشئ أسانيد من الذاكرة." }),
       ...responseModelOptions(model), text: { format: { type: "json_schema", name: "legal_case_intake", description: "Progressive Kuwait legal case intake and memo handoff state.", strict: true, schema: { ...compactIntakeSchema, properties: { ...compactIntakeSchema.properties, legalBasis: { ...legalIntakeSchema.properties.legalBasis, items: { ...legalIntakeSchema.properties.legalBasis.items, properties: { ...legalIntakeSchema.properties.legalBasis.items.properties, passageId: { type: "string", enum: input.passageIds?.length ? input.passageIds : ["unavailable"] } } } } } } } }, max_output_tokens: 4_500, store: false,
     }), signal: input.signal ? AbortSignal.any([input.signal, AbortSignal.timeout(45_000)]) : AbortSignal.timeout(45_000),
-  }, 1);
+  }, 1, true, true);
   if (!response.ok) await throwHttpError(response, "responses");
   let payload: OpenAIResponsePayload;
   if (input.onText) {

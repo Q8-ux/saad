@@ -158,3 +158,34 @@ test('Heretic text request preserves legal context and rejects incomplete output
     Response.json({ choices: [{ finish_reason: 'length', message: { content: 'partial' } }] }) });
   await assert.rejects(truncated.responses.create(input), /ai_response_incomplete/);
 });
+
+test('OpenRouter chains after Gemini fallback with data_collection=deny alongside existing providers', async () => {
+  const urls = [];
+  const client = createTextAiClient({
+    env: {
+      LEGAL_AI_PROVIDER: 'groq',
+      GROQ_API_KEY: 'synthetic-groq',
+      LEGAL_AI_FALLBACK_PROVIDER: 'gemini,openrouter',
+      GEMINI_API_KEY: 'synthetic-gemini',
+      OPENROUTER_API_KEY: 'synthetic-openrouter',
+    },
+    fetchImpl: async (url, init) => {
+      urls.push(url);
+      if (url.includes('groq.com')) return Response.json({}, { status: 429 });
+      if (url.includes('generativelanguage.googleapis.com')) return Response.json({}, { status: 503 });
+      assert.equal(url, 'https://openrouter.ai/api/v1/chat/completions');
+      assert.equal(init.headers.Authorization, 'Bearer synthetic-openrouter');
+      assert.equal(init.headers['X-Title'], 'Sabeq Legal');
+      const body = JSON.parse(init.body);
+      assert.equal(body.model, 'meta-llama/llama-3.3-70b-instruct:free');
+      assert.deepEqual(body.provider, { data_collection: 'deny' });
+      assert.doesNotMatch(init.body, /synthetic-openrouter/);
+      return Response.json({ choices: [{ finish_reason: 'stop', message: { content: 'مسودة مسندة عبر OpenRouter دون تدريب.' } }] });
+    },
+  });
+  assert.ok(client);
+  assert.match((await client.responses.create(input)).output_text, /OpenRouter/);
+  assert.equal(urls.length, 3);
+  assert.equal(urls[2], 'https://openrouter.ai/api/v1/chat/completions');
+  assert.match(openAiError({ status: 401, code: 'openrouter_request_failed' }).message, /مزود النص القانوني/);
+});

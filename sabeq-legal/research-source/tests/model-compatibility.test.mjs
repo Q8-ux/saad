@@ -401,3 +401,56 @@ test('Meta Model API serves both memo drafting and legal assistant intake with p
   await api.runLegalTool({ action: 'summary', text: 'وقائع اصطناعية', language: 'ar', evidence: '', passageIds: [] });
   assert.equal(calls.length, 5);
 });
+
+test('OpenRouter backs up memo generation and legal assistant alongside OpenAI and Gemini when both reject transiently', async () => {
+  const visited = [];
+  const memoSchema = { type: 'object', additionalProperties: false, required: ['facts'], properties: { facts: { type: 'string' } } };
+  const { api } = client('gpt-4.1-mini', async (url, init) => {
+    visited.push(url);
+    if (url.includes('api.openai.com')) return Response.json({ error: { code: 'rate_limit_exceeded' } }, { status: 429 });
+    if (url.includes('generativelanguage.googleapis.com')) return Response.json({ error: { status: 'RESOURCE_EXHAUSTED' } }, { status: 429 });
+    assert.equal(url, 'https://openrouter.ai/api/v1/chat/completions');
+    assert.equal(init.headers.Authorization, 'Bearer synthetic-openrouter-key');
+    const request = JSON.parse(init.body);
+    assert.equal(request.model, 'meta-llama/llama-3.3-70b-instruct:free');
+    assert.deepEqual(request.provider, { data_collection: 'deny' });
+    assert.doesNotMatch(init.body, /synthetic-openrouter-key/);
+    const marker = 'أعد JSON فقط مطابقًا لهذا المخطط، دون شرح أو Markdown:\n';
+    const sys = request.messages[0].content;
+    const idx = sys.lastIndexOf(marker);
+    function syntheticJson(schema) {
+      if (schema.anyOf) return syntheticJson(schema.anyOf[0]);
+      if (schema.enum) return schema.enum[0];
+      const types = Array.isArray(schema.type) ? schema.type : [schema.type];
+      if (types.includes('object')) return Object.fromEntries(Object.entries(schema.properties || {}).map(([k, child]) => [k, syntheticJson(child)]));
+      if (types.includes('array')) return [];
+      if (types.includes('boolean')) return false;
+      if (types.includes('integer') || types.includes('number')) return schema.minimum ?? 0;
+      return 'تمت المتابعة عبر سلسلة الإسناد القانونية.';
+    }
+    const content = idx >= 0 ? JSON.stringify(syntheticJson(JSON.parse(sys.slice(idx + marker.length)))) : 'نص اختبار فقط.';
+    return Response.json({ choices: [{ finish_reason: 'stop', message: { content } }] });
+  }, {
+    LEGAL_AI_PROVIDER: 'openai',
+    LEGAL_AI_FALLBACK_PROVIDER: 'gemini,openrouter',
+    GEMINI_API_KEY: 'synthetic-gemini-key',
+    OPENROUTER_API_KEY: 'synthetic-openrouter-key',
+  });
+
+  const drafted = await api.generateText({
+    instructions: 'لا تختلق مادة قانونية أو حكمًا.',
+    input: 'وقائع اختبارية لا تخص أي عميل.',
+    schema: memoSchema,
+  });
+  assert.equal(drafted, '{"facts":"تمت المتابعة عبر سلسلة الإسناد القانونية."}');
+  const intakeState = await api.conductLegalIntake({
+    language: 'ar',
+    messages: [{ role: 'user', content: 'استفسار اختباري للمساعد القانوني.' }],
+    evidence: '',
+  });
+  assert.match(intakeState.assistantMessage, /سلسلة الإسناد/);
+  assert.equal(visited.length, 6);
+  assert.match(visited[0], /api\.openai\.com/);
+  assert.match(visited[1], /generativelanguage\.googleapis\.com/);
+  assert.equal(visited[2], 'https://openrouter.ai/api/v1/chat/completions');
+});

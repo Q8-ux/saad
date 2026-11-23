@@ -26,6 +26,7 @@ export function openRouterRequest(body: ResponsesPayload, model = DEFAULT_FREE_L
     ],
     stream: false, // Convert a validated complete response to Responses-style SSE below.
     max_tokens: Math.max(512, Math.min(body.max_output_tokens || 4096, 16000)),
+    provider: { data_collection: "deny" },
     ...(body.text?.format?.type === "json_schema" && body.text.format.schema ? {
       response_format: {
         type: "json_schema",

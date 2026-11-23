@@ -19,12 +19,12 @@ function textAiConfig(env = process.env) {
     meta: { key: env.MODEL_API_KEY, model: env.META_MODEL || 'muse-spark-1.3' },
     groq: { key: env.GROQ_API_KEY, model: env.GROQ_MODEL || 'qwen/qwen3.8-27b', endpoint: 'https://api.groq.com/openai/v1/chat/completions' },
     nvidia: { key: env.NVIDIA_API_KEY, model: env.NVIDIA_MODEL || '', endpoint: 'https://integrate.api.nvidia.com/v1/chat/completions' },
-    openrouter: { key: env.OPENROUTER_API_KEY, model: env.OPENROUTER_MODEL || '', endpoint: 'https://openrouter.ai/api/v1/chat/completions' },
+    openrouter: { key: env.OPENROUTER_API_KEY, model: env.OPENROUTER_MODEL || env.OPENROUTER_FREE_MODEL || '', endpoint: 'https://openrouter.ai/api/v1/chat/completions' },
     heretic: { key: env.HERETIC_API_KEY, model: env.HERETIC_MODEL || '', endpoint: hereticEndpoint(env.HERETIC_CHAT_COMPLETIONS_URL) },
   };
   const selected = Object.hasOwn(choices, provider) ? choices[provider] : undefined;
   const model = selected?.model.trim() || '';
-  return { provider, model, apiKey: selected?.key?.trim() || '', endpoint: selected?.endpoint, configured: Boolean(selected?.key?.trim() && /^[a-zA-Z0-9._:/-]{1,180}$/.test(model) && (provider !== 'openrouter' || model.endsWith(':free')) && (provider !== 'heretic' || Boolean(selected?.endpoint))) };
+  return { provider, model, apiKey: selected?.key?.trim() || '', endpoint: selected?.endpoint, configured: Boolean(selected?.key?.trim() && /^[a-zA-Z0-9._:/-]{1,180}$/.test(model) && (provider !== 'openrouter' || env.OPENROUTER_ALLOW_PAID === 'true' || model.endsWith(':free')) && (provider !== 'heretic' || Boolean(selected?.endpoint))) };
 }
 
 function aiError(code, status = 503) {
@@ -37,10 +37,12 @@ function createSingleTextAiClient({ env = process.env, OpenAI, fetchImpl = fetch
   if (['groq', 'nvidia', 'openrouter', 'heretic'].includes(config.provider)) return { responses: { create: async (input, options = {}) => {
     if (typeof input.input !== 'string' || typeof input.instructions !== 'string') throw aiError('unsupported_text_input', 400);
     options.signal?.throwIfAborted();
+    const extraHeaders = config.provider === 'openrouter' ? { 'HTTP-Referer': 'https://www.sabeq.legal/', 'X-Title': 'Sabeq Legal' } : {};
+    const privacyOptions = config.provider === 'openrouter' ? { provider: { data_collection: 'deny' } } : {};
     const response = await fetchImpl(config.endpoint, {
       method: 'POST', redirect: 'error',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${config.apiKey}` },
-      body: JSON.stringify({ model: config.model, messages: [{ role: 'system', content: input.instructions }, { role: 'user', content: input.input }], max_tokens: input.max_output_tokens || 16000, stream: false, ...(typeof input.temperature === 'number' ? { temperature: input.temperature } : {}) }),
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${config.apiKey}`, ...extraHeaders },
+      body: JSON.stringify({ model: config.model, messages: [{ role: 'system', content: input.instructions }, { role: 'user', content: input.input }], max_tokens: input.max_output_tokens || 16000, ...privacyOptions, stream: false, ...(typeof input.temperature === 'number' ? { temperature: input.temperature } : {}) }),
       signal: options.signal ? AbortSignal.any([options.signal, AbortSignal.timeout(75000)]) : AbortSignal.timeout(75000),
     });
     if (!response.ok) throw aiError(`${config.provider}_request_failed`, response.status);
@@ -93,15 +95,39 @@ function createTextAiClient(options = {}) {
   if (!primary) return null;
   const config = textAiConfig(env);
   return { responses: { create: async (input, requestOptions = {}) => {
+    const isTransientRejection = (err, provider) => !requestOptions.signal?.aborted &&
+      (/^(?:groq|nvidia|openrouter|heretic|gemini|meta)_request_failed$/.test(err?.code || '') || provider === 'openai' && typeof err?.status === 'number') &&
+      [429, 502, 503, 504].includes(err?.status);
+    let lastError;
     try { return await primary.responses.create(input, requestOptions); }
     catch (error) {
-      const alternate = env.LEGAL_AI_FALLBACK_PROVIDER?.trim().toLowerCase();
-      const explicitRejection = /^(?:groq|nvidia|openrouter|heretic|gemini|meta)_request_failed$/.test(error.code || '') || config.provider === 'openai' && typeof error.status === 'number';
-      if (requestOptions.signal?.aborted || !explicitRejection || ![429, 502, 503, 504].includes(error.status) || !alternate || alternate === config.provider) throw error;
-      const fallback = createSingleTextAiClient({ ...options, env: { ...env, LEGAL_AI_PROVIDER: alternate } });
-      if (!fallback) throw error;
-      return fallback.responses.create(input, requestOptions);
+      if (!isTransientRejection(error, config.provider)) throw error;
+      lastError = error;
     }
+    const seen = new Set([config.provider]);
+    const alternates = (env.LEGAL_AI_FALLBACK_PROVIDER || '').split(',').map(item => item.trim().toLowerCase()).filter(item => {
+      if (!item || seen.has(item)) return false;
+      seen.add(item);
+      return true;
+    });
+    for (let index = 0; index < alternates.length; index += 1) {
+      const alternate = alternates[index];
+      const fallbackEnv = {
+        ...env,
+        LEGAL_AI_PROVIDER: alternate,
+        ...(alternate === 'openrouter' && !env.OPENROUTER_MODEL?.trim() && !env.OPENROUTER_FREE_MODEL?.trim()
+          ? { OPENROUTER_MODEL: 'meta-llama/llama-3.3-70b-instruct:free' }
+          : {}),
+      };
+      const fallback = createSingleTextAiClient({ ...options, env: fallbackEnv });
+      if (!fallback) continue;
+      try { return await fallback.responses.create(input, requestOptions); }
+      catch (fallbackError) {
+        lastError = fallbackError;
+        if (!isTransientRejection(fallbackError, alternate) || index === alternates.length - 1) throw fallbackError;
+      }
+    }
+    throw lastError;
   } } };
 }
 

@@ -3,7 +3,7 @@
 function openAiError(error) {
   const status = Number(error?.status || error?.response?.status || 0);
   const code = error?.code || error?.error?.code;
-  if (/^(gemini|meta)_request_failed$/.test(String(code))) {
+  if (/^(gemini|meta|openrouter|groq|nvidia|heretic)_request_failed$/.test(String(code))) {
     if (status === 401 || status === 403) return { status: 503, message: 'مفتاح مزود النص القانوني غير صالح أو غير مفعل على الخادم.' };
     if (status === 404) return { status: 503, message: 'النموذج المحدد غير متاح لدى مزود النص القانوني.' };
   }
