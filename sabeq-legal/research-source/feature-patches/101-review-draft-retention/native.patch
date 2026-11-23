@@ -1,0 +1,116 @@
+diff --git a/app/api/legal/memo/route.ts b/app/api/legal/memo/route.ts
+index 94ba157..f46fa9a 100644
+--- a/app/api/legal/memo/route.ts
++++ b/app/api/legal/memo/route.ts
+@@ -218,10 +218,15 @@ export async function POST(request: Request) {
+         try {
+           caseAudit = parseGroundedCaseAudit(auditText,auditRequest,checkedPlan,content,evidence);
+         } catch {
+-          // A malformed audit blocks delivery but the submitted case is already
+-          // saved. Preserve its actual review stage for the client and dashboard.
+-          await finishMemoRequest(managementRequestId,"needs_review","","defense_review");
+-          return privateJson({requestId:managementRequestId,error:"لم تكتمل مراجعة اتساق الدفوع والوقائع. احتفظ ببياناتك وأعد المحاولة.",stage:"defense_review"},422);
++          // Retain a screened candidate for authorized office review only. The
++          // incomplete audit still blocks visitor delivery and payment completion.
++          const normalized = (value:string)=>value.normalize("NFKC").replace(/【[^】]*】|\[[^\]]*\]/gu,"").replace(/\s+/gu," ").trim();
++          const standaloneGrounds = normalized(content.grounds).split(normalized(content.facts)).join("").split(normalized(content.requests)).join("");
++          const reviewDraftSaved = contentReview.ok && routeReview.ok && finalCitations.ok && evidence.length > 0
++            && /【\s*م\d+\s*】|\[\s*م\d+\s*\]/u.test(content.grounds) && standaloneGrounds.replace(/\s/gu,"").length >= 120;
++          const reviewDraft = reviewDraftSaved ? pleadingText(buildPleadingDocument(template.info,template.definition,kind,memoInput,content,referenceStyle.memorandumTitle)) : "";
++          await finishMemoRequest(managementRequestId,"needs_review",reviewDraft,"defense_review");
++          return privateJson({requestId:managementRequestId,error:reviewDraftSaved?"حُفظت مسودة المذكرة للمراجعة في لوحة التحكم. لم تكتمل مراجعة اتساق الدفوع والوقائع؛ لم تُعتمد المسودة ولم يُصرف استحقاق الدفع.":"لم تكتمل مراجعة اتساق الدفوع والوقائع. احتفظ ببياناتك وأعد المحاولة.",stage:"defense_review",reviewDraftSaved},422);
+         }
+         if(!caseAudit.ok || !contentReview.ok || !routeReview.ok) {
+           if(qualityRetried&&!paymentLease&&!content.grounds.trim()&&caseAudit.roleConsistent&&caseAudit.factsPreserved&&caseAudit.reliefConsistent&&!caseAudit.unsupportedAssertions.length&&caseAudit.checks.every(check=>check.status==="blocked"))return pendingSourceReview(["defense_research_pending"]);
+diff --git a/specs/101-review-draft-retention/plan.md b/specs/101-review-draft-retention/plan.md
+new file mode 100644
+index 0000000..285e331
+--- /dev/null
++++ b/specs/101-review-draft-retention/plan.md
+@@ -0,0 +1,6 @@
++# الخطة
++1. اختبار انحدار في مسار API الحالي ببيانات اصطناعية؛ فحص سبب الفشل قبل التعديل.
++2. تعديل فرع خطأ تحليل المراجعة فقط: بناء النص بالقالب الحالي وحفظه للمراجعة عند اجتياز الفحوص المتاحة ووجود دفاع مستقل.
++3. منع إعادة توصيف المسودة كنجاح أو صرف الاستحقاق. عدم تغيير الجداول أو الصلاحيات أو الوصول إلى النص.
++4. تشغيل الاختبارات والبناء وفحص بصمات المحرك، ثم نشر المصدر ومزامنة فرق GitHub المحدود.
++5. توليد القضية التي اختارها المستخدم، وفحص محتوى المسودة وحفظه في اللوحة؛ تحديد أي مراجعة لم تكتمل دون ادعاء اعتمادها.
+diff --git a/specs/101-review-draft-retention/spec.md b/specs/101-review-draft-retention/spec.md
+new file mode 100644
+index 0000000..84c9fb2
+--- /dev/null
++++ b/specs/101-review-draft-retention/spec.md
+@@ -0,0 +1,13 @@
++# الاحتفاظ بمسودة المذكرة للمراجعة
++
++المطلوب توليد نص بدفوع وأسانيد، لا عرض نسخة من بيانات الطلب. في النسخة 232 يعيد تعذر تحليل المراجعة المستقلة حالة defense_review لكنه يمحو فرصة مراجعة النص الذي صاغه الكاتب.
++
++## النطاق
++- لا تتغير تعليمات الكاتب أو المراجع أو النماذج أو المصادر أو القوالب.
++- إذا اجتاز النص فحوص الاستشهادات النهائية وبنية المستند ومسار القضية، واحتوى دفاعًا مستقلًا عن نسخ الوقائع والطلبات، يحتفظ سجل المكتب بالنص كمسودة needs_review / defense_review عند تعذر تحليل المراجعة المستقلة.
++- يبقى رد الزائر 422 دون نص أو مستند أو اعتماد، مع بيان أن المسودة متاحة للمراجعة في اللوحة. لا صرف دفع ولا أرشيف نجاح.
++- لا يحتفظ بهذا المسار بوقائع فقط أو طلبات فقط أو مسودة بلا مصادر أو أقسامها ناقصة أو مسارها مخالف.
++- لا تسجل بيانات أي قضية حقيقية في المصدر أو سجلات الأخطاء أو الاختبارات.
++
++## القبول
++يثبت اختبار API فقد النص في النسخة السابقة ثم الاحتفاظ بالنص الحقيقي قيد المراجعة، مع استمرار حجب التسليم والدفع. اختبارات النسخ والنقص والمصادر المخالفة تبقى محجوبة. يُفحص النص المحفوظ داخل اللوحة بعد النشر.
+diff --git a/specs/101-review-draft-retention/tasks.md b/specs/101-review-draft-retention/tasks.md
+new file mode 100644
+index 0000000..7c9d636
+--- /dev/null
++++ b/specs/101-review-draft-retention/tasks.md
+@@ -0,0 +1,6 @@
++# المهام
++- [x] T001 إثبات فقد المسودة باختبار انحدار مستقل.
++- [x] T002 الاحتفاظ بمسودة ذات دفاع مستقل بعد فحوص المصدر والبنية والمسار؛ بقاء 422 وعدم صرف الدفع.
++- [x] T003 فحص رفض الوقائع المنسوخة والنص الناقص وتغير المسار والمصادر غير المجتازة.
++- [x] T004 الاختبارات والبناء وحماية تعليمات وقوالب المحرك.
++- [ ] T005 النشر وفحص النص الفعلي في اللوحة وتوثيق حدود المراجعة.
+diff --git a/specs/101-review-draft-retention/validation.md b/specs/101-review-draft-retention/validation.md
+new file mode 100644
+index 0000000..afed576
+--- /dev/null
++++ b/specs/101-review-draft-retention/validation.md
+@@ -0,0 +1,7 @@
++# دليل الفحص
++- فشل اختبار API أولًا لأن الرد لم يثبت الاحتفاظ بالنص الفعلي؛ ظهر reviewDraftSaved غير موجود ولم يحتفظ السجل بالنص.
++- بعد الإصلاح نجحت 36 حالة لمسار التوليد وحماية المحتوى. بقيت حالات نسخ المدخلات وغياب الطلبات ومسار القضية الخاطئ بلا نص محفوظ؛ بقي الرد 422 ولم يصل نص المذكرة أو المستند للزائر ولم يُصرف الدفع.
++- يبنى النص المحفوظ من خرج الكاتب بالقالب الحالي، بعد فحص الاستشهادات وبنية المستند والمسار، مع وجود مصدر مشار إليه ودفاع مستقل عن الوقائع والطلبات. لا تُعد عتبة التفريق النصي مراجعة قانونية أو بديلًا عن فحص الدفوع.
++- لا تتغير تعليمات الكاتب أو المراجع ولا القالب أو مخطط قاعدة البيانات أو الصلاحيات. فحص البصمات يحافظ على 87 ملفًا محميًا وتعليمات النموذج المطابقة للنسخة الأساسية.
++- فحوص الإصدار والبناء والنشر وفحص اللوحة تُسجل بعد اكتمالها؛ لا يُدّعى اعتماد مسودة لم يكتمل تدقيقها.
++- اكتملت بوابات الجودة الست و404 اختبارات إصدار داخلي: مصادر 42، مذكرات 250، وصول 112. نجح بناء Worker وفحص تعليمات النموذج والملفات المحمية. نجحت أيضًا 31 حالة توافق للمراجعة والقوالب. فحص النشر الحي ما زال معلقًا عند تجميد هذه النسخة.
+diff --git a/tests/agent-pipeline.test.mjs b/tests/agent-pipeline.test.mjs
+index eb7a019..4204766 100644
+--- a/tests/agent-pipeline.test.mjs
++++ b/tests/agent-pipeline.test.mjs
+@@ -155,14 +155,29 @@ test('payment completion failure remains visible with the saved request referenc
+  const route=memoRoute(h,{complete:async()=>{throw Error('synthetic payment outage');},pipeline:{agentPipelineEnabled:()=>true,generateAgentPleading:async()=>({content:{...content},audit:{}})},ledger:{startMemoRequest:async()=> 'synthetic-payment-memo',finishMemoRequest:async()=>{}}});
+  const response=await route.POST(request());assert.equal(response.status,503);const data=await response.json();assert.equal(data.requestId,'synthetic-payment-memo');assert.equal(data.stage,'payment');assert.doesNotMatch(JSON.stringify(data),/synthetic payment outage/);
+ });
+-test('a malformed independent audit remains saved for defense review without a success archive or payment',async t=>{
++test('a malformed independent audit retains the screened actual draft privately without a success archive or payment',async t=>{
+  const h=templateHarness();t.after(h.cleanup);const saved=[];let completed=0,archived=0;
+  const route=memoRoute(h,{paid:true,complete:async()=>{completed++;},record:async()=>{archived++;},pipeline:{agentPipelineEnabled:()=>true,generateAgentPleading:async()=>({content:{...content},audit:{}})},ledger:{startMemoRequest:async()=> 'synthetic-malformed-audit',finishMemoRequest:async(...row)=>saved.push(row)},model:async options=>{
+   if(options.schema?.properties?.clientRole) return JSON.stringify({clientRole:caseData.partyRole,opponentRole:'مدعى عليه',characterization:'مطالبة',issues:[{issue:'المبلغ',factQuote:'مبلغ لم يتم سداده',document:'',sourceMarkers:['م1'],application:'فحص أصل المطالبة',counterargument:'منازعة السداد',response:'فحص المستند',proposedRelief:caseData.requests,missing:''}],missingFacts:[],researchGaps:[]});
+   if(options.schema?.properties?.checks) return '{invalid audit response';
+   throw Error('unexpected model call');
+  }});
+- const response=await route.POST(request());assert.equal(response.status,422);const data=await response.json();assert.equal(data.requestId,'synthetic-malformed-audit');assert.equal(data.stage,'defense_review');assert.equal(data.memo,undefined);assert.equal(data.document,undefined);assert.deepEqual(saved.at(-1),['synthetic-malformed-audit','needs_review','','defense_review']);assert.equal(completed,0);assert.equal(archived,0);assert.doesNotMatch(JSON.stringify(data),/invalid audit response/);
++ const response=await route.POST(request());assert.equal(response.status,422);const data=await response.json();assert.equal(data.requestId,'synthetic-malformed-audit');assert.equal(data.stage,'defense_review');assert.equal(data.memo,undefined);assert.equal(data.document,undefined);assert.equal(data.reviewDraftSaved,true);assert.equal(saved.at(-1)[0],'synthetic-malformed-audit');assert.equal(saved.at(-1)[1],'needs_review');assert.equal(saved.at(-1)[3],'defense_review');assert.ok(saved.at(-1)[2].includes(reasoning.applicationQuote));assert.ok(saved.at(-1)[2].includes(reasoning.opposingQuote));assert.ok(saved.at(-1)[2].includes(reasoning.responseQuote));assert.notEqual(saved.at(-1)[2],caseData.facts);assert.equal(completed,0);assert.equal(archived,0);assert.doesNotMatch(JSON.stringify(data),/invalid audit response/);
++});
++test('malformed audit retention never turns copied intake, missing relief or a wrong route into a saved memorandum',async t=>{
++ for(const [name,candidate] of [
++  ['copied-intake',{...content,grounds:caseData.facts+' '+caseData.requests+' 【م1】'}],
++  ['missing-relief',{...content,requests:''}],
++  ['wrong-route',{...content,grounds:'مذكرة بدفاع جنح\n'+content.grounds}],
++ ]) await t.test(name,async()=>{
++  const h=templateHarness();t.after(h.cleanup);const saved=[];let completed=0,archived=0;
++  const route=memoRoute(h,{paid:true,complete:async()=>{completed++;},record:async()=>{archived++;},pipeline:{agentPipelineEnabled:()=>true,generateAgentPleading:async()=>({content:candidate,audit:{}})},ledger:{startMemoRequest:async()=> 'synthetic-rejected-draft',finishMemoRequest:async(...row)=>saved.push(row)},model:async options=>{
++   if(options.schema?.properties?.clientRole) return JSON.stringify({clientRole:caseData.partyRole,opponentRole:'مدعى عليه',characterization:'مطالبة',issues:[{issue:'المبلغ',factQuote:'مبلغ لم يتم سداده',document:'',sourceMarkers:['م1'],application:'فحص أصل المطالبة',counterargument:'منازعة السداد',response:'فحص المستند',proposedRelief:caseData.requests,missing:''}],missingFacts:[],researchGaps:[]});
++   if(options.schema?.properties?.checks) return '{invalid audit response';
++   throw Error('unexpected model call');
++  }});
++  const response=await route.POST(request());assert.equal(response.status,422);const data=await response.json();assert.equal(data.reviewDraftSaved,false);assert.equal(data.memo,undefined);assert.equal(saved.at(-1)[1],'needs_review');assert.equal(saved.at(-1)[2],'');assert.equal(completed,0);assert.equal(archived,0);
++ });
+ });
+ test('auth failure cannot reach agents; enabled worker failure is not silently bypassed',async t=>{
+  const h=templateHarness();t.after(h.cleanup);let calls=0;

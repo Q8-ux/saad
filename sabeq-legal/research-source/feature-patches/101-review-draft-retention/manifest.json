@@ -1,0 +1,18 @@
+{
+  "nativeVersion": 233,
+  "nativeCommit": "1b7693297f9bd307b4ade33891d6101f686c06e0",
+  "nativeBase": "fec514f892bca647280798298c07e9fdfe6e0cfe",
+  "nativeDeployment": "appgdep_6b043185c7fc8191a21be51aa54a8462",
+  "publishedAt": "2026-11-23T12:29:12.830321+00:00",
+  "internalChecksPassed": 404,
+  "focusedApiAndProtectionChecks": 36,
+  "compatibilityChecks": 31,
+  "protectedFilesUnchanged": 87,
+  "instructionsUnchanged": true,
+  "privateReviewOnly": true,
+  "visitorResponseStatus": 422,
+  "paymentCompletionOnIncompleteAudit": false,
+  "nativePatchSha256": "916e00055932ec51cf8919b7fdfd813fcc32b4592a524471637df8270e07dbf3",
+  "liveDraftVerified": true,
+  "liveOfficeRevisionVerified": true
+}

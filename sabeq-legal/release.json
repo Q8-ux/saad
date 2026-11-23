@@ -1,7 +1,7 @@
 {
   "release": "2026-11-23-memo-submission-recovery",
-  "clientSource": "fec514f892bca647280798298c07e9fdfe6e0cfe",
-  "backendSource": "fec514f892bca647280798298c07e9fdfe6e0cfe",
+  "clientSource": "1b7693297f9bd307b4ade33891d6101f686c06e0",
+  "backendSource": "1b7693297f9bd307b4ade33891d6101f686c06e0",
   "assistant": "indirect-intake-completeness-1",
   "voice": "gulf-male-voice-4",
   "tools": "legal-tools-1",
@@ -28,7 +28,7 @@
   "interfaceLocalization": "ar-en-ur-tools-guidance-1",
   "memoProseLanguage": "arabic-with-protected-names-and-identifiers-1",
   "builtAt": "2026-11-23",
-  "backendVersion": 232,
+  "backendVersion": 233,
   "pleadingLayout": "first-page-only-sidebar-and-frame-full-width-right-aligned-continuations",
   "citationCorrection": "one-bounded-server-retry-before-archive",
   "legalSourceDirectory": "6-catalogues-3-fetched-0-new-citable-pdfs",
@@ -285,5 +285,14 @@
     "malformedAuditSavedForDefenseReview": true,
     "liveCompleteMemoGenerated": false,
     "livePreparationRequestCountVerified": false
+  },
+  "memoReviewDraftRetention": {
+    "nativeVersion": 233,
+    "nativeCommit": "1b7693297f9bd307b4ade33891d6101f686c06e0",
+    "internalChecksPassed": 404,
+    "privateReviewOnly": true,
+    "visitorResponseStatus": 422,
+    "instructionsUnchanged": true,
+    "liveDraftVerified": true
   }
 }

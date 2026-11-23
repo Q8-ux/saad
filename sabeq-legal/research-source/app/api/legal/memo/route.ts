@@ -218,10 +218,15 @@ export async function POST(request: Request) {
         try {
           caseAudit = parseGroundedCaseAudit(auditText,auditRequest,checkedPlan,content,evidence);
         } catch {
-          // A malformed audit blocks delivery but the submitted case is already
-          // saved. Preserve its actual review stage for the client and dashboard.
-          await finishMemoRequest(managementRequestId,"needs_review","","defense_review");
-          return privateJson({requestId:managementRequestId,error:"لم تكتمل مراجعة اتساق الدفوع والوقائع. احتفظ ببياناتك وأعد المحاولة.",stage:"defense_review"},422);
+          // Retain a screened candidate for authorized office review only. The
+          // incomplete audit still blocks visitor delivery and payment completion.
+          const normalized = (value:string)=>value.normalize("NFKC").replace(/【[^】]*】|\[[^\]]*\]/gu,"").replace(/\s+/gu," ").trim();
+          const standaloneGrounds = normalized(content.grounds).split(normalized(content.facts)).join("").split(normalized(content.requests)).join("");
+          const reviewDraftSaved = contentReview.ok && routeReview.ok && finalCitations.ok && evidence.length > 0
+            && /【\s*م\d+\s*】|\[\s*م\d+\s*\]/u.test(content.grounds) && standaloneGrounds.replace(/\s/gu,"").length >= 120;
+          const reviewDraft = reviewDraftSaved ? pleadingText(buildPleadingDocument(template.info,template.definition,kind,memoInput,content,referenceStyle.memorandumTitle)) : "";
+          await finishMemoRequest(managementRequestId,"needs_review",reviewDraft,"defense_review");
+          return privateJson({requestId:managementRequestId,error:reviewDraftSaved?"حُفظت مسودة المذكرة للمراجعة في لوحة التحكم. لم تكتمل مراجعة اتساق الدفوع والوقائع؛ لم تُعتمد المسودة ولم يُصرف استحقاق الدفع.":"لم تكتمل مراجعة اتساق الدفوع والوقائع. احتفظ ببياناتك وأعد المحاولة.",stage:"defense_review",reviewDraftSaved},422);
         }
         if(!caseAudit.ok || !contentReview.ok || !routeReview.ok) {
           if(qualityRetried&&!paymentLease&&!content.grounds.trim()&&caseAudit.roleConsistent&&caseAudit.factsPreserved&&caseAudit.reliefConsistent&&!caseAudit.unsupportedAssertions.length&&caseAudit.checks.every(check=>check.status==="blocked"))return pendingSourceReview(["defense_research_pending"]);
