@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#fffc00">
+  <meta name="description" content="خوارزميات — قبل لا تنشر. حلقة تفاعلية رأسية من تأليف سعد روضان. خمس دقائق قد تغيّر قراءتك للمشهد.">
+  <title>خوارزميات | قبل لا تنشر</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <svg class="icon-defs" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="m8 5 11 7-11 7z" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><path d="M7 5h3v14H7zm7 0h3v14h-3z" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="M7 5v14m12-14L8 12l11 7z"/></symbol>
+    <symbol id="i-next" viewBox="0 0 24 24"><path d="M17 5v14M5 5l11 7L5 19z"/></symbol>
+    <symbol id="i-sound" viewBox="0 0 24 24"><path d="m11 5-5 4H3v6h3l5 4zm4 3a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/></symbol>
+    <symbol id="i-muted" viewBox="0 0 24 24"><path d="m11 5-5 4H3v6h3l5 4zm5 4 5 6m0-6-5 6"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M6 18 18 6"/></symbol>
+    <symbol id="i-lens" viewBox="0 0 24 24"><path d="M3 8h4l2-3h6l2 3h4v12H3z"/><circle cx="12" cy="13" r="4"/></symbol>
+    <symbol id="i-like" viewBox="0 0 24 24"><path d="M20 5c-3-3-7-1-8 1-1-2-5-4-8-1-4 4 0 9 8 15 8-6 12-11 8-15Z"/></symbol>
+    <symbol id="i-save" viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4z"/></symbol>
+    <symbol id="i-share" viewBox="0 0 24 24"><path d="M12 15V3m-4 4 4-4 4 4M5 12v9h14v-9"/></symbol>
+    <symbol id="i-proof" viewBox="0 0 24 24"><path d="M5 3h14v18H5zm4 5h6m-6 4h6m-6 4h3"/></symbol>
+    <symbol id="i-repeat" viewBox="0 0 24 24"><path d="M4 9a8 8 0 1 1 0 7M4 3v6h6"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+    <symbol id="i-phone" viewBox="0 0 24 24"><path d="m5 3 5 4-3 4c2 3 3 4 6 6l4-3 4 5c-1 5-8 2-13-3S0 4 5 3Z"/></symbol>
+  </defs></svg>
+
+  <main class="workspace">
+    <aside class="intro" aria-label="عن الحلقة">
+      <a class="wordmark" href="#" id="brandHome" aria-label="بداية خوارزميات"><span class="brand-mark"><i></i><i></i><i></i></span>خوارزميات</a>
+      <div class="intro-main"><p class="eyebrow">مسلسل تفاعلي رأسي · الحلقة الأولى</p><h1>كل واحد<br>شاف <em>نسخة.</em></h1><p class="intro-copy">مقطع ناقص. حساب يتكلم مكان صاحبته.<br>وثلاث دقات ما كان المفروض توصل للباب.</p><p class="author">تأليف سعد روضان</p></div>
+      <div class="intro-bottom"><p><span class="yellow-dot"></span> خمس دقائق داخل شاشة دانا</p><p class="quiet">الأحداث والحسابات والترندات جزء من عالم القصة. التوصيات تتغيّر بتفاعلك على هذا الجهاز.</p><a class="source-link" id="sourceLink" hidden href="https://github.com/Q8-ux/saad/tree/main/khawarizmiat-demo" target="_blank" rel="noopener">ملفات المشروع على GitHub</a></div>
+    </aside>
+
+    <section class="player-column" aria-label="مشغّل الحلقة">
+      <div class="mobile-brand"><span class="brand-mark"><i></i><i></i><i></i></span><strong>خوارزميات</strong><span>قبل لا تنشر</span></div>
+      <div id="stage" class="stage is-cover" tabindex="0" aria-label="الحلقة الرأسية">
+        <div class="stage-grain"></div>
+        <div id="cover" class="cover">
+          <div class="cover-top"><span class="episode-tag">الحلقة الأولى</span><span class="cover-time">05:00</span></div>
+          <div class="cover-art" aria-hidden="true"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="cover-door"><span class="door-hole"></span><span class="door-handle"></span><span class="three-marks">|||</span></div><div class="message-fragment fragment-one">ريم · رسالة صوتية</div><div class="message-fragment fragment-two">الملف ناقص.</div><div class="art-cross cross-one">+</div><div class="art-cross cross-two">+</div></div>
+          <div class="cover-copy"><p class="cover-kicker">قبل لا تنشر</p><h2>خوارزميات</h2><p>شوف المقطع.<br>وبعدين قرر من تصدّق.</p><button class="start-button" id="startButton" disabled><svg class="icon"><use href="#i-play"/></svg><span id="startLabel">تحميل الحلقة</span><b>05:00</b></button><button id="resumeButton" class="resume-button" hidden>أكمل من حيث توقفت</button><p class="cover-footnote">تجربة قصصية مستقلة مستوحاة من شكل القصص الرأسية</p></div>
+        </div>
+
+        <div id="playerContent" class="player-content" hidden>
+          <header class="story-header"><div class="segments" id="segments" aria-hidden="true"></div><div class="story-head-row"><span class="avatar" id="storyAvatar">ر</span><div class="story-identity"><strong id="storyName">ريم</strong><span id="storyMeta">رسالة صوتية</span></div><button class="icon-button" id="openEvidenceTop" aria-label="افتح الأدلة"><svg class="icon"><use href="#i-proof"/></svg></button></div></header>
+          <div id="sceneVisual" class="scene-visual"></div>
+          <div id="subtitle" class="subtitle" aria-live="off"><span id="subtitleSpeaker"></span><p id="subtitleText"></p></div>
+          <div class="stage-bottom"><span id="sceneCount">01 / 10</span><span id="visitLabel">المشاهدة الأولى</span></div>
+          <div class="chapter-toast" id="chapterToast"></div>
+        </div>
+
+        <div class="pause-shade" id="pauseShade" hidden><button id="centerPlay" class="center-play" aria-label="استئناف الحلقة"><svg class="icon"><use href="#i-play"/></svg></button><p>توقف مؤقت</p></div>
+        <div id="endScreen" class="end-screen" hidden><span class="eyebrow">انتهت الحلقة الأولى</span><h2>منو اللي<br>عند الباب؟</h2><p>الدقات كانت في الأصل من البداية.<br>ارجع للمشهد وراقب إشارتها.</p><button class="start-button" id="replayEnd"><svg class="icon"><use href="#i-repeat"/></svg>أعيدها بعيون ثانية</button><button class="outline-button" id="endEvidence">أراجع الأدلة</button><p class="end-state" id="endState"></p></div>
+      </div>
+
+      <div class="transport" id="transport"><div class="seek-row"><span id="currentTime">00:00</span><input id="seek" type="range" min="0" max="300" step="0.1" value="0" aria-label="تقديم أو إرجاع الحلقة"><span>05:00</span></div><div class="transport-row"><button class="icon-button" id="previousScene" aria-label="المشهد السابق"><svg class="icon"><use href="#i-back"/></svg></button><button class="play-toggle icon-button" id="playToggle" aria-label="تشغيل الحلقة"><svg class="icon"><use href="#i-play"/></svg></button><button class="icon-button" id="nextScene" aria-label="المشهد التالي"><svg class="icon"><use href="#i-next"/></svg></button><span class="transport-separator"></span><button class="icon-button" id="muteButton" aria-label="كتم الصوت"><svg class="icon"><use href="#i-sound"/></svg></button><button class="icon-button" id="replayButton" aria-label="إعادة الحلقة"><svg class="icon"><use href="#i-repeat"/></svg></button><button class="icon-button" id="saveButton" aria-label="حفظ المشهد" aria-pressed="false"><svg class="icon"><use href="#i-save"/></svg></button><button class="icon-button" id="likeButton" aria-label="أعجبني المشهد" aria-pressed="false"><svg class="icon"><use href="#i-like"/></svg></button></div></div>
+      <nav class="bottom-nav" aria-label="أدوات التجربة"><button id="evidenceButton"><svg class="icon"><use href="#i-proof"/></svg>الأدلة<span id="evidenceCount">0</span></button><button id="lensButton"><svg class="icon"><use href="#i-lens"/></svg>العدسة</button><button id="shareButton"><svg class="icon"><use href="#i-share"/></svg>شارك التجربة</button></nav>
+      <p class="mobile-disclaimer">الحسابات والترند داخل القصة · ليست خدمة رسمية من سنابشات</p>
+    </section>
+
+    <aside class="recommendations" aria-label="مشاهد مقترحة لك"><div class="recommendations-head"><span class="eyebrow">على حسب تفاعلك</span><h2>يمكن فاتك<br>شي في المشهد.</h2><p>الحقيقة ثابتة.<br>ترتيب اكتشافك لها يتغير.</p></div><div id="recommendationList"></div><div class="script-links"><span class="eyebrow">السيناريو الكامل</span><a href="assets/khawarizmiat-script.pdf" target="_blank" rel="noopener">قراءة PDF</a><a href="assets/khawarizmiat-script.docx" download>تنزيل Word</a></div><p class="keyboard-help"><kbd>مسافة</kbd> تشغيل وإيقاف<br><kbd>←</kbd> <kbd>→</kbd> عشر ثوان</p></aside>
+  </main>
+
+  <dialog id="evidenceDialog" class="sheet evidence-sheet" aria-labelledby="evidenceTitle"><div class="sheet-head"><div><span class="eyebrow">ملفك في القصة</span><h2 id="evidenceTitle">الأدلة اللي عندك</h2></div><button class="icon-button" data-close aria-label="إغلاق الأدلة"><svg class="icon"><use href="#i-close"/></svg></button></div><div id="evidenceBody"></div><div class="sheet-footer"><a href="assets/khawarizmiat-script.pdf" target="_blank" rel="noopener">السيناريو PDF</a><a href="assets/khawarizmiat-script.docx" download>السيناريو Word</a><button id="clearProgress" class="text-button">ابدأ ملفًا جديدًا</button></div></dialog>
+
+  <dialog id="lensDialog" class="sheet lens-sheet" aria-labelledby="lensTitle"><div class="sheet-head"><div><span class="eyebrow">عدسة خوارزميات</span><h2 id="lensTitle">كل واحد له نسخته</h2></div><button class="icon-button" data-close aria-label="إغلاق العدسة"><svg class="icon"><use href="#i-close"/></svg></button></div><div class="lens-preview" id="lensPreview"><video id="cameraVideo" autoplay muted playsinline hidden></video><div class="lens-fallback" id="lensFallback"><div class="lens-eye"><span></span></div><strong>نسختك</strong></div><div class="scan-line"></div><div class="lens-crosshair"></div><span class="lens-watermark">خوارزميات</span><span class="lens-code">03</span><p>وش الجزء اللي ما شفته؟</p></div><p class="lens-status" id="lensStatus">جرّب تأثير العدسة على المشهد، أو شغّل الكاميرا بنفسك. لا يتم رفع الصور.</p><div class="lens-actions"><button class="yellow-button" id="startCamera">تشغيل الكاميرا</button><button class="outline-button" id="downloadLens">حفظ صورة ستوري</button></div><label class="effect-label">شدة التأثير<input type="range" id="effectRange" min="0" max="100" value="60"></label></dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <audio id="audio" preload="metadata" src="assets/episode.mp3"></audio>
+  <script src="engine.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
