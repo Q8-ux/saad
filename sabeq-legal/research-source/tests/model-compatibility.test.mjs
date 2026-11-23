@@ -5,7 +5,7 @@ import vm from 'node:vm';
 import ts from 'typescript';
 import {load as loadCaseModule} from './template-harness.mjs';
 
-function client(model, transport, environment = {}, managedConfig = null) {
+function client(model, transport, environment = {}) {
   const cache = new Map();
   const logs = [];
   function load(url) {
@@ -18,10 +18,6 @@ function client(model, transport, environment = {}, managedConfig = null) {
     vm.runInNewContext(js, {
       exports,
       require(name) {
-        if (name === './text-runtime') {
-          const actual = load(new URL('./text-runtime.ts', url));
-          return {resolveTextEnvironment: runtime => actual.resolveTextEnvironment(runtime, async () => managedConfig)};
-        }
         if (name === 'cloudflare:workers') return { env: {
           OPENAI_API_KEY: 'synthetic-test-key', OPENAI_MODEL: model, OPENAI_INTAKE_MODEL: model, ...environment,
         } };
@@ -328,20 +324,80 @@ test('schema diagnostics expose only fixed reason categories and never vendor pr
  }
 });
 
-test('activated Meta vault setting routes actual memo generation and legal intake to the same pinned model',async()=>{
- const saved={enabled:true,apiKey:'synthetic-meta-key',model:'meta-llama/llama-3.3-70b-instruct:free',testedAt:'2026-11-23T00:00:00Z',revision:'synthetic'};
- const calls=[];
- const {api}=client('gpt-4.1-mini',async(url,init)=>{
-  const body=JSON.parse(init.body);calls.push({url,body,authorization:init.headers.Authorization});
-  const schema=JSON.parse(body.messages[0].content.split('دون شرح أو Markdown:\n')[1]);
-  function example(shape){if(shape.enum)return shape.enum[0];if(shape.type==='object')return Object.fromEntries(Object.entries(shape.properties||{}).map(([key,value])=>[key,example(value)]));if(shape.type==='array')return [];if(shape.type==='string')return 'نص اصطناعي فقط';if(shape.type==='boolean')return false;if(shape.type==='number'||shape.type==='integer')return 0;return null;}
-  const output=example(schema);
-  return Response.json({choices:[{finish_reason:'stop',message:{content:JSON.stringify(output)}}]});
- },{LEGAL_AI_MANAGED_SETTINGS:'enabled'},saved);
- const schema={type:'object',required:['text'],additionalProperties:false,properties:{text:{type:'string'}}};
- assert.match(await api.generateText({instructions:'استخدم المصدر الموثق فقط ولا تختلق مادة عند غيابه.',input:'اختبار اصطناعي للمذكرة دون مصدر قانوني.',schema}),/اصطناعي/);
- const intake=await api.conductLegalIntake({language:'ar',messages:[{role:'user',content:'اختبار اصطناعي للمساعد بلا مصادر.'}],evidence:''});
- assert.equal(intake.readyForMemo,false);assert.equal(calls.length,2);
- for(const call of calls){assert.equal(call.url,'https://openrouter.ai/api/v1/chat/completions');assert.equal(call.body.model,saved.model);assert.equal(call.authorization,'Bearer '+saved.apiKey);assert.equal(call.body.provider.data_collection,'deny');assert.doesNotMatch(JSON.stringify(call.body),/synthetic-meta-key/);}
- assert.match(calls[0].body.messages[0].content,/لا تختلق/);
+test('Heretic GGUF reaches the actual native legal text adapter with synthetic-only content', async () => {
+  const calls = [];
+  const schema = { type: 'object', additionalProperties: false, required: ['facts'], properties: { facts: { type: 'string' } } };
+  const { api } = client('gpt-4.1-mini', async (url, init) => {
+    calls.push({ url, init });
+    assert.equal(url, 'https://gpu.example.test/v1/chat/completions');
+    assert.equal(init.redirect, 'manual');
+    assert.equal(init.headers.Authorization, 'Bearer synthetic-heretic-token');
+    assert.equal(init.headers['x-goog-api-key'], undefined);
+    const request = JSON.parse(init.body);
+    assert.equal(request.model, 'heretic-9b-q4');
+    assert.equal(request.messages[1].content, 'وقائع اختبارية لا تخص أي عميل.');
+    assert.match(request.messages[0].content, /لا تختلق/);
+    assert.doesNotMatch(init.body, /synthetic-heretic-token/);
+    return Response.json({ choices: [{ finish_reason: 'stop', message: { content: '{"facts":"وقائع افتراضية فقط."}' } }] });
+  }, {
+    LEGAL_AI_PROVIDER: 'heretic', HERETIC_API_KEY: 'synthetic-heretic-token',
+    HERETIC_MODEL: 'heretic-9b-q4', HERETIC_CHAT_COMPLETIONS_URL: 'https://gpu.example.test/v1/chat/completions',
+  });
+  assert.equal(await api.generateText({
+    instructions: 'لا تختلق مادة قانونية أو حكمًا.', input: 'وقائع اختبارية لا تخص أي عميل.', schema,
+  }), '{"facts":"وقائع افتراضية فقط."}');
+  assert.equal(calls.length, 1);
+});
+
+test('Meta Model API serves both memo drafting and legal assistant intake with privacy guards', async () => {
+  const calls = [];
+  const memoSchema = { type: 'object', additionalProperties: false, required: ['facts'], properties: { facts: { type: 'string' } } };
+  const { api } = client('gpt-4.1-mini', async (url, init) => {
+    calls.push({ url, init });
+    assert.equal(url, 'https://api.meta.ai/v1/chat/completions');
+    assert.equal(init.redirect, 'manual');
+    assert.equal(init.headers.Authorization, 'Bearer synthetic-meta-key');
+    const request = JSON.parse(init.body);
+    assert.equal(request.model, 'muse-spark-1.3');
+    assert.equal(request.prompt_cache_retention, 'in_memory');
+    assert.equal(request.user, undefined);
+    assert.equal(request.safety_identifier, undefined);
+    assert.doesNotMatch(init.body, /synthetic-meta-key/);
+    const marker = 'أعد JSON فقط مطابقًا لهذا المخطط، دون شرح أو Markdown:\n';
+    const sys = request.messages[0].content;
+    const idx = sys.lastIndexOf(marker);
+    function syntheticJson(schema) {
+      if (schema.anyOf) return syntheticJson(schema.anyOf[0]);
+      if (schema.enum) return schema.enum[0];
+      const types = Array.isArray(schema.type) ? schema.type : [schema.type];
+      if (types.includes('object')) return Object.fromEntries(Object.entries(schema.properties || {}).map(([k, child]) => [k, syntheticJson(child)]));
+      if (types.includes('array')) return [];
+      if (types.includes('boolean')) return false;
+      if (types.includes('integer') || types.includes('number')) return schema.minimum ?? 0;
+      return 'استلمت تفاصيل النزاع المبدئية.';
+    }
+    const content = idx >= 0 ? JSON.stringify(syntheticJson(JSON.parse(sys.slice(idx + marker.length)))) : 'نص اختبار فقط.';
+    return Response.json({ choices: [{ finish_reason: 'stop', message: { content } }] });
+  }, {
+    LEGAL_AI_PROVIDER: 'meta',
+    MODEL_API_KEY: 'synthetic-meta-key',
+    META_MODEL: 'muse-spark-1.3',
+  });
+
+  const drafted = await api.generateText({
+    instructions: 'لا تختلق مادة قانونية أو حكمًا.',
+    input: 'وقائع اختبارية لا تخص أي عميل.',
+    schema: memoSchema,
+  });
+  assert.equal(drafted, '{"facts":"استلمت تفاصيل النزاع المبدئية."}');
+  await api.deriveLegalResearchPlan('وقائع اختبار اصطناعية.');
+  const intakeState = await api.conductLegalIntake({
+    language: 'ar',
+    messages: [{ role: 'user', content: 'لدي نزاع حول عقد توريد تجاري للاختبار.' }],
+    evidence: '',
+  });
+  assert.match(intakeState.assistantMessage, /استلمت تفاصيل النزاع/);
+  await api.analyzeMemoDictation('وقائع اختبار اصطناعية.');
+  await api.runLegalTool({ action: 'summary', text: 'وقائع اصطناعية', language: 'ar', evidence: '', passageIds: [] });
+  assert.equal(calls.length, 5);
 });

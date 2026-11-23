@@ -9,7 +9,6 @@ import { pleadingStyleRevision } from "@/lib/bound-draft";
 import {boundArticleTextReviewSummary} from '@/lib/bound-article-reviews';
 import { env } from "cloudflare:workers";
 import { textProviderSummary, type TextProviderEnvironment } from "@/lib/text-providers";
-import { resolveTextEnvironment } from "@/lib/text-runtime";
 
 export async function GET() {
   try {
@@ -18,9 +17,11 @@ export async function GET() {
       database.prepare("SELECT COUNT(*) AS count FROM legal_documents").first<{ count: number }>(),
       database.prepare("SELECT COUNT(*) AS count FROM legal_chunks WHERE verified = 1").first<{ count: number }>(),
     ]);
-    const providerSummary = textProviderSummary(await resolveTextEnvironment(env as unknown as TextProviderEnvironment));
+    const providerSummary = textProviderSummary(env as unknown as TextProviderEnvironment);
     return privateJson({ ok: true, legalDocuments: Number(documents?.count || 0), verifiedLegalChunks: Number(chunks?.count || 0),sourceVerification:officialVerificationSummary(),memoControlRevision,defenseRevision,memoLanguageRevision,pleadingStyleRevision,legalDraftingRouteRevision,boundArticleTextReview:boundArticleTextReviewSummary(),pleadingLayoutRevision:"plain-header-wide-pages-1",...providerSummary });
   } catch {
     return privateJson({ ok: false }, 503);
   }
 }
+
+

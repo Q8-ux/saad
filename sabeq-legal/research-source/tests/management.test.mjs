@@ -10,7 +10,7 @@ import ts from 'typescript';
 const require=createRequire(import.meta.url),root=resolve(new URL('..',import.meta.url).pathname);
 function harness(){
  const sqlite=new DatabaseSync(':memory:');
- for(const file of readdirSync(root+'/drizzle').filter(f=>f.endsWith('.sql')).sort())sqlite.exec(readFileSync(root+'/drizzle/'+file,'utf8'));
+ sqlite.exec(readFileSync(root+'/tests/fixtures/management-foundation-schema.sql','utf8'));
  const statements=query=>{let args=[];return{bind(...values){args=values;return this;},async first(){return sqlite.prepare(query).get(...args)||null;},async all(){return{results:sqlite.prepare(query).all(...args)};},async run(){const result=sqlite.prepare(query).run(...args);return{success:true,meta:{changes:Number(result.changes)}};}};};
  const db={prepare:statements,async batch(values){const out=[];for(const v of values)out.push(await v.run());return out;}};
  const runtime={AUTH_SECRET:'synthetic-management-secret-'.repeat(3),MANAGEMENT_ALLOWED_EMAILS:'manager@example.test'};
@@ -39,7 +39,7 @@ test('memo supervisor signs in case-insensitively with a server-owned scope and 
  configureStaff(h);configureAdministrator(h);const password=memoSupervisorConfiguration(h),routes=h.load('app/api/management/[...path]/route.ts');
  const response=await routes.POST(request('password-login',null,{username:'Ahmad',password,role:'administrator',sections:['payments','users']}));assert.equal(response.status,200);const session=await response.json();assert.equal(session.manager.role,'memo_supervisor');assert.equal(session.manager.username,'ahmad');assert.deepEqual(Array.from(session.manager.sections),['memos','bookings','inbox']);
  for(const path of ['session','memos','bookings','inbox']){const r=await routes.GET(request(path,session.token));assert.equal(r.status,200,path);}
- for(const path of ['snapshot','users','site','services','paths','programmer','payments','mailboxes','whatsapp','gmail','verification-email','text-provider','control-accounts','legislation','legislation-asset','commands','updates']){
+ for(const path of ['snapshot','users','site','services','paths','programmer','payments','mailboxes','whatsapp','gmail','verification-email','control-accounts','legislation','legislation-asset','commands','updates']){
   const denied=await routes.GET(request(path,session.token));assert.equal(denied.status,403,path);assert.equal((await routes.POST(request(path,session.token,{action:'save'}))).status,403,path);
  }
  assert.equal((await routes.POST(request('logout',session.token,{}))).status,200);assert.equal((await routes.GET(request('memos',session.token))).status,401);
@@ -251,7 +251,7 @@ test('password throttling and same-origin protection apply to administrator logi
 
 async function login(h){const auth=h.load('lib/management-auth.ts'),verifier=auth.randomToken(),code=auth.randomToken();h.sqlite.prepare('INSERT INTO management_login_codes VALUES (?,?,?,?,?)').run(await auth.digest(code),'manager@example.test','مدير اصطناعي',await auth.proofChallenge(verifier),Math.floor(Date.now()/1000)+60);return{...(await auth.exchangeManagerCode({code,verifier})),code,verifier};}
 
-test('new migration adds isolated management tables without dropping the original service tables',()=>{const h=harness();try{const names=h.sqlite.prepare("SELECT name FROM sqlite_master WHERE type='table'").all().map(r=>r.name);for(const name of ['management_memo_requests','management_vault','management_sessions','contact_messages','public_users','service_records'])assert.ok(names.includes(name));assert.equal(h.sqlite.prepare('SELECT COUNT(*) n FROM public_users').get().n,0);}finally{h.close();}});
+test('exported final schema preserves management tables alongside the original service tables',()=>{const h=harness();try{const names=h.sqlite.prepare("SELECT name FROM sqlite_master WHERE type='table'").all().map(r=>r.name);for(const name of ['management_memo_requests','management_vault','management_sessions','contact_messages','public_users','service_records'])assert.ok(names.includes(name));assert.equal(h.sqlite.prepare('SELECT COUNT(*) n FROM public_users').get().n,0);}finally{h.close();}});
 test('unauthenticated and cross-origin management reads/writes never reach client data or external services',async()=>{const h=harness();try{const routes=h.load('app/api/management/[...path]/route.ts');for(const path of ['snapshot','memos','inbox','commands','whatsapp','mail','legislation','legislation-report','legislation-workbench','legislation-articles','legislation-asset']){assert.equal((await routes.GET(request(path))).status,401);}const session=await login(h);assert.equal((await routes.POST(request('commands',session.token,{title:'أمر اصطناعي'},'https://other.example'))).status,403);assert.equal(h.network.length,0);}finally{h.close();}});
 test('PKCE code is single use, wrong proof does not consume it, expired sessions and revoked allowlist fail closed',async()=>{const h=harness();try{const auth=h.load('lib/management-auth.ts');const verifier=auth.randomToken(),code=auth.randomToken();h.sqlite.prepare('INSERT INTO management_login_codes VALUES(?,?,?,?,?)').run(await auth.digest(code),'manager@example.test','اختبار',await auth.proofChallenge(verifier),Math.floor(Date.now()/1000)+60);await assert.rejects(auth.exchangeManagerCode({code,verifier:auth.randomToken()}));const result=await auth.exchangeManagerCode({code,verifier});await assert.rejects(auth.exchangeManagerCode({code,verifier}));assert.equal((await auth.requireManager(request('session',result.token))).email,'manager@example.test');h.runtime.MANAGEMENT_ALLOWED_EMAILS='';await assert.rejects(auth.requireManager(request('session',result.token)));h.runtime.MANAGEMENT_ALLOWED_EMAILS='manager@example.test';h.sqlite.prepare('UPDATE management_sessions SET expires_at=0').run();await assert.rejects(auth.requireManager(request('session',result.token)));}finally{h.close();}});
 test('login uses the actual platform Request, prevents redirect loops and ignores a conflicting render identity',async()=>{const h=harness();try{
@@ -632,7 +632,6 @@ test('global service switches preserve billing configuration and consultation ad
 
 test('revoked service sessions and corrupt stored permission values fail closed',async()=>{const h=harness();try{const users=h.load('lib/user-management.ts'),helper=h.load('lib/service-settings.ts');for(const value of ['bad-json','null','[]','{"memo":"false"}'])assert.ok(Object.values(users.userPermissions(value)).every(allowed=>allowed===false));assert.ok(Object.values(users.userPermissions()).every(Boolean));const created=await users.updateManagedUser({action:'create',name:'عميل اختبار الإلغاء',email:'revoked@example.test'});const session=await h.load('lib/public-auth.ts').createPublicSession(created.id);await users.updateManagedUser({id:created.id,permissions:{memo:false,assistant:true,consultation:true,library:true}});await assert.rejects(helper.requireServiceEnabled('assistant',request('session',session.token)),error=>error.status===401);await helper.requireServiceEnabled('assistant');}finally{h.close();}});
 
-
 test('office ready forms are administrator-only, blank and independent from memo requests and public templates',async()=>{const h=harness();try{
  const routes=h.load('app/api/management/[...path]/route.ts');
  assert.equal((await routes.GET(request('ready-forms'))).status,401);
@@ -644,48 +643,4 @@ test('office ready forms are administrator-only, blank and independent from memo
  assert.equal(h.sqlite.prepare('SELECT COUNT(*) n FROM management_memo_requests').get().n,0);
  const supervisorPassword=memoSupervisorConfiguration(h);const supervisor=await(await routes.POST(request('password-login',null,{username:'ahmad',password:supervisorPassword}))).json();
  assert.equal((await routes.GET(request('ready-forms',supervisor.token))).status,403);
-}finally{h.close();}});
-
-test('Meta key activates only after two synthetic checks and is encrypted, masked and reversible',async()=>{const h=harness();try{
- h.runtime.LEGAL_AI_MANAGED_SETTINGS='enabled';h.runtime.LEGAL_AI_PROVIDER='openai';h.runtime.OPENAI_API_KEY='synthetic-original-key';
- const routes=h.load('app/api/management/[...path]/route.ts'),session=await login(h),key='sk-or-v1-'+'a'.repeat(64),model='meta-llama/llama-3.3-70b-instruct:free';
- assert.equal((await routes.GET(request('text-provider'))).status,401);
- let settings=await(await routes.GET(request('text-provider',session.token))).json();assert.equal(settings.enabled,false);assert.equal(settings.hasApiKey,false);
- h.setTransport(async(url,init)=>{assert.equal(url,'https://openrouter.ai/api/v1/chat/completions');const body=JSON.parse(init.body);assert.equal(body.provider.data_collection,'deny');assert.equal(body.model,model);assert.match(body.messages[1].content,/synthetic/);assert.doesNotMatch(init.body,/synthetic-original-key/);return Response.json({choices:[{finish_reason:'stop',message:{content:JSON.stringify({text:'اختبار عربي اصطناعي مكتمل فقط'})}}]});});
- const response=await routes.POST(request('text-provider',session.token,{action:'activate',apiKey:key,model,revision:settings.revision}));assert.equal(response.status,200);settings=await response.json();
- assert.equal(settings.enabled,true);assert.equal(settings.activeProvider,'openrouter');assert.equal(h.network.length,2);assert.doesNotMatch(JSON.stringify(settings),/sk-or-v1/);
- const row=h.sqlite.prepare("SELECT sealed FROM management_vault WHERE integration='meta-text-provider'").get();assert.ok(row);assert.doesNotMatch(row.sealed,/sk-or-v1/);
- assert.equal((await h.load('lib/management-vault.ts').openConfig(row.sealed)).apiKey,key);
- assert.doesNotMatch(JSON.stringify(h.sqlite.prepare('SELECT * FROM management_events').all()),/sk-or-v1/);
- const stale=await routes.POST(request('text-provider',session.token,{action:'disable',revision:'unconfigured'}));assert.equal(stale.status,409);
- const disabled=await routes.POST(request('text-provider',session.token,{action:'disable',revision:settings.revision}));assert.equal(disabled.status,200);const after=await disabled.json();assert.equal(after.enabled,false);assert.equal(after.hasApiKey,true);assert.equal(after.activeProvider,'openai');
-}finally{h.close();}});
-
-test('Meta rejects paid models, invalid keys and failed or cancelled probes without changing vault',async()=>{const h=harness();try{
- h.runtime.LEGAL_AI_MANAGED_SETTINGS='enabled';const routes=h.load('app/api/management/[...path]/route.ts'),session=await login(h),key='sk-or-v1-'+'b'.repeat(64),model='meta-llama/llama-3.3-70b-instruct:free';
- const submit=(extra={})=>routes.POST(request('text-provider',session.token,{action:'activate',apiKey:key,model,revision:'unconfigured',...extra}));
- for(const fields of [{apiKey:'wrong'},{model:'meta-llama/paid'},{model:'another/model:free'}])assert.equal((await submit(fields)).status,400);
- assert.equal(h.network.length,0);
- for(const status of [401,429,404]){h.setTransport(async()=>new Response('private upstream key='+key,{status}));const r=await submit();assert.equal(r.status,status===429?429:502);assert.doesNotMatch(await r.text(),/sk-or-v1|private upstream/);}
- h.setTransport(async()=>Response.json({choices:[{finish_reason:'length',message:{content:'partial'}}]}));assert.equal((await submit()).status,502);
- const api=h.load('lib/text-provider-settings.ts');const controller=new AbortController();controller.abort();await assert.rejects(api.probeMetaProvider(key,model,controller.signal),error=>error.kind==='timeout');
- assert.equal(h.sqlite.prepare("SELECT COUNT(*) n FROM management_vault WHERE integration='meta-text-provider'").get().n,0);
-}finally{h.close();}});
-
-test('Meta failed key replacement retains the last tested active setting and conflicts reject late writes',async()=>{const h=harness();try{
- h.runtime.LEGAL_AI_MANAGED_SETTINGS='enabled';const api=h.load('lib/text-provider-settings.ts'),vault=h.load('lib/management-vault.ts'),key='sk-or-v1-'+'c'.repeat(64),model='meta-llama/llama-3.3-70b-instruct:free';
- const old={apiKey:key,model,enabled:true,testedAt:'2026-11-23T00:00:00Z',revision:'first'};const sealed=await vault.sealConfig(old);h.sqlite.prepare('INSERT INTO management_vault(integration,sealed,updated_by) VALUES(?,?,?)').run('meta-text-provider',sealed,'synthetic');
- h.setTransport(async()=>new Response('private',{status:401}));await assert.rejects(api.metaProviderAction({action:'activate',revision:'first',apiKey:'sk-or-v1-'+'d'.repeat(64),model},'synthetic'));
- assert.equal(h.sqlite.prepare("SELECT sealed FROM management_vault WHERE integration='meta-text-provider'").get().sealed,sealed);
- let calls=0;h.setTransport(async()=>{if(++calls===2)await api.metaProviderAction({action:'disable',revision:'first'},'another-admin');return Response.json({choices:[{finish_reason:'stop',message:{content:'{"text":"نص اصطناعي مكتمل"}'}}]});});
- await assert.rejects(api.metaProviderAction({action:'activate',revision:'first',apiKey:'',model},'synthetic'),error=>error.status===409);
- assert.equal((await api.savedMetaProvider()).enabled,false);
-}finally{h.close();}});
-
-test('Meta paid selection never contacts a provider before explicit cost approval',async()=>{const h=harness();try{
- h.runtime.LEGAL_AI_MANAGED_SETTINGS='enabled';const routes=h.load('app/api/management/[...path]/route.ts'),session=await login(h);
- const data={action:'activate',apiKey:'sk-or-v1-'+'e'.repeat(64),model:'meta-llama/llama-4-scout',revision:'unconfigured'};
- assert.equal((await routes.POST(request('text-provider',session.token,data))).status,400);assert.equal(h.network.length,0);
- h.setTransport(async(_url,init)=>{assert.equal(JSON.parse(init.body).model,data.model);return Response.json({choices:[{finish_reason:'stop',message:{content:'{"text":"اختبار تقني اصطناعي فقط"}'}}]});});
- const response=await routes.POST(request('text-provider',session.token,{...data,allowPaidModel:true}));assert.equal(response.status,200);const settings=await response.json();assert.equal(settings.allowPaidModel,true);assert.equal(settings.activeModel,data.model);assert.equal(h.network.length,2);
 }finally{h.close();}});

@@ -9,3 +9,5 @@ Llama 4 Scout is an available paid option; free endpoints may be unavailable. No
 419 internal release checks and all six dashboard groups passed. Concurrent distinct cases and reverse-order ledger completion remain isolated. Existing article text/number, fact application, citation and missing-source checks remain in force, as do templates, source corpus and human revisions. Synthetic provider checks do not establish legal correctness. Owner key input and actual live inference remain pending.
 
 This does not modify the separate Bolt.new frontend. It updates Sabeq's shared backend and the GitHub console. No archived memorandum was merged or rewritten.
+
+The historical research snapshot retains its separate Meta-native and Heretic extensions. Apply the complete native patch only against the stated native backend base; the deployed backend is authoritative for the managed OpenRouter setting. The GitHub console and its management mirror ship the identical updated client.

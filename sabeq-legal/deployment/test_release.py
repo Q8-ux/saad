@@ -235,5 +235,42 @@ class PublicationTests(unittest.TestCase):
             finally:
                 os.chdir(previous)
 
+
+    def test_meta_provider_module_remains_local_unique_ordered_and_required(self):
+        source = Path(__file__).resolve().parents[2] / "sabeq-admin-preview"
+        with tempfile.TemporaryDirectory() as tmp:
+            previous = os.getcwd()
+            os.chdir(tmp)
+            try:
+                root = Path("_site")
+                (root / "sabeq-legal/assets").mkdir(parents=True)
+                (root / "sabeq-ahmad").mkdir()
+                (root / "sabeq-ahmad/index.html").write_text("Public supervisor fixture")
+                (root / "sabeq-legal/index.html").write_text('<script src="/saad/sabeq-legal/assets/client.js"></script>')
+                (root / "sabeq-legal/assets/client.js").write_text("synthetic")
+                (root / "sabeq-legal/release.json").write_text(json.dumps({"clientSource":"a"*40,"backendSource":"b"*40}))
+                admin = root / "sabeq-admin-preview"
+                shutil.copytree(source, admin)
+                Path("_protected-pages.json").write_text(json.dumps(release.protected_manifest(root)))
+                release.verify()
+                original = (admin / "index.html").read_text()
+                module = (admin / "meta-provider.js").read_bytes()
+                (admin / "meta-provider.js").unlink()
+                with self.assertRaisesRegex(RuntimeError, "referenced script missing"):
+                    release.verify()
+                (admin / "meta-provider.js").write_bytes(module)
+                current = re.search(r'<script[^>]+src="(\./meta-provider\.js(?:\?v=[^"]+)?)"', original).group(1)
+                for replacement in ("https://other.example/meta-provider.js", "./meta-provider.js?redirect=other"):
+                    (admin / "index.html").write_text(original.replace(current, replacement, 1))
+                    with self.assertRaisesRegex(RuntimeError, "Unexpected admin script"):
+                        release.verify()
+                for names in (["control","programmer","legislation","meta-provider","meta-provider","admin"],
+                              ["control","programmer","legislation","admin","meta-provider"]):
+                    (admin / "index.html").write_text("".join('<script src="./'+name+'.js"></script>' for name in names))
+                    with self.assertRaisesRegex(RuntimeError, "Unexpected admin script"):
+                        release.verify()
+            finally:
+                os.chdir(previous)
+
 if __name__ == "__main__":
     unittest.main()

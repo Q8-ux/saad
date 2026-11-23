@@ -7,7 +7,7 @@ import { spawnSync } from 'node:child_process';
 export function load(path,deps={}) {
  const exports={};const source=readFileSync(new URL(path,import.meta.url),'utf8');
  const js=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,esModuleInterop:true}}).outputText;
- vm.runInNewContext(js,{exports,require:name=>{if(name==="./text-runtime"||name==="@/lib/text-runtime")return load("../lib/text-runtime.ts");
+ vm.runInNewContext(js,{exports,require:name=>{
   if(name === "./ready-forms" || name === "@/lib/ready-forms") return load("../lib/ready-forms.ts",deps);
   if (name === "./memorandum-reference-style" || name === "@/lib/memorandum-reference-style") return load("../lib/memorandum-reference-style.ts");
   if (name === "./appeal-reference-style" || name === "@/lib/appeal-reference-style") return load("../lib/appeal-reference-style.ts");
@@ -25,3 +25,4 @@ c=db.execute(p['sql'],p['bindings']);rows=[dict(r) for r in c.fetchall()];db.com
  const templates=load('../lib/approved-templates.ts',{'cloudflare:workers':{env:{DOCUMENTS:bucket}},'@/db':{getD1:()=>database},'./request-security':security,...sourceOverrides});
  return {templates,objects,database,bucket,security,sql,get writes(){return writes;},cleanup:()=>rmSync(directory,{recursive:true,force:true})};
 }
+
