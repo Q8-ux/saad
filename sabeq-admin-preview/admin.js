@@ -103,7 +103,7 @@
       else if(['users','site','services','bookings'].includes(section)){await globalThis.SabeqControl.mount(content(),section,api,toast,()=>{token='';manager=null;sessionStorage.removeItem(SESSION);loginScreen('حُفظت بيانات الدخول. سجّل الدخول مجدداً للمتابعة.');},manager.role);}
       else if(section==='legislation'){await globalThis.SabeqLegislation.mount(content(),api,managementFile,toast);}
       else if(section==='programmer'){const settings=await api('programmer');globalThis.SabeqProgrammer.mount(content(),settings,api,toast);}
-      else if(section==='paths'){const d=await api('paths');renderPaths(d);}
+      else if(section==='paths'){const [d,meta]=await Promise.all([api('paths'),api('text-provider')]);renderPaths(d);globalThis.SabeqMetaProvider.mount(content(),meta,api,toast);}
       else if(section==='payments'){paymentsData=await api('payments');renderPayments();}
       else if(section==='mailboxes'){mailboxData=await api('mailboxes?'+new URLSearchParams({offset:String(offset)}));hasMore=mailboxData.hasMore;renderMailboxes();}
       else if(section==='commands'){rows=(await api('commands')).commands;renderCommands();}

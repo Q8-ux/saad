@@ -1,0 +1,45 @@
+{
+  "baseCommit": "1b7693297f9bd307b4ade33891d6101f686c06e0",
+  "scope": "Exact provider-only substitutions, reversed before original protected hashes are checked. No prompt or legal-template change is allowed.",
+  "files": {
+    "lib/openai.ts": [
+      {
+        "before": "import { compatibleTextResponse, textProviderConfig, TextProviderError, type TextProviderEnvironment } from \"./text-providers\";",
+        "after": "import { compatibleTextResponse, textProviderConfig, TextProviderError, type TextProviderEnvironment } from \"./text-providers\";\nimport { resolveTextEnvironment } from \"./text-runtime\";",
+        "count": 1
+      },
+      {
+        "before": "function getTextEnvironment(intake = false) {\n  try { return textProviderConfig(env as unknown as OpenAIEnvironment, undefined, intake); }",
+        "after": "async function getTextEnvironment(intake = false) {\n  try { return textProviderConfig(await resolveTextEnvironment(env as unknown as OpenAIEnvironment), undefined, intake); }",
+        "count": 1
+      },
+      {
+        "before": "  const runtime = env as unknown as OpenAIEnvironment;\n  const primary = getTextEnvironment();",
+        "after": "  const runtime = await resolveTextEnvironment(env as unknown as OpenAIEnvironment);\n  const primary = textProviderConfig(runtime);",
+        "count": 1
+      },
+      {
+        "before": "const { apiKey, model } = getTextEnvironment();",
+        "after": "const { apiKey, model } = await getTextEnvironment();",
+        "count": 3
+      },
+      {
+        "before": "const { apiKey, model } = getTextEnvironment(true);",
+        "after": "const { apiKey, model } = await getTextEnvironment(true);",
+        "count": 2
+      }
+    ],
+    "lib/text-providers.ts": [
+      {
+        "before": "stream: false, ...(schema ?",
+        "after": "stream: false, ...(config.provider === \"openrouter\" ? { provider: { data_collection: \"deny\", zdr: true } } : {}), ...(schema ?",
+        "count": 1
+      },
+      {
+        "before": "provider === \"openrouter\" && !model.endsWith(\":free\")",
+        "after": "provider === \"openrouter\" && !model.endsWith(\":free\") && !(runtime.OPENROUTER_ALLOW_PAID_META === \"approved\" && /^meta-llama\\/llama-[a-zA-Z0-9._-]+$/.test(model))",
+        "count": 1
+      }
+    ]
+  }
+}

@@ -47,81 +47,29 @@ test('redirects never forward credentials; vendor errors and reasoning remain pr
   assert.doesNotMatch(events, /synthetic-private/);
 });
 
-test('Heretic GGUF is opt-in and refuses invalid or missing server configuration', () => {
-  const base = { LEGAL_AI_PROVIDER: 'heretic', HERETIC_API_KEY: 'synthetic-heretic-token', HERETIC_MODEL: 'heretic-9b-q4' };
-  for (const endpoint of [undefined, '', 'http://gpu.example.test/v1/chat/completions',
-    'https://name:password@gpu.example.test/v1/chat/completions',
-    'https://gpu.example.test/v1/chat/completions?leak=1',
-    'https://gpu.example.test/v1/chat/completions#fragment',
-    'https://gpu.example.test/v1/other']) {
-    assert.throws(() => textProviderConfig({ ...base, HERETIC_CHAT_COMPLETIONS_URL: endpoint }), error => error.kind === 'configuration');
-  }
-  assert.throws(() => textProviderConfig({ ...base, HERETIC_API_KEY: '', HERETIC_CHAT_COMPLETIONS_URL: 'https://gpu.example.test/v1/chat/completions' }));
-  const summary = textProviderSummary(base);
-  assert.equal(summary.textProviderConfigured, false);
-  assert.doesNotMatch(JSON.stringify(summary), /synthetic-heretic-token/);
-  const config = textProviderConfig({ ...base, HERETIC_CHAT_COMPLETIONS_URL: 'https://gpu.example.test/v1/chat/completions' });
-  assert.equal(config.model, 'heretic-9b-q4');
-  assert.equal(config.endpoint, 'https://gpu.example.test/v1/chat/completions');
+test('OpenRouter excludes endpoints that collect prompts and never changes the pinned free model',async()=>{
+ const router=textProviderConfig({OPENROUTER_API_KEY:'synthetic-router-key',OPENROUTER_MODEL:'meta-llama/llama-3.3-70b-instruct:free'},'openrouter');
+ await compatibleTextResponse(init(),router,async(url,request)=>{
+  assert.equal(url,'https://openrouter.ai/api/v1/chat/completions');assert.equal(request.redirect,'manual');
+  const body=JSON.parse(request.body);assert.equal(body.provider.data_collection,'deny');assert.equal(body.provider.zdr,true);assert.equal(body.model,router.model);
+  assert.doesNotMatch(request.body,/synthetic-router-key/);
+  return complete('{"facts":"بيانات اصطناعية"}');
+ });
 });
 
-test('Heretic uses the existing verified text-only contract without leaking secrets', async () => {
-  const cfg = textProviderConfig({
-    LEGAL_AI_PROVIDER: 'heretic', HERETIC_API_KEY: 'synthetic-heretic-token',
-    HERETIC_MODEL: 'heretic-9b-q4', HERETIC_CHAT_COMPLETIONS_URL: 'https://gpu.example.test/v1/chat/completions',
-  });
-  const result = await compatibleTextResponse(init(), cfg, async (url, request) => {
-    assert.equal(url, 'https://gpu.example.test/v1/chat/completions');
-    assert.equal(request.redirect, 'manual');
-    assert.equal(request.headers.Authorization, 'Bearer synthetic-heretic-token');
-    const body = JSON.parse(request.body);
-    assert.equal(body.messages[0].role, 'system');
-    assert.match(body.messages[0].content, /لا تختلق مصدرًا/);
-    assert.equal(body.messages[1].content, 'وقائع اصطناعية فقط.');
-    assert.doesNotMatch(request.body, /synthetic-heretic-token/);
-    return complete('{"facts":"وقائع اختبار اصطناعية فقط."}');
-  });
-  assert.equal((await result.json()).status, 'completed');
-  for (const response of [
-    Response.json({ choices: [{ finish_reason: 'length', message: { content: '{"facts":"incomplete"}' } }] }),
-    Response.json({ choices: [{ finish_reason: 'stop', message: { content: '{"wrong":"source"}' } }] }),
-    new Response('', { status: 302, headers: { Location: 'https://untrusted.example.test/steal' } }),
-  ]) {
-    await assert.rejects(compatibleTextResponse(init(), cfg, async () => response));
-  }
-  let invoked = 0;
-  await assert.rejects(compatibleTextResponse(init({ input: [{ type: 'input_file', file_id: 'synthetic-file' }] }), cfg, async () => {
-    invoked++;
-    return complete('{}');
-  }), error => error.kind === 'configuration');
-  assert.equal(invoked, 0);
+test('paid Meta routing requires an explicit approval flag and never enables a different paid family',()=>{
+ const runtime={OPENROUTER_API_KEY:'synthetic-router-key',OPENROUTER_MODEL:'meta-llama/llama-4-scout'};
+ assert.throws(()=>textProviderConfig(runtime,'openrouter'));
+ assert.equal(textProviderConfig({...runtime,OPENROUTER_ALLOW_PAID_META:'approved'},'openrouter').model,runtime.OPENROUTER_MODEL);
+ assert.throws(()=>textProviderConfig({...runtime,OPENROUTER_ALLOW_PAID_META:'approved',OPENROUTER_MODEL:'different/model'},'openrouter'));
 });
 
-test('Meta Model API enforces standard non-training models, in-memory cache, and server-only secrets', async () => {
-  assert.throws(() => textProviderConfig({ LEGAL_AI_PROVIDER: 'meta' }), error => error.kind === 'configuration');
-  for (const trainingModel of ['muse-spark-1.3-contributor', 'meta/muse-wonder:contributor', 'contributor']) {
-    assert.throws(() => textProviderConfig({ LEGAL_AI_PROVIDER: 'meta', MODEL_API_KEY: 'synthetic-meta-secret', META_MODEL: trainingModel }), error => error.kind === 'configuration');
-  }
-  const metaCfg = textProviderConfig({ LEGAL_AI_PROVIDER: 'meta', MODEL_API_KEY: 'synthetic-meta-secret' });
-  assert.equal(metaCfg.model, 'muse-spark-1.3');
-  assert.equal(metaCfg.endpoint, 'https://api.meta.ai/v1/chat/completions');
-  const summary = textProviderSummary({ LEGAL_AI_PROVIDER: 'openai', OPENAI_API_KEY: 'synthetic-openai', LEGAL_AI_FALLBACK_PROVIDER: 'meta', MODEL_API_KEY: 'synthetic-meta-secret' });
-  assert.equal(summary.textFallbackProvider, 'meta');
-  assert.doesNotMatch(JSON.stringify(summary), /synthetic-meta-secret/);
-
-  const res = await compatibleTextResponse(init(), metaCfg, async (url, request) => {
-    assert.equal(url, 'https://api.meta.ai/v1/chat/completions');
-    assert.equal(request.redirect, 'manual');
-    assert.equal(request.headers.Authorization, 'Bearer synthetic-meta-secret');
-    const body = JSON.parse(request.body);
-    assert.equal(body.model, 'muse-spark-1.3');
-    assert.equal(body.max_completion_tokens, 16000);
-    assert.equal(body.max_tokens, undefined);
-    assert.equal(body.prompt_cache_retention, 'in_memory');
-    assert.equal(body.user, undefined);
-    assert.equal(body.safety_identifier, undefined);
-    assert.doesNotMatch(request.body, /synthetic-meta-secret/);
-    return complete('{"facts":"وقائع اختبار اصطناعية فقط."}');
-  });
-  assert.equal((await res.json()).status, 'completed');
+test('two concurrent OpenRouter cases carry separate messages and keep reverse-order responses separate',async()=>{
+ const router=textProviderConfig({OPENROUTER_API_KEY:'synthetic-router-key',OPENROUTER_MODEL:'meta-llama/llama-3.3-70b-instruct:free'},'openrouter');
+ const pending=[];const transport=async(_url,request)=>new Promise(resolve=>{const body=JSON.parse(request.body);assert.equal(body.messages.length,2);assert.equal(body.previous_response_id,undefined);assert.equal(body.conversation,undefined);pending.push({body,resolve});});
+ const first=compatibleTextResponse(init({input:'قضية اصطناعية ألف — A-ONLY-001'}),router,transport);
+ const second=compatibleTextResponse(init({input:'قضية اصطناعية باء — B-ONLY-002'}),router,transport);
+ assert.equal(pending.length,2);assert.doesNotMatch(JSON.stringify(pending[0].body),/B-ONLY-002/);assert.doesNotMatch(JSON.stringify(pending[1].body),/A-ONLY-001/);
+ pending[1].resolve(complete('{"facts":"نتيجة باء B-ONLY-002"}'));pending[0].resolve(complete('{"facts":"نتيجة ألف A-ONLY-001"}'));
+ const outputs=await Promise.all([first,second]);assert.match((await outputs[0].json()).output_text,/A-ONLY-001/);assert.match((await outputs[1].json()).output_text,/B-ONLY-002/);
 });

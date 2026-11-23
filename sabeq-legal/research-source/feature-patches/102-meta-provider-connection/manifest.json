@@ -1,0 +1,21 @@
+{
+  "feature": 102,
+  "base_native_commit": "1b7693297f9bd307b4ade33891d6101f686c06e0",
+  "native_source_commit": "66fe41b496b4d3f6bf530caee97e96f7f593d1da",
+  "native_version": 234,
+  "environment_revision": 32,
+  "deployment_id": "appgdep_6b043cc774688191944d8de9c5398c68",
+  "deployment_succeeded_at": "2026-11-23T13:17:15.911672+00:00",
+  "patch_sha256": "fe3216790480555721e4c5ccd227195350f3bf21feb0a33ca088583ad8c719b1",
+  "patch_bytes": 78811,
+  "internal_checks": {
+    "sources": 42,
+    "memo": 260,
+    "access": 117,
+    "total": 419,
+    "passed": 419
+  },
+  "provider_live_test": "pending_owner_secret_input",
+  "office_memos_rewritten": false,
+  "legal_prompts_changed": false
+}

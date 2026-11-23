@@ -3,7 +3,6 @@ import { engineeringPathStatus } from "@/lib/engineering-paths";
 import { siteAction, servicesAction, bookingsAction } from "@/lib/site-controls";
 import { listManagedUsers, updateManagedUser } from "@/lib/user-management";
 import { managementAccounts } from "@/lib/management-password";
-import { requestManagementRecovery, finishManagementRecovery } from "@/lib/management-password-recovery";
 import { mailboxAction } from "@/lib/management-mailboxes";
 import { sadadManagement } from "@/lib/sadad-payments";
 import { programmerAction } from "@/lib/management-programmer";
@@ -16,6 +15,8 @@ import { bridgeKeys, managerInbox, managerMemos, managerSnapshot, managerUpdates
 import { readMemoRevision, saveMemoRevision } from "@/lib/management-memo-revisions";
 import { mailAction, operationEvent, whatsappAction } from "@/lib/management-integrations";
 import { verificationEmailAction } from "@/lib/verification-email-settings";
+import { notificationEmailAction } from "@/lib/notification-email";
+import { metaProviderAction } from "@/lib/text-provider-settings";
 import { sendTestEmail } from "@/lib/email";
 import { gmailAction, gmailSettings } from "@/lib/gmail";
 import { cleanMultiline, cleanString, enforceRateLimit, readJsonObject, RequestError } from "@/lib/request-security";
@@ -37,6 +38,8 @@ async function managementGet(request: Request) {
     if (action === "gmail") return managementJson(await gmailSettings());
     if (action === "control-accounts") return managementJson(await managementAccounts(null, manager));
     if (action === "verification-email") return managementJson(await verificationEmailAction(null, manager.email));
+    if (action === "notification-email") return managementJson(await notificationEmailAction(null, manager.email));
+    if (action === "text-provider") return managementJson(await metaProviderAction(null, manager.email));
     if (action === "site") return managementJson(await siteAction(null, manager.email));
     if (action === "services") return managementJson(await servicesAction(null));
     if (action === "bookings") return managementJson(await bookingsAction(null));
@@ -69,17 +72,13 @@ async function managementPost(request: Request) {
     const action = actionPath(request), data = await readJsonObject(request, action === "password-login" ? 4_096 : action === "memo-revision" ? 500_000 : action === "site" ? 200_000 : 20_000);
     if (action === "exchange") { await enforceRateLimit(request, "management-exchange", 30); return managementJson(await exchangeManagerCode(data)); }
     if (action === "password-login") return managementJson(await passwordManagerLogin(request, data));
-    if (action === "password-recovery-request") {
-      await enforceRateLimit(request, "management-recovery-request", 6);
-      return managementJson(await requestManagementRecovery(data));
-    }
-    if (action === "password-recovery-confirm") {
-      await enforceRateLimit(request, "management-recovery-confirm", 10);
-      return managementJson(await finishManagementRecovery(data));
-    }
     const manager = await requireManager(request);
     assertManagerAction(manager, action, "POST");
     await enforceRateLimit(request, "management-write", 150);
+    if (action === "text-provider") {
+      await enforceRateLimit(request, "management-meta-provider", 8);
+      return managementJson(await metaProviderAction(data, manager.email, request.signal));
+    }
     if (action === "memo-revision") return managementJson(await saveMemoRevision(data, manager.email));
     if (action === "gmail") {
       await enforceRateLimit(request, data.action === "send-test" ? "gmail-test" : "gmail-management", data.action === "send-test" ? 5 : 30);
@@ -110,6 +109,10 @@ async function managementPost(request: Request) {
       return managementJson(await verificationEmailAction(data, manager.email));
     }
     if (action === "mail") return managementJson(await mailAction(data, manager.email));
+    if (action === "notification-email") {
+      await enforceRateLimit(request, "management-notification-email", 30);
+      return managementJson(await notificationEmailAction(data, manager.email));
+    }
     if (action === "read") {
       if (!Array.isArray(data.ids) || data.ids.length > 100 || data.ids.some(id => typeof id !== "string" || id.length > 200)) throw new RequestError("قائمة التنبيهات غير صحيحة.");
       if (data.ids.length) await getD1().batch(data.ids.map(id => getD1().prepare("INSERT INTO management_read_states (id, email, event_id) VALUES (?, ?, ?) ON CONFLICT(email, event_id) DO NOTHING").bind(crypto.randomUUID(), manager.email, id)));
