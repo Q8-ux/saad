@@ -1,9 +1,17 @@
 (() => {
   'use strict';
   const escape = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const isConfirmedActive = (v, expectedModel = 'meta-llama/llama-4-scout') => Boolean(
+    v &&
+    v.enabled === true &&
+    v.hasApiKey === true &&
+    v.activeProvider === 'openrouter' &&
+    v.activeModel === expectedModel
+  );
   globalThis.SabeqMetaProvider = {
+    isConfirmedActive,
     mount(container, initial, api, toast) {
-      let settings = initial;
+      let settings = { ...initial, model: initial?.model || 'meta-llama/llama-4-scout' };
       let pending = false;
       const panel = document.createElement('section');
       panel.className = 'panel';
@@ -17,23 +25,32 @@
       async function submit(action) {
         if (pending) return;
         pending = true;
+        const previousSettings = { ...settings };
         const form = panel.querySelector('form');
         const secret = form.elements.apiKey;
-        const body = {action, revision:settings.revision, ...(action === 'activate' ? {apiKey:secret.value, model:form.elements.model.value, allowPaidModel:form.elements.allowPaidModel.checked} : {})};
+        const chosenModel = form.elements.model.value || 'meta-llama/llama-4-scout';
+        const body = {action, revision:settings.revision, ...(action === 'activate' ? {apiKey:secret.value, model:chosenModel, allowPaidModel:form.elements.allowPaidModel.checked} : {})};
         secret.value = '';
         const buttons = [...panel.querySelectorAll('button')];
         buttons.forEach(button => { button.disabled = true; });
         panel.querySelector('[data-meta-status]').textContent = action === 'activate' ? 'جارٍ اختبار اتصال المذكرات والمساعد…' : 'جارٍ العودة للمزود الأساسي…';
         try {
-          settings = await api('text-provider', body);
+          const next = await api('text-provider', body);
           if (!panel.isConnected) return;
+          if (action === 'activate' && !isConfirmedActive(next, chosenModel)) {
+            settings = previousSettings;
+            render();
+            panel.querySelector('[data-meta-status]').textContent = 'لم يؤكد الخادم اكتمال شروط التفعيل الأربعة؛ بقي الإعداد السابق كما هو.';
+            return;
+          }
+          settings = next;
           render();
           toast(action === 'activate' ? 'اجتاز الربط الاختبارين وفُعّل للمذكرات والمساعد. تبقى المسودات خاضعة للمراجعة القانونية.' : 'أُوقف Meta وعاد المزود الأساسي.');
         } catch (error) {
+          settings = previousSettings;
           if (panel.isConnected) {
+            render();
             panel.querySelector('[data-meta-status]').textContent = error.message || 'تعذر إكمال الربط.';
-            buttons.forEach(button => { button.disabled = false; });
-            panel.querySelector('[data-meta-disable]').disabled = !settings.enabled;
           }
         } finally { body.apiKey = ''; pending = false; }
       }

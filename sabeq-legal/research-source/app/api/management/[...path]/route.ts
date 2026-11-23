@@ -16,6 +16,7 @@ import { bridgeKeys, managerInbox, managerMemos, managerSnapshot, managerUpdates
 import { readMemoRevision, saveMemoRevision } from "@/lib/management-memo-revisions";
 import { mailAction, operationEvent, whatsappAction } from "@/lib/management-integrations";
 import { verificationEmailAction } from "@/lib/verification-email-settings";
+import { metaProviderAction } from "@/lib/text-provider-settings";
 import { sendTestEmail } from "@/lib/email";
 import { gmailAction, gmailSettings } from "@/lib/gmail";
 import { cleanMultiline, cleanString, enforceRateLimit, readJsonObject, RequestError } from "@/lib/request-security";
@@ -37,6 +38,7 @@ async function managementGet(request: Request) {
     if (action === "gmail") return managementJson(await gmailSettings());
     if (action === "control-accounts") return managementJson(await managementAccounts(null, manager));
     if (action === "verification-email") return managementJson(await verificationEmailAction(null, manager.email));
+    if (action === "text-provider") return managementJson(await metaProviderAction(null, manager.email));
     if (action === "site") return managementJson(await siteAction(null, manager.email));
     if (action === "services") return managementJson(await servicesAction(null));
     if (action === "bookings") return managementJson(await bookingsAction(null));
@@ -80,6 +82,10 @@ async function managementPost(request: Request) {
     const manager = await requireManager(request);
     assertManagerAction(manager, action, "POST");
     await enforceRateLimit(request, "management-write", 150);
+    if (action === "text-provider") {
+      await enforceRateLimit(request, "management-meta-provider", 8);
+      return managementJson(await metaProviderAction(data, manager.email, request.signal));
+    }
     if (action === "memo-revision") return managementJson(await saveMemoRevision(data, manager.email));
     if (action === "gmail") {
       await enforceRateLimit(request, data.action === "send-test" ? "gmail-test" : "gmail-management", data.action === "send-test" ? 5 : 30);

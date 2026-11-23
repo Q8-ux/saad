@@ -150,9 +150,33 @@ test('OpenRouter works alongside existing fallback providers and enforces data_c
     assert.equal(request.headers['X-Title'], 'Sabeq Legal');
     const body = JSON.parse(request.body);
     assert.equal(body.model, 'meta-llama/llama-3.3-70b-instruct:free');
-    assert.deepEqual(body.provider, { data_collection: 'deny' });
+    assert.deepEqual(body.provider, { data_collection: 'deny', zdr: true });
+    assert.equal(body.response_format.type, 'json_schema');
     assert.doesNotMatch(request.body, /synthetic-openrouter-secret/);
     return complete('{"facts":"وقائع اختبار اصطناعية فقط."}');
   });
   assert.equal((await res.json()).status, 'completed');
+
+  // Paid Meta Llama 4 Scout requires explicit approval and falls back cleanly if an endpoint filters json_schema
+  assert.throws(() => textProviderConfig({ OPENROUTER_API_KEY: 'synthetic-openrouter-secret', OPENROUTER_MODEL: 'meta-llama/llama-4-scout' }, 'openrouter'));
+  const scoutCfg = textProviderConfig({
+    OPENROUTER_API_KEY: 'synthetic-openrouter-secret',
+    OPENROUTER_MODEL: 'meta-llama/llama-4-scout',
+    OPENROUTER_ALLOW_PAID_META: 'approved',
+  }, 'openrouter');
+  assert.equal(scoutCfg.model, 'meta-llama/llama-4-scout');
+  let scoutCalls = 0;
+  const scoutRes = await compatibleTextResponse(init(), scoutCfg, async (_url, request) => {
+    scoutCalls++;
+    const body = JSON.parse(request.body);
+    assert.deepEqual(body.provider, { data_collection: 'deny', zdr: true });
+    if (scoutCalls === 1) {
+      assert.equal(body.response_format.type, 'json_schema');
+      return new Response('{"error":{"message":"Filter by Parameters"}}', { status: 404 });
+    }
+    assert.equal(body.response_format, undefined);
+    return complete('```json\n{"facts":"وقائع اصطناعية مستقلة"}\n```');
+  });
+  assert.equal(scoutCalls, 2);
+  assert.equal((await scoutRes.json()).output_text, '{"facts":"وقائع اصطناعية مستقلة"}');
 });

@@ -413,7 +413,7 @@ test('OpenRouter backs up memo generation and legal assistant alongside OpenAI a
     assert.equal(init.headers.Authorization, 'Bearer synthetic-openrouter-key');
     const request = JSON.parse(init.body);
     assert.equal(request.model, 'meta-llama/llama-3.3-70b-instruct:free');
-    assert.deepEqual(request.provider, { data_collection: 'deny' });
+    assert.deepEqual(request.provider, { data_collection: 'deny', zdr: true });
     assert.doesNotMatch(init.body, /synthetic-openrouter-key/);
     const marker = 'أعد JSON فقط مطابقًا لهذا المخطط، دون شرح أو Markdown:\n';
     const sys = request.messages[0].content;
