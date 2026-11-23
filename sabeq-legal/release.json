@@ -1,7 +1,7 @@
 {
   "release": "2026-11-23-memo-submission-recovery",
-  "clientSource": "68757bab51403ff789655a2bc428fdf876664a16",
-  "backendSource": "68757bab51403ff789655a2bc428fdf876664a16",
+  "clientSource": "fec514f892bca647280798298c07e9fdfe6e0cfe",
+  "backendSource": "fec514f892bca647280798298c07e9fdfe6e0cfe",
   "assistant": "indirect-intake-completeness-1",
   "voice": "gulf-male-voice-4",
   "tools": "legal-tools-1",
@@ -28,7 +28,7 @@
   "interfaceLocalization": "ar-en-ur-tools-guidance-1",
   "memoProseLanguage": "arabic-with-protected-names-and-identifiers-1",
   "builtAt": "2026-11-23",
-  "backendVersion": 231,
+  "backendVersion": 232,
   "pleadingLayout": "first-page-only-sidebar-and-frame-full-width-right-aligned-continuations",
   "citationCorrection": "one-bounded-server-retry-before-archive",
   "legalSourceDirectory": "6-catalogues-3-fetched-0-new-citable-pdfs",
@@ -270,18 +270,20 @@
   },
   "memoSubmissionRecovery": {
     "revision": "reviewed-fields-and-saved-reference-1",
-    "nativeVersion": 231,
-    "source": "68757bab51403ff789655a2bc428fdf876664a16",
-    "internalChecksPassed": 399,
-    "githubVariantChecksPassed": 31,
+    "nativeVersion": 232,
+    "source": "fec514f892bca647280798298c07e9fdfe6e0cfe",
+    "internalChecksPassed": 400,
+    "githubVariantChecksPassed": 36,
     "sharedLedgerChecksPassed": 8,
     "protectedFilesUnchanged": 87,
     "modelInstructionsUnchanged": true,
     "legacyStaleErrorReproduced": true,
     "nativeErrorRecoveryVerified": true,
-    "finalPublicBrowserCheck": "pending-after-pages-publication",
+    "finalPublicBrowserCheck": "passed-saved-source-review-with-reference",
     "realCaseRetried": false,
-    "historicalMemosRegenerated": false
+    "historicalMemosRegenerated": false,
+    "malformedAuditSavedForDefenseReview": true,
+    "liveCompleteMemoGenerated": false,
+    "livePreparationRequestCountVerified": false
   }
 }
-

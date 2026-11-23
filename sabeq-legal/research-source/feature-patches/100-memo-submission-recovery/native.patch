@@ -1,5 +1,5 @@
 diff --git a/app/api/legal/memo/route.ts b/app/api/legal/memo/route.ts
-index e0e18a5..7e2aba7 100644
+index e0e18a5..94ba157 100644
 --- a/app/api/legal/memo/route.ts
 +++ b/app/api/legal/memo/route.ts
 @@ -59,6 +59,7 @@ export async function POST(request: Request) {
@@ -33,7 +33,21 @@ index e0e18a5..7e2aba7 100644
      const matter=assessMatterFacts(facts+" "+requests+" "+allParties);
      if(!matter.ready && raw.draftMode !== availableEvidenceMode) {
        await finishMemoRequest(managementRequestId, "needs_information", "", "fact_clarification");
-@@ -231,9 +236,14 @@ export async function POST(request: Request) {
+@@ -212,7 +217,12 @@ export async function POST(request: Request) {
+           });
+         try {
+           caseAudit = parseGroundedCaseAudit(auditText,auditRequest,checkedPlan,content,evidence);
+-        } catch { throw new RequestError("لم تكتمل مراجعة اتساق الدفوع والوقائع. احتفظ ببياناتك وأعد المحاولة.",422); }
++        } catch {
++          // A malformed audit blocks delivery but the submitted case is already
++          // saved. Preserve its actual review stage for the client and dashboard.
++          await finishMemoRequest(managementRequestId,"needs_review","","defense_review");
++          return privateJson({requestId:managementRequestId,error:"لم تكتمل مراجعة اتساق الدفوع والوقائع. احتفظ ببياناتك وأعد المحاولة.",stage:"defense_review"},422);
++        }
+         if(!caseAudit.ok || !contentReview.ok || !routeReview.ok) {
+           if(qualityRetried&&!paymentLease&&!content.grounds.trim()&&caseAudit.roleConsistent&&caseAudit.factsPreserved&&caseAudit.reliefConsistent&&!caseAudit.unsupportedAssertions.length&&caseAudit.checks.every(check=>check.status==="blocked"))return pendingSourceReview(["defense_research_pending"]);
+           if(qualityRetried) {
+@@ -231,9 +241,14 @@ export async function POST(request: Request) {
        const caseQuality=caseQualitySummary(checkedPlan,caseAudit,content,sources.length);
        if(caseQuality.status==="incomplete") return pendingSourceReview(["incomplete_defense_coverage"]);
        signal.throwIfAborted();
@@ -49,7 +63,7 @@ index e0e18a5..7e2aba7 100644
        await completeMemoPayment(paymentLease, responseData);
        return privateJson(responseData);
      }
-@@ -278,10 +288,10 @@ export async function POST(request: Request) {
+@@ -278,10 +293,10 @@ export async function POST(request: Request) {
    } catch (error) {
      if (managementRequestId) await finishMemoRequest(managementRequestId, request.signal.aborted ? "cancelled" : "failed", "", error instanceof RequestError ? `request_${error.status}` : "generation_failed").catch(() => undefined);
      const openAIError = openAIErrorResponse(error, "تعذر توليد المذكرة حالياً. يرجى المحاولة لاحقاً.");
@@ -467,10 +481,10 @@ index 0000000..cc37ba1
 +يمكن أن يكون الاستثناء الأصلي في المتصفح أو في الاتصال قبل وصول التوليد، ولا يُدّعى تحديده من سجلات الخادم وحدها. أسانيد غير مكتملة تظل بحاجة لمراجعة مختص؛ هذا الإصلاح لا ينشئ مصادر أو يضعف بوابة المراجعة.
 diff --git a/specs/100-memo-submission-recovery/tasks.md b/specs/100-memo-submission-recovery/tasks.md
 new file mode 100644
-index 0000000..1336a08
+index 0000000..bfcd9af
 --- /dev/null
 +++ b/specs/100-memo-submission-recovery/tasks.md
-@@ -0,0 +1,8 @@
+@@ -0,0 +1,9 @@
 +# المهام
 +- [x] T001 تثبيت بصمات المحرك وإثبات انحدار محو النص المحفوظ قبل الإصلاح.
 +- [x] T002 إضافة طبقة إرسال/تحضير وعرض مرحلة الفشل ورقم الطلب وإزالة الخطأ القديم.
@@ -479,12 +493,13 @@ index 0000000..1336a08
 +- [x] T005 اجتياز الاختبارات والبناء وفحص بصمات المحتوى.
 +- [ ] T006 نشر المصدر وواجهة GitHub وفحص الواجهة الاصطناعية المنشورة وتوثيق النسخة والفحوص والحدود المتبقية.
 +- [ ] T007 منع إعادة التحضير بسبب القيم الافتراضية التي تضيفها شاشة المراجعة النهائية؛ التحقق من طلب تحضير واحد ثم توليد واحد في السجلات الحية.
++- [x] T008 حفظ الطلب بمرحلة defense_review عند تعذر تحليل نتيجة المراجعة المستقلة، مع بقاء رفض التسليم والدفع دون تغيير؛ اختبار انحدار مثبت قبل الإصلاح.
 diff --git a/specs/100-memo-submission-recovery/validation.md b/specs/100-memo-submission-recovery/validation.md
 new file mode 100644
-index 0000000..77ed916
+index 0000000..a8f2a59
 --- /dev/null
 +++ b/specs/100-memo-submission-recovery/validation.md
-@@ -0,0 +1,12 @@
+@@ -0,0 +1,13 @@
 +# دليل الفحص
 +
 +- قبل الإصلاح: اختبارا محو النص المحفوظ ووصول التوليد الآلي بعد المراجعة البشرية يفشلان؛ حالة المراجعة دون نص تنجح.
@@ -497,11 +512,12 @@ index 0000000..77ed916
 +- النشر وفحص النسخة الجديدة الحي يُوثقان بعد اكتمالهما. لا يُعد اختبار source_review الاصطناعي مذكرة قانونية مكتملة ولا إثباتًا لفحص بيانات القضية الشخصية.
 +- نشر الإصلاح الأول في النسخة 230 أكد اختفاء الخطأ القديم بعد تصحيح الإدخال، ووصول التوليد إلى مراجعة الأسانيد. كشف الفحص الحي طلب تحضير إضافيًا مدته 45ms بسبب قيم حقول المراجعة الافتراضية؛ أضيف اختبار مستقل وإصلاح يمرر الحقول المعتمدة للخادم مباشرة دون إعادة استخلاص. فحوص النسخة النهائية والتأكد من عدد الطلبات تُستكمل قبل إعلان الإكمال.
 +- اجتاز الإصلاح النهائي 399 فحصًا داخليًا: مصادر 42، مذكرات 245، وصول 112. نجحت بوابات الجودة الست والبناء الأصلي؛ نجح بناء واجهة GitHub و31 اختبار واجهة/نقل. فحص عدد الطلبات بعد النشر النهائي يبقى مسجلاً في مهمة T007 حتى رصده حيًا.
++- فحص Pages للإصدار 231 أكد زوال الخطأ القديم ووصول الطلب إلى المراجعة المستقلة. كشف أن تعذر تحليل رد المراجعة يسجّل خطأ عامًا generation بدل defense_review. أثبت اختبار API حقيقي فشل التصنيف قبل الإصلاح؛ بعده نجح مع 31 حالة أخرى تشمل حماية المحتوى. لا تتغير دعوة النموذج أو تعليماته أو شروط قبول المراجعة؛ تُحفظ حالة المراجعة ويظل التسليم محجوبًا، دون صرف استحقاق الدفع أو أرشفة نجاح كاذب. فحص النشر اللاحق يُوثّق عند اكتماله.
 diff --git a/tests/agent-pipeline.test.mjs b/tests/agent-pipeline.test.mjs
-index 2383f99..655efd8 100644
+index 2383f99..eb7a019 100644
 --- a/tests/agent-pipeline.test.mjs
 +++ b/tests/agent-pipeline.test.mjs
-@@ -145,6 +145,16 @@ test('memo route invokes agents after auth and retains actual approved document
+@@ -145,6 +145,25 @@ test('memo route invokes agents after auth and retains actual approved document
   }}});
   const response=await route.POST(request());assert.equal(response.status,200);const value=await response.json();assert.equal(value.document.kind,'claim');assert.equal(value.analysis.sources[0].sourceUrl,evidence[0].sourceUrl);assert.equal(value.template.sourceFilename,(await h.templates.loadApprovedTemplate('claim')).info.sourceFilename);assert.doesNotMatch(value.memo,/المساعد|ملاحظات المراجعة|نتيجة التحليل/);
  });
@@ -514,6 +530,15 @@ index 2383f99..655efd8 100644
 + const h=templateHarness();t.after(h.cleanup);
 + const route=memoRoute(h,{complete:async()=>{throw Error('synthetic payment outage');},pipeline:{agentPipelineEnabled:()=>true,generateAgentPleading:async()=>({content:{...content},audit:{}})},ledger:{startMemoRequest:async()=> 'synthetic-payment-memo',finishMemoRequest:async()=>{}}});
 + const response=await route.POST(request());assert.equal(response.status,503);const data=await response.json();assert.equal(data.requestId,'synthetic-payment-memo');assert.equal(data.stage,'payment');assert.doesNotMatch(JSON.stringify(data),/synthetic payment outage/);
++});
++test('a malformed independent audit remains saved for defense review without a success archive or payment',async t=>{
++ const h=templateHarness();t.after(h.cleanup);const saved=[];let completed=0,archived=0;
++ const route=memoRoute(h,{paid:true,complete:async()=>{completed++;},record:async()=>{archived++;},pipeline:{agentPipelineEnabled:()=>true,generateAgentPleading:async()=>({content:{...content},audit:{}})},ledger:{startMemoRequest:async()=> 'synthetic-malformed-audit',finishMemoRequest:async(...row)=>saved.push(row)},model:async options=>{
++  if(options.schema?.properties?.clientRole) return JSON.stringify({clientRole:caseData.partyRole,opponentRole:'مدعى عليه',characterization:'مطالبة',issues:[{issue:'المبلغ',factQuote:'مبلغ لم يتم سداده',document:'',sourceMarkers:['م1'],application:'فحص أصل المطالبة',counterargument:'منازعة السداد',response:'فحص المستند',proposedRelief:caseData.requests,missing:''}],missingFacts:[],researchGaps:[]});
++  if(options.schema?.properties?.checks) return '{invalid audit response';
++  throw Error('unexpected model call');
++ }});
++ const response=await route.POST(request());assert.equal(response.status,422);const data=await response.json();assert.equal(data.requestId,'synthetic-malformed-audit');assert.equal(data.stage,'defense_review');assert.equal(data.memo,undefined);assert.equal(data.document,undefined);assert.deepEqual(saved.at(-1),['synthetic-malformed-audit','needs_review','','defense_review']);assert.equal(completed,0);assert.equal(archived,0);assert.doesNotMatch(JSON.stringify(data),/invalid audit response/);
 +});
  test('auth failure cannot reach agents; enabled worker failure is not silently bypassed',async t=>{
   const h=templateHarness();t.after(h.cleanup);let calls=0;
@@ -594,6 +619,19 @@ index 0000000..00fc8a0
 +test('latest model configuration, drafting, legal review and export sources retain their baseline bytes',()=>{
 +  const result=checkMemoCore();assert.ok(result.protectedFiles>50);assert.equal(result.instructionsUnchanged,true);
 +});
+diff --git a/tests/memo-import-render.test.mjs b/tests/memo-import-render.test.mjs
+index 7f2c152..8551f3d 100644
+--- a/tests/memo-import-render.test.mjs
++++ b/tests/memo-import-render.test.mjs
+@@ -17,7 +17,7 @@ const source=readFileSync(new URL('../app/sabeq-site.tsx',import.meta.url),'utf8
+ const ast=ts.createSourceFile('sabeq-site.tsx',source,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX);
+ const functions=ast.statements.filter(node=>ts.isFunctionDeclaration(node)&&['Field','CustomComboBox','MemoWizard'].includes(node.name?.text)).map(node=>node.getText(ast)).join('\n');
+ const exports={};
+-vm.runInNewContext(ts.transpileModule('import {useState,useEffect,useMemo,useRef} from "react";\n'+functions+'\nexport {MemoWizard};',{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,jsx:ts.JsxEmit.ReactJSX}}).outputText,{exports,require,...load("../lib/legal-drafting-routes.ts"),...handoff,...procedure,...journey,...dictation,...require('lucide-react'),...load('../lib/sadad-client.ts'),...load('../lib/memo-generation.ts'),interfaceLabel:localization.interfaceLabel,tr:localization.interfaceText,pleadingFields:{},selectPleadingKind:()=>"memorandum",emptyAnalysisFields:{},MemoVoiceInput:VoiceInput,ProceduralPositionView:()=>null,Intl});
++vm.runInNewContext(ts.transpileModule('import {useState,useEffect,useMemo,useRef} from "react";\n'+functions+'\nexport {MemoWizard};',{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,jsx:ts.JsxEmit.ReactJSX}}).outputText,{exports,require,...load("../lib/legal-drafting-routes.ts"),...handoff,...procedure,...journey,...dictation,...require('lucide-react'),...load('../lib/sadad-client.ts'),...load('../lib/memo-generation.ts'),...load('../lib/memo-submission.ts'),interfaceLabel:localization.interfaceLabel,tr:localization.interfaceText,pleadingFields:{},selectPleadingKind:()=>"memorandum",emptyAnalysisFields:{},MemoVoiceInput:VoiceInput,ProceduralPositionView:()=>null,Intl});
+ const {copy}=load('../app/site-content.ts');
+ const state={memoPrefill:{facts:'وقائع اصطناعية سبق ذكرها في المحادثة',requests:'طلب اصطناعي سبق ذكره',clientName:'اسم اصطناعي أول',otherParty:'اسم اصطناعي ثان',caseType:'مدني',court:'المحكمة الكلية',partyRole:'مدعٍ'}};
+ const render=(intake,language='ar')=>renderToStaticMarkup(React.createElement(exports.MemoWizard,{t:copy[language],language,token:'',active:true,initialData:null,assistantSession:{messages:[{role:'user',content:'قضية اصطناعية'}],intake},openAssistant(){}}));
 diff --git a/tests/memo-ledger-recovery.test.mjs b/tests/memo-ledger-recovery.test.mjs
 new file mode 100644
 index 0000000..dcc37c1

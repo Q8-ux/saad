@@ -217,7 +217,12 @@ export async function POST(request: Request) {
           });
         try {
           caseAudit = parseGroundedCaseAudit(auditText,auditRequest,checkedPlan,content,evidence);
-        } catch { throw new RequestError("لم تكتمل مراجعة اتساق الدفوع والوقائع. احتفظ ببياناتك وأعد المحاولة.",422); }
+        } catch {
+          // A malformed audit blocks delivery but the submitted case is already
+          // saved. Preserve its actual review stage for the client and dashboard.
+          await finishMemoRequest(managementRequestId,"needs_review","","defense_review");
+          return privateJson({requestId:managementRequestId,error:"لم تكتمل مراجعة اتساق الدفوع والوقائع. احتفظ ببياناتك وأعد المحاولة.",stage:"defense_review"},422);
+        }
         if(!caseAudit.ok || !contentReview.ok || !routeReview.ok) {
           if(qualityRetried&&!paymentLease&&!content.grounds.trim()&&caseAudit.roleConsistent&&caseAudit.factsPreserved&&caseAudit.reliefConsistent&&!caseAudit.unsupportedAssertions.length&&caseAudit.checks.every(check=>check.status==="blocked"))return pendingSourceReview(["defense_research_pending"]);
           if(qualityRetried) {

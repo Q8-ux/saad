@@ -1,19 +1,19 @@
 {
   "baseNativeCommit": "e1184b3fe790e891eabb36acaef786b24c9191ec",
-  "nativeCommit": "68757bab51403ff789655a2bc428fdf876664a16",
-  "nativeVersion": 231,
-  "nativeDeployment": "appgdep_6b041e253c708191b048b8e7f348d0bc",
-  "nativePublishedAt": "2026-11-23T11:06:33.219533+00:00",
-  "nativePatchSha256": "6b85997df07a7b58591912d4a70c5567a8ee8c66e8ae990003f2bd65ebd1a673",
-  "nativePatchBytes": 73931,
+  "nativeCommit": "fec514f892bca647280798298c07e9fdfe6e0cfe",
+  "nativeVersion": 232,
+  "nativeDeployment": "appgdep_6b0425399fcc8191a9682e58095333bf",
+  "nativePublishedAt": "2026-11-23T11:36:44.143279+00:00",
+  "nativePatchSha256": "a03eed95c08c3f8ef95adc43c410897d4d163fe1941d3e2d69f4a74486be804c",
+  "nativePatchBytes": 80495,
   "publicAsset": {
     "path": "sabeq-legal/assets/index-Ccg1FPn3.js",
     "bytes": 607698,
     "sha256": "248da88d0258fb973d560373dbf9d9b73eb4c577c7f91802fddd3b34d2303e99",
     "gitSha": "0eef2dccf095a14aeb60e3c0fe2d9898fd932a60"
   },
-  "internalChecks": 399,
-  "githubVariantChecks": 31,
+  "internalChecks": 400,
+  "githubVariantChecks": 36,
   "sharedLedgerChecks": 8,
   "protectedMemoFiles": 87,
   "modelInstructionsUnchanged": true,
@@ -21,7 +21,11 @@
   "realCaseRetried": false,
   "publicMirrorConditionalWrite": "atomic UPDATE RETURNING id; same preservation conditions",
   "publicMirrorDependencyClosureCompleted": true,
-  "publicMirrorChecksPassed": 39,
+  "publicMirrorChecksPassed": 44,
   "isolatedSyntheticMemoStatus": 200,
-  "isolatedSyntheticSavedTextMatched": true
+  "isolatedSyntheticSavedTextMatched": true,
+  "malformedAuditSavedForReview": true,
+  "finalPublicBrowserCheck": "passed-saved-source-review-with-reference; incomplete-memo-not-delivered",
+  "liveCompleteMemoGenerated": false,
+  "livePreparationRequestCountVerified": false
 }
