@@ -4,12 +4,14 @@ from __future__ import annotations
 import asyncio
 import hmac
 import json
+import logging
 import os
 import re
 import shutil
 import tempfile
 import time
 from collections import defaultdict, deque
+from importlib.metadata import version
 from pathlib import Path
 from urllib.parse import urlsplit
 
@@ -20,6 +22,7 @@ from pydantic import BaseModel, Field
 from starlette.background import BackgroundTask
 
 ROOT = Path(__file__).resolve().parent
+logger = logging.getLogger(__name__)
 APP_PASSWORD = os.getenv("APP_PASSWORD", "")
 PUBLIC_APP_MODE = os.getenv("PUBLIC_APP_MODE", "0") == "1"
 PUBLIC_MAX_MB = 60
@@ -165,11 +168,26 @@ async def command(args: list[str], timeout: int) -> tuple[int, bytes, bytes]:
         raise HTTPException(504, "انتهت مهلة استخلاص الفيديو.") from None
 
 
+def extractor_failure(stderr: bytes) -> str:
+    # Only log a category; extractor stderr can contain submitted URLs or cookies.
+    error = stderr.decode('utf-8', 'replace').lower()
+    if any(word in error for word in ('sign in', 'not a bot', 'captcha', 'login', 'cookies')):
+        return 'provider_requires_verification'
+    if 'javascript runtime' in error or 'yt-dlp-ejs' in error:
+        return 'javascript_runtime_missing'
+    if '403' in error or '429' in error:
+        return 'provider_access_denied'
+    if 'ffmpeg' in error and ('not found' in error or 'not installed' in error):
+        return 'media_tool_missing'
+    return 'extractor_failed'
+
+
 async def read_info(url: str) -> dict:
-    code, stdout, _ = await command(
+    code, stdout, stderr = await command(
         ["--dump-single-json", "--skip-download", "--", url], 55
     )
     if code:
+        logger.warning('Video metadata extraction failed: %s', extractor_failure(stderr))
         raise HTTPException(
             422, "تعذّر تحليل المقطع. ربما يتطلب تسجيل دخول أو أن المنصة تمنع الوصول إليه."
         )
@@ -217,6 +235,8 @@ def health():
     return {
         "status": "ok", "engine": "yt-dlp", "configured": bool(APP_PASSWORD),
         "public_app_mode": PUBLIC_APP_MODE,
+        "engine_version": version('yt-dlp'),
+        "javascript_runtime_ready": bool(shutil.which('deno')),
         "supported_platforms": list(PLATFORMS),
     }
 
@@ -289,8 +309,12 @@ async def download(clip: Clip, request: Request):
                     "-f", chosen, "--merge-output-format", "mp4",
                     "--recode-video", "mp4"
                 ]
-            code, _, _ = await command(args + ["--", url], 160)
+            code, _, stderr = await command(args + ["--", url], 160)
             if code:
+                reason = extractor_failure(stderr)
+                logger.warning('Video download failed: %s', reason)
+                if reason in ('provider_requires_verification', 'provider_access_denied'):
+                    raise HTTPException(422, 'المصدر يرفض تنزيل هذا المقطع أو يتطلب تحققًا. جرّب رابطًا عامًا آخر؛ لا يتم تجاوز قيود المصدر.')
                 raise HTTPException(
                     422, "تعذر تنزيل الفيديو بهذه الجودة. جرّب جودة أخرى أو مقطعًا عامًا."
                 )
@@ -317,3 +341,4 @@ async def download(clip: Clip, request: Request):
     except Exception:
         shutil.rmtree(folder, ignore_errors=True)
         raise
+

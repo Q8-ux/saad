@@ -19,6 +19,8 @@ The combined Pages build omitted `video-downloader`, returning HTTP 404 even whi
 
 Checks: `node --test video-downloader/tests/frontend.test.cjs` and `python -m unittest discover -s video-downloader/deployment -p 'test_*.py' -v`.
 
+The API also installs yt-dlp's default EJS dependencies and Deno, required by current YouTube extraction. Health reports the engine version and JavaScript runtime readiness. Extractor failures log a category only; submitted URLs and cookies are not copied into diagnostics. Provider verification requirements are reported without attempting to bypass them.
+
 ## Backend support
 
 TikTok, YouTube and Shorts, Instagram and Reels, Facebook, X/Twitter, Snapchat Spotlight, Pinterest, Reddit, Vimeo, Twitch, Dailymotion, SoundCloud, Bluesky, Bilibili, Rumble, Streamable, VK, LinkedIn, Threads, Telegram, Kwai.
