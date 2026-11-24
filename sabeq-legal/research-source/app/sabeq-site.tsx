@@ -32,6 +32,7 @@ import VoiceCountdown from "./voice-countdown";
 import { LegalVoiceConversation, type VoiceAnalysisResult } from "@/lib/legal-voice-client";
 import { DEFAULT_LEGAL_VOICE, resolveLegalVoice, LEGAL_VOICES, isLegalVoice, voiceCopy, type LegalVoice, type VoicePhase } from "@/lib/legal-voice";
 import { memoApprovalNotice, conversationTranscript, importMemoDraft, type MemoPrefill } from "@/lib/memo-handoff";
+import { isDifferentMemoCase, mergeMemoCasePatch } from "@/lib/memo-case-context";
 
 import Image from "next/image";
 import {
@@ -598,7 +599,7 @@ export default function SabeqSite() {
         {modal === "library" && <Library t={t} language={language} token={authToken} />}
         {modal === "media" && <MediaViewer video={mediaVideos[selectedVideo]} language={language} />}
       </ModalShell>}
-      {(memoVisited || modal === "memo") && <ModalShell language={language} onClose={() => setModal(null)} large active={modal === "memo"}><MemoWizard t={t} language={language} token={authToken} active={modal === "memo"} initialData={assistantMemoPrefill} assistantSession={assistantSession} openAssistant={(context) => { if (!assistantSession) setAssistantSession({ question: context, messages: [], intake: null }); setModal("assistant"); }} /></ModalShell>}
+      {(memoVisited || modal === "memo") && <ModalShell language={language} onClose={() => setModal(null)} large active={modal === "memo"}><MemoWizard t={t} language={language} token={authToken} active={modal === "memo"} initialData={assistantMemoPrefill} assistantSession={assistantSession} startNewCase={() => { setAssistantSession(null); setAssistantMemoPrefill(null); }} openAssistant={(context) => { if (!assistantSession) setAssistantSession({ question: context, messages: [], intake: null }); setModal("assistant"); }} /></ModalShell>}
 
       <div className="floating">
         <button type="button" className="assistant-avatar-button" onClick={() => showModal("assistant")} aria-label={t.assistant} aria-haspopup="dialog"><span className="assistant-portrait"><img src={assetUrl(branding.avatar)} alt="" width={64} height={64} decoding="async" /></span></button>
@@ -1014,7 +1015,7 @@ const emptyAnalysisFields: AnalysisFields = {
   legalIssues: "",
 };
 
-function MemoWizard({ t, language, token, initialData = null, assistantSession, active, openAssistant }: { t: SiteCopy; language: Language; token: string; initialData?: MemoPrefill | null; assistantSession: AssistantSession | null; active: boolean; openAssistant: (context: string) => void }) {
+function MemoWizard({ t, language, token, initialData = null, assistantSession, active, startNewCase, openAssistant }: { t: SiteCopy; language: Language; token: string; initialData?: MemoPrefill | null; assistantSession: AssistantSession | null; active: boolean; startNewCase: () => void; openAssistant: (context: string) => void }) {
   const [paymentPolicy, setPaymentPolicy] = useState<{ required: boolean; publicCheckoutEnabled: boolean; priceFils: number; ready: boolean; environment: string } | null>(null);
   const [checkout, setCheckout] = useState<SadadCheckout | null>(null);
   const [checkingPayment, setCheckingPayment] = useState(false);
@@ -1043,6 +1044,7 @@ function MemoWizard({ t, language, token, initialData = null, assistantSession, 
   const [memoApproved, setMemoApproved] = useState(false);
   const [generationSeconds, setGenerationSeconds] = useState(0);
   const generationRequest = useRef<AbortController | null>(null);
+  const caseEpoch = useRef(0);
   const storyRequest = useRef<AbortController | null>(null);
   const generationMounted = useRef(true);
   const generationUi = memoGenerationCopy(language);
@@ -1085,6 +1087,20 @@ function MemoWizard({ t, language, token, initialData = null, assistantSession, 
     setMemoData(next);
     return next;
   }
+  function resetCaseWork(preserveDocuments = false) {
+    caseEpoch.current += 1;
+    generationRequest.current?.abort(); storyRequest.current?.abort();
+    generationRequest.current = null; storyRequest.current = null;
+    submissionSession.current = new MemoSubmissionSession();
+    if (!preserveDocuments) setDocuments([]);
+    setAnalysisFields(emptyAnalysisFields); setAnalysisParties([]);
+    lastAppliedAnalysis.current = null; automaticProcedure.current = {};
+    setAnalysisStatus("idle"); setAnalysisNotice(""); setAnalysisWarnings([]);
+    setMemoAnalysis(null); setMemoQuality(null); setMemoDocument(null); setMemo("");
+    setMemoApproved(false); setMemoFailure(null); setMemoError(""); setResultNotice(null);
+    setStatus("idle"); setStoryBusy(false); setVoiceEntryBusy(false);
+    if (documentInputRef.current) documentInputRef.current.value = "";
+  }
   useEffect(() => {
     if (!initialData || appliedHandoff.current === initialData) return;
     appliedHandoff.current = initialData;
@@ -1093,7 +1109,8 @@ function MemoWizard({ t, language, token, initialData = null, assistantSession, 
       setStatus("error"); setMemoError(payUi.changed); return;
     }
     const story = memoStoryText(initialData.facts, initialData.requests);
-    setMemoData(current => ({ ...current, ...initialData, caseStory: story }));
+    resetCaseWork();
+    setMemoData({ ...initialData, caseStory: story });
     lastUnderstoodStory.current = initialData.facts && initialData.requests ? story : "";
     setFacts(initialData.facts || ""); setRequests(initialData.requests || "");
     setMemoApproved(false); setVoiceFormVersion(version => version + 1);
@@ -1102,12 +1119,16 @@ function MemoWizard({ t, language, token, initialData = null, assistantSession, 
   }, [initialData, checkout, memo, payUi.changed]);
   useEffect(() => {
     if (!active || !assistantSession || importedSession.current === assistantSession || paymentAttempt.current || checkout || memo) return;
+    const previousSession = importedSession.current;
     importedSession.current = assistantSession;
-    const next = importMemoDraft(captureDraft(), assistantSession.intake, assistantSession.messages);
+    const fresh = importMemoDraft({}, assistantSession.intake, assistantSession.messages);
+    const newCase = isDifferentMemoCase(memoData, fresh) || Boolean(previousSession?.messages.length && !assistantSession.messages.length && !assistantSession.intake);
+    if (newCase) resetCaseWork();
+    const next = newCase ? fresh : importMemoDraft(captureDraft(), assistantSession.intake, assistantSession.messages);
     setMemoData(next); setFacts(next.facts || ""); setRequests(next.requests || "");
     if (!next.caseStory && next.facts && next.requests) lastUnderstoodStory.current = memoStoryText(next.facts, next.requests);
     setMemoApproved(false); setVoiceFormVersion(version => version + 1);
-    if (next.conversationTranscript?.trim()) setStep(initialMemoStep(true));
+    if (newCase || next.conversationTranscript?.trim()) setStep(initialMemoStep(Boolean(next.conversationTranscript?.trim())));
   }, [active, assistantSession, checkout, memo]);
   useEffect(() => {
     if (active) return;
@@ -1303,7 +1324,10 @@ function MemoWizard({ t, language, token, initialData = null, assistantSession, 
 
   function applyCaseStory(patch: Record<string, string>, story: string) {
     setFacts(patch.facts || ""); setRequests(patch.requests || "");
-    setMemoData(current => ({ ...current, ...patch, facts: patch.facts || "", requests: patch.requests || "", caseStory: story }));
+    if (isDifferentMemoCase(memoData, patch)) {
+      resetCaseWork(); setVoiceFormVersion(version => version + 1);
+    }
+    setMemoData(current => ({ ...mergeMemoCasePatch(current, patch), facts: patch.facts || "", requests: patch.requests || "", caseStory: story }));
     lastUnderstoodStory.current = story;
     setMemoApproved(false); setStatus("idle"); setMemoError("");
   }
@@ -1314,6 +1338,7 @@ function MemoWizard({ t, language, token, initialData = null, assistantSession, 
       setAnalysisNotice(ui.filesRequired);
       return;
     }
+    const analysisEpoch = caseEpoch.current;
     setAnalysisStatus("loading");
     setAnalysisNotice("");
     setAnalysisWarnings([]);
@@ -1331,8 +1356,11 @@ function MemoWizard({ t, language, token, initialData = null, assistantSession, 
         };
         error?: string;
       }>(response);
+      if (analysisEpoch !== caseEpoch.current || !generationMounted.current) return;
       if (!response.ok || !data.analysis) throw new Error(data.error || t.error);
       const extracted = data.analysis;
+      const newCase = isDifferentMemoCase(memoData, extracted);
+      if (newCase) { resetCaseWork(true); setVoiceFormVersion(version => version + 1); }
       const parties = extracted.parties?.length
         ? extracted.parties
         : [
@@ -1354,7 +1382,7 @@ function MemoWizard({ t, language, token, initialData = null, assistantSession, 
       setFacts(extracted.facts || "");
       setRequests(extracted.requests || "");
       const story = memoStoryText(extracted.facts, extracted.requests);
-      setMemoData(current => ({ ...current, caseStory: story }));
+      setMemoData(current => ({ ...(newCase ? Object.fromEntries(Object.entries(extracted).filter(([,value]) => typeof value === "string")) as Record<string,string> : current), caseStory: story }));
       lastUnderstoodStory.current = story;
       setAnalysisWarnings(extracted.warnings || []);
       setAnalysisStatus("success");
@@ -1364,6 +1392,7 @@ function MemoWizard({ t, language, token, initialData = null, assistantSession, 
       return patch;
     } catch (error) {
       setAnalysisStatus("error");
+      if (analysisEpoch !== caseEpoch.current || !generationMounted.current) return;
       setAnalysisNotice(interfaceError(error, language, t.error));
     }
   }
@@ -1617,6 +1646,10 @@ function MemoWizard({ t, language, token, initialData = null, assistantSession, 
     <div className="memo-modal">
       <div className="journey-switch"><button type="button" className="button button-outline" disabled={status === "loading"} onClick={() => { const draft = captureDraft(); openAssistant(draft.caseStory || memoStoryText(facts, requests)); }}>{language === "ar" ? "المتابعة مع المساعد القانوني" : language === "en" ? "Continue with the legal assistant" : "قانونی معاون کے ساتھ جاری رکھیں"}</button><small>{language === "ar" ? "تبقى مسودتك ومرفقاتك عند الرجوع خلال هذه الجلسة." : language === "en" ? "Your draft and attachments remain here while you switch during this session." : "اس نشست میں واپسی پر مسودہ اور منسلکات محفوظ رہیں گے۔"}</small></div>
       <div className="memo-modal-title"><div className="modal-icon"><FileText /></div><span><h2>{t.memoModal}</h2><p><Languages size={15} />{t.arabicOnly}</p></span></div>
+      <button type="button" className="button button-outline" disabled={Boolean(checkout || paymentAttempt.current)} onClick={() => {
+        resetCaseWork(); setMemoData({}); setFacts(""); setRequests(""); lastUnderstoodStory.current = "";
+        setStep(0); setVoiceFormVersion(version => version + 1); startNewCase();
+      }}>{language === "ar" ? "بدء قضية جديدة" : language === "en" ? "Start a new case" : "نیا مقدمہ شروع کریں"}</button>
       {memoData.conversationTranscript && <details className="memo-conversation-review">
         <summary>{language === "ar" ? "المحادثة وملخص القضية المنقولان من المساعد" : language === "en" ? "Conversation and case summary from the assistant" : "معاون سے منتقل گفتگو اور مقدمے کا خلاصہ"}</summary>
         <p>{language === "ar" ? "راجع الأسماء والأرقام والوقائع والطلبات أدناه. يتولى المساعد التصحيح اللغوي والبحث القانوني؛ كلام المساعد ليس مصدراً قانونياً." : language === "en" ? "Confirm names, numbers and case facts. The assistant corrects the language and researches legal sources; assistant messages are not legal authorities." : "گفتگو اور خلاصے کی تصحیح کریں۔ منظور شدہ حقائق اور مطالبات بنیاد ہیں؛ معاون کی بات قانونی ماخذ نہیں۔"}</p>

@@ -1,0 +1,1146 @@
+diff --git a/app/api/legal/assistant/route.ts b/app/api/legal/assistant/route.ts
+index e4c53d4..92f7854 100644
+--- a/app/api/legal/assistant/route.ts
++++ b/app/api/legal/assistant/route.ts
+@@ -1,5 +1,5 @@
+ import { applyIntakeReadiness } from "@/lib/intake-readiness";
+-import { applyProceduralPosition } from "@/lib/procedural-position";
++import { applyProceduralPosition, inferProceduralPosition, inferMatterType } from "@/lib/procedural-position";
+ import {guardMatterIntake} from "@/lib/matter-facts";
+ import {scopeEvidenceToFacts} from "@/lib/bound-draft";
+ import { ASSISTANT_REQUEST_BYTES, validateAssistantInput } from "@/lib/assistant-input";
+@@ -15,16 +15,6 @@ import { requireServiceEnabled } from "@/lib/service-settings";
+ import { assertSameOrigin, cleanLanguage, corsPreflight, enforceRateLimit, errorResponse, privateJson, readJsonObject, RequestError } from "@/lib/request-security";
+ 
+ export const OPTIONS = corsPreflight;
+-function guessCaseType(text: string) {
+-  if (/عمل|عامل|راتب|أجر|اجر|فصل|مكافأة|مكافاه/u.test(text)) return "عمالي";
+-  if (/طلاق|نفقة|نفقه|حضانة|حضانه|زواج|أسرة|اسرة|ميراث/u.test(text)) return "أحوال شخصية";
+-  if (/إيجار|ايجار|مستأجر|مستاجر|مؤجر|إخلاء|اخلاء/u.test(text)) return "إيجارات";
+-  if (/بلاغ|نصب|احتيال|سرقة|سرقه|اعتداء|ضرب|جزائي|جنحة|جنحه|جناية|جنايه/u.test(text)) return "جزائي";
+-  if (/قرار إداري|قرار اداري/u.test(text)) return "إداري";
+-  if (/شركة|شركه|تجاري|توريد|أسهم|اسهم/u.test(text)) return "تجاري";
+-  if (/دين|قرض|تعويض|مبلغ|مدني/u.test(text)) return "مدني";
+-  return "";
+-}
+ 
+ function buildLimitedIntakeState(input: { language: string; message: string; currentState: unknown; failure: string }): LegalIntakeState {
+   const previous = cleanIntakeContext(input.currentState);
+@@ -36,20 +26,23 @@ function buildLimitedIntakeState(input: { language: string; message: string; cur
+   const facts = [...(previous?.facts || [])];
+   if (input.message.trim().length >= 8 && !facts.some(item => item === input.message.trim())) facts.push(input.message.trim());
+   const joined = [...facts, input.message, previous?.caseType || ""].join(" ");
+-  const caseType = previous?.caseType || guessCaseType(joined);
++  const stated = inferProceduralPosition(joined, memoText("clientName"), memoText("otherParty"));
++  const caseType = stated.court ? inferMatterType(joined, stated.court) || previous?.caseType || "" : previous?.caseType || inferMatterType(joined);
++  const court = stated.court || previous?.court || "";
++  const statedPending = !!stated.court && /منظورة|منظوره|(?:القضية|القضيه|الدعوى)\s+أمام/u.test(joined);
+   const questions = input.language === "en"
+     ? ["What result do you want from the court?", "Who is the other party and what is your relationship with them?", "Has any judgment or case already been filed about this dispute?"]
+     : input.language === "ur"
+       ? ["آپ عدالت سے کیا نتیجہ چاہتے ہیں؟", "دوسرا فریق کون ہے اور آپ کا اس سے کیا تعلق ہے؟", "کیا اس معاملے میں پہلے کوئی مقدمہ یا فیصلہ موجود ہے؟"]
+       : ["ما النتيجة التي تريدها من المحكمة؟", "من هو الطرف الآخر وما علاقتك به؟", "هل توجد قضية مرفوعة أو حكم سابق عن نفس الموضوع؟"];
+   const question = questions.find(item => !memory.asked.some(row => row.key === inferQuestionKey(item))) || "";
+-  const assistantMessage = input.language === "en"
++  const assistantMessage = stated.court ? (input.language === "en" ? `Your account identifies a ${interfaceLabel(caseType,input.language)} matter currently before ${interfaceLabel(court,input.language)}. Full analysis is temporarily unavailable; I have retained the stated court and role.` : input.language === "ur" ? `آپ کے بیان میں ${interfaceLabel(court,input.language)} کے سامنے مقدمہ اور آپ کی حیثیت واضح ہے۔ مکمل تجزیہ عارضی طور پر دستیاب نہیں؛ درج معلومات محفوظ ہیں۔` : `وصفت القضية بأنها ${caseType || "قضية منظورة"} أمام ${court}${stated.courtCircuit ? " — "+stated.courtCircuit : ""}${stated.partyRole ? "، وصفتك "+stated.partyRole : ""}. احتفظت بهذه المعلومات؛ تعذر التحليل الكامل مؤقتاً.`) : input.language === "en"
+     ? `I saved your details and will continue with essential facts only.\n${question}`
+     : input.language === "ur"
+       ? `میں نے معلومات محفوظ کر لی ہیں اور ضروری حقائق مکمل کر رہا ہوں۔\n${question}`
+       : `استقبلت كلامك وسأكمل جمع الوقائع الأساسية مؤقتاً.\n${question}`;
+   const state: LegalIntakeState = {
+-    orientation: previous?.orientation || { categoryReason: "", track: "unknown", judgment: "unknown", judgmentQuote: "", nextAction: "" },
++    orientation: { ...(previous?.orientation || { categoryReason: "", track: "unknown", judgment: "unknown", judgmentQuote: "", nextAction: "" }), ...(statedPending ? { track: "pending" as const } : {}) },
+     precedentMatches: [],
+     questionKey: question ? inferQuestionKey(question) : "",
+     resolvedTopics: previous?.questionMemory?.resolved || [],
+@@ -58,12 +51,12 @@ function buildLimitedIntakeState(input: { language: string; message: string; cur
+     assistantMessage,
+     progress: facts.length ? 25 : 10,
+     caseType,
+-    caseStage: previous?.caseStage || "قيد جمع الوقائع",
+-    court: previous?.court || "",
+-    courtCircuit: previous?.courtCircuit || "",
+-    jurisdictionReason: previous?.jurisdictionReason || interfaceLabel("تعذر إكمال التحليل الذكي الآن؛ التوجيه للمحكمة يبقى مؤجلاً حتى عودة الخدمة أو اكتمال المراجعة.", input.language),
++    caseStage: statedPending ? interfaceLabel("قضية منظورة",input.language) : previous?.caseStage || "قيد جمع الوقائع",
++    court,
++    courtCircuit: stated.courtCircuit || previous?.courtCircuit || "",
++    jurisdictionReason: stated.court ? interfaceLabel("احتُفظ بالمحكمة المصرح بها في وقائع القضية؛ يظل الاختصاص بحاجة إلى مراجعة المصادر.",input.language) : previous?.jurisdictionReason || interfaceLabel("تعذر إكمال التحليل الذكي الآن؛ التوجيه للمحكمة يبقى مؤجلاً حتى عودة الخدمة أو اكتمال المراجعة.", input.language),
+     jurisdictionConfidence: "low",
+-    jurisdictionMissing: previous?.jurisdictionMissing || [interfaceLabel("استكمال التحليل الذكي والتحقق من الاختصاص عند توفر الخدمة.", input.language)],
++    jurisdictionMissing: stated.court ? [] : previous?.jurisdictionMissing || [interfaceLabel("استكمال التحليل الذكي والتحقق من الاختصاص عند توفر الخدمة.", input.language)],
+     caseSummary: facts.join("\n"),
+     legalBasis: [],
+     analysisWarnings: [...new Set([...rawWarnings.map(warning => interfaceLabel(warning, input.language)), interfaceError(input.failure, input.language, interfaceLabel("الخدمة غير متاحة مؤقتاً. يرجى المحاولة لاحقاً.", input.language)), interfaceLabel("المقابلة مستمرة بجمع الوقائع فقط، دون اعتماد قانوني نهائي.", input.language)])],
+@@ -81,9 +74,9 @@ function buildLimitedIntakeState(input: { language: string; message: string; cur
+     memoPrefill: {
+       ...previous?.memoFields,
+       caseType,
+-      court: previous?.court || "",
++      court,
+       clientName: memoText("clientName"),
+-      partyRole: memoText("partyRole"),
++      partyRole: stated.partyRole || memoText("partyRole"),
+       otherParty: memoText("otherParty"),
+       allParties: memoText("allParties"),
+       facts: facts.join("\n"),
+diff --git a/app/api/legal/memo/route.ts b/app/api/legal/memo/route.ts
+index f46fa9a..d8a3442 100644
+--- a/app/api/legal/memo/route.ts
++++ b/app/api/legal/memo/route.ts
+@@ -2,6 +2,7 @@ import { projectContextInstructions } from "@/lib/project-context";
+ import { legalDraftingRouteRevision, legalRouteInstructions, legalRouteSummary, legalRouteResearchQueries, reviewLegalRouteContent } from "@/lib/legal-drafting-routes";
+ import { availableEvidenceMode } from "@/lib/memo-preparation";
+ import { validateMemoInput } from "@/lib/memo-input";
++import { managementGenerationContext } from "@/lib/management-generation-context";
+ import { reserveMemoPayment, completeMemoPayment, releaseMemoPayment, type PaymentLease } from "@/lib/sadad-payments";
+ import {assessMatterFacts} from "@/lib/matter-facts";
+ import {preserveLegalQuotes,draftStatutoryText} from '@/lib/statutory-text';
+@@ -67,7 +68,8 @@ export async function POST(request: Request) {
+       signal.throwIfAborted();
+       return modelGenerateText({ ...options, instructions:`${options.instructions}\n${pleadingAuthorityInstructions}\n${projectContextInstructions}\n${draftingInstructions}`, signal });
+     };
+-    const user = await requireMemoUserOrGuest(request);
++    const management = managementGenerationContext(request);
++    const user = management ? null : await requireMemoUserOrGuest(request);
+     await requireServiceEnabled("memo", request);
+     requestStage = "input_validation";
+     const raw = await readJsonObject(request, 200_000);
+@@ -78,12 +80,13 @@ export async function POST(request: Request) {
+     const { caseType, clientName, court, courtCircuit, caseNumber, otherParty, partyRole, allParties, facts, requests, legalIssues, conversationTranscript, conversationSummary, assistantResearch, extraFields, documentKind, caseStage, legalRoute, preparationNotes } = validateMemoInput(raw);
+     draftingInstructions=legalRouteInstructions(legalRoute);
+     requestStage = "payment";
+-    const entitlement = await reserveMemoPayment(raw);
++    const entitlement = management ? { lease: undefined, result: undefined } : await reserveMemoPayment(raw);
+     if (entitlement.result) return privateJson(entitlement.result);
+     paymentLease = entitlement.lease;
+     await enforceRateLimit(request, paymentLease ? `legal-memo-paid:${paymentLease.id}` : "legal-memo", 12, "hour");
+     requestStage = "saving";
+-    managementRequestId = await startMemoRequest({ ...extraFields, clientName, court, courtCircuit, caseNumber, caseType, partyRole, otherParty, allParties, facts, requests, legalIssues, documentKind, caseStage, legalRoute:legalRouteSummary(legalRoute) }, user, request.headers.get("origin") || new URL(request.url).origin);
++    managementRequestId = await startMemoRequest({ ...extraFields, clientName, court, courtCircuit, caseNumber, caseType, partyRole, otherParty, allParties, facts, requests, legalIssues, documentKind, caseStage, legalRoute:legalRouteSummary(legalRoute), ...(management ? { managementGenerated: true, ...(management.parentRequestId ? { parentRequestId: management.parentRequestId } : {}) } : {}) }, user, request.headers.get("origin") || new URL(request.url).origin);
++    if (management) await management.onStarted(managementRequestId);
+     requestStage = "generation";
+     const matter=assessMatterFacts(facts+" "+requests+" "+allParties);
+     if(!matter.ready && raw.draftMode !== availableEvidenceMode) {
+@@ -299,7 +302,7 @@ export async function POST(request: Request) {
+     if (managementRequestId) await finishMemoRequest(managementRequestId, request.signal.aborted ? "cancelled" : "failed", "", error instanceof RequestError ? `request_${error.status}` : "generation_failed").catch(() => undefined);
+     const openAIError = openAIErrorResponse(error, "تعذر توليد المذكرة حالياً. يرجى المحاولة لاحقاً.");
+     if (openAIError) return privateJson({ error: openAIError.message, ...(managementRequestId ? { requestId: managementRequestId } : {}), stage: requestStage, serviceCode: openAIError.code, upstreamStatus: openAIError.upstreamStatus }, openAIError.status);
+-    if (error instanceof RequestError && "stage" in error && "missingFacts" in error) return privateJson({ error: error.message, stage: error.stage, missingFacts: error.missingFacts, ...(managementRequestId ? {requestId:managementRequestId} : {}), ...("legalRoute" in error ? {legalRoute:error.legalRoute} : {}) }, error.status);
++    if (error instanceof RequestError && "stage" in error && "missingFacts" in error) return privateJson({ error: error.message, stage: error.stage, missingFacts: error.missingFacts, ...(managementRequestId ? {requestId:managementRequestId} : {}), ...("legalRoute" in error ? {legalRoute:error.legalRoute} : {}), ...("conflictingFields" in error ? {conflictingFields:error.conflictingFields} : {}) }, error.status);
+     if (error instanceof RequestError) return privateJson({ error: error.message, stage: requestStage, ...(managementRequestId ? {requestId:managementRequestId} : {}) }, error.status);
+     return privateJson({ error: "تعذر توليد المذكرة حالياً. يرجى المحاولة لاحقاً.", stage: requestStage, ...(managementRequestId ? {requestId:managementRequestId} : {}) }, 503);
+   } finally {
+diff --git a/app/api/management/[...path]/route.ts b/app/api/management/[...path]/route.ts
+index 2d31916..8ef8f6f 100644
+--- a/app/api/management/[...path]/route.ts
++++ b/app/api/management/[...path]/route.ts
+@@ -13,6 +13,7 @@ import { getD1 } from "@/db";
+ import { assertManagementOrigin, assertManagerAction, exchangeManagerCode, managementJson, managementCorsResponse, managerLogin, managerProfile, passwordManagerLogin, requireManager } from "@/lib/management-auth";
+ import { bridgeKeys, managerInbox, managerMemos, managerSnapshot, managerUpdates } from "@/lib/management-data";
+ import { readMemoRevision, saveMemoRevision } from "@/lib/management-memo-revisions";
++import { memoGenerationPreview, memoGenerationAction } from "@/lib/management-memo-generation";
+ import { mailAction, operationEvent, whatsappAction } from "@/lib/management-integrations";
+ import { verificationEmailAction } from "@/lib/verification-email-settings";
+ import { notificationEmailAction } from "@/lib/notification-email";
+@@ -58,6 +59,7 @@ async function managementGet(request: Request) {
+     if (action === "ready-forms") return managementJson({ forms: await listReadyForms() });
+     if (action === "memos") return managementJson(await managerMemos(url));
+     if (action === "memo-revision") return managementJson(await readMemoRevision(url));
++    if (action === "memo-generation") return managementJson(await memoGenerationPreview(url, manager.email));
+     if (action === "inbox") return managementJson(await managerInbox(url));
+     if (action === "updates") return managementJson(await managerUpdates());
+     if (action === "whatsapp") return managementJson(await whatsappAction(null, manager.email));
+@@ -69,7 +71,7 @@ async function managementGet(request: Request) {
+ async function managementPost(request: Request) {
+   try {
+     assertManagementOrigin(request);
+-    const action = actionPath(request), data = await readJsonObject(request, action === "password-login" ? 4_096 : action === "memo-revision" ? 500_000 : action === "site" ? 200_000 : 20_000);
++    const action = actionPath(request), data = await readJsonObject(request, action === "password-login" ? 4_096 : action === "memo-revision" ? 500_000 : action === "site" || action === "memo-generation" ? 200_000 : 20_000);
+     if (action === "exchange") { await enforceRateLimit(request, "management-exchange", 30); return managementJson(await exchangeManagerCode(data)); }
+     if (action === "password-login") return managementJson(await passwordManagerLogin(request, data));
+     const manager = await requireManager(request);
+@@ -80,6 +82,10 @@ async function managementPost(request: Request) {
+       return managementJson(await metaProviderAction(data, manager.email, request.signal));
+     }
+     if (action === "memo-revision") return managementJson(await saveMemoRevision(data, manager.email));
++    if (action === "memo-generation") {
++      await enforceRateLimit(request, "management-memo-generation", 20, "hour");
++      return managementJson(await memoGenerationAction(data, manager.email, request));
++    }
+     if (action === "gmail") {
+       await enforceRateLimit(request, data.action === "send-test" ? "gmail-test" : "gmail-management", data.action === "send-test" ? 5 : 30);
+       return managementJson(await gmailAction(data, manager.email, request));
+diff --git a/app/sabeq-site.tsx b/app/sabeq-site.tsx
+index 2cc37f7..6650ae8 100644
+--- a/app/sabeq-site.tsx
++++ b/app/sabeq-site.tsx
+@@ -33,6 +33,7 @@ import VoiceCountdown from "./voice-countdown";
+ import { LegalVoiceConversation, type VoiceAnalysisResult } from "@/lib/legal-voice-client";
+ import { DEFAULT_LEGAL_VOICE, resolveLegalVoice, LEGAL_VOICES, isLegalVoice, voiceCopy, type LegalVoice, type VoicePhase } from "@/lib/legal-voice";
+ import { memoApprovalNotice, conversationTranscript, importMemoDraft, type MemoPrefill } from "@/lib/memo-handoff";
++import { isDifferentMemoCase, mergeMemoCasePatch } from "@/lib/memo-case-context";
+ 
+ import Image from "next/image";
+ import {
+@@ -599,7 +600,7 @@ export default function SabeqSite() {
+         {modal === "library" && <Library t={t} language={language} token={authToken} />}
+         {modal === "media" && <MediaViewer video={mediaVideos[selectedVideo]} language={language} />}
+       </ModalShell>}
+-      {(memoVisited || modal === "memo") && <ModalShell language={language} onClose={() => setModal(null)} large active={modal === "memo"}><MemoWizard t={t} language={language} token={authToken} active={modal === "memo"} initialData={assistantMemoPrefill} assistantSession={assistantSession} openAssistant={(context) => { if (!assistantSession) setAssistantSession({ question: context, messages: [], intake: null }); setModal("assistant"); }} /></ModalShell>}
++      {(memoVisited || modal === "memo") && <ModalShell language={language} onClose={() => setModal(null)} large active={modal === "memo"}><MemoWizard t={t} language={language} token={authToken} active={modal === "memo"} initialData={assistantMemoPrefill} assistantSession={assistantSession} startNewCase={() => { setAssistantSession(null); setAssistantMemoPrefill(null); }} openAssistant={(context) => { if (!assistantSession) setAssistantSession({ question: context, messages: [], intake: null }); setModal("assistant"); }} /></ModalShell>}
+ 
+       <div className="floating">
+         <button type="button" className="assistant-avatar-button" onClick={() => showModal("assistant")} aria-label={t.assistant} aria-haspopup="dialog"><span className="assistant-portrait"><img src={assetUrl(branding.avatar)} alt="" width={64} height={64} decoding="async" /></span></button>
+@@ -1015,7 +1016,7 @@ const emptyAnalysisFields: AnalysisFields = {
+   legalIssues: "",
+ };
+ 
+-function MemoWizard({ t, language, token, initialData = null, assistantSession, active, openAssistant }: { t: SiteCopy; language: Language; token: string; initialData?: MemoPrefill | null; assistantSession: AssistantSession | null; active: boolean; openAssistant: (context: string) => void }) {
++function MemoWizard({ t, language, token, initialData = null, assistantSession, active, startNewCase, openAssistant }: { t: SiteCopy; language: Language; token: string; initialData?: MemoPrefill | null; assistantSession: AssistantSession | null; active: boolean; startNewCase: () => void; openAssistant: (context: string) => void }) {
+   const [paymentPolicy, setPaymentPolicy] = useState<{ required: boolean; publicCheckoutEnabled: boolean; priceFils: number; ready: boolean; environment: string } | null>(null);
+   const [checkout, setCheckout] = useState<SadadCheckout | null>(null);
+   const [checkingPayment, setCheckingPayment] = useState(false);
+@@ -1044,6 +1045,7 @@ function MemoWizard({ t, language, token, initialData = null, assistantSession,
+   const [memoApproved, setMemoApproved] = useState(false);
+   const [generationSeconds, setGenerationSeconds] = useState(0);
+   const generationRequest = useRef<AbortController | null>(null);
++  const caseEpoch = useRef(0);
+   const storyRequest = useRef<AbortController | null>(null);
+   const generationMounted = useRef(true);
+   const generationUi = memoGenerationCopy(language);
+@@ -1086,6 +1088,20 @@ function MemoWizard({ t, language, token, initialData = null, assistantSession,
+     setMemoData(next);
+     return next;
+   }
++  function resetCaseWork(preserveDocuments = false) {
++    caseEpoch.current += 1;
++    generationRequest.current?.abort(); storyRequest.current?.abort();
++    generationRequest.current = null; storyRequest.current = null;
++    submissionSession.current = new MemoSubmissionSession();
++    if (!preserveDocuments) setDocuments([]);
++    setAnalysisFields(emptyAnalysisFields); setAnalysisParties([]);
++    lastAppliedAnalysis.current = null; automaticProcedure.current = {};
++    setAnalysisStatus("idle"); setAnalysisNotice(""); setAnalysisWarnings([]);
++    setMemoAnalysis(null); setMemoQuality(null); setMemoDocument(null); setMemo("");
++    setMemoApproved(false); setMemoFailure(null); setMemoError(""); setResultNotice(null);
++    setStatus("idle"); setStoryBusy(false); setVoiceEntryBusy(false);
++    if (documentInputRef.current) documentInputRef.current.value = "";
++  }
+   useEffect(() => {
+     if (!initialData || appliedHandoff.current === initialData) return;
+     appliedHandoff.current = initialData;
+@@ -1094,7 +1110,8 @@ function MemoWizard({ t, language, token, initialData = null, assistantSession,
+       setStatus("error"); setMemoError(payUi.changed); return;
+     }
+     const story = memoStoryText(initialData.facts, initialData.requests);
+-    setMemoData(current => ({ ...current, ...initialData, caseStory: story }));
++    resetCaseWork();
++    setMemoData({ ...initialData, caseStory: story });
+     lastUnderstoodStory.current = initialData.facts && initialData.requests ? story : "";
+     setFacts(initialData.facts || ""); setRequests(initialData.requests || "");
+     setMemoApproved(false); setVoiceFormVersion(version => version + 1);
+@@ -1103,12 +1120,16 @@ function MemoWizard({ t, language, token, initialData = null, assistantSession,
+   }, [initialData, checkout, memo, payUi.changed]);
+   useEffect(() => {
+     if (!active || !assistantSession || importedSession.current === assistantSession || paymentAttempt.current || checkout || memo) return;
++    const previousSession = importedSession.current;
+     importedSession.current = assistantSession;
+-    const next = importMemoDraft(captureDraft(), assistantSession.intake, assistantSession.messages);
++    const fresh = importMemoDraft({}, assistantSession.intake, assistantSession.messages);
++    const newCase = isDifferentMemoCase(memoData, fresh) || Boolean(previousSession?.messages.length && !assistantSession.messages.length && !assistantSession.intake);
++    if (newCase) resetCaseWork();
++    const next = newCase ? fresh : importMemoDraft(captureDraft(), assistantSession.intake, assistantSession.messages);
+     setMemoData(next); setFacts(next.facts || ""); setRequests(next.requests || "");
+     if (!next.caseStory && next.facts && next.requests) lastUnderstoodStory.current = memoStoryText(next.facts, next.requests);
+     setMemoApproved(false); setVoiceFormVersion(version => version + 1);
+-    if (next.conversationTranscript?.trim()) setStep(initialMemoStep(true));
++    if (newCase || next.conversationTranscript?.trim()) setStep(initialMemoStep(Boolean(next.conversationTranscript?.trim())));
+   }, [active, assistantSession, checkout, memo]);
+   useEffect(() => {
+     if (active) return;
+@@ -1304,7 +1325,10 @@ function MemoWizard({ t, language, token, initialData = null, assistantSession,
+ 
+   function applyCaseStory(patch: Record<string, string>, story: string) {
+     setFacts(patch.facts || ""); setRequests(patch.requests || "");
+-    setMemoData(current => ({ ...current, ...patch, facts: patch.facts || "", requests: patch.requests || "", caseStory: story }));
++    if (isDifferentMemoCase(memoData, patch)) {
++      resetCaseWork(); setVoiceFormVersion(version => version + 1);
++    }
++    setMemoData(current => ({ ...mergeMemoCasePatch(current, patch), facts: patch.facts || "", requests: patch.requests || "", caseStory: story }));
+     lastUnderstoodStory.current = story;
+     setMemoApproved(false); setStatus("idle"); setMemoError("");
+   }
+@@ -1315,6 +1339,7 @@ function MemoWizard({ t, language, token, initialData = null, assistantSession,
+       setAnalysisNotice(ui.filesRequired);
+       return;
+     }
++    const analysisEpoch = caseEpoch.current;
+     setAnalysisStatus("loading");
+     setAnalysisNotice("");
+     setAnalysisWarnings([]);
+@@ -1332,8 +1357,11 @@ function MemoWizard({ t, language, token, initialData = null, assistantSession,
+         };
+         error?: string;
+       }>(response);
++      if (analysisEpoch !== caseEpoch.current || !generationMounted.current) return;
+       if (!response.ok || !data.analysis) throw new Error(data.error || t.error);
+       const extracted = data.analysis;
++      const newCase = isDifferentMemoCase(memoData, extracted);
++      if (newCase) { resetCaseWork(true); setVoiceFormVersion(version => version + 1); }
+       const parties = extracted.parties?.length
+         ? extracted.parties
+         : [
+@@ -1355,7 +1383,7 @@ function MemoWizard({ t, language, token, initialData = null, assistantSession,
+       setFacts(extracted.facts || "");
+       setRequests(extracted.requests || "");
+       const story = memoStoryText(extracted.facts, extracted.requests);
+-      setMemoData(current => ({ ...current, caseStory: story }));
++      setMemoData(current => ({ ...(newCase ? Object.fromEntries(Object.entries(extracted).filter(([,value]) => typeof value === "string")) as Record<string,string> : current), caseStory: story }));
+       lastUnderstoodStory.current = story;
+       setAnalysisWarnings(extracted.warnings || []);
+       setAnalysisStatus("success");
+@@ -1365,6 +1393,7 @@ function MemoWizard({ t, language, token, initialData = null, assistantSession,
+       return patch;
+     } catch (error) {
+       setAnalysisStatus("error");
++      if (analysisEpoch !== caseEpoch.current || !generationMounted.current) return;
+       setAnalysisNotice(interfaceError(error, language, t.error));
+     }
+   }
+@@ -1618,6 +1647,10 @@ function MemoWizard({ t, language, token, initialData = null, assistantSession,
+     <div className="memo-modal">
+       <div className="journey-switch"><button type="button" className="button button-outline" disabled={status === "loading"} onClick={() => { const draft = captureDraft(); openAssistant(draft.caseStory || memoStoryText(facts, requests)); }}>{language === "ar" ? "المتابعة مع المساعد القانوني" : language === "en" ? "Continue with the legal assistant" : "قانونی معاون کے ساتھ جاری رکھیں"}</button><small>{language === "ar" ? "تبقى مسودتك ومرفقاتك عند الرجوع خلال هذه الجلسة." : language === "en" ? "Your draft and attachments remain here while you switch during this session." : "اس نشست میں واپسی پر مسودہ اور منسلکات محفوظ رہیں گے۔"}</small></div>
+       <div className="memo-modal-title"><div className="modal-icon"><FileText /></div><span><h2>{t.memoModal}</h2><p><Languages size={15} />{t.arabicOnly}</p></span></div>
++      <button type="button" className="button button-outline" disabled={Boolean(checkout || paymentAttempt.current)} onClick={() => {
++        resetCaseWork(); setMemoData({}); setFacts(""); setRequests(""); lastUnderstoodStory.current = "";
++        setStep(0); setVoiceFormVersion(version => version + 1); startNewCase();
++      }}>{language === "ar" ? "بدء قضية جديدة" : language === "en" ? "Start a new case" : "نیا مقدمہ شروع کریں"}</button>
+       {memoData.conversationTranscript && <details className="memo-conversation-review">
+         <summary>{language === "ar" ? "المحادثة وملخص القضية المنقولان من المساعد" : language === "en" ? "Conversation and case summary from the assistant" : "معاون سے منتقل گفتگو اور مقدمے کا خلاصہ"}</summary>
+         <p>{language === "ar" ? "راجع الأسماء والأرقام والوقائع والطلبات أدناه. يتولى المساعد التصحيح اللغوي والبحث القانوني؛ كلام المساعد ليس مصدراً قانونياً." : language === "en" ? "Confirm names, numbers and case facts. The assistant corrects the language and researches legal sources; assistant messages are not legal authorities." : "گفتگو اور خلاصے کی تصحیح کریں۔ منظور شدہ حقائق اور مطالبات بنیاد ہیں؛ معاون کی بات قانونی ماخذ نہیں۔"}</p>
+diff --git a/lib/intake-analysis.ts b/lib/intake-analysis.ts
+index 1480cd5..3c24c66 100644
+--- a/lib/intake-analysis.ts
++++ b/lib/intake-analysis.ts
+@@ -1,3 +1,4 @@
++import { intakeCourtNames } from "@/lib/procedural-position";
+ import { factualRequirements, researchOwnershipCopy, removeDelegatedResearch } from "./legal-language";
+ import type { LegalIntakeState } from "./openai";
+ import { corpusContext, isCassationEvidence, isJudgmentEvidence, normalizeLegalText, type LegalEvidence } from "./legal-search";
+@@ -78,7 +79,7 @@ export function reviewIntakeAnalysis(state: LegalIntakeState, evidence: LegalEvi
+     if (orientation) orientation.nextAction = missing;
+     warnings.push(missing);
+   }
+-  const knownCourts = ["المحكمة الكلية", "المحكمة الجزئية", "محكمة الأسرة", "محكمة الاستئناف", "محكمة التمييز", "المحكمة الدستورية"];
++  const knownCourts = intakeCourtNames;
+   if (state.court && !knownCourts.includes(state.court.trim())) {
+     state.court = ""; state.courtCircuit = ""; state.jurisdictionConfidence = "low";
+     state.readyForMemo = false; warnings.push(copy.missing);
+diff --git a/lib/management-generation-context.ts b/lib/management-generation-context.ts
+new file mode 100644
+index 0000000..b47480f
+--- /dev/null
++++ b/lib/management-generation-context.ts
+@@ -0,0 +1,9 @@
++// Object identity is server-owned. Headers and visitor JSON cannot grant this authority.
++export type ManagementGenerationContext = { parentRequestId?: string; onStarted: (id: string) => Promise<void> };
++const contexts = new WeakMap<Request, ManagementGenerationContext>();
++export const managementGenerationContext = (request: Request) => contexts.get(request);
++export async function withManagementGeneration<T>(request: Request, context: ManagementGenerationContext, run: (request: Request) => Promise<T>) {
++  contexts.set(request, context);
++  try { return await run(request); }
++  finally { contexts.delete(request); }
++}
+diff --git a/lib/management-memo-generation.ts b/lib/management-memo-generation.ts
+new file mode 100644
+index 0000000..da5f380
+--- /dev/null
++++ b/lib/management-memo-generation.ts
+@@ -0,0 +1,102 @@
++import { getD1 } from "@/db";
++import { digest } from "@/lib/management-auth";
++import { openConfig, sealConfig } from "@/lib/management-vault";
++import { RequestError, cleanMultiline, cleanString } from "@/lib/request-security";
++import { pleadingFields } from "@/lib/pleading-document";
++import { reviewMemoCaseContext } from "@/lib/memo-case-context";
++import { validateMemoInput } from "@/lib/memo-input";
++import { withManagementGeneration } from "@/lib/management-generation-context";
++
++const fieldLabels: Record<string,string> = { clientName:"مقدم المذكرة", otherParty:"الخصم", partyRole:"صفة مقدم المذكرة", court:"المحكمة", courtCircuit:"الدائرة", caseNumber:"رقم القضية", caseType:"نوع القضية", allParties:"جميع الأطراف والصفات", facts:"وقائع هذه القضية", requests:"الطلبات", legalIssues:"المسائل القانونية", caseStage:"مرحلة القضية", documentKind:"صيغة المستند", ...pleadingFields };
++type SourceRow = {id:string; input_json:string; output_text:string; status:string; error_code:string; updated_at:string; client_name:string; case_type:string; case_number:string};
++type Receipt = {actor:string; fingerprint:string; action:string; status:"running"|"completed"; requestId?:string; result?:Record<string,unknown>; original:SourceRow|null; fields:Record<string,string>; createdAt:string};
++const sourceHash = (row:SourceRow) => digest(JSON.stringify([row.id,row.input_json,row.output_text,row.status,row.error_code,row.updated_at]));
++function idValue(value:unknown) {
++  const id=cleanString(value,"معرف الطلب",{max:100,required:false});
++  if(id&&!/^[A-Za-z0-9_-]+$/.test(id))throw new RequestError("التوليد من الأرشيف السابق غير متاح. أنشئ طلباً مستقلاً ببيانات القضية المراجعة.",409);
++  return id;
++}
++function operationKey(value:unknown) {
++  if(typeof value!=="string"||!/^[a-f0-9-]{36}$/i.test(value))throw new RequestError("أعد فتح نموذج المذكرة قبل تنفيذ العملية.",409);
++  return "memo-generation:"+value;
++}
++async function source(id:string) {
++  const row=await getD1().prepare("SELECT id,input_json,output_text,status,error_code,updated_at,client_name,case_type,case_number FROM management_memo_requests WHERE id=?").bind(id).first<SourceRow>();
++  if(!row)throw new RequestError("طلب المذكرة غير موجود.",404);
++  if(row.status==="running")throw new RequestError("انتظر انتهاء الطلب الجاري قبل تصحيحه أو إعادة توليده.",409);
++  return row;
++}
++function fieldsFrom(value:unknown) {
++  if(!value||typeof value!=="object"||Array.isArray(value))throw new RequestError("بيانات القضية غير صحيحة.");
++  const raw=value as Record<string,unknown>;
++  if(Object.keys(raw).some(key=>!Object.hasOwn(fieldLabels,key)))throw new RequestError("حقول القضية غير صحيحة.");
++  return Object.fromEntries(Object.entries(fieldLabels).map(([key,label])=>[key,cleanMultiline(raw[key],label,{max:key==="facts"?16_000:key==="requests"?7_000:key==="allParties"?4_000:5_000,required:false})]));
++}
++async function readReceipt(key:string,actor:string) {
++  const row=await getD1().prepare("SELECT sealed FROM management_vault WHERE integration=?").bind(key).first<{sealed:string}>();
++  if(!row)return null;
++  const receipt=await openConfig<Receipt>(row.sealed);
++  if(receipt.actor!==actor)throw new RequestError("هذه العملية غير متاحة لهذا الحساب.",403);
++  return receipt;
++}
++const publicReceipt=(receipt:Receipt)=>({ok:true,status:receipt.status,requestId:receipt.requestId,...receipt.result});
++async function writeReceipt(key:string,receipt:Receipt) {
++  await getD1().prepare("UPDATE management_vault SET sealed=?,updated_at=CURRENT_TIMESTAMP WHERE integration=? AND updated_by=?").bind(await sealConfig(receipt),key,receipt.actor).run();
++}
++export async function memoGenerationPreview(url:URL,actor:string) {
++  if(url.searchParams.has("operationId")) {
++    const receipt=await readReceipt(operationKey(url.searchParams.get("operationId")),actor);
++    if(!receipt)throw new RequestError("العملية غير موجودة.",404);
++    return publicReceipt(receipt);
++  }
++  const id=idValue(url.searchParams.get("id")),row=id?await source(id):null;
++  let saved:Record<string,unknown>={};
++  if(row){try{saved=JSON.parse(row.input_json);}catch{throw new RequestError("تعذرت قراءة أصل الطلب. احتفظ به وأنشئ طلباً مستقلاً.",409);}}
++  const raw=Object.fromEntries(Object.keys(fieldLabels).map(key=>[key,typeof saved[key]==="string"?saved[key]:""]));
++  const fields=fieldsFrom(raw);
++  return {id,fields,fieldLabels,context:reviewMemoCaseContext(fields),expectedHash:row?await sourceHash(row):"",operationId:crypto.randomUUID(),canRepair:!!row&&!row.output_text.trim(),hasSavedMemo:!!row?.output_text.trim()};
++}
++export async function memoGenerationAction(data:Record<string,unknown>,actor:string,request:Request,engine?: (request:Request)=>Promise<Response>) {
++  if(Object.keys(data).some(key=>!["id","fields","expectedHash","operationId","action","reviewed"].includes(key))||!["repair","generate"].includes(String(data.action))||data.reviewed!==true)throw new RequestError("راجع بيانات هذه القضية وأكد استقلالها قبل الحفظ أو التوليد.");
++  const id=idValue(data.id),key=operationKey(data.operationId),fields=fieldsFrom(data.fields);
++  const fingerprint=await digest(JSON.stringify([actor,data.action,id,data.expectedHash,fields]));
++  const previous=await readReceipt(key,actor);
++  if(previous){if(previous.fingerprint!==fingerprint)throw new RequestError("استُخدم معرف العملية لبيانات أخرى. أعد فتح النموذج.",409);return publicReceipt(previous);}
++  const row=id?await source(id):null;
++  if(row&&await sourceHash(row)!==data.expectedHash)throw new RequestError("تغير الطلب منذ فتحه. احتفظ بتعديلك ثم افتح النسخة الأحدث.",409);
++  const context=reviewMemoCaseContext(fields);
++  if(!context.valid)throw new RequestError("ما زالت بيانات الأطراف الأصلية غير مرتبطة بوقائع هذه القضية. صححها قبل التوليد.",422);
++  if(data.action==="repair"&&(!row||row.output_text.trim()))throw new RequestError("تصحيح المدخلات متاح للطلبات بلا نص محفوظ. المذكرة الموجودة تبقى كما هي؛ ولّد نسخة مستقلة بعد مراجعة البيانات.",409);
++  if(data.action==="generate")validateMemoInput(fields);
++  const receipt:Receipt={actor,fingerprint,action:String(data.action),status:data.action==="repair"?"completed":"running",original:row,fields,createdAt:new Date().toISOString()};
++  if(data.action==="repair")receipt.result={repaired:true,id};
++  const sealed=await sealConfig(receipt),db=getD1();
++  const insert=row?db.prepare(`INSERT INTO management_vault(integration,sealed,updated_by)
++    SELECT ?,?,? FROM management_memo_requests WHERE id=? AND input_json=? AND output_text=? AND status=? AND error_code=? AND updated_at=? ON CONFLICT(integration) DO NOTHING`)
++    .bind(key,sealed,actor,id,row.input_json,row.output_text,row.status,row.error_code,row.updated_at)
++    :db.prepare("INSERT INTO management_vault(integration,sealed,updated_by) VALUES(?,?,?) ON CONFLICT(integration) DO NOTHING").bind(key,sealed,actor);
++  if(data.action==="repair"&&row) {
++    // Keep all original metadata in the private backup. Change only editable case fields.
++    const corrected={...JSON.parse(row.input_json),...fields};
++    const results=await db.batch([insert,db.prepare(`UPDATE management_memo_requests SET input_json=?,client_name=?,case_type=?,case_number=?,status='needs_review',error_code='case_input_repaired',updated_at=CURRENT_TIMESTAMP
++      WHERE id=? AND input_json=? AND output_text=? AND status=? AND error_code=? AND updated_at=? AND EXISTS(SELECT 1 FROM management_vault WHERE integration=? AND sealed=?)`)
++      .bind(JSON.stringify(corrected),fields.clientName,fields.caseType,fields.caseNumber,id,row.input_json,row.output_text,row.status,row.error_code,row.updated_at,key,sealed)]);
++    if(results[0].meta.changes!==1||results[1].meta.changes!==1)throw new RequestError("تغير الطلب أثناء التصحيح. أعد فتحه دون تكرار الحفظ.",409);
++    return publicReceipt(receipt);
++  }
++  const inserted=await insert.run();
++  if(inserted.meta.changes!==1){const existing=await readReceipt(key,actor);if(existing?.fingerprint===fingerprint)return publicReceipt(existing);throw new RequestError("تغير الطلب أثناء بدء التوليد. أعد فتحه.",409);}
++  try {
++    const origin=new URL(request.url).origin;
++    const internal=new Request(new URL("/api/legal/memo",origin),{method:"POST",headers:{"Content-Type":"application/json",Origin:origin},body:JSON.stringify(fields),signal:request.signal});
++    const run=engine||(await import("@/app/api/legal/memo/route")).POST;
++    const response=await withManagementGeneration(internal,{parentRequestId:id||undefined,onStarted:async requestId=>{receipt.requestId=requestId;await writeReceipt(key,receipt);}},run);
++    const result=await response.json() as Record<string,unknown>;
++    receipt.requestId=typeof result.requestId==="string"?result.requestId:receipt.requestId;
++    receipt.result={ok:response.ok,error:typeof result.error==="string"?result.error:undefined,stage:typeof result.stage==="string"?result.stage:undefined,hasDraft:typeof result.memo==="string"&&!!result.memo.trim(),responseStatus:response.status};
++  } catch {
++    receipt.result={ok:false,error:"تعذر إكمال التوليد. تحقق من الطلب المستقل المحفوظ قبل المحاولة من جديد.",responseStatus:503};
++  }
++  receipt.status="completed";await writeReceipt(key,receipt);
++  return publicReceipt(receipt);
++}
+diff --git a/lib/memo-case-context.ts b/lib/memo-case-context.ts
+new file mode 100644
+index 0000000..552881e
+--- /dev/null
++++ b/lib/memo-case-context.ts
+@@ -0,0 +1,29 @@
++// Case facts are never inferred from another request or from the shared library.
++type Fields = Record<string, unknown>;
++const value = (input: Fields, key: string) => typeof input[key] === "string" ? input[key] as string : "";
++const normal = (text: string) => text.normalize("NFKC").replace(/[\u064b-\u065f\u0670ـ]/gu, "").replace(/[أإآ]/gu, "ا").replace(/ى/gu, "ي").replace(/ة/gu, "ه").toLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim();
++const historicalFields = ["judgmentNumber", "judgmentDate", "judgmentCircuit", "judgmentCourt", "judgmentOperative", "originalRequests", "originalGrounds", "originalPlaintiff", "originalDefendant", "notificationDate", "appealGrounds", "announcementDate", "hearingDate", "hearingTime"];
++
++function supportedParty(name: string, primary: string) {
++  const cleaned = normal(name);
++  if (!cleaned || /^(?:غير مذكور|غير محدد|لم يذكر|المدعي|المدعي عليه|الخصم|المتهم)$/u.test(cleaned)) return true;
++  if (/^(?:النيابه العامه|الادعاء العام)$/u.test(cleaned) && /النيابه العامه|الادعاء العام/u.test(primary)) return true;
++  return (` ${primary} `).includes(` ${cleaned} `);
++}
++export function reviewMemoCaseContext(input: Fields) {
++  const primary = normal(["clientName", "otherParty", "allParties", "facts", "requests"].map(key => value(input, key)).join("\n"));
++  const conflictingFields = ["originalPlaintiff", "originalDefendant"].filter(key => {
++    const names = value(input, key).split(/[،,؛;\n]+/u).map(name => name.trim()).filter(Boolean);
++    return names.some(name => !supportedParty(name, primary));
++  });
++  return { valid: conflictingFields.length === 0, conflictingFields,
++    // A proposal only: the administrator reviews these fields before saving.
++    suggestedClearFields: conflictingFields.length ? historicalFields.filter(key => value(input, key).trim()) : [] };
++}
++export function isDifferentMemoCase(current: Fields, incoming: Fields) {
++  return ["caseNumber", "clientName"].some(key => value(current, key).trim() && value(incoming, key).trim() && normal(value(current, key)) !== normal(value(incoming, key)));
++}
++export function mergeMemoCasePatch(current: Record<string, string>, patch: Record<string, string>) {
++  if (!isDifferentMemoCase(current, patch)) return { ...current, ...patch };
++  return { ...patch };
++}
+diff --git a/lib/memo-input.ts b/lib/memo-input.ts
+index 9f60d79..3429963 100644
+--- a/lib/memo-input.ts
++++ b/lib/memo-input.ts
+@@ -1,4 +1,5 @@
+ import { availableEvidenceMode, prepareMemoDraft } from "./memo-preparation";
++import { reviewMemoCaseContext } from "@/lib/memo-case-context";
+ import { inferProceduralPosition } from "@/lib/procedural-position";
+ import { cleanString, cleanMultiline, RequestError } from "@/lib/request-security";
+ import { correctLegalProse } from "@/lib/legal-language";
+@@ -7,6 +8,8 @@ import { assessMatterFacts } from "@/lib/matter-facts";
+ import { resolveLegalDraftingRoute, legalRouteSummary } from "@/lib/legal-drafting-routes";
+ 
+ export function validateMemoInput(raw: Record<string, unknown>) {
++    const context = reviewMemoCaseContext(raw);
++    if (!context.valid) throw Object.assign(new RequestError("تحتوي بيانات الحكم أو الأطراف الأصلية أسماء غير مرتبطة بوقائع هذه القضية. راجع الحقول المتعارضة قبل التوليد.", 422), { stage: "case_context_review", conflictingFields: context.conflictingFields, missingFacts: context.conflictingFields.map(key => ({key, question: "تحقق من انتماء هذا الحقل إلى القضية الحالية أو أزله."})) });
+     const available = raw.draftMode === availableEvidenceMode;
+     const preparation = available ? prepareMemoDraft(raw) : null;
+     if (preparation) raw = preparation.input;
+diff --git a/lib/openai.ts b/lib/openai.ts
+index e10e80a..a56fd6d 100644
+--- a/lib/openai.ts
++++ b/lib/openai.ts
+@@ -1,5 +1,5 @@
+ import { intakeMemoFieldNames, type IntakeMemoFields } from "./memo-handoff";
+-import { inferProceduralPosition, proceduralPositionInstructions, type ProceduralPosition } from "./procedural-position";
++import { intakeCourtNames, inferProceduralPosition, proceduralPositionInstructions, type ProceduralPosition } from "./procedural-position";
+ import {matterFactInstructions} from "./matter-facts";
+ import { caseReasoningInstructions } from "./case-reasoning";
+ import { legalSpeechSettings } from "./legal-voice";
+@@ -127,9 +127,9 @@ async function getTextEnvironment(intake = false) {
+   catch { throw new OpenAIServiceError("configuration"); }
+ }
+ 
+-async function textModelFetch(init: RequestInit, attempts = 3) {
++async function textModelFetch(init: RequestInit, attempts = 3, intake = false) {
+   const runtime = await resolveTextEnvironment(env as unknown as OpenAIEnvironment);
+-  const primary = textProviderConfig(runtime);
++  const primary = textProviderConfig(runtime, undefined, intake);
+   const budget = Math.max(1, Math.min(attempts, 3));
+   async function run(config: ReturnType<typeof textProviderConfig>, count: number, request: RequestInit): Promise<Response> {
+     if (request.signal?.aborted) throw new OpenAIServiceError("timeout");
+@@ -160,12 +160,12 @@ async function textModelFetch(init: RequestInit, attempts = 3) {
+     }
+     if (init.signal?.aborted) throw new OpenAIServiceError("timeout");
+     const alternate = runtime.LEGAL_AI_FALLBACK_PROVIDER?.trim();
+-    if (budget <= 1 || !alternate || alternate === primary.provider) {
++    if (budget <= 1 && !intake || !alternate || alternate === primary.provider) {
+       if (primary.provider === "openai") return response;
+       throw new OpenAIServiceError(response.status === 429 ? "rate_limit" : "upstream", response.status === 429 ? 429 : 503, response.status);
+     }
+     let fallback: ReturnType<typeof textProviderConfig>;
+-    try { fallback = textProviderConfig(runtime, alternate); }
++    try { fallback = textProviderConfig(runtime, alternate, intake); }
+     catch {
+       if (primary.provider === "openai") return response;
+       throw new OpenAIServiceError(response.status === 429 ? "rate_limit" : "upstream", response.status === 429 ? 429 : 503, response.status);
+@@ -385,7 +385,7 @@ const legalIntakeSchema = {
+     phase: { type: "string", enum: ["gathering", "review", "ready"] }, assistantMessage: { type: "string", maxLength: 700, description: "Two or three concise sentences explaining what the visitor facts mean, provisional interpretation, and next action. No questions here, unsupported legal citations, guarantees, or invented facts." }, progress: { type: "integer", minimum: 0, maximum: 100 },
+     orientation: { type: "object", additionalProperties: false, required: ["categoryReason", "track", "judgment", "judgmentQuote", "nextAction"], properties: { categoryReason: { type: "string", maxLength: 300 }, track: { type: "string", enum: ["unknown", "initial", "pending", "complaint", "challenge", "enforcement"] }, judgment: { type: "string", enum: ["unknown", "none", "first_instance", "appeal", "cassation"] }, judgmentQuote: { type: "string", maxLength: 300, description: "Exact visitor quote confirming an ACTUAL judgment/proceeding, not a wish to appeal or a source judgment. Empty if none." }, nextAction: { type: "string", maxLength: 350, description: "Plain-language provisional next step. No unverified deadline or definitive admissibility." } } },
+     precedentMatches: { type: "array", maxItems: 2, items: { type: "object", additionalProperties: false, required: ["passageId", "similarity", "differences", "relevance"], properties: { passageId: { type: "string" }, similarity: { type: "string", maxLength: 250 }, differences: { type: "string", maxLength: 250 }, relevance: { type: "string", enum: ["analogous", "distinguished", "insufficient"] } } } },
+-    caseType: { type: "string" }, caseStage: { type: "string" }, court: { type: "string", enum: ["", "المحكمة الكلية", "المحكمة الجزئية", "محكمة الأسرة", "محكمة الاستئناف", "محكمة التمييز", "المحكمة الدستورية"], description: "Official Kuwaiti court name in Arabic. Leave empty when information or sources are insufficient. The specialized circuit goes in courtCircuit, not in this field." }, courtCircuit: { type: "string", description: "Specialist circuit, e.g. الدائرة العمالية. Do not invent a court name from the dispute category." }, jurisdictionReason: { type: "string" }, jurisdictionConfidence: { type: "string", enum: ["low", "medium", "high"] },
++    caseType: { type: "string" }, caseStage: { type: "string" }, court: { type: "string", enum: ["", ...intakeCourtNames], description: "Official Kuwaiti court name in Arabic. Leave empty when information or sources are insufficient. The specialized circuit goes in courtCircuit, not in this field." }, courtCircuit: { type: "string", description: "Specialist circuit, e.g. الدائرة العمالية. Do not invent a court name from the dispute category." }, jurisdictionReason: { type: "string" }, jurisdictionConfidence: { type: "string", enum: ["low", "medium", "high"] },
+     jurisdictionMissing: { type: "array", maxItems: 6, items: { type: "string" } },
+     caseSummary: { type: "string", description: "Concise reviewable factual case summary; no new facts." },
+     legalBasis: { type: "array", maxItems: 3, items: { type: "object", additionalProperties: false, required: ["passageId", "application", "use"], properties: { passageId: { type: "string", description: "Select the supplied exact paragraph ID, e.g. م1:2. The server supplies its verbatim text. Never invent IDs." }, application: { type: "string", description: "Briefly explain why this exact passage applies to the facts; no unsupported article or appeal number." }, use: { type: "string", enum: ["jurisdiction", "substance"] } } } },
+@@ -693,7 +693,7 @@ caseType لطبيعة الحق (مدني، تجاري، عمالي، أسرة،
+       input: JSON.stringify({ explicitProceduralFacts: statedProcedure, language: input.language, ...preparedContext, currentState, questionMemory: memory, verifiedLegalSources: input.evidence || "لا توجد نصوص قانونية مطابقة متاحة؛ لا تنشئ أسانيد من الذاكرة." }),
+       ...responseModelOptions(model), text: { format: { type: "json_schema", name: "legal_case_intake", description: "Progressive Kuwait legal case intake and memo handoff state.", strict: true, schema: { ...compactIntakeSchema, properties: { ...compactIntakeSchema.properties, legalBasis: { ...legalIntakeSchema.properties.legalBasis, items: { ...legalIntakeSchema.properties.legalBasis.items, properties: { ...legalIntakeSchema.properties.legalBasis.items.properties, passageId: { type: "string", enum: input.passageIds?.length ? input.passageIds : ["unavailable"] } } } } } } } }, max_output_tokens: 4_500, store: false,
+     }), signal: input.signal ? AbortSignal.any([input.signal, AbortSignal.timeout(45_000)]) : AbortSignal.timeout(45_000),
+-  }, 1);
++  }, 1, true);
+   if (!response.ok) await throwHttpError(response, "responses");
+   let payload: OpenAIResponsePayload;
+   if (input.onText) {
+diff --git a/lib/procedural-position.ts b/lib/procedural-position.ts
+index 5f6fc04..ec20925 100644
+--- a/lib/procedural-position.ts
++++ b/lib/procedural-position.ts
+@@ -5,6 +5,7 @@ export type ProceduralPosition = {
+ };
+ const normalize = (s: string) => s.normalize("NFKC").replace(/[أإآٱ]/g,"ا").replace(/ى/g,"ي").replace(/ة/g,"ه").replace(/ئ/g,"ي").replace(/ؤ/g,"و").replace(/[\u064b-\u065fـ]/g,"").toLowerCase();
+ const roles: Array<[RegExp,string]> = [
++  [/^(?:ال)?متهمات/,"متهمات"], [/^(?:ال)?متهمه/,"متهمة"], [/^(?:ال)?متهم/,"متهم"],
+   [/^(?:ال)?مدعي? عليها/,"مدعى عليها"], [/^(?:ال)?مدعي? عليه/,"مدعى عليه"],
+   [/^(?:ال)?مدعيه/,"مدعية"], [/^(?:ال)?مدعي?/,"مدعٍ"],
+   [/^(?:ال)?مستانف ضدها/,"مستأنف ضدها"], [/^(?:ال)?مستانف ضده/,"مستأنف ضده"],
+@@ -13,10 +14,27 @@ const roles: Array<[RegExp,string]> = [
+   [/^(?:ال)?طاعنه/,"طاعنة"], [/^(?:ال)?طاعن/,"طاعن"],
+ ];
+ const roleOf = (s: string) => roles.find(([pattern])=>pattern.test(normalize(s)))?.[1] || "";
+-const isDefendant = (s: string) => /علي/.test(s);
+-const firstRole = (s: string) => /^(?:مدع|مدعي)/.test(s);
++const isDefendant = (s: string) => /علي|متهم/.test(s);
++const firstRole = (s: string) => /^(?:مدع|مدعي|متهم)/.test(s);
+ const negated = (s: string, index: number) => /(?:^|\s)(?:لم|لن|لا|ليس|لست|اذا|لو|ان|في حال)\s+[^،؛.!?\n]{0,22}$/.test(s.slice(0,index));
+ const courts = { first_instance:"المحكمة الكلية", appeal:"محكمة الاستئناف", cassation:"محكمة التمييز" };
++export const intakeCourtNames = ["المحكمة الكلية", "المحكمة الجزئية", "محكمة الأسرة", "محكمة الاستئناف", "محكمة التمييز", "المحكمة الدستورية", "محكمة الجنح", "محكمة الجنايات"];
++// These labels describe stated facts only, not a legal jurisdiction decision.
++export function inferMatterType(text: string, statedCourt = "") {
++  const s=normalize(text);
++  if(statedCourt==="محكمة الجنح")return "جنحة";
++  if(statedCourt==="محكمة الجنايات")return "جناية";
++  if(statedCourt==="محكمة الأسرة")return "أحوال شخصية";
++  if(/مطالبه (?:مدنيه|بالتعويض)|دعوي (?:مدنيه|تعويض)/.test(s))return "مدني";
++  if(/مستحقات عماليه|عقد عمل|جه[هة] عملي|فصل تعسفي|اجور|راتب|رواتب|مكافاه نهايه الخدمه/.test(s))return "عمالي";
++  if(/طلاق|نفقه|حضانه|عقد زواج|احوال شخصيه|ميراث/.test(s))return "أحوال شخصية";
++  if(/عقد ايجار|مستاجر|مؤجر|اخلاء العين/.test(s))return "إيجارات";
++  if(/الغاء قرار اداري|قرار اداري|دعوي اداريه/.test(s))return "إداري";
++  if(/نزاع تجاري|عقد توريد|مطالبه تجاريه|اسهم/.test(s))return "تجاري";
++  if(/جنحه|جنايه|اتهام|نصب|احتيال|سرقه|اعتداء|سب وقذف/.test(s))return "جزائي";
++  if(/دين|قرض|تعويض|مبلغ|مطالبه مدنيه/.test(s))return "مدني";
++  return "";
++}
+ 
+ /** Extracts stated procedure only; it does not establish jurisdiction or appeal eligibility. */
+ export function inferProceduralPosition(text: string, clientName = "", otherParty = ""): ProceduralPosition {
+@@ -26,7 +44,7 @@ export function inferProceduralPosition(text: string, clientName = "", otherPart
+   const evidence: string[] = [], originals = new Set<string>(), explicit = new Set<string>();
+   const addEvidence = (raw: string) => { if (!evidence.includes(raw)) evidence.push(raw.slice(0,400)); };
+   for (const {raw,s} of clauses) {
+-    const self = /(?:^|\s)(?:انا|انني|بصفتي|صفتي|موكلي|موكلتي|الطرف الذي امثله)\s+(?:(?:هو|هي|في الدعوي|بصفه)\s+)?((?:ال)?(?:مدعي?|مدعيه|مستانف|مستانفه|طاعن|طاعنه|مطعون)[^،؛.!?\n]{0,18})/.exec(s);
++    const self = /(?:^|\s)(?:انا|انني|بصفتي|صفتي|موكلي|موكلتي|الطرف الذي امثله)\s+(?:(?:هو|هي|في الدعوي|بصفه)\s+)?((?:ال)?(?:مدعي?|مدعيه|متهم|متهمه|متهمات|مستانف|مستانفه|طاعن|طاعنه|مطعون)[^،؛.!?\n]{0,18})/.exec(s);
+     const role = self && !negated(s,self.index) ? roleOf(self[1]) : "";
+     if (role && /^(?:تصحيح|للتصحيح|الصحيح)\s*[:：]/.test(s)) { originals.clear(); explicit.clear(); }
+     if (role) { (firstRole(role) ? originals : explicit).add(role); addEvidence(raw); }
+@@ -41,6 +59,7 @@ export function inferProceduralPosition(text: string, clientName = "", otherPart
+   type Level = keyof typeof courts;
+   const actions: Array<{level:Level;side:"self"|"opponent";raw:string}> = [];
+   let statedLevel: Level | undefined;
++  let statedCourt = "";
+   const administrative = currentClauses.some(({s}) => /(?:الدعوي|القضيه|دائره|الدائره|المحكمه)\s+الاداريه|(?:محكمه|المحكمه)\s+(?:الاستيناف|الكليه)[^.\n]{0,25}الاداريه/.test(s) && !/(?:ليست|ليس|لا)\s+(?:الدعوي|القضيه|دائره|الدائره|المحكمه)/.test(s));
+   const actorSide = (actor: string) => {
+     if (/الخصم|خصمي|الطرف الاخر/.test(actor)) return "opponent" as const;
+@@ -51,8 +70,12 @@ export function inferProceduralPosition(text: string, clientName = "", otherPart
+     return null;
+   };
+   for (const {raw,s} of currentClauses) {
+-    const forum=/(?:امام|منظوره (?:لدي|في)|الجلسه (?:امام|في))\s+(?:المحكمه|محكمه)?\s*(التمييز|الاستيناف|الكليه)/.exec(s);
+-    if (forum && !negated(s,forum.index)) { statedLevel=forum[1]==="التمييز"?"cassation":forum[1]==="الاستيناف"?"appeal":"first_instance"; addEvidence(raw); }
++    const forum=/(?:امام|منظوره (?:لدي|في)|الجلسه (?:امام|في))\s+(?:المحكمه|محكمه)?\s*(التمييز|الاستيناف|الكليه|الجزئيه|الاسره|الجنح|الجنايات|الدستوريه)/.exec(s);
++    if (forum && !negated(s,forum.index)) {
++      statedLevel=forum[1]==="التمييز"?"cassation":forum[1]==="الاستيناف"?"appeal":"first_instance";
++      statedCourt=({الجنح:"محكمة الجنح",الجنايات:"محكمة الجنايات",الاسره:"محكمة الأسرة",الجزئيه:"المحكمة الجزئية",الدستوريه:"المحكمة الدستورية"} as Record<string,string>)[forum[1]] || courts[statedLevel];
++      addEvidence(raw);
++    }
+     for (const [level,action] of [["cassation",/(?:طعن|طعنت|طعننا|قدم طعنا|قدمت طعنا|تقدم بطعن)\s+(?:[^،؛.!?\n]{0,18}\s+)?بالتمييز/g],["appeal",/(?:استانف(?:ت|نا)?|استيناف|استينافا)/g]] as const) {
+       if (/(?:قضيه اخري|دعوي اخري|للاستشهاد|استشهد|استند الي حكم)/.test(s)) continue;
+       for (const match of s.matchAll(action)) {
+@@ -77,7 +100,7 @@ export function inferProceduralPosition(text: string, clientName = "", otherPart
+   if (sides.size===1) partyRole=level==="cassation" ? (current[0].side==="self"?(female?"طاعنة":"طاعن"):(female?"مطعون ضدها":"مطعون ضده")) : current[0].side==="self"?(female?"مستأنفة":"مستأنف"):(female?"مستأنف ضدها":"مستأنف ضده");
+   if (!partyRole && (level==="unknown"||level==="first_instance")) partyRole=originalRole;
+   const conflict = originals.size>1 || explicit.size>1 || sides.size>1 || (!!explicitRole && !!partyRole && normalize(explicitRole)!==normalize(partyRole));
+-  return { partyRole:conflict?"":partyRole,originalRole,courtCircuit:administrative?"الدائرة الإدارية":"",specialization:administrative?"administrative":"unknown",court:level==="unknown"||conflict?"":courts[level],level,evidence:evidence.slice(-4),conflict,needsActor:!conflict&&(level==="appeal"||level==="cassation")&&!partyRole };
++  return { partyRole:conflict?"":partyRole,originalRole,courtCircuit:administrative?"الدائرة الإدارية":statedCourt?(text.match(/(?:الدائرة|دائرة)\s*(?:رقم\s*)?([0-9٠-٩۰-۹]{1,4})(?![0-9٠-٩۰-۹])/u)?.[0]||""):"",specialization:administrative?"administrative":"unknown",court:level==="unknown"||conflict?"":actions.length?courts[level]:statedCourt||courts[level],level,evidence:evidence.slice(-4),conflict,needsActor:!conflict&&(level==="appeal"||level==="cassation")&&!partyRole };
+ }
+ 
+ export const proceduralPositionInstructions = `استنتج صفة الطرف الذي تمثله الصحيفة من أفعال الزائر والأطراف: من أقام الدعوى وعلى من؟ ثم من رفع الاستئناف أو الطعن؟ لا تفترض أن أول اسم هو الموكل. افصل الصفة الأصلية عن الحالية؛ المدعى عليه الذي يستأنف يصبح مستأنفاً، ومن يرد على استئناف خصمه يكون مستأنفاً ضده، وفي التمييز طاعن أو مطعون ضده. ذكر حكم تمييز للاستشهاد أو المحكمة التي أصدرت حكماً سابقاً لا يحدد المحكمة الحالية. اجمع من الوقائع من تقدم بالإجراء والمحكمة المنظور أمامها دون مطالبة الزائر باختيار مصطلح قانوني. الإداري تخصص مستقل عن الدرجة: قد تكون الدائرة الإدارية في أول درجة أو الاستئناف، فلا تجعل إداري والكلية والاستئناف بدائل متنافية. لا يكفي كون الخصم وزارة لتقرير النزاع الإداري؛ افهم القرار أو العقد أو التصرف محل الطلب وصفة الأطراف. لا تختلق حكماً أو ميعاداً أو جواز طعن. عند التصنيف لا تختزل وصف جنحة أو جناية مذكور صراحة للإجراء الحالي إلى جزائي عام، ولا تعِد السؤال عنه؛ ثبته في نوع القضية أو الدائرة. ذكر جريمة أو حكم جزائي في خلفية مطالبة مدنية لا يغير مسارها. صنف موضوع الطلب لا عنوان الملف ولا اسم صاحب العمل أو وجود جهة عامة في الخصوم. افصل دعوى المطالبة وندب الخبير والوصاية والتكليف بالرعاية، ولا تستعر مواداً أو طلبات أو بيانات من النماذج الأسلوبية.`;
+@@ -96,8 +119,9 @@ export function applyProceduralPosition<T extends { court:string; courtCircuit:s
+     }
+     return p;
+   });
+-  return {...state,proceduralPosition:position,court,courtCircuit:position.conflict?"":position.courtCircuit||(court!==state.court?"":state.courtCircuit),
++  const caseType = ["محكمة الجنح","محكمة الجنايات","محكمة الأسرة"].includes(position.court) ? inferMatterType(text,position.court) : (state as T & {caseType?:string}).caseType || inferMatterType(text);
++  return {...state,...(caseType?{caseType}:{}),proceduralPosition:position,court,courtCircuit:position.conflict?"":position.courtCircuit||(court!==state.court?"":state.courtCircuit),
+     readyForMemo:unresolved?false:state.readyForMemo,phase:unresolved&&state.phase==="ready"?"review":state.phase,
+     parties,
+-    memoPrefill:{...state.memoPrefill,partyRole:role,court,allParties:parties.map(p=>`${p.name}: ${p.role}`).join("\n")}};
++    memoPrefill:{...state.memoPrefill,...(caseType?{caseType}:{}),partyRole:role,court,allParties:parties.map(p=>`${p.name}: ${p.role}`).join("\n")}};
+ }
+diff --git a/public/management/admin.js b/public/management/admin.js
+index 0ac3599..d3cb30c 100644
+--- a/public/management/admin.js
++++ b/public/management/admin.js
+@@ -30,7 +30,7 @@
+   try { token=sessionStorage.getItem(SESSION)||''; } catch { /* storage is checked when signing in */ }
+   async function api(path,body,method,signal) {
+     const requestToken=token;
+-    const response=await fetch(API+path,{method:method || (body?'POST':'GET'),headers:{...(requestToken?{Authorization:'Bearer '+requestToken}:{}),...(body?{'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{}),credentials:'omit',cache:'no-store',referrerPolicy:'no-referrer',signal:signal?AbortSignal.any([signal,AbortSignal.timeout(35_000)]):AbortSignal.timeout(30_000)});
++    const response=await fetch(API+path,{method:method || (body?'POST':'GET'),headers:{...(requestToken?{Authorization:'Bearer '+requestToken}:{}),...(body?{'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{}),credentials:'omit',cache:'no-store',referrerPolicy:'no-referrer',signal:signal?AbortSignal.any([signal,AbortSignal.timeout(path==='memo-generation'?300_000:35_000)]):AbortSignal.timeout(path==='memo-generation'?300_000:30_000)});
+     const data=await response.json().catch(()=>({error:'لم تصل استجابة قابلة للقراءة.'}));
+     if(response.status===401 && token===requestToken && !['exchange','password-login','password-recovery-request','password-recovery-confirm'].includes(path)) {token='';manager=null;sessionStorage.removeItem(SESSION);loginScreen('انتهت الجلسة. سجّل الدخول للمتابعة.');}
+     if(!response.ok)throw Error(data.error||'تعذر الاتصال بخدمة الإدارة.');
+@@ -141,7 +141,7 @@
+     </form>${report}</div>`);
+   }
+   function canReviewMemos(){return ['administrator','memo_supervisor'].includes(manager?.role);}
+-  function memoExportControls() { return canReviewMemos()?'<div class="actions"><button type="button" data-memo-export="true">تصدير المذكرات للمراجعة</button></div>':''; }
++  function memoExportControls() { return canReviewMemos()?`<div class="actions">${manager?.role==='administrator'?'<button type="button" class="primary" data-memo-new="true">توليد مذكرة جديدة</button>':''}<button type="button" data-memo-export="true">تصدير المذكرات للمراجعة</button></div>`:''; }
+   async function exportMemosForReview(button) {
+     if(!canReviewMemos())throw Error('تصدير النصوص متاح للمشرف فقط.');
+     const found=new Map(),records=[];let page=0,more=true;
+@@ -268,6 +268,7 @@
+     return hits.size>=2 ? '<p class="banner error" role="note">تنبيه تدقيق: تحتوي المذكرة المحفوظة على نص تشريعي مشوّه من استخراج PDF. لا يُعتمد الاقتباس كما هو؛ يجب مطابقة أصل المادة وسريان تعديلاتها، ثم مراجعة نسخة مصححة منفصلة قبل تقديمها للمحكمة. لم يُعدّل السجل الأصلي.</p>' : '';
+   }
+   let currentMemo=null;
++  let memoGenerationState=null;
+   function editableMemoText(value, depth=0) {
+     if(depth>3)return '';
+     const data=savedValue(value);
+@@ -293,7 +294,34 @@
+     openDetail(`<h2 id="memo-detail-title" class="detail-title">التعديل ${n(row.revision)}</h2><div class="record-scroll"><section class="record-section"><h3>النص قبل التعديل${row.revision===1?' — الأصل':''}</h3><article class="record-document record-prose" dir="rtl">${memoContent(row.before_text)}</article><button data-memo-restore="${row.revision}">استخدام هذا النص في المحرر</button></section><section class="record-section"><h3>النص بعد التعديل</h3><article class="record-document record-prose" dir="rtl">${memoContent(row.after_text)}</article></section><button data-memo-history="true">العودة إلى سجل النسخ</button></div>`,true);
+   }
+   function memoRecord(memo) {
+-    return `<header class="record-heading"><h2 id="memo-detail-title" class="detail-title">${esc(memo.client_name || 'طلب مذكرة')}</h2><p class="detail-meta">${date(memo.created_at)}${memo.case_type?` · ${esc(memo.case_type)}`:''}</p>${badge(memo.status)}${memoRevisionControls(memo)}</header><div class="record-scroll" tabindex="0" role="region" aria-label="تفاصيل الطلب والمذكرة"><section class="record-section" aria-labelledby="record-input-title"><h3 id="record-input-title">بيانات الطلب</h3>${requestDetails(memo.input_json)}</section><section class="record-section" aria-labelledby="record-output-title"><h3 id="record-output-title">المذكرة المحفوظة</h3><article class="record-document record-prose" dir="rtl" lang="ar">${memoOCRNotice(memo.output_text)}${memoContent(memo.output_text)}</article></section></div>`;
++    return `<header class="record-heading"><h2 id="memo-detail-title" class="detail-title">${esc(memo.client_name || 'طلب مذكرة')}</h2><p class="detail-meta">${date(memo.created_at)}${memo.case_type?` · ${esc(memo.case_type)}`:''}</p>${badge(memo.status)}${memoRevisionControls(memo)}${manager?.role==='administrator'&&/^[A-Za-z0-9_-]+$/.test(memo.id)&&memo.status!=='running'?'<div class="actions"><button data-memo-generate="true">مراجعة البيانات وتوليد نسخة مستقلة</button></div>':''}</header><div class="record-scroll" tabindex="0" role="region" aria-label="تفاصيل الطلب والمذكرة"><section class="record-section" aria-labelledby="record-input-title"><h3 id="record-input-title">بيانات الطلب</h3>${requestDetails(memo.input_json)}</section><section class="record-section" aria-labelledby="record-output-title"><h3 id="record-output-title">المذكرة المحفوظة</h3><article class="record-document record-prose" dir="rtl" lang="ar">${memoOCRNotice(memo.output_text)}${memoContent(memo.output_text)}</article></section></div>`;
++  }
++  async function openMemoGeneration(id) {
++    if(manager?.role!=='administrator')throw Error('التوليد متاح للمسؤول فقط.');
++    memoGenerationState=await api('memo-generation'+(id?'?id='+encodeURIComponent(id):''));
++    const state=memoGenerationState,required=new Set(['clientName','otherParty','partyRole','court','caseType','facts','requests']);
++    const controls=Object.entries(state.fieldLabels).map(([key,label])=>{
++      const value=state.fields[key]||'';
++      if(key==='documentKind')return `<label class="field"><span>${esc(label)}</span><select name="documentKind">${[['auto','تلقائي حسب الصفة والقضية'],['memorandum','مذكرة دفاع'],['claim','صحيفة دعوى'],['appeal','صحيفة استئناف']].map(([v,l])=>`<option value="${v}"${value===v?' selected':''}>${l}</option>`).join('')}</select></label>`;
++      return `<label class="field"><span>${esc(label)}</span><textarea name="${esc(key)}" rows="${['facts','requests','originalGrounds','judgmentOperative'].includes(key)?5:2}" maxlength="${key==='facts'?16000:key==='requests'?7000:5000}"${required.has(key)?' required':''}>${esc(value)}</textarea></label>`;
++    }).join('');
++    openDetail(`<header class="record-heading"><h2 id="memo-detail-title" class="detail-title">${id?'مراجعة القضية قبل التوليد':'توليد مذكرة جديدة'}</h2><p>استخدم وقائع ومستندات هذه القضية فقط. التوليد ينشئ طلباً مستقلاً، وتبقى المذكرة الأصلية محفوظة.</p></header><div class="record-scroll"><form data-form="memo-generation">${!state.context.valid?`<div role="alert" class="service-status"><p>حقول إضافية تحتاج التحقق من انتمائها لهذه القضية: ${state.context.conflictingFields.map(key=>esc(state.fieldLabels[key])).join('، ')}.</p><button type="button" data-memo-clear-conflicts="true">إفراغ الحقول الإضافية المقترحة للمراجعة</button></div>`:''}${controls}<label class="checkbox"><input type="checkbox" name="reviewed" required><span>راجعت الوقائع والأطراف والطلبات والحقول الإضافية، وكلها تخص هذه القضية وحدها.</span></label><p role="status" data-generation-status></p><div class="actions"><button class="primary" type="submit" value="generate">توليد نسخة مستقلة</button>${state.canRepair?'<button type="submit" value="repair">حفظ تصحيح المدخلات مع الأصل</button>':''}${id?'<button type="button" data-memo-current="true">العودة إلى الطلب الأصلي</button>':''}</div></form></div>`,true);
++  }
++  function memoGenerationResult(result) {
++    openDetail(`<h2 id="memo-detail-title" class="detail-title">${result.repaired?'حُفظ تصحيح المدخلات':result.hasDraft?'حُفظت المذكرة للمراجعة':result.status==='running'?'التوليد جارٍ':'يحتاج الطلب إلى مراجعة'}</h2><div class="record-scroll"><p role="status">${esc(result.error||(result.repaired?'حُفظ الأصل قبل تصحيح بيانات القضية. لم يُغير أي نص مذكرة محفوظ.':result.status==='running'?'بدأت العملية؛ تحقق من الطلب المحفوظ قبل إعادة المحاولة.':'أُنشئت نسخة مستقلة وتبقى بانتظار المراجعة القانونية.'))}</p>${result.requestId||result.id?`<button class="primary" data-memo="${esc(result.requestId||result.id)}">فتح الطلب المحفوظ</button>`:''}<button type="button" data-memo-new="true">طلب مستقل جديد</button></div>`,true);
++  }
++  async function submitMemoGeneration(form,action) {
++    const state=memoGenerationState,fields=Object.fromEntries(Object.keys(state.fieldLabels).map(key=>[key,String(form.elements.namedItem(key)?.value||'')]));
++    const buttons=Array.from(form.querySelectorAll('button'));buttons.forEach(button=>button.disabled=true);
++    const status=form.querySelector('[data-generation-status]');status.textContent=action==='repair'?'جارٍ حفظ الأصل والتصحيح…':'جارٍ التوليد ومراجعة المصادر والدفوع… قد يستغرق عدة دقائق.';
++    try {
++      const result=await api('memo-generation',{id:state.id,fields,expectedHash:state.expectedHash,operationId:state.operationId,action,reviewed:form.elements.reviewed.checked});
++      memoGenerationResult(result);
++    } catch(error) {
++      // The same operation id is retained on retry; a timeout cannot start a second draft.
++      try{const result=await api('memo-generation?operationId='+encodeURIComponent(state.operationId));memoGenerationResult(result);return;}catch{}
++      status.textContent=error.message;throw error;
++    } finally {buttons.forEach(button=>button.disabled=false);}
+   }
+   const memoReference=value=>typeof value==='string'&&/^[A-Za-z0-9:_-]{1,100}$/.test(value)?value:'';
+   async function openMemo(id){const data=await api('memos?id='+encodeURIComponent(id));currentMemo=data.memo;openDetail(memoRecord(data.memo),true);}
+@@ -335,6 +363,13 @@
+       if(button.dataset.mailboxTest){mailboxData=await api('mailboxes',{action:'test'});hasMore=mailboxData.hasMore;offset=0;renderMailboxes();toast('تم اختبار التفويض وجلب الحسابات الفعلية.');}
+       if(button.dataset.mailboxStatus!==undefined){const u=mailboxData.accounts[Number(button.dataset.mailboxStatus)];openDetail(`<h2 class="detail-title">${u.enabled?'إيقاف صندوق البريد':'إعادة تفعيل صندوق البريد'}</h2><p><bdi>${esc(u.email)}</bdi></p><p>يتغير دخول هذا المستخدم لدى Zoho وخدماته المرتبطة. تبقى بيانات الصندوق والعناوين والمجموعات محفوظة.</p><form data-form="mailbox-status"><input type="hidden" name="id" value="${esc(u.id)}"><input type="hidden" name="zuid" value="${esc(u.zuid)}"><input type="hidden" name="enabled" value="${u.enabled?'false':'true'}"><label class="checkbox"><input name="confirm" type="checkbox" required><span>أؤكد تغيير حالة هذا الحساب لدى المزود.</span></label><button class="primary" type="submit">تأكيد ${u.enabled?'الإيقاف':'التفعيل'}</button></form>`);}
+       if(button.dataset.memoExport){const label=button.textContent;try{await exportMemosForReview(button);}finally{button.textContent=label;}}
++      if(button.dataset.memoNew)await openMemoGeneration('');
++      if(button.dataset.memoGenerate)await openMemoGeneration(currentMemo.id);
++      if(button.dataset.memoClearConflicts){
++        const form=detail.querySelector('[data-form="memo-generation"]');
++        for(const key of memoGenerationState.context.suggestedClearFields)if(form.elements.namedItem(key))form.elements.namedItem(key).value='';
++        form.elements.reviewed.checked=false;toast('أُفرغت الحقول الإضافية المقترحة في النموذج. راجعها ثم احفظ التصحيح.');
++      }
+       if(button.dataset.memoEdit)editMemo();
+       if(button.dataset.memoHistory)await memoHistory();
+       if(button.dataset.memoVersion)await showMemoVersion(Number(button.dataset.memoVersion));
+@@ -357,6 +392,7 @@
+        if(kind==='password-login'){const data=await api('password-login',values);token=data.token;sessionStorage.setItem(SESSION,token);manager=data.manager;form.reset();shell();await load();await openPendingMemo();return;}
+       if(kind==='sadad-reconcile'){paymentsData=await api('payments',{...values,action:'reconcile'});dialog.close();renderPayments();toast('تمت مطابقة الفاتورة والتحقق من بياناتها.');}
+       if(kind==='sadad'){paymentsData=await api('payments',{...values,action:'save',publicCheckoutEnabled:form.elements.publicCheckoutEnabled.checked,required:form.elements.required.checked,accountConfirmed:form.elements.accountConfirmed.checked,callbacksConfirmed:form.elements.callbacksConfirmed.checked});renderPayments();toast('حُفظت إعدادات سداد في الخادم.');}
++      if(kind==='memo-generation'){await submitMemoGeneration(form,event.submitter?.value||'generate');return;}
+       if(kind==='memo-revision'){const id=currentMemo.id;const result=await api('memo-revision',{id,text:values.text,expectedHash:currentMemo.edit.hash,expectedRevision:currentMemo.edit.revision});await openMemo(id);toast(result.unchanged?'لم يتغير النص المحفوظ.':'حُفظت النسخة المصححة مع الاحتفاظ بالأصل. تبقى بانتظار المراجعة القانونية.');}
+       if(kind==='user-search'){query=String(values.q||'');memoStatus=String(values.status||'');offset=0;await load();}
+       if(kind==='user-edit'){await api('users',values);dialog.close();await load();toast('حُفظت بيانات المستخدم وحدود خدماته.');}
+diff --git a/scripts/check-dashboard-quality.mjs b/scripts/check-dashboard-quality.mjs
+index 6f590b1..4c429d7 100644
+--- a/scripts/check-dashboard-quality.mjs
++++ b/scripts/check-dashboard-quality.mjs
+@@ -4,7 +4,7 @@ import path from 'node:path';
+ 
+ export const dashboardChecks=[
+  {id:'memo-submission-recovery',files:['tests/memo-core-preserved.test.mjs','tests/memo-submission.test.mjs','tests/memo-ledger-recovery.test.mjs','tests/interface-language.test.mjs']},
+- {id:'case-context',files:['tests/project-context.test.mjs','tests/dashboard-quality.test.mjs']},
++ {id:'case-context',files:['tests/project-context.test.mjs','tests/dashboard-quality.test.mjs','tests/case-context-isolation.test.mjs','tests/assistant-classification.test.mjs']},
+  {id:'memo-article-text',files:['tests/article-text-in-memos.test.mjs','tests/memo-completeness.test.mjs','tests/reference-pleading-style.test.mjs','tests/legal-drafting-routes.test.mjs','tests/agent-pipeline.test.mjs']},
+  {id:'admin-permissions-and-failures',files:['tests/management.test.mjs','tests/email-worker-transport.test.mjs','tests/gmail.test.mjs','tests/user-email-link.test.mjs','tests/user-list-live.test.mjs']},
+  {id:'admin-service-contract',files:['tests/admin-bridge-contract.test.mjs','tests/management-source-connection.test.mjs','tests/admin-source-status.test.mjs','tests/admin-memo-link.test.mjs','tests/ready-forms.test.mjs']},
+diff --git a/scripts/check-memo-core-preserved.mjs b/scripts/check-memo-core-preserved.mjs
+index 54bdf0f..798c5ed 100644
+--- a/scripts/check-memo-core-preserved.mjs
++++ b/scripts/check-memo-core-preserved.mjs
+@@ -13,9 +13,9 @@ export function instructionDigest(source){
+ export function checkMemoCore(){
+   const manifest=JSON.parse(readFileSync(resolve(root,'specs/100-memo-submission-recovery/protected-core.json'),'utf8'));
+   const transport=JSON.parse(readFileSync(resolve(root,'specs/102-meta-provider-connection/protected-transport.json'),'utf8'));
++  const isolation=JSON.parse(readFileSync(resolve(root,'specs/103-admin-memo-generation-isolation/protected-case-isolation.json'),'utf8'));
+   function originalTransport(file,source){
+-    const substitutions=transport.files[file];
+-    if(!substitutions)return source;
++    const substitutions=[...(isolation.files[file]||[]),...(transport.files[file]||[])];
+     for(const {before,after,count} of substitutions){
+       if(source.split(after).length-1!==count)throw Error('Unexpected provider transport edit: '+file);
+       source=source.split(after).join(before);
+diff --git a/specs/103-admin-memo-generation-isolation/plan.md b/specs/103-admin-memo-generation-isolation/plan.md
+new file mode 100644
+index 0000000..8f657cc
+--- /dev/null
++++ b/specs/103-admin-memo-generation-isolation/plan.md
+@@ -0,0 +1,12 @@
++# خطة التنفيذ
++
++1. دوال نقية لعزل السياق وكشف الأطراف الإضافية غير المرتبطة، ثم ربطها بالواجهة والتحقق الخادمي.
++2. مسار management/memo-generation للمسؤول فقط: معاينة حقول، بصمة مصدر، أصل مشفر داخل management_vault، تصحيح متفائل، وتوليد مستقل مع مفتاح عملية يمنع التكرار.
++3. تمرير تفويض داخلي عبر WeakMap على كائن Request إلى محرك المذكرات نفسه. تظل المصادقة والدفع لطلبات الجمهور كما هي، وتظل بوابات المصادر والجودة مشتركة.
++4. نموذج إدارة عربي يراجع كل مدخل قبل التصحيح/التوليد، ويحفظ نتيجة الخادم حتى عند فشل بوابة الجودة. لا تُمس المذكرة الأصلية عند إعادة التوليد.
++5. توثيق التعديلات المحددة القابلة للعكس أمام حارس النواة، مع إبقاء بصمات الأساس وتعليمات الصياغة دون تغيير.
++6. اختبارات اصطناعية، بناء، نشر الخادم ومزامنة عميل GitHub بحدود الملف، ثم التحقق من الطلبات المتأثرة عبر واجهة الإدارة المصرح بها.
++
++لا حاجة لترحيل قاعدة البيانات؛ تستخدم الأصول وسجلات العمليات مخزن الإدارة المشفر القائم. لا أسرار أو وقائع حقيقية في Git.
++
++7. إصلاح استرداد مزود المقابلة في textModelFetch مع إبقاء ميزانية المحاولات العادية للمذكرات دون تغيير. توحيد قائمة المحاكم المدعومة وإضافة التعرف من الإجراء الحالي والصفة الجزائية، ثم تسوية حالة المقابلة وحقول الإحالة دون رفع الثقة أو تعطيل مراجعة المصادر.
+diff --git a/specs/103-admin-memo-generation-isolation/protected-case-isolation.json b/specs/103-admin-memo-generation-isolation/protected-case-isolation.json
+new file mode 100644
+index 0000000..3e08d31
+--- /dev/null
++++ b/specs/103-admin-memo-generation-isolation/protected-case-isolation.json
+@@ -0,0 +1,94 @@
++{
++  "baseCommit": "6b3dc83a97f2bf8d79d10fea00a2576c69dd959c",
++  "scope": "Exact authorized case isolation, stated court/role classification, and existing configured intake fallback after quota refusal. Reverse these changes before the unchanged original protected hashes. No memo drafting instruction, legal template, source-review gate or public payment bypass.",
++  "files": {
++    "lib/intake-analysis.ts": [
++      {
++        "before": "import { factualRequirements, researchOwnershipCopy, removeDelegatedResearch } from \"./legal-language\";\nimport type { LegalIntakeState } from \"./openai\";\nimport { corpusContext, isCassationEvidence, isJudgmentEvidence, normalizeLegalText, type LegalEvidence } from \"./legal-search\";\n",
++        "after": "import { intakeCourtNames } from \"@/lib/procedural-position\";\nimport { factualRequirements, researchOwnershipCopy, removeDelegatedResearch } from \"./legal-language\";\nimport type { LegalIntakeState } from \"./openai\";\nimport { corpusContext, isCassationEvidence, isJudgmentEvidence, normalizeLegalText, type LegalEvidence } from \"./legal-search\";\n",
++        "count": 1
++      },
++      {
++        "before": "    if (orientation) orientation.nextAction = missing;\n    warnings.push(missing);\n  }\n  const knownCourts = [\"المحكمة الكلية\", \"المحكمة الجزئية\", \"محكمة الأسرة\", \"محكمة الاستئناف\", \"محكمة التمييز\", \"المحكمة الدستورية\"];\n  if (state.court && !knownCourts.includes(state.court.trim())) {\n    state.court = \"\"; state.courtCircuit = \"\"; state.jurisdictionConfidence = \"low\";\n    state.readyForMemo = false; warnings.push(copy.missing);\n",
++        "after": "    if (orientation) orientation.nextAction = missing;\n    warnings.push(missing);\n  }\n  const knownCourts = intakeCourtNames;\n  if (state.court && !knownCourts.includes(state.court.trim())) {\n    state.court = \"\"; state.courtCircuit = \"\"; state.jurisdictionConfidence = \"low\";\n    state.readyForMemo = false; warnings.push(copy.missing);\n",
++        "count": 1
++      }
++    ],
++    "lib/memo-input.ts": [
++      {
++        "before": "import { availableEvidenceMode, prepareMemoDraft } from \"./memo-preparation\";\nimport { inferProceduralPosition } from \"@/lib/procedural-position\";\nimport { cleanString, cleanMultiline, RequestError } from \"@/lib/request-security\";\nimport { correctLegalProse } from \"@/lib/legal-language\";\n",
++        "after": "import { availableEvidenceMode, prepareMemoDraft } from \"./memo-preparation\";\nimport { reviewMemoCaseContext } from \"@/lib/memo-case-context\";\nimport { inferProceduralPosition } from \"@/lib/procedural-position\";\nimport { cleanString, cleanMultiline, RequestError } from \"@/lib/request-security\";\nimport { correctLegalProse } from \"@/lib/legal-language\";\n",
++        "count": 1
++      },
++      {
++        "before": "import { resolveLegalDraftingRoute, legalRouteSummary } from \"@/lib/legal-drafting-routes\";\n\nexport function validateMemoInput(raw: Record<string, unknown>) {\n    const available = raw.draftMode === availableEvidenceMode;\n    const preparation = available ? prepareMemoDraft(raw) : null;\n    if (preparation) raw = preparation.input;\n",
++        "after": "import { resolveLegalDraftingRoute, legalRouteSummary } from \"@/lib/legal-drafting-routes\";\n\nexport function validateMemoInput(raw: Record<string, unknown>) {\n    const context = reviewMemoCaseContext(raw);\n    if (!context.valid) throw Object.assign(new RequestError(\"تحتوي بيانات الحكم أو الأطراف الأصلية أسماء غير مرتبطة بوقائع هذه القضية. راجع الحقول المتعارضة قبل التوليد.\", 422), { stage: \"case_context_review\", conflictingFields: context.conflictingFields, missingFacts: context.conflictingFields.map(key => ({key, question: \"تحقق من انتماء هذا الحقل إلى القضية الحالية أو أزله.\"})) });\n    const available = raw.draftMode === availableEvidenceMode;\n    const preparation = available ? prepareMemoDraft(raw) : null;\n    if (preparation) raw = preparation.input;\n",
++        "count": 1
++      }
++    ],
++    "lib/openai.ts": [
++      {
++        "before": "import { intakeMemoFieldNames, type IntakeMemoFields } from \"./memo-handoff\";\nimport { inferProceduralPosition, proceduralPositionInstructions, type ProceduralPosition } from \"./procedural-position\";\nimport {matterFactInstructions} from \"./matter-facts\";\nimport { caseReasoningInstructions } from \"./case-reasoning\";\nimport { legalSpeechSettings } from \"./legal-voice\";\n",
++        "after": "import { intakeMemoFieldNames, type IntakeMemoFields } from \"./memo-handoff\";\nimport { intakeCourtNames, inferProceduralPosition, proceduralPositionInstructions, type ProceduralPosition } from \"./procedural-position\";\nimport {matterFactInstructions} from \"./matter-facts\";\nimport { caseReasoningInstructions } from \"./case-reasoning\";\nimport { legalSpeechSettings } from \"./legal-voice\";\n",
++        "count": 1
++      },
++      {
++        "before": "  catch { throw new OpenAIServiceError(\"configuration\"); }\n}\n\nasync function textModelFetch(init: RequestInit, attempts = 3) {\n  const runtime = await resolveTextEnvironment(env as unknown as OpenAIEnvironment);\n  const primary = textProviderConfig(runtime);\n  const budget = Math.max(1, Math.min(attempts, 3));\n  async function run(config: ReturnType<typeof textProviderConfig>, count: number, request: RequestInit): Promise<Response> {\n    if (request.signal?.aborted) throw new OpenAIServiceError(\"timeout\");\n",
++        "after": "  catch { throw new OpenAIServiceError(\"configuration\"); }\n}\n\nasync function textModelFetch(init: RequestInit, attempts = 3, intake = false) {\n  const runtime = await resolveTextEnvironment(env as unknown as OpenAIEnvironment);\n  const primary = textProviderConfig(runtime, undefined, intake);\n  const budget = Math.max(1, Math.min(attempts, 3));\n  async function run(config: ReturnType<typeof textProviderConfig>, count: number, request: RequestInit): Promise<Response> {\n    if (request.signal?.aborted) throw new OpenAIServiceError(\"timeout\");\n",
++        "count": 1
++      },
++      {
++        "before": "    }\n    if (init.signal?.aborted) throw new OpenAIServiceError(\"timeout\");\n    const alternate = runtime.LEGAL_AI_FALLBACK_PROVIDER?.trim();\n    if (budget <= 1 || !alternate || alternate === primary.provider) {\n      if (primary.provider === \"openai\") return response;\n      throw new OpenAIServiceError(response.status === 429 ? \"rate_limit\" : \"upstream\", response.status === 429 ? 429 : 503, response.status);\n    }\n    let fallback: ReturnType<typeof textProviderConfig>;\n    try { fallback = textProviderConfig(runtime, alternate); }\n    catch {\n      if (primary.provider === \"openai\") return response;\n      throw new OpenAIServiceError(response.status === 429 ? \"rate_limit\" : \"upstream\", response.status === 429 ? 429 : 503, response.status);\n",
++        "after": "    }\n    if (init.signal?.aborted) throw new OpenAIServiceError(\"timeout\");\n    const alternate = runtime.LEGAL_AI_FALLBACK_PROVIDER?.trim();\n    if (budget <= 1 && !intake || !alternate || alternate === primary.provider) {\n      if (primary.provider === \"openai\") return response;\n      throw new OpenAIServiceError(response.status === 429 ? \"rate_limit\" : \"upstream\", response.status === 429 ? 429 : 503, response.status);\n    }\n    let fallback: ReturnType<typeof textProviderConfig>;\n    try { fallback = textProviderConfig(runtime, alternate, intake); }\n    catch {\n      if (primary.provider === \"openai\") return response;\n      throw new OpenAIServiceError(response.status === 429 ? \"rate_limit\" : \"upstream\", response.status === 429 ? 429 : 503, response.status);\n",
++        "count": 1
++      },
++      {
++        "before": "    phase: { type: \"string\", enum: [\"gathering\", \"review\", \"ready\"] }, assistantMessage: { type: \"string\", maxLength: 700, description: \"Two or three concise sentences explaining what the visitor facts mean, provisional interpretation, and next action. No questions here, unsupported legal citations, guarantees, or invented facts.\" }, progress: { type: \"integer\", minimum: 0, maximum: 100 },\n    orientation: { type: \"object\", additionalProperties: false, required: [\"categoryReason\", \"track\", \"judgment\", \"judgmentQuote\", \"nextAction\"], properties: { categoryReason: { type: \"string\", maxLength: 300 }, track: { type: \"string\", enum: [\"unknown\", \"initial\", \"pending\", \"complaint\", \"challenge\", \"enforcement\"] }, judgment: { type: \"string\", enum: [\"unknown\", \"none\", \"first_instance\", \"appeal\", \"cassation\"] }, judgmentQuote: { type: \"string\", maxLength: 300, description: \"Exact visitor quote confirming an ACTUAL judgment/proceeding, not a wish to appeal or a source judgment. Empty if none.\" }, nextAction: { type: \"string\", maxLength: 350, description: \"Plain-language provisional next step. No unverified deadline or definitive admissibility.\" } } },\n    precedentMatches: { type: \"array\", maxItems: 2, items: { type: \"object\", additionalProperties: false, required: [\"passageId\", \"similarity\", \"differences\", \"relevance\"], properties: { passageId: { type: \"string\" }, similarity: { type: \"string\", maxLength: 250 }, differences: { type: \"string\", maxLength: 250 }, relevance: { type: \"string\", enum: [\"analogous\", \"distinguished\", \"insufficient\"] } } } },\n    caseType: { type: \"string\" }, caseStage: { type: \"string\" }, court: { type: \"string\", enum: [\"\", \"المحكمة الكلية\", \"المحكمة الجزئية\", \"محكمة الأسرة\", \"محكمة الاستئناف\", \"محكمة التمييز\", \"المحكمة الدستورية\"], description: \"Official Kuwaiti court name in Arabic. Leave empty when information or sources are insufficient. The specialized circuit goes in courtCircuit, not in this field.\" }, courtCircuit: { type: \"string\", description: \"Specialist circuit, e.g. الدائرة العمالية. Do not invent a court name from the dispute category.\" }, jurisdictionReason: { type: \"string\" }, jurisdictionConfidence: { type: \"string\", enum: [\"low\", \"medium\", \"high\"] },\n    jurisdictionMissing: { type: \"array\", maxItems: 6, items: { type: \"string\" } },\n    caseSummary: { type: \"string\", description: \"Concise reviewable factual case summary; no new facts.\" },\n    legalBasis: { type: \"array\", maxItems: 3, items: { type: \"object\", additionalProperties: false, required: [\"passageId\", \"application\", \"use\"], properties: { passageId: { type: \"string\", description: \"Select the supplied exact paragraph ID, e.g. م1:2. The server supplies its verbatim text. Never invent IDs.\" }, application: { type: \"string\", description: \"Briefly explain why this exact passage applies to the facts; no unsupported article or appeal number.\" }, use: { type: \"string\", enum: [\"jurisdiction\", \"substance\"] } } } },\n",
++        "after": "    phase: { type: \"string\", enum: [\"gathering\", \"review\", \"ready\"] }, assistantMessage: { type: \"string\", maxLength: 700, description: \"Two or three concise sentences explaining what the visitor facts mean, provisional interpretation, and next action. No questions here, unsupported legal citations, guarantees, or invented facts.\" }, progress: { type: \"integer\", minimum: 0, maximum: 100 },\n    orientation: { type: \"object\", additionalProperties: false, required: [\"categoryReason\", \"track\", \"judgment\", \"judgmentQuote\", \"nextAction\"], properties: { categoryReason: { type: \"string\", maxLength: 300 }, track: { type: \"string\", enum: [\"unknown\", \"initial\", \"pending\", \"complaint\", \"challenge\", \"enforcement\"] }, judgment: { type: \"string\", enum: [\"unknown\", \"none\", \"first_instance\", \"appeal\", \"cassation\"] }, judgmentQuote: { type: \"string\", maxLength: 300, description: \"Exact visitor quote confirming an ACTUAL judgment/proceeding, not a wish to appeal or a source judgment. Empty if none.\" }, nextAction: { type: \"string\", maxLength: 350, description: \"Plain-language provisional next step. No unverified deadline or definitive admissibility.\" } } },\n    precedentMatches: { type: \"array\", maxItems: 2, items: { type: \"object\", additionalProperties: false, required: [\"passageId\", \"similarity\", \"differences\", \"relevance\"], properties: { passageId: { type: \"string\" }, similarity: { type: \"string\", maxLength: 250 }, differences: { type: \"string\", maxLength: 250 }, relevance: { type: \"string\", enum: [\"analogous\", \"distinguished\", \"insufficient\"] } } } },\n    caseType: { type: \"string\" }, caseStage: { type: \"string\" }, court: { type: \"string\", enum: [\"\", ...intakeCourtNames], description: \"Official Kuwaiti court name in Arabic. Leave empty when information or sources are insufficient. The specialized circuit goes in courtCircuit, not in this field.\" }, courtCircuit: { type: \"string\", description: \"Specialist circuit, e.g. الدائرة العمالية. Do not invent a court name from the dispute category.\" }, jurisdictionReason: { type: \"string\" }, jurisdictionConfidence: { type: \"string\", enum: [\"low\", \"medium\", \"high\"] },\n    jurisdictionMissing: { type: \"array\", maxItems: 6, items: { type: \"string\" } },\n    caseSummary: { type: \"string\", description: \"Concise reviewable factual case summary; no new facts.\" },\n    legalBasis: { type: \"array\", maxItems: 3, items: { type: \"object\", additionalProperties: false, required: [\"passageId\", \"application\", \"use\"], properties: { passageId: { type: \"string\", description: \"Select the supplied exact paragraph ID, e.g. م1:2. The server supplies its verbatim text. Never invent IDs.\" }, application: { type: \"string\", description: \"Briefly explain why this exact passage applies to the facts; no unsupported article or appeal number.\" }, use: { type: \"string\", enum: [\"jurisdiction\", \"substance\"] } } } },\n",
++        "count": 1
++      },
++      {
++        "before": "      input: JSON.stringify({ explicitProceduralFacts: statedProcedure, language: input.language, ...preparedContext, currentState, questionMemory: memory, verifiedLegalSources: input.evidence || \"لا توجد نصوص قانونية مطابقة متاحة؛ لا تنشئ أسانيد من الذاكرة.\" }),\n      ...responseModelOptions(model), text: { format: { type: \"json_schema\", name: \"legal_case_intake\", description: \"Progressive Kuwait legal case intake and memo handoff state.\", strict: true, schema: { ...compactIntakeSchema, properties: { ...compactIntakeSchema.properties, legalBasis: { ...legalIntakeSchema.properties.legalBasis, items: { ...legalIntakeSchema.properties.legalBasis.items, properties: { ...legalIntakeSchema.properties.legalBasis.items.properties, passageId: { type: \"string\", enum: input.passageIds?.length ? input.passageIds : [\"unavailable\"] } } } } } } } }, max_output_tokens: 4_500, store: false,\n    }), signal: input.signal ? AbortSignal.any([input.signal, AbortSignal.timeout(45_000)]) : AbortSignal.timeout(45_000),\n  }, 1);\n  if (!response.ok) await throwHttpError(response, \"responses\");\n  let payload: OpenAIResponsePayload;\n  if (input.onText) {\n",
++        "after": "      input: JSON.stringify({ explicitProceduralFacts: statedProcedure, language: input.language, ...preparedContext, currentState, questionMemory: memory, verifiedLegalSources: input.evidence || \"لا توجد نصوص قانونية مطابقة متاحة؛ لا تنشئ أسانيد من الذاكرة.\" }),\n      ...responseModelOptions(model), text: { format: { type: \"json_schema\", name: \"legal_case_intake\", description: \"Progressive Kuwait legal case intake and memo handoff state.\", strict: true, schema: { ...compactIntakeSchema, properties: { ...compactIntakeSchema.properties, legalBasis: { ...legalIntakeSchema.properties.legalBasis, items: { ...legalIntakeSchema.properties.legalBasis.items, properties: { ...legalIntakeSchema.properties.legalBasis.items.properties, passageId: { type: \"string\", enum: input.passageIds?.length ? input.passageIds : [\"unavailable\"] } } } } } } } }, max_output_tokens: 4_500, store: false,\n    }), signal: input.signal ? AbortSignal.any([input.signal, AbortSignal.timeout(45_000)]) : AbortSignal.timeout(45_000),\n  }, 1, true);\n  if (!response.ok) await throwHttpError(response, \"responses\");\n  let payload: OpenAIResponsePayload;\n  if (input.onText) {\n",
++        "count": 1
++      }
++    ],
++    "lib/procedural-position.ts": [
++      {
++        "before": "};\nconst normalize = (s: string) => s.normalize(\"NFKC\").replace(/[أإآٱ]/g,\"ا\").replace(/ى/g,\"ي\").replace(/ة/g,\"ه\").replace(/ئ/g,\"ي\").replace(/ؤ/g,\"و\").replace(/[\\u064b-\\u065fـ]/g,\"\").toLowerCase();\nconst roles: Array<[RegExp,string]> = [\n  [/^(?:ال)?مدعي? عليها/,\"مدعى عليها\"], [/^(?:ال)?مدعي? عليه/,\"مدعى عليه\"],\n  [/^(?:ال)?مدعيه/,\"مدعية\"], [/^(?:ال)?مدعي?/,\"مدعٍ\"],\n  [/^(?:ال)?مستانف ضدها/,\"مستأنف ضدها\"], [/^(?:ال)?مستانف ضده/,\"مستأنف ضده\"],\n",
++        "after": "};\nconst normalize = (s: string) => s.normalize(\"NFKC\").replace(/[أإآٱ]/g,\"ا\").replace(/ى/g,\"ي\").replace(/ة/g,\"ه\").replace(/ئ/g,\"ي\").replace(/ؤ/g,\"و\").replace(/[\\u064b-\\u065fـ]/g,\"\").toLowerCase();\nconst roles: Array<[RegExp,string]> = [\n  [/^(?:ال)?متهمات/,\"متهمات\"], [/^(?:ال)?متهمه/,\"متهمة\"], [/^(?:ال)?متهم/,\"متهم\"],\n  [/^(?:ال)?مدعي? عليها/,\"مدعى عليها\"], [/^(?:ال)?مدعي? عليه/,\"مدعى عليه\"],\n  [/^(?:ال)?مدعيه/,\"مدعية\"], [/^(?:ال)?مدعي?/,\"مدعٍ\"],\n  [/^(?:ال)?مستانف ضدها/,\"مستأنف ضدها\"], [/^(?:ال)?مستانف ضده/,\"مستأنف ضده\"],\n",
++        "count": 1
++      },
++      {
++        "before": "  [/^(?:ال)?طاعنه/,\"طاعنة\"], [/^(?:ال)?طاعن/,\"طاعن\"],\n];\nconst roleOf = (s: string) => roles.find(([pattern])=>pattern.test(normalize(s)))?.[1] || \"\";\nconst isDefendant = (s: string) => /علي/.test(s);\nconst firstRole = (s: string) => /^(?:مدع|مدعي)/.test(s);\nconst negated = (s: string, index: number) => /(?:^|\\s)(?:لم|لن|لا|ليس|لست|اذا|لو|ان|في حال)\\s+[^،؛.!?\\n]{0,22}$/.test(s.slice(0,index));\nconst courts = { first_instance:\"المحكمة الكلية\", appeal:\"محكمة الاستئناف\", cassation:\"محكمة التمييز\" };\n\n/** Extracts stated procedure only; it does not establish jurisdiction or appeal eligibility. */\nexport function inferProceduralPosition(text: string, clientName = \"\", otherParty = \"\"): ProceduralPosition {\n",
++        "after": "  [/^(?:ال)?طاعنه/,\"طاعنة\"], [/^(?:ال)?طاعن/,\"طاعن\"],\n];\nconst roleOf = (s: string) => roles.find(([pattern])=>pattern.test(normalize(s)))?.[1] || \"\";\nconst isDefendant = (s: string) => /علي|متهم/.test(s);\nconst firstRole = (s: string) => /^(?:مدع|مدعي|متهم)/.test(s);\nconst negated = (s: string, index: number) => /(?:^|\\s)(?:لم|لن|لا|ليس|لست|اذا|لو|ان|في حال)\\s+[^،؛.!?\\n]{0,22}$/.test(s.slice(0,index));\nconst courts = { first_instance:\"المحكمة الكلية\", appeal:\"محكمة الاستئناف\", cassation:\"محكمة التمييز\" };\nexport const intakeCourtNames = [\"المحكمة الكلية\", \"المحكمة الجزئية\", \"محكمة الأسرة\", \"محكمة الاستئناف\", \"محكمة التمييز\", \"المحكمة الدستورية\", \"محكمة الجنح\", \"محكمة الجنايات\"];\n// These labels describe stated facts only, not a legal jurisdiction decision.\nexport function inferMatterType(text: string, statedCourt = \"\") {\n  const s=normalize(text);\n  if(statedCourt===\"محكمة الجنح\")return \"جنحة\";\n  if(statedCourt===\"محكمة الجنايات\")return \"جناية\";\n  if(statedCourt===\"محكمة الأسرة\")return \"أحوال شخصية\";\n  if(/مطالبه (?:مدنيه|بالتعويض)|دعوي (?:مدنيه|تعويض)/.test(s))return \"مدني\";\n  if(/مستحقات عماليه|عقد عمل|جه[هة] عملي|فصل تعسفي|اجور|راتب|رواتب|مكافاه نهايه الخدمه/.test(s))return \"عمالي\";\n  if(/طلاق|نفقه|حضانه|عقد زواج|احوال شخصيه|ميراث/.test(s))return \"أحوال شخصية\";\n  if(/عقد ايجار|مستاجر|مؤجر|اخلاء العين/.test(s))return \"إيجارات\";\n  if(/الغاء قرار اداري|قرار اداري|دعوي اداريه/.test(s))return \"إداري\";\n  if(/نزاع تجاري|عقد توريد|مطالبه تجاريه|اسهم/.test(s))return \"تجاري\";\n  if(/جنحه|جنايه|اتهام|نصب|احتيال|سرقه|اعتداء|سب وقذف/.test(s))return \"جزائي\";\n  if(/دين|قرض|تعويض|مبلغ|مطالبه مدنيه/.test(s))return \"مدني\";\n  return \"\";\n}\n\n/** Extracts stated procedure only; it does not establish jurisdiction or appeal eligibility. */\nexport function inferProceduralPosition(text: string, clientName = \"\", otherParty = \"\"): ProceduralPosition {\n",
++        "count": 1
++      },
++      {
++        "before": "  const evidence: string[] = [], originals = new Set<string>(), explicit = new Set<string>();\n  const addEvidence = (raw: string) => { if (!evidence.includes(raw)) evidence.push(raw.slice(0,400)); };\n  for (const {raw,s} of clauses) {\n    const self = /(?:^|\\s)(?:انا|انني|بصفتي|صفتي|موكلي|موكلتي|الطرف الذي امثله)\\s+(?:(?:هو|هي|في الدعوي|بصفه)\\s+)?((?:ال)?(?:مدعي?|مدعيه|مستانف|مستانفه|طاعن|طاعنه|مطعون)[^،؛.!?\\n]{0,18})/.exec(s);\n    const role = self && !negated(s,self.index) ? roleOf(self[1]) : \"\";\n    if (role && /^(?:تصحيح|للتصحيح|الصحيح)\\s*[:：]/.test(s)) { originals.clear(); explicit.clear(); }\n    if (role) { (firstRole(role) ? originals : explicit).add(role); addEvidence(raw); }\n",
++        "after": "  const evidence: string[] = [], originals = new Set<string>(), explicit = new Set<string>();\n  const addEvidence = (raw: string) => { if (!evidence.includes(raw)) evidence.push(raw.slice(0,400)); };\n  for (const {raw,s} of clauses) {\n    const self = /(?:^|\\s)(?:انا|انني|بصفتي|صفتي|موكلي|موكلتي|الطرف الذي امثله)\\s+(?:(?:هو|هي|في الدعوي|بصفه)\\s+)?((?:ال)?(?:مدعي?|مدعيه|متهم|متهمه|متهمات|مستانف|مستانفه|طاعن|طاعنه|مطعون)[^،؛.!?\\n]{0,18})/.exec(s);\n    const role = self && !negated(s,self.index) ? roleOf(self[1]) : \"\";\n    if (role && /^(?:تصحيح|للتصحيح|الصحيح)\\s*[:：]/.test(s)) { originals.clear(); explicit.clear(); }\n    if (role) { (firstRole(role) ? originals : explicit).add(role); addEvidence(raw); }\n",
++        "count": 1
++      },
++      {
++        "before": "  type Level = keyof typeof courts;\n  const actions: Array<{level:Level;side:\"self\"|\"opponent\";raw:string}> = [];\n  let statedLevel: Level | undefined;\n  const administrative = currentClauses.some(({s}) => /(?:الدعوي|القضيه|دائره|الدائره|المحكمه)\\s+الاداريه|(?:محكمه|المحكمه)\\s+(?:الاستيناف|الكليه)[^.\\n]{0,25}الاداريه/.test(s) && !/(?:ليست|ليس|لا)\\s+(?:الدعوي|القضيه|دائره|الدائره|المحكمه)/.test(s));\n  const actorSide = (actor: string) => {\n    if (/الخصم|خصمي|الطرف الاخر/.test(actor)) return \"opponent\" as const;\n",
++        "after": "  type Level = keyof typeof courts;\n  const actions: Array<{level:Level;side:\"self\"|\"opponent\";raw:string}> = [];\n  let statedLevel: Level | undefined;\n  let statedCourt = \"\";\n  const administrative = currentClauses.some(({s}) => /(?:الدعوي|القضيه|دائره|الدائره|المحكمه)\\s+الاداريه|(?:محكمه|المحكمه)\\s+(?:الاستيناف|الكليه)[^.\\n]{0,25}الاداريه/.test(s) && !/(?:ليست|ليس|لا)\\s+(?:الدعوي|القضيه|دائره|الدائره|المحكمه)/.test(s));\n  const actorSide = (actor: string) => {\n    if (/الخصم|خصمي|الطرف الاخر/.test(actor)) return \"opponent\" as const;\n",
++        "count": 1
++      },
++      {
++        "before": "    return null;\n  };\n  for (const {raw,s} of currentClauses) {\n    const forum=/(?:امام|منظوره (?:لدي|في)|الجلسه (?:امام|في))\\s+(?:المحكمه|محكمه)?\\s*(التمييز|الاستيناف|الكليه)/.exec(s);\n    if (forum && !negated(s,forum.index)) { statedLevel=forum[1]===\"التمييز\"?\"cassation\":forum[1]===\"الاستيناف\"?\"appeal\":\"first_instance\"; addEvidence(raw); }\n    for (const [level,action] of [[\"cassation\",/(?:طعن|طعنت|طعننا|قدم طعنا|قدمت طعنا|تقدم بطعن)\\s+(?:[^،؛.!?\\n]{0,18}\\s+)?بالتمييز/g],[\"appeal\",/(?:استانف(?:ت|نا)?|استيناف|استينافا)/g]] as const) {\n      if (/(?:قضيه اخري|دعوي اخري|للاستشهاد|استشهد|استند الي حكم)/.test(s)) continue;\n      for (const match of s.matchAll(action)) {\n",
++        "after": "    return null;\n  };\n  for (const {raw,s} of currentClauses) {\n    const forum=/(?:امام|منظوره (?:لدي|في)|الجلسه (?:امام|في))\\s+(?:المحكمه|محكمه)?\\s*(التمييز|الاستيناف|الكليه|الجزئيه|الاسره|الجنح|الجنايات|الدستوريه)/.exec(s);\n    if (forum && !negated(s,forum.index)) {\n      statedLevel=forum[1]===\"التمييز\"?\"cassation\":forum[1]===\"الاستيناف\"?\"appeal\":\"first_instance\";\n      statedCourt=({الجنح:\"محكمة الجنح\",الجنايات:\"محكمة الجنايات\",الاسره:\"محكمة الأسرة\",الجزئيه:\"المحكمة الجزئية\",الدستوريه:\"المحكمة الدستورية\"} as Record<string,string>)[forum[1]] || courts[statedLevel];\n      addEvidence(raw);\n    }\n    for (const [level,action] of [[\"cassation\",/(?:طعن|طعنت|طعننا|قدم طعنا|قدمت طعنا|تقدم بطعن)\\s+(?:[^،؛.!?\\n]{0,18}\\s+)?بالتمييز/g],[\"appeal\",/(?:استانف(?:ت|نا)?|استيناف|استينافا)/g]] as const) {\n      if (/(?:قضيه اخري|دعوي اخري|للاستشهاد|استشهد|استند الي حكم)/.test(s)) continue;\n      for (const match of s.matchAll(action)) {\n",
++        "count": 1
++      },
++      {
++        "before": "  if (sides.size===1) partyRole=level===\"cassation\" ? (current[0].side===\"self\"?(female?\"طاعنة\":\"طاعن\"):(female?\"مطعون ضدها\":\"مطعون ضده\")) : current[0].side===\"self\"?(female?\"مستأنفة\":\"مستأنف\"):(female?\"مستأنف ضدها\":\"مستأنف ضده\");\n  if (!partyRole && (level===\"unknown\"||level===\"first_instance\")) partyRole=originalRole;\n  const conflict = originals.size>1 || explicit.size>1 || sides.size>1 || (!!explicitRole && !!partyRole && normalize(explicitRole)!==normalize(partyRole));\n  return { partyRole:conflict?\"\":partyRole,originalRole,courtCircuit:administrative?\"الدائرة الإدارية\":\"\",specialization:administrative?\"administrative\":\"unknown\",court:level===\"unknown\"||conflict?\"\":courts[level],level,evidence:evidence.slice(-4),conflict,needsActor:!conflict&&(level===\"appeal\"||level===\"cassation\")&&!partyRole };\n}\n\nexport const proceduralPositionInstructions = `استنتج صفة الطرف الذي تمثله الصحيفة من أفعال الزائر والأطراف: من أقام الدعوى وعلى من؟ ثم من رفع الاستئناف أو الطعن؟ لا تفترض أن أول اسم هو الموكل. افصل الصفة الأصلية عن الحالية؛ المدعى عليه الذي يستأنف يصبح مستأنفاً، ومن يرد على استئناف خصمه يكون مستأنفاً ضده، وفي التمييز طاعن أو مطعون ضده. ذكر حكم تمييز للاستشهاد أو المحكمة التي أصدرت حكماً سابقاً لا يحدد المحكمة الحالية. اجمع من الوقائع من تقدم بالإجراء والمحكمة المنظور أمامها دون مطالبة الزائر باختيار مصطلح قانوني. الإداري تخصص مستقل عن الدرجة: قد تكون الدائرة الإدارية في أول درجة أو الاستئناف، فلا تجعل إداري والكلية والاستئناف بدائل متنافية. لا يكفي كون الخصم وزارة لتقرير النزاع الإداري؛ افهم القرار أو العقد أو التصرف محل الطلب وصفة الأطراف. لا تختلق حكماً أو ميعاداً أو جواز طعن. عند التصنيف لا تختزل وصف جنحة أو جناية مذكور صراحة للإجراء الحالي إلى جزائي عام، ولا تعِد السؤال عنه؛ ثبته في نوع القضية أو الدائرة. ذكر جريمة أو حكم جزائي في خلفية مطالبة مدنية لا يغير مسارها. صنف موضوع الطلب لا عنوان الملف ولا اسم صاحب العمل أو وجود جهة عامة في الخصوم. افصل دعوى المطالبة وندب الخبير والوصاية والتكليف بالرعاية، ولا تستعر مواداً أو طلبات أو بيانات من النماذج الأسلوبية.`;\n",
++        "after": "  if (sides.size===1) partyRole=level===\"cassation\" ? (current[0].side===\"self\"?(female?\"طاعنة\":\"طاعن\"):(female?\"مطعون ضدها\":\"مطعون ضده\")) : current[0].side===\"self\"?(female?\"مستأنفة\":\"مستأنف\"):(female?\"مستأنف ضدها\":\"مستأنف ضده\");\n  if (!partyRole && (level===\"unknown\"||level===\"first_instance\")) partyRole=originalRole;\n  const conflict = originals.size>1 || explicit.size>1 || sides.size>1 || (!!explicitRole && !!partyRole && normalize(explicitRole)!==normalize(partyRole));\n  return { partyRole:conflict?\"\":partyRole,originalRole,courtCircuit:administrative?\"الدائرة الإدارية\":statedCourt?(text.match(/(?:الدائرة|دائرة)\\s*(?:رقم\\s*)?([0-9٠-٩۰-۹]{1,4})(?![0-9٠-٩۰-۹])/u)?.[0]||\"\"):\"\",specialization:administrative?\"administrative\":\"unknown\",court:level===\"unknown\"||conflict?\"\":actions.length?courts[level]:statedCourt||courts[level],level,evidence:evidence.slice(-4),conflict,needsActor:!conflict&&(level===\"appeal\"||level===\"cassation\")&&!partyRole };\n}\n\nexport const proceduralPositionInstructions = `استنتج صفة الطرف الذي تمثله الصحيفة من أفعال الزائر والأطراف: من أقام الدعوى وعلى من؟ ثم من رفع الاستئناف أو الطعن؟ لا تفترض أن أول اسم هو الموكل. افصل الصفة الأصلية عن الحالية؛ المدعى عليه الذي يستأنف يصبح مستأنفاً، ومن يرد على استئناف خصمه يكون مستأنفاً ضده، وفي التمييز طاعن أو مطعون ضده. ذكر حكم تمييز للاستشهاد أو المحكمة التي أصدرت حكماً سابقاً لا يحدد المحكمة الحالية. اجمع من الوقائع من تقدم بالإجراء والمحكمة المنظور أمامها دون مطالبة الزائر باختيار مصطلح قانوني. الإداري تخصص مستقل عن الدرجة: قد تكون الدائرة الإدارية في أول درجة أو الاستئناف، فلا تجعل إداري والكلية والاستئناف بدائل متنافية. لا يكفي كون الخصم وزارة لتقرير النزاع الإداري؛ افهم القرار أو العقد أو التصرف محل الطلب وصفة الأطراف. لا تختلق حكماً أو ميعاداً أو جواز طعن. عند التصنيف لا تختزل وصف جنحة أو جناية مذكور صراحة للإجراء الحالي إلى جزائي عام، ولا تعِد السؤال عنه؛ ثبته في نوع القضية أو الدائرة. ذكر جريمة أو حكم جزائي في خلفية مطالبة مدنية لا يغير مسارها. صنف موضوع الطلب لا عنوان الملف ولا اسم صاحب العمل أو وجود جهة عامة في الخصوم. افصل دعوى المطالبة وندب الخبير والوصاية والتكليف بالرعاية، ولا تستعر مواداً أو طلبات أو بيانات من النماذج الأسلوبية.`;\n",
++        "count": 1
++      },
++      {
++        "before": "    }\n    return p;\n  });\n  return {...state,proceduralPosition:position,court,courtCircuit:position.conflict?\"\":position.courtCircuit||(court!==state.court?\"\":state.courtCircuit),\n    readyForMemo:unresolved?false:state.readyForMemo,phase:unresolved&&state.phase===\"ready\"?\"review\":state.phase,\n    parties,\n    memoPrefill:{...state.memoPrefill,partyRole:role,court,allParties:parties.map(p=>`${p.name}: ${p.role}`).join(\"\\n\")}};\n}\n",
++        "after": "    }\n    return p;\n  });\n  const caseType = [\"محكمة الجنح\",\"محكمة الجنايات\",\"محكمة الأسرة\"].includes(position.court) ? inferMatterType(text,position.court) : (state as T & {caseType?:string}).caseType || inferMatterType(text);\n  return {...state,...(caseType?{caseType}:{}),proceduralPosition:position,court,courtCircuit:position.conflict?\"\":position.courtCircuit||(court!==state.court?\"\":state.courtCircuit),\n    readyForMemo:unresolved?false:state.readyForMemo,phase:unresolved&&state.phase===\"ready\"?\"review\":state.phase,\n    parties,\n    memoPrefill:{...state.memoPrefill,...(caseType?{caseType}:{}),partyRole:role,court,allParties:parties.map(p=>`${p.name}: ${p.role}`).join(\"\\n\")}};\n}\n",
++        "count": 1
++      }
++    ]
++  }
++}
+diff --git a/specs/103-admin-memo-generation-isolation/spec.md b/specs/103-admin-memo-generation-isolation/spec.md
+new file mode 100644
+index 0000000..0590a2b
+--- /dev/null
++++ b/specs/103-admin-memo-generation-isolation/spec.md
+@@ -0,0 +1,27 @@
++# عزل القضايا وتوليد المذكرات من الإدارة
++
++## المطلوب والنطاق
++منع انتقال بيانات القضية السابقة إلى قضية جديدة وإتاحة تصحيح مدخلات الطلبات الفارغة وتوليد نسخة مستقلة من لوحة الإدارة. لا تعديل لتعليمات الصياغة أو الأسانيد أو القوالب أو بوابات الجودة والدفع العامة.
++
++## الأدلة والافتراضات
++لوحظ طلب محفوظ يحتوي أطرافاً إضافية من قضية أخرى، بلا نص مولد. طلب آخر ذو مذكرة محفوظة صحيحة يجب حمايته. لا تُحفظ أسماء العملاء أو وقائعهم أو معرفات طلباتهم في المستودع. وجود اختلاف في رقم الحكم الأصلي وحده ليس دليلاً على الخلط؛ قد يكون استئنافاً صحيحاً.
++
++## القبول
++- إحالة جديدة تبدأ ببياناتها فقط، ويُلغى أثر التحليل المتأخر للقضية السابقة.
++- الخادم يرفض الأطراف الأصلية غير المسندة إلى الوقائع الحالية قبل الدفع أو استدعاء النموذج، ويبين الحقول المطلوب مراجعتها.
++- الإدارة تتطلب جلسة مسؤول فعلية؛ لا يجوز تقليد التفويض من JSON أو ترويسة عميل.
++- التصحيح يحتفظ بأصل مشفر، ويمنع تعارض التعديلات، ولا يبدل نصاً محفوظاً أو تعديلاً بشرياً.
++- التوليد يستخدم المحرك القائم وينشئ طلباً مستقلاً؛ إعادة إرسال العملية نفسها لا تكرر التوليد ولا تحمّل دفعة العميل.
++- نقص المصادر أو تعارض الوقائع يبقى حالة مراجعة صريحة دون اختلاق مواد أو أحكام.
++- تمر اختبارات العزل والصلاحيات والتزامن والنقص والتصدير وحماية التعليمات، ويُنشر العميل والخادم المتوافقان.
++
++## خارج النطاق
++تغيير المزود أو المفاتيح أو صلاحيات الحسابات أو السياسة القانونية. لا دمج لقواعد قضايا خاصة ولا اعتماد قانوني تلقائي للمسودات.
++
++## إضافة طلب المستخدم: تحليل نوع القضية والمحكمة
+++أثبت اختبار حي ببيانات اصطناعية أن مزود التحليل بلغ حد الاستخدام؛ دخل المساعد وضع جمع الوقائع ولم يتعرف على محكمة الجنح وصفة المتهم المصرح بهما. فشل اختبار بديل المزود: ميزانية الدور الواحد كانت تمنع البديل المهيأ حتى بعد رفض الحصة.
+++
+++- محاولة واحدة على المزود الأساسي، ثم محاولة واحدة على البديل المهيأ فقط عند رفض صريح قابل للاسترداد. لا تبديل عند مصادقة مرفوضة أو طلب خاطئ أو مهلة غامضة أو إلغاء، ولا مزود جديد أو مدفوع تلقائياً.
+++- يبقى نموذج المقابلة منفصلاً عن نموذج الصياغة في اختيار المزود، وتُحفظ أسماء المحاكم الحالية المصرح بها، بما فيها الجنح والجنايات، دون افتراض طريق طعن.
+++- عند تعطل جميع المزودين يحتفظ المساعد بالمحكمة والصفة ونوع القضية الواضحة من العبارة، ويبين تعطل التحليل. لا يتحول التعرف على اسم المحكمة إلى إثبات اختصاص أو سند قانوني أو جاهزية اعتماد.
+++- ما لا تحسمه الوقائع يبقى غامضاً مع سؤال واقعي محدد؛ لا يطلب من الزائر اختيار نوع القضية أو المحكمة.
+diff --git a/specs/103-admin-memo-generation-isolation/tasks.md b/specs/103-admin-memo-generation-isolation/tasks.md
+new file mode 100644
+index 0000000..ecee7ad
+--- /dev/null
++++ b/specs/103-admin-memo-generation-isolation/tasks.md
+@@ -0,0 +1,11 @@
++# مهام
++
++- [ ] T01 اختبار يثبت رفض الخلط وقبول الأطراف الصحيحة.
++- [ ] T02 دوال السياق والتحقق الخادمي وإلغاء نتائج التحليل المتأخرة وإعادة تهيئة الإحالة الجديدة.
++- [ ] T03 مسار مسؤول للتصحيح والتوليد المستقل والأصول المشفرة والتزامن ومنع التكرار.
++- [ ] T04 نموذج توليد ومراجعة مدخلات في لوحة التحكم مع حالة النقص والمهلة المناسبة.
++- [ ] T05 اختبارات الصلاحيات والتصحيح والتوليد/النقص وحماية النواة والقوالب والتصدير.
++- [ ] T06 بناء ونشر الخادم ومزامنة عميل GitHub دون مسّ المشاريع الأخرى.
++- [ ] T07 فحص حي وتصحيح الطلبات المؤكدة المتأثرة مع الإبقاء على المذكرات السليمة وتوثيق حدود التحقق.
++- [ ] T08 إصلاح محاولة المزود الاحتياطي للمقابلة واختيار نموذج المقابلة الصحيح، باختبار رفض الحصة والإلغاء.
++- [ ] T09 الاحتفاظ بنوع القضية والمحكمة والصفة الصريحة، وفحص الانتقال للمذكرة وحالة التعطل باختبار حي اصطناعي.
+diff --git a/tests/assistant-classification.test.mjs b/tests/assistant-classification.test.mjs
+new file mode 100644
+index 0000000..11a268b
+--- /dev/null
++++ b/tests/assistant-classification.test.mjs
+@@ -0,0 +1,28 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import {load} from './template-harness.mjs';
++const security=load('../lib/request-security.ts',{'@/db':{getD1(){throw Error('Unexpected database request');}}});
++const search=load('../lib/legal-search.ts',{'@/db':{}});
++const handoff=load('../lib/memo-handoff.ts');
++const context=load('../lib/intake-context.ts',{'./memo-handoff':handoff});
++const analysis=load('../lib/intake-analysis.ts',{'./legal-search':search});
++const readiness=load('../lib/intake-readiness.ts',{'./memo-handoff':handoff,'./intake-context':context});
++function handlers(){return load('../app/api/legal/assistant/route.ts',{
++ '@/lib/intake-readiness':readiness,'@/lib/intake-context':context,'@/lib/intake-analysis':analysis,
++ '@/lib/assistant-input':load('../lib/assistant-input.ts'),
++ '@/lib/openai':{conductLegalIntake:async()=>{throw Error('synthetic quota');},openAIErrorResponse:()=>({message:'خدمة التحليل غير متاحة في الاختبار بسبب حد الاستخدام.',status:503})},
++ '@/lib/legal-search':{...search,searchIntakeLibrary:async()=>[]},
++ '@/lib/public-auth':{requireMemoUserOrGuest:async()=>null},
++ '@/lib/service-settings':{requireServiceEnabled:async()=>{}},
++ '@/lib/service-records':{enforceUserServiceLimit:async()=>{},recordServiceActivity:async()=>assert.fail('Guest must not be archived')},
++ '@/lib/request-security':{...security,enforceRateLimit:async()=>{}},
++}).POST;}
++async function run(message){const response=await handlers()(new Request('https://example.test/api/legal/assistant',{method:'POST',headers:{Origin:'https://example.test','Content-Type':'application/json'},body:JSON.stringify({message,messages:[],language:'ar'})}));assert.equal(response.status,200);return (await response.json()).state;}
++test('provider outage retains explicitly stated current court, criminal subtype and role without inventing authority',async()=>{
++ const state=await run('اختبار اصطناعي فقط: أنا المتهم الخامس في قضية منظورة أمام محكمة الجنح، الدائرة 24، بجنحة سب وقذف. أنكر الواقعة وأطلب البراءة.');
++ assert.equal(state.caseType,'جنحة');assert.equal(state.court,'محكمة الجنح');assert.match(state.courtCircuit,/24/);assert.equal(state.memoPrefill.partyRole,'متهم');assert.equal(state.memoPrefill.court,state.court);assert.equal(state.memoPrefill.caseType,state.caseType);
++ assert.equal(state.readyForMemo,false);assert.equal(state.jurisdictionConfidence,'low');assert.equal(state.legalBasis.length,0);assert.match(state.assistantMessage,/محكمة الجنح/);assert.doesNotMatch(state.assistantMessage,/المادة\s*\d|قانون رقم|الطعن رقم/);
++});
++test('missing court remains unresolved; memo preparation wording does not become an employment claim',async()=>{
++ const state=await run('أريد عمل مذكرة دفاع ولا أعرف تفاصيل الموضوع بعد.');assert.equal(state.caseType,'');assert.equal(state.court,'');assert.equal(state.readyForMemo,false);assert.equal(state.legalBasis.length,0);
++});
+diff --git a/tests/case-context-isolation.test.mjs b/tests/case-context-isolation.test.mjs
+new file mode 100644
+index 0000000..0b9da8a
+--- /dev/null
++++ b/tests/case-context-isolation.test.mjs
+@@ -0,0 +1,34 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import {load} from './template-harness.mjs';
++const security=load('../lib/request-security.ts',{'@/db':{getD1(){throw Error('Unexpected database access');}}});
++const {validateMemoInput}=load('../lib/memo-input.ts',{'@/lib/request-security':security});
++const current={caseType:'مطالبة مدنية',clientName:'صاحب القضية الافتراضي',otherParty:'الخصم الافتراضي الحالي',partyRole:'مدعى عليه',court:'المحكمة الكلية',caseNumber:'SYNTHETIC-A',documentKind:'memorandum',facts:'في تاريخ 2026/01/01 أقام الخصم الافتراضي الحالي دعوى على صاحب القضية الافتراضي بطلب مبلغ 100 دينار كويتي عن دين مزعوم. ينكر صاحب القضية الافتراضي المديونية ويتمسك بعدم وجود مستند يثبت تسلمه هذا المبلغ.',requests:'رفض الدعوى لعدم ثبوت المديونية.'};
++test('unrelated original parties are rejected before any payment or model request',()=>{
++ assert.throws(()=>validateMemoInput({...current,originalDefendant:'طرف قضية أخرى افتراضية',originalGrounds:'وقائع اصطناعية من قضية سابقة',judgmentOperative:'منطوق يخص القضية السابقة'}),e=>e.status===422&&e.stage==='case_context_review'&&e.conflictingFields.includes('originalDefendant'));
++});
++test('matching original parties and a different appealed judgment number remain valid',()=>{
++ const input=validateMemoInput({...current,originalPlaintiff:current.otherParty,originalDefendant:current.clientName,judgmentNumber:'SYNTHETIC-FIRST-INSTANCE'});
++ assert.equal(input.extraFields.originalDefendant,current.clientName);
++});
++const context=load('../lib/memo-case-context.ts');
++test('a new matter drops every prior private field; an update to the same matter retains its fields',()=>{
++ const old={...current,originalDefendant:'طرف سابق',documentContext:'private synthetic prior document',conversationTranscript:'synthetic prior chat',assistantSourceIds:'[123]',hearingDate:'2026-01-02'};
++ const next=context.mergeMemoCasePatch(old,{clientName:'موكل اصطناعي مختلف',facts:'وقائع القضية الجديدة فقط',caseNumber:'SYNTHETIC-B'});
++ for(const key of ['originalDefendant','documentContext','conversationTranscript','assistantSourceIds','hearingDate','requests','otherParty'])assert.equal(next[key],undefined,key);
++ assert.equal(old.documentContext,'private synthetic prior document');
++ assert.equal(context.mergeMemoCasePatch(old,{facts:'تصحيح وقائع القضية الحالية'}).hearingDate,'2026-01-02');
++});
++test('a named original party explicitly supported in the current facts is accepted',()=>{
++ assert.equal(context.reviewMemoCaseContext({...current,originalDefendant:'خصم اصطناعي متدخل',facts:current.facts+' تدخل خصم اصطناعي متدخل في الدعوى.'}).valid,true);
++ assert.equal(context.reviewMemoCaseContext({...current,otherParty:'النيابة العامة',originalPlaintiff:'الادعاء العام'}).valid,true);
++});
++test('server generation authority is isolated across concurrent requests and removed after failure',async()=>{
++ const trusted=load('../lib/management-generation-context.ts'),a=new Request('https://example.test/a'),b=new Request('https://example.test/b',{headers:{'X-Management-Generation':'true'}});
++ let release;const waiting=new Promise(resolve=>{release=resolve;});
++ const running=trusted.withManagementGeneration(a,{parentRequestId:'synthetic-a',onStarted:async()=>{}},async()=>{await waiting;assert.equal(trusted.managementGenerationContext(a).parentRequestId,'synthetic-a');});
++ assert.equal(trusted.managementGenerationContext(b),undefined);release();await running;
++ assert.equal(trusted.managementGenerationContext(a),undefined);
++ await assert.rejects(trusted.withManagementGeneration(a,{onStarted:async()=>{}},async()=>{throw Error('synthetic failure');}));
++ assert.equal(trusted.managementGenerationContext(a),undefined);
++});
+diff --git a/tests/management.test.mjs b/tests/management.test.mjs
+index af2f31b..e5642ab 100644
+--- a/tests/management.test.mjs
++++ b/tests/management.test.mjs
+@@ -705,3 +705,41 @@ test('Meta failure guidance is specific and secret-free while a tested active se
+  }
+  assert.equal(h.logs.length,0);
+ }finally{h.close();}});
++
++const isolatedCase={caseType:'مطالبة مدنية',clientName:'صاحب القضية الافتراضي',otherParty:'الخصم الافتراضي الحالي',partyRole:'مدعى عليه',court:'المحكمة الكلية',caseNumber:'SYNTHETIC-ISOLATION',documentKind:'memorandum',facts:'في تاريخ 2026/01/01 أقام الخصم الافتراضي الحالي دعوى على صاحب القضية الافتراضي بطلب مبلغ 100 دينار كويتي عن دين مزعوم. ينكر صاحب القضية الافتراضي المديونية ويتمسك بعدم وجود مستند يثبت تسلمه هذا المبلغ.',requests:'رفض الدعوى لعدم ثبوت المديونية.'};
++function seedIsolatedMemo(h,id,extra={},output=''){
++ h.sqlite.prepare('INSERT INTO management_memo_requests(id,client_name,case_type,case_number,input_json,output_text,status) VALUES(?,?,?,?,?,?,?)').run(id,isolatedCase.clientName,isolatedCase.caseType,isolatedCase.caseNumber,JSON.stringify({...isolatedCase,...extra}),output,'needs_review');
++}
++test('admin case repair preserves encrypted original and rejects stale edits or saved human text',async()=>{const h=harness();try{
++ const helper=h.load('lib/management-memo-generation.ts'),actor='manager@example.test',id='synthetic-context-repair';seedIsolatedMemo(h,id,{originalDefendant:'طرف قضية أخرى افتراضية',judgmentOperative:'منطوق من قضية سابقة'});
++ const preview=await helper.memoGenerationPreview(new URL(request('memo-generation?id='+id).url),actor);assert.equal(preview.context.valid,false);
++ const fields={...preview.fields,originalDefendant:'',judgmentOperative:''},data={id,fields,expectedHash:preview.expectedHash,operationId:preview.operationId,action:'repair',reviewed:true};
++ const saved=await helper.memoGenerationAction(data,actor,request('memo-generation'));assert.equal(saved.repaired,true);
++ const current=h.sqlite.prepare('SELECT * FROM management_memo_requests WHERE id=?').get(id);assert.equal(JSON.parse(current.input_json).originalDefendant,'');assert.equal(current.output_text,'');assert.equal(current.error_code,'case_input_repaired');
++ const privateRow=h.sqlite.prepare('SELECT * FROM management_vault WHERE integration=?').get('memo-generation:'+preview.operationId);assert.ok(!privateRow.sealed.includes('طرف قضية'));
++ const original=await h.load('lib/management-vault.ts').openConfig(privateRow.sealed);assert.equal(JSON.parse(original.original.input_json).originalDefendant,'طرف قضية أخرى افتراضية');
++ assert.equal((await helper.memoGenerationAction(data,actor,request('memo-generation'))).repaired,true);
++ await assert.rejects(helper.memoGenerationAction({...data,operationId:crypto.randomUUID()},actor,request('memo-generation')),e=>e.status===409);
++ const fresh=await helper.memoGenerationPreview(new URL(request('memo-generation?id='+id).url),actor);h.sqlite.prepare("UPDATE management_memo_requests SET output_text=?,error_code='manual_revision' WHERE id=?").run('نص اصطناعي راجعه المشرف ولا يجوز استبداله',id);
++ await assert.rejects(helper.memoGenerationAction({...data,fields:fresh.fields,expectedHash:fresh.expectedHash,operationId:fresh.operationId},actor,request('memo-generation')),e=>e.status===409);
++ assert.match(h.sqlite.prepare('SELECT output_text FROM management_memo_requests WHERE id=?').get(id).output_text,/راجعه المشرف/);
++ assert.equal(h.network.length,0);
++}finally{h.close();}});
++test('admin generation uses one isolated request, retains source failures, and never overwrites the original',async()=>{const h=harness();try{
++ const helper=h.load('lib/management-memo-generation.ts'),trusted=h.load('lib/management-generation-context.ts'),actor='manager@example.test',id='synthetic-generation-parent',original='مذكرة اصطناعية مصححة بشرياً تخص القضية الحالية وحدها';seedIsolatedMemo(h,id,{},original);
++ const p=await helper.memoGenerationPreview(new URL(request('memo-generation?id='+id).url),actor),data={id,fields:p.fields,expectedHash:p.expectedHash,operationId:p.operationId,action:'generate',reviewed:true};let calls=0;
++ const engine=async req=>{calls++;const context=trusted.managementGenerationContext(req);assert.equal(context.parentRequestId,id);assert.equal(req.headers.has('authorization'),false);const fields=await req.json();assert.equal(fields.clientName,isolatedCase.clientName);assert.equal(fields.originalDefendant,'');await context.onStarted('synthetic-generation-child');return Response.json({requestId:'synthetic-generation-child',error:'نقص مصدر اصطناعي موثق',stage:'source_review'},{status:422});};
++ const first=await helper.memoGenerationAction(data,actor,request('memo-generation'),engine);assert.equal(first.ok,false);assert.equal(first.stage,'source_review');assert.equal(first.requestId,'synthetic-generation-child');
++ const replay=await helper.memoGenerationAction(data,actor,request('memo-generation'),engine);assert.equal(replay.requestId,first.requestId);assert.equal(calls,1);assert.equal(h.sqlite.prepare('SELECT output_text FROM management_memo_requests WHERE id=?').get(id).output_text,original);
++ await assert.rejects(helper.memoGenerationAction({...data,fields:{...p.fields,requests:'طلبات مختلفة'}},actor,request('memo-generation'),engine),e=>e.status===409);
++ const progress=await helper.memoGenerationPreview(new URL(request('memo-generation?operationId='+p.operationId).url),actor);assert.equal(progress.responseStatus,422);
++ await assert.rejects(helper.memoGenerationPreview(new URL(request('memo-generation?operationId='+p.operationId).url),'someoneelse@example.test'),e=>e.status===403);
++ assert.equal(h.network.length,0);
++}finally{h.close();}});
++test('memo generation endpoint rejects anonymous, supervisor and foreign-origin callers without running the engine',async()=>{const h=harness();try{
++ const routes=h.load('app/api/management/[...path]/route.ts');
++ assert.equal((await routes.GET(request('memo-generation'))).status,401);assert.equal((await routes.POST(request('memo-generation',null,{action:'generate',role:'administrator'}))).status,401);
++ const password=memoSupervisorConfiguration(h),session=await (await routes.POST(request('password-login',null,{username:'ahmad',password}))).json();
++ assert.equal((await routes.GET(request('memo-generation',session.token))).status,403);assert.equal((await routes.POST(request('memo-generation',session.token,{action:'generate'}))).status,403);
++ assert.equal((await routes.POST(request('memo-generation',session.token,{action:'generate'},'https://foreign.example'))).status,403);assert.equal(h.network.length,0);
++}finally{h.close();}});
+diff --git a/tests/model-compatibility.test.mjs b/tests/model-compatibility.test.mjs
+index 852f48b..7738901 100644
+--- a/tests/model-compatibility.test.mjs
++++ b/tests/model-compatibility.test.mjs
+@@ -345,3 +345,14 @@ test('activated Meta vault setting routes actual memo generation and legal intak
+  for(const call of calls){assert.equal(call.url,'https://openrouter.ai/api/v1/chat/completions');assert.equal(call.body.model,saved.model);assert.equal(call.authorization,'Bearer '+saved.apiKey);assert.equal(call.body.provider.data_collection,'deny');assert.doesNotMatch(JSON.stringify(call.body),/synthetic-meta-key/);}
+  assert.match(calls[0].body.messages[0].content,/لا تختلق/);
+ });
++
++test('legal intake switches once to the explicitly configured alternate on quota rejection',async()=>{
++ const calls=[];
++ const {api}=client('gpt-4.1-mini',async(url,init)=>{calls.push({url,body:JSON.parse(init.body)});if(url.includes('groq.com')){
++   const body=JSON.parse(init.body),schema=JSON.parse(body.messages[0].content.split('دون شرح أو Markdown:\n')[1]);
++   function example(shape){if(shape.anyOf)return example(shape.anyOf[0]);if(shape.enum)return shape.enum[0];if(shape.type==='object')return Object.fromEntries(Object.entries(shape.properties||{}).map(([key,value])=>[key,example(value)]));if(shape.type==='array')return [];if(shape.type==='string')return 'نص اصطناعي';if(shape.type==='boolean')return false;if(shape.type==='number'||shape.type==='integer')return 0;return null;}
++   return Response.json({choices:[{finish_reason:'stop',message:{content:JSON.stringify({...example(schema),assistantMessage:'تحليل اصطناعي للقضية.'})}}]});
++  }return Response.json({error:{code:'insufficient_quota'}},{status:429});},{LEGAL_AI_FALLBACK_PROVIDER:'groq',GROQ_API_KEY:'synthetic-groq-key',GROQ_MODEL:'synthetic-intake-model',OPENAI_MODEL:'synthetic-draft-model'});
++ const state=await api.conductLegalIntake({language:'ar',messages:[{role:'user',content:'وقائع اصطناعية للمساعد فقط'}],evidence:''});
++ assert.match(state.assistantMessage,/تحليل اصطناعي/);assert.equal(calls.length,2);assert.equal(calls[0].body.model,'gpt-4.1-mini');assert.equal(calls[1].body.model,'synthetic-intake-model');
++});
+diff --git a/tests/procedural-position.test.mjs b/tests/procedural-position.test.mjs
+index 2f9fabf..29e935d 100644
+--- a/tests/procedural-position.test.mjs
++++ b/tests/procedural-position.test.mjs
+@@ -67,3 +67,20 @@ test('current party roles stay consistent in all transferred party fields',()=>{
+  const value=apply(state,'أنا المدعى عليه واستأنفت الحكم.');
+  assert.equal(value.parties[0].role,'مستأنف');assert.equal(value.parties[1].role,'مستأنف ضده');assert.equal(value.memoPrefill.allParties,'طرف اصطناعي: مستأنف\nخصم اصطناعي: مستأنف ضده');
+ });
++
++test('explicit current misdemeanour court and accused role survive recognition',()=>{
++ const current=infer('أنا المتهم الخامس في قضية منظورة أمام محكمة الجنح، الدائرة 24، وأطلب مذكرة دفاع بالبراءة.');
++ assert.equal(current.court,'محكمة الجنح');assert.equal(current.partyRole,'متهم');assert.match(current.courtCircuit,/24/);
++});
++
++
++test('stated criminal court classifies its subtype without declaring source or legal readiness',()=>{
++ const state={caseType:'جزائي',court:'',courtCircuit:'',readyForMemo:false,phase:'gathering',parties:[],memoPrefill:{clientName:'',otherParty:'',partyRole:'',court:'',caseType:'جزائي'}};
++ const result=apply(state,'أنا المتهم في قضية منظورة أمام محكمة الجنايات.');
++ assert.equal(result.caseType,'جناية');assert.equal(result.memoPrefill.caseType,'جناية');assert.equal(result.court,'محكمة الجنايات');assert.equal(result.readyForMemo,false);
++});
++test('requesting memo preparation is not an employment relationship and an unknown forum stays unknown',()=>{
++ assert.equal(exports.inferMatterType('أريد عمل مذكرة دفاع'),'');
++ const position=infer('أريد أن أستأنف الحكم ولم أقدم الاستئناف بعد.');assert.equal(position.court,'');
++ assert.equal(exports.inferMatterType('أريد دعوى مدنية للتعويض عن ضرر بعد جنحة سابقة'),'مدني');
++});
+diff --git a/tests/template-harness.mjs b/tests/template-harness.mjs
+index 0a709e1..5b193cb 100644
+--- a/tests/template-harness.mjs
++++ b/tests/template-harness.mjs
+@@ -7,11 +7,11 @@ import { spawnSync } from 'node:child_process';
+ export function load(path,deps={}) {
+  const exports={};const source=readFileSync(new URL(path,import.meta.url),'utf8');
+  const js=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,esModuleInterop:true}}).outputText;
+- vm.runInNewContext(js,{exports,require:name=>{if(name==="./text-runtime"||name==="@/lib/text-runtime")return load("../lib/text-runtime.ts");
++ vm.runInNewContext(js,{exports,require:name=>{if(name.endsWith("/memo-case-context"))return load("../lib/memo-case-context.ts");if(name.endsWith("/management-generation-context"))return deps[name]||load("../lib/management-generation-context.ts");if(name==="./text-runtime"||name==="@/lib/text-runtime")return load("../lib/text-runtime.ts");
+   if(name === "./ready-forms" || name === "@/lib/ready-forms") return load("../lib/ready-forms.ts",deps);
+   if (name === "./memorandum-reference-style" || name === "@/lib/memorandum-reference-style") return load("../lib/memorandum-reference-style.ts");
+   if (name === "./appeal-reference-style" || name === "@/lib/appeal-reference-style") return load("../lib/appeal-reference-style.ts");
+-  if(name.endsWith("/legal-drafting-routes")||name==="./legal-drafting-routes")return load("../lib/legal-drafting-routes.ts");if(name.endsWith("/bound-article-reviews")||name==="./bound-article-reviews")return load("../lib/bound-article-reviews.ts");if(name.endsWith("/council-defense-review"))return load("../lib/council-defense-review.ts");if(name.endsWith("/statutory-authority-coverage"))return load("../lib/statutory-authority-coverage.ts");if(name.endsWith("/meta-secondary-review"))return deps[name]||{reviewMissingLegalIssues:async()=>null};if(name.endsWith("/text-providers")||name==="./text-providers")return load("../lib/text-providers.ts");if(name === "./gemini")return load("../lib/gemini.ts");if(name.endsWith("/project-context"))return load("../lib/project-context.ts");if(name.endsWith('/memo-preparation')||name==='./memo-preparation')return load('../lib/memo-preparation.ts',deps);if(name==='@/lib/memo-input')return load('../lib/memo-input.ts',deps);if(name==='@/lib/sadad-payments')return deps[name]||{reserveMemoPayment:async()=>({}),completeMemoPayment:async()=>{},releaseMemoPayment:async()=>{}};if(name==='@/lib/memo-requests')return deps[name]||{startMemoRequest:async()=> 'synthetic-management-request',finishMemoRequest:async()=>{}};if(name.endsWith("/procedural-position"))return load("../lib/procedural-position.ts");if(name.endsWith("/judgment-evidence"))return load("../lib/judgment-evidence.ts");if(name.endsWith("/matter-facts")||name==="./matter-facts")return load("../lib/matter-facts.ts");if(name.endsWith('/statutory-text')||name==='./statutory-text')return load('../lib/statutory-text.ts');if(name.endsWith("/bound-draft")||name==="./bound-draft")return load("../lib/bound-draft.ts");if(name.endsWith("/case-reasoning")||name==="./case-reasoning")return load("../lib/case-reasoning.ts");if(name === '@/data/legal-sources/reviewed.json') return JSON.parse(readFileSync(new URL('../data/legal-sources/reviewed.json',import.meta.url),'utf8')); if(name.endsWith('/legal-source-coverage')||name==='./legal-source-coverage') return load('../lib/legal-source-coverage.ts',{'./legal-search':{isJudgmentEvidence:s=>/حكم|احكام|أحكام|قضائ|تمييز/.test(s.title+' '+s.documentType)}}); if(name.endsWith('/official-legislation')||name === './official-legislation') return deps[name]||load('../lib/official-legislation.ts'); if(name.endsWith('/legal-citation-review')||name === './legal-citation-review') return load('../lib/legal-citation-review.ts'); if(name.endsWith('/memo-language'))return load('../lib/memo-language.ts');if(name.endsWith('/interface-language'))return load('../lib/interface-language.ts');if(name.endsWith('/pleading-document')||name==='./pleading-document')return load('../lib/pleading-document.ts');if(name.endsWith('/legal-language'))return load('../lib/legal-language.ts');if(name.startsWith('@/data/')&&Object.hasOwn(deps,name))return deps[name];if(name.startsWith('@/data/'))return JSON.parse(readFileSync(new URL('../'+name.slice(2),import.meta.url),'utf8'));if(!(name in deps))throw Error('Missing test dependency '+name);return deps[name];},console,URL,Request,Response,Headers,TextEncoder,TextDecoder,Uint8Array,DataView,ReadableStream,crypto,atob,btoa,setTimeout,clearTimeout,fetch,AbortSignal});return exports;
++  if(name.endsWith("/legal-drafting-routes")||name==="./legal-drafting-routes")return load("../lib/legal-drafting-routes.ts");if(name.endsWith("/bound-article-reviews")||name==="./bound-article-reviews")return load("../lib/bound-article-reviews.ts");if(name.endsWith("/council-defense-review"))return load("../lib/council-defense-review.ts");if(name.endsWith("/statutory-authority-coverage"))return load("../lib/statutory-authority-coverage.ts");if(name.endsWith("/meta-secondary-review"))return deps[name]||{reviewMissingLegalIssues:async()=>null};if(name.endsWith("/text-providers")||name==="./text-providers")return load("../lib/text-providers.ts");if(name === "./gemini")return load("../lib/gemini.ts");if(name.endsWith("/project-context"))return load("../lib/project-context.ts");if(name.endsWith('/memo-preparation')||name==='./memo-preparation')return load('../lib/memo-preparation.ts',deps);if(name==='@/lib/memo-input')return load('../lib/memo-input.ts',deps);if(name==='@/lib/sadad-payments')return deps[name]||{reserveMemoPayment:async()=>({}),completeMemoPayment:async()=>{},releaseMemoPayment:async()=>{}};if(name==='@/lib/memo-requests')return deps[name]||{startMemoRequest:async()=> 'synthetic-management-request',finishMemoRequest:async()=>{}};if(name.endsWith("/procedural-position"))return load("../lib/procedural-position.ts");if(name.endsWith("/judgment-evidence"))return load("../lib/judgment-evidence.ts");if(name.endsWith("/matter-facts")||name==="./matter-facts")return load("../lib/matter-facts.ts");if(name.endsWith('/statutory-text')||name==='./statutory-text')return load('../lib/statutory-text.ts');if(name.endsWith("/bound-draft")||name==="./bound-draft")return load("../lib/bound-draft.ts");if(name.endsWith("/case-reasoning")||name==="./case-reasoning")return load("../lib/case-reasoning.ts");if(name === '@/data/legal-sources/reviewed.json') return JSON.parse(readFileSync(new URL('../data/legal-sources/reviewed.json',import.meta.url),'utf8')); if(name.endsWith('/legal-source-coverage')||name==='./legal-source-coverage') return load('../lib/legal-source-coverage.ts',{'./legal-search':{isJudgmentEvidence:s=>/حكم|احكام|أحكام|قضائ|تمييز/.test(s.title+' '+s.documentType)}}); if(name.endsWith('/official-legislation')||name === './official-legislation') return deps[name]||load('../lib/official-legislation.ts'); if(name.endsWith('/legal-citation-review')||name === './legal-citation-review') return load('../lib/legal-citation-review.ts'); if(name.endsWith('/memo-language'))return load('../lib/memo-language.ts');if(name.endsWith('/interface-language'))return load('../lib/interface-language.ts');if(name.endsWith('/pleading-document')||name==='./pleading-document')return load('../lib/pleading-document.ts');if(name.endsWith('/legal-language'))return load('../lib/legal-language.ts');if(name.startsWith('@/data/')&&Object.hasOwn(deps,name))return deps[name];if(name.startsWith('@/data/'))return JSON.parse(readFileSync(new URL('../'+name.slice(2),import.meta.url),'utf8'));if(!(name in deps))throw Error('Missing test dependency '+name);return deps[name];},console,URL,Request,Response,Headers,TextEncoder,TextDecoder,Uint8Array,DataView,ReadableStream,crypto,atob,btoa,setTimeout,clearTimeout,fetch,performance,AbortController,AbortSignal});return exports;
+ }
+ export function templateHarness({sourceOverrides={}}={}) {
+  const directory=mkdtempSync(join(tmpdir(),'sabeq-template-')),path=join(directory,'db.sqlite'),objects=new Map();let writes=0;
+diff --git a/tools/internal-verification/verify.py b/tools/internal-verification/verify.py
+index 29d4002..48855f1 100644
+--- a/tools/internal-verification/verify.py
++++ b/tools/internal-verification/verify.py
+@@ -127,7 +127,7 @@ def check_plan(profile):
+     if profile == "site":
+         return [
+             node("sources", ["tests/official-errata.test.mjs", "tests/bound-article-reviews.test.mjs", "tests/bound-article-review-source.test.mjs", "tests/bound-legislation.test.mjs", "tests/reviewed-judgments.test.mjs", "tests/legislation-workbench.test.mjs", "tests/legal-source-coverage.test.mjs"]),
+-            node("memo", ["tests/model-compatibility.test.mjs", "tests/text-runtime.test.mjs", "tests/text-providers.test.mjs", "tests/openrouter-errors.test.mjs", "tests/grounded-audit-excerpts.test.mjs", "tests/indirect-intake.test.mjs", "tests/procedural-position.test.mjs", "tests/memo-journey.test.mjs", "tests/payment-dialog.test.mjs", "tests/agent-pipeline.test.mjs", "tests/reviewed-coverage-expansion.test.mjs", "tests/memo-path-strengthening.test.mjs", "tests/case-reasoning.test.mjs", "tests/defense-strength.test.mjs", "tests/memo-reference-language.test.mjs", "tests/inline-authorities.test.mjs", "tests/article-text-in-memos.test.mjs", "tests/memo-generation-control.test.mjs", "tests/connected-intake.test.mjs", "tests/memo-responsive-generation.test.mjs", "tests/memo-submission.test.mjs", "tests/memo-core-preserved.test.mjs"]),
++            node("memo", ["tests/assistant-classification.test.mjs", "tests/case-context-isolation.test.mjs", "tests/model-compatibility.test.mjs", "tests/text-runtime.test.mjs", "tests/text-providers.test.mjs", "tests/openrouter-errors.test.mjs", "tests/grounded-audit-excerpts.test.mjs", "tests/indirect-intake.test.mjs", "tests/procedural-position.test.mjs", "tests/memo-journey.test.mjs", "tests/payment-dialog.test.mjs", "tests/agent-pipeline.test.mjs", "tests/reviewed-coverage-expansion.test.mjs", "tests/memo-path-strengthening.test.mjs", "tests/case-reasoning.test.mjs", "tests/defense-strength.test.mjs", "tests/memo-reference-language.test.mjs", "tests/inline-authorities.test.mjs", "tests/article-text-in-memos.test.mjs", "tests/memo-generation-control.test.mjs", "tests/connected-intake.test.mjs", "tests/memo-responsive-generation.test.mjs", "tests/memo-submission.test.mjs", "tests/memo-core-preserved.test.mjs"]),
+             node("access", ["tests/management.test.mjs", "tests/analytics-consent.test.mjs", "tests/programmer-client.test.mjs", "tests/user-email-link.test.mjs", "tests/user-list-live.test.mjs", "tests/memo-ledger-recovery.test.mjs"], timeout=360),
+         ]
+     if profile == "backend":

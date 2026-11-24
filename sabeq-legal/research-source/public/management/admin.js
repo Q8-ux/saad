@@ -30,7 +30,7 @@
   try { token=sessionStorage.getItem(SESSION)||''; } catch { /* storage is checked when signing in */ }
   async function api(path,body,method,signal) {
     const requestToken=token;
-    const response=await fetch(API+path,{method:method || (body?'POST':'GET'),headers:{...(requestToken?{Authorization:'Bearer '+requestToken}:{}),...(body?{'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{}),credentials:'omit',cache:'no-store',referrerPolicy:'no-referrer',signal:signal?AbortSignal.any([signal,AbortSignal.timeout(35_000)]):AbortSignal.timeout(30_000)});
+    const response=await fetch(API+path,{method:method || (body?'POST':'GET'),headers:{...(requestToken?{Authorization:'Bearer '+requestToken}:{}),...(body?{'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{}),credentials:'omit',cache:'no-store',referrerPolicy:'no-referrer',signal:signal?AbortSignal.any([signal,AbortSignal.timeout(path==='memo-generation'?300_000:35_000)]):AbortSignal.timeout(path==='memo-generation'?300_000:30_000)});
     const data=await response.json().catch(()=>({error:'لم تصل استجابة قابلة للقراءة.'}));
     if(response.status===401 && token===requestToken && !['exchange','password-login','password-recovery-request','password-recovery-confirm'].includes(path)) {token='';manager=null;sessionStorage.removeItem(SESSION);loginScreen('انتهت الجلسة. سجّل الدخول للمتابعة.');}
     if(!response.ok)throw Error(data.error||'تعذر الاتصال بخدمة الإدارة.');
@@ -144,7 +144,7 @@
     </form>${report}</div>`);
   }
   function canReviewMemos(){return ['administrator','memo_supervisor'].includes(manager?.role);}
-  function memoExportControls() { return canReviewMemos()?'<div class="actions"><button type="button" data-memo-export="true">تصدير المذكرات للمراجعة</button></div>':''; }
+  function memoExportControls() { return canReviewMemos()?`<div class="actions">${manager?.role==='administrator'?'<button type="button" class="primary" data-memo-new="true">توليد مذكرة جديدة</button>':''}<button type="button" data-memo-export="true">تصدير المذكرات للمراجعة</button></div>`:''; }
   async function exportMemosForReview(button) {
     if(!canReviewMemos())throw Error('تصدير النصوص متاح للمشرف فقط.');
     const found=new Map(),records=[];let page=0,more=true;
@@ -271,6 +271,7 @@
     return hits.size>=2 ? '<p class="banner error" role="note">تنبيه تدقيق: تحتوي المذكرة المحفوظة على نص تشريعي مشوّه من استخراج PDF. لا يُعتمد الاقتباس كما هو؛ يجب مطابقة أصل المادة وسريان تعديلاتها، ثم مراجعة نسخة مصححة منفصلة قبل تقديمها للمحكمة. لم يُعدّل السجل الأصلي.</p>' : '';
   }
   let currentMemo=null;
+  let memoGenerationState=null;
   function editableMemoText(value, depth=0) {
     if(depth>3)return '';
     const data=savedValue(value);
@@ -296,7 +297,34 @@
     openDetail(`<h2 id="memo-detail-title" class="detail-title">التعديل ${n(row.revision)}</h2><div class="record-scroll"><section class="record-section"><h3>النص قبل التعديل${row.revision===1?' — الأصل':''}</h3><article class="record-document record-prose" dir="rtl">${memoContent(row.before_text)}</article><button data-memo-restore="${row.revision}">استخدام هذا النص في المحرر</button></section><section class="record-section"><h3>النص بعد التعديل</h3><article class="record-document record-prose" dir="rtl">${memoContent(row.after_text)}</article></section><button data-memo-history="true">العودة إلى سجل النسخ</button></div>`,true);
   }
   function memoRecord(memo) {
-    return `<header class="record-heading"><h2 id="memo-detail-title" class="detail-title">${esc(memo.client_name || 'طلب مذكرة')}</h2><p class="detail-meta">${date(memo.created_at)}${memo.case_type?` · ${esc(memo.case_type)}`:''}</p>${badge(memo.status)}${memoRevisionControls(memo)}</header><div class="record-scroll" tabindex="0" role="region" aria-label="تفاصيل الطلب والمذكرة"><section class="record-section" aria-labelledby="record-input-title"><h3 id="record-input-title">بيانات الطلب</h3>${requestDetails(memo.input_json)}</section><section class="record-section" aria-labelledby="record-output-title"><h3 id="record-output-title">المذكرة المحفوظة</h3><article class="record-document record-prose" dir="rtl" lang="ar">${memoOCRNotice(memo.output_text)}${memoContent(memo.output_text)}</article></section></div>`;
+    return `<header class="record-heading"><h2 id="memo-detail-title" class="detail-title">${esc(memo.client_name || 'طلب مذكرة')}</h2><p class="detail-meta">${date(memo.created_at)}${memo.case_type?` · ${esc(memo.case_type)}`:''}</p>${badge(memo.status)}${memoRevisionControls(memo)}${manager?.role==='administrator'&&/^[A-Za-z0-9_-]+$/.test(memo.id)&&memo.status!=='running'?'<div class="actions"><button data-memo-generate="true">مراجعة البيانات وتوليد نسخة مستقلة</button></div>':''}</header><div class="record-scroll" tabindex="0" role="region" aria-label="تفاصيل الطلب والمذكرة"><section class="record-section" aria-labelledby="record-input-title"><h3 id="record-input-title">بيانات الطلب</h3>${requestDetails(memo.input_json)}</section><section class="record-section" aria-labelledby="record-output-title"><h3 id="record-output-title">المذكرة المحفوظة</h3><article class="record-document record-prose" dir="rtl" lang="ar">${memoOCRNotice(memo.output_text)}${memoContent(memo.output_text)}</article></section></div>`;
+  }
+  async function openMemoGeneration(id) {
+    if(manager?.role!=='administrator')throw Error('التوليد متاح للمسؤول فقط.');
+    memoGenerationState=await api('memo-generation'+(id?'?id='+encodeURIComponent(id):''));
+    const state=memoGenerationState,required=new Set(['clientName','otherParty','partyRole','court','caseType','facts','requests']);
+    const controls=Object.entries(state.fieldLabels).map(([key,label])=>{
+      const value=state.fields[key]||'';
+      if(key==='documentKind')return `<label class="field"><span>${esc(label)}</span><select name="documentKind">${[['auto','تلقائي حسب الصفة والقضية'],['memorandum','مذكرة دفاع'],['claim','صحيفة دعوى'],['appeal','صحيفة استئناف']].map(([v,l])=>`<option value="${v}"${value===v?' selected':''}>${l}</option>`).join('')}</select></label>`;
+      return `<label class="field"><span>${esc(label)}</span><textarea name="${esc(key)}" rows="${['facts','requests','originalGrounds','judgmentOperative'].includes(key)?5:2}" maxlength="${key==='facts'?16000:key==='requests'?7000:5000}"${required.has(key)?' required':''}>${esc(value)}</textarea></label>`;
+    }).join('');
+    openDetail(`<header class="record-heading"><h2 id="memo-detail-title" class="detail-title">${id?'مراجعة القضية قبل التوليد':'توليد مذكرة جديدة'}</h2><p>استخدم وقائع ومستندات هذه القضية فقط. التوليد ينشئ طلباً مستقلاً، وتبقى المذكرة الأصلية محفوظة.</p></header><div class="record-scroll"><form data-form="memo-generation">${!state.context.valid?`<div role="alert" class="service-status"><p>حقول إضافية تحتاج التحقق من انتمائها لهذه القضية: ${state.context.conflictingFields.map(key=>esc(state.fieldLabels[key])).join('، ')}.</p><button type="button" data-memo-clear-conflicts="true">إفراغ الحقول الإضافية المقترحة للمراجعة</button></div>`:''}${controls}<label class="checkbox"><input type="checkbox" name="reviewed" required><span>راجعت الوقائع والأطراف والطلبات والحقول الإضافية، وكلها تخص هذه القضية وحدها.</span></label><p role="status" data-generation-status></p><div class="actions"><button class="primary" type="submit" value="generate">توليد نسخة مستقلة</button>${state.canRepair?'<button type="submit" value="repair">حفظ تصحيح المدخلات مع الأصل</button>':''}${id?'<button type="button" data-memo-current="true">العودة إلى الطلب الأصلي</button>':''}</div></form></div>`,true);
+  }
+  function memoGenerationResult(result) {
+    openDetail(`<h2 id="memo-detail-title" class="detail-title">${result.repaired?'حُفظ تصحيح المدخلات':result.hasDraft?'حُفظت المذكرة للمراجعة':result.status==='running'?'التوليد جارٍ':'يحتاج الطلب إلى مراجعة'}</h2><div class="record-scroll"><p role="status">${esc(result.error||(result.repaired?'حُفظ الأصل قبل تصحيح بيانات القضية. لم يُغير أي نص مذكرة محفوظ.':result.status==='running'?'بدأت العملية؛ تحقق من الطلب المحفوظ قبل إعادة المحاولة.':'أُنشئت نسخة مستقلة وتبقى بانتظار المراجعة القانونية.'))}</p>${result.requestId||result.id?`<button class="primary" data-memo="${esc(result.requestId||result.id)}">فتح الطلب المحفوظ</button>`:''}<button type="button" data-memo-new="true">طلب مستقل جديد</button></div>`,true);
+  }
+  async function submitMemoGeneration(form,action) {
+    const state=memoGenerationState,fields=Object.fromEntries(Object.keys(state.fieldLabels).map(key=>[key,String(form.elements.namedItem(key)?.value||'')]));
+    const buttons=Array.from(form.querySelectorAll('button'));buttons.forEach(button=>button.disabled=true);
+    const status=form.querySelector('[data-generation-status]');status.textContent=action==='repair'?'جارٍ حفظ الأصل والتصحيح…':'جارٍ التوليد ومراجعة المصادر والدفوع… قد يستغرق عدة دقائق.';
+    try {
+      const result=await api('memo-generation',{id:state.id,fields,expectedHash:state.expectedHash,operationId:state.operationId,action,reviewed:form.elements.reviewed.checked});
+      memoGenerationResult(result);
+    } catch(error) {
+      // The same operation id is retained on retry; a timeout cannot start a second draft.
+      try{const result=await api('memo-generation?operationId='+encodeURIComponent(state.operationId));memoGenerationResult(result);return;}catch{}
+      status.textContent=error.message;throw error;
+    } finally {buttons.forEach(button=>button.disabled=false);}
   }
   const memoReference=value=>typeof value==='string'&&/^[A-Za-z0-9:_-]{1,100}$/.test(value)?value:'';
   async function openMemo(id){const data=await api('memos?id='+encodeURIComponent(id));currentMemo=data.memo;openDetail(memoRecord(data.memo),true);}
@@ -338,6 +366,13 @@
       if(button.dataset.mailboxTest){mailboxData=await api('mailboxes',{action:'test'});hasMore=mailboxData.hasMore;offset=0;renderMailboxes();toast('تم اختبار التفويض وجلب الحسابات الفعلية.');}
       if(button.dataset.mailboxStatus!==undefined){const u=mailboxData.accounts[Number(button.dataset.mailboxStatus)];openDetail(`<h2 class="detail-title">${u.enabled?'إيقاف صندوق البريد':'إعادة تفعيل صندوق البريد'}</h2><p><bdi>${esc(u.email)}</bdi></p><p>يتغير دخول هذا المستخدم لدى Zoho وخدماته المرتبطة. تبقى بيانات الصندوق والعناوين والمجموعات محفوظة.</p><form data-form="mailbox-status"><input type="hidden" name="id" value="${esc(u.id)}"><input type="hidden" name="zuid" value="${esc(u.zuid)}"><input type="hidden" name="enabled" value="${u.enabled?'false':'true'}"><label class="checkbox"><input name="confirm" type="checkbox" required><span>أؤكد تغيير حالة هذا الحساب لدى المزود.</span></label><button class="primary" type="submit">تأكيد ${u.enabled?'الإيقاف':'التفعيل'}</button></form>`);}
       if(button.dataset.memoExport){const label=button.textContent;try{await exportMemosForReview(button);}finally{button.textContent=label;}}
+      if(button.dataset.memoNew)await openMemoGeneration('');
+      if(button.dataset.memoGenerate)await openMemoGeneration(currentMemo.id);
+      if(button.dataset.memoClearConflicts){
+        const form=detail.querySelector('[data-form="memo-generation"]');
+        for(const key of memoGenerationState.context.suggestedClearFields)if(form.elements.namedItem(key))form.elements.namedItem(key).value='';
+        form.elements.reviewed.checked=false;toast('أُفرغت الحقول الإضافية المقترحة في النموذج. راجعها ثم احفظ التصحيح.');
+      }
       if(button.dataset.memoEdit)editMemo();
       if(button.dataset.memoHistory)await memoHistory();
       if(button.dataset.memoVersion)await showMemoVersion(Number(button.dataset.memoVersion));
@@ -361,6 +396,7 @@
        if(kind==='password-login'){const data=await api('password-login',values);token=data.token;sessionStorage.setItem(SESSION,token);manager=data.manager;form.reset();shell();await load();await openPendingMemo();return;}
       if(kind==='sadad-reconcile'){paymentsData=await api('payments',{...values,action:'reconcile'});dialog.close();renderPayments();toast('تمت مطابقة الفاتورة والتحقق من بياناتها.');}
       if(kind==='sadad'){paymentsData=await api('payments',{...values,action:'save',publicCheckoutEnabled:form.elements.publicCheckoutEnabled.checked,required:form.elements.required.checked,accountConfirmed:form.elements.accountConfirmed.checked,callbacksConfirmed:form.elements.callbacksConfirmed.checked});renderPayments();toast('حُفظت إعدادات سداد في الخادم.');}
+      if(kind==='memo-generation'){await submitMemoGeneration(form,event.submitter?.value||'generate');return;}
       if(kind==='memo-revision'){const id=currentMemo.id;const result=await api('memo-revision',{id,text:values.text,expectedHash:currentMemo.edit.hash,expectedRevision:currentMemo.edit.revision});await openMemo(id);toast(result.unchanged?'لم يتغير النص المحفوظ.':'حُفظت النسخة المصححة مع الاحتفاظ بالأصل. تبقى بانتظار المراجعة القانونية.');}
       if(kind==='user-search'){query=String(values.q||'');memoStatus=String(values.status||'');offset=0;await load();}
       if(kind==='user-edit'){await api('users',values);dialog.close();await load();toast('حُفظت بيانات المستخدم وحدود خدماته.');}
