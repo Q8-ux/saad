@@ -34,10 +34,12 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import AppUpdates from "./AppUpdates";
+import {MAX_STORY_CHARACTERS} from "@/lib/story-limits";
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import {
   DIRECT_MEDIA_UPLOAD_BYTES,
   MAX_MEDIA_FILE_BYTES,
+  MAX_DOCUMENT_FILE_BYTES,
   MEDIA_UPLOAD_CHUNK_BYTES,
   mediaSourceMode,
 } from "@/lib/media-files";
@@ -268,6 +270,7 @@ export default function PoetryStudio() {
   const [verseEditSuccess, setVerseEditSuccess] = useState("");
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioFileInputRef = useRef<HTMLInputElement | null>(null);
+  const documentFileInputRef = useRef<HTMLInputElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const recordingBytesRef = useRef(0);
@@ -573,21 +576,25 @@ export default function PoetryStudio() {
   const extractAndAnalyzeMedia = async (file: File) => {
     const sourceMode = mediaSourceMode(file.name, file.type);
     if (!sourceMode) {
-      setError("صيغة الملف غير مدعومة. استخدم MP3 أو M4A أو WAV أو OGG أو MP4 أو WebM.");
+      setError("صيغة الملف غير مدعومة. استخدم PDF أو DOCX أو TXT أو صورة PNG أو JPG أو WebP أو ملف صوت أو فيديو.");
       return;
     }
     if (file.size === 0) {
-      setError("الملف فارغ. اختر ملفًا يحتوي على صوت واضح.");
+      setError("الملف فارغ. اختر ملفًا يحتوي على نص أو صوت واضح.");
       return;
     }
     if (file.size > MAX_MEDIA_FILE_BYTES) {
       setError("حجم الملف يتجاوز ٢٠ م.ب. اختر ملفًا أصغر أو اضغط الفيديو قبل رفعه.");
       return;
     }
+    if ((sourceMode === 'document' || sourceMode === 'image') && file.size > MAX_DOCUMENT_FILE_BYTES) {
+      setError('حد المستندات والصور وPDF هو ٨ م.ب. اختر ملفًا أصغر.');
+      return;
+    }
 
     setBusy("transcribe");
     setError("");
-    setNotice("جارٍ رفع الملف واستخراج الكلام منه…");
+    setNotice("جارٍ حفظ الملف واستخراج النص منه…");
     setMediaUploadProgress(0);
     const uploadId = crypto.randomUUID();
     const totalChunks = Math.ceil(file.size / MEDIA_UPLOAD_CHUNK_BYTES);
@@ -655,7 +662,7 @@ export default function PoetryStudio() {
           setMediaUploadProgress(Math.round(((chunkIndex + 1) / totalChunks) * 70));
         }
 
-        setNotice("اكتمل الرفع. جارٍ استخراج الكلام وتحليل المحتوى…");
+        setNotice("اكتمل الرفع. جارٍ قراءة الملف وتحليل المحتوى…");
         response = await appFetch("/api/media/process", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -673,16 +680,20 @@ export default function PoetryStudio() {
         error?: string;
         text?: string;
         submission_id?: string;
+        original_saved?: boolean;
       };
-      if (!response.ok) throw new Error(result.error || "تعذّر استخراج الكلام من الملف.");
+      if (!response.ok) {
+        if (result.original_saved) setNotice("الملف الأصلي محفوظ في أرشيفك، حتى عند تعذر القراءة أو التحليل.");
+        throw new Error(result.error || "تعذّر استخراج النص من الملف.");
+      }
       const extractedText = result.text?.trim() || "";
-      if (!extractedText) throw new Error("لم يظهر كلام واضح في الملف.");
+      if (!extractedText) throw new Error("لم يظهر نص أو كلام واضح في الملف.");
 
       setMediaUploadProgress(100);
       setStory(extractedText);
       setSubmissionId(result.submission_id || null);
       setInputMode("text");
-      setNotice("تم استخراج الكلام. جارٍ تحليل القصة تلقائيًا…");
+      setNotice("الملف الأصلي محفوظ وتم استخراج النص. جارٍ تحليل القصة تلقائيًا…");
       await analyzeStoryContent(extractedText, result.submission_id);
     } catch (requestError) {
       if (file.size > DIRECT_MEDIA_UPLOAD_BYTES) {
@@ -1214,12 +1225,12 @@ export default function PoetryStudio() {
                   className="story-textarea"
                   aria-label="اكتب قصتك"
                   aria-describedby="story-help story-count"
-                  maxLength={3000}
+                  maxLength={MAX_STORY_CHARACTERS}
                   placeholder={exampleStory}
                   value={story}
                   onChange={(event) => setStory(event.target.value)}
                 />
-                <div className="char-count" id="story-count" aria-label={`${formatCount(story.length)} حرف من أصل ٣٠٠٠`}><bdi>{formatCount(story.length)} / ٣٠٠٠</bdi></div>
+                <div className="char-count" id="story-count" aria-label={`${formatCount(story.length)} حرف من أصل ٣٠ ألف`}><bdi>{formatCount(story.length)} / ٣٠٠٠٠</bdi></div>
               </div>
               <div className="voice-panel" id="story-voice-panel" role="tabpanel" aria-labelledby="story-voice-tab" hidden={inputMode !== "voice"}>
                 <input
@@ -1271,6 +1282,14 @@ export default function PoetryStudio() {
                   رفع ملف صوت أو فيديو
                 </button>
               </div>
+
+            <div className="document-upload-row">
+              <input ref={documentFileInputRef} className="audio-file-input" type="file" accept=".pdf,.docx,.txt,.md,image/png,image/jpeg,image/webp,.png,.jpg,.jpeg,.webp" onChange={useMediaFile} tabIndex={-1} aria-label="اختر مستندًا أو صورة أو PDF" />
+              <button type="button" className="audio-file-button" onClick={() => documentFileInputRef.current?.click()} disabled={recording || busy !== null}>
+                <FileImage size={17} aria-hidden="true" /> رفع مستند أو صورة أو PDF
+              </button>
+              <p className="field-help">Word وPDF ومستند نصي وصور النصوص حتى ٨ م.ب. يُحفظ الأصل ثم يُستخرج النص لتحليله</p>
+            </div>
 
             <p className="field-help" id="story-help">
               {inputMode === "voice" ? "بعد التسجيل أو رفع الملف سنستخرج القصة ونحلّلها، ويمكنك مراجعة النص." : story.trim().length > 0 && story.trim().length < 24

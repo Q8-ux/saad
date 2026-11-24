@@ -5,6 +5,7 @@
   const frame = document.querySelector(".site-frame");
   const loader = document.querySelector(".loading-shell");
   const retryButton = document.querySelector(".retry");
+  const directLink = document.querySelector(".open-app");
   const route = document.body.dataset.appPath || "/";
   const audioBridgeChannel = "ant-alshaer-audio";
   const navigationChannel = "ant-alshaer-navigation";
@@ -149,9 +150,10 @@
       loader.classList.remove("is-slow");
       loadingTimeout = window.setTimeout(() => loader.classList.add("is-slow"), 7000);
     }
-    const target = new URL(appPath, appOrigin);
+    const target = new URL(supportedRoutes.has(appPath) ? appPath : "/", appOrigin);
     target.search = window.location.search;
     target.hash = window.location.hash;
+    if (directLink) directLink.href = target.toString();
     frame.src = target.toString();
   };
 
@@ -168,8 +170,11 @@
 
 
   const recoverRedirectedRoute = () => {
-    const storedAddress = sessionStorage.getItem("ant-alshaer-return-path");
-    sessionStorage.removeItem("ant-alshaer-return-path");
+    let storedAddress;
+    try {
+      storedAddress = sessionStorage.getItem("ant-alshaer-return-path");
+      sessionStorage.removeItem("ant-alshaer-return-path");
+    } catch { return route; }
     if (!storedAddress) return route;
     try {
       const restored = new URL(storedAddress, window.location.origin);
@@ -205,7 +210,13 @@
   frame.addEventListener("load", () => {
     if (frame.src === "about:blank") return;
     window.clearTimeout(loadingTimeout);
-    if (loader instanceof HTMLElement) loader.hidden = true;
+    // A loaded frame can be a blocked sign-in page. Only the application
+    // bridge can confirm readiness; the first-party link remains usable.
+    if (loader instanceof HTMLElement) {
+      loader.hidden = false;
+      loader.classList.add("is-slow");
+    }
+    frame.contentWindow?.postMessage({ channel: navigationChannel, type: "app-ready-check" }, appOrigin);
   });
 
   retryButton?.addEventListener("click", () => {
@@ -222,6 +233,10 @@
     if (event.origin !== appOrigin || event.source !== frame.contentWindow) return;
     if (event.data?.channel === navigationChannel) {
       syncGitHubAddress(event.data);
+      if (event.data.type === "route-changed" && supportedRoutes.has(event.data.pathname)) {
+        window.clearTimeout(loadingTimeout);
+        if (loader instanceof HTMLElement) loader.hidden = true;
+      }
       return;
     }
     if (event.data?.channel === audioBridgeChannel) {

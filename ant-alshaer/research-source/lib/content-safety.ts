@@ -45,10 +45,33 @@ export class ContentSafetyError extends Error {
 }
 
 export class ContentSafetyUnavailableError extends Error {
-  constructor() {
+  constructor(public limitKind: "quota" | "rate_limit" | null = null) {
     super("CONTENT_SAFETY_UNAVAILABLE");
     this.name = "ContentSafetyUnavailableError";
   }
+}
+
+export function aiLimitKind(error: unknown): "quota" | "rate_limit" | null {
+  if (!(error instanceof OpenAI.APIError) || error.status !== 429) return null;
+  // The upstream message is inspected in memory only, never returned or logged.
+  return /quota|credit|balance|budget|billing|spending|daily.{0,30}limit|رصيد|حصة/iu.test(error.message) ? "quota" : "rate_limit";
+}
+
+// Diagnose the provider failure without logging the story, upstream message,
+// request headers, API key or the model's private safety explanation.
+export function logSafetyFailure(error: unknown, stage: PoetrySafetyStage) {
+  const apiError = error instanceof OpenAI.APIError ? error : null;
+  const knownCodes = new Set(["invalid_api_key", "insufficient_quota", "rate_limit_exceeded", "model_not_found", "unsupported_parameter", "unsupported_value", "invalid_json_schema", "invalid_value", "unknown_parameter"]);
+  const knownParams = new Set(["model", "reasoning.effort", "max_output_tokens", "text.format", "text.format.schema", "input", "store"]);
+  console.error("poetry_safety_unavailable", {
+    stage,
+    status: apiError?.status ?? null,
+    code: apiError?.code && knownCodes.has(apiError.code) ? apiError.code : "unavailable",
+    param: apiError?.param && knownParams.has(apiError.param) ? apiError.param : null,
+    kind: error instanceof Error && error.message === "MISSING_API_KEY" ? "missing_key" : apiError ? "provider_error" : "unavailable",
+    limitKind: aiLimitKind(error),
+  });
+  return aiLimitKind(error);
 }
 
 function normalizedArabic(value: string) {
@@ -70,8 +93,7 @@ function combineSafetyText(parts: readonly unknown[]) {
   return parts
     .filter((part) => part !== undefined && part !== null && part !== "")
     .map((part) => (typeof part === "string" ? part : JSON.stringify(part)))
-    .join("\n\n")
-    .slice(0, 14_000);
+    .join("\n\n");
 }
 
 export async function assertSafePoetryContent(
@@ -80,6 +102,7 @@ export async function assertSafePoetryContent(
   stage: PoetrySafetyStage,
 ) {
   const content = combineSafetyText(parts);
+  if (content.length > 100_000) throw new ContentSafetyUnavailableError();
   const localDecision = localSafetyDecision(content);
   if (localDecision !== "needs_context") throw new ContentSafetyError(localDecision);
 
@@ -117,10 +140,10 @@ ${POETRY_SAFETY_POLICY_AR}
     result = response.output_parsed;
   } catch (error) {
     if (error instanceof ContentSafetyError) throw error;
-    throw new ContentSafetyUnavailableError();
+    throw new ContentSafetyUnavailableError(logSafetyFailure(error, stage));
   }
 
-  if (!result) throw new ContentSafetyUnavailableError();
+  if (!result) { logSafetyFailure(null, stage); throw new ContentSafetyUnavailableError(); }
   if (result.decision !== "allow" || result.category !== "allowed") {
     throw new ContentSafetyError(result.category);
   }
@@ -138,6 +161,10 @@ export function contentSafetyErrorResponse(error: unknown) {
     );
   }
   if (error instanceof ContentSafetyUnavailableError) {
+    if (error.limitKind) return Response.json({
+      code: error.limitKind === "quota" ? "AI_QUOTA_EXCEEDED" : "AI_RATE_LIMITED",
+      error: error.limitKind === "quota" ? "خدمة الذكاء الاصطناعي استنفدت حصة الاستخدام. يلزم تفعيل رصيد الخدمة لاستكمال التحليل. النص ما زال في خانة الكتابة." : "خدمة الذكاء الاصطناعي وصلت إلى حد الطلبات مؤقتًا. انتظر قليلًا ثم أعد المحاولة؛ النص ما زال في خانة الكتابة.",
+    }, {status:429});
     return Response.json(
       {
         code: "CONTENT_SAFETY_UNAVAILABLE",

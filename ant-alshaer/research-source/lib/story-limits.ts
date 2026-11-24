@@ -1,0 +1,1 @@
+export const MAX_STORY_CHARACTERS = 30_000;

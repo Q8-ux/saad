@@ -2047,3 +2047,5 @@ button { -webkit-tap-highlight-color: transparent; }
 .footer-contact-link { min-height: 44px; }
 
 .app-update-notice { position: fixed; z-index: 100; bottom: 16px; inset-inline: 16px; margin-inline: auto; max-width: 580px; padding: 12px 18px; border: 1px solid #a69572; border-radius: 14px; background: #f6f0e4; color: #263f36; text-align: center; font: inherit; box-shadow: 0 4px 20px #0002; }
+
+.document-upload-row{display:grid;gap:.4rem;margin-top:1rem}.document-upload-row .audio-file-button{margin-inline:0}.document-upload-row .field-help{margin:0}

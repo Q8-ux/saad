@@ -18,6 +18,7 @@ export type RuntimeBindings = {
   OPENAI_POETRY_MODEL?: string;
   OPENAI_SAFETY_MODEL?: string;
   OPENAI_TRANSCRIBE_MODEL?: string;
+  OPENAI_DOCUMENT_MODEL?: string;
   MASAR_API_URL?: string;
   MASAR_ANT_ALSHAER_TOKEN?: string;
   POETRY_AI_PROVIDER?: string;

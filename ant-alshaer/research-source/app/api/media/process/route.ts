@@ -10,6 +10,7 @@ import {
   safeMediaFilename,
 } from "@/lib/media-files";
 import { transcribeMedia, transcriptionErrorResponse } from "@/lib/media-transcription";
+import {extractStoryDocument,documentTextErrorResponse} from '@/lib/document-text';
 import type { UserRecord } from "@/db/schema";
 
 export const runtime = "edge";
@@ -26,6 +27,7 @@ export async function POST(request: Request) {
   let activeUser: UserRecord | null = null;
   let activeSubmissionId: string | undefined;
   let cleanupKeys: string[] = [];
+  let documentInput = false;
   try {
     activeUser = await requireAppUser();
     const body = (await request.json()) as ProcessBody;
@@ -35,6 +37,7 @@ export async function POST(request: Request) {
     const totalChunks = Number(body.total_chunks || 0);
     const totalSize = Number(body.total_size || 0);
     const sourceMode = mediaSourceMode(filename, contentType);
+    documentInput = sourceMode === 'document' || sourceMode === 'image';
 
     if (
       !isValidUploadId(uploadId) ||
@@ -70,12 +73,12 @@ export async function POST(request: Request) {
     const saved = await saveMediaSubmission(activeUser, { file: mediaFile, sourceMode });
     activeSubmissionId = saved.submissionId;
 
-    const text = await transcribeMedia(mediaFile);
+    const text = documentInput ? await extractStoryDocument(mediaFile) : await transcribeMedia(mediaFile);
     if (!text) {
       return Response.json({ code: "NO_SPEECH_DETECTED", error: "لم يظهر كلام واضح في الملف. جرّب ملفًا بصوت أوضح." }, { status: 422 });
     }
     await saveTranscription(activeUser.id, activeSubmissionId, text);
-    return Response.json({ text, submission_id: activeSubmissionId });
+    return Response.json({ text, submission_id: activeSubmissionId, original_saved:true });
   } catch (error) {
     if (activeUser && activeSubmissionId) {
       await markSubmissionFailed(activeUser.id, activeSubmissionId).catch(() => undefined);
@@ -89,7 +92,9 @@ export async function POST(request: Request) {
     ) {
       return appErrorResponse(error);
     }
-    return transcriptionErrorResponse(error);
+    const response = documentInput ? documentTextErrorResponse(error) : transcriptionErrorResponse(error);
+    const data = await response.json() as Record<string,unknown>;
+    return Response.json({...data, ...(activeSubmissionId ? {submission_id:activeSubmissionId,original_saved:true} : {})}, {status:response.status});
   } finally {
     if (cleanupKeys.length) {
       await getBucket().delete(cleanupKeys).catch(() => undefined);

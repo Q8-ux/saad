@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import {MAX_STORY_CHARACTERS} from '@/lib/story-limits';
 import { parsePoetryResponse } from "@/lib/free-llm";
 import { zodTextFormat } from "openai/helpers/zod";
 import { z } from "zod";
@@ -130,7 +131,7 @@ const PoemSchema = DraftSchema.extend({
 const RequestSchema = z.object({
   mode: z.enum(["analyze", "generate", "revise"]),
   submission_id: z.string().uuid().optional(),
-  story: z.string().min(24).max(3000),
+  story: z.string().min(24).max(MAX_STORY_CHARACTERS),
   analysis: AnalysisInputSchema.optional(),
   answers: z.record(z.string(), z.string()).optional(),
   current_poem: PoemSchema.optional(),
