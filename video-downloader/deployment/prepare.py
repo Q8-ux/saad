@@ -37,9 +37,7 @@ def overlay(root, source):
     if not entry.is_file() or 'video-downloader-web-20261124' not in entry.read_text():
         raise RuntimeError("Video downloader release is incomplete")
     protected = manifest(root)
-    if (root / TARGET).exists():
-        shutil.rmtree(root / TARGET)
-    (root / TARGET).mkdir(parents=True)
+    (root / TARGET).mkdir(parents=True, exist_ok=True)
     shutil.copyfile(source / "index.html", root / TARGET / "index.html")
     (root / TARGET / "release-version.txt").write_text(os.environ.get("GITHUB_SHA", "local") + "\n")
     if manifest(root) != protected:
@@ -97,4 +95,3 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--add-to-build", action="store_true")
     prepare(parser.parse_args().add_to_build)
-

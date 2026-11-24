@@ -20,10 +20,14 @@ class PublicationTests(unittest.TestCase):
             (source / 'index.html').write_text('video-downloader-web-20261124')
             (source / 'app.py').write_text('private backend source')
             (source / '.env').write_text('test-only placeholder')
+            (root / 'video-downloader').mkdir()
+            apk = root / 'video-downloader/Video-Hub-Android.apk'
+            apk.write_bytes(b'PK existing public APK')
             before = manifest(root)
             overlay(root, source)
             self.assertEqual(manifest(root), before)
-            self.assertEqual(sorted(p.name for p in (root / 'video-downloader').iterdir()), ['index.html', 'release-version.txt'])
+            self.assertEqual(sorted(p.name for p in (root / 'video-downloader').iterdir()), ['Video-Hub-Android.apk', 'index.html', 'release-version.txt'])
+            self.assertEqual(apk.read_bytes(), b'PK existing public APK')
 
     def test_incomplete_release_is_rejected_before_modifying_published_files(self):
         with tempfile.TemporaryDirectory() as temporary:

@@ -15,7 +15,7 @@ The GitHub Pages frontend preconfigures the Railway HTTPS origin and detects the
 
 The combined Pages build omitted `video-downloader`, returning HTTP 404 even while the Railway service was healthy. The web UI also used only private endpoints after public download mode had already been enabled for Android.
 
-`deploy-video-downloader.yml` now restores the last successfully published Pages artifact, changes only this site's static entry, checks all other file hashes, and verifies the live release SHA. The combined Pages workflow also includes this entry so later releases preserve it. Backend source, Android binaries, tests and configuration are excluded from the static package. Existing server authentication and public quotas are unchanged.
+`publish-video-downloader.yml` now restores the last successfully published Pages artifact, changes only this site's static entry, checks all other file hashes, and verifies the live release SHA. The combined Pages workflow also includes this entry so later releases preserve it. Backend source, Android source code, tests and configuration are excluded from the static package; any previously published APK mirror is preserved. Existing server authentication and public quotas are unchanged.
 
 Checks: `node --test video-downloader/tests/frontend.test.cjs` and `python -m unittest discover -s video-downloader/deployment -p 'test_*.py' -v`.
 
