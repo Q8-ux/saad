@@ -2,8 +2,12 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createStudioWorks} from '../assets/studio-works.mjs';
 
-function createHarness(startUrl) {
+function createHarness(startUrl, options = {}) {
   const originalWindow = globalThis.window;
+  const originalStorage = Object.getOwnPropertyDescriptor(globalThis, "localStorage");
+  const cache = new Map(Object.entries(options.cache || {}));
+  const storage = {getItem:key=>cache.get(key)||null,setItem:(key,value)=>cache.set(key,value)};
+  Object.defineProperty(globalThis,"localStorage",{configurable:true,value:storage});
   let href = startUrl;
   globalThis.window = {
     location: {get href() {return href;}},
@@ -40,8 +44,8 @@ function createHarness(startUrl) {
       });
     },
   };
-  const account = {id:'owner',username:'saad'};
-  const savedWorks = [
+  const account = options.account || {id:'owner',username:'saad'};
+  const savedWorks = options.projects || [
     {id:'barcode',title:'باركود',kind:'series',archivedAt:null},
     {id:'outside-story',title:'خارج الستوري',kind:'series',archivedAt:null},
   ];
@@ -65,6 +69,8 @@ function createHarness(startUrl) {
     return [node, ...(node.children||[]).flat(Infinity).flatMap(descendants)];
   }
   function finish() {
+    if(originalStorage)Object.defineProperty(globalThis,"localStorage",originalStorage);
+    else delete globalThis.localStorage;
     for(const entry of hooks) if(entry?.cleanup) entry.cleanup();
     if (originalWindow === undefined) delete globalThis.window;
     else globalThis.window = originalWindow;
@@ -108,4 +114,31 @@ test('a direct entry without work query also opens Works first', async () => {
   } finally {
     h.finish();
   }
+});
+
+
+test('an explicit writing link opens only the requested authenticated work', async()=>{
+ const h=createHarness('https://q8-ux.github.io/saad/family-online-studio/?view=writer&work=outside-story');
+ try{h.render();await new Promise(r=>setTimeout(r,0));const editor=h.render();assert.equal(editor.type,h.Studio);assert.equal(editor.props.requestedWork,'outside-story');assert.equal(h.requests.length,1);assert.equal(h.requests[0].method,'GET');editor.props.onWorks();h.render();assert.equal(new URL(h.href).searchParams.has('view'),false);}finally{h.finish();}
+});
+test('writing entry offers a compact work selector without opening the file archive', async()=>{
+ const h=createHarness('https://q8-ux.github.io/saad/family-online-studio/?view=writer');
+ try{h.render();await new Promise(r=>setTimeout(r,0));h.render();assert.ok(h.descendants().some(n=>n.type==='h1'&&n.children.includes('صفحة الكتابة')));assert.ok(!h.descendants().some(n=>n.type==='nav'||n.type==='strong'));const chooser=h.descendants().find(n=>n.type==='select'&&n.props.id==='writer-work');assert.ok(chooser);chooser.props.onChange({target:{value:'outside-story'}});const editor=h.render();assert.equal(editor.type,h.Studio);assert.equal(editor.props.requestedWork,'outside-story');}finally{h.finish();}
+});
+test('writing entry restores the last chosen work of this account only',async()=>{
+ const h=createHarness('https://q8-ux.github.io/saad/family-online-studio/?view=writer',{cache:{'fo-studio-last-writer:owner':'outside-story','fo-studio-last-writer:other':'barcode'}});
+ try{h.render();await new Promise(r=>setTimeout(r,0));const editor=h.render();assert.equal(editor.type,h.Studio);assert.equal(editor.props.requestedWork,'outside-story');}finally{h.finish();}
+});
+test('a foreign or archived writing target does not silently open another work',async()=>{
+ for(const work of ['foreign-project','archived-project']){
+  const h=createHarness('https://q8-ux.github.io/saad/family-online-studio/?view=writer&work='+work,{projects:[{id:'own-project',title:'عمل الحساب',archivedAt:null},{id:'archived-project',title:'أرشيف',archivedAt:'2026-01-01'}],cache:{'fo-studio-last-writer:owner':'own-project'}});
+  try{h.render();await new Promise(r=>setTimeout(r,0));assert.equal(h.render().type,'main');assert.ok(h.descendants().some(n=>n.props.role==='alert'));assert.ok(!h.descendants().some(n=>n.type==='option'&&n.props.value==='archived-project'));assert.equal(h.requests.length,1);}finally{h.finish();}
+ }
+});
+test('a sole accessible project opens from the writing link while ordinary entry still opens Works',async()=>{
+ const options={projects:[{id:'only-work',title:'عمل واحد',archivedAt:null}],cache:{'fo-studio-last-writer:other':'foreign'}};
+ for(const intent of [true,false]){
+  const h=createHarness('https://q8-ux.github.io/saad/family-online-studio/'+(intent?'?view=writer':''),options);
+  try{h.render();await new Promise(r=>setTimeout(r,0));const page=h.render();assert.equal(page.type,intent?h.Studio:'main');if(intent)assert.equal(page.props.requestedWork,'only-work');}finally{h.finish();}
+ }
 });

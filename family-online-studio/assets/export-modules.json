@@ -2,7 +2,7 @@
   "initial": [
     {
       "file": "assets/app.mjs",
-      "bytes": 272646
+      "bytes": 272640
     },
     {
       "file": "assets/chunks/chunk-3MNS2YWJ.mjs",
@@ -241,6 +241,18 @@
     {
       "file": "assets/chunks/delivery-studio-delivery-KNLCL4OP.mjs",
       "bytes": 6593
+    },
+    {
+      "file": "assets/login.mjs",
+      "bytes": 8375
+    },
+    {
+      "file": "assets/studio-works.mjs",
+      "bytes": 39051
+    },
+    {
+      "file": "assets/writer-entry.mjs",
+      "bytes": 1478
     }
   ]
 }

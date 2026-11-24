@@ -1,5 +1,6 @@
 import {saveOriginalFile,saveExtractedText,recordExtractionFailure,linkStoredAttachment,readStoredOriginal,readableImportedSource} from './studio-file-store.mjs?v=20261118-recovery1';
 import {createSavedAttachmentsView} from './studio-file-archive.mjs?v=20261118-recovery1';
+import {resolveWriterEntry,readWriterChoice,rememberWriterChoice} from './writer-entry.mjs?v=20261124-writer1';
 import { importManuscriptFile, parseManuscriptText, normalizeSpokenManuscript, prepareImportedDocument, summarizeImportedDocument } from './manuscript-import.mjs?v=20261117-voice1';
 
 const kinds = {
@@ -36,6 +37,7 @@ export function createStudioWorks({ React, Studio }) {
     const [verified, setVerified] = React.useState(null);
     const [projects, setProjects] = React.useState(null);
     const [active, setActive] = React.useState(null);
+    const [writerEntry, setWriterEntry] = React.useState(() => new URL(window.location.href).searchParams.get('view') === 'writer');
     const [tab, setTab] = React.useState('works');
     const [error, setError] = React.useState('');
     const [notice, setNotice] = React.useState('');
@@ -87,10 +89,11 @@ export function createStudioWorks({ React, Studio }) {
 
     function choose(id) {
       const url = new URL(window.location.href);
-      if (id) url.searchParams.set('work', id);
-      else url.searchParams.delete('work');
+      if (id) { url.searchParams.set('work', id); rememberWriterChoice(account.id, id); }
+      else { url.searchParams.delete('work'); url.searchParams.delete('view'); }
       window.history.replaceState(null, '', url.pathname + url.search + url.hash);
       setDeleteTarget(null);
+      setWriterEntry(false);
       setActive(id);
     }
 
@@ -385,9 +388,17 @@ export function createStudioWorks({ React, Studio }) {
       request(null, controller.signal).then(result => {
         if (controller.signal.aborted) return;
         applyCatalogue(result);
-        // The authenticated entry always starts at "أعمالي", even when an
-        // old link or a previous editor session left a ?work= parameter.
         const landing = new URL(window.location.href);
+        const entry = resolveWriterEntry(landing.href, result.projects, readWriterChoice(account.id));
+        if (entry.mode === 'writer') { choose(entry.workId); return; }
+        if (entry.mode === 'choose') {
+          setWriterEntry(true);
+          if (entry.error) setError(entry.error);
+          return;
+        }
+        // Ordinary entry still starts at أعمالي. Only an explicit writing link
+        // restores a previously chosen, currently accessible manuscript.
+        setWriterEntry(false);
         if (landing.searchParams.has('work')) {
           landing.searchParams.delete('work');
           window.history.replaceState(null, '', landing.pathname + landing.search + landing.hash);
@@ -430,6 +441,26 @@ export function createStudioWorks({ React, Studio }) {
       onSelectedWork: id => { if (typeof id === 'string' && id.trim()) choose(id); },
       onWorks: () => { choose(null); setReload(value => value + 1); },
     });
+
+    if (writerEntry) return h('main', {className:'studio-workspaces',dir:'rtl'},
+      h('header',{className:'workspace-header'},
+        h('h1',null,'صفحة الكتابة'),
+        h('div',{className:'workspace-account'},
+          (verified?.username || account.username) && h('bdi',null,verified?.username || account.username),
+          h('button',{type:'button',className:'workspace-sign-out',onClick:onSignOut},'تسجيل الخروج'))),
+      error && h('p',{role:'alert'},error),
+      !projects && h('p',{role:'status'},error?'تعذر تحميل الأعمال. أعد المحاولة.':'جارٍ فتح صفحة الكتابة…'),
+      !projects && error && h('button',{type:'button',onClick:()=>setReload(value=>value+1)},'إعادة المحاولة'),
+      projects && h('section',{'aria-label':'اختيار العمل للكتابة'},
+        h('p',null,'اختر عملك لفتح محرر الكتابة مباشرة'),
+        h('label',{htmlFor:'writer-work'},'العمل'),
+        h('select',{id:'writer-work',value:'',onChange:event=>{
+          const id=event.target.value;
+          if(projects.some(work=>work.id===id&&!work.archivedAt&&!work.deletedAt))choose(id);
+        }},h('option',{value:'',disabled:true},'اختر اسم العمل'),
+          projects.filter(work=>!work.archivedAt&&!work.deletedAt).map(work=>h('option',{key:work.id,value:work.id},work.title))),
+        !projects.some(work=>!work.archivedAt&&!work.deletedAt) && h('p',null,'لا يوجد عمل متاح للكتابة في هذا الحساب.'),
+        h('button',{type:'button',className:'workspace-primary',onClick:()=>{choose(null);setNewWork(true);}},'إنشاء عمل جديد')));
 
     const archive = tab === 'archive';
     const visible = projects?.filter(work => Boolean(work.archivedAt) === archive) ?? [];
@@ -574,4 +605,3 @@ export function createStudioWorks({ React, Studio }) {
         : h('p', { className: 'workspace-empty' }, archive ? 'أرشيفك فارغ.' : 'ابدأ بإضافة أول عمل.')));
   };
 }
-
