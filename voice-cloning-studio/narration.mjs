@@ -17,9 +17,9 @@ export function prepareNarration(sourceText, mode = 'qisas-msa') {
   let speechText = sourceText.replace(/\r\n?/g, '\n').trim();
   const pronunciationEdits = [];
   for (const [word, spoken] of pronunciations) {
-    const pattern = new RegExp(`(?<![\\p{L}\\p{M}\\p{N}_])${word}(?![\\p{L}\\p{M}\\p{N}_])`, 'gu');
+    const pattern = new RegExp(`(?<![\\p{L}\\p{M}\\p{N}_])([وف]?[بكل]?)${word}(?![\\p{L}\\p{M}\\p{N}_])`, 'gu');
     let count = 0;
-    speechText = speechText.replace(pattern, () => {count += 1; return spoken;});
+    speechText = speechText.replace(pattern, (_match, prefix) => {count += 1; return prefix + spoken;});
     if (count) pronunciationEdits.push({word, spoken, count});
   }
   return {

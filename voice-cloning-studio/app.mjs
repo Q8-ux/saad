@@ -1,6 +1,6 @@
 import {validateReferenceFile,prepareFileReference,maxReferenceSeconds} from './reference.mjs';
 import {initI18n,translate as t,getUILocale} from './i18n.mjs?v=1.5.0';
-import {initLocalClone,refreshCloneReferences,selectCloneReference,setCloneText} from './local-clone-page.mjs?v=1.5.1';
+import {initLocalClone,refreshCloneReferences,selectCloneReference,setCloneText} from './local-clone-page.mjs?v=1.5.2';
 import {MediaAPI,videoId,embedURL,getDeviceVoices,speakDevice} from './media.mjs';
 import {VoiceboxAPI,APIError,validateBase} from './api.mjs';
 import {localDB,download,blobToDataURL,dataURLToBlob,safeName} from './storage.mjs';

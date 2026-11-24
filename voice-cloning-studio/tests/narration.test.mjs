@@ -18,7 +18,7 @@ test('speech copy preserves approved words, negation, numbers and event order', 
 test('limited name pronunciation is idempotent and does not touch other words', () => {
   const original = 'شمشوني وشمشون شَمْشُون دَلِيلَة دليل دليلة';
   const first = prepareNarration(original);
-  assert.equal(first.speechText, 'شمشوني وشمشون شَمْشُون دَلِيلَة دليل دَلِيلَة');
+  assert.equal(first.speechText, 'شمشوني وشَمْشُون شَمْشُون دَلِيلَة دليل دَلِيلَة');
   assert.equal(prepareNarration(first.speechText).speechText, first.speechText);
 });
 
@@ -35,4 +35,11 @@ test('Kuwaiti narration retains dialect and confines any rewrite to a separate b
 test('reject invalid input before model load', () => {
   for (const value of ['', '  ', null, 15, 'ن'.repeat(2001)]) assert.throws(() => prepareNarration(value));
   assert.throws(() => prepareNarration('نص', '__proto__'));
+});
+
+test('Arabic conjunctions and prepositions retain their letters while names receive pronunciation marks', () => {
+  const original = 'ودليلة ولشمشون فبشمشون كدليلة شمشوني دليل';
+  const plan = prepareNarration(original);
+  assert.equal(plan.speechText, 'ودَلِيلَة ولشَمْشُون فبشَمْشُون كدَلِيلَة شمشوني دليل');
+  assert.equal(letters(plan.speechText), original);
 });

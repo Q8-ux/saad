@@ -1,7 +1,7 @@
 import {decodeAudio, encodeWav, formatTime} from './audio.mjs';
 import {localDB, download, safeName} from './storage.mjs';
 import {validateReferenceFile, referenceBounds, maxReferenceSeconds} from './reference.mjs';
-import {prepareNarration, narrationBrief, narrationDownload, narrationModes} from './narration.mjs?v=1.5.1';
+import {prepareNarration, narrationBrief, narrationDownload, narrationModes} from './narration.mjs?v=1.5.2';
 import {getUILocale} from './i18n.mjs?v=1.5.0';
 
 const $ = id => document.getElementById(id);
