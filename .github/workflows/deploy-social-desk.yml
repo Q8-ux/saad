@@ -33,7 +33,9 @@ jobs:
         run: |
           node --check social-desk/app.js
           node --check social-desk/core.mjs
-          node --test social-desk/tests/*.test.mjs
+          node --check social-desk/cloud.mjs
+          node --check social-desk/server/index.mjs
+          node --test social-desk/tests/*.test.mjs social-desk/server-tests/*.test.mjs
       - uses: actions/configure-pages@v5
       - name: Preserve published projects and add social desk
         env:
@@ -79,4 +81,3 @@ jobs:
       - name: Deploy
         id: deploy
         uses: actions/deploy-pages@v4
-

@@ -94,7 +94,7 @@ def overlay(destination,base_run):
     if target.exists():
         shutil.rmtree(target)
     target.mkdir(parents=True)
-    for name in ["index.html", "styles.css", "app.js", "core.mjs"]:
+    for name in ["index.html", "styles.css", "app.js", "core.mjs", "cloud.mjs"]:
         shutil.copy2(SOURCE/name, target/name)
     shutil.copytree(SOURCE/"assets", target/"assets")
     if not (target/'index.html').is_file():

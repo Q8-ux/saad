@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {freshState,newCampaign,localDraft,normalizeOutput,approveEdit,scheduleKuwait,validateState,exportState,safeUrl,gatewayUrl,designSvg,kuwaitInput,metrics} from '../core.mjs';
+import {freshState,newCampaign,normalizeOutput,approveEdit,scheduleKuwait,validateState,exportState,safeUrl,gatewayUrl,designSvg,kuwaitInput,metrics} from '../core.mjs';
 
 const brief={topic:'حملة عربية',brand:'مشروعي',platform:'إنستغرام',goal:'زيادة التفاعل',tone:'عربية واضحة',facts:'معلومة راجعها صاحب المشروع'};
-const make=()=>({...newCampaign(brief,'campaign-1','2026-11-24T09:00:00.000Z'),output:localDraft(brief)});
+const make=()=>({...newCampaign(brief,'campaign-1','2026-11-24T09:00:00.000Z'),output:{hook:brief.topic,body:brief.facts,cta:'شاركنا رأيك',hashtags:'#عربي'}});
 
 test('A campaign must be approved before a local publishing time can be saved',()=>{
   const c=make();assert.throws(()=>scheduleKuwait(c,'2026-11-25T12:00',Date.parse('2026-11-24T09:00Z')),/اعتمده/);
@@ -28,7 +28,7 @@ test('Backup import cannot bypass approval or invent published analytics',()=>{
 });
 test('Backups preserve campaigns but omit gateway configuration and credentials',()=>{
   const state={...freshState(),campaigns:[make()],settings:{mode:'gateway',gateway:'https://example.com/private-webhook'}};
-  const data=exportState(state);assert.equal(data.campaigns.length,1);assert.deepEqual(data.settings,{mode:'local',gateway:''});
+  const data=exportState(state);assert.equal(data.campaigns.length,1);assert.deepEqual(data.settings,{mode:'live',gateway:''});
 });
 test('Malformed and duplicate imported campaign IDs are rejected',()=>{
   const state=freshState();assert.throws(()=>validateState({...state,version:300}));
@@ -42,10 +42,6 @@ test('Source links and gateway links do not accept script URLs, embedded credent
 test('Server failure cannot be mistaken for successful content generation',()=>{
   for(const response of [{},{message:'success'},{hook:'x',body:''},null])assert.throws(()=>normalizeOutput(response));
   assert.equal(normalizeOutput({hook:'عنوان',body:'نص',hashtags:['#عربي','#مشروع']}).hashtags,'#عربي #مشروع');
-});
-test('Local writing preserves supplied facts without adding research claims',()=>{
-  const out=localDraft(brief);assert.equal(out.body,brief.facts);assert.ok(out.cta.includes('شاركنا'));
-  const noFacts=localDraft({...brief,facts:''});assert.ok(noFacts.body.includes('سؤال'));assert.ok(!noFacts.body.includes('دراسة'));
 });
 test('Exported Arabic SVG keeps user content as text and escapes markup',()=>{
   const c=make();c.output.hook='<script>alert(1)</script> عنوان عربي';

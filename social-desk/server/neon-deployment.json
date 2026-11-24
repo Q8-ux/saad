@@ -1,0 +1,1 @@
+{"project_id":"blue-glade-82998856","branch_id":"br-small-firefly-bg6hh3qv","function_slug":"socialdesk","region":"aws-eu-central-1","runtime":"nodejs24","database":"PostgreSQL","secrets":"Runtime environment and encrypted social_config; never in source"}

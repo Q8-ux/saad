@@ -1,0 +1,8 @@
+server/node_modules/
+dist/
+.openai/
+.env*
+*.zip
+*.log
+__pycache__/
+build/

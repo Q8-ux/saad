@@ -12,3 +12,5 @@
 /* Legible secondary Arabic text on the light pastel panels. */
 .eyebrow,.identity-meta,.header-metrics span,.rail-heading span:last-child,.agent-tools,.agent-task,.agent-status,.rail-note,.tiny-label,.pipeline-breadcrumb,.canvas-caption,.idea-cloud span,.node-state,.canvas-coordinate,.workflow-state span:last-child,.post-account small,.post-platform,.post-text,.post-hashtags,.terminal-label,.terminal-row time,.terminal-row p,.terminal-footer,.tool-purpose,.tools-footnote,.campaign-row small,.recent-empty,.section-intro p,.card-meta,.content-card p,.calendar-weekday,.report-card span,.no-analytics p,.optional,.form-note,.editor-counter,.app-footer{color:#71647d}
 input::placeholder,textarea::placeholder{color:#796781}.owner-card p{color:#7b6740}.canvas-caption{max-width:calc(100% - 44px);overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.canvas-caption span{overflow:hidden;text-overflow:ellipsis}
+
+@media(max-width:560px){.button,.button.compact,.run-buttons .button,.preview-actions .button,.preview-actions .icon-button,.icon-button,.tab{min-height:44px}.agent-status{font-size:8px}.agent-head>span:last-child{min-width:0}}
