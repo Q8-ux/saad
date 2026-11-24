@@ -719,5 +719,20 @@
   "clone_unsaved": "Der Clip ist zum Download bereit. Er konnte nicht im Verlauf gespeichert werden.",
   "clone_silent": "Die Probe ist fast stumm. Wähle einen Abschnitt mit deutlicher Sprache.",
   "clone_settings": "Stimmenklonen im Browser, Transkription über eine verbundene Engine",
-  "clone_media_note": "Bereite die Probe hier vor und nutze sie zum lokalen Klonen oder für ein Profil auf deinem Server."
+  "clone_media_note": "Bereite die Probe hier vor und nutze sie zum lokalen Klonen oder für ein Profil auf deinem Server.",
+  "qisas_narration_1": "Erzählvoreinstellung",
+  "qisas_narration_2": "Originaltext",
+  "qisas_narration_3": "قصص و روايات — Hocharabische Erzählung",
+  "qisas_narration_4": "قصص و روايات — Kuwaitischer Dialog",
+  "qisas_narration_5": "Die gewählte Stimmprobe bleibt unverändert. Der Originaltext bleibt erhalten; eine separate Sprechfassung erhält gezielte Aussprachezeichen für Namen.",
+  "qisas_narration_6": "Sprechtext vorbereiten",
+  "qisas_narration_7": "Überarbeitungsauftrag anzeigen",
+  "qisas_narration_8": "Sprachplan herunterladen",
+  "qisas_narration_9": "Sprechfassung",
+  "qisas_narration_10": "Überarbeitungsauftrag",
+  "qisas_narration_11": "Der Sprechtext ist bereit. Prüfen Sie die Namen und hören Sie das Ergebnis auf Tonfall und Aussprache ab.",
+  "qisas_narration_12": "Geben Sie zuerst den Erzähltext ein.",
+  "qisas_narration_13": "Wählen Sie eine unterstützte Erzählvoreinstellung.",
+  "qisas_narration_14": "Teilen Sie den Text in Abschnitte mit höchstens 2000 Zeichen.",
+  "qisas_narration_15": "Bereiten Sie zuerst den Text vor."
 }

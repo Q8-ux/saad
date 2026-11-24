@@ -92,6 +92,16 @@
         <div class="panel-heading"><h2 id="clone-text-heading">النص الجديد</h2></div>
         <label class="sr-only" for="clone-text">النص المراد توليده</label>
         <textarea id="clone-text" dir="auto" rows="8" maxlength="2000" placeholder="اكتب النص الذي تريد سماعه…" required></textarea>
+        <div class="clone-stack narration-preparation">
+          <label for="clone-narration-mode">إعداد التعليق<select id="clone-narration-mode"><option value="original">النص الأصلي</option><option value="qisas-msa">قصص و روايات — تعليق فصيح</option><option value="qisas-kuwaiti">قصص و روايات — حوار كويتي</option></select></label>
+          <div id="clone-narration-tools" class="clone-stack" hidden>
+            <p class="field-note">تبقى العيّنة الصوتية كما اخترتها. تُحفظ نسخة النص الأصلية ويُضاف تشكيل محدود للأسماء في نسخة النطق.</p>
+            <div class="button-group"><button type="button" id="clone-prepare-narration" class="button secondary small">تهيئة نص النطق</button><button type="button" id="clone-narration-brief-button" class="button ghost small">عرض طلب تحسين السرد</button><button type="button" id="clone-narration-plan" class="button ghost small">تنزيل خطة الصوت</button></div>
+            <label for="clone-speech-preview">نسخة النطق<textarea id="clone-speech-preview" dir="auto" rows="4" readonly></textarea></label>
+            <label id="clone-narration-brief-label" for="clone-narration-brief" hidden>طلب تحسين السرد<textarea id="clone-narration-brief" dir="auto" rows="6" readonly></textarea></label>
+            <p id="clone-narration-status" class="field-note" role="status"></p>
+          </div>
+        </div>
         <p class="field-note">يتطلّب التشغيل الأول تنزيل نحو 290 ميغابايت من ملفات النموذج. تبقى العيّنة والنص على جهازك.</p>
         <div class="button-group">
           <button id="clone-submit" class="button primary" type="submit" disabled><svg aria-hidden="true"><use href="#i-spark"/></svg>ولّد بالصوت المنسوخ</button>
@@ -155,5 +165,5 @@
 <dialog id="text-assist-dialog"><div class="dialog-header"><h2>مراجعة النص المقترح</h2><button class="icon-btn" data-close-dialog aria-label="إغلاق"><svg><use href="#i-x"/></svg></button></div><p>راجع المعنى والأسماء والأرقام قبل اعتماد أي صياغة.</p><label>النص المقترح<textarea dir="auto" id="assisted-text" rows="8"></textarea></label><div class="dialog-actions"><button class="button secondary" data-close-dialog>إلغاء</button><button class="button primary" id="apply-assisted-text">استخدم النص</button></div></dialog>
 <input id="profile-import-file" type="file" accept=".zip" hidden><input id="project-import-file" type="file" accept=".json,.voiceproject,application/json" hidden><input id="backup-import-file" type="file" accept=".json,application/json" hidden>
 <div id="toasts" class="toast-stack" aria-live="polite" aria-atomic="false"></div>
-<script type="module" src="app.mjs?v=1.5.0"></script>
+<script type="module" src="app.mjs?v=1.5.1"></script>
 </body></html>

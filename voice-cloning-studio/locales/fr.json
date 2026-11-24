@@ -719,5 +719,20 @@
   "clone_unsaved": "Le clip est prêt à télécharger. Il n’a pas pu être ajouté à l’historique.",
   "clone_silent": "L’échantillon est presque silencieux. Choisissez un passage avec une voix claire.",
   "clone_settings": "Clonage vocal dans le navigateur et transcription via un moteur connecté",
-  "clone_media_note": "Préparez l’échantillon ici, puis utilisez-le pour un clonage local ou un profil sur votre serveur."
+  "clone_media_note": "Préparez l’échantillon ici, puis utilisez-le pour un clonage local ou un profil sur votre serveur.",
+  "qisas_narration_1": "Préréglage de narration",
+  "qisas_narration_2": "Texte original",
+  "qisas_narration_3": "قصص و روايات — Narration en arabe standard",
+  "qisas_narration_4": "قصص و روايات — Dialogue koweïtien",
+  "qisas_narration_5": "Votre échantillon vocal reste inchangé. Le texte original est conservé et quelques signes de prononciation des noms sont ajoutés dans une copie distincte.",
+  "qisas_narration_6": "Préparer le texte vocal",
+  "qisas_narration_7": "Afficher la consigne de révision",
+  "qisas_narration_8": "Télécharger le plan vocal",
+  "qisas_narration_9": "Copie vocale",
+  "qisas_narration_10": "Consigne de révision",
+  "qisas_narration_11": "Le texte vocal est prêt. Vérifiez les noms, puis écoutez le résultat pour contrôler le ton et la prononciation.",
+  "qisas_narration_12": "Saisissez d’abord le texte de narration.",
+  "qisas_narration_13": "Choisissez un préréglage de narration disponible.",
+  "qisas_narration_14": "Divisez la narration en sections de 2000 caractères maximum.",
+  "qisas_narration_15": "Préparez d’abord le texte."
 }

@@ -719,5 +719,20 @@
   "clone_unsaved": "音频可下载。无法将其保存到历史记录。",
   "clone_silent": "样本几乎无声。请选择一段清晰的语音。",
   "clone_settings": "在浏览器内克隆声音，通过已连接的引擎转录",
-  "clone_media_note": "在此准备样本，然后在本地克隆声音或将其用于服务器上的声音档案。"
+  "clone_media_note": "在此准备样本，然后在本地克隆声音或将其用于服务器上的声音档案。",
+  "qisas_narration_1": "旁白预设",
+  "qisas_narration_2": "原始文本",
+  "qisas_narration_3": "قصص و روايات — 标准阿拉伯语旁白",
+  "qisas_narration_4": "قصص و روايات — 科威特方言对白",
+  "qisas_narration_5": "所选声音样本保持不变。保留原稿，仅在独立朗读副本中为姓名添加少量发音标记。",
+  "qisas_narration_6": "准备朗读文本",
+  "qisas_narration_7": "显示旁白润色要求",
+  "qisas_narration_8": "下载声音计划",
+  "qisas_narration_9": "朗读副本",
+  "qisas_narration_10": "旁白润色要求",
+  "qisas_narration_11": "朗读文本已准备好。请核对姓名，再收听生成音频以检查语气和发音。",
+  "qisas_narration_12": "请先输入旁白文本。",
+  "qisas_narration_13": "请选择支持的旁白预设。",
+  "qisas_narration_14": "请将旁白分成每段不超过2000字符的部分。",
+  "qisas_narration_15": "请先准备文本。"
 }

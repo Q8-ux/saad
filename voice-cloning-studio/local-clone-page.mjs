@@ -1,6 +1,7 @@
 import {decodeAudio, encodeWav, formatTime} from './audio.mjs';
 import {localDB, download, safeName} from './storage.mjs';
 import {validateReferenceFile, referenceBounds, maxReferenceSeconds} from './reference.mjs';
+import {prepareNarration, narrationBrief, narrationDownload, narrationModes} from './narration.mjs?v=1.5.1';
 import {getUILocale} from './i18n.mjs?v=1.5.0';
 
 const $ = id => document.getElementById(id);
@@ -18,7 +19,7 @@ const label = {
   saved:'حُفظت العيّنة على هذا الجهاز.',
   unsaved:'المقطع جاهز للتنزيل. تعذّر حفظه في السجل.',
 };
-let reference, worker, run, previewURL, resultURL, resultBlob, currentSelection = 0;
+let reference, worker, run, previewURL, resultURL, resultBlob, currentSelection = 0, resultFilename = 'sawtak-voice-clone.wav';
 
 function status(message, progress) {
   $('clone-status').textContent = message;
@@ -30,7 +31,7 @@ function status(message, progress) {
 
 function updateControls() {
   const locked = Boolean(run);
-  for (const id of ['clone-file','clone-saved','clone-start','clone-end','clone-text','clone-permission']) {
+  for (const id of ['clone-file','clone-saved','clone-start','clone-end','clone-text','clone-permission','clone-narration-mode','clone-prepare-narration','clone-narration-brief-button','clone-narration-plan']) {
     $(id).disabled = locked;
   }
   $('clone-sample-details').hidden = !reference;
@@ -121,7 +122,49 @@ function endRun(message) {
   status(message);
 }
 
+function prepareSelectedNarration() {
+  const mode = $('clone-narration-mode').value;
+  if (mode === 'original') return null;
+  const plan = prepareNarration($('clone-text').value, mode);
+  $('clone-speech-preview').value = plan.speechText;
+  $('clone-narration-status').textContent = 'جُهّز نص النطق. راجع الأسماء، ثم استمع إلى الصوت الناتج للتحقق من النبرة والحروف.';
+  return plan;
+}
+
+function resetNarrationPreparation() {
+  $('clone-narration-tools').hidden = $('clone-narration-mode').value === 'original';
+  $('clone-speech-preview').value = '';
+  $('clone-narration-brief').value = '';
+  $('clone-narration-brief-label').hidden = true;
+  $('clone-narration-status').textContent = '';
+}
+
 export function initLocalClone(saveGeneration) {
+  const requestedPreset = new URLSearchParams(location.search).get('preset');
+  if (requestedPreset === 'qisas-riwayat') $('clone-narration-mode').value = 'qisas-msa';
+  resetNarrationPreparation();
+  $('clone-narration-mode').addEventListener('change', resetNarrationPreparation);
+  $('clone-text').addEventListener('input', resetNarrationPreparation);
+  $('clone-prepare-narration').addEventListener('click', () => {
+    try {prepareSelectedNarration();} catch (error) {$('clone-narration-status').textContent = error.message;}
+  });
+  $('clone-narration-brief-button').addEventListener('click', () => {
+    try {
+      const plan = prepareSelectedNarration();
+      if (!plan) return;
+      $('clone-narration-brief').value = narrationBrief(plan);
+      $('clone-narration-brief-label').hidden = false;
+      $('clone-narration-brief').focus();
+      $('clone-narration-brief').select();
+    } catch (error) {$('clone-narration-status').textContent = error.message;}
+  });
+  $('clone-narration-plan').addEventListener('click', () => {
+    try {
+      const plan = prepareSelectedNarration();
+      if (plan) download(new Blob([JSON.stringify(narrationDownload(plan), null, 2)], {type:'application/json'}), 'qisas-riwayat-voice-plan.json');
+    } catch (error) {$('clone-narration-status').textContent = error.message;}
+  });
+
   const sampleAudio = $('clone-sample-audio');
   sampleAudio.addEventListener('play', () => {
     if (sampleAudio.currentTime < Number($('clone-start').value) || sampleAudio.currentTime >= Number($('clone-end').value)) {
@@ -165,14 +208,17 @@ export function initLocalClone(saveGeneration) {
     endRun(label.stopped);
   });
   $('clone-download').addEventListener('click', () => {
-    if (resultBlob) download(resultBlob, 'sawtak-voice-clone.wav');
+    if (resultBlob) download(resultBlob, resultFilename);
   });
   $('clone-form').addEventListener('submit', async event => {
     event.preventDefault();
     if (run || !reference || !$('clone-permission').checked) return;
     const text = $('clone-text').value.trim();
     if (!text) return;
-    const task = {text, name:reference.name};
+    let plan;
+    try {plan = prepareSelectedNarration();} catch (error) {status(error.message); return;}
+    const speechText = plan?.speechText ?? text;
+    const task = {text, speechText, plan, name:reference.name};
     run = task;
     updateControls();
     status(label.preparing, null);
@@ -206,8 +252,10 @@ export function initLocalClone(saveGeneration) {
           $('clone-result-audio').src = resultURL;
           $('clone-result-duration').textContent = formatTime(duration);
           $('clone-result').hidden = false;
+          resultFilename = task.plan ? 'qisas-riwayat-voice-clone.wav' : 'sawtak-voice-clone.wav';
           const meta = {id:'local-'+crypto.randomUUID(), kind:'generation', blob:resultBlob, text, profile_name:task.name,
-            engine:'MOSS-TTS-Nano', language:getUILocale(), status:'completed', duration, created_at:new Date().toISOString(), is_favorited:false};
+            engine:'MOSS-TTS-Nano', language:task.plan ? 'ar' : getUILocale(),
+            ...(task.plan ? {narration_profile:task.plan.mode, speech_text:task.speechText, pronunciation_edits:task.plan.pronunciationEdits, text_preparation:task.plan.preparation} : {}), status:'completed', duration, created_at:new Date().toISOString(), is_favorited:false};
           try {
             await saveGeneration(meta);
             if (run === task) endRun(label.ready);
@@ -217,7 +265,7 @@ export function initLocalClone(saveGeneration) {
         }
       };
       status(label.loading, null);
-      worker.postMessage({type:'generate', pcm, text}, [pcm.buffer]);
+      worker.postMessage({type:'generate', pcm, text:speechText}, [pcm.buffer]);
     } catch (error) {
       if (run === task) endRun(error.message);
     }
@@ -225,7 +273,9 @@ export function initLocalClone(saveGeneration) {
   updateControls();
 }
 
-export function setCloneText(text) {
+export function setCloneText(text, mode = 'original') {
   $('clone-text').value = text;
+  $('clone-narration-mode').value = Object.hasOwn(narrationModes, mode) ? mode : 'original';
+  resetNarrationPreparation();
   updateControls();
 }

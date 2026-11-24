@@ -66,3 +66,18 @@ selectable when the connected Voicebox host reports the matching model IDs.
 They use the existing voice library and generation history. See
 [server/README.md](server/README.md#moss-and-habibi-cloning) for the inference
 image and gateway configuration.
+
+## قصص و روايات: preparing cloned narration
+
+Open `?preset=qisas-riwayat#clone`, keep the chosen voice reference, and select
+formal Arabic narration or Kuwaiti dialogue. The preparation creates a separate
+speech copy with limited pronunciation marks for شمشون and دليلة. It preserves the
+approved original, facts, numbers, negation and dialect. Preview the speech copy,
+optionally display a separate editorial request, and generate using the existing
+browser clone engine. No model weights or voice identity are changed by preparation.
+
+The generated history retains the original text, speech copy and preparation mode.
+Reusing a history item restores that mode. A downloadable voice plan records that
+cloning, listening and video synchronization still require their own verification.
+The workflow applies the prompt-baseline stage of «مسار الفتح» to the text before
+speech; it does not run Heretic on TTS weights or claim to fix accent automatically.

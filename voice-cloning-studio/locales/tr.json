@@ -719,5 +719,20 @@
   "clone_unsaved": "Klip indirilmeye hazır. Geçmişe kaydedilemedi.",
   "clone_silent": "Örnek neredeyse sessiz. Konuşmanın net olduğu bir bölüm seçin.",
   "clone_settings": "Tarayıcıda ses klonlama, bağlı motorla transkripsiyon",
-  "clone_media_note": "Örneği burada hazırlayıp yerel klonlamada veya sunucunuzdaki bir profilde kullanın."
+  "clone_media_note": "Örneği burada hazırlayıp yerel klonlamada veya sunucunuzdaki bir profilde kullanın.",
+  "qisas_narration_1": "Anlatım ayarı",
+  "qisas_narration_2": "Orijinal metin",
+  "qisas_narration_3": "قصص و روايات — Standart Arapça anlatım",
+  "qisas_narration_4": "قصص و روايات — Kuveyt lehçesinde diyalog",
+  "qisas_narration_5": "Seçtiğiniz ses örneği değişmez. Orijinal metin korunur; ayrı okuma kopyasına adlar için sınırlı telaffuz işaretleri eklenir.",
+  "qisas_narration_6": "Okuma metnini hazırla",
+  "qisas_narration_7": "Anlatım düzenleme isteğini göster",
+  "qisas_narration_8": "Ses planını indir",
+  "qisas_narration_9": "Okuma kopyası",
+  "qisas_narration_10": "Anlatım düzenleme isteği",
+  "qisas_narration_11": "Okuma metni hazır. Adları kontrol edin, ardından ton ve telaffuz için üretilen sesi dinleyin.",
+  "qisas_narration_12": "Önce anlatım metnini girin.",
+  "qisas_narration_13": "Desteklenen bir anlatım ayarı seçin.",
+  "qisas_narration_14": "Anlatımı en fazla 2000 karakterlik bölümlere ayırın.",
+  "qisas_narration_15": "Önce metni hazırlayın."
 }

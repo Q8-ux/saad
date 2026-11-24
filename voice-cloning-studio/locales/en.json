@@ -719,5 +719,20 @@
   "clone_unsaved": "The clip is ready to download. It could not be saved to history.",
   "clone_silent": "The sample is almost silent. Choose a part with clear speech.",
   "clone_settings": "Voice cloning in the browser, transcription through a connected engine",
-  "clone_media_note": "Prepare the sample here, then use it for local voice cloning or a profile on your server."
+  "clone_media_note": "Prepare the sample here, then use it for local voice cloning or a profile on your server.",
+  "qisas_narration_1": "Narration preset",
+  "qisas_narration_2": "Original text",
+  "qisas_narration_3": "قصص و روايات — Standard Arabic narration",
+  "qisas_narration_4": "قصص و روايات — Kuwaiti dialogue",
+  "qisas_narration_5": "Your selected voice sample stays unchanged. The original script is kept, with limited name pronunciation marks in a separate speech copy.",
+  "qisas_narration_6": "Prepare speech text",
+  "qisas_narration_7": "Show narration editing brief",
+  "qisas_narration_8": "Download voice plan",
+  "qisas_narration_9": "Speech copy",
+  "qisas_narration_10": "Narration editing brief",
+  "qisas_narration_11": "Speech text is ready. Review the names, then listen to the generated audio to check tone and pronunciation.",
+  "qisas_narration_12": "Enter the narration text first.",
+  "qisas_narration_13": "Choose a supported narration preset.",
+  "qisas_narration_14": "Split narration into sections of at most 2000 characters.",
+  "qisas_narration_15": "Prepare the text first."
 }

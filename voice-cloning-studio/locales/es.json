@@ -719,5 +719,20 @@
   "clone_unsaved": "El clip está listo para descargar. No se pudo guardar en el historial.",
   "clone_silent": "La muestra está casi en silencio. Elige un fragmento con voz clara.",
   "clone_settings": "Clonación en el navegador y transcripción mediante un motor conectado",
-  "clone_media_note": "Prepara la muestra aquí y úsala para clonar en tu dispositivo o crear un perfil en tu servidor."
+  "clone_media_note": "Prepara la muestra aquí y úsala para clonar en tu dispositivo o crear un perfil en tu servidor.",
+  "qisas_narration_1": "Ajuste de narración",
+  "qisas_narration_2": "Texto original",
+  "qisas_narration_3": "قصص و روايات — Narración en árabe estándar",
+  "qisas_narration_4": "قصص و روايات — Diálogo kuwaití",
+  "qisas_narration_5": "La muestra de voz elegida se conserva. Se mantiene el texto original y se añaden marcas limitadas de pronunciación a los nombres en una copia separada.",
+  "qisas_narration_6": "Preparar texto de voz",
+  "qisas_narration_7": "Mostrar solicitud de revisión",
+  "qisas_narration_8": "Descargar plan de voz",
+  "qisas_narration_9": "Copia para voz",
+  "qisas_narration_10": "Solicitud de revisión",
+  "qisas_narration_11": "El texto está listo. Revise los nombres y escuche el audio generado para comprobar tono y pronunciación.",
+  "qisas_narration_12": "Introduzca primero el texto de narración.",
+  "qisas_narration_13": "Elija un ajuste de narración compatible.",
+  "qisas_narration_14": "Divida la narración en secciones de hasta 2000 caracteres.",
+  "qisas_narration_15": "Prepare primero el texto."
 }

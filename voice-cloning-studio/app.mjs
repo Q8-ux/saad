@@ -1,6 +1,6 @@
 import {validateReferenceFile,prepareFileReference,maxReferenceSeconds} from './reference.mjs';
 import {initI18n,translate as t,getUILocale} from './i18n.mjs?v=1.5.0';
-import {initLocalClone,refreshCloneReferences,selectCloneReference,setCloneText} from './local-clone-page.mjs?v=1.5.0';
+import {initLocalClone,refreshCloneReferences,selectCloneReference,setCloneText} from './local-clone-page.mjs?v=1.5.1';
 import {MediaAPI,videoId,embedURL,getDeviceVoices,speakDevice} from './media.mjs';
 import {VoiceboxAPI,APIError,validateBase} from './api.mjs';
 import {localDB,download,blobToDataURL,dataURLToBlob,safeName} from './storage.mjs';
@@ -241,7 +241,7 @@ async function localHistoryAction(button){
   case'mp3':download(h.blob,'voice-'+h.id.slice(-8)+'.mp3');break;
   case'favorite':h.is_favorited=!h.is_favorited;await localDB.put('assets',h);await loadLocalGenerations();break;
   case'delete':if(confirmUI('حذف المقطع من هذا الجهاز؟')){await localDB.remove('assets',h.id);await loadLocalGenerations();}break;
-  case'reuse':if(h.engine==='MOSS-TTS-Nano'){setCloneText(h.text);location.hash='clone';break;}$('generation-text').value=h.text;$('generation-engine').value='edge';$('generation-language').value=h.language;updateProfiles();$('generation-profile').value=h.profile_id;scriptCount();location.hash='generate';break;
+  case'reuse':if(h.engine==='MOSS-TTS-Nano'){setCloneText(h.text, h.narration_profile);location.hash='clone';break;}$('generation-text').value=h.text;$('generation-engine').value='edge';$('generation-language').value=h.language;updateProfiles();$('generation-profile').value=h.profile_id;scriptCount();location.hash='generate';break;
  }
 }
 function selectYouTube(meta){
