@@ -1,0 +1,499 @@
+diff --git a/app/api/legal/assistant/route.ts b/app/api/legal/assistant/route.ts
+index 92f7854..1993f62 100644
+--- a/app/api/legal/assistant/route.ts
++++ b/app/api/legal/assistant/route.ts
+@@ -1,5 +1,5 @@
+ import { applyIntakeReadiness } from "@/lib/intake-readiness";
+-import { applyProceduralPosition, inferProceduralPosition, inferMatterType } from "@/lib/procedural-position";
++import { applyProceduralPosition, inferProceduralPosition, inferMatterType, currentMatterText, inspectMatterType } from "@/lib/procedural-position";
+ import {guardMatterIntake} from "@/lib/matter-facts";
+ import {scopeEvidenceToFacts} from "@/lib/bound-draft";
+ import { ASSISTANT_REQUEST_BYTES, validateAssistantInput } from "@/lib/assistant-input";
+@@ -114,11 +114,16 @@ export async function POST(request: Request) {
+         Object.assign(step.stage, { status, finishedAt: new Date().toISOString(), durationMs: Math.round(performance.now() - step.clock) });
+         send({ type: "stage", stage: { ...step.stage } });
+       };
+-      const scopeFacts=[...(cleanIntakeContext(data.currentState)?.facts || []), ...messages.filter(item=>item.role==="user").map(item=>item.content)].join("\n");
++      const userFacts=messages.filter(item=>item.role==="user").map(item=>item.content);
++      const scopeFacts=currentMatterText([...(cleanIntakeContext(data.currentState)?.facts || []), ...userFacts].join("\n"));
+       const search = begin("library");
+       let evidence: LegalEvidence[] = [], lookupFailed = false;
+       try {
+-        const queries = intakeSearchQueries(message, data.currentState, messages.filter(item => item.role === "user").map(item => item.content));
++        const current=inspectMatterType(userFacts.join("\n"));
++        const prior=cleanIntakeContext(data.currentState);
++        const resetSearch=current.denied.length>0||current.conflict||!!(current.caseType&&prior?.caseType&&current.caseType!==prior.caseType);
++        const searchContext=resetSearch?{...prior,caseType:current.caseType,legalIssues:[],requests:[],facts:userFacts}:data.currentState;
++        const queries = intakeSearchQueries(message, searchContext, userFacts);
+         evidence = scopeEvidenceToFacts(await searchIntakeLibrary(queries),scopeFacts);
+       } catch { lookupFailed = true; }
+       end(search, lookupFailed ? "failed" : evidence.length ? "completed" : "limited");
+@@ -139,9 +144,26 @@ export async function POST(request: Request) {
+       }
+       generationMs = analysis.stage.durationMs || 0;
+       const review = begin("source_review");
+-      const sourceReviewed = reviewIntakeAnalysis(applyProceduralPosition(state,scopeFacts), evidence, lookupFailed, language);
++      const positioned=applyProceduralPosition(state,scopeFacts);
++      const classification=positioned.caseClassification;
++      const classificationNotice=language==="en"?(positioned.caseType?`The current account points provisionally to ${interfaceLabel(positioned.caseType,language)}. The earlier classification was excluded; the court and legal basis require fresh review.`:"The earlier classification was excluded. The current account does not establish one clear case type."):language==="ur"?(positioned.caseType?"موجودہ حقائق کے مطابق مقدمے کی ابتدائی درجہ بندی درست کی گئی ہے۔ سابقہ درجہ بندی خارج ہے؛ عدالت اور قانونی بنیاد دوبارہ جانچنا ضروری ہے۔":"سابقہ درجہ بندی خارج کر دی گئی ہے۔ موجودہ حقائق سے مقدمے کی ایک واضح قسم ثابت نہیں ہوتی۔"):(positioned.caseType?`تشير وقائع الطلب الحالي مبدئياً إلى نزاع ${positioned.caseType}. استُبعد التصنيف السابق؛ يلزم إعادة مراجعة المحكمة والأسانيد على أساس هذه الوقائع.`:"استُبعد التصنيف السابق؛ لا تكفي الوقائع الحالية لتثبيت تصنيف واحد للقضية.");
++      if(classification.changed){
++        positioned.assistantMessage=classificationNotice;
++        positioned.jurisdictionReason=classificationNotice;
++        positioned.analysisWarnings=[...new Set([...(positioned.analysisWarnings||[]),classificationNotice])];
++        if(positioned.orientation)positioned.orientation={...positioned.orientation,categoryReason:classificationNotice,nextAction:""};
++      }
++      const sourceReviewed = reviewIntakeAnalysis(positioned, evidence, lookupFailed, language);
+       const analysisMessage = sourceReviewed.assistantMessage;
+       const reviewed = applyIntakeReadiness(guardMatterIntake(sourceReviewed,scopeFacts,readQuestionMemory(data.currentState),language),readQuestionMemory(data.currentState),language,analysisMessage);
++      if(classification.blocked&&!positioned.caseType){
++        const memory=readQuestionMemory(data.currentState);
++        const question=language==="en"?"What is the event or obligation you want to address in this request, and what do you want the other party to do?":language==="ur"?"اس درخواست میں کون سا واقعہ یا ذمہ داری حل کرنا چاہتے ہیں اور دوسرے فریق سے کیا چاہتے ہیں؟":"ما الواقعة أو الالتزام الذي تريد معالجته في هذا الطلب، وماذا تطلب من الطرف الآخر؟";
++        const repeated=memory.asked.some(item=>item.key==="matter.claim_focus");
++        reviewed.readyForMemo=false;reviewed.phase="gathering";reviewed.questionKey=repeated?"":"matter.claim_focus";
++        reviewed.nextQuestions=repeated?[]:[question];reviewed.assistantMessage=[classificationNotice,...reviewed.nextQuestions].join("\n");
++        reviewed.questionMemory=updateQuestionMemory(memory,{questionKey:reviewed.questionKey,nextQuestions:reviewed.nextQuestions,resolvedTopics:reviewed.resolvedTopics,unavailableTopics:reviewed.unavailableTopics});
++      }
+       end(review, reviewed.legalBasis.length ? "completed" : "limited");
+       stages.push({ id: "human_review", status: "pending", startedAt: null, finishedAt: null, durationMs: null });
+       const sourceCoverage = legalSourceCoverage(evidence, lookupFailed);
+diff --git a/lib/intake-context.ts b/lib/intake-context.ts
+index 74d8fc2..6095faa 100644
+--- a/lib/intake-context.ts
++++ b/lib/intake-context.ts
+@@ -182,11 +182,11 @@ export function intakeSearchQueries(message: string, currentState: unknown, user
+   const state = cleanIntakeContext(currentState);
+   const context = [message, state?.caseType, ...(state?.legalIssues || []), ...(state?.requests || []), ...(state?.facts || []).slice(-8), ...userMessages.slice(-3)].filter(Boolean).join(" ");
+   const normalized = normalizeQuestion(context);
+-  const isLabor = topics[0][0].test(normalized);
+-  const matched = topics.filter(([pattern], i) => pattern.test(normalized) && !(i === 5 && isLabor && !/شراك|توريد|افلاس|اسهم|تجاري/.test(normalized))).map(([, terms]) => terms).slice(0, 3);
++  const isLabor = assessMatterFacts(context).domain === "employment";
++  const matched = topics.filter(([pattern], i) => pattern.test(normalized) && (i!==0||isLabor) && !(i === 5 && isLabor && !/شراك|توريد|افلاس|اسهم|تجاري/.test(normalized))).map(([, terms]) => terms).slice(0, 3);
+   if (isLabor && /قطاع اهلي|قطاع خاص|شركه خاصه/.test(normalized)) matched.unshift("العمل القطاع الأهلي");
+   const focused = matched.join(" ") || [state?.caseType, ...(state?.legalIssues || []), message].filter(Boolean).join(" ");
+   const issueTerms: Array<[RegExp, string]> = [[/اقرض|قرض|سلفت|سلفني/, "قرض مديونية وفاء إثبات"], [/مكافاه|نهايه الخدمه/, "مكافأة نهاية الخدمة أجور"], [/راتب|رواتب|اجور/, "أجور راتب تأخير العمل"], [/ضرب|اعتدا|اصابه/, "ضرب جرح إيذاء اعتداء"], [/نفقه|مصاريف.*طفل|طفل.*مصاريف/, "نفقة أولاد صغار"], [/اخلاء|ايجار/, "إيجار إخلاء أجرة"], [/تعويض|اتلاف/, "تعويض ضرر مسؤولية"], [/فصل.*عمل|انها.*خدمه/, "فصل تعسفي إنهاء الخدمة"]];
+-  const specific = issueTerms.filter(([pattern]) => pattern.test(normalized)).map(([, terms]) => terms).slice(0, 2).join(" ");
++  const specific = issueTerms.filter(([pattern],i) => pattern.test(normalized) && (isLabor||![1,2,7].includes(i))).map(([, terms]) => terms).slice(0, 2).join(" ");
+   return [...new Set([[specific, state?.caseType, ...(state?.legalIssues || []).slice(0, 2)].filter(Boolean).join(" ") || focused, [specific, ...(state?.requests || []).slice(0, 2), message].filter(Boolean).join(" ").slice(0, 500), `اختصاص ${focused.slice(0, 350)}`])].filter(Boolean);
+ }
+diff --git a/lib/matter-facts.ts b/lib/matter-facts.ts
+index c34b6ef..c8f9a16 100644
+--- a/lib/matter-facts.ts
++++ b/lib/matter-facts.ts
+@@ -1,28 +1,31 @@
+ import type {LegalEvidence} from './legal-search';
+ import type {LegalIntakeState} from './openai';
+ import type {QuestionMemory} from './intake-context';
++import {currentMatterText,inspectMatterType} from './procedural-position';
+ const n=(s:string)=>s.normalize('NFKC').replace(/[أإآٱ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').replace(/[\u064b-\u065fـ]/g,'').toLowerCase();
+ export type MatterGap={key:string;ar:string;en:string;ur:string};
+ const gap=(key:string,ar:string,en:string,ur:string):MatterGap=>({key,ar,en,ur});
+ export const matterFactInstructions=`قبل ترجيح التشريع، افهم محل المطالبة وعلاقة الأطراف من الوقائع، لا من اسم نشاط المنشأة وحده. موظف الشركة العقارية قد ينازع على راتبه لا العقار، ومورّد شركة نفطية قد ينازع على فاتورة لا حقوق عامل. اسأل بلغة بسيطة عن الفعل والصفة وطبيعة النشاط والعمل والجهة الحقيقية في العقد ومن يدفع الأجر وهل توجد شركة مقاول وسيطة. لا تعتبر العمل داخل منشأة نفطية عقداً مباشراً معها. لا تساوِ مجرد كلمة «حكومي» أو «خاص» بانطباق نظام قانوني. في العمل استوضح طبيعة المهام ودورية الأجر عند تأثيرهما في المطالبة. في العقار استوضح هل المستخدم مالك أو مستأجر أو مشترٍ أو وسيط، وما التصرف والعقار وموقعه. وفي الأعمال استوضح محل التعاقد وصفة الطرفين. اسأل عن المعلومة الجوهرية الناقصة فقط، سؤالاً واحداً، دون إعادة المعروف أو طلب اختيار نوع الدعوى أو القانون أو المحكمة. إذا تعددت العلاقات أو تعارضت الإجابات فلا تختر قطاعاً أو سنداً على التخمين. اجمع الوقائع ثم استخرج من الملف شروط انطباق النص واستثناءاته وفرعه الموافق للصفة ونوع الأجر وتاريخ الواقعة. لا تستكمل ما غاب عن الملف من الذاكرة. الملاءمة المبدئية ليست اعتماداً نهائياً.`;
+ export function assessMatterFacts(text:string){
+- const s=n(text),known:string[]=[],missing:MatterGap[]=[];
++ const scoped=currentMatterText(text),s=n(scoped),known:string[]=[],missing:MatterGap[]=[];
++ const classification=inspectMatterType(scoped);
++ const otherSubject=!!classification.caseType&&classification.caseType!=='عمالي';
+  const employmentText=s.replace(/(?:ليس لي|ليس لدي|لا يوجد لدي|لا يوجد بيننا|ليس بيننا)\s+(?:اي\s+)?عقد\s+عمل/g,'');
+  const employmentClaim=/راتبي|راتبه|راتب\s+شهري|اجور|رواتب|مكافاه\s+نهايه\s+الخدمه|عقد\s+عمل|فصل(?:ت|وني|ه|ني|ها)?\s+من\s+العمل|انه(?:ت|اء|ي).*عقد\s+العمل|employment|unpaid salary|end.of.service/.test(employmentText);
+  const employmentRelation=/انا\s+(?:موظف|عامل)|اعمل\s+(?:ك|لدي|في)|اشتغل\s+(?:ك|عند|في)|عمل\s+[^.\n]{0,45}لدي\s+شركه|موظف\s+في\s+شركه|عقد\s+عمل|راتبي|راتب\s+شهري/.test(employmentText);
+  const propertyClaim=/استاجرت|اجرت\s+(?:شقه|محل|بيت|عقار)|اشتريت\s+(?:شقه|بيت|عقار|ارض)|مستاجر|موجر|اخلاء|عقد\s+ايجار|بيع\s+(?:عقار|شقه|بيت|ارض)|تسجيل\s+عقار|سند\s+ملكيه|tenant|landlord|property sale/.test(s);
+  const commercialClaim=/وردت|وردنا|تورد|فاتوره|توريد|شراكه|عقد\s+مقاوله|بعت\s+بضاعه|ثمن\s+بضاعه|supplier|invoice|supply contract/.test(s);
+  const propertyMention=/عقار|شقه|ارض|ايجار|بيت|property|real estate/.test(s);
+- const mixed=employmentClaim&&(propertyClaim||commercialClaim);
+- const domain=mixed?'mixed':propertyClaim?'property':commercialClaim?'commercial':employmentClaim||employmentRelation?'employment':propertyMention&&!/شركه\s+عقاريه/.test(s)?'property':'other';
++ const mixed=!otherSubject&&employmentClaim&&(propertyClaim||commercialClaim);
++ const domain=mixed?'mixed':propertyClaim?'property':commercialClaim?'commercial':!otherSubject&&(employmentClaim||employmentRelation)?'employment':propertyMention&&!/شركه\s+عقاريه/.test(s)?'property':'other';
+  const oil=!/(?:ليست|ليس|لا اعمل|لست|غير)[^.\n]{0,20}(?:نفط|بترول)/.test(s)&&/شركه\s+(?:نفطيه|بتروليه)|منشاه\s+نفطيه|استخراج\s+النفط|انتاج\s+النفط|oil company|petroleum/.test(s);
+  const propertyIndustry=/شركه\s+عقاريه|تطوير\s+عقاري/.test(s);
+  const privateStated=/القطاع\s+الاهلي|القطاع\s+الخاص|قطاع\s+اهلي|شركه\s+خاصه|private sector/.test(s);
+  const publicStated=/جهه\s+حكوميه|وزاره|موظف\s+حكومي|government ministry/.test(s);
+  const domestic=/عامل[ه]?\s+منزلي[ه]?|عماله\s+منزليه|خادمه|سائق\s+(?:المنزل|منزلي)|domestic worker/.test(s);
+  const agency=/عقدي\s+مع\s+شركه\s+(?:مقاول|وسيط)|تابع\s+لشركه\s+مقاول|شركه\s+مقاول.*(?:عقد|راتب)|لست\s+موظفا\s+(?:مباشرا|لدي)|subcontractor|staffing agency/.test(s);
+- const activityKnown=oil||propertyIndustry||publicStated||domestic||/نشاط\s+(?:الشركه|الجهه)|تعمل\s+(?:في\s+)?(?:التجاره|التعليم|الصناعه|الصحه|بيع|توزيع|المقاولات)|شركه\s+(?:تجاريه|صناعيه|تعليميه|مقاولات|تبيع)|electrical trading|manufactur|employer activity/.test(s);
+- const workKnown=domestic||/محاسب|مهندس|مدرس|معلم|طبيب|صيدلي|ممرض|موظف\s+اداري|سائق|عامل\s+(?:حفر|تشغيل|نظافه)|فني\s+صيانه|امين\s+مخزن|وظيفتي\s+\S+|عملي\s+هو\s+\S+|مسماي\s+الوظيفي\s+\S+|accountant|engineer|teacher|nurse|job duties/.test(s);
++ const activityKnown=oil||propertyIndustry||publicStated||domestic||/نشاط\s+(?:الشركه|الجهه)|نشاطها\s+\S+|تعمل\s+(?:في\s+)?(?:التجاره|التعليم|الصناعه|الصحه|بيع|توزيع|المقاولات)|شركه\s+(?:تجاريه|صناعيه|تعليميه|مقاولات|تبيع)|electrical trading|manufactur|employer activity/.test(s);
++ const workKnown=domestic||/محاسب|مهندس|مدرس|معلم|طبيب|صيدلي|ممرض|موظف\s+(?:اداري|مبيعات)|مندوب\s+مبيعات|بائع|سائق|عامل\s+(?:حفر|تشغيل|نظافه)|فني\s+صيانه|امين\s+مخزن|وظيفتي\s+\S+|عملي\s+هو\s+\S+|مسماي\s+الوظيفي\s+\S+|accountant|engineer|teacher|nurse|job duties/.test(s);
+  const contractKnown=domestic||agency||/(?:صاحب العمل|جهه العمل|الجهه التي تدفع راتبي|الشركه التي تدفع راتبي)(?:\s+الفعلي)?\s+(?:هو|هي|اسمها)\s+\S+|راتبي\s+من\s+شركه\s+\S+/.test(s)||/قرار\s+تعيين(?:ي|ه)?\s+(?:من|ب|في)\s*وزاره/.test(s)||/عقد(?:ي|ه|ها|\s+العمل)?[^.\n]{0,35}(?:باسم|مع|لدي)\s+\S+|عمل\s+[^.\n]{0,45}لدي\s+شركه[^.\n]{0,65}بعقد|تعاقدت\s+مباشره|عقد\s+مباشر\s+مع|contract (?:is )?with|direct employment contract/.test(employmentText);
+  const directOil=/عقد(?:ي|ه|\s+العمل)?[^.\n]{0,65}(?:مع|باسم)[^.\n]{0,35}(?:الشركه\s+النفطيه|شركه\s+نفطيه|مؤسسه\s+البترول|شركه\s+نفط\s+الكويت)/.test(s);
+  const frequencyKnown=/شهري|بالشهر|يومي|باليوم|اسبوعي|بالاسبوع|بالساعه|monthly|daily|hourly|weekly/.test(s);
+@@ -53,9 +56,10 @@ export function assessMatterFacts(text:string){
+  return {domain,activity:oil?'oil':propertyIndustry?'real_estate':publicStated?'public':domestic?'domestic':activityKnown?'other':'unknown',agency,known:[...new Set(known)],missing,ready:!missing.length,eligibility:{oil:employmentReady&&oil&&!agency&&directOil,domestic:employmentReady&&domestic,public:employmentReady&&publicStated&&!agency,private:employmentReady&&!domestic&&(!publicStated||agency)&&(privateStated||agency||activityKnown)}};
+ }
+ export function selectMatterSources<T extends Pick<LegalEvidence,'title'>>(evidence:T[],text:string):T[]{
+- const profile=assessMatterFacts(text),s=n(text);
++ const profile=assessMatterFacts(text),s=n(currentMatterText(text)),subject=inspectMatterType(text).caseType;
+  return evidence.filter(source=>{
+   const title=n(source.title),labor=/العمل\s+في\s+القطاع|العماله\s+المنزليه|الخدمه\s+المدنيه|التامين\s+التكميلي/.test(title);
++  if(subject&&subject!=='عمالي'&&subject!=='إداري'&&labor)return false;
+   if(profile.domain==='property'||profile.domain==='commercial')return !labor;
+   if(profile.domain==='employment'){
+    if(/القطاع\s+النفطي/.test(title))return profile.eligibility.oil;
+@@ -73,6 +77,16 @@ export function guardMatterIntake(state:LegalIntakeState,text:string,previous:Qu
+  const memory={asked:[...previous.asked],resolved:[...new Set([...previous.resolved,...(state.questionMemory?.resolved||[]),...p.known])],unavailable:[...new Set([...previous.unavailable,...(state.questionMemory?.unavailable||[])])]};
+  const current=state as LegalIntakeState & {matterFacts?:unknown};
+  current.matterFacts={...p,missing:p.missing.map(g=>({key:g.key,question:g[lang]})),legalApplicability:'requires_source_and_human_review'};
++ current.questionMemory=memory;current.resolvedTopics=memory.resolved;current.unavailableTopics=memory.unavailable;
++ if(p.domain==='employment'){
++  const recorded=current.memoPrefill.facts||current.facts?.join('\n')||'';
++  const known=assessMatterFacts(recorded).known;
++  const needed=new Set(p.known.filter(key=>key.startsWith('employment.')&&!known.includes(key)));
++  // Keep supplied context that the summary omitted; these are verbatim visitor
++  // statements, not a finding that the corresponding statute applies.
++  const context=currentMatterText(text).split('\n').filter(clause=>!n(recorded).includes(n(clause))&&assessMatterFacts(clause).known.some(key=>needed.has(key)));
++  if(context.length)current.memoPrefill={...current.memoPrefill,facts:[recorded,...new Set(context)].filter(Boolean).join('\n')};
++ }
+  if(!p.missing.length)return current;
+  const question=p.missing.find(g=>!memory.asked.some(q=>q.key===g.key)&&!memory.unavailable.includes(g.key));
+  current.readyForMemo=false;current.phase='gathering';current.court='';current.courtCircuit='';current.jurisdictionConfidence='low';current.legalBasis=[];
+diff --git a/lib/procedural-position.ts b/lib/procedural-position.ts
+index ec20925..4e3241a 100644
+--- a/lib/procedural-position.ts
++++ b/lib/procedural-position.ts
+@@ -19,21 +19,58 @@ const firstRole = (s: string) => /^(?:مدع|مدعي|متهم)/.test(s);
+ const negated = (s: string, index: number) => /(?:^|\s)(?:لم|لن|لا|ليس|لست|اذا|لو|ان|في حال)\s+[^،؛.!?\n]{0,22}$/.test(s.slice(0,index));
+ const courts = { first_instance:"المحكمة الكلية", appeal:"محكمة الاستئناف", cassation:"محكمة التمييز" };
+ export const intakeCourtNames = ["المحكمة الكلية", "المحكمة الجزئية", "محكمة الأسرة", "محكمة الاستئناف", "محكمة التمييز", "المحكمة الدستورية", "محكمة الجنح", "محكمة الجنايات"];
+-// These labels describe stated facts only, not a legal jurisdiction decision.
++// A profession or a word in a negated/background claim is not the subject of
++// the current request. This is a conservative factual check, not jurisdiction.
++export function currentMatterText(text: string) {
++  const corrections=[...text.matchAll(/(?:^|[\n.؛])\s*(?:تصحيح|للتصحيح|الصحيح)\s*[:：]/gu)];
++  const current=corrections.length?text.slice(corrections.at(-1)!.index!+corrections.at(-1)![0].length):text;
++  return current.split(/[\n،؛.!?]+/u).filter(raw=>!/(?:قضيه اخري|دعوي اخري|للاستشهاد|مثال افتراضي|قال الخصم|ورد في صحيفه الخصم)/u.test(normalize(raw))).join("\n");
++}
++const matterLabels: Array<[string,RegExp]> = [
++  ["عمالي",/عمالي(?:ه)?|علاقه عمل|employment|labou?r/],
++  ["إيجارات",/ايجار(?:ات)?|tenancy|rental/],
++  ["أحوال شخصية",/احوال شخصيه|اسره|family/],
++  ["تجاري",/تجاري(?:ه)?|commercial/], ["إداري",/اداري(?:ه)?|administrative/],
++  ["مدني",/مدني(?:ه)?|civil/], ["جزائي",/جزايي(?:ه)?|جنائي(?:ه)?|criminal/],
++];
++const matterFamily=(value:string)=>matterLabels.find(([,pattern])=>pattern.test(normalize(value)))?.[0]||(/جنح|جناي/.test(normalize(value))?"جزائي":value);
++export function inspectMatterType(text: string, statedCourt = "") {
++  const s=normalize(currentMatterText(text));
++  const denied=matterLabels.filter(([,pattern])=>s.split("\n").some(clause=>{
++    return [...clause.matchAll(new RegExp(pattern.source,"gu"))].some(match=>/(?:ليس(?:ت)?|لست|مو|not)\s+(?:(?:هذه|هي|القضيه|قضيه|الدعوي|دعوي|قضيتي|مطالبه|نزاع|علاقه|الحاليه)\s+){0,4}$/u.test(clause.slice(0,match.index)));
++  })).map(([label])=>label);
++  // Strip only a denied relationship/subject; an unpaid wage remains a claim.
++  const facts=s.replace(/(?:ليس لي|ليس لدي|لا يوجد لدي|لا يوجد بيننا|ليس بيننا|لا توجد بيننا)\s+(?:اي\s+)?عقد\s+عمل/gu,"");
++  const has=(pattern:RegExp)=>facts.split("\n").some(clause=>{
++    const match=pattern.exec(clause);return !!match&&!/(?:لا اطلب|لا اريد|لا اطالب|ليس|ليست|غير|not)\s+(?:[^\n]{0,18}\s+)?$/u.test(clause.slice(0,match.index));
++  });
++  const candidates:string[]=[];
++  const add=(label:string,yes:boolean)=>{if(yes&&!denied.includes(matterFamily(label))&&!candidates.includes(label))candidates.push(label);};
++  // A currently stated forum has priority over occupational background.
++  const court=statedCourt||inferProceduralPosition(currentMatterText(text)).court;
++  if(["محكمة الجنح","محكمة الجنايات","محكمة الأسرة"].includes(court)){
++    const label=court==="محكمة الجنح"?"جنحة":court==="محكمة الجنايات"?"جناية":"أحوال شخصية";
++    if(!denied.includes(matterFamily(label)))return {caseType:label,candidates:[label],denied,conflict:false};
++  }
++  const civilFiling=has(/(?:مطالبه\s+مدنيه|دعوي\s+(?:مدنيه|تعويض))/u);
++  const debtClaim=has(/اقرضت|سلفت|رد\s+(?:القرض|الدين)|repay\s+(?:the\s+)?loan/u);
++  const employmentRelief=has(/(?:اطالب|اطلب|المطالبه)[^\n]{0,45}(?:راتب|رواتب|اجور|الاجر)|مستحقات\s+عماليه|فصل\s+تعسفي|مكافاه\s+نهايه\s+الخدمه/u);
++  const laborClaim=has(/مستحقات\s+عماليه|فصل\s+تعسفي|مكافاه\s+نهايه\s+الخدمه|(?:راتب\S*|رواتب|اجور|اجر\S*)[^\n]{0,60}(?:لم\s|متاخر|تاخر|مستحق|لم\s+يصرف)|(?:لم\s+(?:تدفع|يدفع|يدفعوا|استلم|اتسلم)|اطالب|اطلب|المطالبه)[^\n]{0,65}(?:راتب|رواتب|اجور|الاجر)|انهاء\s+عقد\s+العمل|unpaid\s+(?:salary|wages)/u);
++  add("عمالي",laborClaim&&(!debtClaim||employmentRelief));
++  add("إيجارات",has(/عقد\s+ايجار|مستاجر|موجر|اخلاء\s+(?:العين|شقه)|اخلاء\s+شقه\s+او?جرها|tenant|landlord|rental\s+dispute/u));
++  add("أحوال شخصية",has(/طلاق|نفقه|حضانه|عقد\s+زواج|احوال\s+شخصيه|ميراث|custody|divorce/u));
++  add("إداري",has(/الغاء\s+قرار\s+اداري|قرار\s+اداري|دعوي\s+اداريه/u));
++  add("تجاري",has(/نزاع\s+تجاري|عقد\s+توريد|مطالبه\s+تجاريه|انا\s+المورد|وردت\s+(?:اجهزه|بضاعه|مواد|معدات|سلعا)|فاتوره\s+(?:توريد|بضاعه)|supply\s+contract|unpaid\s+invoice/u));
++  if(!civilFiling)add("جزائي",has(/جنحه|جنايه|اتهام|متهم|سرقه|سب\s+وقذف|criminal\s+charge/u));
++  const civil= civilFiling||has(/اقرضت|سلفت|رد\s+(?:القرض|الدين|مبلغ)|مطالبه\s+بالتعويض|دين|قرض|تعويض|loan|debt/u);
++  // Compensation can be consequential to another claim; its word alone is not
++  // a second proceeding. An explicit civil filing remains a separate signal.
++  add("مدني",civil&&(civilFiling||debtClaim||!candidates.length));
++  if(!candidates.length)add("عمالي",has(/عقد\s+عمل|مستحقات\s+عماليه/u));
++  return {caseType:candidates.length===1?candidates[0]:"",candidates,denied,conflict:candidates.length>1};
++}
+ export function inferMatterType(text: string, statedCourt = "") {
+-  const s=normalize(text);
+-  if(statedCourt==="محكمة الجنح")return "جنحة";
+-  if(statedCourt==="محكمة الجنايات")return "جناية";
+-  if(statedCourt==="محكمة الأسرة")return "أحوال شخصية";
+-  if(/مطالبه (?:مدنيه|بالتعويض)|دعوي (?:مدنيه|تعويض)/.test(s))return "مدني";
+-  if(/مستحقات عماليه|عقد عمل|جه[هة] عملي|فصل تعسفي|اجور|راتب|رواتب|مكافاه نهايه الخدمه/.test(s))return "عمالي";
+-  if(/طلاق|نفقه|حضانه|عقد زواج|احوال شخصيه|ميراث/.test(s))return "أحوال شخصية";
+-  if(/عقد ايجار|مستاجر|مؤجر|اخلاء العين/.test(s))return "إيجارات";
+-  if(/الغاء قرار اداري|قرار اداري|دعوي اداريه/.test(s))return "إداري";
+-  if(/نزاع تجاري|عقد توريد|مطالبه تجاريه|اسهم/.test(s))return "تجاري";
+-  if(/جنحه|جنايه|اتهام|نصب|احتيال|سرقه|اعتداء|سب وقذف/.test(s))return "جزائي";
+-  if(/دين|قرض|تعويض|مبلغ|مطالبه مدنيه/.test(s))return "مدني";
+-  return "";
++  return inspectMatterType(text,statedCourt).caseType;
+ }
+ 
+ /** Extracts stated procedure only; it does not establish jurisdiction or appeal eligibility. */
+@@ -119,9 +156,15 @@ export function applyProceduralPosition<T extends { court:string; courtCircuit:s
+     }
+     return p;
+   });
+-  const caseType = ["محكمة الجنح","محكمة الجنايات","محكمة الأسرة"].includes(position.court) ? inferMatterType(text,position.court) : (state as T & {caseType?:string}).caseType || inferMatterType(text);
+-  return {...state,...(caseType?{caseType}:{}),proceduralPosition:position,court,courtCircuit:position.conflict?"":position.courtCircuit||(court!==state.court?"":state.courtCircuit),
+-    readyForMemo:unresolved?false:state.readyForMemo,phase:unresolved&&state.phase==="ready"?"review":state.phase,
++  const previous=(state as T & {caseType?:string}).caseType||"";
++  const classification=inspectMatterType(text,position.court);
++  const denied=classification.denied.includes(matterFamily(previous));
++  const blocked=classification.conflict||denied;
++  const caseType=classification.caseType||(blocked?"":previous);
++  const changed=blocked||!!(previous&&caseType&&matterFamily(previous)!==matterFamily(caseType));
++  const reviewedCourt=changed&&!position.court?"":court;
++  return {...state,caseType,caseClassification:{...classification,changed,blocked},...(changed?{legalBasis:[],legalIssues:[],jurisdictionConfidence:"low" as const}:{}),proceduralPosition:position,court:reviewedCourt,courtCircuit:position.conflict||changed?position.courtCircuit:position.courtCircuit||(court!==state.court?"":state.courtCircuit),
++    readyForMemo:unresolved||changed?false:state.readyForMemo,phase:(unresolved||changed)&&state.phase==="ready"?"review":state.phase,
+     parties,
+-    memoPrefill:{...state.memoPrefill,...(caseType?{caseType}:{}),partyRole:role,court,allParties:parties.map(p=>`${p.name}: ${p.role}`).join("\n")}};
++    memoPrefill:{...state.memoPrefill,caseType,partyRole:role,court:reviewedCourt,...(changed?{legalIssues:""}:{}),allParties:parties.map(p=>`${p.name}: ${p.role}`).join("\n")}};
+ }
+diff --git a/scripts/check-memo-core-preserved.mjs b/scripts/check-memo-core-preserved.mjs
+index 798c5ed..d5fc630 100644
+--- a/scripts/check-memo-core-preserved.mjs
++++ b/scripts/check-memo-core-preserved.mjs
+@@ -14,8 +14,9 @@ export function checkMemoCore(){
+   const manifest=JSON.parse(readFileSync(resolve(root,'specs/100-memo-submission-recovery/protected-core.json'),'utf8'));
+   const transport=JSON.parse(readFileSync(resolve(root,'specs/102-meta-provider-connection/protected-transport.json'),'utf8'));
+   const isolation=JSON.parse(readFileSync(resolve(root,'specs/103-admin-memo-generation-isolation/protected-case-isolation.json'),'utf8'));
++  const classification=JSON.parse(readFileSync(resolve(root,'specs/104-case-classification-audit/protected-classification.json'),'utf8'));
+   function originalTransport(file,source){
+-    const substitutions=[...(isolation.files[file]||[]),...(transport.files[file]||[])];
++    const substitutions=[...(classification.files[file]||[]),...(isolation.files[file]||[]),...(transport.files[file]||[])];
+     for(const {before,after,count} of substitutions){
+       if(source.split(after).length-1!==count)throw Error('Unexpected provider transport edit: '+file);
+       source=source.split(after).join(before);
+diff --git a/specs/104-case-classification-audit/plan.md b/specs/104-case-classification-audit/plan.md
+new file mode 100644
+index 0000000..ce1862e
+--- /dev/null
++++ b/specs/104-case-classification-audit/plan.md
+@@ -0,0 +1,8 @@
++# خطة محدودة
++
++1. إعادة إنتاج التصنيف الخاطئ باختبارات اصطناعية على الاستنتاج والحارس ومسار المساعد.
++2. تمييز موضوع الطلب عن ألفاظ الخلفية، وحجب التصنيف المنفي أو المتعارض بدلاً من الاعتماد على نتيجة النموذج السابقة.
++3. مراجعة خادمية بعد بوابات الاستقبال تنظف التصنيف والمحكمة والأسانيد التابعة له عند رفضه؛ تبقى الوقائع والطلبات محفوظة ولا تُنشأ إحالات قانونية.
++4. تصحيح فهم نشاط جهة العمل والمهام المذكورة صراحة، دون اعتبار وظيفة الزائر موضوع النزاع تلقائياً.
++5. الحفاظ على البصمات الأصلية للنواة وإضافة عقد فروق محددة قابل للعكس للتعديلات المأذون بها فقط.
++6. اختبار المكونات والمسار، البناء والنشر في المشروع الحالي والتحقق بعيّنة اصطناعية. لا ترحيل قاعدة ولا تعديل ملفات خاصة.
+diff --git a/specs/104-case-classification-audit/protected-classification.json b/specs/104-case-classification-audit/protected-classification.json
+new file mode 100644
+index 0000000..1e0f496
+--- /dev/null
++++ b/specs/104-case-classification-audit/protected-classification.json
+@@ -0,0 +1,42 @@
++{
++  "baseCommit": "b8bac8047131b092500e7fe9ea25e09edba8daaf",
++  "scope": "Exact authorized factual subject classification, explicit denial/correction, and intake source-query scoping. Memo instructions, template text, source/citation review and payment behavior are unchanged. Reverse these deltas before the existing 103 and 102 contracts; keep original 100 hashes.",
++  "files": {
++    "lib/procedural-position.ts": [
++      {
++        "before": "const negated = (s: string, index: number) => /(?:^|\\s)(?:لم|لن|لا|ليس|لست|اذا|لو|ان|في حال)\\s+[^،؛.!?\\n]{0,22}$/.test(s.slice(0,index));\nconst courts = { first_instance:\"المحكمة الكلية\", appeal:\"محكمة الاستئناف\", cassation:\"محكمة التمييز\" };\nexport const intakeCourtNames = [\"المحكمة الكلية\", \"المحكمة الجزئية\", \"محكمة الأسرة\", \"محكمة الاستئناف\", \"محكمة التمييز\", \"المحكمة الدستورية\", \"محكمة الجنح\", \"محكمة الجنايات\"];\n// These labels describe stated facts only, not a legal jurisdiction decision.\nexport function inferMatterType(text: string, statedCourt = \"\") {\n  const s=normalize(text);\n  if(statedCourt===\"محكمة الجنح\")return \"جنحة\";\n  if(statedCourt===\"محكمة الجنايات\")return \"جناية\";\n  if(statedCourt===\"محكمة الأسرة\")return \"أحوال شخصية\";\n  if(/مطالبه (?:مدنيه|بالتعويض)|دعوي (?:مدنيه|تعويض)/.test(s))return \"مدني\";\n  if(/مستحقات عماليه|عقد عمل|جه[هة] عملي|فصل تعسفي|اجور|راتب|رواتب|مكافاه نهايه الخدمه/.test(s))return \"عمالي\";\n  if(/طلاق|نفقه|حضانه|عقد زواج|احوال شخصيه|ميراث/.test(s))return \"أحوال شخصية\";\n  if(/عقد ايجار|مستاجر|مؤجر|اخلاء العين/.test(s))return \"إيجارات\";\n  if(/الغاء قرار اداري|قرار اداري|دعوي اداريه/.test(s))return \"إداري\";\n  if(/نزاع تجاري|عقد توريد|مطالبه تجاريه|اسهم/.test(s))return \"تجاري\";\n  if(/جنحه|جنايه|اتهام|نصب|احتيال|سرقه|اعتداء|سب وقذف/.test(s))return \"جزائي\";\n  if(/دين|قرض|تعويض|مبلغ|مطالبه مدنيه/.test(s))return \"مدني\";\n  return \"\";\n}\n\n/** Extracts stated procedure only; it does not establish jurisdiction or appeal eligibility. */\n",
++        "after": "const negated = (s: string, index: number) => /(?:^|\\s)(?:لم|لن|لا|ليس|لست|اذا|لو|ان|في حال)\\s+[^،؛.!?\\n]{0,22}$/.test(s.slice(0,index));\nconst courts = { first_instance:\"المحكمة الكلية\", appeal:\"محكمة الاستئناف\", cassation:\"محكمة التمييز\" };\nexport const intakeCourtNames = [\"المحكمة الكلية\", \"المحكمة الجزئية\", \"محكمة الأسرة\", \"محكمة الاستئناف\", \"محكمة التمييز\", \"المحكمة الدستورية\", \"محكمة الجنح\", \"محكمة الجنايات\"];\n// A profession or a word in a negated/background claim is not the subject of\n// the current request. This is a conservative factual check, not jurisdiction.\nexport function currentMatterText(text: string) {\n  const corrections=[...text.matchAll(/(?:^|[\\n.؛])\\s*(?:تصحيح|للتصحيح|الصحيح)\\s*[:：]/gu)];\n  const current=corrections.length?text.slice(corrections.at(-1)!.index!+corrections.at(-1)![0].length):text;\n  return current.split(/[\\n،؛.!?]+/u).filter(raw=>!/(?:قضيه اخري|دعوي اخري|للاستشهاد|مثال افتراضي|قال الخصم|ورد في صحيفه الخصم)/u.test(normalize(raw))).join(\"\\n\");\n}\nconst matterLabels: Array<[string,RegExp]> = [\n  [\"عمالي\",/عمالي(?:ه)?|علاقه عمل|employment|labou?r/],\n  [\"إيجارات\",/ايجار(?:ات)?|tenancy|rental/],\n  [\"أحوال شخصية\",/احوال شخصيه|اسره|family/],\n  [\"تجاري\",/تجاري(?:ه)?|commercial/], [\"إداري\",/اداري(?:ه)?|administrative/],\n  [\"مدني\",/مدني(?:ه)?|civil/], [\"جزائي\",/جزايي(?:ه)?|جنائي(?:ه)?|criminal/],\n];\nconst matterFamily=(value:string)=>matterLabels.find(([,pattern])=>pattern.test(normalize(value)))?.[0]||(/جنح|جناي/.test(normalize(value))?\"جزائي\":value);\nexport function inspectMatterType(text: string, statedCourt = \"\") {\n  const s=normalize(currentMatterText(text));\n  const denied=matterLabels.filter(([,pattern])=>s.split(\"\\n\").some(clause=>{\n    return [...clause.matchAll(new RegExp(pattern.source,\"gu\"))].some(match=>/(?:ليس(?:ت)?|لست|مو|not)\\s+(?:(?:هذه|هي|القضيه|قضيه|الدعوي|دعوي|قضيتي|مطالبه|نزاع|علاقه|الحاليه)\\s+){0,4}$/u.test(clause.slice(0,match.index)));\n  })).map(([label])=>label);\n  // Strip only a denied relationship/subject; an unpaid wage remains a claim.\n  const facts=s.replace(/(?:ليس لي|ليس لدي|لا يوجد لدي|لا يوجد بيننا|ليس بيننا|لا توجد بيننا)\\s+(?:اي\\s+)?عقد\\s+عمل/gu,\"\");\n  const has=(pattern:RegExp)=>facts.split(\"\\n\").some(clause=>{\n    const match=pattern.exec(clause);return !!match&&!/(?:لا اطلب|لا اريد|لا اطالب|ليس|ليست|غير|not)\\s+(?:[^\\n]{0,18}\\s+)?$/u.test(clause.slice(0,match.index));\n  });\n  const candidates:string[]=[];\n  const add=(label:string,yes:boolean)=>{if(yes&&!denied.includes(matterFamily(label))&&!candidates.includes(label))candidates.push(label);};\n  // A currently stated forum has priority over occupational background.\n  const court=statedCourt||inferProceduralPosition(currentMatterText(text)).court;\n  if([\"محكمة الجنح\",\"محكمة الجنايات\",\"محكمة الأسرة\"].includes(court)){\n    const label=court===\"محكمة الجنح\"?\"جنحة\":court===\"محكمة الجنايات\"?\"جناية\":\"أحوال شخصية\";\n    if(!denied.includes(matterFamily(label)))return {caseType:label,candidates:[label],denied,conflict:false};\n  }\n  const civilFiling=has(/(?:مطالبه\\s+مدنيه|دعوي\\s+(?:مدنيه|تعويض))/u);\n  const debtClaim=has(/اقرضت|سلفت|رد\\s+(?:القرض|الدين)|repay\\s+(?:the\\s+)?loan/u);\n  const employmentRelief=has(/(?:اطالب|اطلب|المطالبه)[^\\n]{0,45}(?:راتب|رواتب|اجور|الاجر)|مستحقات\\s+عماليه|فصل\\s+تعسفي|مكافاه\\s+نهايه\\s+الخدمه/u);\n  const laborClaim=has(/مستحقات\\s+عماليه|فصل\\s+تعسفي|مكافاه\\s+نهايه\\s+الخدمه|(?:راتب\\S*|رواتب|اجور|اجر\\S*)[^\\n]{0,60}(?:لم\\s|متاخر|تاخر|مستحق|لم\\s+يصرف)|(?:لم\\s+(?:تدفع|يدفع|يدفعوا|استلم|اتسلم)|اطالب|اطلب|المطالبه)[^\\n]{0,65}(?:راتب|رواتب|اجور|الاجر)|انهاء\\s+عقد\\s+العمل|unpaid\\s+(?:salary|wages)/u);\n  add(\"عمالي\",laborClaim&&(!debtClaim||employmentRelief));\n  add(\"إيجارات\",has(/عقد\\s+ايجار|مستاجر|موجر|اخلاء\\s+(?:العين|شقه)|اخلاء\\s+شقه\\s+او?جرها|tenant|landlord|rental\\s+dispute/u));\n  add(\"أحوال شخصية\",has(/طلاق|نفقه|حضانه|عقد\\s+زواج|احوال\\s+شخصيه|ميراث|custody|divorce/u));\n  add(\"إداري\",has(/الغاء\\s+قرار\\s+اداري|قرار\\s+اداري|دعوي\\s+اداريه/u));\n  add(\"تجاري\",has(/نزاع\\s+تجاري|عقد\\s+توريد|مطالبه\\s+تجاريه|انا\\s+المورد|وردت\\s+(?:اجهزه|بضاعه|مواد|معدات|سلعا)|فاتوره\\s+(?:توريد|بضاعه)|supply\\s+contract|unpaid\\s+invoice/u));\n  if(!civilFiling)add(\"جزائي\",has(/جنحه|جنايه|اتهام|متهم|سرقه|سب\\s+وقذف|criminal\\s+charge/u));\n  const civil= civilFiling||has(/اقرضت|سلفت|رد\\s+(?:القرض|الدين|مبلغ)|مطالبه\\s+بالتعويض|دين|قرض|تعويض|loan|debt/u);\n  // Compensation can be consequential to another claim; its word alone is not\n  // a second proceeding. An explicit civil filing remains a separate signal.\n  add(\"مدني\",civil&&(civilFiling||debtClaim||!candidates.length));\n  if(!candidates.length)add(\"عمالي\",has(/عقد\\s+عمل|مستحقات\\s+عماليه/u));\n  return {caseType:candidates.length===1?candidates[0]:\"\",candidates,denied,conflict:candidates.length>1};\n}\nexport function inferMatterType(text: string, statedCourt = \"\") {\n  return inspectMatterType(text,statedCourt).caseType;\n}\n\n/** Extracts stated procedure only; it does not establish jurisdiction or appeal eligibility. */\n",
++        "count": 1
++      },
++      {
++        "before": "    }\n    return p;\n  });\n  const caseType = [\"محكمة الجنح\",\"محكمة الجنايات\",\"محكمة الأسرة\"].includes(position.court) ? inferMatterType(text,position.court) : (state as T & {caseType?:string}).caseType || inferMatterType(text);\n  return {...state,...(caseType?{caseType}:{}),proceduralPosition:position,court,courtCircuit:position.conflict?\"\":position.courtCircuit||(court!==state.court?\"\":state.courtCircuit),\n    readyForMemo:unresolved?false:state.readyForMemo,phase:unresolved&&state.phase===\"ready\"?\"review\":state.phase,\n    parties,\n    memoPrefill:{...state.memoPrefill,...(caseType?{caseType}:{}),partyRole:role,court,allParties:parties.map(p=>`${p.name}: ${p.role}`).join(\"\\n\")}};\n}\n",
++        "after": "    }\n    return p;\n  });\n  const previous=(state as T & {caseType?:string}).caseType||\"\";\n  const classification=inspectMatterType(text,position.court);\n  const denied=classification.denied.includes(matterFamily(previous));\n  const blocked=classification.conflict||denied;\n  const caseType=classification.caseType||(blocked?\"\":previous);\n  const changed=blocked||!!(previous&&caseType&&matterFamily(previous)!==matterFamily(caseType));\n  const reviewedCourt=changed&&!position.court?\"\":court;\n  return {...state,caseType,caseClassification:{...classification,changed,blocked},...(changed?{legalBasis:[],legalIssues:[],jurisdictionConfidence:\"low\" as const}:{}),proceduralPosition:position,court:reviewedCourt,courtCircuit:position.conflict||changed?position.courtCircuit:position.courtCircuit||(court!==state.court?\"\":state.courtCircuit),\n    readyForMemo:unresolved||changed?false:state.readyForMemo,phase:(unresolved||changed)&&state.phase===\"ready\"?\"review\":state.phase,\n    parties,\n    memoPrefill:{...state.memoPrefill,caseType,partyRole:role,court:reviewedCourt,...(changed?{legalIssues:\"\"}:{}),allParties:parties.map(p=>`${p.name}: ${p.role}`).join(\"\\n\")}};\n}\n",
++        "count": 1
++      }
++    ],
++    "lib/matter-facts.ts": [
++      {
++        "before": "import type {LegalEvidence} from './legal-search';\nimport type {LegalIntakeState} from './openai';\nimport type {QuestionMemory} from './intake-context';\nconst n=(s:string)=>s.normalize('NFKC').replace(/[أإآٱ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').replace(/[\\u064b-\\u065fـ]/g,'').toLowerCase();\nexport type MatterGap={key:string;ar:string;en:string;ur:string};\nconst gap=(key:string,ar:string,en:string,ur:string):MatterGap=>({key,ar,en,ur});\nexport const matterFactInstructions=`قبل ترجيح التشريع، افهم محل المطالبة وعلاقة الأطراف من الوقائع، لا من اسم نشاط المنشأة وحده. موظف الشركة العقارية قد ينازع على راتبه لا العقار، ومورّد شركة نفطية قد ينازع على فاتورة لا حقوق عامل. اسأل بلغة بسيطة عن الفعل والصفة وطبيعة النشاط والعمل والجهة الحقيقية في العقد ومن يدفع الأجر وهل توجد شركة مقاول وسيطة. لا تعتبر العمل داخل منشأة نفطية عقداً مباشراً معها. لا تساوِ مجرد كلمة «حكومي» أو «خاص» بانطباق نظام قانوني. في العمل استوضح طبيعة المهام ودورية الأجر عند تأثيرهما في المطالبة. في العقار استوضح هل المستخدم مالك أو مستأجر أو مشترٍ أو وسيط، وما التصرف والعقار وموقعه. وفي الأعمال استوضح محل التعاقد وصفة الطرفين. اسأل عن المعلومة الجوهرية الناقصة فقط، سؤالاً واحداً، دون إعادة المعروف أو طلب اختيار نوع الدعوى أو القانون أو المحكمة. إذا تعددت العلاقات أو تعارضت الإجابات فلا تختر قطاعاً أو سنداً على التخمين. اجمع الوقائع ثم استخرج من الملف شروط انطباق النص واستثناءاته وفرعه الموافق للصفة ونوع الأجر وتاريخ الواقعة. لا تستكمل ما غاب عن الملف من الذاكرة. الملاءمة المبدئية ليست اعتماداً نهائياً.`;\nexport function assessMatterFacts(text:string){\n const s=n(text),known:string[]=[],missing:MatterGap[]=[];\n const employmentText=s.replace(/(?:ليس لي|ليس لدي|لا يوجد لدي|لا يوجد بيننا|ليس بيننا)\\s+(?:اي\\s+)?عقد\\s+عمل/g,'');\n const employmentClaim=/راتبي|راتبه|راتب\\s+شهري|اجور|رواتب|مكافاه\\s+نهايه\\s+الخدمه|عقد\\s+عمل|فصل(?:ت|وني|ه|ني|ها)?\\s+من\\s+العمل|انه(?:ت|اء|ي).*عقد\\s+العمل|employment|unpaid salary|end.of.service/.test(employmentText);\n const employmentRelation=/انا\\s+(?:موظف|عامل)|اعمل\\s+(?:ك|لدي|في)|اشتغل\\s+(?:ك|عند|في)|عمل\\s+[^.\\n]{0,45}لدي\\s+شركه|موظف\\s+في\\s+شركه|عقد\\s+عمل|راتبي|راتب\\s+شهري/.test(employmentText);\n const propertyClaim=/استاجرت|اجرت\\s+(?:شقه|محل|بيت|عقار)|اشتريت\\s+(?:شقه|بيت|عقار|ارض)|مستاجر|موجر|اخلاء|عقد\\s+ايجار|بيع\\s+(?:عقار|شقه|بيت|ارض)|تسجيل\\s+عقار|سند\\s+ملكيه|tenant|landlord|property sale/.test(s);\n const commercialClaim=/وردت|وردنا|تورد|فاتوره|توريد|شراكه|عقد\\s+مقاوله|بعت\\s+بضاعه|ثمن\\s+بضاعه|supplier|invoice|supply contract/.test(s);\n const propertyMention=/عقار|شقه|ارض|ايجار|بيت|property|real estate/.test(s);\n const mixed=employmentClaim&&(propertyClaim||commercialClaim);\n const domain=mixed?'mixed':propertyClaim?'property':commercialClaim?'commercial':employmentClaim||employmentRelation?'employment':propertyMention&&!/شركه\\s+عقاريه/.test(s)?'property':'other';\n const oil=!/(?:ليست|ليس|لا اعمل|لست|غير)[^.\\n]{0,20}(?:نفط|بترول)/.test(s)&&/شركه\\s+(?:نفطيه|بتروليه)|منشاه\\s+نفطيه|استخراج\\s+النفط|انتاج\\s+النفط|oil company|petroleum/.test(s);\n const propertyIndustry=/شركه\\s+عقاريه|تطوير\\s+عقاري/.test(s);\n const privateStated=/القطاع\\s+الاهلي|القطاع\\s+الخاص|قطاع\\s+اهلي|شركه\\s+خاصه|private sector/.test(s);\n const publicStated=/جهه\\s+حكوميه|وزاره|موظف\\s+حكومي|government ministry/.test(s);\n const domestic=/عامل[ه]?\\s+منزلي[ه]?|عماله\\s+منزليه|خادمه|سائق\\s+(?:المنزل|منزلي)|domestic worker/.test(s);\n const agency=/عقدي\\s+مع\\s+شركه\\s+(?:مقاول|وسيط)|تابع\\s+لشركه\\s+مقاول|شركه\\s+مقاول.*(?:عقد|راتب)|لست\\s+موظفا\\s+(?:مباشرا|لدي)|subcontractor|staffing agency/.test(s);\n const activityKnown=oil||propertyIndustry||publicStated||domestic||/نشاط\\s+(?:الشركه|الجهه)|تعمل\\s+(?:في\\s+)?(?:التجاره|التعليم|الصناعه|الصحه|بيع|توزيع|المقاولات)|شركه\\s+(?:تجاريه|صناعيه|تعليميه|مقاولات|تبيع)|electrical trading|manufactur|employer activity/.test(s);\n const workKnown=domestic||/محاسب|مهندس|مدرس|معلم|طبيب|صيدلي|ممرض|موظف\\s+اداري|سائق|عامل\\s+(?:حفر|تشغيل|نظافه)|فني\\s+صيانه|امين\\s+مخزن|وظيفتي\\s+\\S+|عملي\\s+هو\\s+\\S+|مسماي\\s+الوظيفي\\s+\\S+|accountant|engineer|teacher|nurse|job duties/.test(s);\n const contractKnown=domestic||agency||/(?:صاحب العمل|جهه العمل|الجهه التي تدفع راتبي|الشركه التي تدفع راتبي)(?:\\s+الفعلي)?\\s+(?:هو|هي|اسمها)\\s+\\S+|راتبي\\s+من\\s+شركه\\s+\\S+/.test(s)||/قرار\\s+تعيين(?:ي|ه)?\\s+(?:من|ب|في)\\s*وزاره/.test(s)||/عقد(?:ي|ه|ها|\\s+العمل)?[^.\\n]{0,35}(?:باسم|مع|لدي)\\s+\\S+|عمل\\s+[^.\\n]{0,45}لدي\\s+شركه[^.\\n]{0,65}بعقد|تعاقدت\\s+مباشره|عقد\\s+مباشر\\s+مع|contract (?:is )?with|direct employment contract/.test(employmentText);\n const directOil=/عقد(?:ي|ه|\\s+العمل)?[^.\\n]{0,65}(?:مع|باسم)[^.\\n]{0,35}(?:الشركه\\s+النفطيه|شركه\\s+نفطيه|مؤسسه\\s+البترول|شركه\\s+نفط\\s+الكويت)/.test(s);\n const frequencyKnown=/شهري|بالشهر|يومي|باليوم|اسبوعي|بالاسبوع|بالساعه|monthly|daily|hourly|weekly/.test(s);\n",
++        "after": "import type {LegalEvidence} from './legal-search';\nimport type {LegalIntakeState} from './openai';\nimport type {QuestionMemory} from './intake-context';\nimport {currentMatterText,inspectMatterType} from './procedural-position';\nconst n=(s:string)=>s.normalize('NFKC').replace(/[أإآٱ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').replace(/[\\u064b-\\u065fـ]/g,'').toLowerCase();\nexport type MatterGap={key:string;ar:string;en:string;ur:string};\nconst gap=(key:string,ar:string,en:string,ur:string):MatterGap=>({key,ar,en,ur});\nexport const matterFactInstructions=`قبل ترجيح التشريع، افهم محل المطالبة وعلاقة الأطراف من الوقائع، لا من اسم نشاط المنشأة وحده. موظف الشركة العقارية قد ينازع على راتبه لا العقار، ومورّد شركة نفطية قد ينازع على فاتورة لا حقوق عامل. اسأل بلغة بسيطة عن الفعل والصفة وطبيعة النشاط والعمل والجهة الحقيقية في العقد ومن يدفع الأجر وهل توجد شركة مقاول وسيطة. لا تعتبر العمل داخل منشأة نفطية عقداً مباشراً معها. لا تساوِ مجرد كلمة «حكومي» أو «خاص» بانطباق نظام قانوني. في العمل استوضح طبيعة المهام ودورية الأجر عند تأثيرهما في المطالبة. في العقار استوضح هل المستخدم مالك أو مستأجر أو مشترٍ أو وسيط، وما التصرف والعقار وموقعه. وفي الأعمال استوضح محل التعاقد وصفة الطرفين. اسأل عن المعلومة الجوهرية الناقصة فقط، سؤالاً واحداً، دون إعادة المعروف أو طلب اختيار نوع الدعوى أو القانون أو المحكمة. إذا تعددت العلاقات أو تعارضت الإجابات فلا تختر قطاعاً أو سنداً على التخمين. اجمع الوقائع ثم استخرج من الملف شروط انطباق النص واستثناءاته وفرعه الموافق للصفة ونوع الأجر وتاريخ الواقعة. لا تستكمل ما غاب عن الملف من الذاكرة. الملاءمة المبدئية ليست اعتماداً نهائياً.`;\nexport function assessMatterFacts(text:string){\n const scoped=currentMatterText(text),s=n(scoped),known:string[]=[],missing:MatterGap[]=[];\n const classification=inspectMatterType(scoped);\n const otherSubject=!!classification.caseType&&classification.caseType!=='عمالي';\n const employmentText=s.replace(/(?:ليس لي|ليس لدي|لا يوجد لدي|لا يوجد بيننا|ليس بيننا)\\s+(?:اي\\s+)?عقد\\s+عمل/g,'');\n const employmentClaim=/راتبي|راتبه|راتب\\s+شهري|اجور|رواتب|مكافاه\\s+نهايه\\s+الخدمه|عقد\\s+عمل|فصل(?:ت|وني|ه|ني|ها)?\\s+من\\s+العمل|انه(?:ت|اء|ي).*عقد\\s+العمل|employment|unpaid salary|end.of.service/.test(employmentText);\n const employmentRelation=/انا\\s+(?:موظف|عامل)|اعمل\\s+(?:ك|لدي|في)|اشتغل\\s+(?:ك|عند|في)|عمل\\s+[^.\\n]{0,45}لدي\\s+شركه|موظف\\s+في\\s+شركه|عقد\\s+عمل|راتبي|راتب\\s+شهري/.test(employmentText);\n const propertyClaim=/استاجرت|اجرت\\s+(?:شقه|محل|بيت|عقار)|اشتريت\\s+(?:شقه|بيت|عقار|ارض)|مستاجر|موجر|اخلاء|عقد\\s+ايجار|بيع\\s+(?:عقار|شقه|بيت|ارض)|تسجيل\\s+عقار|سند\\s+ملكيه|tenant|landlord|property sale/.test(s);\n const commercialClaim=/وردت|وردنا|تورد|فاتوره|توريد|شراكه|عقد\\s+مقاوله|بعت\\s+بضاعه|ثمن\\s+بضاعه|supplier|invoice|supply contract/.test(s);\n const propertyMention=/عقار|شقه|ارض|ايجار|بيت|property|real estate/.test(s);\n const mixed=!otherSubject&&employmentClaim&&(propertyClaim||commercialClaim);\n const domain=mixed?'mixed':propertyClaim?'property':commercialClaim?'commercial':!otherSubject&&(employmentClaim||employmentRelation)?'employment':propertyMention&&!/شركه\\s+عقاريه/.test(s)?'property':'other';\n const oil=!/(?:ليست|ليس|لا اعمل|لست|غير)[^.\\n]{0,20}(?:نفط|بترول)/.test(s)&&/شركه\\s+(?:نفطيه|بتروليه)|منشاه\\s+نفطيه|استخراج\\s+النفط|انتاج\\s+النفط|oil company|petroleum/.test(s);\n const propertyIndustry=/شركه\\s+عقاريه|تطوير\\s+عقاري/.test(s);\n const privateStated=/القطاع\\s+الاهلي|القطاع\\s+الخاص|قطاع\\s+اهلي|شركه\\s+خاصه|private sector/.test(s);\n const publicStated=/جهه\\s+حكوميه|وزاره|موظف\\s+حكومي|government ministry/.test(s);\n const domestic=/عامل[ه]?\\s+منزلي[ه]?|عماله\\s+منزليه|خادمه|سائق\\s+(?:المنزل|منزلي)|domestic worker/.test(s);\n const agency=/عقدي\\s+مع\\s+شركه\\s+(?:مقاول|وسيط)|تابع\\s+لشركه\\s+مقاول|شركه\\s+مقاول.*(?:عقد|راتب)|لست\\s+موظفا\\s+(?:مباشرا|لدي)|subcontractor|staffing agency/.test(s);\n const activityKnown=oil||propertyIndustry||publicStated||domestic||/نشاط\\s+(?:الشركه|الجهه)|نشاطها\\s+\\S+|تعمل\\s+(?:في\\s+)?(?:التجاره|التعليم|الصناعه|الصحه|بيع|توزيع|المقاولات)|شركه\\s+(?:تجاريه|صناعيه|تعليميه|مقاولات|تبيع)|electrical trading|manufactur|employer activity/.test(s);\n const workKnown=domestic||/محاسب|مهندس|مدرس|معلم|طبيب|صيدلي|ممرض|موظف\\s+(?:اداري|مبيعات)|مندوب\\s+مبيعات|بائع|سائق|عامل\\s+(?:حفر|تشغيل|نظافه)|فني\\s+صيانه|امين\\s+مخزن|وظيفتي\\s+\\S+|عملي\\s+هو\\s+\\S+|مسماي\\s+الوظيفي\\s+\\S+|accountant|engineer|teacher|nurse|job duties/.test(s);\n const contractKnown=domestic||agency||/(?:صاحب العمل|جهه العمل|الجهه التي تدفع راتبي|الشركه التي تدفع راتبي)(?:\\s+الفعلي)?\\s+(?:هو|هي|اسمها)\\s+\\S+|راتبي\\s+من\\s+شركه\\s+\\S+/.test(s)||/قرار\\s+تعيين(?:ي|ه)?\\s+(?:من|ب|في)\\s*وزاره/.test(s)||/عقد(?:ي|ه|ها|\\s+العمل)?[^.\\n]{0,35}(?:باسم|مع|لدي)\\s+\\S+|عمل\\s+[^.\\n]{0,45}لدي\\s+شركه[^.\\n]{0,65}بعقد|تعاقدت\\s+مباشره|عقد\\s+مباشر\\s+مع|contract (?:is )?with|direct employment contract/.test(employmentText);\n const directOil=/عقد(?:ي|ه|\\s+العمل)?[^.\\n]{0,65}(?:مع|باسم)[^.\\n]{0,35}(?:الشركه\\s+النفطيه|شركه\\s+نفطيه|مؤسسه\\s+البترول|شركه\\s+نفط\\s+الكويت)/.test(s);\n const frequencyKnown=/شهري|بالشهر|يومي|باليوم|اسبوعي|بالاسبوع|بالساعه|monthly|daily|hourly|weekly/.test(s);\n",
++        "count": 1
++      },
++      {
++        "before": " return {domain,activity:oil?'oil':propertyIndustry?'real_estate':publicStated?'public':domestic?'domestic':activityKnown?'other':'unknown',agency,known:[...new Set(known)],missing,ready:!missing.length,eligibility:{oil:employmentReady&&oil&&!agency&&directOil,domestic:employmentReady&&domestic,public:employmentReady&&publicStated&&!agency,private:employmentReady&&!domestic&&(!publicStated||agency)&&(privateStated||agency||activityKnown)}};\n}\nexport function selectMatterSources<T extends Pick<LegalEvidence,'title'>>(evidence:T[],text:string):T[]{\n const profile=assessMatterFacts(text),s=n(text);\n return evidence.filter(source=>{\n  const title=n(source.title),labor=/العمل\\s+في\\s+القطاع|العماله\\s+المنزليه|الخدمه\\s+المدنيه|التامين\\s+التكميلي/.test(title);\n  if(profile.domain==='property'||profile.domain==='commercial')return !labor;\n  if(profile.domain==='employment'){\n   if(/القطاع\\s+النفطي/.test(title))return profile.eligibility.oil;\n",
++        "after": " return {domain,activity:oil?'oil':propertyIndustry?'real_estate':publicStated?'public':domestic?'domestic':activityKnown?'other':'unknown',agency,known:[...new Set(known)],missing,ready:!missing.length,eligibility:{oil:employmentReady&&oil&&!agency&&directOil,domestic:employmentReady&&domestic,public:employmentReady&&publicStated&&!agency,private:employmentReady&&!domestic&&(!publicStated||agency)&&(privateStated||agency||activityKnown)}};\n}\nexport function selectMatterSources<T extends Pick<LegalEvidence,'title'>>(evidence:T[],text:string):T[]{\n const profile=assessMatterFacts(text),s=n(currentMatterText(text)),subject=inspectMatterType(text).caseType;\n return evidence.filter(source=>{\n  const title=n(source.title),labor=/العمل\\s+في\\s+القطاع|العماله\\s+المنزليه|الخدمه\\s+المدنيه|التامين\\s+التكميلي/.test(title);\n  if(subject&&subject!=='عمالي'&&subject!=='إداري'&&labor)return false;\n  if(profile.domain==='property'||profile.domain==='commercial')return !labor;\n  if(profile.domain==='employment'){\n   if(/القطاع\\s+النفطي/.test(title))return profile.eligibility.oil;\n",
++        "count": 1
++      },
++      {
++        "before": " const memory={asked:[...previous.asked],resolved:[...new Set([...previous.resolved,...(state.questionMemory?.resolved||[]),...p.known])],unavailable:[...new Set([...previous.unavailable,...(state.questionMemory?.unavailable||[])])]};\n const current=state as LegalIntakeState & {matterFacts?:unknown};\n current.matterFacts={...p,missing:p.missing.map(g=>({key:g.key,question:g[lang]})),legalApplicability:'requires_source_and_human_review'};\n if(!p.missing.length)return current;\n const question=p.missing.find(g=>!memory.asked.some(q=>q.key===g.key)&&!memory.unavailable.includes(g.key));\n current.readyForMemo=false;current.phase='gathering';current.court='';current.courtCircuit='';current.jurisdictionConfidence='low';current.legalBasis=[];\n",
++        "after": " const memory={asked:[...previous.asked],resolved:[...new Set([...previous.resolved,...(state.questionMemory?.resolved||[]),...p.known])],unavailable:[...new Set([...previous.unavailable,...(state.questionMemory?.unavailable||[])])]};\n const current=state as LegalIntakeState & {matterFacts?:unknown};\n current.matterFacts={...p,missing:p.missing.map(g=>({key:g.key,question:g[lang]})),legalApplicability:'requires_source_and_human_review'};\n current.questionMemory=memory;current.resolvedTopics=memory.resolved;current.unavailableTopics=memory.unavailable;\n if(p.domain==='employment'){\n  const recorded=current.memoPrefill.facts||current.facts?.join('\\n')||'';\n  const known=assessMatterFacts(recorded).known;\n  const needed=new Set(p.known.filter(key=>key.startsWith('employment.')&&!known.includes(key)));\n  // Keep supplied context that the summary omitted; these are verbatim visitor\n  // statements, not a finding that the corresponding statute applies.\n  const context=currentMatterText(text).split('\\n').filter(clause=>!n(recorded).includes(n(clause))&&assessMatterFacts(clause).known.some(key=>needed.has(key)));\n  if(context.length)current.memoPrefill={...current.memoPrefill,facts:[recorded,...new Set(context)].filter(Boolean).join('\\n')};\n }\n if(!p.missing.length)return current;\n const question=p.missing.find(g=>!memory.asked.some(q=>q.key===g.key)&&!memory.unavailable.includes(g.key));\n current.readyForMemo=false;current.phase='gathering';current.court='';current.courtCircuit='';current.jurisdictionConfidence='low';current.legalBasis=[];\n",
++        "count": 1
++      }
++    ],
++    "lib/intake-context.ts": [
++      {
++        "before": "  const state = cleanIntakeContext(currentState);\n  const context = [message, state?.caseType, ...(state?.legalIssues || []), ...(state?.requests || []), ...(state?.facts || []).slice(-8), ...userMessages.slice(-3)].filter(Boolean).join(\" \");\n  const normalized = normalizeQuestion(context);\n  const isLabor = topics[0][0].test(normalized);\n  const matched = topics.filter(([pattern], i) => pattern.test(normalized) && !(i === 5 && isLabor && !/شراك|توريد|افلاس|اسهم|تجاري/.test(normalized))).map(([, terms]) => terms).slice(0, 3);\n  if (isLabor && /قطاع اهلي|قطاع خاص|شركه خاصه/.test(normalized)) matched.unshift(\"العمل القطاع الأهلي\");\n  const focused = matched.join(\" \") || [state?.caseType, ...(state?.legalIssues || []), message].filter(Boolean).join(\" \");\n  const issueTerms: Array<[RegExp, string]> = [[/اقرض|قرض|سلفت|سلفني/, \"قرض مديونية وفاء إثبات\"], [/مكافاه|نهايه الخدمه/, \"مكافأة نهاية الخدمة أجور\"], [/راتب|رواتب|اجور/, \"أجور راتب تأخير العمل\"], [/ضرب|اعتدا|اصابه/, \"ضرب جرح إيذاء اعتداء\"], [/نفقه|مصاريف.*طفل|طفل.*مصاريف/, \"نفقة أولاد صغار\"], [/اخلاء|ايجار/, \"إيجار إخلاء أجرة\"], [/تعويض|اتلاف/, \"تعويض ضرر مسؤولية\"], [/فصل.*عمل|انها.*خدمه/, \"فصل تعسفي إنهاء الخدمة\"]];\n  const specific = issueTerms.filter(([pattern]) => pattern.test(normalized)).map(([, terms]) => terms).slice(0, 2).join(\" \");\n  return [...new Set([[specific, state?.caseType, ...(state?.legalIssues || []).slice(0, 2)].filter(Boolean).join(\" \") || focused, [specific, ...(state?.requests || []).slice(0, 2), message].filter(Boolean).join(\" \").slice(0, 500), `اختصاص ${focused.slice(0, 350)}`])].filter(Boolean);\n}\n",
++        "after": "  const state = cleanIntakeContext(currentState);\n  const context = [message, state?.caseType, ...(state?.legalIssues || []), ...(state?.requests || []), ...(state?.facts || []).slice(-8), ...userMessages.slice(-3)].filter(Boolean).join(\" \");\n  const normalized = normalizeQuestion(context);\n  const isLabor = assessMatterFacts(context).domain === \"employment\";\n  const matched = topics.filter(([pattern], i) => pattern.test(normalized) && (i!==0||isLabor) && !(i === 5 && isLabor && !/شراك|توريد|افلاس|اسهم|تجاري/.test(normalized))).map(([, terms]) => terms).slice(0, 3);\n  if (isLabor && /قطاع اهلي|قطاع خاص|شركه خاصه/.test(normalized)) matched.unshift(\"العمل القطاع الأهلي\");\n  const focused = matched.join(\" \") || [state?.caseType, ...(state?.legalIssues || []), message].filter(Boolean).join(\" \");\n  const issueTerms: Array<[RegExp, string]> = [[/اقرض|قرض|سلفت|سلفني/, \"قرض مديونية وفاء إثبات\"], [/مكافاه|نهايه الخدمه/, \"مكافأة نهاية الخدمة أجور\"], [/راتب|رواتب|اجور/, \"أجور راتب تأخير العمل\"], [/ضرب|اعتدا|اصابه/, \"ضرب جرح إيذاء اعتداء\"], [/نفقه|مصاريف.*طفل|طفل.*مصاريف/, \"نفقة أولاد صغار\"], [/اخلاء|ايجار/, \"إيجار إخلاء أجرة\"], [/تعويض|اتلاف/, \"تعويض ضرر مسؤولية\"], [/فصل.*عمل|انها.*خدمه/, \"فصل تعسفي إنهاء الخدمة\"]];\n  const specific = issueTerms.filter(([pattern],i) => pattern.test(normalized) && (isLabor||![1,2,7].includes(i))).map(([, terms]) => terms).slice(0, 2).join(\" \");\n  return [...new Set([[specific, state?.caseType, ...(state?.legalIssues || []).slice(0, 2)].filter(Boolean).join(\" \") || focused, [specific, ...(state?.requests || []).slice(0, 2), message].filter(Boolean).join(\" \").slice(0, 500), `اختصاص ${focused.slice(0, 350)}`])].filter(Boolean);\n}\n",
++        "count": 1
++      }
++    ]
++  }
++}
+diff --git a/specs/104-case-classification-audit/spec.md b/specs/104-case-classification-audit/spec.md
+new file mode 100644
+index 0000000..1c56635
+--- /dev/null
++++ b/specs/104-case-classification-audit/spec.md
+@@ -0,0 +1,20 @@
++# تدقيق نوع القضية من وقائع الطلب الحالي
++
++طلب المستخدم: التحقق من كل قضية وعدم افتراض أنها عمالية أو نقل تصنيف تجربة إلى قضية عميل.
++
++## النطاق والافتراضات
++
++- المثال السابق كان اصطناعياً؛ لا يمثل قضية المستخدم ولا يجيز تعديل سجلات العملاء.
++- التصنيف المبدئي يصف الرواية ولا يثبت الاختصاص القانوني أو صحة الدعوى. مصدر الاختصاص والنصوص وبوابات الاعتماد محفوظة.
++- لا تغيّر تعليمات صياغة المذكرات أو قوالبها أو إعداد المزود أو الأسعار؛ التغيير في فهم المدخلات والتحقق قبل إحالتها.
++- لا توجد وقائع حالية كافية لتصنيف قضية المستخدم نفسها. الاختبارات اصطناعية بلا أسماء عملاء.
++
++## معايير القبول
++
++1. ذكر راتب أو وظيفة في خلفية قرض أو إيجار أو اتهام لا يكفي لتصنيف عمالي.
++2. نفي المستخدم للتصنيف وتصحيحه يتقدمان على تصنيف النموذج أو الحالة السابقة. عند عدم اتضاح البديل تُفرّغ الخانة ويطلب توضيح واقعي واحد.
++3. لا يختار النظام بين روايتين أو نوعين متعارضين بصمت، ولا ينقل محكمة أو أسانيد التصنيف المرفوض للمذكرة.
++4. المحكمة المصرح بها للإجراء الحالي تبقى منفصلة عن المحكمة الواردة في حكم قديم أو مثال أو قضية أخرى.
++5. عبارات النشاط والعمل الصريحة في المثال الاصطناعي السابق تُفهم دون إعادة سؤال عنها.
++6. لا يُستعاد رد النموذج الخاطئ بعد بوابات التحقق. تستمر المسودة والمعلومات الصحيحة مع بيان النقص.
++7. اختبارات انحدار تفشل قبل التصحيح ثم تنجح، تشمل مدني/تجاري/إيجارات/أسرة/جزائي/عمالي والنفي والتصحيح والتعارض وتعطل المزود. لا تستدل هذه العينات على صحة كل القضايا.
+diff --git a/specs/104-case-classification-audit/tasks.md b/specs/104-case-classification-audit/tasks.md
+new file mode 100644
+index 0000000..5716a8d
+--- /dev/null
++++ b/specs/104-case-classification-audit/tasks.md
+@@ -0,0 +1,9 @@
++# المهام
++
++- [x] T01 اختبارات تعيد إنتاج النفي والتصحيح وكلمة الراتب في نزاع غير عمالي وتوثيق فشلها.
++- [x] T02 استنتاج موضوع الطلب والتحقق من التصنيف المرفوض/المتعارض على الخادم.
++- [x] T03 منع إعادة طلب النشاط والمهام الصريحة مع الحفاظ على نقص الوقائع الحقيقي.
++- [x] T04 عقد حفظ النواة، اختبارات المسار والفحوص والبناء.
++- [x] T05 نشر النسخة والتحقق الاصطناعي وتوثيق حدود الاختبار دون تعديل قضية عميل.
++
++الفحص الحي للإصدار 238: ظهر نوع مدني للقرض الشخصي مع وجود الوظيفة والراتب في خلفية الرواية، ولم يظهر تصنيف عمالي. بقي التحليل الكامل محدوداً بسبب رفض OpenAI بـ429 ثم Gemini بـ503؛ لم تُحدّد المحكمة ولم يعتمد سند أو مذكرة. لا يثبت ذلك تصنيف القضية الحقيقية للمستخدم.
+diff --git a/specs/104-case-classification-audit/verification.md b/specs/104-case-classification-audit/verification.md
+new file mode 100644
+index 0000000..3d6ef07
+--- /dev/null
++++ b/specs/104-case-classification-audit/verification.md
+@@ -0,0 +1,14 @@
++# أدلة فحص التدقيق
++
++كل المدخلات اصطناعية؛ لا تخص عميلًا ولا تثبت نوع قضية المستخدم.
++
++- قبل الإصلاح: فشلت 11 من 13 حالة بسبب إرجاع عمالي للقرض والإيجار والتوريد والأسرة رغم خلفية الوظيفة، وتجاهل نفي التصنيف، وفقد تفاصيل عمل صريحة.
++- اختبار مسار HTTP أعاد تصنيف النموذج الخاطئ في النص بعد تعديل الحقول؛ فشل قبل تغيير ترتيب المراجعة، ثم نجح بعد استبعاد الرد والدائرة والأسانيد التابعة له.
++- أضيفت حالتا «أقرضت صديقي راتبي ولم يسدد القرض» و«وردت أسماء في الملف»؛ فشلتا ثم نجحتا بعد تضييق علاقة فعل عدم الوفاء ومحله.
++- أعاد اختبار فقد السياق ملخصاً لا يتضمن نشاط الشركة والقطاع المذكورين صراحة. فشل قبل حفظ أقوال المستخدم الأصلية التي أسقطها الملخص، ثم نجح.
++- نجح اختبار بقاء نصوص الخدمة المدنية ضمن مرشحات النزاع الإداري بعد تصحيح استبعاد عام زائد؛ الاسترجاع مرشح بحث وليس إثباتاً لانطباق النص.
++- آخر فحص شامل: 473 اختباراً نجحت (42 مصادر، 310 مذكرات واستقبال، 121 صلاحيات)، مع فحوص اللوحة الستة وبناء Vinext واختبار صادرات المزود بعد البناء. سجل التحقق: release-df5318b5063a46f59e24e93941571c2d. تبقى بصمات النواة الأصلية وتعليمات الصياغة والقوالب محفوظة؛ فروق التدقيق المحددة تعكس قبل فحصها.
++- نُشر الإصدار 238 من المصدر 539e133baddbce3ec16973df22f7f44054754e66 بنجاح. اختبرت واجهة GitHub بطلب مصطنع مستقل عن قرض لصديق من الراتب؛ ظهرت «مدني» رغم الوظيفة والراتب، وحافظت الواجهة على الرواية المستقلة بعد بدء محادثة جديدة.
++- لم يكتمل التحليل الدلالي الحي: سجّل الخادم OpenAI 429 ثم Gemini 503، فاستُخدم جمع الوقائع المحدود ولم يُعتمد اختصاص أو سند أو مذكرة. نجاح التعرف المبدئي لا يثبت عمل النموذج أو دقة كل قضية. لا مفاتيح مزود جديدة ولا تعديل في قضية حقيقية أو تحقق من سريان النصوص في هذه المهمة.
++
++حدود: هذه حواجز للتعارض والنفي وسياق الألفاظ، وليست مصنفاً يثبت صحة كل نوع قضية. يظل تحليل النموذج والمصادر والمراجعة البشرية لازماً؛ نقص الوقائع لا يعوض بتصنيف افتراضي.
+diff --git a/tests/assistant-classification.test.mjs b/tests/assistant-classification.test.mjs
+index 11a268b..3fc31e4 100644
+--- a/tests/assistant-classification.test.mjs
++++ b/tests/assistant-classification.test.mjs
+@@ -7,10 +7,10 @@ const handoff=load('../lib/memo-handoff.ts');
+ const context=load('../lib/intake-context.ts',{'./memo-handoff':handoff});
+ const analysis=load('../lib/intake-analysis.ts',{'./legal-search':search});
+ const readiness=load('../lib/intake-readiness.ts',{'./memo-handoff':handoff,'./intake-context':context});
+-function handlers(){return load('../app/api/legal/assistant/route.ts',{
++function handlers(modelResult){return load('../app/api/legal/assistant/route.ts',{
+  '@/lib/intake-readiness':readiness,'@/lib/intake-context':context,'@/lib/intake-analysis':analysis,
+  '@/lib/assistant-input':load('../lib/assistant-input.ts'),
+- '@/lib/openai':{conductLegalIntake:async()=>{throw Error('synthetic quota');},openAIErrorResponse:()=>({message:'خدمة التحليل غير متاحة في الاختبار بسبب حد الاستخدام.',status:503})},
++ '@/lib/openai':{conductLegalIntake:async()=>{if(modelResult)return structuredClone(modelResult);throw Error('synthetic quota');},openAIErrorResponse:()=>({message:'خدمة التحليل غير متاحة في الاختبار بسبب حد الاستخدام.',status:503})},
+  '@/lib/legal-search':{...search,searchIntakeLibrary:async()=>[]},
+  '@/lib/public-auth':{requireMemoUserOrGuest:async()=>null},
+  '@/lib/service-settings':{requireServiceEnabled:async()=>{}},
+@@ -26,3 +26,16 @@ test('provider outage retains explicitly stated current court, criminal subtype
+ test('missing court remains unresolved; memo preparation wording does not become an employment claim',async()=>{
+  const state=await run('أريد عمل مذكرة دفاع ولا أعرف تفاصيل الموضوع بعد.');assert.equal(state.caseType,'');assert.equal(state.court,'');assert.equal(state.readyForMemo,false);assert.equal(state.legalBasis.length,0);
+ });
++
++test('رفض التصنيف السابق لا يعاد عرضه من رد النموذج بعد بوابات الاستقبال',async()=>{
++ const previous={caseType:'عمالي',court:'المحكمة الكلية',courtCircuit:'الدائرة العمالية',phase:'gathering',facts:[],nextQuestions:[],questionMemory:{asked:[],resolved:[],unavailable:[]},memoPrefill:{caseType:'عمالي',court:'المحكمة الكلية'}};
++ const response=await handlers()(new Request('https://example.test/api/legal/assistant',{method:'POST',headers:{Origin:'https://example.test','Content-Type':'application/json'},body:JSON.stringify({message:'القضية ليست عمالية. لم أشرح المشكلة بعد.',messages:[],currentState:previous,language:'ar'})}));
++ assert.equal(response.status,200);const {state}=await response.json();assert.equal(state.caseType,'');assert.equal(state.memoPrefill.caseType,'');assert.equal(state.court,'');assert.equal(state.legalBasis.length,0);assert.equal(state.readyForMemo,false);assert.ok(state.nextQuestions.length<=1);assert.match(state.assistantMessage,/تصنيف|الواقعة/);assert.doesNotMatch(state.assistantMessage,/وصفت القضية بأنها عمالي/);
++});
++
++test('رد نموذج خاطئ لا يتغلب على وقائع قرض مستقلة ولا يحتفظ بدائرة عمالية',async()=>{
++ const message='اختبار اصطناعي: أنا موظف في شركة ولكن النزاع مع صديقي الذي أقرضته مبلغاً من راتبي وأطلب رد القرض. لم أرفع دعوى ولم يصدر حكم.';
++ const result={orientation:{categoryReason:'نزاع عمالي عن الأجور',track:'initial',judgment:'none',judgmentQuote:'',nextAction:'تقديم شكوى عمالية'},caseType:'عمالي',caseStage:'قبل رفع الدعوى',court:'المحكمة الكلية',courtCircuit:'الدائرة العمالية',assistantMessage:'القضية عمالية والمطالبة تتعلق بأجور متأخرة.',phase:'ready',progress:90,jurisdictionReason:'اختصاص عمالي مفترض',jurisdictionConfidence:'high',jurisdictionMissing:[],analysisWarnings:[],parties:[],facts:[message],requests:['رد القرض'],legalIssues:['أجر متأخر'],importantDates:[],documentsNeeded:[],missingInformation:[],contradictions:[],nextQuestions:[],readyForMemo:true,legalBasis:[],precedentMatches:[],memoFields:{},memoPrefill:{caseType:'عمالي',court:'المحكمة الكلية',clientName:'مقرض اصطناعي',otherParty:'مقترض اصطناعي',partyRole:'مدعٍ',facts:message,requests:'رد القرض',allParties:''}};
++ const response=await handlers(result)(new Request('https://example.test/api/legal/assistant',{method:'POST',headers:{Origin:'https://example.test','Content-Type':'application/json'},body:JSON.stringify({message,messages:[],language:'ar'})}));
++ assert.equal(response.status,200);const {state}=await response.json();assert.equal(state.caseType,'مدني');assert.equal(state.memoPrefill.caseType,'مدني');assert.equal(state.court,'');assert.equal(state.courtCircuit,'');assert.equal(state.readyForMemo,false);assert.equal(state.legalBasis.length,0);assert.doesNotMatch(state.assistantMessage,/القضية عمالية|أجور متأخرة/);assert.doesNotMatch(state.orientation.nextAction,/عمالي/);
++});
+diff --git a/tests/case-classification-audit.test.mjs b/tests/case-classification-audit.test.mjs
+new file mode 100644
+index 0000000..6b8300c
+--- /dev/null
++++ b/tests/case-classification-audit.test.mjs
+@@ -0,0 +1,64 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import {load} from './template-harness.mjs';
++const procedure=load('../lib/procedural-position.ts');
++const matter=load('../lib/matter-facts.ts');
++const memory={asked:[],resolved:[],unavailable:[]};
++const state=()=>({caseType:'عمالي',court:'المحكمة الكلية',courtCircuit:'الدائرة العمالية',readyForMemo:true,phase:'ready',parties:[],legalBasis:[{sourceId:'م1',quote:'اقتباس اصطناعي لا يمثل قانوناً',use:'merits'}],analysisWarnings:[],contradictions:[],missingInformation:[],nextQuestions:[],jurisdictionReason:'تقدير قديم',jurisdictionConfidence:'high',memoFields:{},memoPrefill:{caseType:'عمالي',court:'المحكمة الكلية',partyRole:'مدعٍ',clientName:'',otherParty:'',facts:'',requests:'',allParties:''}});
++const subjects=[
++ ['قرض من الراتب ليس مطالبة بالأجر','أنا موظف في شركة. أقرضت صديقي مبلغاً من راتبي وأطلب رد القرض.','مدني'],
++ ['تعثر القرض لا يصبح راتباً متأخراً','أقرضت صديقي راتبي ولم يسدد القرض. أطلب رد القرض.','مدني'],
++ ['أجرة السكن ليست أجر العمل','أنا موظف وراتبي شهري. أنا المستأجر ولدي عقد إيجار شقة في الكويت وأطلب رفض إخلاء العين.','إيجارات'],
++ ['المورد لا يصبح عاملاً بسبب عقد منفي','أنا المورد وعندي عقد توريد أجهزة لم تدفع فاتورته. ليس لدي عقد عمل مع الشركة.','تجاري'],
++ ['اتهام الموظف أمام المحكمة الحالية','أنا موظف وأتقاضى راتباً. أنا المتهم في القضية الحالية أمام محكمة الجنح وأطلب البراءة من تهمة السرقة.','جنحة'],
++ ['مطالبة مدنية عن خلفية جنائية','أطلب تعويضاً في دعوى مدنية عن اعتداء سابق ولا أطلب إجراء جزائياً.','مدني'],
++ ['طلب الأسرة لا يتبع مهنة صاحبته','أنا موظفة وراتبي شهري. أطلب نفقة وحضانة أطفالي بعد الطلاق.','أحوال شخصية'],
++ ['الطلب العمالي الفعلي','أنا موظف مبيعات في شركة خاصة ولم تدفع راتبي الشهري منذ ثلاثة أشهر وأطالب بالأجور المتأخرة.','عمالي'],
++ ['لا يوجد نوع بديل بمجرد رفض القديم','القضية ليست عمالية ولا يوجد بيننا عقد عمل. أحتاج شرح المشكلة أولاً.',''],
++ ['ورود معلومة ليس توريداً تجارياً','وردت أسماء في ملف الشكوى ولم أوضح الطلب بعد.',''],
++ ['تصحيح الموضوع يتقدم على الرواية القديمة','راتبي لم يدفع وأريد أجوري. تصحيح: القضية الحالية عن عقد إيجار وأنا المستأجر وأطلب رفض الإخلاء.','إيجارات'],
++ ['طلبات مستقلة غير مفصولة لا تختزل لنوع واحد','أطالب بأجوري المتأخرة من الشركة وأطالب بإخلاء شقة أؤجرها لنفس الشخص.',''],
++];
++for(const [name,text,expected] of subjects)test('تصنيف اصطناعي: '+name,()=>assert.equal(procedure.inferMatterType(text),expected));
++test('تصحيح المستخدم يزيل تصنيف النموذج القديم وأسانيده التابعة دون مسح الوقائع',()=>{
++ const original=state();original.facts=['وقائع الاختبار المحفوظة'];
++ const value=procedure.applyProceduralPosition(original,'القضية ليست عمالية. لم أوضح موضوعها بعد.');
++ assert.equal(value.caseType,'');assert.equal(value.memoPrefill.caseType,'');assert.equal(value.court,'');assert.equal(value.courtCircuit,'');assert.equal(value.memoPrefill.court,'');assert.equal(value.readyForMemo,false);assert.equal(value.legalBasis.length,0);assert.deepEqual(value.facts,original.facts);
++});
++test('مطالبة القرض لا تشغّل بوابة استكمال وقائع علاقة العمل',()=>{
++ const profile=matter.assessMatterFacts('أنا موظف وأقرضت صديقي مبلغاً من راتبي الشهري وأطلب رد القرض.');
++ assert.notEqual(profile.domain,'employment');assert.ok(profile.missing.every(g=>!g.key.startsWith('employment.')));
++});
++test('فهم النشاط والمهام الصريحة دون إعادة السؤال في المثال السابق',()=>{
++ const text='أنا موظف مبيعات في شركة خاصة بالكويت نشاطها بيع الأدوات الكهربائية. لدي عقد عمل باسم الشركة وهي صاحب العمل وتدفع راتبي الشهري 500 دينار. لم أتسلم رواتب ثلاثة أشهر.';
++ const profile=matter.assessMatterFacts(text);assert.equal(profile.domain,'employment');assert.equal(profile.ready,true);assert.ok(profile.known.includes('employment.activity'));assert.ok(profile.known.includes('employment.work'));
++ const result=matter.guardMatterIntake({...state(),questionMemory:memory},text,memory,'ar');assert.ok(!result.nextQuestions.some(q=>/نشاط|المهام/.test(q)));
++});
++test('تلخيص النموذج لا يسقط نشاط الشركة والقطاع المصرح به من حقول الإحالة',()=>{
++ const text='أنا موظف مبيعات في شركة خاصة بالكويت نشاطها بيع الأدوات الكهربائية. لدي عقد عمل باسم الشركة وهي صاحب العمل وتدفع راتبي الشهري 500 دينار. لم أتسلم رواتب ثلاثة أشهر.';
++ const current={...state(),questionMemory:memory,facts:['أعمل موظف مبيعات براتب شهري ولم تدفع رواتب ثلاثة أشهر.'],nextQuestions:[]};current.memoPrefill.facts=current.facts.join('\n');
++ const result=matter.guardMatterIntake(current,text,memory,'ar');assert.match(result.memoPrefill.facts,/شركة خاصة/);assert.match(result.memoPrefill.facts,/نشاطها بيع الأدوات الكهربائية/);assert.ok(result.questionMemory.resolved.includes('employment.activity'));
++});
++test('القضية السابقة والمثال للاستشهاد لا يحددان نوع الطلب الحالي',()=>{
++ const text='في قضية أخرى كنت أطالب برواتب أمام محكمة الجنح. القضية الحالية عن عقد إيجار وأنا المستأجر وأطلب رفض إخلاء العين.';
++ assert.equal(procedure.inferMatterType(text),'إيجارات');
++});
++test('قضية مستقلة لا تستعير نتيجة فحص قضية أخرى',()=>{
++ const salary=procedure.inferMatterType('أنا عامل وأطالب بأجوري المتأخرة منذ شهرين.');
++ const invoice=procedure.inferMatterType('أنا المورد وعقد توريد الأجهزة لم يسدد وفق الفاتورة.');
++ assert.equal(salary,'عمالي');assert.equal(invoice,'تجاري');assert.equal(procedure.inferMatterType('أريد إعداد مذكرة ولا أملك رواية للواقعة الآن.'),'');
++});
++test('مصادر العمل لا تدخل مطالبة قرض بسبب مهنة صاحب الطلب',()=>{
++ const sources=[{title:'قانون العمل في القطاع الأهلي'},{title:'القانون المدني'}];
++ const result=matter.selectMatterSources(sources,'أنا موظف وأقرضت صديقي مبلغاً من راتبي وأطلب رد القرض.');
++ assert.deepEqual(Array.from(result,s=>s.title),['القانون المدني']);
++});
++test('نزاع القرار الإداري لا يستبعد نصوص الخدمة المدنية من مرشحات البحث',()=>{
++ const result=matter.selectMatterSources([{title:'قانون الخدمة المدنية'},{title:'القانون المدني'}],'أطعن في قرار إداري بإنهاء الوظيفة العامة وأطلب إلغاء القرار الإداري.');
++ assert.ok(result.some(s=>s.title==='قانون الخدمة المدنية'));
++});
++test('كلمات البحث تستبعد مفردات الأجور عندما تكون خلفية لقرض مستقل',()=>{
++ const context=load('../lib/intake-context.ts',{'./memo-handoff':load('../lib/memo-handoff.ts')});
++ const queries=context.intakeSearchQueries('أنا موظف وأقرضت صديقي مبلغاً من راتبي وأطلب رد القرض.',null,[]);
++ assert.ok(queries.some(q=>q.includes('قرض مديونية')));assert.ok(queries.every(q=>!q.includes('العمل العامل أجور')&&!q.includes('أجور راتب تأخير العمل')));
++});
+diff --git a/tools/internal-verification/verify.py b/tools/internal-verification/verify.py
+index 48855f1..e0adab7 100644
+--- a/tools/internal-verification/verify.py
++++ b/tools/internal-verification/verify.py
+@@ -127,7 +127,7 @@ def check_plan(profile):
+     if profile == "site":
+         return [
+             node("sources", ["tests/official-errata.test.mjs", "tests/bound-article-reviews.test.mjs", "tests/bound-article-review-source.test.mjs", "tests/bound-legislation.test.mjs", "tests/reviewed-judgments.test.mjs", "tests/legislation-workbench.test.mjs", "tests/legal-source-coverage.test.mjs"]),
+-            node("memo", ["tests/assistant-classification.test.mjs", "tests/case-context-isolation.test.mjs", "tests/model-compatibility.test.mjs", "tests/text-runtime.test.mjs", "tests/text-providers.test.mjs", "tests/openrouter-errors.test.mjs", "tests/grounded-audit-excerpts.test.mjs", "tests/indirect-intake.test.mjs", "tests/procedural-position.test.mjs", "tests/memo-journey.test.mjs", "tests/payment-dialog.test.mjs", "tests/agent-pipeline.test.mjs", "tests/reviewed-coverage-expansion.test.mjs", "tests/memo-path-strengthening.test.mjs", "tests/case-reasoning.test.mjs", "tests/defense-strength.test.mjs", "tests/memo-reference-language.test.mjs", "tests/inline-authorities.test.mjs", "tests/article-text-in-memos.test.mjs", "tests/memo-generation-control.test.mjs", "tests/connected-intake.test.mjs", "tests/memo-responsive-generation.test.mjs", "tests/memo-submission.test.mjs", "tests/memo-core-preserved.test.mjs"]),
++            node("memo", ["tests/case-classification-audit.test.mjs", "tests/matter-facts.test.mjs", "tests/assistant-classification.test.mjs", "tests/case-context-isolation.test.mjs", "tests/model-compatibility.test.mjs", "tests/text-runtime.test.mjs", "tests/text-providers.test.mjs", "tests/openrouter-errors.test.mjs", "tests/grounded-audit-excerpts.test.mjs", "tests/indirect-intake.test.mjs", "tests/procedural-position.test.mjs", "tests/memo-journey.test.mjs", "tests/payment-dialog.test.mjs", "tests/agent-pipeline.test.mjs", "tests/reviewed-coverage-expansion.test.mjs", "tests/memo-path-strengthening.test.mjs", "tests/case-reasoning.test.mjs", "tests/defense-strength.test.mjs", "tests/memo-reference-language.test.mjs", "tests/inline-authorities.test.mjs", "tests/article-text-in-memos.test.mjs", "tests/memo-generation-control.test.mjs", "tests/connected-intake.test.mjs", "tests/memo-responsive-generation.test.mjs", "tests/memo-submission.test.mjs", "tests/memo-core-preserved.test.mjs"]),
+             node("access", ["tests/management.test.mjs", "tests/analytics-consent.test.mjs", "tests/programmer-client.test.mjs", "tests/user-email-link.test.mjs", "tests/user-list-live.test.mjs", "tests/memo-ledger-recovery.test.mjs"], timeout=360),
+         ]
+     if profile == "backend":

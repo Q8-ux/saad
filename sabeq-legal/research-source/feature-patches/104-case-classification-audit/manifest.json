@@ -1,0 +1,36 @@
+{
+  "nativeBaseCommit": "b8bac8047131b092500e7fe9ea25e09edba8daaf",
+  "nativeRuntimeSourceCommit": "539e133baddbce3ec16973df22f7f44054754e66",
+  "nativeAuditSourceCommit": "c1bd39a79245ad90d184215e25301d3d1cffd9f5",
+  "activeNativeVersion": 238,
+  "patchSha256": "e4e4916aefb44145ef2ee099ca11d16b905c403672f09599ce65c4efceaa8178",
+  "patchBytes": 91642,
+  "scope": "Conservative factual intake classification, explicit denial/correction and related source-query scope. No memo drafting instructions, templates, payment or authorization changes.",
+  "validation": {
+    "sources": 42,
+    "memo": 310,
+    "access": 121,
+    "dashboardGroups": 6,
+    "builtProviderNamespace": true
+  },
+  "liveClassification": {
+    "syntheticOnly": true,
+    "case": "personal loan with salary as background",
+    "result": "civil",
+    "semanticAnalysis": "limited",
+    "upstreamFailures": [
+      {
+        "provider": "openai",
+        "status": 429
+      },
+      {
+        "provider": "gemini",
+        "status": 503
+      }
+    ],
+    "courtApproved": false,
+    "memoGenerated": false
+  },
+  "metaActivation": "not_changed_or_verified_by_this_feature",
+  "privateCaseRepair": "not_performed"
+}
