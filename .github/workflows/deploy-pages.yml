@@ -319,6 +319,8 @@ jobs:
         # Its own workflow publishes updates without rebuilding unrelated projects.
         # Backend code, Android sources and tests must never enter the Pages artifact.
         run: python video-downloader/deployment/prepare.py --add-to-build
+      - name: Keep Asas Kout in every Pages release
+        run: python asaskout/deployment/publish.py --add-to-build
       - name: Archive GitHub Pages artifact
         shell: bash
         run: |
