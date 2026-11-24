@@ -35,6 +35,7 @@ import {
 import Link from "next/link";
 import AppUpdates from "./AppUpdates";
 import {MAX_STORY_CHARACTERS} from "@/lib/story-limits";
+import { needsBrowserDocumentRead } from '@/lib/browser-document';
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import {
   DIRECT_MEDIA_UPLOAD_BYTES,
@@ -271,6 +272,9 @@ export default function PoetryStudio() {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioFileInputRef = useRef<HTMLInputElement | null>(null);
   const documentFileInputRef = useRef<HTMLInputElement | null>(null);
+  const documentReadAbortRef = useRef<AbortController | null>(null);
+  const restoredDocumentRef = useRef<string | null>(null);
+  const [readingDocument, setReadingDocument] = useState(false);
   const streamRef = useRef<MediaStream | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const recordingBytesRef = useRef(0);
@@ -573,6 +577,66 @@ export default function PoetryStudio() {
     void transcribe(audioBlob, durationSeconds, wasStoppedForSize);
   };
 
+  const readAndSaveDocument = async (file: File, savedId: string) => {
+    const controller = new AbortController();
+    documentReadAbortRef.current = controller;
+    setReadingDocument(true);
+    try {
+      const { readDocumentInBrowser } = await import('@/lib/browser-document');
+      const text = await readDocumentInBrowser(file, (message, fraction) => {
+        setNotice(message);
+        setMediaUploadProgress(70 + Math.round(fraction * 26));
+      }, controller.signal);
+      setStory(text); setInputMode('text');
+      const response = await appFetch('/api/transcribe', {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ submission_id: savedId, text }),
+      });
+      const data = await response.json().catch(() => ({})) as { error?: string };
+      if (!response.ok) {
+        throw new Error(data.error || 'تمت قراءة النص، لكن تعذر حفظه. الأصل محفوظ؛ أعد المحاولة.');
+      }
+      return text;
+    } finally {
+      documentReadAbortRef.current = null;
+      setReadingDocument(false);
+    }
+  };
+
+  const restoreDocument = async (id: string) => {
+    setBusy('transcribe'); setError(''); setMediaUploadProgress(0);
+    setNotice('جارٍ فتح الملف المحفوظ في أرشيفك…');
+    try {
+      const metadataResponse = await appFetch(`/api/transcribe?submission_id=${encodeURIComponent(id)}`, { cache: 'no-store' });
+      const metadata = await metadataResponse.json() as { error?: string; filename?: string; content_type?: string; text?: string };
+      if (!metadataResponse.ok) throw new Error(metadata.error || 'تعذر فتح الملف المحفوظ.');
+      setSubmissionId(id);
+      let text = metadata.text?.trim() || '';
+      if (!text) {
+        if (!needsBrowserDocumentRead(metadata.filename || '')) throw new Error('نزّل الملف الأصلي ثم ارفعه من صفحة الكتابة لإعادة قراءته.');
+        const response = await appFetch(`/api/audio/${encodeURIComponent(id)}`, { cache: 'no-store' });
+        if (!response.ok) throw new Error('تعذر تنزيل الملف المحفوظ لقراءته.');
+        if (Number(response.headers.get('content-length')) > MAX_DOCUMENT_FILE_BYTES) throw new Error('الأصل محفوظ، لكن حجمه يتجاوز حد القراءة وهو ٨ م.ب.');
+        const blob = await response.blob();
+        const file = new File([blob], metadata.filename || 'story.pdf', { type: metadata.content_type || blob.type });
+        text = await readAndSaveDocument(file, id);
+      }
+      setStory(text); setInputMode('text'); setMediaUploadProgress(100);
+      setNotice('الملف والنص محفوظان. جارٍ تحليل القصة…');
+      await analyzeStoryContent(text, id);
+    } catch (error) {
+      setError(requestErrorMessage(error, 'تعذرت قراءة الملف المحفوظ. الأصل باقٍ في أرشيفك.'));
+    } finally { setBusy(null); setMediaUploadProgress(null); }
+  };
+
+  useEffect(() => {
+    const id = new URLSearchParams(window.location.search).get('read_file');
+    if (!id || !/^[0-9a-f-]{36}$/iu.test(id) || restoredDocumentRef.current === id) return;
+    restoredDocumentRef.current = id;
+    void restoreDocument(id);
+    return () => { documentReadAbortRef.current?.abort(); };
+  }, []);
+
   const extractAndAnalyzeMedia = async (file: File) => {
     const sourceMode = mediaSourceMode(file.name, file.type);
     if (!sourceMode) {
@@ -598,6 +662,7 @@ export default function PoetryStudio() {
     setMediaUploadProgress(0);
     const uploadId = crypto.randomUUID();
     const totalChunks = Math.ceil(file.size / MEDIA_UPLOAD_CHUNK_BYTES);
+    const readOnDevice = needsBrowserDocumentRead(file.name);
 
     try {
       let response: Response;
@@ -605,6 +670,7 @@ export default function PoetryStudio() {
         const formData = new FormData();
         formData.append("media", file, file.name);
         formData.append("duration_seconds", "0");
+        if (readOnDevice) formData.append('read_on_device', 'true');
         response = await appFetch(new URL("/api/transcribe", window.location.origin), {
           method: "POST",
           body: formData,
@@ -672,6 +738,7 @@ export default function PoetryStudio() {
             content_type: file.type || "application/octet-stream",
             total_chunks: totalChunks,
             total_size: file.size,
+            read_on_device: readOnDevice,
           }),
         });
       }
@@ -681,12 +748,16 @@ export default function PoetryStudio() {
         text?: string;
         submission_id?: string;
         original_saved?: boolean;
+        needs_local_read?: boolean;
       };
       if (!response.ok) {
         if (result.original_saved) setNotice("الملف الأصلي محفوظ في أرشيفك، حتى عند تعذر القراءة أو التحليل.");
         throw new Error(result.error || "تعذّر استخراج النص من الملف.");
       }
-      const extractedText = result.text?.trim() || "";
+      if (result.submission_id) setSubmissionId(result.submission_id);
+      const extractedText = result.needs_local_read && result.submission_id
+        ? await readAndSaveDocument(file, result.submission_id)
+        : result.text?.trim() || "";
       if (!extractedText) throw new Error("لم يظهر نص أو كلام واضح في الملف.");
 
       setMediaUploadProgress(100);
@@ -1288,7 +1359,8 @@ export default function PoetryStudio() {
               <button type="button" className="audio-file-button" onClick={() => documentFileInputRef.current?.click()} disabled={recording || busy !== null}>
                 <FileImage size={17} aria-hidden="true" /> رفع مستند أو صورة أو PDF
               </button>
-              <p className="field-help">Word وPDF ومستند نصي وصور النصوص حتى ٨ م.ب. يُحفظ الأصل ثم يُستخرج النص لتحليله</p>
+              <p className="field-help">Word وPDF ومستند نصي وصور حتى ٨ م.ب. يُحفظ الأصل، وتُقرأ الصور وPDF على جهازك. حد PDF هو ٣٠ صفحة</p>
+              {readingDocument && <button type="button" className="secondary-button" onClick={() => documentReadAbortRef.current?.abort()}>إيقاف القراءة مع حفظ الأصل</button>}
             </div>
 
             <p className="field-help" id="story-help">

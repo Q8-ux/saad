@@ -92,6 +92,7 @@ export default function UserArchive({ displayName }: { displayName: string }) {
               <div className="archive-block"><h3>قصتك</h3><p>{item.storyText}</p></div>
               {item.requestText && <div className="archive-block compact"><h3>طلبك</h3><p>{item.requestText}</p></div>}
               {item.hasAudio && <div className="archive-audio"><div>{item.sourceMode === "video" ? <Video size={18} /> : <AudioLines size={18} />} الملف الأصلي</div>{item.sourceMode === "document" || item.sourceMode === "image" ? <a className="secondary-button" href={`/api/audio/${item.id}`} download={item.audioFilename || "source"}>تنزيل الملف الأصلي</a> : item.sourceMode === "video" ? <video controls preload="metadata" src={`/api/audio/${item.id}`} /> : <audio controls preload="none" src={`/api/audio/${item.id}`} />}</div>}
+              {item.hasAudio && (item.sourceMode === 'document' || item.sourceMode === 'image') && !item.poem && <Link className="secondary-button" href={`/?read_file=${encodeURIComponent(item.id)}`}>{item.storyText ? 'متابعة الكتابة من هذا الملف' : 'قراءة الملف ومتابعة الكتابة'}</Link>}
               {item.poem?.verses?.length ? (
                 <div className="archive-poem">
                   <h3>{item.poem.title || item.poemTitle}</h3>

@@ -4,11 +4,15 @@ import {
   markSubmissionFailed,
   saveMediaSubmission,
   saveTranscription,
+  getOwnedDocument,
+  saveDeviceDocumentText,
 } from "@/lib/archive-store";
 import type { UserRecord } from "@/db/schema";
 import { DIRECT_MEDIA_UPLOAD_BYTES, mediaSourceMode } from "@/lib/media-files";
 import { transcribeMedia, transcriptionErrorResponse } from "@/lib/media-transcription";
 import {extractStoryDocument,documentTextErrorResponse} from '@/lib/document-text';
+import { MAX_STORY_CHARACTERS } from '@/lib/story-limits';
+import { z } from 'zod';
 
 export const runtime = "edge";
 
@@ -55,6 +59,10 @@ export async function POST(request: Request) {
     });
     activeSubmissionId = saved.submissionId;
 
+    if (documentInput && formData.get('read_on_device') === 'true') {
+      return Response.json({ submission_id: activeSubmissionId, original_saved: true, needs_local_read: true }, { status: 202 });
+    }
+
     // Document extraction is read-only. The next /api/poetry request checks the
     // complete extracted text before any creative analysis or poem generation.
     const text = documentInput ? await extractStoryDocument(audio) : await transcribeMedia(audio);
@@ -81,4 +89,27 @@ export async function POST(request: Request) {
     const data = await response.json() as Record<string,unknown>;
     return Response.json({...data, ...(activeSubmissionId ? {submission_id:activeSubmissionId,original_saved:true} : {})}, {status:response.status});
   }
+}
+
+const documentId = z.string().uuid();
+export async function GET(request: Request) {
+  try {
+    const user = await requireAppUser();
+    const id = documentId.safeParse(new URL(request.url).searchParams.get('submission_id'));
+    if (!id.success) return Response.json({ error: 'معرف الملف غير صالح.' }, { status: 400 });
+    const row = await getOwnedDocument(user.id, id.data);
+    return Response.json({ submission_id: row.id, filename: row.audioFilename, content_type: row.audioContentType, text: row.storyText }, { headers: { 'cache-control': 'private, no-store' } });
+  } catch (error) { return appErrorResponse(error); }
+}
+
+// Device OCR is editable user input, never trusted instructions or a safety
+// verdict. /api/poetry still screens the full text before creating any output.
+export async function PATCH(request: Request) {
+  try {
+    const user = await requireAppUser();
+    const data = z.object({ submission_id: documentId, text: z.string().trim().min(1).max(MAX_STORY_CHARACTERS) }).safeParse(await request.json());
+    if (!data.success) return Response.json({ error: 'النص غير صالح أو يتجاوز ٣٠ ألف حرف.' }, { status: 400 });
+    await saveDeviceDocumentText(user.id, data.data.submission_id, data.data.text);
+    return Response.json({ submission_id: data.data.submission_id, text: data.data.text, original_saved: true });
+  } catch (error) { return appErrorResponse(error); }
 }

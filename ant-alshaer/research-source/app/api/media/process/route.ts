@@ -4,6 +4,7 @@ import { ArchiveError, markSubmissionFailed, saveMediaSubmission, saveTranscript
 import {
   MAX_MEDIA_CHUNKS,
   MAX_MEDIA_FILE_BYTES,
+  MAX_DOCUMENT_FILE_BYTES,
   isValidUploadId,
   mediaChunkKey,
   mediaSourceMode,
@@ -21,6 +22,7 @@ type ProcessBody = {
   content_type?: string;
   total_chunks?: number;
   total_size?: number;
+  read_on_device?: boolean;
 };
 
 export async function POST(request: Request) {
@@ -51,6 +53,9 @@ export async function POST(request: Request) {
     ) {
       return Response.json({ error: "بيانات الملف غير صالحة أو أن صيغته غير مدعومة." }, { status: 400 });
     }
+    if (documentInput && totalSize > MAX_DOCUMENT_FILE_BYTES) {
+      return Response.json({ error: 'حد المستندات والصور هو ٨ م.ب.' }, { status: 413 });
+    }
 
     cleanupKeys = Array.from(
       { length: totalChunks },
@@ -72,6 +77,10 @@ export async function POST(request: Request) {
     });
     const saved = await saveMediaSubmission(activeUser, { file: mediaFile, sourceMode });
     activeSubmissionId = saved.submissionId;
+
+    if (documentInput && body.read_on_device === true) {
+      return Response.json({ submission_id: activeSubmissionId, original_saved: true, needs_local_read: true }, { status: 202 });
+    }
 
     const text = documentInput ? await extractStoryDocument(mediaFile) : await transcribeMedia(mediaFile);
     if (!text) {

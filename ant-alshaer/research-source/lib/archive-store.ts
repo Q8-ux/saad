@@ -113,6 +113,29 @@ export async function saveTranscription(userId: string, submissionId: string, tr
     .where(and(eq(submissions.id, submissionId), eq(submissions.userId, userId)));
 }
 
+// Document recovery and device OCR are always scoped to the owning account,
+// including when an administrator opens the writing interface.
+export async function getOwnedDocument(userId: string, submissionId: string) {
+  const [row] = await getDb().select().from(submissions)
+    .where(and(eq(submissions.id, submissionId), eq(submissions.userId, userId))).limit(1);
+  if (!row?.audioKey || !['document', 'image'].includes(row.sourceMode)) {
+    throw new ArchiveError(404, 'الملف غير موجود في أرشيفك.');
+  }
+  return row;
+}
+
+export async function saveDeviceDocumentText(userId: string, submissionId: string, text: string) {
+  const row = await getOwnedDocument(userId, submissionId);
+  if (row.state !== 'audio_saved' && row.state !== 'failed' || row.poemJson || row.analysisJson) {
+    throw new ArchiveError(409, 'لهذا الملف نتيجة محفوظة بالفعل. افتح النص الموجود في أرشيفك.');
+  }
+  const updated = await getDb().update(submissions).set({ storyText: text, transcriptionText: text, state: 'audio_saved', updatedAt: now() })
+    .where(and(eq(submissions.id, submissionId), eq(submissions.userId, userId),
+      sql`${submissions.state} IN ('audio_saved', 'failed')`,
+      sql`${submissions.poemJson} IS NULL`, sql`${submissions.analysisJson} IS NULL`)).returning({ id: submissions.id });
+  if (!updated.length) throw new ArchiveError(409, 'تغيرت نتيجة الملف أثناء القراءة. افتح آخر نسخة من أرشيفك.');
+}
+
 async function ownedSubmission(userId: string, submissionId: string) {
   const db = getDb();
   const [row] = await db
