@@ -2,6 +2,7 @@
 <html lang="ar" dir="rtl"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#110f24">
+<meta name="application-version" content="video-downloader-web-20261124">
 <meta name="description" content="مسار الفيديو، تحميل الفيديوهات والصوت من المنصات المدعومة بواجهة عربية واحدة.">
 <title>مسار الفيديو | Video Hub</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -66,13 +67,14 @@ footer{text-align:center;font-size:11px;color:#9990ae;line-height:2.2;padding:26
 <div class="panel"><form id="lookup"><div class="formrow"><div class="inputrow">
 <input id="url" aria-label="رابط الفيديو" type="url" required placeholder="https://www.youtube.com/watch?v=...">
 <button type="button" id="paste" class="btn mini">📋 لصق</button>
-</div><button type="submit" id="inspect" class="primary">فحص الفيديو ←</button></div>
+</div><button type="submit" id="inspect" class="btn">عرض معلومات المقطع</button></div>
 <div class="controls"><label for="quality">الجودة المطلوبة <select id="quality"><option value="best">الأفضل المتاحة</option><option value="1080">1080p</option><option value="720">720p</option><option value="480">480p</option><option value="360">360p</option></select></label>
-<button class="linkbtn" type="button" id="openSettings">⚙ إعداد محرك التحميل</button></div></form></div>
-<div id="feedback" role="status" aria-live="polite" class="status">تيك توك متاح عبر مزود احتياطي. بقية المنصات تتطلب خادم yt-dlp.</div>
+<button class="linkbtn" type="button" id="openSettings">⚙ إعدادات الاتصال</button></div>
+<div class="actions"><button type="button" id="mp4" class="primary">⬇ تحميل MP4</button><button type="button" id="mp3" class="btn">♫ تحميل MP3</button></div>
+<p class="notice">الصق الرابط واضغط تحميل مباشرة؛ عرض معلومات المقطع اختياري. حتى 10 دقائق و60 ميغابايت للتنزيل المباشر.</p></form></div>
+<div id="feedback" role="status" aria-live="polite" class="status">جارٍ الاتصال بخدمة التحميل…</div>
 <div class="result" id="result"><div class="resmain"><img id="thumb" class="thumb" alt="صورة مصغرة للفيديو" referrerpolicy="no-referrer">
 <div><h2 id="clipTitle"></h2><div id="clipMeta" class="resmeta"></div><div id="clipEngine" class="notice"></div></div></div>
-<div class="actions"><button type="button" id="mp4" class="primary">⬇ تحميل MP4</button><button type="button" id="mp3" class="btn">♫ تحميل MP3</button></div>
 <a id="directLink" class="direct" hidden rel="noopener noreferrer" target="_blank">رابط تحميل بديل</a>
 </div></section>
 <section class="android-install" style="max-width:810px;margin:28px auto 12px;padding:22px;background:linear-gradient(120deg,#292150,#201a38);border:1px solid #63519c;border-radius:20px">
@@ -80,15 +82,15 @@ footer{text-align:center;font-size:11px;color:#9990ae;line-height:2.2;padding:26
 <p style="font-size:12px;color:#d3c5ef;line-height:2;margin:0">تطبيق Android أصلي لحفظ فيديوهات MP4 والصوت MP3 واستقبال الروابط من قائمة «مشاركة».</p></div>
 <a href="https://github.com/Q8-ux/saad/releases/download/video-hub-android-v1.4.0/Tahmeel-Alvideo-v1.4.0.apk" rel="noopener" style="display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:12px 18px;border-radius:12px;background:#8661ea;color:#fff;text-decoration:none;font-size:14px;font-weight:800">⬇ تحميل تطبيق «تحميل الفيديو»</a></div>
 <p style="font-size:11px;color:#ad9bc9;line-height:1.8;margin:10px 0 0">إصدار «تحميل الفيديو» 1.4.0: واجهة Android مبسطة تظهر حتى دون اتصال بالإنترنت، مع زري تنزيل MP4 وMP3 ورسائل تشخيص واضحة. التطبيق الجديد منفصل عن الإصدار القديم. إذا لم يبدأ التحميل، <a href="https://github.com/Q8-ux/saad/raw/refs/heads/main/video-downloader/android/releases/Video-Hub-Android.apk" rel="noopener">استخدم رابط GitHub المباشر</a> أو <a href="https://github.com/Q8-ux/saad/releases/tag/video-hub-android-v1.4.0" target="_blank" rel="noopener">افتح صفحة الإصدار</a>.</p></section>
-<section class="platforms"><h2 class="sectitle">المنصات المستهدفة</h2><p class="sectiondesc">دعمها في محرك yt-dlp مشروط بتوافر الفيديو واتصال الخادم؛ ليست جميعها مفعلة على GitHub Pages حاليًا.</p>
+<section class="platforms"><h2 class="sectitle">المنصات المستهدفة</h2><p class="sectiondesc">توافر التنزيل يعتمد على المقطع والمنصة. بعض الروابط الخاصة أو المقيدة لا تقبل التنزيل.</p>
 <div class="chips" id="platforms">
 <span class="chip active">🎵 TikTok <small>احتياطي مباشر</small></span><span class="chip">▶️ YouTube</span><span class="chip">📸 Instagram</span><span class="chip">👥 Facebook</span><span class="chip">𝕏 X / Twitter</span><span class="chip">👻 Snapchat</span><span class="chip">📌 Pinterest</span><span class="chip">🤖 Reddit</span><span class="chip">🎞 Vimeo</span><span class="chip">🎮 Twitch</span><span class="chip">🎧 SoundCloud</span><span class="chip">🟦 Bluesky</span><span class="chip">📺 Dailymotion</span><span class="chip">🎬 Bilibili</span><span class="chip">📡 Telegram</span><span class="chip">🔗 وغيرها من المصادر المدرجة</span>
 </div></section>
 <section class="cards"><article class="card"><div class="icon">📎</div><h3>رابط واحد</h3><p>يتعرف على منصة الفيديو تلقائيًا ويعطيك رسالة واضحة في حال عدم توافر المحرك.</p></article>
 <article class="card"><div class="icon">🎥</div><h3>جودة وصيغ مختلفة</h3><p>MP4 أو استخراج صوت MP3 عند تشغيل yt-dlp؛ جودة الفيديو مرتبطة بما يقدمه المصدر.</p></article>
-<article class="card"><div class="icon">🔒</div><h3>موقعك المستقل</h3><p>الواجهة مستضافة على GitHub. المحرك الخاص محمي بكلمة مرور عند نشره على خادم منفصل.</p></article></section>
+<article class="card"><div class="icon">🔒</div><h3>تحميل مباشر</h3><p>الخدمة الحالية تتصل تلقائيًا دون كلمة مرور. تُحذف ملفات المعالجة المؤقتة بعد إرسالها.</p></article></section>
 <div class="details"><details id="backendSettings"><summary>⚙ إعداد الاتصال بالمحرك متعدد المنصات</summary>
-<p>لتحميل YouTube وInstagram وبقية المنصات، شغّل خادم yt-dlp من مستودعك ثم ضع عنوان HTTPS هنا. يحتفظ المتصفح بعنوان المحرك محليًا، وكلمة المرور خلال الجلسة فقط.</p>
+<p>الاتصال بالخدمة الحالية تلقائي. هذه الإعدادات اختيارية لاستخدام خادم آخر؛ كلمة المرور مطلوبة فقط إذا كان الخادم الخاص يشترطها.</p>
 <div class="settings"><label class="wide">عنوان الخادم (HTTPS)<input id="backendUrl" type="url" placeholder="https://your-video-api.example.com"></label>
 <label class="wide">كلمة مرور الخادم<input id="backendPass" type="password" autocomplete="off" placeholder="أدخل كلمة المرور التي ضبطتها في الاستضافة"></label>
 <div class="actions"><button type="button" id="testBackend" class="primary">اختبار الاتصال وحفظ</button><button type="button" id="clearBackend" class="btn">فصل المحرك</button></div>
@@ -109,7 +111,8 @@ const TIKWM = 'https://www.tikwm.com/api/';
 const MAX_BYTES = 140*1024*1024;
 let backend = localStorage.getItem('videohub_backend') || 'https://video-hub-api-production.up.railway.app';
 let password = sessionStorage.getItem('videohub_password') || '';
-let record = null, busy = false, engineOnline = false;
+let record = null, busy = false, engineOnline = false, publicMode = false;
+let connection = Promise.resolve();
 function report(text,error=false){$('feedback').textContent=text;$('feedback').classList.toggle('error',error);}
 function platformFromUrl(raw) {
   try {
@@ -134,8 +137,8 @@ function settingsOpen(){
 }
 function setBusy(on){
   busy=on;$('inspect').disabled=on;
-  $('mp4').disabled=on||!record?.video;
-  $('mp3').disabled=on||!record?.audio;
+  $('mp4').disabled=on;
+  $('mp3').disabled=on;
 }
 function link(value,label){
   const a=$('directLink');
@@ -171,13 +174,28 @@ async function healthCheck(url){
     const r=await fetch(url+'/api/health',{signal:c.signal,cache:'no-store',credentials:'omit'});
     if(!r.ok)throw Error('استجابة الخادم: HTTP '+r.status);
     const data=await r.json();
-    if(data.engine!=='yt-dlp'||data.status!=='ok'||!data.configured)throw Error('الخادم لا يعمل بمحرك yt-dlp جاهز.');
+    if(data.engine!=='yt-dlp'||data.status!=='ok'||(!data.configured&&!data.public_app_mode))throw Error('خدمة التحميل غير جاهزة حاليًا.');
     return data;
   }finally{clearTimeout(timer);}
 }
 function labelEngine(online){
   engineOnline=online;
-  $('engineStatus').textContent=online?'🟢 المحرك متعدد المنصات متصل':'⚪ TikTok احتياطي · باقي المنصات تحتاج خادمًا';
+  $('engineStatus').textContent=online?'🟢 متصل · جاهز للتحميل':'⚪ تعذر الاتصال بخدمة التحميل';
+}
+async function connectBackend(){
+  const target=backend;
+  publicMode=false;
+  if(!target){labelEngine(false);return;}
+  try{
+    const status=await healthCheck(target);
+    if(target!==backend)return;
+    publicMode=status.public_app_mode===true;
+    labelEngine(publicMode||Boolean(password));
+    if(publicMode)report('جاهز. الصق رابط الفيديو واختر MP4 أو MP3 للتحميل مباشرة.');
+    else if(!password){$('engineStatus').textContent='🟡 الخادم الخاص يتطلب كلمة مرور';report('أدخل كلمة مرور خادمك الخاص في إعدادات الاتصال.',true);}
+  }catch{
+    if(target===backend){labelEngine(false);report('تعذر الاتصال بخدمة التحميل. أعد المحاولة بعد قليل؛ يتاح TikTok الاحتياطي عند استجابة مزوده.',true);}
+  }
 }
 $('testBackend').addEventListener('click',async()=>{
   const target=$('backendUrl').value.trim();
@@ -186,22 +204,25 @@ $('testBackend').addEventListener('click',async()=>{
     const url=cleanBackendUrl(target);
     const status=await healthCheck(url);
     const candidate=readPassword();
-    if(!candidate)throw Error('أدخل كلمة مرور الخادم قبل حفظ الاتصال.');
-    const challenge=await fetch(url+'/api/info',{method:'POST',mode:'cors',credentials:'omit',
-      headers:{'Content-Type':'application/json','X-Download-Key':candidate},
-      body:JSON.stringify({url:'https://example.invalid/verify'})});
-    if(challenge.status===401)throw Error('كلمة المرور غير صحيحة.');
-    if(challenge.status!==400)throw Error('تعذر التحقق من صلاحية كلمة المرور على الخادم.');
+    if(status.public_app_mode!==true){
+      if(!candidate)throw Error('هذا الخادم الخاص يتطلب كلمة مرور.');
+      const challenge=await fetch(url+'/api/info',{method:'POST',mode:'cors',credentials:'omit',
+        headers:{'Content-Type':'application/json','X-Download-Key':candidate},
+        body:JSON.stringify({url:'https://example.invalid/verify'})});
+      if(challenge.status===401)throw Error('كلمة المرور غير صحيحة.');
+      if(challenge.status!==400)throw Error('تعذر التحقق من صلاحية كلمة المرور على الخادم.');
+    }
     backend=url;password=candidate;
+    publicMode=status.public_app_mode===true;
     localStorage.setItem('videohub_backend',backend);
     sessionStorage.setItem('videohub_password',password);
-    $('backendFeedback').textContent='تم الاتصال بـ '+status.engine+' · يدعم '+status.supported_platforms.length+' منصة مدرجة.';
+    $('backendFeedback').textContent=publicMode?'تم الاتصال. التحميل المباشر جاهز دون كلمة مرور.':'تم الاتصال بالخادم الخاص.';
     labelEngine(true);
     report('المحرك متصل. يمكنك تجربة الروابط من المنصات المتاحة.');
   }catch(err){labelEngine(false);$('backendFeedback').textContent=err.message||'تعذّر الاتصال بالخادم.';}
 });
 $('clearBackend').addEventListener('click',()=>{
-  backend='';password='';localStorage.removeItem('videohub_backend');sessionStorage.removeItem('videohub_password');
+  backend='';password='';publicMode=false;localStorage.removeItem('videohub_backend');sessionStorage.removeItem('videohub_password');
   $('backendPass').value='';$('backendUrl').value='';labelEngine(false);
   $('backendFeedback').textContent='تم فصل الخادم. يبقى TikTok الاحتياطي متاحًا عند استجابة مزوده.';
 });
@@ -212,11 +233,15 @@ $('paste').addEventListener('click',async()=>{
 });
 $('thumb').addEventListener('error',()=>{$('thumb').style.display='none';});
 async function api(path,payload){
-  if(!engineOnline||!backend||!password)throw Error('خادم yt-dlp غير متصل.');
+  await connection;
+  if(!engineOnline||!backend||(!publicMode&&!password))throw Error('خدمة التحميل غير متصلة. أعد المحاولة أو راجع إعدادات الاتصال.');
   const c=new AbortController(),timer=setTimeout(()=>c.abort(),180000);
   try{
-    const r=await fetch(backend+path,{method:'POST',mode:'cors',credentials:'omit',signal:c.signal,
-      headers:{'Content-Type':'application/json','X-Download-Key':password},body:JSON.stringify(payload)});
+    const headers={'Content-Type':'application/json'};
+    if(!publicMode)headers['X-Download-Key']=password;
+    const route=publicMode?path.replace(/^\/api\//,'/api/public/'):path;
+    const r=await fetch(backend+route,{method:'POST',mode:'cors',credentials:'omit',signal:c.signal,
+      headers,body:JSON.stringify(payload)});
     if(!r.ok){
       const data=await r.json().catch(()=>({}));
       throw Error(data.detail||('رفض خادم التحميل الطلب (HTTP '+r.status+').'));
@@ -247,6 +272,7 @@ $('lookup').addEventListener('submit',async e=>{
   report('جارٍ فحص رابط '+platform+'…');
   try{
     let item;
+    await connection;
     if(engineOnline){
       const r=await api('/api/info',{url,quality:$('quality').value});
       const d=await r.json();
@@ -255,9 +281,9 @@ $('lookup').addEventListener('submit',async e=>{
     }else if(platform==='TikTok')item=await inspectTikTok(url);
     else{
       settingsOpen();
-      throw Error('تم التعرف على '+platform+'، لكن التحميل منها يحتاج ربط خادم yt-dlp من إعدادات المحرك.');
+      throw Error('تعذر الاتصال بخدمة التحميل. أعد المحاولة بعد قليل أو راجع إعدادات الاتصال.');
     }
-    showRecord(item);report('تم العثور على الفيديو. اختر التحميل.');
+    item.url=url;showRecord(item);report('تم العثور على الفيديو. اختر التحميل.');
   }catch(err){report(err?.name==='AbortError'?'انتهت مهلة الاتصال.':err.message||'فشل فحص الفيديو.',true);}
   finally{setBusy(false);}
 });
@@ -279,9 +305,16 @@ async function saveBlob(response,name){
   document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),30000);
 }
 async function download(kind){
-  if(busy||!record)return;
+  if(busy)return;
+  const url=$('url').value.trim(),platform=platformFromUrl(url);
+  if(!platform){report('الصق رابط فيديو HTTPS صحيحًا من إحدى المنصات المدرجة أولًا.',true);return;}
   setBusy(true);report('جارٍ تجهيز الملف للتنزيل…');
   try{
+    await connection;
+    if(!record||record.url!==url){
+      record=engineOnline?{mode:'backend',url,platform,id:'clip'}:platform==='TikTok'?{...await inspectTikTok(url),url}:null;
+    }
+    if(!record)throw Error('تعذر الاتصال بخدمة التحميل. أعد المحاولة بعد قليل.');
     let response,filename;
     if(record.mode==='backend'){
       response=await api('/api/download',{url:record.url,kind,quality:$('quality').value});
@@ -296,17 +329,16 @@ async function download(kind){
     await saveBlob(response,filename);
     report('تم إرسال الملف إلى مدير التنزيلات في جهازك.');
   }catch(err){
-    if(record.mode==='fallback'){
+    if(record?.mode==='fallback'){
       const target=kind==='audio'?record.audio:record.video;
       link(target,kind==='audio'?'فتح رابط الموسيقى مباشرة':'فتح رابط MP4 مباشرة');
     }
-    report((err?.message||'تعذر التحميل')+(record.mode==='fallback'?'؛ جرّب الرابط المباشر الظاهر أسفل الأزرار.':''),true);
+    report((err?.message||'تعذر التحميل')+(record?.mode==='fallback'?'؛ جرّب الرابط المباشر الظاهر أسفل الأزرار.':''),true);
   }finally{setBusy(false);}
 }
 $('mp4').addEventListener('click',()=>download('video'));
 $('mp3').addEventListener('click',()=>download('audio'));
 $('backendUrl').value=backend;
 if(password)$('backendPass').value=password;
-labelEngine(false);
-if(backend)healthCheck(backend).then(()=>{labelEngine(Boolean(password));if(!password)$('engineStatus').textContent='🟡 الخادم متصل · أدخل كلمة المرور';}).catch(()=>labelEngine(false));
+connection=connectBackend();
 </script></body></html>

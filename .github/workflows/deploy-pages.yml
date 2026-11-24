@@ -314,6 +314,11 @@ jobs:
           fi
           test -s _site/kab-kat/index.html
           test -s _site/kab-kat/OPEN-CUT-LICENSE.txt
+      - name: Keep Video Downloader in every Pages release
+        # Keep this static entry in full builds and in every preserved-site release.
+        # Its own workflow publishes updates without rebuilding unrelated projects.
+        # Backend code, Android sources and tests must never enter the Pages artifact.
+        run: python video-downloader/deployment/prepare.py --add-to-build
       - name: Archive GitHub Pages artifact
         shell: bash
         run: |

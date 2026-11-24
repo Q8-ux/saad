@@ -9,7 +9,15 @@ An independent Arabic RTL multi-platform video downloader frontend, with an opti
 
 **Live backend:** https://video-hub-api-production.up.railway.app/api/health — Railway production with FastAPI, yt-dlp and a bundled FFmpeg binary. `/api/health` returned HTTP 200, `configured=true`, and 21 allowlisted platform groups. Both YouTube and TikTok public URL metadata extraction returned HTTP 200 in protected end-to-end tests; a real YouTube MP4 downloaded successfully and its MP4 header was verified (533,931 bytes). This does **not** guarantee all individual video URLs or platforms will work. 
 
-The GitHub Pages frontend now preconfigures the Railway HTTPS origin. In **⚙ إعداد محرك التحميل**, enter the private backend password (not stored in this public repository), select **اختبار الاتصال وحفظ**, then paste the video URL. TikTok also has a public TikWM fallback; it may intermittently return HTTP 403.
+The GitHub Pages frontend preconfigures the Railway HTTPS origin and detects the existing `public_app_mode` from `/api/health`. When enabled, it uses `/api/public/info` and `/api/public/download` without a password. Paste a video URL and select MP4 or MP3 directly; metadata inspection is optional. Private custom servers still require a session-only password and use the protected routes. TikTok also has a public TikWM fallback; it may intermittently return HTTP 403.
+
+## Web publication repair — 24 November 2026
+
+The combined Pages build omitted `video-downloader`, returning HTTP 404 even while the Railway service was healthy. The web UI also used only private endpoints after public download mode had already been enabled for Android.
+
+`deploy-video-downloader.yml` now restores the last successfully published Pages artifact, changes only this site's static entry, checks all other file hashes, and verifies the live release SHA. The combined Pages workflow also includes this entry so later releases preserve it. Backend source, Android binaries, tests and configuration are excluded from the static package. Existing server authentication and public quotas are unchanged.
+
+Checks: `node --test video-downloader/tests/frontend.test.cjs` and `python -m unittest discover -s video-downloader/deployment -p 'test_*.py' -v`.
 
 ## Backend support
 

@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - 'video-downloader/index.html'
+      - 'video-downloader/tests/frontend.test.cjs'
       - '.github/workflows/video-downloader-frontend-ci.yml'
   workflow_dispatch:
 permissions:
@@ -53,9 +54,11 @@ jobs:
             const got=vm.runInContext('platformFromUrl('+JSON.stringify(url)+')',sandbox);
             assert.equal(got,platform,url+' should resolve as '+platform);
           }
-          assert.match(html,/خادم yt-dlp/);
+          assert.match(html,/video-downloader-web-20261124/);
           assert.match(html,/id="backendUrl"/);
           assert.match(html,/id="mp4"/);
           assert.match(html,/id="mp3"/);
           console.log('PASS: frontend JS parsed; platform routing, malicious-host rejection, backend settings and download controls verified.');
           JS
+      - name: Verify public and private download behavior
+        run: node --test video-downloader/tests/frontend.test.cjs
