@@ -131,10 +131,15 @@ index f46fa9a..d8a3442 100644
      return privateJson({ error: "تعذر توليد المذكرة حالياً. يرجى المحاولة لاحقاً.", stage: requestStage, ...(managementRequestId ? {requestId:managementRequestId} : {}) }, 503);
    } finally {
 diff --git a/app/api/management/[...path]/route.ts b/app/api/management/[...path]/route.ts
-index 2d31916..8ef8f6f 100644
+index 2d31916..e2cb7f4 100644
 --- a/app/api/management/[...path]/route.ts
 +++ b/app/api/management/[...path]/route.ts
-@@ -13,6 +13,7 @@ import { getD1 } from "@/db";
+@@ -1,3 +1,4 @@
++import { POST as generateManagementMemo } from "@/app/api/legal/memo/route";
+ import { listReadyForms } from "@/lib/ready-forms";
+ import { engineeringPathStatus } from "@/lib/engineering-paths";
+ import { siteAction, servicesAction, bookingsAction } from "@/lib/site-controls";
+@@ -13,6 +14,7 @@ import { getD1 } from "@/db";
  import { assertManagementOrigin, assertManagerAction, exchangeManagerCode, managementJson, managementCorsResponse, managerLogin, managerProfile, passwordManagerLogin, requireManager } from "@/lib/management-auth";
  import { bridgeKeys, managerInbox, managerMemos, managerSnapshot, managerUpdates } from "@/lib/management-data";
  import { readMemoRevision, saveMemoRevision } from "@/lib/management-memo-revisions";
@@ -142,7 +147,7 @@ index 2d31916..8ef8f6f 100644
  import { mailAction, operationEvent, whatsappAction } from "@/lib/management-integrations";
  import { verificationEmailAction } from "@/lib/verification-email-settings";
  import { notificationEmailAction } from "@/lib/notification-email";
-@@ -58,6 +59,7 @@ async function managementGet(request: Request) {
+@@ -58,6 +60,7 @@ async function managementGet(request: Request) {
      if (action === "ready-forms") return managementJson({ forms: await listReadyForms() });
      if (action === "memos") return managementJson(await managerMemos(url));
      if (action === "memo-revision") return managementJson(await readMemoRevision(url));
@@ -150,7 +155,7 @@ index 2d31916..8ef8f6f 100644
      if (action === "inbox") return managementJson(await managerInbox(url));
      if (action === "updates") return managementJson(await managerUpdates());
      if (action === "whatsapp") return managementJson(await whatsappAction(null, manager.email));
-@@ -69,7 +71,7 @@ async function managementGet(request: Request) {
+@@ -69,7 +72,7 @@ async function managementGet(request: Request) {
  async function managementPost(request: Request) {
    try {
      assertManagementOrigin(request);
@@ -159,13 +164,13 @@ index 2d31916..8ef8f6f 100644
      if (action === "exchange") { await enforceRateLimit(request, "management-exchange", 30); return managementJson(await exchangeManagerCode(data)); }
      if (action === "password-login") return managementJson(await passwordManagerLogin(request, data));
      const manager = await requireManager(request);
-@@ -80,6 +82,10 @@ async function managementPost(request: Request) {
+@@ -80,6 +83,10 @@ async function managementPost(request: Request) {
        return managementJson(await metaProviderAction(data, manager.email, request.signal));
      }
      if (action === "memo-revision") return managementJson(await saveMemoRevision(data, manager.email));
 +    if (action === "memo-generation") {
 +      await enforceRateLimit(request, "management-memo-generation", 20, "hour");
-+      return managementJson(await memoGenerationAction(data, manager.email, request));
++      return managementJson(await memoGenerationAction(data, manager.email, request, generateManagementMemo));
 +    }
      if (action === "gmail") {
        await enforceRateLimit(request, data.action === "send-test" ? "gmail-test" : "gmail-management", data.action === "send-test" ? 5 : 30);
@@ -353,10 +358,10 @@ index 0000000..b47480f
 +}
 diff --git a/lib/management-memo-generation.ts b/lib/management-memo-generation.ts
 new file mode 100644
-index 0000000..da5f380
+index 0000000..5149ed5
 --- /dev/null
 +++ b/lib/management-memo-generation.ts
-@@ -0,0 +1,102 @@
+@@ -0,0 +1,103 @@
 +import { getD1 } from "@/db";
 +import { digest } from "@/lib/management-auth";
 +import { openConfig, sealConfig } from "@/lib/management-vault";
@@ -448,7 +453,8 @@ index 0000000..da5f380
 +  try {
 +    const origin=new URL(request.url).origin;
 +    const internal=new Request(new URL("/api/legal/memo",origin),{method:"POST",headers:{"Content-Type":"application/json",Origin:origin},body:JSON.stringify(fields),signal:request.signal});
-+    const run=engine||(await import("@/app/api/legal/memo/route")).POST;
++    if (!engine) throw new Error("Generation engine was not supplied");
++    const run=engine;
 +    const response=await withManagementGeneration(internal,{parentRequestId:id||undefined,onStarted:async requestId=>{receipt.requestId=requestId;await writeReceipt(key,receipt);}},run);
 +    const result=await response.json() as Record<string,unknown>;
 +    receipt.requestId=typeof result.requestId==="string"?result.requestId:receipt.requestId;
@@ -664,6 +670,36 @@ index 5f6fc04..ec20925 100644
 -    memoPrefill:{...state.memoPrefill,partyRole:role,court,allParties:parties.map(p=>`${p.name}: ${p.role}`).join("\n")}};
 +    memoPrefill:{...state.memoPrefill,...(caseType?{caseType}:{}),partyRole:role,court,allParties:parties.map(p=>`${p.name}: ${p.role}`).join("\n")}};
  }
+diff --git a/lib/text-provider-store.ts b/lib/text-provider-store.ts
+new file mode 100644
+index 0000000..c011365
+--- /dev/null
++++ b/lib/text-provider-store.ts
+@@ -0,0 +1,9 @@
++import { getD1 } from "@/db";
++import { openConfig } from "@/lib/management-vault";
++import type { ManagedMetaProvider } from "./text-runtime";
++
++// A leaf module: never import a route, settings actions, or the Worker entrypoint.
++export async function readSavedTextProvider(): Promise<ManagedMetaProvider | null> {
++  const row=await getD1().prepare("SELECT sealed FROM management_vault WHERE integration = ?").bind("meta-text-provider").first<{sealed:string}>();
++  return row?openConfig<ManagedMetaProvider>(row.sealed):null;
++}
+diff --git a/lib/text-runtime.ts b/lib/text-runtime.ts
+index 9e002d9..4ab72dd 100644
+--- a/lib/text-runtime.ts
++++ b/lib/text-runtime.ts
+@@ -2,8 +2,8 @@ import { textProviderConfig, TextProviderError, type TextProviderEnvironment } f
+ 
+ export type ManagedMetaProvider = { enabled: boolean; apiKey: string; model: string; testedAt?: string; revision: string; allowPaidModel?: boolean };
+ async function loadSavedProvider(): Promise<ManagedMetaProvider | null> {
+-  const { savedMetaProvider } = await import("./text-provider-settings");
+-  return savedMetaProvider();
++  const { readSavedTextProvider } = await import("./text-provider-store");
++  return readSavedTextProvider();
+ }
+ 
+ // Opt-in and server-only. An absent setting preserves the existing provider exactly.
 diff --git a/public/management/admin.js b/public/management/admin.js
 index 0ac3599..d3cb30c 100644
 --- a/public/management/admin.js
@@ -752,6 +788,15 @@ index 0ac3599..d3cb30c 100644
        if(kind==='memo-revision'){const id=currentMemo.id;const result=await api('memo-revision',{id,text:values.text,expectedHash:currentMemo.edit.hash,expectedRevision:currentMemo.edit.revision});await openMemo(id);toast(result.unchanged?'لم يتغير النص المحفوظ.':'حُفظت النسخة المصححة مع الاحتفاظ بالأصل. تبقى بانتظار المراجعة القانونية.');}
        if(kind==='user-search'){query=String(values.q||'');memoStatus=String(values.status||'');offset=0;await load();}
        if(kind==='user-edit'){await api('users',values);dialog.close();await load();toast('حُفظت بيانات المستخدم وحدود خدماته.');}
+diff --git a/scripts/build-verified.sh b/scripts/build-verified.sh
+index 078cd2f..59f3be7 100755
+--- a/scripts/build-verified.sh
++++ b/scripts/build-verified.sh
+@@ -27,3 +27,4 @@ timeout \
+   --kill-after="${SITES_BUILD_KILL_AFTER:-10s}" \
+   "${SITES_BUILD_TIMEOUT:-3m}" \
+   "${vinext}" build
++node --test tests/built-provider-namespace.test.mjs
 diff --git a/scripts/check-dashboard-quality.mjs b/scripts/check-dashboard-quality.mjs
 index 6f590b1..4c429d7 100644
 --- a/scripts/check-dashboard-quality.mjs
@@ -783,10 +828,10 @@ index 54bdf0f..798c5ed 100644
        source=source.split(after).join(before);
 diff --git a/specs/103-admin-memo-generation-isolation/plan.md b/specs/103-admin-memo-generation-isolation/plan.md
 new file mode 100644
-index 0000000..8f657cc
+index 0000000..1c96861
 --- /dev/null
 +++ b/specs/103-admin-memo-generation-isolation/plan.md
-@@ -0,0 +1,12 @@
+@@ -0,0 +1,14 @@
 +# خطة التنفيذ
 +
 +1. دوال نقية لعزل السياق وكشف الأطراف الإضافية غير المرتبطة، ثم ربطها بالواجهة والتحقق الخادمي.
@@ -799,6 +844,8 @@ index 0000000..8f657cc
 +لا حاجة لترحيل قاعدة البيانات؛ تستخدم الأصول وسجلات العمليات مخزن الإدارة المشفر القائم. لا أسرار أو وقائع حقيقية في Git.
 +
 +7. إصلاح استرداد مزود المقابلة في textModelFetch مع إبقاء ميزانية المحاولات العادية للمذكرات دون تغيير. توحيد قائمة المحاكم المدعومة وإضافة التعرف من الإجراء الحالي والصفة الجزائية، ثم تسوية حالة المقابلة وحقول الإحالة دون رفع الثقة أو تعطيل مراجعة المصادر.
++
++8. كشف الفحص الحي أن تجميع Vinext أعاد توجيه الاستيراد الديناميكي لإعداد المزود إلى index.js الذي يصدر default فقط. يعزل قارئ الخزنة في ملف مستقل، ويحقن محرك التوليد باستيراد ثابت من مسار الإدارة؛ يضاف اختبار تعاقد صادرات الحزمة بعد البناء.
 diff --git a/specs/103-admin-memo-generation-isolation/protected-case-isolation.json b/specs/103-admin-memo-generation-isolation/protected-case-isolation.json
 new file mode 100644
 index 0000000..3e08d31
@@ -934,21 +981,26 @@ index 0000000..0590a2b
 ++- ما لا تحسمه الوقائع يبقى غامضاً مع سؤال واقعي محدد؛ لا يطلب من الزائر اختيار نوع القضية أو المحكمة.
 diff --git a/specs/103-admin-memo-generation-isolation/tasks.md b/specs/103-admin-memo-generation-isolation/tasks.md
 new file mode 100644
-index 0000000..ecee7ad
+index 0000000..b4706d7
 --- /dev/null
 +++ b/specs/103-admin-memo-generation-isolation/tasks.md
-@@ -0,0 +1,11 @@
+@@ -0,0 +1,16 @@
 +# مهام
 +
-+- [ ] T01 اختبار يثبت رفض الخلط وقبول الأطراف الصحيحة.
-+- [ ] T02 دوال السياق والتحقق الخادمي وإلغاء نتائج التحليل المتأخرة وإعادة تهيئة الإحالة الجديدة.
-+- [ ] T03 مسار مسؤول للتصحيح والتوليد المستقل والأصول المشفرة والتزامن ومنع التكرار.
-+- [ ] T04 نموذج توليد ومراجعة مدخلات في لوحة التحكم مع حالة النقص والمهلة المناسبة.
-+- [ ] T05 اختبارات الصلاحيات والتصحيح والتوليد/النقص وحماية النواة والقوالب والتصدير.
-+- [ ] T06 بناء ونشر الخادم ومزامنة عميل GitHub دون مسّ المشاريع الأخرى.
++- [x] T01 اختبار يثبت رفض الخلط وقبول الأطراف الصحيحة.
++- [x] T02 دوال السياق والتحقق الخادمي وإلغاء نتائج التحليل المتأخرة وإعادة تهيئة الإحالة الجديدة.
++- [x] T03 مسار مسؤول للتصحيح والتوليد المستقل والأصول المشفرة والتزامن ومنع التكرار.
++- [x] T04 نموذج توليد ومراجعة مدخلات في لوحة التحكم مع حالة النقص والمهلة المناسبة.
++- [x] T05 اختبارات الصلاحيات والتصحيح والتوليد/النقص وحماية النواة والقوالب والتصدير.
++- [x] T06 بناء ونشر الخادم ومزامنة عميل GitHub دون مسّ المشاريع الأخرى.
 +- [ ] T07 فحص حي وتصحيح الطلبات المؤكدة المتأثرة مع الإبقاء على المذكرات السليمة وتوثيق حدود التحقق.
-+- [ ] T08 إصلاح محاولة المزود الاحتياطي للمقابلة واختيار نموذج المقابلة الصحيح، باختبار رفض الحصة والإلغاء.
-+- [ ] T09 الاحتفاظ بنوع القضية والمحكمة والصفة الصريحة، وفحص الانتقال للمذكرة وحالة التعطل باختبار حي اصطناعي.
++- [x] T08 إصلاح محاولة المزود الاحتياطي للمقابلة واختيار نموذج المقابلة الصحيح، باختبار رفض الحصة والإلغاء.
++- [x] T09 الاحتفاظ بنوع القضية والمحكمة والصفة الصريحة، وفحص الانتقال للمذكرة وحالة التعطل باختبار حي اصطناعي.
++- [x] T10 إصلاح استيراد إعداد المزود في الحزمة المنشورة واختبار أسماء صادرات الملف بعد البناء، وإزالة الاستيراد الديناميكي لنقطة دخول محرك التوليد.
++
++التحقق الحي: نشر الإصدار 236 وواجهة GitHub، ونجاح التعرف على الجنح والدائرة والصفة وإفراغ القضية الجديدة. إصلاح الطلبات الخاصة وتفعيل Meta ينتظران جلسة مسؤول؛ أضيف T10 لمعالجة عيب صادرات الحزمة الذي كشفه الفحص الحي.
++
++اجتازت الحزمة المصححة 436 اختباراً داخلياً وفحوص اللوحة الستة واختبار صادرات المزود بعد البناء. لم يُجر تصحيح الطلبات الخاصة أو تفعيل مفتاح Meta دون جلسة المسؤول.
 diff --git a/tests/assistant-classification.test.mjs b/tests/assistant-classification.test.mjs
 new file mode 100644
 index 0000000..11a268b
@@ -982,6 +1034,35 @@ index 0000000..11a268b
 +});
 +test('missing court remains unresolved; memo preparation wording does not become an employment claim',async()=>{
 + const state=await run('أريد عمل مذكرة دفاع ولا أعرف تفاصيل الموضوع بعد.');assert.equal(state.caseType,'');assert.equal(state.court,'');assert.equal(state.readyForMemo,false);assert.equal(state.legalBasis.length,0);
++});
+diff --git a/tests/built-provider-namespace.test.mjs b/tests/built-provider-namespace.test.mjs
+new file mode 100644
+index 0000000..2f0223b
+--- /dev/null
++++ b/tests/built-provider-namespace.test.mjs
+@@ -0,0 +1,23 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import {readFileSync,readdirSync} from 'node:fs';
++import {resolve,dirname} from 'node:path';
++import ts from 'typescript';
++const root=resolve(new URL('../dist/server',import.meta.url).pathname);
++function files(path){return readdirSync(path,{withFileTypes:true}).flatMap(e=>e.isDirectory()?files(resolve(path,e.name)):e.name.endsWith('.js')?[resolve(path,e.name)]:[]);}
++test('built provider reader imports an actually exported namespace member instead of the Worker default-only entry',()=>{
++ let checked=0;
++ for(const path of files(root)){
++  const source=readFileSync(path,'utf8'),ast=ts.createSourceFile(path,source,ts.ScriptTarget.Latest,true,ts.ScriptKind.JS);
++  for(const fn of ast.statements.filter(n=>ts.isFunctionDeclaration(n)&&n.name?.text==='loadSavedProvider')){
++   const declaration=fn.body.statements.find(ts.isVariableStatement)?.declarationList.declarations[0];
++   assert.ok(ts.isObjectBindingPattern(declaration.name));
++   const expression=declaration.initializer.expression;assert.equal(expression.expression.kind,ts.SyntaxKind.ImportKeyword);
++   const target=resolve(dirname(path),expression.arguments[0].text),module=ts.createSourceFile(target,readFileSync(target,'utf8'),ts.ScriptTarget.Latest,true,ts.ScriptKind.JS);
++   const exported=new Set(module.statements.filter(ts.isExportDeclaration).flatMap(n=>n.exportClause?.elements?.map(e=>e.name.text)||[]));
++   for(const entry of declaration.name.elements){const name=(entry.propertyName||entry.name).text;assert.ok(exported.has(name),`${name} is missing from the built module exports`);}
++   assert.notEqual(target,resolve(root,'index.js'));checked++;
++  }
++ }
++ assert.ok(checked>0,'No built provider reader found');
 +});
 diff --git a/tests/case-context-isolation.test.mjs b/tests/case-context-isolation.test.mjs
 new file mode 100644
@@ -1023,10 +1104,45 @@ index 0000000..0b9da8a
 + await assert.rejects(trusted.withManagementGeneration(a,{onStarted:async()=>{}},async()=>{throw Error('synthetic failure');}));
 + assert.equal(trusted.managementGenerationContext(a),undefined);
 +});
+diff --git a/tests/fixtures/user-email-harness.mjs b/tests/fixtures/user-email-harness.mjs
+index 877227a..c2c78ca 100644
+--- a/tests/fixtures/user-email-harness.mjs
++++ b/tests/fixtures/user-email-harness.mjs
+@@ -14,7 +14,7 @@ export function emailHarness(){
+  let transport=async()=>Response.json({id:'synthetic-provider-id'});
+  function load(file){file=resolve(root,file);if(cache.has(file))return cache.get(file);const exports={};cache.set(file,exports);
+   const code=ts.transpileModule(readFileSync(file,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,esModuleInterop:true}}).outputText;
+-  const localRequire=name=>name==='@/db'?{getD1:()=>db}:name==='cloudflare:workers'?{env:runtime}:name==='next/headers'?{headers:async()=>new Headers()}:name==='next/navigation'?{redirect(){throw Error('unexpected redirect');}}:name.startsWith('@/')?load(name.slice(2)+'.ts'):name.startsWith('.')?load(resolve(dirname(file),name+'.ts')):require(name);
++  const localRequire=name=>name==='@/db'?{getD1:()=>db}:name==='cloudflare:workers'?{env:runtime}:name==='next/headers'?{headers:async()=>new Headers()}:name==='next/navigation'?{redirect(){throw Error('unexpected redirect');}}:name.startsWith('@/')&&name.endsWith('.json')?JSON.parse(readFileSync(resolve(root,name.slice(2)),'utf8')):name.startsWith('@/')?load(name.slice(2)+'.ts'):name.startsWith('.')?load(resolve(dirname(file),name+'.ts')):require(name);
+   vm.runInNewContext(code,{exports,require:localRequire,crypto:webcrypto,URL,URLSearchParams,TextEncoder,TextDecoder,Uint8Array,Headers,Request,Response,AbortSignal,Date,JSON,btoa,atob,console:{error:(...args)=>logs.push(args)},fetch:async(url,init={})=>{network.push({url:String(url),init});return transport(url,init);}});return exports;
+  }
+  async function configure(overrides={}){
+diff --git a/tests/gmail.test.mjs b/tests/gmail.test.mjs
+index d30b43f..17c9286 100644
+--- a/tests/gmail.test.mjs
++++ b/tests/gmail.test.mjs
+@@ -20,7 +20,7 @@ function harness(){
+  const network=[],logs=[],cache=new Map();let transport=async()=>Response.json({error:'offline'},{status:503});
+  function load(file){file=resolve(root,file);if(cache.has(file))return cache.get(file);const exports={};cache.set(file,exports);
+   const compiled=ts.transpileModule(readFileSync(file,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,esModuleInterop:true}}).outputText;
+-  const localRequire=name=>{if(name==='@/db')return{getD1:()=>db};if(name==='cloudflare:workers')return{env:runtime};if(name==='next/headers')return{headers:async()=>new Headers()};if(name==='next/navigation')return{};if(name.startsWith('@/'))return load(name.slice(2)+'.ts');if(name.startsWith('.'))return load(resolve(dirname(file),name+'.ts'));return require(name);};
++  const localRequire=name=>{if(name==='@/db')return{getD1:()=>db};if(name==='cloudflare:workers')return{env:runtime};if(name==='next/headers')return{headers:async()=>new Headers()};if(name==='next/navigation')return{};if(name.startsWith('@/')&&name.endsWith('.json'))return JSON.parse(readFileSync(resolve(root,name.slice(2)),'utf8'));if(name.startsWith('@/'))return load(name.slice(2)+'.ts');if(name.startsWith('.'))return load(resolve(dirname(file),name+'.ts'));return require(name);};
+   vm.runInNewContext(compiled,{exports,require:localRequire,crypto:webcrypto,URL,URLSearchParams,TextEncoder,TextDecoder,Uint8Array,Headers,Request,Response,AbortSignal,Error,Date,JSON,btoa,atob,console:{...console,error:(...args)=>logs.push(args)},fetch:async(url,init={})=>{network.push({url:String(url),init});return transport(String(url),init);}});return exports;
+  }
+  async function manager(){const auth=load('lib/management-auth.ts'),token=auth.randomToken(),now=Math.floor(Date.now()/1000);sqlite.prepare('INSERT INTO management_sessions VALUES(?,?,?,?,?)').run(await auth.digest(token),'manager@example.test','Synthetic manager',now+3600,now);return token;}
 diff --git a/tests/management.test.mjs b/tests/management.test.mjs
-index af2f31b..e5642ab 100644
+index af2f31b..b6bc60e 100644
 --- a/tests/management.test.mjs
 +++ b/tests/management.test.mjs
+@@ -18,7 +18,7 @@ function harness(){
+  // Copy noble options into its module realm; the actual KDF runs unchanged across the VM boundary.
+  const load=file=>{file=resolve(root,file);if(cache.has(file))return cache.get(file);const exports={};cache.set(file,exports);
+   const source=ts.transpileModule(readFileSync(file,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,esModuleInterop:true}}).outputText;
+-  const localRequire=name=>{if(name==='@/db')return{getD1:()=>db};if(name==='cloudflare:workers')return{env:runtime};if(name==='next/headers')return{headers:async()=>new Headers(identity.value?{'oai-authenticated-user-id':'synthetic-id','oai-authenticated-user-email':identity.value}: {})};if(name==='next/navigation')return{redirect:()=>{throw Error('unexpected redirect helper');}};if(name==='@noble/hashes/pbkdf2.js'){const real=require(name);return {...real,pbkdf2Async:(hash,password,salt,opts)=>real.pbkdf2Async(hash,password,salt,{...opts})};}if(name.startsWith('@/'))return load(name.slice(2)+'.ts');if(name.startsWith('.'))return load(resolve(dirname(file),name+'.ts'));return require(name);};
++  const localRequire=name=>{if(name==='@/db')return{getD1:()=>db};if(name==='cloudflare:workers')return{env:runtime};if(name==='next/headers')return{headers:async()=>new Headers(identity.value?{'oai-authenticated-user-id':'synthetic-id','oai-authenticated-user-email':identity.value}: {})};if(name==='next/navigation')return{redirect:()=>{throw Error('unexpected redirect helper');}};if(name==='@noble/hashes/pbkdf2.js'){const real=require(name);return {...real,pbkdf2Async:(hash,password,salt,opts)=>real.pbkdf2Async(hash,password,salt,{...opts})};}if(name.startsWith('@/')&&name.endsWith('.json'))return JSON.parse(readFileSync(resolve(root,name.slice(2)),'utf8'));if(name.startsWith('@/'))return load(name.slice(2)+'.ts');if(name.startsWith('.'))return load(resolve(dirname(file),name+'.ts'));return require(name);};
+   vm.runInNewContext(source,{exports,require:localRequire,crypto:webcrypto,URL,URLSearchParams,TextEncoder,TextDecoder,Uint8Array,Headers,Request,Response,AbortSignal,Error,Date,JSON,btoa,atob,console:{...console,error:(...args)=>logs.push(args)},fetch:async(url,init={})=>{network.push({url:String(url),init});return transport(url,init);}});return exports;
+  };
+  return{sqlite,db,runtime,load,network,logs,identity,setTransport:f=>transport=f,close:()=>sqlite.close()};
 @@ -705,3 +705,41 @@ test('Meta failure guidance is specific and secret-free while a tested active se
   }
   assert.equal(h.logs.length,0);

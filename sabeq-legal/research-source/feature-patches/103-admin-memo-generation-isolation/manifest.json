@@ -1,15 +1,18 @@
 {
   "nativeBaseCommit": "6b3dc83a97f2bf8d79d10fea00a2576c69dd959c",
-  "nativeSourceCommit": "9b88bb8f565dcc2bdb4fe8dfb6a0741e1851b01f",
-  "patchSha256": "9f99447445feffbf1a5ceb2c45fdb528f5a7e901981d369aa78440afbc93cc4d",
-  "patchBytes": 156654,
+  "nativeSourceCommit": "b8bac8047131b092500e7fe9ea25e09edba8daaf",
+  "patchSha256": "6cd48f7fb152e220ec6cbf282ae2f07c4d441c494e42405fffb03bb39d4057c9",
+  "patchBytes": 168583,
   "scope": "Case isolation, admin generation and intake classification/fallback. No memo instructions, legal templates or citation review weakened.",
   "validation": {
     "sources": 42,
     "memo": 273,
     "access": 121,
-    "dashboardGroups": 6
+    "dashboardGroups": 6,
+    "builtProviderNamespace": true
   },
   "liveRepairs": "not_run_admin_signin_required",
-  "metaActivation": "not_verified_no_key_in_source"
+  "metaActivation": "not_verified_no_key_in_source",
+  "liveClassification": "passed_synthetic_current_court_and_role",
+  "liveContextReset": "passed_start_new_case"
 }
