@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#eef0f8">
+  <meta name="description" content="مكتب عربي لإدارة فريق المحتوى: من الفكرة والاستراتيجية إلى التصميم والمراجعة والجدول.">
+  <title>مكتب السوشيال الذكي</title>
+  <link rel="icon" href="./assets/mark.svg" type="image/svg+xml">
+  <link rel="preload" href="./assets/cairo.woff" as="font" type="font/woff" crossorigin>
+  <link rel="stylesheet" href="./styles.css">
+  <script type="module" src="./app.js"></script>
+</head>
+<body>
+  <a class="skip" href="#main">انتقل إلى مساحة العمل</a>
+  <div class="ambient" aria-hidden="true"></div>
+  <div class="app-shell">
+    <div class="top-strip">
+      <div class="window-dots" aria-hidden="true"><i></i><i></i><i></i></div>
+      <span class="strip-label">مساحة أفكارك</span>
+      <div class="topic-ribbon"><button data-topic="الذكاء الاصطناعي">#الذكاء_الاصطناعي</button><button data-topic="صناعة المحتوى">#صناعة_المحتوى</button><button data-topic="هوية العلامة">#هوية_العلامة</button><button data-topic="قصص ملهمة">#قصص_ملهمة</button></div>
+      <span class="suggested-tag">اقتراحات · ليست ترندات حية</span>
+    </div>
+
+    <header class="app-header">
+      <div class="identity"><img class="brand-mark" src="./assets/mark.svg" width="78" height="78" alt="شعار مكتب السوشيال"><div><div class="eyebrow">فكرتك. فريقك. مساحة واحدة.</div><h1><span>مكتب</span> السوشيال الذكي</h1><div class="identity-meta"><span class="status-chip"><i></i> مساحة العمل جاهزة</span><span id="today"></span></div></div></div>
+      <div class="header-metrics" aria-label="أرقام مساحة العمل"><div><strong id="statDrafts">٠</strong><span>مسودة محتوى</span></div><div><strong id="statApproved">٠</strong><span>جاهزة للنشر</span></div><div><strong id="statScheduled">٠</strong><span>في جدولك المحلي</span></div></div>
+      <button class="connection-pill" data-action="settings"><span class="connection-dot"></span><span id="connectionText">Grok غير متصل</span><span class="arrow">↗</span></button>
+    </header>
+
+    <div class="workspace-toolbar">
+      <nav class="tabs" aria-label="أقسام النظام"><button class="tab active" data-view="desk" aria-current="page">غرفة العمليات</button><button class="tab" data-view="content">المحتوى <span id="contentCount">٠</span></button><button class="tab" data-view="calendar">التقويم</button><button class="tab" data-view="reports">التقارير</button></nav>
+      <div class="toolbar-actions"><button class="icon-button" data-action="export" aria-label="تصدير مساحة العمل" title="تصدير مساحة العمل"><svg><use href="#i-download"/></svg></button><button class="button primary compact" data-action="new"><svg><use href="#i-plus"/></svg> حملة جديدة</button></div>
+    </div>
+
+    <div class="desk-layout">
+      <aside class="agents-rail" aria-label="أعضاء فريق المحتوى"><div class="rail-heading"><span>فريقك</span><span>٦ أدوار متكاملة</span></div><div id="agents"></div><div class="owner-card"><span class="owner-avatar">س</span><div><strong>أنت صاحب القرار</strong><p>وجّه الفكرة واعتمد المحتوى</p></div><span class="owner-spark">✦</span></div><div class="rail-note"><i></i> التجهيز محلي حتى تربط خدماتك</div></aside>
+
+      <main id="main" tabindex="-1">
+        <section id="view-desk" class="view">
+          <div class="panel workflow-panel">
+            <div class="panel-heading"><div><span class="tiny-label">غرفة العمليات</span><h2>من فكرة إلى محتوى جاهز</h2></div><div class="workflow-actions"><span class="mode-tag" id="modeTag">تجهيز محلي</span><button class="icon-button" data-action="fullscreen" aria-label="تكبير مساحة الفريق" title="تكبير مساحة الفريق"><svg><use href="#i-expand"/></svg></button></div></div>
+            <div class="pipeline-breadcrumb"><span>ابحث</span><b>‹</b><span>خطط</span><b>‹</b><span>اكتب</span><b>‹</b><span>صمم</span><b>‹</b><span>راجع وجدول</span><b>‹</b><span>حلل</span></div>
+            <div class="workflow-canvas" id="workflowCanvas">
+              <div class="canvas-grid" aria-hidden="true"></div>
+              <div class="canvas-caption"><i></i><span id="canvasCaption">كل فكرة تستحق فريقًا</span></div>
+              <div class="idea-cloud" id="ideaCloud"><button data-topic="كيف أعرّف الجمهور بمشروعي؟">كيف أعرّف الجمهور بمشروعي؟ <span>فكرة مقترحة</span></button><button data-topic="معلومة تستحق المشاركة">معلومة تستحق المشاركة <span>فكرة مقترحة</span></button></div>
+              <svg class="flow-lines" viewBox="0 0 1000 310" preserveAspectRatio="none" aria-hidden="true"><path class="flow-base" d="M840 115 C740 115 740 115 580 115 S370 115 190 115 C90 115 90 235 190 235 C350 235 400 235 580 235 S730 235 840 235"/><path class="flow-active" d="M840 115 C740 115 740 115 580 115 S370 115 190 115 C90 115 90 235 190 235 C350 235 400 235 580 235 S730 235 840 235"/></svg>
+              <div id="flowNodes" class="flow-nodes"></div>
+              <span class="canvas-coordinate" aria-hidden="true">فكرة ← أثر</span>
+            </div>
+            <div class="workflow-bottom"><div class="workflow-state"><span id="runLight" class="run-light"></span><div><strong id="runTitle">الفريق بانتظار فكرتك</strong><span id="runDetail">اكتب الموضوع ودعنا نرتب خطواته</span></div></div><div class="run-buttons"><button class="button secondary" id="pauseButton" data-action="pause" hidden>إيقاف مؤقت</button><button class="button primary" id="runButton" data-action="run"><svg><use href="#i-play"/></svg> شغّل الفريق</button></div></div>
+          </div>
+
+          <div class="middle-grid">
+            <section class="panel preview-panel"><div class="panel-heading small"><div class="heading-inline"><svg><use href="#i-layout"/></svg><h2>معاينة المنشور</h2></div><span class="mini-badge" id="previewBadge">بانتظار فكرتك</span></div><div id="postPreview"></div><div class="preview-actions"><button class="button secondary" data-action="edit"><svg><use href="#i-edit"/></svg> تعديل المحتوى</button><button class="icon-button" data-action="copy" aria-label="نسخ نص المنشور" title="نسخ نص المنشور"><svg><use href="#i-copy"/></svg></button><button class="icon-button" data-action="design" aria-label="تحميل تصميم المنشور" title="تحميل التصميم"><svg><use href="#i-download"/></svg></button></div></section>
+            <section class="panel activity-panel"><div class="panel-heading small"><div class="heading-inline"><span class="terminal-symbol">›_</span><h2>ماذا يحدث الآن؟</h2></div><span class="terminal-label"><i></i> سجل التنفيذ</span></div><div id="terminal" class="terminal" role="log" aria-live="polite" aria-relevant="additions"></div><div class="terminal-footer"><span id="eventCount">٠ أحداث في مساحتك</span><button class="text-button" data-action="history">عرض السجل الكامل <span>←</span></button></div></section>
+          </div>
+
+          <section class="panel tools-panel"><div class="panel-heading small"><div class="heading-inline"><span class="stack-icon">▦</span><h2>الأدوات خلف الفريق</h2><span class="count-badge">١٢</span></div><button class="text-button" data-action="tools">استكشف الأدوات <span>↗</span></button></div><div id="toolsGrid" class="tools-grid"></div><div class="tools-footnote">روابط المشاريع الأصلية · الربط والتشغيل يُفعّلان من إعدادات خدماتك</div></section>
+          <section class="panel recent-panel"><div class="panel-heading small"><div class="heading-inline"><svg><use href="#i-clock"/></svg><h2>آخر الحملات</h2></div><button class="text-button" data-view="content">كل المحتوى ←</button></div><div id="recentCampaigns"></div></section>
+        </section>
+
+        <section id="view-content" class="view" hidden><div class="section-intro"><div><span class="tiny-label">أفكار تتحول إلى أثر</span><h2>مكتبة المحتوى</h2><p>مسوداتك ومحتواك المعتمد في مساحة واحدة.</p></div><button class="button primary" data-action="new"><svg><use href="#i-plus"/></svg> حملة جديدة</button></div><div class="filter-bar"><input type="search" id="contentSearch" placeholder="ابحث في حملاتك…" aria-label="ابحث في حملاتك"><select id="contentFilter" aria-label="تصفية حسب الحالة"><option value="all">كل الحالات</option><option value="draft">مسودة</option><option value="approved">معتمد</option><option value="scheduled">في الجدول المحلي</option></select></div><div id="contentGrid" class="content-grid"></div></section>
+        <section id="view-calendar" class="view" hidden><div class="section-intro"><div><span class="tiny-label">كل محتوى في وقته</span><h2>تقويم المحتوى</h2><p>جدولك محفوظ في هذا المتصفح. النشر التلقائي يحتاج ربط أداة نشر.</p></div><span class="mode-tag">توقيت الكويت</span></div><div class="panel calendar-panel"><div class="calendar-nav"><button class="icon-button" data-action="prev-month" aria-label="الشهر السابق">→</button><h3 id="calendarTitle"></h3><button class="icon-button" data-action="next-month" aria-label="الشهر التالي">←</button></div><div id="calendarGrid" class="calendar-grid"></div></div><div id="scheduleList" class="schedule-list"></div></section>
+        <section id="view-reports" class="view" hidden><div class="section-intro"><div><span class="tiny-label">افهم عمل فريقك</span><h2>تقارير مساحة العمل</h2><p>قياسات فعلية للمحتوى المحفوظ في هذا المتصفح.</p></div><button class="button secondary" data-action="export"><svg><use href="#i-download"/></svg> تصدير البيانات</button></div><div id="reportCards" class="report-cards"></div><div class="panel report-panel"><h3>توزيع محتواك حسب المنصة</h3><div id="platformReport"></div></div><div class="panel no-analytics"><span class="big-icon">↗</span><div><h3>أداء الحسابات يبدأ بعد الربط</h3><p>الوصول والتفاعل ونمو المتابعين غير متاحة حاليًا. اربط مصدر تحليلات لعرض أرقام حقيقية.</p><button class="text-button" data-action="settings">إعداد الاتصالات ←</button></div></div></section>
+      </main>
+    </div>
+    <footer class="app-footer"><span>مكتب السوشيال الذكي <b>✦</b> أنت الفكرة، وفريقك يكملها.</span><a href="https://github.com/Q8-ux/saad/tree/main/social-desk" target="_blank" rel="noopener noreferrer">المشروع على GitHub ↗</a></footer>
+  </div>
+
+  <dialog id="campaignDialog" class="app-dialog"><form id="campaignForm"><div class="dialog-heading"><div><span class="tiny-label">ابدأ بشيء يستحق المشاركة</span><h2>فكرتك القادمة</h2></div><button class="icon-button" type="button" data-close aria-label="إغلاق">×</button></div><div class="form-grid"><label class="full">موضوع الحملة<textarea name="topic" rows="2" maxlength="220" required placeholder="مثال: كيف نعرّف الجمهور بمشروعنا الجديد؟"></textarea></label><label>المشروع<select name="brand"><option>مشروعي</option><option>الدكتور حمد</option><option>سابق القانونية</option><option>قصص وروايات</option></select></label><label>المنصة<select name="platform"><option>إنستغرام</option><option>إكس</option><option>تيك توك</option><option>لينكدإن</option><option>يوتيوب</option></select></label><label>هدف المحتوى<select name="goal"><option>تعريف الجمهور</option><option>زيادة التفاعل</option><option>استقبال الاستفسارات</option><option>التوعية والتعليم</option></select></label><label>نبرة الكتابة<select name="tone"><option>عربية واضحة</option><option>خليجية خفيفة</option><option>رسمية</option></select></label><label class="full">المعلومات التي تريد تضمينها <span class="optional">اختياري</span><textarea name="facts" rows="3" maxlength="5000" placeholder="ألصق المعلومات والمراجع المعتمدة. ستظهر ضمن مسودتك، ويمكنك تعديلها قبل الاعتماد."></textarea></label><label class="full">رابط مرجعي <span class="optional">اختياري</span><input name="sourceUrl" type="url" placeholder="https://…" dir="ltr"></label></div><p class="form-note">النسخة الحالية تجهز مسودة بقوالب محلية. فعّل خادم التوليد من الإعدادات لاستخدام نموذج ذكاء اصطناعي.</p><div class="dialog-actions"><button class="button secondary" type="button" data-close>إلغاء</button><button class="button primary" type="submit"><svg><use href="#i-play"/></svg> إنشاء وتشغيل الفريق</button></div></form></dialog>
+
+  <dialog id="editorDialog" class="app-dialog"><form id="editorForm"><div class="dialog-heading"><div><span class="tiny-label">كلمتك الأخيرة تصنع الفرق</span><h2>مراجعة المحتوى</h2></div><button class="icon-button" type="button" data-close aria-label="إغلاق">×</button></div><label>العنوان<input name="hook" maxlength="220" required></label><label>نص المنشور<textarea name="body" rows="7" maxlength="8000" required></textarea></label><label>دعوة للتفاعل<input name="cta" maxlength="350"></label><label>الوسوم<input name="hashtags" maxlength="600"></label><div class="editor-counter" id="editorCounter"></div><label class="approval-check"><input type="checkbox" name="approve"><span>راجعت النص والتصميم وأعتمد هذه النسخة</span></label><div class="dialog-actions"><button class="button secondary" type="button" data-close>إلغاء</button><button class="button primary" type="submit">حفظ المراجعة</button></div></form></dialog>
+
+  <dialog id="scheduleDialog" class="app-dialog narrow"><form id="scheduleForm"><div class="dialog-heading"><h2>أضف إلى جدولك</h2><button class="icon-button" type="button" data-close aria-label="إغلاق">×</button></div><p class="form-note">يُحفظ الموعد محليًا بتوقيت الكويت. لا يُرسل المنشور لأي منصة.</p><label>تاريخ ووقت النشر<input type="datetime-local" name="when" required></label><div class="dialog-actions"><button type="button" class="button secondary" data-close>إلغاء</button><button type="submit" class="button primary">حفظ الموعد المحلي</button></div></form></dialog>
+
+  <dialog id="settingsDialog" class="app-dialog"><form id="settingsForm"><div class="dialog-heading"><div><span class="tiny-label">اربط خدماتك عندما تكون جاهزًا</span><h2>إعدادات مساحة العمل</h2></div><button class="icon-button" type="button" data-close aria-label="إغلاق">×</button></div><div class="settings-state"><span class="connection-dot"></span><div><strong>النشر وحسابات التواصل غير متصلة</strong><p>يمكنك الآن تجهيز المحتوى ومراجعته وتحميله وحفظ مواعيده محليًا.</p></div></div><label>طريقة تجهيز المحتوى<select name="mode"><option value="local">قوالب محلية</option><option value="gateway">خادم توليد متصل</option></select></label><label>عنوان خادم التوليد<input name="gateway" type="url" dir="ltr" placeholder="https://your-server.example/generate"></label><label>رمز جلسة الخادم <span class="optional">اختياري · لهذه الجلسة فقط</span><input name="token" type="password" autocomplete="off" placeholder="رمز الوصول إلى خادمك"></label><p class="form-note">استخدم خادمًا وسيطًا أو سير عمل n8n. احتفظ بمفتاح Grok في الخادم. لا تضع مفاتيح مزودي النماذج هنا.</p><div class="backup-actions"><button class="button secondary" type="button" data-action="export"><svg><use href="#i-download"/></svg> نسخة احتياطية</button><button class="button secondary" type="button" data-action="import"><svg><use href="#i-upload"/></svg> استيراد نسخة</button></div><p class="form-note" id="storageNote">بيانات مساحة العمل محفوظة في هذا المتصفح؛ صدّر نسخة للاحتفاظ بها خارج الجهاز.</p><div class="dialog-actions"><button class="button secondary" type="button" data-close>إلغاء</button><button class="button primary" type="submit">حفظ الإعدادات</button></div></form></dialog>
+
+  <dialog id="detailDialog" class="app-dialog"><div class="dialog-heading"><h2 id="detailTitle"></h2><button class="icon-button" type="button" data-close aria-label="إغلاق">×</button></div><div id="detailBody"></div></dialog>
+  <input type="file" id="importFile" accept="application/json,.json" hidden>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <svg class="svg-defs" aria-hidden="true"><defs>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="m9 5 11 7-11 7Z"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M5 16v4h14v-4"/></symbol>
+    <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V4m-5 5 5-5 5 5M5 16v4h14v-4"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V4H4v12h4"/></symbol>
+    <symbol id="i-edit" viewBox="0 0 24 24"><path d="m15 4 5 5M4 20l5-1L21 7l-5-5L4 15Z"/></symbol>
+    <symbol id="i-layout" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 9v12"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+    <symbol id="i-expand" viewBox="0 0 24 24"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10" cy="10" r="6"/><path d="m15 15 6 6"/></symbol>
+    <symbol id="i-strategy" viewBox="0 0 24 24"><path d="M8 3h8v4H8zM5 7h14v14H5zM9 12h6m-6 4h4"/></symbol>
+    <symbol id="i-pen" viewBox="0 0 24 24"><path d="m5 19 3-7L18 2l4 4L12 16Z M5 19l6-3M14 6l4 4"/></symbol>
+    <symbol id="i-design" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="m4 17 5-5 4 4 3-3 5 5"/><circle cx="16" cy="9" r="2"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="m3 3 19 9-19 9 4-9Z M7 12h15"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 4v16h17M9 16v-4m5 4V8m5 8V5"/></symbol>
+  </defs></svg>
+</body>
+</html>
