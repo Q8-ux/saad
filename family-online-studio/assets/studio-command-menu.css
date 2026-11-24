@@ -78,3 +78,31 @@
   .studio-command-toggle,.studio-command-backdrop,.studio-command-heading,
   .studio .topbar .top-actions[data-command-drawer]{display:none!important}
 }
+
+/* Core writing commands stay visible; original React handlers own the action. */
+@media screen {
+  .studio-writing-quick-actions {
+    display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;
+    flex:0 0 auto;min-width:0;padding:10px 16px;
+    border-block:1px solid var(--line,#d5dfda);
+    background:var(--surface,#fffdf7);color:var(--text,#173b3b);
+    direction:rtl;font:600 15px/1.5 StudioMenuCairo,Cairo,Tahoma,sans-serif;
+  }
+  .studio-writing-quick-actions > button {
+    appearance:none;min-height:44px;min-width:0;padding:8px 10px;
+    border:1px solid var(--line,#bdd2cd);border-radius:9px;
+    background:var(--soft,#f2f7f3);color:inherit;font:inherit;
+    white-space:normal;cursor:pointer;
+  }
+  .studio-writing-quick-actions > .studio-writing-export {
+    background:var(--accent,#087f7c);color:#fff;border-color:var(--accent,#087f7c);
+  }
+  .studio-writing-quick-actions > button:disabled {opacity:.5;cursor:default;}
+  .studio-writing-quick-actions > button:focus-visible {outline:3px solid #087f7c;outline-offset:2px;}
+  .studio.writer-solo-mode.studio-quick-format-open .writing-canvas > .editor-toolbar.studio-toolbar-expanded,
+  .studio.writer-solo-mode.studio-quick-format-open > .book-tools.studio-toolbar-expanded {display:flex!important;}
+}
+@media screen and (max-width:600px) {
+  .studio-writing-quick-actions {grid-template-columns:repeat(2,minmax(0,1fr));padding:8px 12px;gap:6px;font-size:14px;}
+}
+@media print {.studio-writing-quick-actions {display:none!important;}}

@@ -46,7 +46,7 @@ test('entry includes compact styles after existing styles and preserves all expo
     source('../assets/studio-command-menu.mjs'),
     source('../README.md')
   ]);
-  assert.match(html, /studio-command-menu\.mjs\?v=20261117-navigation5/);
+  assert.match(html, /studio-command-menu\.mjs\?v=20261124-tools1/);
   assert.match(html, /studio-compact-layout\.mjs\?v=20261117-compact1/);
   assert.match(html, /studio-compact-layout\.css\?v=20261117-board1/);
   assert.ok(html.indexOf('studio-compact-layout.css') > html.indexOf('studio-french.css'));
@@ -106,7 +106,7 @@ test('sidebar acts after React handlers and exposes French, Writer Toolbar, Writ
   assert.match(app, /Writer Toolbar \| شريط التنسيق/);
   assert.match(app, /requestAnimationFrame\(\(\)=>requestAnimationFrame/);
   assert.match(app, /رايت سولو العربي/);
-  assert.match(html, /studio-command-menu\.mjs\?v=20261117-navigation5/);
+  assert.match(html, /studio-command-menu\.mjs\?v=20261124-tools1/);
 });
 
 test('landing project selection is explicitly opt-in; previous ?work never auto-opens', async () => {

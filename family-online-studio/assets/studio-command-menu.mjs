@@ -70,6 +70,58 @@ export function mountCommandMenu(studio) {
     groupButtons.set(group.id,tab);
     groupBar.append(tab);
   }
+  const quickBar=make('div','studio-writing-quick-actions');
+  quickBar.setAttribute('role','group');
+  quickBar.setAttribute('aria-label','أدوات الكتابة والحفظ والتصدير');
+  const quickSave=make('button','studio-writing-save','حفظ');
+  const quickExport=make('button','studio-writing-export','تصدير PDF وWord');
+  const quickTools=make('button','studio-writing-tools','أدوات الكتابة');
+  const quickFormat=make('button','studio-writing-format','تنسيق النص');
+  for(const button of [quickSave,quickExport,quickTools,quickFormat])button.type='button';
+  quickExport.setAttribute('aria-haspopup','dialog');
+  quickTools.setAttribute('aria-haspopup','dialog');
+  quickSave.setAttribute('aria-label','حفظ التعديلات الآن');
+  quickFormat.setAttribute('aria-expanded','false');
+  quickBar.append(quickSave,quickExport,quickTools,quickFormat);
+  const findExport=()=>panel.querySelector(':scope > .export-main, :scope > .book-save-export') ||
+    [...panel.querySelectorAll(':scope > button')].find(button=>/^(تصدير|التصدير والاستيراد)$/.test(button.textContent.trim()));
+  const findWritingTools=()=>[...panel.querySelectorAll(':scope > button')]
+    .find(button=>button!==bookFormat&&button.textContent.trim()==='أدوات الكتابة');
+  const activateSource=source=>{
+    if(!source?.isConnected||source.disabled||source.getAttribute('aria-disabled')==='true')return false;
+    source.click();return true;
+  };
+  const showWritingMenu=()=>{selectedGroup='write';updateGroups();open();};
+  quickSave.addEventListener('click',()=>activateSource(saveSource));
+  quickExport.addEventListener('click',()=>activateSource(findExport()));
+  quickTools.addEventListener('click',()=>{if(!activateSource(findWritingTools()))showWritingMenu();});
+  const currentToolbar=()=>studio.querySelector('.writing-canvas.view-script .editor-toolbar, .book-tools');
+  const showFormat=()=>{
+    const toolbar=currentToolbar(),toggle=toolbar?.previousElementSibling;
+    if(!toolbar||!toggle?.classList.contains('studio-format-toggle')){showWritingMenu();return;}
+    toggle.click();
+    const expanded=toggle.getAttribute('aria-expanded')==='true';
+    studio.classList.toggle('studio-quick-format-open',expanded);
+    quickFormat.setAttribute('aria-expanded',String(expanded));
+    quickFormat.setAttribute('aria-controls',toolbar.id);
+    if(expanded)toolbar.scrollIntoView({block:'nearest',behavior:'smooth'});
+  };
+  quickFormat.addEventListener('click',()=>{
+    const writingTab=[...studio.querySelectorAll('.viewbar .view-tabs > button')].find(button=>button.textContent.trim()==='الكتابة');
+    if(!currentToolbar()&&activateSource(writingTab))doc.defaultView.requestAnimationFrame(()=>doc.defaultView.requestAnimationFrame(showFormat));
+    else showFormat();
+  });
+  function syncQuickActions(){
+    if(quickBar.parentElement!==studio)studio.querySelector('.topbar')?.after(quickBar);
+    for(const [button,source] of [[quickSave,saveSource],[quickExport,findExport()]]){
+      const disabled=!source?.isConnected||source.disabled||source.getAttribute('aria-disabled')==='true';
+      if(button.disabled!==disabled)button.disabled=disabled;
+    }
+    const toolbar=currentToolbar(),toggle=toolbar?.previousElementSibling;
+    const expanded=!!toolbar&&toggle?.classList.contains('studio-format-toggle')&&toggle.getAttribute('aria-expanded')==='true';
+    if(quickFormat.getAttribute('aria-expanded')!==String(expanded))quickFormat.setAttribute('aria-expanded',String(expanded));
+    if(toolbar?.id&&quickFormat.getAttribute('aria-controls')!==toolbar.id)quickFormat.setAttribute('aria-controls',toolbar.id);
+  }
   const bookFormat=make('button','studio-command-book-format','Writer Toolbar | تنسيق الكتاب');
   bookFormat.type='button';
   bookFormat.dataset.commandGroup='write';
@@ -163,10 +215,10 @@ export function mountCommandMenu(studio) {
       saveSource?.classList.remove('studio-command-original-save');
       saveProxy?.remove();saveProxy=undefined;signature='';saveSource=source;
     }
-    if(!source){updateGroups();return;}
+    if(!source){syncQuickActions();updateGroups();return;}
     source.classList.add('studio-command-original-save');
     const next=source.outerHTML;
-    if(next===signature&&saveProxy?.parentElement===panel){updateGroups();return;}
+    if(next===signature&&saveProxy?.parentElement===panel){syncQuickActions();updateGroups();return;}
     signature=next;
     if(!saveProxy) {
       saveProxy=doc.createElement('button');saveProxy.type='button';
@@ -180,7 +232,7 @@ export function mountCommandMenu(studio) {
     saveProxy.setAttribute('aria-label',source.getAttribute('aria-label')||source.textContent.trim());
     if(source.hasAttribute('aria-busy'))saveProxy.setAttribute('aria-busy',source.getAttribute('aria-busy'));
     else saveProxy.removeAttribute('aria-busy');
-    updateGroups();
+    syncQuickActions();updateGroups();
   }
   const toggle=()=>opened?close():open();
   const onCommand=event=>{
@@ -214,6 +266,7 @@ export function mountCommandMenu(studio) {
     worksButton.removeEventListener('click',openWorks);
     exitButton.removeEventListener('click',signOut);
     shortcuts.remove();
+    quickBar.remove();studio.classList.remove('studio-quick-format-open');
     delete studio.dataset.commandMenuReady;studio.classList.remove('command-menu-open');
     for(const [name,value] of before)if(value===null)panel.removeAttribute(name);else panel.setAttribute(name,value);
     panel.removeEventListener('click',onCommand,true);doc.removeEventListener('keydown',onKey,true);doc.removeEventListener('focusin',onFocus);
@@ -231,7 +284,7 @@ export function startCommandMenus(doc=document) {
     }
   }
   const observer=new doc.defaultView.MutationObserver(()=>{if(!queued){queued=true;queueMicrotask(scan);}});
-  observer.observe(doc.getElementById('root')||doc.body,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['disabled','aria-disabled','aria-busy']});
+  observer.observe(doc.getElementById('root')||doc.body,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['disabled','aria-disabled','aria-busy','aria-expanded']});
   scan();
   return ()=>{observer.disconnect();for(const state of mounted.values())state.destroy();mounted.clear();};
 }
