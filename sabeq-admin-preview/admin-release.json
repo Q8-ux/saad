@@ -1,5 +1,5 @@
 {
-  "revision": "independent-admin-18-account-entry",
+  "revision": "independent-admin-account-entry-20261125",
   "backendSource": "b29baa1f872eb8e20d5324926bee10571abc018f",
   "sourceRepository": "https://github.com/Q8-ux/saad",
   "paymentVisibility": "admin-only-by-default",
@@ -65,7 +65,7 @@
   "gmailLiveConsentVerified": false,
   "gmailLiveDeliveryVerified": false,
   "adminEntry": "authorized-account-pkce",
-  "adminPasswordForm": false,
+  "adminPasswordForm": true,
   "adminEntryAuthentication": "existing-platform-identity-and-server-authorization",
   "adminEntryValidation": "24-targeted-tests;both-ui-syntax-checks",
   "adminEntryPublishedAt": "2026-11-09",
@@ -110,5 +110,12 @@
     "featureTestsPassed": 11,
     "nativeReleaseTestsPassed": 383,
     "githubClientTestsPassed": 33
+  },
+  "passwordlessAccountEntry": {
+    "link": "?signin=account",
+    "authentication": "existing-platform-account-and-server-authorization",
+    "newAnonymousAccess": false,
+    "clientTestsPassed": 6,
+    "ownerAuthenticatedBrowserTested": false
   }
 }

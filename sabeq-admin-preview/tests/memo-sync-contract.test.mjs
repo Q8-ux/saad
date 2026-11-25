@@ -1,4 +1,5 @@
 import './live-memo-arrival.cases.mjs';
+import './account-entry.test.mjs';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
@@ -56,7 +57,7 @@ function verifyEntryProof(f,url){
 for(const [label,source] of entrySources){
  test(label+': signed-out entry retains password sign-in and account switching without data reads',()=>{
   const f=entryFixture(source);
-  assert.doesNotMatch(f.node('app').innerHTML,/data-action="sign-in"/);
+  assert.match(f.node('app').innerHTML,/data-action="sign-in"/);
   assert.match(f.node('app').innerHTML,/data-action="switch-account"/);
   assert.match(f.node('app').innerHTML,/data-form="password-login"/);assert.match(f.node('app').innerHTML,/name="username"/);assert.match(f.node('app').innerHTML,/type="password"/);
   assert.equal(f.calls.length,0);
@@ -95,7 +96,7 @@ for(const [label,source] of entrySources){
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(f.calls.length,0);
   assert.match(f.node('app').innerHTML,/طلب الدخول لا يطابق هذه الجلسة/);
-  assert.doesNotMatch(f.node('app').innerHTML,/data-action="sign-in"/);
+  assert.match(f.node('app').innerHTML,/data-action="sign-in"/);
  });
  test(label+': a denied account can switch accounts without password instructions',()=>{
   const f=entryFixture(source,'https://q8-ux.github.io/saad/sabeq-admin-preview/?login_error=not_authorized');
@@ -121,3 +122,4 @@ test('GitHub and management mirror ship the identical ready forms client',()=>{
 });
 
 import './user-list-live.cases.mjs';
+

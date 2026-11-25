@@ -47,7 +47,7 @@
   function loginScreen(message='') {
     currentMemo=null;
     globalThis.SabeqControl?.leave();globalThis.SabeqProgrammer?.clear();globalThis.SabeqLegislation?.leave();
-    app.innerHTML=`<main class="login"><img src="./sabeq-logo.png" width="100" height="100" alt="مجموعة سابق القانونية"><h1>كل أعمال سابق،<br>في مكان واحد.</h1><p>طلبات المذكرات، رسائل العملاء، تنبيهات التشغيل وتكاملات المكتب.</p><form data-form="password-login">${input('username','اسم المستخدم','','required autocomplete="username" autocapitalize="none" spellcheck="false" dir="ltr" maxlength="32"')}${input('password','كلمة المرور','','required type="password" autocomplete="current-password" dir="ltr" maxlength="256"')}<button class="primary" type="submit">الدخول إلى مركز التحكم</button></form><button type="button" class="text-button" data-action="forgot-password">نسيت كلمة المرور؟</button><p class="muted" role="status">${esc(message||'الدخول للحسابات المصرح لها بصلاحياتها المعتمدة.')}</p><div class="login-alternative"><button class="secondary" data-action="switch-account">تغيير حساب الدخول</button></div><a href="https://www.sabeq.legal" target="_blank" rel="noopener noreferrer">زيارة الموقع الرسمي</a></main>`;
+    app.innerHTML=`<main class="login"><img src="./sabeq-logo.png" width="100" height="100" alt="مجموعة سابق القانونية"><h1>كل أعمال سابق،<br>في مكان واحد.</h1><p>طلبات المذكرات، رسائل العملاء، تنبيهات التشغيل وتكاملات المكتب.</p><button type="button" class="primary" data-action="sign-in">الدخول بحسابك المعتمد</button><p class="muted">بدون كلمة مرور اللوحة، باستخدام حسابك الإداري المفتوح في المتصفح.</p><form data-form="password-login">${input('username','اسم المستخدم','','required autocomplete="username" autocapitalize="none" spellcheck="false" dir="ltr" maxlength="32"')}${input('password','كلمة المرور','','required type="password" autocomplete="current-password" dir="ltr" maxlength="256"')}<button class="primary" type="submit">الدخول إلى مركز التحكم</button></form><button type="button" class="text-button" data-action="forgot-password">نسيت كلمة المرور؟</button><p class="muted" role="status">${esc(message||'الدخول للحسابات المصرح لها بصلاحياتها المعتمدة.')}</p><div class="login-alternative"><button class="secondary" data-action="switch-account">تغيير حساب الدخول</button></div><a href="https://www.sabeq.legal" target="_blank" rel="noopener noreferrer">زيارة الموقع الرسمي</a></main>`;
   }
   async function signIn(switchAccount=false) {
     const random=()=>btoa(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(32)))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
@@ -425,13 +425,15 @@
   async function boot(){
     try{
       const url=new URL(location.href),code=url.searchParams.get('code'),state=url.searchParams.get('state'),loginError=url.searchParams.get('login_error');
+      const accountEntry=url.searchParams.get('signin')==='account';
+      if(accountEntry){url.searchParams.delete('signin');history.replaceState(null,'',url.pathname+url.search+url.hash);}
       if(url.hash.startsWith('#reset=')){token='';try{sessionStorage.removeItem(SESSION);}catch{}recoveryConfirmScreen(url.hash.slice(7));return;}
        const [hashSection,recordQuery='']=url.hash.slice(1).split('?');
       const requestedSection=hashSection||sessionStorage.getItem('sabeq-admin-section');if(Object.hasOwn(labels,requestedSection)){section=requestedSection;sessionStorage.setItem('sabeq-admin-section',section);}
       pendingMemoId=section==='memos'?memoReference(new URLSearchParams(recordQuery).get('record')||sessionStorage.getItem(RECORD)):'';
       if(pendingMemoId)sessionStorage.setItem(RECORD,pendingMemoId);else sessionStorage.removeItem(RECORD);
       if(code||loginError){history.replaceState(null,'',location.pathname+(section==='overview'?'':'#'+section));if(loginError){loginScreen(loginError==='identity_unavailable'?'تعذر إكمال هوية الدخول. افتح اللوحة في Chrome ثم أعد الدخول.':'هذا الحساب غير مصرح له بإدارة سابق. اختر استخدام حساب آخر وسجّل الدخول بالحساب الإداري المعتمد.');return;}const verifier=sessionStorage.getItem('sabeq-admin-proof'),expected=sessionStorage.getItem('sabeq-admin-state');sessionStorage.removeItem('sabeq-admin-proof');sessionStorage.removeItem('sabeq-admin-state');if(!state||state!==expected||!verifier)throw Error('طلب الدخول لا يطابق هذه الجلسة. ابدأ الدخول مجدداً.');token='';const data=await api('exchange',{code,verifier});token=data.token;sessionStorage.setItem(SESSION,token);}
-      if(!token){loginScreen();return;}manager=(await api('session')).manager;shell();await load();await openPendingMemo();
+      if(!token){if(accountEntry&&!code&&!loginError){await signIn();return;}loginScreen();return;}manager=(await api('session')).manager;shell();await load();await openPendingMemo();
     }catch(error){token='';manager=null;try{sessionStorage.removeItem(SESSION);}catch{}loginScreen(error.message||'تعذر التحقق من الدخول.');}
   }
   async function refreshLive() {
