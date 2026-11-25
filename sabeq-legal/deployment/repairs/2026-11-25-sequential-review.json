@@ -1,0 +1,32 @@
+{
+  "release": "openai-meta-review-1",
+  "nativeVersion": 239,
+  "nativeSource": "085c5359ba79faa49f14a46d6b35f6e75ae54480",
+  "publishedAt": "2026-11-25T05:56:42.634265+00:00",
+  "tests": {
+    "sources": 42,
+    "memo": 321,
+    "access": 121,
+    "failed": 0
+  },
+  "builtProviderNamespace": "passed",
+  "behavior": {
+    "primary": "openai",
+    "secondary": "meta",
+    "exactPrimaryInputToReviewer": true,
+    "unverifiedCitationsBlocked": true,
+    "automaticAlternateMemoWriter": false
+  },
+  "liveSyntheticTest": {
+    "status": "blocked",
+    "requestId": "b9c77185-0429-4f58-85f0-e7e9fbbebce8",
+    "seconds": 7.3,
+    "stage": "openai_planning",
+    "httpStatus": 503,
+    "upstreamStatus": 429,
+    "serviceCode": "billing",
+    "confirmedVendorCode": "credit_balance_exhausted",
+    "metaConfigured": false
+  },
+  "scope": "Published native server and generated GitHub client. Patch is an audit copy against the native parent, not a replacement of the older research-source snapshot. No credentials, real cases or legal authority text have been added."
+}
