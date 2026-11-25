@@ -21,3 +21,10 @@ test('terminal failure never reports success and a pending deployment is cancell
  const failed=harness(['deployment_content_failed']);await assert.rejects(deployPages(failed.args),/deployment_content_failed/);assert.equal(failed.outputs.status,undefined);
  const pending=harness(['deployment_in_progress']);await assert.rejects(deployPages(pending.args),/timed out/);assert.ok(pending.calls.some(([path])=>path.endsWith('/cancel')));assert.equal(pending.calls.filter(([path])=>path.startsWith('GET ')).length,120);
 });
+
+test('a finalized upload waits for REST metadata visibility while permission failures fail immediately',async()=>{
+ const h=harness(),read=h.args.github.rest.actions.getArtifact;let attempts=0;
+ h.args.github.rest.actions.getArtifact=async data=>{attempts++;if(attempts<3)throw Object.assign(Error('not yet visible'),{status:404});return read(data);};
+ await deployPages(h.args);assert.equal(attempts,3);assert.equal(h.outputs.status,'succeed');
+ const denied=harness();let deniedAttempts=0;denied.args.github.rest.actions.getArtifact=async()=>{deniedAttempts++;throw Object.assign(Error('forbidden'),{status:403});};await assert.rejects(deployPages(denied.args));assert.equal(deniedAttempts,1);assert.ok(!denied.calls.some(([path])=>path==='oidc'));
+});
