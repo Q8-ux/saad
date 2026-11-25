@@ -366,6 +366,6 @@
     "regression": "numbered-evidence-law-query-returned-other-laws-before-fix",
     "focusedSourceChecksPassed": 26,
     "originalBaselineHashesPreserved": true,
-    "liveSearchVerified": false
+    "liveSearchVerified": true
   }
 }
