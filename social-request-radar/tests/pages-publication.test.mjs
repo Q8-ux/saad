@@ -10,7 +10,7 @@ function harness(statuses=['deployment_in_progress','succeed']){
 }
 test('publish uses the exact uploader ID and verifies its run and commit without any name-based list',async()=>{
  const h=harness();await deployPages(h.args);assert.equal(h.outputs.status,'succeed');assert.equal(h.outputs.page_url,'https://fixture.github.io/repository/');
- const create=h.calls.find(([path])=>path==='POST /repos/{owner}/{repo}/pages/deployments');assert.equal(create[1].artifact_id,'987');assert.equal(create[1].pages_build_version,h.args.context.sha);assert.equal(create[1].oidc_token,'synthetic-oidc-only');assert.ok(!h.calls.some(([path])=>/list/i.test(path)));
+ const create=h.calls.find(([path])=>path==='POST /repos/{owner}/{repo}/pages/deployments');assert.equal(create[1].artifact_id,987);assert.equal(create[1].pages_build_version,h.args.context.sha);assert.equal(create[1].oidc_token,'synthetic-oidc-only');assert.ok(!h.calls.some(([path])=>/list/i.test(path)));
 });
 test('foreign, expired or missing artifacts cannot create a Pages deployment',async()=>{
  for(const mutate of [h=>h.args.artifactId='',h=>h.artifact.workflow_run.id=99,h=>h.artifact.workflow_run.head_sha='b'.repeat(40),h=>h.artifact.expired=true]){
