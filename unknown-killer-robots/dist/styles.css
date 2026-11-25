@@ -8,4 +8,4 @@
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation:none!important;transition:none!important}}
 @media print{body{background:white;color:black;font-size:16px}.site-header,.film-player,.player-toolbar{display:none}.shell{width:100%}.film-heading{margin-block:20px}.about-section,.topics-section,.notes-section,.message-content{display:block;padding-block:20px}.film-facts,.message-section,.contact-section{background:#eee;color:black}.story>p,.notes-copy,dt,.fact-note,.section-intro p,.topics-list p{color:#333}.film-facts{margin-top:25px}.contact-inner{padding-block:20px}.whatsapp-link{background:none;color:black}.message-content p{font-size:22px}h2,h3{break-after:avoid}li,dl>div{break-inside:avoid}}
 
-.external-arrow,.contact-arrow{font-family:Arial,sans-serif}
+.external-arrow{display:inline-block;width:15px;height:15px;vertical-align:middle;flex-shrink:0}.whatsapp-link>.contact-arrow{width:24px;height:24px;margin-inline-start:auto;flex-shrink:0}

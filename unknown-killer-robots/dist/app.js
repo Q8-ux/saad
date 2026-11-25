@@ -18,11 +18,12 @@
     link.target = '_blank';
     link.rel = 'noopener noreferrer';
     link.textContent = label.replace(/\s*↗$/u, '');
-    const arrow = document.createElement('span');
-    arrow.className = 'external-arrow';
-    arrow.setAttribute('aria-hidden', 'true');
-    arrow.textContent = ' ↗';
-    link.append(arrow);
+    const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    for (const [name, value] of Object.entries({class: 'external-arrow', viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': '1.7', 'aria-hidden': 'true'})) arrow.setAttribute(name, value);
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', 'M6 18 18 6M6 6h12v12');
+    arrow.append(path);
+    link.append(document.createTextNode(' '), arrow);
     status.append(link);
   }
 
