@@ -8,7 +8,7 @@ import { webcrypto } from 'node:crypto';
 import vm from 'node:vm';
 const require=createRequire(import.meta.url),ts=require('typescript'),root=resolve(import.meta.dirname,'..');
 function harness(){
- const sqlite=new DatabaseSync(':memory:');for(const f of readdirSync(root+'/drizzle').filter(f=>f.endsWith('.sql')).sort())sqlite.exec(readFileSync(root+'/drizzle/'+f,'utf8'));
+ const sqlite=new DatabaseSync(':memory:');sqlite.exec(readFileSync(root+'/tests/fixtures/dashboard-base-schema.sql','utf8'));for(const f of readdirSync(root+'/drizzle').filter(f=>f.endsWith('.sql')).sort())sqlite.exec(readFileSync(root+'/drizzle/'+f,'utf8'));
  const db={prepare(query){let args=[];return{bind(...v){args=v;return this;},async first(){return sqlite.prepare(query).get(...args)||null;},async all(){return{results:sqlite.prepare(query).all(...args)};},async run(){return{meta:{changes:Number(sqlite.prepare(query).run(...args).changes)}};}};},async batch(values){return Promise.all(values.map(v=>v.run()));}};
  const runtime={AUTH_SECRET:'synthetic-secret-for-tests-'.repeat(3),ALLOW_GUEST_MEMO:'true'},cache=new Map(),calls=[],invoices=new Map();let next=100,failInsert=false,authFailures=0,clockOffset=0;
  class Clock extends Date { static now(){return Date.now()+clockOffset;} }
@@ -31,14 +31,21 @@ function harness(){
 const input={contactEmail:'reply@example.test',contactPhone:'80000000',informationConfirmed:true,caseType:'مدني',court:'المحكمة الكلية',courtCircuit:'الدائرة المدنية',clientName:'عميل اصطناعي',otherParty:'خصم اصطناعي',partyRole:'مدعٍ',facts:'هذه وقائع اصطناعية للاختبار دون أي بيانات عميل حقيقية.',requests:'طلب اصطناعي للاختبار',interfaceLanguage:'ar',outputLanguage:'ar'};
 const newAttempt=()=>({attemptId:webcrypto.randomUUID(),paymentToken:Buffer.from(webcrypto.getRandomValues(new Uint8Array(32))).toString('base64url'),input});
 
-test('checkout rejects missing or malformed reply contacts and absent confirmation before any invoice or provider call',async()=>{const h=harness();try{
+test('checkout rejects missing phone, malformed supplied email and absent confirmation before any invoice or provider call',async()=>{const h=harness();try{
  const api=h.load('lib/sadad-payments.ts');
- for(const patch of [{contactEmail:''},{contactEmail:'invalid'},{contactPhone:''},{contactPhone:'123'},{informationConfirmed:false},{informationConfirmed:'true'}])await assert.rejects(api.createMemoPayment({...newAttempt(),input:{...input,...patch}}),error=>error.status===422);
+ for(const patch of [{contactEmail:'invalid'},{contactPhone:''},{contactPhone:'123'},{informationConfirmed:false},{informationConfirmed:'true'}])await assert.rejects(api.createMemoPayment({...newAttempt(),input:{...input,...patch}}),error=>error.status===422);
  assert.equal(h.calls.length,0);assert.equal(h.sqlite.prepare('SELECT COUNT(*) n FROM sadad_payments').get().n,0);
 }finally{h.close();}});
 async function ready(h){const api=h.load('lib/sadad-payments.ts');await api.sadadManagement({action:'save',environment:'sandbox',clientKey:'synthetic-client-key',clientSecret:'synthetic-client-secret',priceKwd:'2.501',required:false,accountConfirmed:true,callbacksConfirmed:true},'test');await api.sadadManagement({action:'test'},'test');await api.sadadManagement({action:'save',environment:'sandbox',priceKwd:'2.501',required:true,publicCheckoutEnabled:true,accountConfirmed:true,callbacksConfirmed:true},'test');return api;}
 async function paid(h,api,attempt){await api.createMemoPayment(attempt);const remote=[...h.invoices.values()].at(-1);remote.status='Paid';remote.transactionID='synthetic-transaction-'+remote.id;return remote;}
 const memoInput=a=>({...a.input,paymentId:a.attemptId,paymentToken:a.paymentToken});
+
+test('phone-only checkout accepts blank and omitted email and keeps contacts out of the provider payload',async()=>{
+ for(const contactEmail of ['',undefined]){const h=harness();try{
+  const api=await ready(h),a={...newAttempt(),input:{...input,contactEmail}};await api.createMemoPayment(a);assert.equal(h.invoices.size,1);
+  const create=h.calls.find(c=>c.url.endsWith('/Invoice/insert'));assert.ok(create);assert.doesNotMatch(create.init.body,/80000000|contactPhone|contactEmail/);
+ }finally{h.close();}}
+});
 
 test('SADAD stays admin-only by default and configuring credentials never enables public checkout',async()=>{const h=harness();try{
  const api=h.load('lib/sadad-payments.ts');assert.equal((await api.memoPaymentPolicy()).publicCheckoutEnabled,false);
