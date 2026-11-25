@@ -11,7 +11,7 @@ import tarfile
 
 WORKFLOW = ".github/workflows/deploy-pages.yml"
 SABEQ_DIRECTORIES = ("sabeq-legal", "sabeq-admin-preview", "sabeq-ahmad")
-SABEQ_TOOL_PREFIXES = ("legal-memo-platform/tools/rea/", "legal-memo-platform/tools/spec-kit/", "legal-memo-platform/.agents/", "legal-memo-platform/.specify/", "legal-memo-platform/specs/001-spec-kit-adoption/", "legal-memo-platform/tools/internal-verification/", "legal-memo-platform/specs/006-internal-verification/", "legal-memo-platform/specs/007-indirect-intake/", "legal-memo-platform/specs/008-one-dinar-test/", "legal-memo-platform/specs/063-continuous-memo-admin/", "legal-memo-platform/native-admin-console/")
+SABEQ_TOOL_PREFIXES = ("legal-memo-platform/tools/rea/", "legal-memo-platform/tools/obscura-memo-check/", "legal-memo-platform/tools/spec-kit/", "legal-memo-platform/.agents/", "legal-memo-platform/.specify/", "legal-memo-platform/specs/001-spec-kit-adoption/", "legal-memo-platform/tools/internal-verification/", "legal-memo-platform/specs/006-internal-verification/", "legal-memo-platform/specs/007-indirect-intake/", "legal-memo-platform/specs/008-one-dinar-test/", "legal-memo-platform/specs/063-continuous-memo-admin/", "legal-memo-platform/native-admin-console/")
 SABEQ_TOOL_FILES = {"legal-memo-platform/AGENTS.md", "legal-memo-platform/package.json", "legal-memo-platform/.gitignore", ".github/workflows/sabeq-internal-verification.yml", ".github/workflows/sabeq-client-admin-contract.yml"}
 
 def command(*args):
