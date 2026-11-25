@@ -50,6 +50,7 @@ test('a denied detail response does not open a record or bypass server permissio
 test('the memo customer-contact list links the submitted reply details and omits unsafe or absent contacts',async()=>{
  const html=await fixture({...base,input_json:JSON.stringify({contactEmail:'reply@example.test',contactPhone:'+96580000000'})}).open();
  assert.match(html,/الاتصال بالعميل/);assert.match(html,/href="tel:\+96580000000"/);assert.match(html,/href="mailto:reply%40example.test"/);
+ const phoneOnly=await fixture({...base,input_json:JSON.stringify({contactPhone:'+96580000000'})}).open();assert.match(phoneOnly,/الاتصال بالعميل/);assert.match(phoneOnly,/href="tel:\+96580000000"/);assert.doesNotMatch(phoneOnly,/href="mailto:/);
  const invalid=await fixture({...base,input_json:JSON.stringify({contactEmail:'<script>@example.test',contactPhone:'javascript:bad'})}).open();
  assert.doesNotMatch(invalid,/record-contact-title|href="tel:|href="mailto:/);
  const old=await fixture({...base,input_json:'{}'}).open();assert.doesNotMatch(old,/record-contact-title/);

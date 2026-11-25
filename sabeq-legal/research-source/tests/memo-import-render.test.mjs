@@ -47,10 +47,11 @@ test('conflicting criminal and administrative classifications display a question
  assert.match(html,/يُحدد بعد مراجعة المسار/);assert.match(html,/اختلف نوع القضية عن الدائرة/);
 });
 
-test('assistant review requires contact details above an unchecked accuracy acknowledgement in every language',()=>{
+test('assistant review requires phone and makes email optional above an unchecked accuracy acknowledgement in every language',()=>{
  for(const language of ['ar','en','ur']){
   const html=render(state,language);
-  for(const name of ['contactPhone','contactEmail']){const input=html.match(/<input\b[^>]*>/g).find(tag=>tag.includes('name="'+name+'"'));assert.ok(input);assert.match(input,/dir="ltr"/);assert.match(input,/required=""/);}
+  for(const name of ['contactPhone','contactEmail']){const input=html.match(/<input\b[^>]*>/g).find(tag=>tag.includes('name="'+name+'"'));assert.ok(input);assert.match(input,/dir="ltr"/);if(name==='contactPhone')assert.match(input,/required=""/);else assert.doesNotMatch(input,/required=""/);}
+  assert.match(html,/اختياري|optional|اختیاری/);
   assert.ok(html.indexOf('name="contactEmail"')<html.indexOf('class="memo-generation-approval"'));
   const approval=html.match(/<input\b[^>]*>/g).find(tag=>tag.includes('name="informationConfirmed"'));assert.match(approval,/type="checkbox"/);assert.match(approval,/required=""/);
   assert.doesNotMatch(html,/<input type="checkbox"[^>]*checked=/);

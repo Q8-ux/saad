@@ -108,7 +108,7 @@ const request=(overrides={})=>new Request('https://example.org/api/legal/memo',{
 
 test('public memo contact validation stops direct generation before payment, models or request creation',async t=>{
  const h=templateHarness();t.after(h.cleanup);
- for(const patch of [{contactEmail:''},{contactEmail:'invalid'},{contactPhone:''},{contactPhone:'123'},{informationConfirmed:false},{informationConfirmed:'true'}]){
+ for(const patch of [{contactEmail:'invalid'},{contactPhone:''},{contactPhone:'123'},{informationConfirmed:false},{informationConfirmed:'true'}]){
   let calls=0;const unexpected=async()=>{calls++;throw Error('contact gate was bypassed');};
   const route=memoRoute(h,{model:unexpected,reserve:unexpected,ledger:{startMemoRequest:unexpected,finishMemoRequest:unexpected}});
   const response=await route.POST(request(patch));assert.equal(response.status,422);assert.equal((await response.json()).stage,'input_validation');assert.equal(calls,0);
@@ -124,15 +124,15 @@ test('conflicting and unresolved routes stop before payment reservation, provide
  }
 });
 
-test('the selected route reaches all drafting and audit calls and survives both archives unchanged',async t=>{
+test('phone-only generation reaches the selected route, all audits and both archives without requiring email',async t=>{
  const h=templateHarness();t.after(h.cleanup);const expected='civil.monetary_claim.first_instance.claim.claimant',seen=[],archived=[];
- const route=memoRoute(h,{auth:async()=>({id:'synthetic'}),pipeline:{agentPipelineEnabled:()=>false},record:async row=>archived.push(row),ledger:{startMemoRequest:async input=>{assert.equal(input.contactEmail,caseData.contactEmail);assert.equal(input.contactPhone,caseData.contactPhone);assert.equal(input.informationConfirmed,true);assert.equal(input.legalRoute.id,expected);return 'synthetic-routed-memo';},finishMemoRequest:async(...row)=>seen.push(row)},model:async options=>{
+ const route=memoRoute(h,{auth:async()=>({id:'synthetic'}),pipeline:{agentPipelineEnabled:()=>false},record:async row=>archived.push(row),ledger:{startMemoRequest:async input=>{assert.equal(input.contactEmail,'');assert.equal(input.contactPhone,caseData.contactPhone);assert.equal(input.informationConfirmed,true);assert.equal(input.legalRoute.id,expected);return 'synthetic-routed-memo';},finishMemoRequest:async(...row)=>seen.push(row)},model:async options=>{
   assert.ok(options.instructions.includes(expected));
   if(options.schema?.properties?.clientRole)return JSON.stringify({clientRole:caseData.partyRole,opponentRole:'خصم',characterization:'مطالبة',issues:[{issue:'المطالبة',factQuote:'مبلغ لم يتم سداده',document:'',sourceMarkers:['م1'],application:'فحص المطالبة',counterargument:'منازعة',response:'مراجعة',proposedRelief:caseData.requests,missing:''}],missingFacts:[],researchGaps:[]});
   if(options.schema?.properties?.checks)return JSON.stringify({checks:[auditCheck(options,evidence)],roleConsistent:true,factsPreserved:true,reliefConsistent:true,unsupportedAssertions:[]});
   return JSON.stringify(content);
  }});
- const response=await route.POST(request({legalRouteId:'felony.forged'}));assert.equal(response.status,200);const data=await response.json();assert.equal(data.legalRoute.id,expected);assert.equal(archived[0].metadata.legalRoute.id,expected);assert.equal(archived[0].outputText,data.memo);assert.equal(seen.at(-1)[2],data.memo);
+ const response=await route.POST(request({contactEmail:'',legalRouteId:'felony.forged'}));assert.equal(response.status,200);const data=await response.json();assert.equal(data.legalRoute.id,expected);assert.equal(archived[0].metadata.legalRoute.id,expected);assert.equal(archived[0].outputText,data.memo);assert.equal(seen.at(-1)[2],data.memo);
 });
 
 test('a persistent heading from another route receives one repair and cannot consume payment or archive success',async t=>{
