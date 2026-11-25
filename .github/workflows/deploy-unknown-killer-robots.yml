@@ -30,16 +30,34 @@ jobs:
         run: |
           node --check unknown-killer-robots/dist/app.js
           python unknown-killer-robots/deployment/verify.py
+          node --test social-request-radar/tests/pages-publication.test.mjs
       - uses: actions/configure-pages@v5
       - name: Preserve published projects and update film page only
         env:
           GH_TOKEN: ${{ github.token }}
         run: python unknown-killer-robots/deployment/publish.py
-      - uses: actions/upload-pages-artifact@v3
-        with: {path: _site, retention-days: 30}
+      - name: Archive Pages artifact
+        shell: bash
+        run: |
+          tar --dereference --hard-dereference --directory _site \
+            --exclude=.git --exclude=.github -cf "$RUNNER_TEMP/artifact.tar" .
+      - uses: actions/upload-artifact@v4
+        id: pages-artifact
+        with:
+          name: github-pages
+          path: ${{ runner.temp }}/artifact.tar
+          retention-days: 30
+          if-no-files-found: error
+          overwrite: true
       - name: Deploy
         id: deploy
-        uses: actions/deploy-pages@v4
+        uses: actions/github-script@v7
+        env:
+          PAGES_ARTIFACT_ID: ${{ steps.pages-artifact.outputs.artifact-id }}
+        with:
+          script: |
+            const deployPages = require('./.github/scripts/pages-deployment.cjs');
+            await deployPages({github,context,core,artifactId:process.env.PAGES_ARTIFACT_ID});
       - name: Verify live page and source revision
         env:
           RELEASE_SHA: ${{ github.sha }}
