@@ -1,7 +1,7 @@
 {
   "release": "2026-11-25-phone-required-email-optional",
   "clientSource": "6134370db708a45698c0e583043d508b477b6d46",
-  "backendSource": "873dc1cf928f937eb74c2f313cff04eec29510fa",
+  "backendSource": "49836b819da5d489dba97aec6a8c8e71b00e1fd4",
   "assistant": "indirect-intake-completeness-1",
   "voice": "gulf-male-voice-4",
   "tools": "legal-tools-1",
@@ -28,7 +28,7 @@
   "interfaceLocalization": "ar-en-ur-tools-guidance-1",
   "memoProseLanguage": "arabic-with-protected-names-and-identifiers-1",
   "builtAt": "2026-11-25",
-  "backendVersion": 250,
+  "backendVersion": 253,
   "pleadingLayout": "first-page-only-sidebar-and-frame-full-width-right-aligned-continuations",
   "citationCorrection": "one-bounded-server-retry-before-archive",
   "legalSourceDirectory": "6-catalogues-3-fetched-0-new-citable-pdfs",
@@ -100,8 +100,8 @@
   "citationAudit": "source-markers-reviewed-before-display;source-trace-retained-outside-court-document",
   "typecheck": "20-existing-Workers-CSS-query-diagnostics;no-new-journey-diagnostic",
   "ssrHarness": "pre-existing-cloudflare-esm-import-failure-reproduced-on-baseline",
-  "nativePublishedAt": "2026-11-25T14:04:50.937968+00:00",
-  "nativeDeployment": "appgdep_6b06eaea11ec81919008698a6ec6aacf",
+  "nativePublishedAt": "2026-11-25T22:58:19.412652+00:00",
+  "nativeDeployment": "appgdep_6b0767e79dfc81918b01d793404c55b7",
   "publicationChecks": "9-scoped-release-tests-and-5-motion-tests-pass",
   "legislationArchive": "2026-04-01-separate-from-primary-2026-10-05",
   "legislationWorkbench": "manager-search-articles-originals-and-report",
@@ -325,5 +325,47 @@
     "changesProviderBilling": false,
     "automaticGenerationRestored": false,
     "realCaseDataInRelease": false
+  },
+  "ownerMemoRecovery": {
+    "revision": "owner-stale-recovery-meta-candidate-1",
+    "publishedVersion": 251,
+    "source": "b53b6b940e57c5b5ef68f34e4dc91ba5d13eb2d8",
+    "emptyRunningMinimumAgeHours": 24,
+    "snapshotGuard": true,
+    "originalJournalPreserved": true,
+    "metaReview": "separate-private-candidate-human-review-required",
+    "canonicalTextAutoReplaced": false,
+    "paidModelRequiresExistingApproval": true,
+    "liveMetaReviewSucceeded": false,
+    "liveMetaConfiguration": "not-configured",
+    "paymentOrMailSent": false
+  },
+  "boundArticleTextReview": {
+    "revision": "bound-article-text-review-3",
+    "reviewedArticleCount": 26,
+    "fullArticleCount": 25,
+    "wholeCorpusReviewed": false,
+    "currentLawVerified": false,
+    "humanLegalApproval": false,
+    "addedPages": [
+      298,
+      313
+    ],
+    "liveSearchVerified": true
+  },
+  "latestNativeValidation": {
+    "version": 253,
+    "internalChecksPassed": 514,
+    "buildPassed": true,
+    "publicationSucceeded": true,
+    "livePaymentTested": false,
+    "liveMetaReviewSucceeded": false
+  },
+  "explicitArticleSectionSearch": {
+    "revision": "explicit-article-section-1",
+    "regression": "numbered-evidence-law-query-returned-other-laws-before-fix",
+    "focusedSourceChecksPassed": 26,
+    "originalBaselineHashesPreserved": true,
+    "liveSearchVerified": true
   }
 }
