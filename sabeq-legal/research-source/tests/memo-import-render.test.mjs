@@ -17,7 +17,7 @@ const source=readFileSync(new URL('../app/sabeq-site.tsx',import.meta.url),'utf8
 const ast=ts.createSourceFile('sabeq-site.tsx',source,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX);
 const functions=ast.statements.filter(node=>ts.isFunctionDeclaration(node)&&['Field','CustomComboBox','MemoWizard'].includes(node.name?.text)).map(node=>node.getText(ast)).join('\n');
 const exports={};
-vm.runInNewContext(ts.transpileModule('import {useState,useEffect,useMemo,useRef} from "react";\n'+functions+'\nexport {MemoWizard};',{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,jsx:ts.JsxEmit.ReactJSX}}).outputText,{exports,require,...load("../lib/legal-drafting-routes.ts"),...handoff,...procedure,...journey,...dictation,...require('lucide-react'),...load('../lib/sadad-client.ts'),...load('../lib/memo-generation.ts'),...load('../lib/memo-submission.ts'),interfaceLabel:localization.interfaceLabel,tr:localization.interfaceText,pleadingFields:{},selectPleadingKind:()=>"memorandum",emptyAnalysisFields:{},MemoVoiceInput:VoiceInput,ProceduralPositionView:()=>null,Intl});
+vm.runInNewContext(ts.transpileModule('import {useState,useEffect,useMemo,useRef} from "react";\n'+functions+'\nexport {MemoWizard};',{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,jsx:ts.JsxEmit.ReactJSX}}).outputText,{exports,require,...load("../lib/legal-drafting-routes.ts"),...handoff,...procedure,...journey,...dictation,...require('lucide-react'),...load('../lib/sadad-client.ts'),...load('../lib/memo-generation.ts'),...load('../lib/memo-submission.ts'),interfaceLabel:localization.interfaceLabel,tr:localization.interfaceText,pleadingFields:{},selectPleadingKind:()=>"memorandum",emptyAnalysisFields:{},MemoContactFields:load('../app/memo-contact-fields.tsx',{'@/lib/memo-contact':load('../lib/memo-contact.ts')}).default,MemoVoiceInput:VoiceInput,ProceduralPositionView:()=>null,Intl});
 const {copy}=load('../app/site-content.ts');
 const state={memoPrefill:{facts:'وقائع اصطناعية سبق ذكرها في المحادثة',requests:'طلب اصطناعي سبق ذكره',clientName:'اسم اصطناعي أول',otherParty:'اسم اصطناعي ثان',caseType:'مدني',court:'المحكمة الكلية',partyRole:'مدعٍ'}};
 const render=(intake,language='ar')=>renderToStaticMarkup(React.createElement(exports.MemoWizard,{t:copy[language],language,token:'',active:true,initialData:null,assistantSession:{messages:[{role:'user',content:'قضية اصطناعية'}],intake},openAssistant(){}}));
@@ -45,4 +45,14 @@ test('the existing review shows the civil expert route and preserves the supplie
 test('conflicting criminal and administrative classifications display a question instead of claiming a civil form',()=>{
  const html=render({...state,courtCircuit:'الإدارية',memoPrefill:{...state.memoPrefill,caseType:'جنح',courtCircuit:'الإدارية',partyRole:'متهم'}});
  assert.match(html,/يُحدد بعد مراجعة المسار/);assert.match(html,/اختلف نوع القضية عن الدائرة/);
+});
+
+test('assistant review requires contact details above an unchecked accuracy acknowledgement in every language',()=>{
+ for(const language of ['ar','en','ur']){
+  const html=render(state,language);
+  for(const name of ['contactPhone','contactEmail']){const input=html.match(/<input\b[^>]*>/g).find(tag=>tag.includes('name="'+name+'"'));assert.ok(input);assert.match(input,/dir="ltr"/);assert.match(input,/required=""/);}
+  assert.ok(html.indexOf('name="contactEmail"')<html.indexOf('class="memo-generation-approval"'));
+  const approval=html.match(/<input\b[^>]*>/g).find(tag=>tag.includes('name="informationConfirmed"'));assert.match(approval,/type="checkbox"/);assert.match(approval,/required=""/);
+  assert.doesNotMatch(html,/<input type="checkbox"[^>]*checked=/);
+ }
 });

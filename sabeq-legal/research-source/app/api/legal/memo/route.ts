@@ -1,7 +1,7 @@
 import { projectContextInstructions } from "@/lib/project-context";
 import { legalDraftingRouteRevision, legalRouteInstructions, legalRouteSummary, legalRouteResearchQueries, reviewLegalRouteContent } from "@/lib/legal-drafting-routes";
 import { availableEvidenceMode } from "@/lib/memo-preparation";
-import { validateMemoInput } from "@/lib/memo-input";
+import { requireMemoContact, validateMemoInput } from "@/lib/memo-input";
 import { reserveMemoPayment, completeMemoPayment, releaseMemoPayment, type PaymentLease } from "@/lib/sadad-payments";
 import {assessMatterFacts} from "@/lib/matter-facts";
 import {preserveLegalQuotes,draftStatutoryText} from '@/lib/statutory-text';
@@ -71,6 +71,7 @@ export async function POST(request: Request) {
     await requireServiceEnabled("memo", request);
     requestStage = "input_validation";
     const raw = await readJsonObject(request, 200_000);
+    const contact = requireMemoContact(raw);
     // Memo sign-in is temporarily disabled for the pilot. The previous guest
     // limit was too low for a normal test flow (retrying after document review
     // exhausted it), so retain abuse protection while allowing real testing.
@@ -83,7 +84,7 @@ export async function POST(request: Request) {
     paymentLease = entitlement.lease;
     await enforceRateLimit(request, paymentLease ? `legal-memo-paid:${paymentLease.id}` : "legal-memo", 12, "hour");
     requestStage = "saving";
-    managementRequestId = await startMemoRequest({ ...extraFields, clientName, court, courtCircuit, caseNumber, caseType, partyRole, otherParty, allParties, facts, requests, legalIssues, documentKind, caseStage, legalRoute:legalRouteSummary(legalRoute) }, user, request.headers.get("origin") || new URL(request.url).origin);
+    managementRequestId = await startMemoRequest({ ...extraFields, ...contact, clientName, court, courtCircuit, caseNumber, caseType, partyRole, otherParty, allParties, facts, requests, legalIssues, documentKind, caseStage, legalRoute:legalRouteSummary(legalRoute) }, user, request.headers.get("origin") || new URL(request.url).origin);
     requestStage = "generation";
     const matter=assessMatterFacts(facts+" "+requests+" "+allParties);
     if(!matter.ready && raw.draftMode !== availableEvidenceMode) {

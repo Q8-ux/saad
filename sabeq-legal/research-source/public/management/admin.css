@@ -64,3 +64,5 @@ html:has(dialog.memo-detail[open]){overflow:hidden}
 .memo-actions-body{display:grid;gap:10px;padding:12px}
 .memo-actions-body .actions{margin:0}
 .memo-actions-body .actions button{flex:none;inline-size:100%;min-inline-size:0}
+
+.memo-contact-link{display:inline-flex;align-items:center;min-block-size:44px;max-inline-size:100%;overflow-wrap:anywhere}

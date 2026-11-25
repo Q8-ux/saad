@@ -4,7 +4,7 @@ import {load} from './template-harness.mjs';
 const routes=load('../lib/legal-drafting-routes.ts');
 const reasoning=load('../lib/case-reasoning.ts');
 // All parties, amounts, case identifiers and events below are synthetic.
-const base={caseType:'مدني',court:'المحكمة الكلية',courtCircuit:'الدائرة المدنية',clientName:'طرف اصطناعي ألف',otherParty:'طرف اصطناعي باء',partyRole:'مدعى عليه',facts:'مطالبة اصطناعية نازع فيها الطرف في المبلغ وأصل استحقاقه.',requests:'رفض المطالبة الاصطناعية.',documentKind:'memorandum'};
+const base={contactEmail:'reply@example.test',contactPhone:'80000000',informationConfirmed:true,caseType:'مدني',court:'المحكمة الكلية',courtCircuit:'الدائرة المدنية',clientName:'طرف اصطناعي ألف',otherParty:'طرف اصطناعي باء',partyRole:'مدعى عليه',facts:'مطالبة اصطناعية نازع فيها الطرف في المبلغ وأصل استحقاقه.',requests:'رفض المطالبة الاصطناعية.',documentKind:'memorandum'};
 const resolve=changes=>routes.resolveLegalDraftingRoute({...base,...changes});
 const conflict=changes=>{const r=resolve(changes);assert.equal(r.status,'needs_clarification');assert.ok(r.issueCodes.includes('self_adverse_relief'));};
 
@@ -65,15 +65,15 @@ test('a proposed adverse prayer is rejected independently of model approval and 
 
 test('the real input validator blocks contradictory relief even in available-evidence mode',()=>{
  const security=load('../lib/request-security.ts',{'@/db':{}});
- const {validateMemoInput}=load('../lib/memo-input.ts',{'@/lib/request-security':security});
+ const {requireMemoContact,validateMemoInput}=load('../lib/memo-input.ts',{'@/lib/request-security':security});
  for(const draftMode of ['', 'available_evidence'])assert.throws(()=>validateMemoInput({...base,draftMode,requests:'إلزام المدعى عليه بدفع مبلغ الاختبار.'}),e=>e.stage==='legal_route_review'&&e.status===422);
 });
 test('the endpoint refuses a conflicting prayer before payment reservation or any generation',async()=>{
  const security=load('../lib/request-security.ts',{'@/db':{}});
- const {validateMemoInput}=load('../lib/memo-input.ts',{'@/lib/request-security':security});
+ const {requireMemoContact,validateMemoInput}=load('../lib/memo-input.ts',{'@/lib/request-security':security});
  let reservations=0,generations=0;
  const {POST}=load('../app/api/legal/memo/route.ts',{
-  '@/lib/memo-input':{validateMemoInput},
+  '@/lib/memo-input':{requireMemoContact,validateMemoInput},
   '@/lib/approved-templates':{loadApprovedTemplate:async()=>{throw Error('must not load template');}},
   '@/lib/legal-search':{},
   '@/lib/sabeq-agent-bridge':{},

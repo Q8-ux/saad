@@ -4,7 +4,7 @@ import { sendSavedDraft } from "@/lib/gmail";
 export async function startMemoRequest(input: Record<string, unknown>, user: { id: string; email: string } | null, origin: string) {
   const id = crypto.randomUUID();
   await getD1().prepare("INSERT INTO management_memo_requests (id, user_id, client_name, email, case_type, case_number, input_json, origin, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'running')")
-    .bind(id, user?.id || null, String(input.clientName || "").slice(0, 200), user?.email || "", String(input.caseType || "").slice(0, 160), String(input.caseNumber || "").slice(0, 120), JSON.stringify(input).slice(0, 180_000), origin.slice(0, 200)).run();
+    .bind(id, user?.id || null, String(input.clientName || "").slice(0, 200), String(input.contactEmail || user?.email || ""), String(input.caseType || "").slice(0, 160), String(input.caseNumber || "").slice(0, 120), JSON.stringify(input).slice(0, 180_000), origin.slice(0, 200)).run();
   return id;
 }
 export async function finishMemoRequest(id: string, status: "needs_information" | "needs_review" | "generated" | "failed" | "cancelled", output = "", code = "") {

@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { load, templateHarness } from './template-harness.mjs';
 
-const caseData = {caseType:'مدني',court:'المحكمة الكلية',clientName:'شخص اختباري',otherParty:'خصم اختباري',partyRole:'مدعٍ',facts:'واقعة اصطناعية للاختبار فقط بشأن مبلغ لم يتم سداده.',requests:'إلزام الخصم بسداد مبلغ الاختبار.'};
+const caseData = {contactEmail:'reply@example.test',contactPhone:'80000000',informationConfirmed:true,caseType:'مدني',court:'المحكمة الكلية',clientName:'شخص اختباري',otherParty:'خصم اختباري',partyRole:'مدعٍ',facts:'واقعة اصطناعية للاختبار فقط بشأن مبلغ لم يتم سداده.',requests:'إلزام الخصم بسداد مبلغ الاختبار.'};
 const template = {id:'test',version:1,kind:'claim',title:'نموذج اختبار',sourceSha256:'a'.repeat(64)};
 const evidence = [{documentId:1,chunkId:7,title:'مرجع عام اصطناعي',text:'المادة 12 نص اختبار.',reference:'المادة 12',sourceUrl:'https://example.org/public-test',documentType:'قانون',officialSource:'اختبار'}];
 const reasoning={factQuote:'مبلغ لم يتم سداده',applicationQuote:'ينصب الخلاف على مبلغ لم يتم سداده بحسب المدخلات، ولذلك يلزم مقابلة قيمة المطالبة بمستند أصل التعامل وتحديد الرصيد محل النزاع.',opposingQuote:'قد ينازع الخصم في بقاء الرصيد أو يدعي سداداً لم ترد مستنداته ضمن بيانات الاختبار.',responseQuote:'والرد أن حسم هذا الاعتراض يتوقف على مطابقة المستندات وبيان أي دفعة متصلة بالمطالبة، دون افتراض ثبوت السداد أو تجاهل ما يقدم بشأنه.'};
@@ -106,6 +106,15 @@ function memoRoute(h, {pipeline, sources=evidence, auth=async()=>null, limits=as
 }
 const request=(overrides={})=>new Request('https://example.org/api/legal/memo',{method:'POST',headers:{Origin:'https://example.org','Content-Type':'application/json'},body:JSON.stringify({...caseData,...overrides,template:{kind:'appeal'},agentToken:'client-forged'})});
 
+test('public memo contact validation stops direct generation before payment, models or request creation',async t=>{
+ const h=templateHarness();t.after(h.cleanup);
+ for(const patch of [{contactEmail:''},{contactEmail:'invalid'},{contactPhone:''},{contactPhone:'123'},{informationConfirmed:false},{informationConfirmed:'true'}]){
+  let calls=0;const unexpected=async()=>{calls++;throw Error('contact gate was bypassed');};
+  const route=memoRoute(h,{model:unexpected,reserve:unexpected,ledger:{startMemoRequest:unexpected,finishMemoRequest:unexpected}});
+  const response=await route.POST(request(patch));assert.equal(response.status,422);assert.equal((await response.json()).stage,'input_validation');assert.equal(calls,0);
+ }
+});
+
 test('conflicting and unresolved routes stop before payment reservation, provider, agents or memo creation',async t=>{
  const h=templateHarness();t.after(h.cleanup);
  for(const enabled of [false,true])for(const input of [{caseType:'جنح',courtCircuit:'الإدارية',partyRole:'متهم'},{caseType:'أخرى',courtCircuit:'',draftMode:'available_evidence'},{caseType:'جنح',courtCircuit:'جنح',partyRole:'شاكي',documentKind:'claim'}]){
@@ -117,7 +126,7 @@ test('conflicting and unresolved routes stop before payment reservation, provide
 
 test('the selected route reaches all drafting and audit calls and survives both archives unchanged',async t=>{
  const h=templateHarness();t.after(h.cleanup);const expected='civil.monetary_claim.first_instance.claim.claimant',seen=[],archived=[];
- const route=memoRoute(h,{auth:async()=>({id:'synthetic'}),pipeline:{agentPipelineEnabled:()=>false},record:async row=>archived.push(row),ledger:{startMemoRequest:async input=>{assert.equal(input.legalRoute.id,expected);return 'synthetic-routed-memo';},finishMemoRequest:async(...row)=>seen.push(row)},model:async options=>{
+ const route=memoRoute(h,{auth:async()=>({id:'synthetic'}),pipeline:{agentPipelineEnabled:()=>false},record:async row=>archived.push(row),ledger:{startMemoRequest:async input=>{assert.equal(input.contactEmail,caseData.contactEmail);assert.equal(input.contactPhone,caseData.contactPhone);assert.equal(input.informationConfirmed,true);assert.equal(input.legalRoute.id,expected);return 'synthetic-routed-memo';},finishMemoRequest:async(...row)=>seen.push(row)},model:async options=>{
   assert.ok(options.instructions.includes(expected));
   if(options.schema?.properties?.clientRole)return JSON.stringify({clientRole:caseData.partyRole,opponentRole:'خصم',characterization:'مطالبة',issues:[{issue:'المطالبة',factQuote:'مبلغ لم يتم سداده',document:'',sourceMarkers:['م1'],application:'فحص المطالبة',counterargument:'منازعة',response:'مراجعة',proposedRelief:caseData.requests,missing:''}],missingFacts:[],researchGaps:[]});
   if(options.schema?.properties?.checks)return JSON.stringify({checks:[auditCheck(options,evidence)],roleConsistent:true,factsPreserved:true,reliefConsistent:true,unsupportedAssertions:[]});

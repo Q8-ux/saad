@@ -291,6 +291,17 @@
     });
     return rows.length ? `<dl class="record-fields">${rows.join('')}</dl>` : '<p class="record-empty">لا توجد بيانات قضية محفوظة قابلة للعرض.</p>';
   }
+  function memoContactDetails(memo) {
+    const data = savedValue(memo.input_json);
+    if (!data || typeof data !== 'object' || Array.isArray(data)) return '';
+    const sources = [data, data.input, data.caseData].filter(item => item && typeof item === 'object' && !Array.isArray(item));
+    const email = sources.map(item => savedText(item.contactEmail)).find(Boolean) || '';
+    const phone = sources.map(item => savedText(item.contactPhone)).find(Boolean) || '';
+    const fields = [];
+    if (/^\+?[1-9]\d{7,14}$/.test(phone)) fields.push(`<div><dt>رقم الهاتف</dt><dd><a class="memo-contact-link" href="tel:${esc(phone)}" aria-label="الاتصال بالعميل"><bdi>${esc(phone)}</bdi></a></dd></div>`);
+    if (email.length <= 254 && /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(email)) fields.push(`<div><dt>البريد الإلكتروني</dt><dd><a class="memo-contact-link" href="mailto:${esc(encodeURIComponent(email))}" aria-label="إرسال بريد إلى العميل"><bdi>${esc(email)}</bdi></a></dd></div>`);
+    return fields.length ? `<section class="record-section" aria-labelledby="record-contact-title"><h3 id="record-contact-title">الاتصال بالعميل</h3><dl class="record-fields">${fields.join('')}</dl></section>` : '';
+  }
   function memoContent(value, depth = 0) {
     const data = savedValue(value);
     if (data && typeof data === 'object' && !Array.isArray(data)) {
@@ -340,7 +351,7 @@
   }
   function memoRecord(memo) {
     const actions = `${memoRevisionControls(memo)}${canReviewMemos()?'<div class="actions"><button type="button" data-memo-file="true">تنزيل ملف الطلب والردود</button></div>':''}${manager?.role==='administrator'&&/^[A-Za-z0-9_-]+$/.test(memo.id)&&memo.status!=='running'?'<div class="actions"><button data-memo-generate="true">مراجعة البيانات وتوليد نسخة مستقلة</button></div>':''}`;
-    return `<header class="record-heading"><h2 id="memo-detail-title" class="detail-title">${esc(memo.client_name || 'طلب مذكرة')}</h2><p class="detail-meta">آخر تعديل: ${date(memo.updated_at||memo.created_at)} · تاريخ الإنشاء: ${date(memo.created_at)}${memo.case_type?` · ${esc(memo.case_type)}`:''}</p>${badge(memo.status)}${actions?`<details class="memo-actions"><summary>إجراءات المذكرة</summary><div class="memo-actions-body">${actions}</div></details>`:''}</header><div class="record-scroll" tabindex="0" role="region" aria-label="تفاصيل الطلب والمذكرة"><section class="record-section" aria-labelledby="record-input-title"><h3 id="record-input-title">بيانات الطلب</h3>${requestDetails(memo.input_json)}</section><section class="record-section" aria-labelledby="record-output-title"><h3 id="record-output-title">المذكرة المحفوظة</h3><article class="record-document record-prose" dir="rtl" lang="ar">${memoOCRNotice(memo.output_text)}${memoContent(memo.output_text)}</article></section>${memoProjectHistory(memo)}</div>`;
+    return `<header class="record-heading"><h2 id="memo-detail-title" class="detail-title">${esc(memo.client_name || 'طلب مذكرة')}</h2><p class="detail-meta">آخر تعديل: ${date(memo.updated_at||memo.created_at)} · تاريخ الإنشاء: ${date(memo.created_at)}${memo.case_type?` · ${esc(memo.case_type)}`:''}</p>${badge(memo.status)}${actions?`<details class="memo-actions"><summary>إجراءات المذكرة</summary><div class="memo-actions-body">${actions}</div></details>`:''}</header><div class="record-scroll" tabindex="0" role="region" aria-label="تفاصيل الطلب والمذكرة">${memoContactDetails(memo)}<section class="record-section" aria-labelledby="record-input-title"><h3 id="record-input-title">بيانات الطلب</h3>${requestDetails(memo.input_json)}</section><section class="record-section" aria-labelledby="record-output-title"><h3 id="record-output-title">المذكرة المحفوظة</h3><article class="record-document record-prose" dir="rtl" lang="ar">${memoOCRNotice(memo.output_text)}${memoContent(memo.output_text)}</article></section>${memoProjectHistory(memo)}</div>`;
   }
   async function openMemoGeneration(id) {
     if(manager?.role!=='administrator')throw Error('التوليد متاح للمسؤول فقط.');
