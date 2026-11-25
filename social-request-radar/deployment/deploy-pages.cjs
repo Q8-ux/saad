@@ -10,7 +10,7 @@ module.exports = async function deployPages({github,context,core,artifactId,paus
   }
   if (String(artifact.id)!==String(artifactId)||artifact.name!=='github-pages'||artifact.expired||artifact.workflow_run?.id!==context.runId||artifact.workflow_run?.head_sha!==context.sha) throw Error('Pages artifact does not belong to this workflow and commit');
   const token=await core.getIDToken();core.setSecret(token);
-  const {data:deployment}=await github.request('POST /repos/{owner}/{repo}/pages/deployments',{...scope,artifact_id:artifactId,pages_build_version:context.sha,oidc_token:token});
+  const {data:deployment}=await github.request('POST /repos/{owner}/{repo}/pages/deployments',{...scope,artifact_id:Number(artifactId),pages_build_version:context.sha,oidc_token:token});
   const deploymentId=String(deployment.id||deployment.status_url?.split('/').pop()||'');
   if (!/^[A-Za-z0-9_-]+$/.test(deploymentId)) throw Error('Missing Pages deployment receipt');
   const path={...scope,deploymentId};let failures=0;
