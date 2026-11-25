@@ -1,7 +1,7 @@
 {
   "release": "2026-11-25-phone-required-email-optional",
   "clientSource": "6134370db708a45698c0e583043d508b477b6d46",
-  "backendSource": "6134370db708a45698c0e583043d508b477b6d46",
+  "backendSource": "873dc1cf928f937eb74c2f313cff04eec29510fa",
   "assistant": "indirect-intake-completeness-1",
   "voice": "gulf-male-voice-4",
   "tools": "legal-tools-1",
@@ -28,7 +28,7 @@
   "interfaceLocalization": "ar-en-ur-tools-guidance-1",
   "memoProseLanguage": "arabic-with-protected-names-and-identifiers-1",
   "builtAt": "2026-11-25",
-  "backendVersion": 249,
+  "backendVersion": 250,
   "pleadingLayout": "first-page-only-sidebar-and-frame-full-width-right-aligned-continuations",
   "citationCorrection": "one-bounded-server-retry-before-archive",
   "legalSourceDirectory": "6-catalogues-3-fetched-0-new-citable-pdfs",
@@ -100,8 +100,8 @@
   "citationAudit": "source-markers-reviewed-before-display;source-trace-retained-outside-court-document",
   "typecheck": "20-existing-Workers-CSS-query-diagnostics;no-new-journey-diagnostic",
   "ssrHarness": "pre-existing-cloudflare-esm-import-failure-reproduced-on-baseline",
-  "nativePublishedAt": "2026-11-25T13:06:09.094397+00:00",
-  "nativeDeployment": "appgdep_6b06dd2aa2d88191996b725328700b71",
+  "nativePublishedAt": "2026-11-25T14:04:50.937968+00:00",
+  "nativeDeployment": "appgdep_6b06eaea11ec81919008698a6ec6aacf",
   "publicationChecks": "9-scoped-release-tests-and-5-motion-tests-pass",
   "legislationArchive": "2026-04-01-separate-from-primary-2026-10-05",
   "legislationWorkbench": "manager-search-articles-originals-and-report",
@@ -310,5 +310,20 @@
     "internalChecksPassed": 507,
     "liveModelGenerationTested": false,
     "livePaymentTested": false
+  },
+  "memoFailurePresentation": {
+    "revision": "normalized-provider-failure-reasons-1",
+    "nativeVersion": 250,
+    "source": "873dc1cf928f937eb74c2f313cff04eec29510fa",
+    "focusedNativeTestsPassed": 29,
+    "githubViewTestsPassed": 11,
+    "internalChecksPassed": 507,
+    "syntheticBrowserWidths": [
+      390,
+      1440
+    ],
+    "changesProviderBilling": false,
+    "automaticGenerationRestored": false,
+    "realCaseDataInRelease": false
   }
 }
