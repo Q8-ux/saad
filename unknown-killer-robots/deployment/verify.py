@@ -52,6 +52,11 @@ def verify():
     assert 'allow-popups' not in (SOURCE / 'app.js').read_text()
     assert 'allow-top-navigation' not in (SOURCE / 'app.js').read_text()
     assert (SOURCE / 'assets/saad-signature.svg').is_file()
+    assert 'id="native-controls"' in html
+    assert 'id="film-video" controls ' not in html
+    assert 'nodownload' in html
+    assert 'drive.google.com' not in html
+    assert 'choose-local-film' not in html
 
     with tempfile.TemporaryDirectory() as work:
         root = Path(work) / 'published'

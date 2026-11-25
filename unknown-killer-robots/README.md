@@ -2,9 +2,11 @@
 
 Arabic RTL documentary watch page for Saad Alnabhan. Buildless HTML, CSS and JavaScript.
 
-Film playback stays inside the page: the Telegram source uses a sandboxed embedded frame without popup or top-navigation permission. There is no external movie-opening action. The Telegram post itself could not be verified as a playable full film. Its availability remains a source dependency, and the UI does not claim successful playback just because a frame loads.
+The viewer uses custom inline controls for playback, seeking, sound and fullscreen. It has no download button, external movie-opening action, or native media overflow menu. The private source file identifier is not published in the frontend. This is a viewer UI restriction, not DRM or a guarantee against browser media inspection.
 
-A native HTML video element supports a configured direct video URL (`film-media-config`, kind `video`, url set to an actual media file). It calls play from the watch action. The optional local-file control plays a selected video on that device without uploading or publishing it to other visitors. The separately labelled Netflix official trailer is not substituted for the full film.
+The supplied Drive file is private and was still processing when inspected. Its contents have not been copied or published. The film configuration is explicitly pending until a separate display source is ready. No Drive-account permission is changed, and no private Drive URL is embedded.
+
+A configured actual video source is played natively after the watch action. The separately labelled Netflix trailer is not substituted for the film.
 
 All supplied film facts, five topics, central message, three questions and notes are retained. The supplied 4/5 rating is attributed to the submitted description, not represented as a verified IMDb score.
 
