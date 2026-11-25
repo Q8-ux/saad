@@ -46,3 +46,11 @@ test('hosted, official and legacy records use the same safe viewer and closing c
 test('a denied detail response does not open a record or bypass server permissions',async()=>{
  const f=fixture(null,403);await f.open();assert.equal(f.node('detail').open,false);assert.equal(f.node('detail-content').innerHTML,'');assert.equal(f.node('notice').textContent,'غير مصرح.');
 });
+
+test('the memo customer-contact list links the submitted reply details and omits unsafe or absent contacts',async()=>{
+ const html=await fixture({...base,input_json:JSON.stringify({contactEmail:'reply@example.test',contactPhone:'+96580000000'})}).open();
+ assert.match(html,/الاتصال بالعميل/);assert.match(html,/href="tel:\+96580000000"/);assert.match(html,/href="mailto:reply%40example.test"/);
+ const invalid=await fixture({...base,input_json:JSON.stringify({contactEmail:'<script>@example.test',contactPhone:'javascript:bad'})}).open();
+ assert.doesNotMatch(invalid,/record-contact-title|href="tel:|href="mailto:/);
+ const old=await fixture({...base,input_json:'{}'}).open();assert.doesNotMatch(old,/record-contact-title/);
+});

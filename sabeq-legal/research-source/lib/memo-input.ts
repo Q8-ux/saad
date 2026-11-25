@@ -5,6 +5,13 @@ import { correctLegalProse } from "@/lib/legal-language";
 import { pleadingFields } from "@/lib/pleading-document";
 import { assessMatterFacts } from "@/lib/matter-facts";
 import { resolveLegalDraftingRoute, legalRouteSummary } from "@/lib/legal-drafting-routes";
+import { readMemoContact, memoContactCopy } from "./memo-contact";
+
+export function requireMemoContact(raw: Record<string, unknown>) {
+    const result = readMemoContact(raw);
+    if (!result.ok) throw new RequestError(memoContactCopy.ar[result.issue], 422);
+    return result.contact;
+}
 
 export function validateMemoInput(raw: Record<string, unknown>) {
     const available = raw.draftMode === availableEvidenceMode;

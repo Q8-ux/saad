@@ -22,6 +22,8 @@ import TeamCarousel from "./team-carousel";
 import MemoVoiceInput from "./memo-voice-input";
 import { memoStoryText } from "@/lib/memo-dictation";
 import MemoPaymentDialog from "./memo-payment-dialog";
+import MemoContactFields from "./memo-contact-fields";
+import { readMemoContact, memoContactCopy } from "@/lib/memo-contact";
 import ProceduralPositionView from "./procedural-position-view";
 import { inferProceduralPosition } from "@/lib/procedural-position";
 import { recogniseMemoProcedure, initialMemoStep, nextMemoStep } from "@/lib/memo-journey";
@@ -1487,6 +1489,14 @@ function MemoWizard({ t, language, token, initialData = null, assistantSession, 
     setStatus("idle"); setMemoError(""); setMemoFailure(null);
     try {
     const stepData = Object.fromEntries(Array.from(new FormData(event.currentTarget).entries(), ([key, value]) => [key, String(value)]));
+    if (step === 2 || assistantReview) {
+      const contact = readMemoContact({ ...memoData, ...stepData, informationConfirmed: memoApproved });
+      if (!contact.ok) {
+        setStatus("error"); setMemoError(memoContactCopy[language][contact.issue]);
+        memoFormRef.current?.querySelector<HTMLInputElement>(`[name="${contact.field}"]`)?.focus();
+        return;
+      }
+    }
     let nextFacts = facts, nextRequests = requests;
     let documentData: Record<string, string> = {};
     if (documents.length && analysisStatus !== "success") {
@@ -1563,14 +1573,14 @@ function MemoWizard({ t, language, token, initialData = null, assistantSession, 
     }
     const confirmedRoute=resolveLegalDraftingRoute(nextData);
     if(confirmedRoute.status!=="ready"){setStatus("error");setMemoError(legalRouteQuestion(confirmedRoute,language));setStep(1);return;}
-    if (!memoApproved && !assistantReview) { setStatus("error"); setMemoError(generationUi.required); return; }
+    if (!memoApproved) { setStatus("error"); setMemoError(generationUi.required); return; }
     const controller = new AbortController();
     generationRequest.current = controller;
     setStatus("loading");
     setMemoError("");
     try {
       const { caseStory: _story, ...memoInput } = nextData;
-      const input: Record<string, unknown> = { ...memoInput, interfaceLanguage: language, outputLanguage: "ar" };
+      const input: Record<string, unknown> = { ...memoInput, informationConfirmed: memoApproved, interfaceLanguage: language, outputLanguage: "ar" };
       failureStage = "payment";
       const policyResponse = await memoFetch("/api/payments/sadad", token, { signal: controller.signal });
       const currentPolicy = await readServiceJson<{ required: boolean; publicCheckoutEnabled: boolean; priceFils: number; ready: boolean; environment: string; error?: string }>(policyResponse);
@@ -1659,7 +1669,7 @@ function MemoWizard({ t, language, token, initialData = null, assistantSession, 
       {assistantReview ? <p className="form-notice">{language === "ar" ? "راجع البيانات المنقولة وعدّل ما يلزم، ثم وافق وولّد المذكرة من هذه الصفحة." : language === "en" ? "Review the transferred details, edit if needed, then approve and generate here." : "منتقل تفصیلات دیکھیں، ضرورت ہو تو درست کریں، پھر یہیں منظوری دے کر یادداشت تیار کریں۔"}</p> : <MemoProgress labels={journeySteps} current={step} label={t.memoModal} language={language} />}
 
       {step > 0 && <ProceduralPositionView position={recognisedPosition} language={language} />}
-      <form ref={memoFormRef} key={voiceFormVersion} noValidate onSubmit={submit} onChange={event => { if ((event.target as HTMLElement).getAttribute("name")) setMemoApproved(false); }}>
+      <form ref={memoFormRef} key={voiceFormVersion} noValidate onSubmit={submit} onChange={event => { if ((event.target as HTMLElement).getAttribute("name") && (event.target as HTMLElement).getAttribute("name") !== "informationConfirmed") setMemoApproved(false); }}>
         <div className="step-content">
           {(step === 0 || assistantReview) && <>
             {assistantReview && facts.trim() && requests.trim() && <dl className="memo-handoff-details"><div><dt>{t.facts}</dt><dd>{facts}</dd></div><div><dt>{t.requests}</dt><dd>{requests}</dd></div></dl>}
@@ -1749,7 +1759,8 @@ function MemoWizard({ t, language, token, initialData = null, assistantSession, 
               {checkout && ["paid", "consumed"].includes(checkout.status) && <p role="status">{language === "ar" ? "تأكد الدفع لدى سداد." : language === "en" ? "Payment verified by SADAD." : "سداد نے ادائیگی کی تصدیق کردی۔"}</p>}
               {checkout && <small dir="ltr">{checkout.id}</small>}
             </section>}
-            {!assistantReview && <label className="memo-generation-approval"><input type="checkbox" checked={memoApproved} onChange={event => setMemoApproved(event.target.checked)} disabled={status === "loading"} />{generationUi.approval}</label>}</div>}
+            <MemoContactFields language={language} email={memoData.contactEmail || ""} phone={memoData.contactPhone || ""} disabled={status === "loading" || storyBusy} onChange={(field, value) => { setMemoData(current => ({ ...current, [field]: value })); setMemoApproved(false); }} />
+            <label className="memo-generation-approval"><input type="checkbox" name="informationConfirmed" checked={memoApproved} onChange={event => setMemoApproved(event.target.checked)} disabled={status === "loading"} required />{generationUi.approval}</label></div>}
         </div>
         <div className="memo-actions">{step > 0 && !assistantReview ? <button type="button" className="button button-outline" disabled={status === "loading"} onClick={() => { captureDraft(); setMemoApproved(false); setStep(step - 1); }}>{t.previous}</button> : <span />}<button className="button button-primary" disabled={voiceEntryBusy || status === "loading" || analysisStatus === "loading" || storyBusy}>{storyBusy ? (language === "ar" ? "جارٍ فهم الوقائع والطلبات…" : language === "en" ? "Understanding facts and requests…" : "حقائق اور مطالبات سمجھ رہا ہوں…") : status === "loading" ? (checkingPayment ? payUi.checking : t.loading) : assistantReview ? (language === "ar" ? ((paymentPolicy?.required || checkout) ? "أوافق وأتابع للدفع والتوليد" : "أوافق وأولّد المذكرة") : language === "en" ? "Approve and generate memorandum" : "منظور کرکے یادداشت تیار کریں") : step === 2 ? (paymentPolicy?.publicCheckoutEnabled && paymentPolicy.required) || checkout ? checkout ? payUi.verify : payUi.pay : t.generate : step === 0 && documents.length === 0 ? ui.continueManual : t.next}<ArrowLeft size={17} /></button></div>
         {status === "loading" && <div className="memo-generation-pending"><p role="status" aria-live="polite">{checkingPayment ? payUi.checking : generationUi.pending}</p><span>{generationSeconds} {generationUi.seconds}</span><small>{checkingPayment ? payUi.safety : generationUi.limit}</small><button type="button" className="button button-outline" onClick={() => generationRequest.current?.abort()}>{generationUi.cancel}</button></div>}

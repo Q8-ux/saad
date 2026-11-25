@@ -14,6 +14,7 @@ export const fixtureName = 'طرف اصطناعي لفحص محرر سابق';
 const client = new URL('../../../sabeq-legal/research-source/', import.meta.url);
 const { transpileModule, ModuleKind, ScriptTarget } = createRequire(client)('typescript');
 const input = {
+  contactEmail: 'reply@example.test', contactPhone: '80000000', informationConfirmed: true,
   caseType: 'مدني', court: 'المحكمة الكلية', clientName: fixtureName,
   otherParty: 'خصم اصطناعي', partyRole: 'مدعٍ',
   facts: 'واقعة اصطناعية للاختبار بشأن مبلغ لم يتم سداده.',

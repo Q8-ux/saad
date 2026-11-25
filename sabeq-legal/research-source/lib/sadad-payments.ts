@@ -3,7 +3,7 @@ import { getD1 } from "@/db";
 import { digest } from "@/lib/management-auth";
 import { integrationConfig, operationEvent, saveIntegration } from "@/lib/management-integrations";
 import { cleanString, RequestError } from "@/lib/request-security";
-import { validateMemoInput } from "@/lib/memo-input";
+import { requireMemoContact, validateMemoInput } from "@/lib/memo-input";
 
 type Config = { environment: "sandbox" | "live"; clientKey: string; clientSecret: string; testedAt?: string; accountConfirmed?: boolean; callbacksConfirmed?: boolean; publicCheckoutEnabled?: boolean };
 type Payment = { id: string; token_hash: string; input_hash: string; environment: Config["environment"]; amount_fils: number; currency: string; reference: string; invoice_id: string | null; invoice_key: string | null; transaction_id: string | null; status: string; generation_id: string | null; lease_until: number | null; result_json: string | null; result_expires_at: number | null };
@@ -136,6 +136,7 @@ export async function createMemoPayment(data: Record<string, unknown>) {
   const id = attemptId(data.attemptId), token = capability(data.paymentToken);
   if (!data.input || typeof data.input !== "object" || Array.isArray(data.input)) throw new RequestError("بيانات طلب المذكرة غير صحيحة.");
   const input = data.input as Record<string, unknown>;
+  requireMemoContact(input);
   validateMemoInput(input);
   if (new TextEncoder().encode(JSON.stringify(input)).byteLength > 190_000) throw new RequestError("بيانات المذكرة أكبر من الحد المسموح للدفع.", 413);
   const tokenHash = await digest(token), inputHash = await paymentInputHash(input), config = await configuration();

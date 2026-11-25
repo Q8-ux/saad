@@ -1,0 +1,49 @@
+{
+  "baseCommit": "62423852fef79bf5e1fa2ecb3e6f6329f9eaf5b3",
+  "scope": "Required reply contact metadata and public confirmation gate only; no model instructions, legal sources or payment policy changes.",
+  "files": {
+    "lib/memo-generation.ts": [
+      {
+        "before": "  if (language === \"en\") return { approval: \"I reviewed the case information and the notice above, and approve generating the draft.\", required: \"Confirm the review below before generating.\", pending: \"Generating and reviewing the draft…\", seconds: \"seconds\", cancel: \"Cancel generation\", cancelled: \"Generation cancelled. Your case information is still here.\", timeout: \"Generation exceeded four minutes. Your information is still here; please try again later.\", limit: \"You can cancel at any time. Waiting is limited to four minutes.\" };\n  if (language === \"ur\") return { approval: \"میں نے مقدمے کی معلومات اور اوپر کا نوٹس پڑھ لیا ہے اور مسودے کی تیاری منظور کرتا ہوں۔\", required: \"تیاری سے پہلے نیچے تصدیق کریں۔\", pending: \"مسودہ تیار اور جانچا جا رہا ہے…\", seconds: \"سیکنڈ\", cancel: \"تیاری منسوخ کریں\", cancelled: \"تیاری منسوخ ہوگئی۔ مقدمے کی معلومات یہاں موجود ہیں۔\", timeout: \"تیاری چار منٹ سے زیادہ ہوگئی۔ معلومات یہاں موجود ہیں؛ بعد میں دوبارہ کوشش کریں۔\", limit: \"کسی بھی وقت منسوخ کر سکتے ہیں۔ انتظار کی حد چار منٹ ہے۔\" };\n  return { approval: \"راجعت بيانات القضية والتنبيه أعلاه، وأوافق على توليد المسودة.\", required: \"ضع علامة الموافقة أدناه قبل التوليد.\", pending: \"جارٍ توليد المسودة ومراجعتها…\", seconds: \"ثانية\", cancel: \"إلغاء التوليد\", cancelled: \"أُلغي التوليد. بيانات القضية ما زالت موجودة ويمكنك تعديلها.\", timeout: \"تجاوز التوليد أربع دقائق. بياناتك ما زالت موجودة؛ حاول لاحقاً.\", limit: \"يمكنك الإلغاء في أي وقت. الحد الأقصى للانتظار أربع دقائق.\" };\n",
+        "after": "  if (language === \"en\") return { approval: \"I confirm the accuracy of the case and contact information, have reviewed the notice above, and approve generating the draft.\", required: \"Confirm the review below before generating.\", pending: \"Generating and reviewing the draft…\", seconds: \"seconds\", cancel: \"Cancel generation\", cancelled: \"Generation cancelled. Your case information is still here.\", timeout: \"Generation exceeded four minutes. Your information is still here; please try again later.\", limit: \"You can cancel at any time. Waiting is limited to four minutes.\" };\n  if (language === \"ur\") return { approval: \"میں مقدمے اور رابطے کی معلومات کی درستگی کی تصدیق کرتا ہوں، اوپر کا نوٹس پڑھ لیا ہے اور مسودے کی تیاری منظور کرتا ہوں۔\", required: \"تیاری سے پہلے نیچے تصدیق کریں۔\", pending: \"مسودہ تیار اور جانچا جا رہا ہے…\", seconds: \"سیکنڈ\", cancel: \"تیاری منسوخ کریں\", cancelled: \"تیاری منسوخ ہوگئی۔ مقدمے کی معلومات یہاں موجود ہیں۔\", timeout: \"تیاری چار منٹ سے زیادہ ہوگئی۔ معلومات یہاں موجود ہیں؛ بعد میں دوبارہ کوشش کریں۔\", limit: \"کسی بھی وقت منسوخ کر سکتے ہیں۔ انتظار کی حد چار منٹ ہے۔\" };\n  return { approval: \"أقر بصحة المعلومات وبيانات التواصل، وراجعت التنبيه أعلاه، وأوافق على توليد المسودة.\", required: \"ضع علامة الموافقة أدناه قبل التوليد.\", pending: \"جارٍ توليد المسودة ومراجعتها…\", seconds: \"ثانية\", cancel: \"إلغاء التوليد\", cancelled: \"أُلغي التوليد. بيانات القضية ما زالت موجودة ويمكنك تعديلها.\", timeout: \"تجاوز التوليد أربع دقائق. بياناتك ما زالت موجودة؛ حاول لاحقاً.\", limit: \"يمكنك الإلغاء في أي وقت. الحد الأقصى للانتظار أربع دقائق.\" };\n",
+        "count": 1
+      }
+    ],
+    "lib/memo-input.ts": [
+      {
+        "before": "",
+        "after": "import { readMemoContact, memoContactCopy } from \"./memo-contact\";\n\nexport function requireMemoContact(raw: Record<string, unknown>) {\n    const result = readMemoContact(raw);\n    if (!result.ok) throw new RequestError(memoContactCopy.ar[result.issue], 422);\n    return result.contact;\n}\n",
+        "count": 1
+      }
+    ],
+    "lib/sadad-payments.ts": [
+      {
+        "before": "import { validateMemoInput } from \"@/lib/memo-input\";\n",
+        "after": "import { requireMemoContact, validateMemoInput } from \"@/lib/memo-input\";\n",
+        "count": 1
+      },
+      {
+        "before": "",
+        "after": "  requireMemoContact(input);\n",
+        "count": 1
+      }
+    ],
+    "app/api/legal/memo/route.ts": [
+      {
+        "before": "import { validateMemoInput } from \"@/lib/memo-input\";\n",
+        "after": "import { requireMemoContact, validateMemoInput } from \"@/lib/memo-input\";\n",
+        "count": 1
+      },
+      {
+        "before": "",
+        "after": "    const contact = management ? {} : requireMemoContact(raw);\n",
+        "count": 1
+      },
+      {
+        "before": "    managementRequestId = await startMemoRequest({ ...extraFields, clientName, court, courtCircuit, caseNumber, caseType, partyRole, otherParty, allParties, facts, requests, legalIssues, documentKind, caseStage, legalRoute:legalRouteSummary(legalRoute), ...(management ? { managementGenerated: true, ...(management.parentRequestId ? { parentRequestId: management.parentRequestId } : {}) } : {}) }, user, request.headers.get(\"origin\") || new URL(request.url).origin);\n",
+        "after": "    managementRequestId = await startMemoRequest({ ...extraFields, ...contact, clientName, court, courtCircuit, caseNumber, caseType, partyRole, otherParty, allParties, facts, requests, legalIssues, documentKind, caseStage, legalRoute:legalRouteSummary(legalRoute), ...(management ? { managementGenerated: true, ...(management.parentRequestId ? { parentRequestId: management.parentRequestId } : {}) } : {}) }, user, request.headers.get(\"origin\") || new URL(request.url).origin);\n",
+        "count": 1
+      }
+    ]
+  }
+}
