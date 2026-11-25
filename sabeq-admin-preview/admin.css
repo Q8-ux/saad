@@ -26,14 +26,14 @@
 /* Administrator content and access controls */
 .control-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin:16px 0}.control-grid fieldset{min-width:0;border:1px solid var(--line,#dbe3e5);border-radius:12px;padding:16px}.control-grid legend{padding:0 8px;font-weight:700}.control-details{border:1px solid var(--line,#dbe3e5);border-radius:10px;padding:12px 16px;margin:10px 0}.control-details summary{cursor:pointer;font-weight:600;list-style:none}.control-details summary::-webkit-details-marker{display:none}.control-details .field{margin:0}.actions [aria-pressed="true"]{background:#e9f4f2;border-color:#35897c}.control-grid textarea{min-height:100px}.control-grid .field{min-width:0}.control-grid input,.control-grid textarea{max-width:100%;box-sizing:border-box}.panel-body form>button[type="submit"]{margin-top:14px}@media(max-width:680px){.control-grid{grid-template-columns:minmax(0,1fr);gap:14px}.control-details{padding:12px}.section-intro{flex-wrap:wrap;gap:14px}}
 
-/* Readable request records: fixed heading, one scroll area, Arabic document text. */
-dialog.memo-detail[open]{display:flex;flex-direction:column;padding:0;overflow:hidden;inline-size:min(980px,calc(100% - 24px));max-inline-size:calc(100% - 24px);max-block-size:calc(100dvh - 24px);direction:rtl;text-align:right}
-.memo-detail #detail-content{display:flex;flex-direction:column;min-block-size:0;max-block-size:calc(100dvh - 26px);overflow:hidden;text-align:right}
-.memo-detail .dialog-close{position:absolute;inset-block-start:18px;inset-inline-end:18px;float:none;z-index:2;inline-size:46px;block-size:46px;min-block-size:44px;padding:8px}
-.record-heading{flex:none;padding:24px 26px 20px;padding-inline-end:82px;border-block-end:1px solid var(--line);background:#fff}
+/* Readable request records: heading and Arabic document share one scroll area. */
+dialog.memo-detail[open]{display:block;padding:0;overflow:auto;overscroll-behavior:contain;scrollbar-gutter:stable;inline-size:min(980px,calc(100% - 24px));max-inline-size:calc(100% - 24px);max-block-size:calc(100dvh - 24px);direction:rtl;text-align:right}
+.memo-detail #detail-content{display:block;min-block-size:0;max-block-size:none;overflow:visible;text-align:right}
+.memo-detail .dialog-close{position:static;float:none;display:block;inline-size:46px;block-size:46px;min-block-size:44px;padding:8px;margin-block:12px 0;margin-inline:auto 14px}
+.record-heading{padding:18px 26px 20px;border-block-end:1px solid var(--line);background:#fff}
 .record-heading .detail-title{font-size:clamp(21px,2.4vw,27px);margin:0 0 6px;overflow-wrap:anywhere}
 .record-heading .detail-meta{margin:0 0 8px;font-size:15px}
-.record-scroll{min-block-size:0;overflow:auto;overscroll-behavior:contain;padding:24px 26px;scrollbar-gutter:stable;scroll-behavior:auto}
+.record-scroll{min-block-size:0;overflow:visible;padding:24px 26px;scroll-behavior:auto}
 .record-section+ .record-section{margin-block-start:30px;padding-block-start:24px;border-block-start:1px solid var(--line)}
 .record-section>h3{margin:0 0 18px;font-size:22px;text-align:right}
 .record-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 24px;margin:0;text-align:right}
@@ -49,10 +49,18 @@ dialog.memo-detail[open]{display:flex;flex-direction:column;padding:0;overflow:h
 .record-prose>:first-child,.record-fields dd>:first-child{margin-block-start:0}
 .record-prose>:last-child,.record-fields dd>:last-child{margin-block-end:0}
 .record-empty{font-size:17px;line-height:1.9;color:var(--muted);margin:0}
-@media(max-width:600px){.record-heading{padding:19px 18px 16px;padding-inline-end:76px}.record-heading .detail-title{font-size:22px}.record-scroll{padding:20px 18px}.record-fields{grid-template-columns:minmax(0,1fr);gap:12px}.record-document{padding:18px 16px}.record-prose{font-size:18px;line-height:1.95}.record-section>h3{font-size:21px}.memo-detail .dialog-close{inset-block-start:17px;inset-inline-end:15px}}
+@media(max-width:600px){.record-heading{padding:16px 18px}.record-heading .detail-title{font-size:22px}.record-scroll{padding:20px 18px}.record-fields{grid-template-columns:minmax(0,1fr);gap:12px}.record-document{padding:18px 16px}.record-prose{font-size:18px;line-height:1.95}.record-section>h3{font-size:21px}.memo-detail .dialog-close{margin-inline-end:12px}}
 
 html:has(dialog.memo-detail[open]){overflow:hidden}
 
 .login input[name="username"],.login input[name="password"]{direction:ltr;text-align:left;unicode-bidi:plaintext}
 
 .control-login-row{flex-wrap:wrap;gap:12px}.control-login-row>div{min-width:0}.control-login-row bdi{overflow-wrap:anywhere}.control-login-row button{white-space:normal}@media(max-width:680px){.control-login-row button{width:100%}}
+
+.memo-actions{margin-block-start:12px;border:1px solid var(--line);border-radius:10px}
+.memo-actions>summary{cursor:pointer;min-block-size:46px;padding:10px 14px;font-size:17px;font-weight:600;line-height:1.7}
+.memo-actions>summary:focus-visible{outline:3px solid var(--teal);outline-offset:3px}
+.memo-actions[open]>summary{border-block-end:1px solid var(--line)}
+.memo-actions-body{display:grid;gap:10px;padding:12px}
+.memo-actions-body .actions{margin:0}
+.memo-actions-body .actions button{flex:none;inline-size:100%;min-inline-size:0}
