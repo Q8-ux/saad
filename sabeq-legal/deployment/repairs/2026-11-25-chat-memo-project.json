@@ -21,11 +21,16 @@
   "mcp": {
     "provisioned": true,
     "installed": true,
-    "currentConversationToolsAvailable": false
+    "currentConversationToolsAvailable": true,
+    "liveSourceSearch": "passed",
+    "liveSyntheticSaveAndReadback": "passed",
+    "exactOriginalFactsAndRequestsPreserved": true,
+    "exactSavedResponseInJournal": true,
+    "automaticModelReview": false,
+    "humanReviewRequired": true
   },
   "limits": [
     "Older responses that were never stored cannot be reconstructed.",
-    "Chat bridge tools need to become available in a conversation before claiming a live authenticated call.",
     "OpenAI API billing and Meta configuration remain separate from this archive change."
   ]
 }
