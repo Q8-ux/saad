@@ -3,8 +3,8 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
 const source=readFileSync(new URL('../public/management/admin.js',import.meta.url),'utf8');
-function fixture(record,status=200) {
-  const events=new Map(),calls=[],nodes=new Map();
+function fixture(record,status=200,role=null) {
+  const events=new Map(),calls=[],nodes=new Map();let listHTML='';
   function node(id) {
     if(!nodes.has(id)) {const classes=new Set(),attributes=new Map();nodes.set(id,{innerHTML:'',textContent:'',hidden:true,open:false,scrollTop:0,
       classList:{toggle(name,on){if(on)classes.add(name);else classes.delete(name);},contains:name=>classes.has(name)},
@@ -13,11 +13,24 @@ function fixture(record,status=200) {
     return nodes.get(id);
   }
   const document={getElementById:node,addEventListener:(name,handler)=>events.set(name,handler),querySelector:()=>null,querySelectorAll:()=>[],hidden:false};
-  vm.runInNewContext(source,{document,sessionStorage:{getItem:()=>null,setItem(){},removeItem(){}},location:{href:'https://preview.example.invalid/management/',pathname:'/management/'},history:{replaceState(){}},URL,URLSearchParams,AbortSignal,Intl,Date,console,setInterval(){},setTimeout(){},clearTimeout(){},fetch:async(url,init)=>{calls.push({url,init});return Response.json(status===200?{memo:record}:{error:'غير مصرح.'},{status});}});
+  vm.runInNewContext(role?source.replace('void boot();',`manager={role:${JSON.stringify(role)}};rows=[${JSON.stringify(record)}];inspectMemoList(memoListHTML());`):source,{document,inspectMemoList:html=>{listHTML=html;},sessionStorage:{getItem:()=>null,setItem(){},removeItem(){}},location:{href:'https://preview.example.invalid/management/',pathname:'/management/'},history:{replaceState(){}},URL,URLSearchParams,AbortSignal,Intl,Date,console,setInterval(){},setTimeout(){},clearTimeout(){},fetch:async(url,init)=>{calls.push({url,init});return Response.json(status===200?{memo:record}:{error:'غير مصرح.'},{status});}});
   const click=async dataset=>{events.get('click')({target:{closest:()=>({dataset,disabled:false,hasAttribute:()=>false})}});await new Promise(resolve=>setImmediate(resolve));};
-  return {open:async(id='synthetic-record')=>{await click({memo:id});return node('detail-content').innerHTML;},close:()=>click({action:'close-dialog'}),node,calls};
+  return {open:async(id='synthetic-record')=>{await click({memo:id});return node('detail-content').innerHTML;},list:()=>listHTML,close:()=>click({action:'close-dialog'}),node,calls};
 }
 const base={client_name:'طلب اصطناعي',case_type:'مدني',status:'needs_review',created_at:'2026-10-29 01:00:00'};
+test('billing failures show the saved cause in the list and actionable detail without changing a request',async()=>{
+ const record={...base,id:'synthetic-billing-request',status:'failed',error_code:'openai_billing',input_json:'{}',output_text:''},f=fixture(record,200,'administrator');
+ assert.match(f.list(),/رصيد OpenAI أو حد الإنفاق/);
+ const html=await f.open();assert.match(html,/سبب تعذر التنفيذ/);assert.match(html,/رصيد OpenAI أو حد الإنفاق/);assert.match(html,/لن تفيد إعادة المحاولة/);
+ assert.match(html,/href="https:\/\/platform.openai.com\/settings\/organization\/billing"/);assert.match(html,/href="https:\/\/platform.openai.com\/settings\/organization\/limits"/);
+ assert.equal(record.status,'failed');assert.equal(record.output_text,'');assert.ok(f.calls.every(call=>!call.init?.method||call.init.method==='GET'));
+ const supervisor=await fixture(record,200,'memo_supervisor').open();assert.match(supervisor,/رصيد OpenAI أو حد الإنفاق/);assert.doesNotMatch(supervisor,/href="https:\/\/platform.openai.com/);
+});
+test('temporary throttling and unknown failures do not claim billing; review records retain their normal state',async()=>{
+ const throttle=await fixture({...base,status:'failed',error_code:'openai_rate_limit'},200,'administrator').open();assert.match(throttle,/كثرة الطلبات/);assert.doesNotMatch(throttle,/رصيد OpenAI|organization\/billing/);
+ const unknown=await fixture({...base,status:'failed',error_code:'<script>private-provider-body</script>'},200,'administrator').open();assert.match(unknown,/يلزم فحص فني/);assert.doesNotMatch(unknown,/<script>|private-provider-body|organization\/billing/);
+ const review=await fixture({...base,error_code:'source_review'},200,'administrator').open();assert.doesNotMatch(review,/سبب تعذر التنفيذ|organization\/billing/);
+});
 test('request fields use Arabic labels, omit empty/technical values and keep long identifiers',async()=>{
   const f=fixture({...base,input_json:JSON.stringify({clientName:'اسم اصطناعي',civilId:'123456789012',clientAddress:'',court:'محكمة اختبار',requests:'رفض المطالبة الاصطناعية',draftMode:'internal-marker',paymentToken:'synthetic-secret-must-not-display'}),output_text:'نص محفوظ اصطناعي'});
   const html=await f.open();assert.match(html,/<dt>الرقم المدني<\/dt>/);assert.match(html,/123456789012/);assert.match(html,/محكمة اختبار/);assert.doesNotMatch(html,/civilId|clientAddress|عنوان مقدم المذكرة|draftMode|internal-marker|paymentToken|synthetic-secret|<pre>/);assert.equal(f.node('detail').getAttribute('aria-labelledby'),'memo-detail-title');assert.equal(f.node('detail').classList.contains('memo-detail'),true);
