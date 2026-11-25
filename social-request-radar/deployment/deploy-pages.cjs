@@ -2,7 +2,12 @@
 module.exports = async function deployPages({github,context,core,artifactId,pause=ms=>new Promise(resolve=>setTimeout(resolve,ms))}) {
   if (!/^[1-9]\d*$/.test(String(artifactId))) throw Error('Missing Pages upload receipt');
   const scope={owner:context.repo.owner,repo:context.repo.repo};
-  const {data:artifact}=await github.rest.actions.getArtifact({...scope,artifact_id:Number(artifactId)});
+  let artifact;
+  // A finalized upload may take a few seconds to appear in the REST API.
+  for(let i=0;i<12;i++) {
+    try {artifact=(await github.rest.actions.getArtifact({...scope,artifact_id:Number(artifactId)})).data;break;}
+    catch(error){if(i===11||![404,429,502,503,504].includes(error.status))throw error;await pause(5000);}
+  }
   if (String(artifact.id)!==String(artifactId)||artifact.name!=='github-pages'||artifact.expired||artifact.workflow_run?.id!==context.runId||artifact.workflow_run?.head_sha!==context.sha) throw Error('Pages artifact does not belong to this workflow and commit');
   const token=await core.getIDToken();core.setSecret(token);
   const {data:deployment}=await github.request('POST /repos/{owner}/{repo}/pages/deployments',{...scope,artifact_id:artifactId,pages_build_version:context.sha,oidc_token:token});
