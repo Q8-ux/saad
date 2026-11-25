@@ -29,6 +29,8 @@ jobs:
       - name: Validate film page and scoped publication
         run: |
           node --check unknown-killer-robots/dist/app.js
+          node --check unknown-killer-robots/dist/sw.js
+          node unknown-killer-robots/deployment/verify-sw.mjs
           python unknown-killer-robots/deployment/verify.py
           node --test social-request-radar/tests/pages-publication.test.mjs
       - uses: actions/configure-pages@v5
@@ -74,7 +76,7 @@ jobs:
                   if actual==sha:
                       with urllib.request.urlopen(base+'?commit='+sha,timeout=20) as response:
                           page=response.read().decode()
-                      assert 'Unknown: Killer Robots' in page and 'signature-stamp' in page and 'wa.me' not in page and 'tel:' not in page
+                      assert 'Unknown: Killer Robots' in page and 'signature-stamp' in page and 'signature-link' in page and 'https://wa.me/' in page and 'tel:' not in page and 'Netflix' not in page
                       print('Film page and exact release verified:',sha)
                       break
               except Exception as error:
@@ -83,3 +85,4 @@ jobs:
                   raise SystemExit('Live film page did not match the source commit')
               time.sleep(8)
           PY
+

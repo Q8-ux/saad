@@ -1,7 +1,9 @@
 """Validate the static page and the preservation boundary before publication."""
 from html.parser import HTMLParser
 import io
+import json
 from pathlib import Path
+import struct
 import tarfile
 import tempfile
 
@@ -47,7 +49,9 @@ def verify():
                    'توقيع زخرفي بجانب علامة واتساب'):
         assert phrase in html, f'Supplied content missing: {phrase}'
     assert 'المعروض الآن هو الإعلان الرسمي، وليس الفيلم الكامل.' in (SOURCE / 'app.js').read_text()
-    assert 'wa.me' not in html and 'tel:' not in html and 'whatsapp-link' not in html
+    assert html.count('href="https://wa.me/') == 1 and 'class="signature-link"' in html
+    assert 'tel:' not in html and 'whatsapp-link' not in html
+    assert 'Netflix' not in html and 'نتفلكس' not in html and 'header-watch' not in html
     assert 'signature-stamp' in html and 'id="film-video"' in html
     assert 'allow-popups' not in (SOURCE / 'app.js').read_text()
     assert 'allow-top-navigation' not in (SOURCE / 'app.js').read_text()
@@ -57,6 +61,15 @@ def verify():
     assert 'nodownload' in html
     assert 'drive.google.com' not in html
     assert 'choose-local-film' not in html
+    manifest_data = json.loads((SOURCE / 'manifest.webmanifest').read_text())
+    assert manifest_data['display'] == 'standalone' and manifest_data['dir'] == 'rtl'
+    assert manifest_data['scope'] == './' and manifest_data['start_url'].startswith('./?')
+    for icon in manifest_data['icons']:
+        data = (SOURCE / icon['src']).read_bytes()
+        assert data.startswith(b'\x89PNG\r\n\x1a\n')
+        width, height = struct.unpack('>II', data[16:24])
+        assert f'{width}x{height}' == icon['sizes']
+    assert 'class="app-nav"' in html and 'rel="manifest"' in html
 
     with tempfile.TemporaryDirectory() as work:
         root = Path(work) / 'published'
