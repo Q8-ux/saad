@@ -19,7 +19,7 @@
     link.rel = 'noopener noreferrer';
     link.textContent = label.replace(/\s*↗$/u, '');
     const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    for (const [name, value] of Object.entries({class: 'external-arrow', viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': '1.7', 'aria-hidden': 'true'})) arrow.setAttribute(name, value);
+    for (const [name, value] of Object.entries({class: 'external-arrow', width: '15', height: '15', viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': '1.7', 'aria-hidden': 'true'})) arrow.setAttribute(name, value);
     const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     path.setAttribute('d', 'M6 18 18 6M6 6h12v12');
     arrow.append(path);

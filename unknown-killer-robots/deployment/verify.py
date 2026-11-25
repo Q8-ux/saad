@@ -25,7 +25,7 @@ class Page(HTMLParser):
             if value.startswith('#'):
                 self.fragments.add(value[1:])
             elif value and not value.startswith(('https://', 'http://', 'data:')):
-                self.local_assets.add(value)
+                self.local_assets.add(value.split('?', 1)[0])
 
 
 def verify():
