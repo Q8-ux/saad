@@ -36,17 +36,22 @@ def verify():
     for asset in page.local_assets:
         path = (SOURCE / asset).resolve()
         assert path.is_relative_to(SOURCE.resolve()) and path.is_file(), f'Missing local asset: {asset}'
-    assert (SOURCE / 'assets/al-mohanad.woff').read_bytes().startswith(b'wOFF')
-    assert (SOURCE / 'assets/al-mohanad-bold.woff').read_bytes().startswith(b'wOFF')
+    assert (SOURCE / 'assets/mohanad-regular.woff').read_bytes().startswith(b'wOFF')
+    assert (SOURCE / 'assets/mohanad-bold.woff').read_bytes().startswith(b'wOFF')
     assert (SOURCE / 'assets/poster.jpg').read_bytes().startswith(b'\xff\xd8')
     for phrase in ('Unknown Killer Robots', '01:10:08', '10 يوليو 2023', 'Jesse Sweet',
                    '4 من 5 على', 'IMDb', 'الطائرات المسيّرة', 'الروبوتات المسلحة',
                    'دون إشراف بشري مباشر', 'تحذيرات الخبراء والعلماء', 'مسؤولين عسكريين',
                    'قرار القتل.', 'من يتحمل المسؤولية', 'Lethal Autonomous Weapons Systems',
                    'الولايات المتحدة، الصين، وروسيا', 'توعويًا', 'Saad Alnabhan',
-                   'https://wa.me/96551231313', 'https://t.me/Moviive/2'):
+                   'توقيع زخرفي بجانب علامة واتساب'):
         assert phrase in html, f'Supplied content missing: {phrase}'
     assert 'المعروض الآن هو الإعلان الرسمي، وليس الفيلم الكامل.' in (SOURCE / 'app.js').read_text()
+    assert 'wa.me' not in html and 'tel:' not in html and 'whatsapp-link' not in html
+    assert 'signature-stamp' in html and 'id="film-video"' in html
+    assert 'allow-popups' not in (SOURCE / 'app.js').read_text()
+    assert 'allow-top-navigation' not in (SOURCE / 'app.js').read_text()
+    assert (SOURCE / 'assets/saad-signature.svg').is_file()
 
     with tempfile.TemporaryDirectory() as work:
         root = Path(work) / 'published'

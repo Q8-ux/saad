@@ -74,7 +74,7 @@ jobs:
                   if actual==sha:
                       with urllib.request.urlopen(base+'?commit='+sha,timeout=20) as response:
                           page=response.read().decode()
-                      assert 'Unknown: Killer Robots' in page and 'https://wa.me/96551231313' in page
+                      assert 'Unknown: Killer Robots' in page and 'signature-stamp' in page and 'wa.me' not in page and 'tel:' not in page
                       print('Film page and exact release verified:',sha)
                       break
               except Exception as error:

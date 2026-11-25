@@ -1,11 +1,15 @@
 # Unknown: Killer Robots
 
-Arabic RTL documentary page for Saad Alnabhan. Buildless HTML, CSS and JavaScript; no installation or build required.
+Arabic RTL documentary watch page for Saad Alnabhan. Buildless HTML, CSS and JavaScript.
 
-The primary action loads Telegram's official public-post widget for the user-supplied post `https://t.me/Moviive/2`. Availability and inline video playback depend on that original post. A visible direct-post link is always available. An optional, clearly labelled official Netflix trailer is embedded separately from YouTube. No full film is copied into this repository.
+Film playback stays inside the page: the Telegram source uses a sandboxed embedded frame without popup or top-navigation permission. There is no external movie-opening action. The Telegram post itself could not be verified as a playable full film. Its availability remains a source dependency, and the UI does not claim successful playback just because a frame loads.
 
-All supplied information, topics, message, questions and additional notes are included. The supplied 4/5 rating is explicitly attributed to the submitted description and is not represented as a verified live IMDb score. The exact supplied file duration is retained.
+A native HTML video element supports a configured direct video URL (`film-media-config`, kind `video`, url set to an actual media file). It calls play from the watch action. The optional local-file control plays a selected video on that device without uploading or publishing it to other visitors. The separately labelled Netflix official trailer is not substituted for the full film.
 
-Cover: official Netflix trailer thumbnail for `YsSzNOpr9cE`; credited on page. Al-Mohanad fonts reuse the user's existing repository font assets. Contact: Saad Alnabhan, WhatsApp `+965 5123 1313`.
+All supplied film facts, five topics, central message, three questions and notes are retained. The supplied 4/5 rating is attributed to the submitted description, not represented as a verified IMDb score.
 
-Deployment updates only `unknown-killer-robots/` within the last successful published Pages artifact, comparing hashes to preserve unrelated published files. The combined Pages workflow must also call `python unknown-killer-robots/deployment/publish.py --add-to-build` so later full releases retain this page.
+Al-Mohanad regular and bold fonts reuse the repository's Unicode-capable Dr Hamad assets, converted to WOFF. The earlier legacy symbol-encoded fonts have been removed. The footer contains only a small noninteractive vector WhatsApp mark and an outlined handwritten Saad Alnabhan signature. No contact number or contact link is present.
+
+The signature outlines were shaped from Allura (Google Fonts, SIL Open Font License); see `dist/assets/SIGNATURE_FONT_LICENSE.txt`. Cover imagery is from Netflix's official trailer `YsSzNOpr9cE` and is credited on the page.
+
+The scoped publisher preserves unrelated published files by comparing their hashes. Deploys use the repository's verified exact-artifact receipt helper.

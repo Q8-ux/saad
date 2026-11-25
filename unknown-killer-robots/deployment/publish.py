@@ -36,7 +36,7 @@ def overlay(root, source):
     entry = source / "index.html"
     if not entry.is_file() or 'Unknown: Killer Robots' not in entry.read_text():
         raise RuntimeError("Arabic release is incomplete")
-    if not all((source / name).is_file() for name in ("styles.css", "app.js", "assets/poster.jpg", "assets/al-mohanad.woff", "assets/al-mohanad-bold.woff")):
+    if not all((source / name).is_file() for name in ("styles.css", "app.js", "assets/poster.jpg", "assets/mohanad-regular.woff", "assets/mohanad-bold.woff")):
         raise RuntimeError("Film page assets are incomplete")
     protected = manifest(root)
     target = root / TARGET
