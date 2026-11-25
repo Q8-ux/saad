@@ -1,0 +1,67 @@
+name: Publish Unknown Killer Robots
+on:
+  push:
+    branches: [main]
+    paths: ['unknown-killer-robots/**', '.github/workflows/deploy-unknown-killer-robots.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages-v2
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: '${{ github.sha }}', fetch-depth: 1}
+      - uses: actions/setup-node@v4
+        with: {node-version: 22}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Validate film page and scoped publication
+        run: |
+          node --check unknown-killer-robots/dist/app.js
+          python unknown-killer-robots/deployment/verify.py
+      - uses: actions/configure-pages@v5
+      - name: Preserve published projects and update film page only
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python unknown-killer-robots/deployment/publish.py
+      - uses: actions/upload-pages-artifact@v3
+        with: {path: _site, retention-days: 30}
+      - name: Deploy
+        id: deploy
+        uses: actions/deploy-pages@v4
+      - name: Verify live page and source revision
+        env:
+          RELEASE_SHA: ${{ github.sha }}
+        run: |
+          python - <<'PY'
+          import os,time,urllib.request
+          sha=os.environ['RELEASE_SHA']
+          base='https://q8-ux.github.io/saad/unknown-killer-robots/'
+          for attempt in range(8):
+              try:
+                  request=urllib.request.Request(base+'release-version.txt?commit='+sha,headers={'Cache-Control':'no-cache'})
+                  with urllib.request.urlopen(request,timeout=20) as response:
+                      actual=response.read().decode().strip()
+                  if actual==sha:
+                      with urllib.request.urlopen(base+'?commit='+sha,timeout=20) as response:
+                          page=response.read().decode()
+                      assert 'Unknown: Killer Robots' in page and 'https://wa.me/96551231313' in page
+                      print('Film page and exact release verified:',sha)
+                      break
+              except Exception as error:
+                  print('Waiting for release:',str(error))
+              if attempt==7:
+                  raise SystemExit('Live film page did not match the source commit')
+              time.sleep(8)
+          PY
