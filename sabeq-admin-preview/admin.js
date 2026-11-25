@@ -7,8 +7,8 @@
   const app = document.getElementById('app');
   const dialog = document.getElementById('detail');
   const detail = document.getElementById('detail-content');
-  const labels = { forms:'الصيغ الجاهزة', paths:'المسارات والربط', site:'محتوى الموقع', services:'خدمات الموقع', bookings:'طلبات الاستشارة', legislation:'التشريعات', programmer:'المبرمج الاقتصادي', payments:'دفع سداد', overview:'نظرة عامة', memos:'المذكرات', inbox:'البريد والرسائل', notifications:'التنبيهات', users:'إدارة المستخدمين', mailboxes:'إدارة البريد', commands:'أوامر المتابعة', updates:'تحديثات النظام', whatsapp:'واتساب المكتب', mail:'ربط البريد' };
-  const descriptions = { forms:'مسودات مفرغة مصنفة حسب نوع المستند، بحقول تستكمل لقضية جديدة.', paths:'حالة المسارات والربط مع مصدر بيانات سابق.', site:'تحرير محتوى الموقع وهويته.', services:'تفعيل وإيقاف خدمات الموقع.', bookings:'متابعة طلبات الاستشارة.', legislation:'أرشيف التشريعات ومراجعات الصور والسريان ومصادر الاستناد.', programmer:'تشخيص الأخطاء ومراجعة الكود واقتراح اختبارات من داخل لوحة الإدارة.', payments:'إعداد بوابة سداد ورسوم المذكرات ومتابعة المدفوعات المتحققة.', overview:'متابعة أعمال المكتب وطلبات الموقع من مركز مستقل.',memos:'المذكرات المولدة من الموقع للمستخدمين والضيوف، مع متابعة كل طلبات التوليد.',inbox:'رسائل نموذج الموقع والبريد الوارد المتصل.',notifications:'أحداث العملاء والتكاملات، مع حفظ حالة القراءة.',users:'حسابات مستخدمي الموقع وحالتها وحدود الخدمات.',mailboxes:'صناديق بريد المكتب المستقلة وإنشاؤها وإدارة حالتها.',commands:'سجّل التكليفات وتابع حالة تنفيذها داخل المكتب.',updates:'سجل التغييرات المنشورة وحالة مصادر البيانات.',whatsapp:'ضبط OpenWA وربط رقم المكتب واستقبال أحداث الاتصال.',mail:'متابعة البريد الوارد وربطه بالمكتب.' };
+  const labels = { forms:'الصيغ الجاهزة', paths:'المسارات والربط', site:'محتوى الموقع', services:'خدمات الموقع', bookings:'طلبات الاستشارة', legislation:'التشريعات', programmer:'المبرمج الاقتصادي', payments:'دفع سداد', overview:'نظرة عامة', memos:'مشروع المذكرات', inbox:'البريد والرسائل', notifications:'التنبيهات', users:'إدارة المستخدمين', mailboxes:'إدارة البريد', commands:'أوامر المتابعة', updates:'تحديثات النظام', whatsapp:'واتساب المكتب', mail:'ربط البريد' };
+  const descriptions = { forms:'مسودات مفرغة مصنفة حسب نوع المستند، بحقول تستكمل لقضية جديدة.', paths:'حالة المسارات والربط مع مصدر بيانات سابق.', site:'تحرير محتوى الموقع وهويته.', services:'تفعيل وإيقاف خدمات الموقع.', bookings:'متابعة طلبات الاستشارة.', legislation:'أرشيف التشريعات ومراجعات الصور والسريان ومصادر الاستناد.', programmer:'تشخيص الأخطاء ومراجعة الكود واقتراح اختبارات من داخل لوحة الإدارة.', payments:'إعداد بوابة سداد ورسوم المذكرات ومتابعة المدفوعات المتحققة.', overview:'متابعة أعمال المكتب وطلبات الموقع من مركز مستقل.',memos:'ملف مستقل لكل طلب، يجمع المدخلات والردود المحفوظة ونسخ التعديل، مع إشعارات المتابعة.',inbox:'رسائل نموذج الموقع والبريد الوارد المتصل.',notifications:'أحداث العملاء والتكاملات، مع حفظ حالة القراءة.',users:'حسابات مستخدمي الموقع وحالتها وحدود الخدمات.',mailboxes:'صناديق بريد المكتب المستقلة وإنشاؤها وإدارة حالتها.',commands:'سجّل التكليفات وتابع حالة تنفيذها داخل المكتب.',updates:'سجل التغييرات المنشورة وحالة مصادر البيانات.',whatsapp:'ضبط OpenWA وربط رقم المكتب واستقبال أحداث الاتصال.',mail:'متابعة البريد الوارد وربطه بالمكتب.' };
   const states = { draft:'مسودة مفرغة', retryable:'أعد المحاولة — لم تنشأ فاتورة',sandbox_closed:'اختبار مؤرشف', paid:'مدفوع ومتحقق',consumed:'مذكرة مكتملة',generating:'جارٍ توليد المذكرة',creating:'إنشاء الفاتورة',uncertain:'يحتاج تحققاً — لا تدفع مجدداً', new:'جديد',read:'مقروء',archived:'مؤرشف',running:'قيد التنفيذ',pending:'بانتظار التنفيذ',completed:'مكتمل',blocked:'متعثر',generated:'تم الإنشاء',needs_review:'بانتظار المراجعة',needs_information:'يحتاج بيانات إضافية',failed:'تعذر التنفيذ',cancelled:'ملغي',ready:'متصل',created:'أُنشئت الجلسة',initializing:'جارٍ الاتصال',qr_ready:'بانتظار مسح QR',authenticating:'جارٍ الربط',disconnected:'غير متصل',action_required:'يحتاج تدخلاً',active:'نشط',suspended:'موقوف',unconfigured:'غير مهيأ',untested:'لم يُختبر',gateway_reachable:'البوابة متاحة',guest:'ضيف',user:'مستخدم مسجل' };
   const paths = {legislation:'M4 3h7v18H4z M14 3h6v18h-6z M6 7h3 M16 7h2',programmer:'M8 5l-6 7 6 7 M16 5l6 7-6 7 M14 3l-4 18',users:'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2 M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8 M17 3a4 4 0 0 1 0 8 M22 21v-2a4 4 0 0 0-3-3.8',mailboxes:'M3 5h18v15H3z M3 6l9 7 9-7 M7 3h10',logout:'M9 4H4v16h5 M14 8l4 4-4 4 M8 12h10',overview:'M3 3h7v7H3z M14 3h7v7h-7z M3 14h7v7H3z M14 14h7v7h-7z',memos:'M7 3h7l4 4v14H7z M14 3v5h5 M10 12h5 M10 16h5',inbox:'M3 5h18v14H3z M3 6l9 7 9-7',notifications:'M6 17h12l-2-3V9a4 4 0 0 0-8 0v5z M10 21h4',commands:'M9 5h11v16H4V5h2 M8 3h8v4H8z M8 12h8 M8 16h5',updates:'M3 12a9 9 0 1 0 3-6 M3 3v6h6 M12 7v6l4 2',whatsapp:'M21 11a9 9 0 0 1-13 8l-5 2 1-5A9 9 0 1 1 21 11z M8 7c0 5 3 8 8 8 M8 7l2 3-1 1 M16 15l-3-2-1 1',mail:'M4 4h16v16H4z M4 6l8 6 8-6',refresh:'M20 7v5h-5 M4 17v-5h5 M6 7a7 7 0 0 1 12-1l2 3 M18 17a7 7 0 0 1-12 1l-2-3',menu:'M3 6h18 M3 12h18 M3 18h18',shield:'M12 3l8 3v6c0 5-8 9-8 9s-8-4-8-9V6z M8 12l3 3 5-6'};
   const icon = name => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${paths[name] || paths.memos}"/></svg>`;
@@ -18,6 +18,7 @@
   function memoOrigin(row) {
     if(row.source==='official') return 'الموقع الرسمي — أرشيف سابق';
     const origin=String(row.origin||'');
+    if(origin==='chatgpt-mcp') return 'مسودة من المحادثة';
     if(/^https:\/\/q8-ux\.github\.io(?::443)?(?:\/|$)/.test(origin)) return 'الموقع التجريبي';
     if(/^https:\/\/(?:www\.)?sabeq\.legal(?::443)?(?:\/|$)/.test(origin)) return 'الموقع الرسمي';
     return String(row.id||'').startsWith('legacy:')?'أرشيف المذكرات':'الموقع الحالي';
@@ -122,7 +123,7 @@
     const cards=[['طلبات المذكرات',total,'تشمل السجلات المتاحة','memos'],['بانتظار المراجعة',s.memo?.review,'المسودات تحتاج مراجعة المكتب','memos'],['رسائل جديدة',Number(s.contacts?.unread||0)+Number(s.mail?.unread||0),'رسائل الموقع والبريد المتصل','inbox'],['أوامر المتابعة',s.commands?.pending,'أوامر لم تكتمل بعد','commands']];
     content().innerHTML=heading()+connectionNotice(s.official.available)+`<div class="stats">${cards.map(([label,value,note,target])=>`<button class="stat" data-section="${target}"><span class="stat-head"><span class="stat-label">${label}</span><span class="stat-icon">${icon(target)}</span></span><b>${n(value)}</b><small>${note}</small></button>`).join('')}</div><div class="grid">`+panel('آخر المستجدات',s.notifications.length?s.notifications.slice(0,6).map(notification).join(''):empty('بانتظار أول نشاط مسجل.'),'<button data-section="notifications">كل التنبيهات</button>')+panel('مصادر المتابعة',`<div class="panel-body">${currentSiteConnection(s)}<div class="source-row"><div><strong>أرشيف الخدمة السابقة</strong><small>${s.official.available?'جسر الأرشيف السابق متصل':'الأرشيف السابق غير متاح؛ الطلبات الحالية مستقلة عنه'}${s.official.trackingSince?'<br>بداية الرصد: '+date(s.official.trackingSince):''}</small></div>${badge(s.official.available?'متصل':'غير متاح',s.official.available?'':'warning')}</div><div class="source-row"><div><strong>طلبات الاستشارة</strong><small>${n(s.appointments?.pending)} طلب جديد من الموقع</small></div><span>${n(s.appointments?.total)}</span></div><p class="service-status">تظهر الطلبات التي حفظتها الخدمات فعلياً. طلبات الضيوف القديمة التي لم تُحفظ لا يمكن استعادتها من هذه اللوحة.</p></div>`)+`</div>`;
   }
-  function notification(row) {return `<article class="notification ${row.read?'read':'unread'}"><span class="dot"></span><div class="notification-body"><strong>${esc(row.title)}</strong><p>${date(row.created_at)} · ${esc(({memo:'المذكرات',contact:'رسائل الموقع',consultation:'الاستشارات',whatsapp:'واتساب',email:'البريد',admin:'الإدارة',official:'الموقع الرسمي',user:'حسابات المستخدمين'})[row.source]||row.source)}</p>${row.severity==='warning'?badge('يحتاج متابعة','warning'):''}</div>${!row.read?`<button data-read="${esc(row.id)}">تمت القراءة</button>`:''}</article>`;}
+  function notification(row) {return `<article class="notification ${row.read?'read':'unread'}"><span class="dot"></span><div class="notification-body"><strong>${esc(row.title)}</strong><p>${date(row.created_at)} · ${esc(({memo:'المذكرات',contact:'رسائل الموقع',consultation:'الاستشارات',whatsapp:'واتساب',email:'البريد',admin:'الإدارة',official:'الموقع الرسمي',user:'حسابات المستخدمين'})[row.source]||row.source)}</p>${row.severity==='warning'?badge('يحتاج متابعة','warning'):''}</div>${/^memo-project:[A-Za-z0-9_-]+:[0-9]+$/.test(row.id)?`<button data-memo="${esc(row.id.split(':')[1])}">فتح ملف المذكرة</button>`:''}${!row.read?`<button data-read="${esc(row.id)}">تمت القراءة</button>`:''}</article>`;}
   function filters(memos){return `<form class="toolbar" data-form="search"><label><span class="sr-only">البحث</span><input name="q" placeholder="ابحث بالاسم أو البريد أو رقم القضية" value="${esc(query)}" maxlength="160"></label>${memos?`<select name="view" aria-label="عرض المذكرات"><option value="all" ${memoView==='all'?'selected':''}>كل طلبات المذكرات</option><option value="generated" ${memoView==='generated'?'selected':''}>المذكرات المولدة</option></select><select name="status" aria-label="حالة المذكرة"><option value="">كل الحالات</option>${['needs_review','generated','completed','running','needs_information','failed','cancelled'].map(s=>`<option value="${s}" ${s===memoStatus?'selected':''}>${states[s]}</option>`).join('')}</select>`:''}<button class="primary" type="submit">بحث</button></form>`;}
   const pager=()=>`<div class="pager"><button data-page="previous" ${offset===0?'disabled':''}>السابق</button><span>صفحة ${n(offset/50+1)}</span><button data-page="next" ${!hasMore?'disabled':''}>التالي</button></div>`;
   function memoRecoveryPanel() {
@@ -144,7 +145,7 @@
     </form>${report}</div>`);
   }
   function canReviewMemos(){return ['administrator','memo_supervisor'].includes(manager?.role);}
-  function memoExportControls() { return canReviewMemos()?`<div class="actions">${manager?.role==='administrator'?'<button type="button" class="primary" data-memo-new="true">توليد مذكرة جديدة</button>':''}<button type="button" data-memo-export="true">تصدير المذكرات للمراجعة</button></div>`:''; }
+  function memoExportControls() { return canReviewMemos()?`<div class="actions">${manager?.role==='administrator'?'<button type="button" class="primary" data-memo-new="true">توليد مذكرة جديدة</button>':''}<button type="button" data-memo-project-export="true">تنزيل مشروع الطلبات والردود</button><button type="button" data-memo-export="true">تصدير المذكرات للمراجعة</button></div>`:''; }
   async function exportMemosForReview(button) {
     if(!canReviewMemos())throw Error('تصدير النصوص متاح للمشرف فقط.');
     const found=new Map(),records=[];let page=0,more=true;
@@ -165,6 +166,42 @@
     const file=new Blob([JSON.stringify(payload,null,2)],{type:'application/json;charset=utf-8'}),url=URL.createObjectURL(file),link=document.createElement('a');
     link.href=url;link.download='sabeq-memos-for-review-'+new Date().toISOString().slice(0,10)+'.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
     toast('تم تصدير '+n(records.length)+' مذكرة كاملة إلى جهازك. لم تُرسل بالبريد.');
+  }
+  function downloadMemoFile(payload,name) {
+    const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json;charset=utf-8'}),url=URL.createObjectURL(blob),link=document.createElement('a');
+    link.href=url;link.download=name;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  }
+  async function fullMemoFile(id) {
+    const {memo}=await api('memos?id='+encodeURIComponent(id)),file=memo.projectFile;
+    if(!file)return memo;
+    let page=file.offset||0;
+    while(file.hasMore){
+      page+=50;
+      if(page>100000)throw Error('تجاوز ملف المذكرة الحد الآمن للتنزيل.');
+      const next=(await api('memos?'+new URLSearchParams({id,historyOffset:String(page)}))).memo.projectFile;
+      if(!next)throw Error('تعذر إكمال سجل النسخ. أعد تنزيل الملف.');
+      file.entries.push(...next.entries);file.revisions.push(...next.revisions);file.hasMore=next.hasMore;
+    }
+    return memo;
+  }
+  async function exportMemoProject(button) {
+    if(!canReviewMemos())throw Error('تنزيل مشروع المذكرات متاح للمشرف فقط.');
+    const ids=new Set(),records=[];let page=0,more=true;
+    while(more){
+      if(page>100000)throw Error('تجاوز المشروع الحد الآمن للتنزيل.');
+      const data=await api('memos?'+new URLSearchParams({view:'all',offset:String(page)}));
+      for(const row of data.memos||[])ids.add(row.id);
+      more=data.hasMore===true&&(data.memos||[]).length>0;page+=50;
+    }
+    for(const id of ids){button.textContent='تجهيز ملف '+n(records.length+1)+' من '+n(ids.size);records.push(await fullMemoFile(id));}
+    if(!records.length)throw Error('لا توجد طلبات محفوظة لتنزيلها.');
+    downloadMemoFile({format:'sabeq-memo-project-1',title:'مشروع المذكرات',exportedAt:new Date().toISOString(),records},'sabeq-memo-project-'+new Date().toISOString().slice(0,10)+'.json');
+    toast('تم تنزيل المشروع شاملاً الطلبات التي لم يصدر لها رد.');
+  }
+  function memoProjectHistory(memo) {
+    const file=memo.projectFile;if(!file)return '';
+    const kinds={received:'استلام الطلب',before_tracking:'النسخة الموجودة قبل تفعيل التتبع',input_updated:'تعديل المدخلات',response_saved:'حفظ رد',status_updated:'تغير الحالة'};
+    return `<section class="record-section"><h3>ملف الطلب والردود</h3><p class="service-status">${esc(file.coverage)}</p>${file.entries.map(entry=>`<details><summary>${esc(kinds[entry.kind]||'نسخة محفوظة')} · ${date(entry.created_at)} · ${esc(states[entry.status]||entry.status)}</summary>${entry.error_code?`<p>رمز المتابعة: <bdi>${esc(entry.error_code)}</bdi></p>`:''}<h4>نسخة المدخلات</h4>${requestDetails(entry.input_json)}<h4>الرد المحفوظ</h4>${entry.output_text?`<article class="record-document record-prose" dir="rtl">${memoContent(entry.output_text)}</article>`:'<p>لم يحفظ نص رد في هذه المرحلة.</p>'}</details>`).join('')}${file.hasMore?'<p>تظهر أول ٥٠ نسخة هنا. تنزيل الملف يجمع جميع النسخ.</p>':''}</section>`;
   }
   function renderReadyForms(){
     content().innerHTML=heading()+`<div class="banner" role="status">${n(rows.length)} صيغ محفوظة كمسودات مفرغة. تحتوي على الهيكل والحقول فقط، دون أسماء أو وقائع قضايا أو ملفات أصلية، وتبقى منفصلة عن القوالب المعتمدة للتوليد.</div>`+panel('الصيغ المصنفة',rows.length?`<div class="table-scroll" tabindex="0" role="region" aria-label="الصيغ الجاهزة"><table><thead><tr><th>الصيغة</th><th>التصنيف</th><th>الحالة</th><th>عرض</th></tr></thead><tbody>${rows.map(row=>`<tr><td><strong>${esc(row.title)}</strong><small>${n(row.fields.length)} حقلًا فارغًا</small></td><td>${esc(row.category)}</td><td>${badge(row.status,'warning')}</td><td><button type="button" data-ready-form="${esc(row.id)}">عرض المسودة</button></td></tr>`).join('')}</tbody></table></div>`:empty('لا توجد صيغ محفوظة حالياً.'));
@@ -297,7 +334,7 @@
     openDetail(`<h2 id="memo-detail-title" class="detail-title">التعديل ${n(row.revision)}</h2><div class="record-scroll"><section class="record-section"><h3>النص قبل التعديل${row.revision===1?' — الأصل':''}</h3><article class="record-document record-prose" dir="rtl">${memoContent(row.before_text)}</article><button data-memo-restore="${row.revision}">استخدام هذا النص في المحرر</button></section><section class="record-section"><h3>النص بعد التعديل</h3><article class="record-document record-prose" dir="rtl">${memoContent(row.after_text)}</article></section><button data-memo-history="true">العودة إلى سجل النسخ</button></div>`,true);
   }
   function memoRecord(memo) {
-    return `<header class="record-heading"><h2 id="memo-detail-title" class="detail-title">${esc(memo.client_name || 'طلب مذكرة')}</h2><p class="detail-meta">${date(memo.created_at)}${memo.case_type?` · ${esc(memo.case_type)}`:''}</p>${badge(memo.status)}${memoRevisionControls(memo)}${manager?.role==='administrator'&&/^[A-Za-z0-9_-]+$/.test(memo.id)&&memo.status!=='running'?'<div class="actions"><button data-memo-generate="true">مراجعة البيانات وتوليد نسخة مستقلة</button></div>':''}</header><div class="record-scroll" tabindex="0" role="region" aria-label="تفاصيل الطلب والمذكرة"><section class="record-section" aria-labelledby="record-input-title"><h3 id="record-input-title">بيانات الطلب</h3>${requestDetails(memo.input_json)}</section><section class="record-section" aria-labelledby="record-output-title"><h3 id="record-output-title">المذكرة المحفوظة</h3><article class="record-document record-prose" dir="rtl" lang="ar">${memoOCRNotice(memo.output_text)}${memoContent(memo.output_text)}</article></section></div>`;
+    return `<header class="record-heading"><h2 id="memo-detail-title" class="detail-title">${esc(memo.client_name || 'طلب مذكرة')}</h2><p class="detail-meta">${date(memo.created_at)}${memo.case_type?` · ${esc(memo.case_type)}`:''}</p>${badge(memo.status)}${memoRevisionControls(memo)}${canReviewMemos()?'<div class="actions"><button type="button" data-memo-file="true">تنزيل ملف الطلب والردود</button></div>':''}${manager?.role==='administrator'&&/^[A-Za-z0-9_-]+$/.test(memo.id)&&memo.status!=='running'?'<div class="actions"><button data-memo-generate="true">مراجعة البيانات وتوليد نسخة مستقلة</button></div>':''}</header><div class="record-scroll" tabindex="0" role="region" aria-label="تفاصيل الطلب والمذكرة"><section class="record-section" aria-labelledby="record-input-title"><h3 id="record-input-title">بيانات الطلب</h3>${requestDetails(memo.input_json)}</section><section class="record-section" aria-labelledby="record-output-title"><h3 id="record-output-title">المذكرة المحفوظة</h3><article class="record-document record-prose" dir="rtl" lang="ar">${memoOCRNotice(memo.output_text)}${memoContent(memo.output_text)}</article></section>${memoProjectHistory(memo)}</div>`;
   }
   async function openMemoGeneration(id) {
     if(manager?.role!=='administrator')throw Error('التوليد متاح للمسؤول فقط.');
@@ -355,6 +392,8 @@
         if(action==='send-pending'){gmail=result;renderMail();toast('تمت معالجة '+result.attempted+' من المسودات المعلقة. راجع حالة الإرسال.');}
       }
       if(button.dataset.gmailMessage){const result=await api('gmail',{action:'read',id:button.dataset.gmailMessage});openDetail('<h2 class="detail-title">رسالة Gmail</h2><div class="mail-preview">'+esc(result.body)+'</div>');}
+      if(button.dataset.memoProjectExport){await exportMemoProject(button);return;}
+      if(button.dataset.memoFile){if(!canReviewMemos()||!currentMemo)throw Error('افتح ملف المذكرة بحساب المشرف أولاً.');downloadMemoFile({format:'sabeq-memo-file-1',exportedAt:new Date().toISOString(),memo:await fullMemoFile(currentMemo.id)},'sabeq-memo-'+currentMemo.id.replace(/[^A-Za-z0-9_-]/g,'_')+'.json');return;}
       if(button.dataset.notificationRetry){const next=await api('notification-email',{action:'retry',id:button.dataset.notificationRetry});if(section==='mail'&&manager){notificationMail=next;renderMail();}return;}
       if(button.hasAttribute('data-verification-check')){verificationMail=await api('verification-email',{action:'check'});if(section==='mail'&&manager)renderMail();return;}
       if(button.dataset.action==='forgot-password'){recoveryRequestScreen();return;}

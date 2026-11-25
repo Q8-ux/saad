@@ -18,7 +18,7 @@ test('Memos keeps all request states on the same backend and offers the generate
  assert.equal(new URL(request.url).origin,'https://sabeq-legal-public.centrino.chatgpt.site');
  assert.equal(new URL(request.url).searchParams.get('view'),'all');
  assert.match(f.node('workspace').innerHTML,/المذكرات المولدة|المذكرات المولّدة/);
- assert.match(f.node('workspace').innerHTML,/كل طلبات التوليد/);
+ assert.match(f.node('workspace').innerHTML,/مشروع المذكرات/);assert.match(f.node('workspace').innerHTML,/ملف مستقل لكل طلب/);assert.match(f.node('workspace').innerHTML,/تنزيل مشروع الطلبات والردود/);
  assert.match(f.node('workspace').innerHTML,/data-memo="synthetic-memo"/);
  assert.equal(request.init.headers.Authorization,'Bearer synthetic-test-session');
 });

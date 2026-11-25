@@ -1,0 +1,36 @@
+{
+  "date": "2026-11-25",
+  "nativeVersion": 240,
+  "sourceCommit": "52cd3ddc1d134dd8eef856f73aa120fb9df7f1ef",
+  "deploymentId": "appgdep_6b067f6aae34819188f50469ba879eb9",
+  "deploymentStatus": "succeeded",
+  "environmentRevision": 33,
+  "features": [
+    "private per-request input/response journal",
+    "atomic linked dashboard notifications",
+    "full project and individual request files",
+    "owner-only chat bridge to bound legal sources"
+  ],
+  "validation": {
+    "internalPassed": 492,
+    "internalFailed": 0,
+    "targetedArchiveAccessPassed": 91,
+    "serviceContractsPassed": 22,
+    "productionBuild": "passed"
+  },
+  "mcp": {
+    "provisioned": true,
+    "installed": true,
+    "currentConversationToolsAvailable": true,
+    "liveSourceSearch": "passed",
+    "liveSyntheticSaveAndReadback": "passed",
+    "exactOriginalFactsAndRequestsPreserved": true,
+    "exactSavedResponseInJournal": true,
+    "automaticModelReview": false,
+    "humanReviewRequired": true
+  },
+  "limits": [
+    "Older responses that were never stored cannot be reconstructed.",
+    "OpenAI API billing and Meta configuration remain separate from this archive change."
+  ]
+}
