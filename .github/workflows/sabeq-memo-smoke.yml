@@ -67,7 +67,7 @@ jobs:
             echo "Expected assets:" >&2
             cat expected-assets.txt >&2
             echo "Published script entries:" >&2
-            grep -oE '<script[^>]+src=["'"'][^"'"']+\.js[^"'"']*["'"']' frontend.html >&2 || true
+            grep -oE '<script[^>]+src="[^"]+\.js[^"]*"' frontend.html >&2 || true
             exit 1
           fi
           curl --fail --location --silent --show-error --retry 2 --max-time 80 https://sabeq-legal-research-api.onrender.com/api/operations-health > gateway.json
