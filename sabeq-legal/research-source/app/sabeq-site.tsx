@@ -81,7 +81,7 @@ import {
   X,
   Zap,
 } from "lucide-react";
-import { FormEvent, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { FormEvent, ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { startVisitorAnalytics } from "@/lib/visitor-analytics";
 import { apiUrl, assetUrl } from "@/lib/runtime-urls";
 import { copy, Language, mediaVideos as defaultMediaVideos, SiteCopy, team as defaultTeam } from "./site-content";
@@ -1092,7 +1092,7 @@ function MemoWizard({ t, language, token, initialData = null, assistantSession, 
   const generationMounted = useRef(true);
   const generationUi = memoGenerationCopy(language);
   useEffect(() => { generationMounted.current = true; return () => { generationMounted.current = false; generationRequest.current?.abort(); storyRequest.current?.abort(); }; }, []);
-  const applyMemoRequestStatus = useCallback((requestStatus: MemoRequestStatusResponse) => {
+  const applyMemoRequestStatus = useMemo(() => (requestStatus: MemoRequestStatusResponse) => {
     const ui = memoRequestRefreshCopy[language];
     if ((requestStatus.status === "needs_review" || requestStatus.status === "generated") && requestStatus.hasDraft) {
       setMemoFailure(new MemoSubmissionError("", "document_review", requestStatus.requestId, 422));
@@ -1109,7 +1109,7 @@ function MemoWizard({ t, language, token, initialData = null, assistantSession, 
     if (requestStatus.status === "running") setMemoError(ui.running);
     if (requestStatus.status === "cancelled") setMemoError(ui.cancelled);
   }, [language]);
-  const refreshMemoRequestStatus = useCallback(async (requestId: string, signal?: AbortSignal, manual = false) => {
+  const refreshMemoRequestStatus = useMemo(() => async (requestId: string, signal?: AbortSignal, manual = false) => {
     setCheckingRequestStatus(true);
     try {
       applyMemoRequestStatus(await readMemoRequestStatus(requestId, token, signal));
