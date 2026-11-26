@@ -25,7 +25,7 @@ func request(s *LocalServer, method, path, host, origin, csrf, cookie, body stri
 		r.Header.Set("X-Mirsad-CSRF", csrf)
 	}
 	if cookie != "" {
-		r.AddCookie(&http.Cookie{Name: "mirsad_session", Value: cookie})
+		r.AddCookie(&http.Cookie{Name: s.cookieName(), Value: cookie})
 	}
 	w := httptest.NewRecorder()
 	s.ServeHTTP(w, r)
@@ -97,5 +97,24 @@ func TestOnlyAllowlistedAssetsAreServed(t *testing.T) {
 	b, _ := io.ReadAll(w.Result().Body)
 	if w.Code != 200 || len(b) < 100 {
 		t.Fatal("embedded app asset missing")
+	}
+}
+
+func TestIndependentWindowsDoNotOverwriteSessions(t *testing.T) {
+	first := testServer(t)
+	second := newLocalServer(first.app, "127.0.0.1:54321")
+	a := request(first, "GET", "/start/"+first.token, first.host, "", "", "", "").Result().Cookies()
+	b := request(second, "GET", "/start/"+second.token, second.host, "", "", "", "").Result().Cookies()
+	if len(a) != 1 || len(b) != 1 || a[0].Name == b[0].Name {
+		t.Fatal("local windows must use distinct cookie names")
+	}
+	r := httptest.NewRequest("GET", "http://"+first.host+"/api/state", nil)
+	r.Host = first.host
+	r.AddCookie(a[0])
+	r.AddCookie(b[0])
+	w := httptest.NewRecorder()
+	first.ServeHTTP(w, r)
+	if w.Code != 200 {
+		t.Fatalf("second window invalidated the first session: %d", w.Code)
 	}
 }

@@ -41,6 +41,11 @@ func randomToken() string {
 func tokenEqual(a, b string) bool {
 	return len(a) == len(b) && subtle.ConstantTimeCompare([]byte(a), []byte(b)) == 1
 }
+func (s *LocalServer) cookieName() string {
+	// Cookies are scoped by host, not port. Distinct names keep independently
+	// opened application windows from replacing each other's local session.
+	return "mirsad_session_" + strings.ReplaceAll(s.host, ":", "_")
+}
 func newLocalServer(a *App, host string) *LocalServer {
 	s := &LocalServer{app: a, host: host, token: randomToken(), csrf: randomToken()}
 	s.lastHeartbeat.Store(time.Now().Unix())
@@ -61,12 +66,12 @@ func (s *LocalServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "جلسة غير صالحة", 403)
 			return
 		}
-		http.SetCookie(w, &http.Cookie{Name: "mirsad_session", Value: s.token, Path: "/", HttpOnly: true, SameSite: http.SameSiteStrictMode})
+		http.SetCookie(w, &http.Cookie{Name: s.cookieName(), Value: s.token, Path: "/", HttpOnly: true, SameSite: http.SameSiteStrictMode})
 		s.lastHeartbeat.Store(time.Now().Unix())
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
 	}
-	c, e := r.Cookie("mirsad_session")
+	c, e := r.Cookie(s.cookieName())
 	if e != nil || !tokenEqual(c.Value, s.token) {
 		http.Error(w, "افتح مرصد من ملف البرنامج لبدء جلسة محلية", 401)
 		return
