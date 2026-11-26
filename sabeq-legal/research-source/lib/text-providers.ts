@@ -2,6 +2,11 @@ import { matchesJsonSchema } from "./gemini";
 
 export type TextProvider = "openai" | "gemini" | "meta" | "groq" | "nvidia" | "openrouter" | "heretic";
 export type TextProviderEnvironment = Record<string, string | undefined>;
+
+// This public research mirror exercises the OpenAI-only route. The deployed
+// source may opt into an alternate writer, but this mirror cannot claim an
+// adapter that its generateText implementation does not contain.
+export function memoWriterProvider(_runtime: TextProviderEnvironment): "openai" { return "openai"; }
 type ProviderErrorKind = "configuration" | "authentication" | "rate_limit" | "model_access" | "timeout" | "network" | "incomplete" | "empty_response" | "upstream";
 type ProviderErrorReason = "data_policy" | "parameters" | "unavailable" | "access" | "credits";
 export class TextProviderError extends Error {
