@@ -81,3 +81,42 @@ Reusing a history item restores that mode. A downloadable voice plan records tha
 cloning, listening and video synchronization still require their own verification.
 The workflow applies the prompt-baseline stage of «مسار الفتح» to the text before
 speech; it does not run Heretic on TTS weights or claim to fix accent automatically.
+
+## Content creation and MoneyPrinterTurbo (v1.6)
+
+Open `#content` to assemble a short video from an approved script, an existing
+cloned/generated narration, and up to 12 JPG/PNG/WebP images. The page offers
+portrait, landscape and square layouts, ordered scenes, a writing brief, limited
+motion, Arabic scene captions, real browser recording, and a playable download.
+An output is marked complete only after MediaRecorder returns nonempty bytes.
+The browser chooses supported MP4 or WebM encoding; it does not promise MP4 on
+every device. Audio speed and speaker identity are unchanged. Keep the page
+visible during rendering. Scene-caption timing is approximate, not word-aligned STT.
+
+Both clone results and generated audio have a direct handoff into this workspace.
+The workspace keeps its audio/images and text in a separate local IndexedDB draft;
+this does not change the existing voice backup format. Export the project bundle
+for a portable copy of actual assets.
+
+The MoneyPrinterTurbo ZIP includes `tasks.json` with the verified native batch
+fields (`video_aspect`, `video_materials`, `custom_audio_file`) and real relative
+asset files, plus the Mohannad font. It is not a URL-only mock integration.
+After a local render it also contains the prepared video and `project.json` for
+MoneyPrinterTurbo's offline `app.services.video_project` renderer. Its manifest
+contract was checked against upstream blob `4634cf56f94d38e25b2b3f22014a65b4165081e1`.
+The offline renderer makes no provider calls and does not publish. The standard
+batch config requires a separately configured MoneyPrinterTurbo installation;
+inspect its publishing settings before running a provider-enabled pipeline.
+
+This static integration does not provision a server or activate cloud model,
+stock-footage, Whisper or publishing accounts. The upstream README recommends
+at least 4 GB RAM for its full local runtime. Exporting a bundle does not run
+that runtime, invoke TTS, upload a voice, or publish anything.
+
+Upstream: https://github.com/harry0703/MoneyPrinterTurbo/blob/main/README-en.md
+Prepared media contract: https://github.com/harry0703/MoneyPrinterTurbo/blob/main/docs/video-projects.md
+
+Validation on 2026-11-26: 20 client tests passed, including ZIP CRC/UTF-8 asset
+round trips. The exported prepared-project schema was also run through the
+upstream local renderer using a synthetic one-second WebM and WAV; it produced
+a real MP4 export. This does not establish Arabic speech or speaker similarity.

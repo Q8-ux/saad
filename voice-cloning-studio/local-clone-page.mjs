@@ -19,7 +19,7 @@ const label = {
   saved:'حُفظت العيّنة على هذا الجهاز.',
   unsaved:'المقطع جاهز للتنزيل. تعذّر حفظه في السجل.',
 };
-let reference, worker, run, previewURL, resultURL, resultBlob, currentSelection = 0, resultFilename = 'sawtak-voice-clone.wav';
+let reference, worker, run, previewURL, resultURL, resultBlob, currentSelection = 0, resultFilename = 'sawtak-voice-clone.wav', lastResultMeta;
 
 function status(message, progress) {
   $('clone-status').textContent = message;
@@ -207,6 +207,7 @@ export function initLocalClone(saveGeneration) {
     resetWorker();
     endRun(label.stopped);
   });
+  $('clone-to-content').addEventListener('click', () => {if(lastResultMeta)window.dispatchEvent(new CustomEvent('studio-use-content-audio',{detail:lastResultMeta}));});
   $('clone-download').addEventListener('click', () => {
     if (resultBlob) download(resultBlob, resultFilename);
   });
@@ -256,6 +257,7 @@ export function initLocalClone(saveGeneration) {
           const meta = {id:'local-'+crypto.randomUUID(), kind:'generation', blob:resultBlob, text, profile_name:task.name,
             engine:'MOSS-TTS-Nano', language:task.plan ? 'ar' : getUILocale(),
             ...(task.plan ? {narration_profile:task.plan.mode, speech_text:task.speechText, pronunciation_edits:task.plan.pronunciationEdits, text_preparation:task.plan.preparation} : {}), status:'completed', duration, created_at:new Date().toISOString(), is_favorited:false};
+          lastResultMeta = meta;
           try {
             await saveGeneration(meta);
             if (run === task) endRun(label.ready);

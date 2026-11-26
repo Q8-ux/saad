@@ -1,6 +1,7 @@
+import {initContentStudio} from './content-studio.mjs?v=1.6.0';
 import {validateReferenceFile,prepareFileReference,maxReferenceSeconds} from './reference.mjs';
 import {initI18n,translate as t,getUILocale} from './i18n.mjs?v=1.5.0';
-import {initLocalClone,refreshCloneReferences,selectCloneReference,setCloneText} from './local-clone-page.mjs?v=1.5.2';
+import {initLocalClone,refreshCloneReferences,selectCloneReference,setCloneText} from './local-clone-page.mjs?v=1.6.0';
 import {MediaAPI,videoId,embedURL,getDeviceVoices,speakDevice} from './media.mjs';
 import {VoiceboxAPI,APIError,validateBase} from './api.mjs';
 import {localDB,download,blobToDataURL,dataURLToBlob,safeName} from './storage.mjs';
@@ -31,7 +32,7 @@ const engines=[
  {id:'omnivoice',name:'OmniVoice',kind:'محرك تجريبي',languages:[],model:'omnivoice',description:'محرك مضاف في المصدر؛ تحقق من لغاته وتوافقه على الخادم قبل الاعتماد عليه.'}
 ];
 const typeLabel={cloned:'مستنسخ',preset:'جاهز',designed:'مصمم'};
-const pageNames={clone:'نسخ الصوت',generate:'توليد الصوت',voices:'مكتبة الأصوات',record:'التسجيل والتفريغ',stories:'محرر القصص',effects:'المؤثرات الصوتية',history:'سجل الأعمال',models:'محركات الصوت',settings:'الاتصال والتكامل',youtube:'من يوتيوب إلى صوتك'};
+const pageNames={clone:'نسخ الصوت',generate:'توليد الصوت',content:'صناعة المحتوى',voices:'مكتبة الأصوات',record:'التسجيل والتفريغ',stories:'محرر القصص',effects:'المؤثرات الصوتية',history:'سجل الأعمال',models:'محركات الصوت',settings:'الاتصال والتكامل',youtube:'من يوتيوب إلى صوتك'};
 const state={mediaApi:null,mediaReady:false,readyVoices:[],deviceVoices:[],localGenerations:[],youtubeMeta:null,youtubeBlob:null,api:new VoiceboxAPI(),connected:false,voices:[],history:[],models:[],recordBlob:null,recordName:'',recordBuffer:null,recording:false,mic:new Microphone(),recordTimer:null,lastOutput:null,job:null,jobController:null,profileBlob:null,profileFilename:'',effectsBlob:null,effectsBuffer:null,effectsResult:null,clips:[],captures:[],urlMap:new Map(),effectOptions:[],dictateTarget:null,projectId:crypto.randomUUID(),projectChanged:false};
 function toast(message,error=false){const el=document.createElement('div');el.className='toast'+(error?' error':'');el.textContent=t(message);$('toasts').append(el);setTimeout(()=>el.remove(),error?10000:5000);}
 function run(fn){return async event=>{try{await fn(event);}catch(e){console.error(e.name,e.message);toast(e.message||'تعذّر تنفيذ العملية.',true);}};}
@@ -39,7 +40,7 @@ function bind(id,event,fn){$(id)?.addEventListener(event,run(fn));}
 async function busy(button,fn){if(button?.disabled)return;const html=button?.innerHTML;if(button){button.disabled=true;button.innerHTML='<span class="spinner"></span> لحظة…';}try{return await fn();}finally{if(button){button.disabled=false;button.innerHTML=html;}}}
 function objectURL(key,blob){if(state.urlMap.has(key))URL.revokeObjectURL(state.urlMap.get(key));const u=URL.createObjectURL(blob);state.urlMap.set(key,u);return u;}
 function closeNav(){$('sidebar').classList.remove('open');$('nav-backdrop').hidden=true;$('nav-backdrop').classList.remove('visible');$('mobile-menu').setAttribute('aria-expanded','false');}
-function route(){const page=location.hash.slice(1)||'clone';const valid=Object.hasOwn(pageNames,page)?page:'clone';document.body.dataset.activePage=valid;if(valid==='clone')void refreshCloneReferences();document.querySelectorAll('.page').forEach(el=>el.classList.toggle('active',el.id==='page-'+valid));document.querySelectorAll('[data-page]').forEach(el=>{const active=el.dataset.page===valid;el.classList.toggle('active',active);if(active)el.setAttribute('aria-current','page');else el.removeAttribute('aria-current');});if(valid!=='youtube'){for(const id of ['reference-video','reference-audio'])$(id)?.pause();$('youtube-player')?.removeAttribute('src');if(youtubeCapture?.recorder?.state==='recording')youtubeCapture.recorder.stop();}else if(state.youtubeMeta&&!state.referenceFile&&!$('youtube-player').getAttribute('src')){$('youtube-player').src=embedURL(state.youtubeMeta.id,Number($('youtube-start').value),Number($('youtube-end').value));}$('page-crumb').textContent=pageNames[valid];document.title=t(pageNames[valid])+' — '+t('صوتك');closeNav();if(valid==='voices')renderVoices();if(valid==='history')renderHistory();if(valid==='models')renderModels();if(valid==='record')renderCaptures();if(valid==='stories')renderStory();window.scrollTo({top:0,behavior:'instant'});}
+function route(){const page=location.hash.slice(1)||'clone';const valid=Object.hasOwn(pageNames,page)?page:'clone';document.body.dataset.activePage=valid;if(valid==='clone')void refreshCloneReferences();document.querySelectorAll('.page').forEach(el=>el.classList.toggle('active',el.id==='page-'+valid));document.querySelectorAll('[data-page]').forEach(el=>{const active=el.dataset.page===valid;el.classList.toggle('active',active);if(active)el.setAttribute('aria-current','page');else el.removeAttribute('aria-current');});if(valid!=='youtube'){for(const id of ['reference-video','reference-audio'])$(id)?.pause();$('youtube-player')?.removeAttribute('src');if(youtubeCapture?.recorder?.state==='recording')youtubeCapture.recorder.stop();}else if(state.youtubeMeta&&!state.referenceFile&&!$('youtube-player').getAttribute('src')){$('youtube-player').src=embedURL(state.youtubeMeta.id,Number($('youtube-start').value),Number($('youtube-end').value));}$('page-crumb').textContent=pageNames[valid];document.title=t(pageNames[valid])+' — '+t('صوتك');closeNav();if(valid==='content')void contentStudio.activate().catch(error=>toast(error.message,true));else contentStudio.onLeave();if(valid==='voices')renderVoices();if(valid==='history')renderHistory();if(valid==='models')renderModels();if(valid==='record')renderCaptures();if(valid==='stories')renderStory();window.scrollTo({top:0,behavior:'instant'});}
 function connected(value,message=''){
  state.connected=value;syncEngineAvailability();const ready=value||state.mediaReady||state.deviceVoices.length>0;
  $('connection-badge').classList.toggle('connected',ready);
@@ -353,6 +354,8 @@ function setupMediaEvents(){
 }
 
 await initI18n();
+const contentStudio=initContentStudio({toast});
+$('output-to-content').addEventListener('click',()=>{if(state.lastOutput)void contentStudio.useAudio({blob:state.lastOutput.blob,...state.lastOutput.meta}).catch(error=>toast(error.message,true));});
 initLocalClone(async meta=>{
  await localDB.put('assets',meta);
  await loadLocalGenerations();
