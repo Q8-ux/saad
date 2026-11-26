@@ -22,10 +22,11 @@ export function checkMemoCore(){
   const order=JSON.parse(readFileSync(resolve(root,'specs/111-memo-modified-order/protected-order.json'),'utf8'));
   const contact=JSON.parse(readFileSync(resolve(root,'specs/113-memo-required-contact/protected-contact.json'),'utf8'));
   const quality=JSON.parse(readFileSync(resolve(root,'specs/116-memo-substance-quality/protected-quality.json'),'utf8'));
+  const proportionality=JSON.parse(readFileSync(resolve(root,'specs/121-memo-defense-proportionality/protected-quality.json'),'utf8'));
   const search=JSON.parse(readFileSync(resolve(root,'specs/118-explicit-article-section/protected-search.json'),'utf8'));
   const facts=JSON.parse(readFileSync(resolve(root,'specs/119-defendant-payment-facts/protected-facts.json'),'utf8'));
   function originalTransport(file,source){
-    const substitutions=[...(quality.files[file]||[]),...(facts.files[file]||[]),...(search.files[file]||[]),...(contact.files[file]||[]),...(order.files[file]||[]),...(style.files[file]||[]),...(magnitude.files[file]||[]),...(project.files[file]||[]),...(sequential.files[file]||[]),...(classification.files[file]||[]),...(isolation.files[file]||[]),...(transport.files[file]||[])];
+    const substitutions=[...(proportionality.files[file]||[]),...(quality.files[file]||[]),...(facts.files[file]||[]),...(search.files[file]||[]),...(contact.files[file]||[]),...(order.files[file]||[]),...(style.files[file]||[]),...(magnitude.files[file]||[]),...(project.files[file]||[]),...(sequential.files[file]||[]),...(classification.files[file]||[]),...(isolation.files[file]||[]),...(transport.files[file]||[])];
     for(const {before,after,count} of substitutions){
       if(source.split(after).length-1!==count)throw Error('Unexpected provider transport edit: '+file);
       source=source.split(after).join(before);
