@@ -29,3 +29,13 @@ test('native confirmation removed, cancel/unmount wired, memo POST excluded from
  const route=readFileSync(new URL('../app/api/legal/memo/route.ts',import.meta.url),'utf8');
  assert.ok(route.indexOf('signal.throwIfAborted();',route.indexOf('const finalMemo'))<route.indexOf('recordServiceActivity({'));
 });
+
+test('browser timeout leaves a response margin beyond the server timeout',()=>{
+ const runnerSource=readFileSync(new URL('../lib/memo-generation.ts',import.meta.url),'utf8');
+ const route=readFileSync(new URL('../app/api/legal/memo/route.ts',import.meta.url),'utf8');
+ const clientTimeout=Number(runnerSource.match(/MEMO_GENERATION_TIMEOUT_MS\s*=\s*([\d_]+)/)?.[1].replaceAll('_',''));
+ const serverTimeout=Number(route.match(/AbortSignal\.timeout\(([\d_]+)\)/)?.[1].replaceAll('_',''));
+ assert.ok(Number.isFinite(clientTimeout)&&Number.isFinite(serverTimeout));
+ assert.ok(clientTimeout>=serverTimeout+10_000,{clientTimeout,serverTimeout});
+ assert.match(runnerSource,/خمس دقائق/);
+});
