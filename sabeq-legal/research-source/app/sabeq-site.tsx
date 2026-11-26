@@ -150,6 +150,46 @@ async function readServiceJson<T extends { error?: string }>(response: Response)
   }
 }
 
+type MemoLedgerStatus = "running" | "needs_information" | "needs_review" | "generated" | "failed" | "cancelled" | "unknown";
+type MemoRequestStatusResponse = { error?: string; requestId: string; status: MemoLedgerStatus; hasDraft: boolean };
+
+const memoRequestRefreshCopy = {
+  ar: {
+    repaired: "تم تحديث حالة الطلب: المسودة محفوظة للمراجعة ولم تُرسل للعميل.",
+    needsInformation: "الطلب محفوظ ويحتاج استكمال الوقائع قبل اعتماده.",
+    running: "طلبك ما زال قيد المعالجة. سنحدّث حالته هنا دون إعادة الإرسال.",
+    cancelled: "أُلغي هذا الطلب ولم يُعد إرساله تلقائيًا.",
+    refresh: "تحديث حالة الطلب",
+    checking: "جارٍ تحديث الحالة...",
+    refreshFailed: "تعذر تحديث حالة الطلب الآن. بقي رقم الطلب محفوظًا.",
+  },
+  en: {
+    repaired: "Request status updated: the draft is saved for review and was not sent to the client.",
+    needsInformation: "The request is saved and needs more facts before approval.",
+    running: "Your request is still processing. Its status will update here without resubmission.",
+    cancelled: "This request was cancelled and was not resubmitted automatically.",
+    refresh: "Refresh request status",
+    checking: "Refreshing status...",
+    refreshFailed: "The request status could not be refreshed. Its reference remains saved.",
+  },
+  ur: {
+    repaired: "درخواست کی حالت تازہ ہو گئی: مسودہ جائزے کے لیے محفوظ ہے اور مؤکل کو نہیں بھیجا گیا۔",
+    needsInformation: "درخواست محفوظ ہے اور منظوری سے پہلے مزید حقائق درکار ہیں۔",
+    running: "درخواست زیرِ کارروائی ہے۔ دوبارہ بھیجے بغیر حالت یہاں تازہ ہو گی۔",
+    cancelled: "یہ درخواست منسوخ ہو گئی اور خودکار طور پر دوبارہ نہیں بھیجی گئی۔",
+    refresh: "درخواست کی حالت تازہ کریں",
+    checking: "حالت تازہ کی جا رہی ہے...",
+    refreshFailed: "درخواست کی حالت ابھی تازہ نہیں ہو سکی۔ اس کا حوالہ محفوظ ہے۔",
+  },
+} satisfies Record<Language, Record<string, string>>;
+
+async function readMemoRequestStatus(requestId: string, token: string, signal?: AbortSignal) {
+  const response = await memoFetch(`/api/legal/memo?id=${encodeURIComponent(requestId)}`, token, { method: "GET", signal });
+  const data = await readServiceJson<MemoRequestStatusResponse>(response);
+  if (!response.ok) throw new Error(data.error || "memo_status_unavailable");
+  return data;
+}
+
 function Field({ label, children, wide = false }: { label: string; children: ReactNode; wide?: boolean }) {
   return <label className={`field${wide ? " field-wide" : ""}`}><span>{label}</span>{children}</label>;
 }
@@ -1042,6 +1082,7 @@ function MemoWizard({ t, language, token, initialData = null, assistantSession, 
   const [status, setStatus] = useState<"idle" | "loading" | "error" | "review">("idle");
   const [memoError, setMemoError] = useState("");
   const [memoFailure, setMemoFailure] = useState<MemoSubmissionError | null>(null);
+  const [checkingRequestStatus, setCheckingRequestStatus] = useState(false);
   const submissionSession = useRef(new MemoSubmissionSession());
   const [memoApproved, setMemoApproved] = useState(false);
   const [generationSeconds, setGenerationSeconds] = useState(0);
@@ -1051,6 +1092,53 @@ function MemoWizard({ t, language, token, initialData = null, assistantSession, 
   const generationMounted = useRef(true);
   const generationUi = memoGenerationCopy(language);
   useEffect(() => { generationMounted.current = true; return () => { generationMounted.current = false; generationRequest.current?.abort(); storyRequest.current?.abort(); }; }, []);
+  const applyMemoRequestStatus = useMemo(() => (requestStatus: MemoRequestStatusResponse) => {
+    const ui = memoRequestRefreshCopy[language];
+    if ((requestStatus.status === "needs_review" || requestStatus.status === "generated") && requestStatus.hasDraft) {
+      setMemoFailure(new MemoSubmissionError("", "document_review", requestStatus.requestId, 422));
+      setMemoError(ui.repaired);
+      setStatus("review");
+      return;
+    }
+    if (requestStatus.status === "needs_information") {
+      setMemoFailure(new MemoSubmissionError("", "fact_clarification", requestStatus.requestId, 422));
+      setMemoError(ui.needsInformation);
+      setStatus("review");
+      return;
+    }
+    if (requestStatus.status === "running") setMemoError(ui.running);
+    if (requestStatus.status === "cancelled") setMemoError(ui.cancelled);
+  }, [language]);
+  const refreshMemoRequestStatus = useMemo(() => async (requestId: string, signal?: AbortSignal, manual = false) => {
+    setCheckingRequestStatus(true);
+    try {
+      applyMemoRequestStatus(await readMemoRequestStatus(requestId, token, signal));
+    } catch (error) {
+      if (manual && !signal?.aborted && generationMounted.current) setMemoError(memoRequestRefreshCopy[language].refreshFailed);
+    } finally {
+      if (generationMounted.current) setCheckingRequestStatus(false);
+    }
+  }, [applyMemoRequestStatus, language, token]);
+  useEffect(() => {
+    const requestId = memoFailure?.requestId;
+    if (!active || status !== "error" || !requestId) return;
+    const controller = new AbortController();
+    let cancelled = false;
+    let attempts = 0;
+    let timer = 0;
+    const check = async () => {
+      if (cancelled || attempts >= 40) return;
+      attempts += 1;
+      await refreshMemoRequestStatus(requestId, controller.signal);
+      if (!cancelled && attempts < 40) timer = window.setTimeout(check, 15_000);
+    };
+    timer = window.setTimeout(check, 750);
+    return () => {
+      cancelled = true;
+      controller.abort();
+      window.clearTimeout(timer);
+    };
+  }, [active, memoFailure?.requestId, refreshMemoRequestStatus, status]);
   useEffect(() => {
     if (status !== "loading") return;
     const start = Date.now(); setGenerationSeconds(0);
@@ -1764,7 +1852,7 @@ function MemoWizard({ t, language, token, initialData = null, assistantSession, 
         </div>
         <div className="memo-actions">{step > 0 && !assistantReview ? <button type="button" className="button button-outline" disabled={status === "loading"} onClick={() => { captureDraft(); setMemoApproved(false); setStep(step - 1); }}>{t.previous}</button> : <span />}<button className="button button-primary" disabled={voiceEntryBusy || status === "loading" || analysisStatus === "loading" || storyBusy}>{storyBusy ? (language === "ar" ? "جارٍ فهم الوقائع والطلبات…" : language === "en" ? "Understanding facts and requests…" : "حقائق اور مطالبات سمجھ رہا ہوں…") : status === "loading" ? (checkingPayment ? payUi.checking : t.loading) : assistantReview ? (language === "ar" ? ((paymentPolicy?.required || checkout) ? "أوافق وأتابع للدفع والتوليد" : "أوافق وأولّد المذكرة") : language === "en" ? "Approve and generate memorandum" : "منظور کرکے یادداشت تیار کریں") : step === 2 ? (paymentPolicy?.publicCheckoutEnabled && paymentPolicy.required) || checkout ? checkout ? payUi.verify : payUi.pay : t.generate : step === 0 && documents.length === 0 ? ui.continueManual : t.next}<ArrowLeft size={17} /></button></div>
         {status === "loading" && <div className="memo-generation-pending"><p role="status" aria-live="polite">{checkingPayment ? payUi.checking : generationUi.pending}</p><span>{generationSeconds} {generationUi.seconds}</span><small>{checkingPayment ? payUi.safety : generationUi.limit}</small><button type="button" className="button button-outline" onClick={() => generationRequest.current?.abort()}>{generationUi.cancel}</button></div>}
-        {(status === "error" || status === "review") && <div className={`form-notice${status === "error" ? " error" : ""}`} role={status === "error" ? "alert" : "status"}>{status === "review" && <strong>{memoSubmissionCopy(language, memoFailure?.stage || "source_review").review}</strong>}<p>{memoError || t.error}</p>{memoFailure && <p>{memoSubmissionCopy(language, memoFailure.stage).stageLabel}: {memoSubmissionCopy(language, memoFailure.stage).stage}{memoFailure.requestId && <><br />{memoSubmissionCopy(language, memoFailure.stage).reference}: <bdi>{memoFailure.requestId}</bdi></>}</p>}</div>}
+        {(status === "error" || status === "review") && <div className={`form-notice${status === "error" ? " error" : ""}`} role={status === "error" ? "alert" : "status"}>{status === "review" && <strong>{memoSubmissionCopy(language, memoFailure?.stage || "source_review").review}</strong>}<p>{memoError || t.error}</p>{memoFailure && <p>{memoSubmissionCopy(language, memoFailure.stage).stageLabel}: {memoSubmissionCopy(language, memoFailure.stage).stage}{memoFailure.requestId && <><br />{memoSubmissionCopy(language, memoFailure.stage).reference}: <bdi>{memoFailure.requestId}</bdi></>}</p>}{status === "error" && memoFailure?.requestId && <button type="button" className="button button-outline" disabled={checkingRequestStatus} onClick={() => refreshMemoRequestStatus(memoFailure.requestId, undefined, true)}>{checkingRequestStatus ? memoRequestRefreshCopy[language].checking : memoRequestRefreshCopy[language].refresh}</button>}</div>}
       </form>
       {active && paymentOpen && checkout && paymentAttempt.current && <MemoPaymentDialog payment={checkout} paymentToken={paymentAttempt.current.paymentToken} language={language} request={memoFetch} onPayment={setCheckout} onClose={() => setPaymentOpen(false)} />}
     </div>

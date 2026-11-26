@@ -1,4 +1,5 @@
 import { projectContextInstructions } from "@/lib/project-context";
+import { getD1 } from "@/db";
 import { legalDraftingRouteRevision, legalRouteInstructions, legalRouteSummary, legalRouteResearchQueries, reviewLegalRouteContent } from "@/lib/legal-drafting-routes";
 import { availableEvidenceMode } from "@/lib/memo-preparation";
 import { requireMemoContact, validateMemoInput } from "@/lib/memo-input";
@@ -53,6 +54,34 @@ function stripInternalMemoLanguage(text: string) {
     .map((line) => line.trim())
     .filter((line) => line && !blocked.some((pattern) => pattern.test(line)) && !/^(?:ال)?نتيجة\s*[:：]?\s*$/u.test(line))
     .join("\n");
+}
+
+const publicMemoStatuses = new Set(["running", "needs_information", "needs_review", "generated", "failed", "cancelled"]);
+
+export async function GET(request: Request) {
+  try {
+    assertSameOrigin(request);
+    const user = await requireMemoUserOrGuest(request);
+    await enforceRateLimit(request, "memo-request-status", 120, "hour");
+    const requestId = new URL(request.url).searchParams.get("id")?.trim() || "";
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(requestId)) {
+      throw new RequestError("مرجع طلب المذكرة غير صحيح.", 400);
+    }
+    const row = await getD1().prepare(
+      `SELECT user_id, status,
+              CASE WHEN output_text IS NOT NULL AND length(trim(output_text)) > 0 THEN 1 ELSE 0 END AS has_draft
+       FROM management_memo_requests
+       WHERE id = ?
+       LIMIT 1`,
+    ).bind(requestId).first<{ user_id: string | null; status: string; has_draft: number }>();
+    if (!row || (row.user_id && row.user_id !== user?.id)) {
+      throw new RequestError("تعذر العثور على طلب المذكرة.", 404);
+    }
+    const status = publicMemoStatuses.has(row.status) ? row.status : "unknown";
+    return privateJson({ requestId, status, hasDraft: row.has_draft === 1 });
+  } catch (error) {
+    return errorResponse(error);
+  }
 }
 
 export async function POST(request: Request) {

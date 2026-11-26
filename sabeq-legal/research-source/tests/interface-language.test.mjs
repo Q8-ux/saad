@@ -68,6 +68,17 @@ test('saved review keeps its record reference visible in every interface languag
     assert.ok(html.includes(modules()('lib/memo-submission.ts').memoSubmissionCopy(language,'source_review').review));
   }
 });
+test('failed memo references offer a localized status refresh without resubmitting', () => {
+  const labels={ar:'تحديث حالة الطلب',en:'Refresh request status',ur:'درخواست کی حالت تازہ کریں'};
+  for(const language of ['ar','en','ur']) {
+    const {MemoWizard}=modules({step:2,status:'error',memoError:'Synthetic failure',memoFailure:{stage:'generation',requestId:'00000000-0000-4000-8000-000000000001',savedForReview:false}})('app/sabeq-site.tsx');
+    const html=renderToStaticMarkup(React.createElement(MemoWizard,props(language)));
+    assert.ok(html.includes(labels[language]));
+    assert.ok(html.includes('00000000-0000-4000-8000-000000000001'));
+    assert.equal((html.match(/type="button"/g)||[]).length>0,true);
+    assert.doesNotMatch(html,/إعادة إرسال|Resubmit|دوبارہ جمع/);
+  }
+});
 test('all languages retain one footer policy link and omit repeated privacy notices in tools', () => {
   for (const language of ['ar','en','ur']) {
     const components=modules({language})('app/sabeq-site.tsx');
