@@ -30,6 +30,7 @@ function dataWrite(store,value,key){return new Promise((resolve,reject)=>{const 
 async function save(){if(!db)throw new Error('التخزين المحلي غير متاح.');await dataWrite('kv',structuredClone(state),'state');$('#save-status').textContent='حُفظ على هذا الجهاز';}
 function showModal(html){previousFocus=document.activeElement;$('#modal-content').innerHTML=`<div class="modal-body">${html}</div>`;if(!$('#modal').open)$('#modal').showModal();}
 function closeModal(){$('#modal').close();previousFocus?.focus();}
+function syncMobileNav(){const sidebar=$('#sidebar');const closed=matchMedia('(max-width:650px)').matches&&!sidebar.classList.contains('open');sidebar.inert=closed;sidebar.setAttribute('aria-hidden',String(closed));}
 const closeButton=()=>`<button class="icon-button" data-action="close-modal" aria-label="إغلاق">${icon('close',17)}</button>`;
 function heading(title,subtitle,action=''){return `<div class="page-heading"><div><div class="eyebrow"><span class="status-dot"></span> مِسبار / المختبر الأمني</div><h1>${title}</h1><p>${subtitle}</p></div>${action}</div>`;}
 const btn=(label,action,ico='plus',kind='primary',extra='')=>`<button class="button ${kind}" data-action="${action}" ${extra}>${icon(ico,17)}${label}</button>`;
@@ -92,7 +93,7 @@ function render(){
  $('#breadcrumb-title').textContent=nav.find(x=>x[0]===actual)[1];
  $('#navigation').innerHTML=nav.map(([id,title,ico],i)=>`${i===5?'<div class="nav-label">المعرفة والتوثيق</div>':''}<a href="#${id}" class="nav-item ${actual===id?'active':''}" ${actual===id?'aria-current="page"':''}>${icon(ico,18)}<span>${title}</span>${id==='tools'?`<span class="nav-number">${num(catalog.length)}</span>`:''}</a>`).join('');
  $('#main').innerHTML=({dashboard,projects:()=>projectsView(id),analyze:analyzeView,tools:toolsView,workflows:workflowsView,learning:learningView,reports:()=>reportsView(id),connect:connectView}[actual])();
- $('#sidebar').classList.remove('open');$('#sidebar-overlay').hidden=true;$('#menu-toggle').setAttribute('aria-expanded','false');
+ $('#sidebar').classList.remove('open');$('#sidebar-overlay').hidden=true;$('#menu-toggle').setAttribute('aria-expanded','false');syncMobileNav();
  document.title=`${nav.find(x=>x[0]===actual)[1]} — مِسبار`;
  if(!db)$('#main').insertAdjacentHTML('afterbegin','<div class="error-box">التخزين في المتصفح غير متاح. لن تُحفظ مشاريع أو مرفقات حتى تتيح التخزين وتعيد فتح الصفحة.</div>');
 }
@@ -188,8 +189,11 @@ document.addEventListener('dragleave',event=>event.target.closest('#drop-zone')?
 document.addEventListener('drop',async event=>{const zone=event.target.closest('#drop-zone');if(!zone)return;event.preventDefault();zone.classList.remove('dragging');if(event.dataTransfer.files[0])await inspect(event.dataTransfer.files[0]);});
 window.addEventListener('hashchange',()=>{if(busy){history.replaceState(null,'',lastRenderedHash);toast('يجري التحليل؛ انتظر حتى يكتمل قبل الانتقال.',true);return;}render();window.scrollTo({top:0,behavior:'instant'});});
 $('#menu-toggle').innerHTML=icon('menu',18);$('#privacy-mark').innerHTML=`${icon('shield',16)} خصوصيتك جزء من المختبر`;
-$('#menu-toggle').addEventListener('click',()=>{const open=$('#sidebar').classList.toggle('open');$('#sidebar-overlay').hidden=!open;$('#menu-toggle').setAttribute('aria-expanded',String(open));});
-$('#sidebar-overlay').addEventListener('click',()=>{$('#sidebar').classList.remove('open');$('#sidebar-overlay').hidden=true;$('#menu-toggle').setAttribute('aria-expanded','false');});
+$('#menu-toggle').addEventListener('click',()=>{const open=$('#sidebar').classList.toggle('open');$('#sidebar-overlay').hidden=!open;$('#menu-toggle').setAttribute('aria-expanded',String(open));syncMobileNav();if(open)$('#navigation a')?.focus();});
+function closeMobileNav(){$('#sidebar').classList.remove('open');$('#sidebar-overlay').hidden=true;$('#menu-toggle').setAttribute('aria-expanded','false');syncMobileNav();$('#menu-toggle').focus();}
+$('#sidebar-overlay').addEventListener('click',closeMobileNav);
+document.addEventListener('keydown',event=>{if(event.key==='Escape'&&$('#sidebar').classList.contains('open'))closeMobileNav();});
+matchMedia('(max-width:650px)').addEventListener('change',syncMobileNav);
 $('#connection-pill').addEventListener('click',()=>location.hash='connect');$('#backup-top').addEventListener('click',()=>actions.backup());
 $('#modal').addEventListener('click',event=>{if(event.target===$('#modal'))closeModal();});
 try{const data=await fetch('catalog.json').then(r=>{if(!r.ok)throw new Error('تعذر تحميل فهرس الأدوات.');return r.json();});catalog=data.tools;categories=data.categories;try{db=await openDb();const saved=await dataGet('kv','state');if(saved?.schema===1)state=saved;$('#save-status').textContent='الحفظ على هذا الجهاز';}catch{$('#save-status').textContent='التخزين المحلي غير متاح';}render();await checkConnection();if((location.hash||'#dashboard').startsWith('#dashboard')||location.hash.startsWith('#connect'))render();}
