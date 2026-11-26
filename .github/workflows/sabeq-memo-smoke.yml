@@ -41,17 +41,35 @@ jobs:
           set -euo pipefail
           curl --fail --location --silent --show-error --retry 2 --max-time 40 https://www.sabeq.legal/ > official.html
           grep -F 'q8-ux.github.io' official.html
-          curl --fail --location --silent --show-error --retry 2 --max-time 40 https://q8-ux.github.io/saad/sabeq-legal/ > frontend.html
-          node <<'JS'
+          node <<'JS' > expected-assets.txt
           const fs = require('node:fs');
           const expected = fs.readFileSync('sabeq-legal/index.html', 'utf8');
-          const actual = fs.readFileSync('frontend.html', 'utf8');
           const assets = [...expected.matchAll(/<script\b[^>]*\bsrc=["']([^"']+\.js(?:\?[^"']*)?)["']/g)].map(match => match[1]);
-          if (!assets.length || assets.some(asset => !actual.includes(asset))) {
-            throw new Error('The published frontend does not match the JavaScript entries in this commit.');
-          }
-          console.log('Published JavaScript entries match the checked-out source:', assets.length);
+          if (!assets.length) throw new Error('The checked-out frontend has no JavaScript entry.');
+          process.stdout.write(assets.join('\n') + '\n');
           JS
+          published=false
+          for attempt in $(seq 1 20); do
+            curl --fail --location --silent --show-error --retry 2 --max-time 40 \
+              "https://q8-ux.github.io/saad/sabeq-legal/?deploy=${GITHUB_SHA}&attempt=${attempt}" > frontend.html
+            published=true
+            while IFS= read -r asset; do
+              grep -Fq -- "$asset" frontend.html || published=false
+            done < expected-assets.txt
+            if [[ "$published" == "true" ]]; then
+              echo "Published JavaScript entries match the checked-out source on attempt $attempt"
+              break
+            fi
+            echo "Pages has not published this commit yet (attempt $attempt/20)"
+            sleep 15
+          done
+          if [[ "$published" != "true" ]]; then
+            echo "Expected assets:" >&2
+            cat expected-assets.txt >&2
+            echo "Published script entries:" >&2
+            grep -oE '<script[^>]+src=["'"'][^"'"']+\.js[^"'"']*["'"']' frontend.html >&2 || true
+            exit 1
+          fi
           curl --fail --location --silent --show-error --retry 2 --max-time 80 https://sabeq-legal-research-api.onrender.com/api/operations-health > gateway.json
           grep -F '"operations-monitor-1"' gateway.json
       - name: Check read-only public signing-key route and protected archive endpoint
