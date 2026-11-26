@@ -40,7 +40,7 @@ jobs:
           node-version: '24'
       - run: npm ci --ignore-scripts --no-audit --no-fund
       - name: Validate accessible memo progress and dialog focus
-        run: node --test tests/interface-routes.test.mjs
+        run: node --test tests/interface-routes.test.mjs tests/interface-language.test.mjs tests/memo-status-route.test.mjs
       - name: Check context, permissions and dashboard source contracts
         run: node scripts/check-dashboard-quality.mjs
       # The GitHub source mirror excludes corpus seed databases. Full SADAD
