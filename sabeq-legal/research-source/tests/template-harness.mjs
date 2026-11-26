@@ -8,6 +8,7 @@ export function load(path,deps={}) {
  const exports={};const source=readFileSync(new URL(path,import.meta.url),'utf8');
  const js=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,esModuleInterop:true}}).outputText;
  vm.runInNewContext(js,{exports,require:name=>{
+  if(name==='@/db')return deps[name]||{getD1(){throw Error('Unexpected database access in route unit test');}};
   if(name === "./text-runtime" || name === "@/lib/text-runtime") return load("../lib/text-runtime.ts",deps);
   if(name === "./ready-forms" || name === "@/lib/ready-forms") return load("../lib/ready-forms.ts",deps);
   if (name === "./memorandum-reference-style" || name === "@/lib/memorandum-reference-style") return load("../lib/memorandum-reference-style.ts");
