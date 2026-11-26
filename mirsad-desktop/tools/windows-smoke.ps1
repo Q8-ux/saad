@@ -60,6 +60,10 @@ try {
   $null = Post-Local '/api/quit' @{}
   if (!$process.WaitForExit(10000)) { throw 'Application did not stop cleanly' }
   Write-Host 'Windows executable, native collectors, installer, shortcuts, exports, and archive passed.'
+} catch {
+  $diag = Join-Path $appData 'install-diagnostic.txt'
+  if (Test-Path -LiteralPath $diag) { Get-Content -LiteralPath $diag | ForEach-Object { Write-Host $_ } }
+  throw
 } finally {
   if (!$process.HasExited) { Stop-Process -Id $process.Id -Force }
 }
