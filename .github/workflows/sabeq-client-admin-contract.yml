@@ -46,7 +46,7 @@ jobs:
       # The GitHub source mirror excludes corpus seed databases. Full SADAD
       # transaction/recovery tests run against the complete native source.
       - name: Validate optional free Meta Llama adapter without real credentials
-        run: node --test tests/llama-openrouter.test.mjs tests/meta-secondary-review.test.mjs
+        run: node --test tests/llama-openrouter.test.mjs tests/sequential-memo-review.test.mjs
       - name: Syntax-check administration login JavaScript
         run: node --check ../../sabeq-admin-preview/admin.js
       - name: Check management password recovery safeguards

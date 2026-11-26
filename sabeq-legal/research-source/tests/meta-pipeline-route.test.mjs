@@ -52,7 +52,7 @@ test('a missing Meta key cannot be marked reviewed or consume payment',async()=>
  const result=await p.run();assert.equal(result.status,503);assert.equal(result.body.stage,'meta_review');assert.equal(result.body.serviceCode,'meta_configuration');assert.equal(result.body.memo,undefined);assert.equal(p.completed,0);assert.equal(p.saved.at(-1)[3],'meta_configuration');
 });
 
-test('an explicitly selected Magnitude writer is identified accurately and still passes through Meta and source review',async()=>{
- const p=pipeline(async data=>{assert.equal(data.primaryProvider,'magnitude');return data.openaiDraft;},{LEGAL_AI_PROVIDER:'magnitude',MAGNITUDE_ENABLED:'enabled',MAGNITUDE_SCOPE:'memo-and-assistant'});
- const result=await p.run();assert.equal(result.status,200);assert.equal(result.body.modelReview.primary,'magnitude');assert.equal(result.body.modelReview.secondary.status,'completed');assert.equal(p.completed,1);
+test('the public research mirror keeps OpenAI as writer even if an unavailable alternate is named',async()=>{
+ const p=pipeline(async data=>{assert.equal(data.primaryProvider,'openai');return data.openaiDraft;},{LEGAL_AI_PROVIDER:'magnitude',MAGNITUDE_ENABLED:'enabled',MAGNITUDE_SCOPE:'memo-and-assistant'});
+ const result=await p.run();assert.equal(result.status,200);assert.equal(result.body.modelReview.primary,'openai');assert.equal(result.body.modelReview.secondary.status,'completed');assert.equal(p.completed,1);
 });
