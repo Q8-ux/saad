@@ -36,11 +36,11 @@ test('missing sources stay incomplete even if model claims every issue addressed
 });
 test('every output path is audited before archive and source correction preserves generated requests',()=>{
  const route=readFileSync(new URL('../app/api/legal/memo/route.ts',import.meta.url),'utf8');
- const audit=route.indexOf('const auditText = await generateText'),parse=route.indexOf('parseGroundedCaseAudit(auditText'),archive=route.indexOf('await recordServiceActivity(');
- assert.ok(audit>=0&&parse>audit&&archive>parse);
+ const audit=route.indexOf('const auditText = await generateText'),parse=route.indexOf('parseGroundedCaseAudit(auditText'),saved=route.indexOf('await finishMemoRequest(managementRequestId, "needs_review", finalMemo'),archive=route.indexOf('await recordServiceActivity(');
+ assert.ok(audit>=0&&parse>audit&&saved>parse&&archive>saved);
  assert.match(route,/return finish\(parsePleadingContent\(revised\),true\)/);
  assert.doesNotMatch(route,/content.requests=memoInput.requests/);
- assert.match(route,/casePlan:checkedPlan/);assert.match(route,/caseQuality,[^\n]*sourceCoverage/);
+ assert.match(route,/casePlan:\s*checkedPlan/);assert.match(route,/caseQuality,[^\n]*sourceCoverage/);
 });
 
 test('display-only wrappers are normalized without rewriting facts or source identifiers',()=>{

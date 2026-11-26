@@ -67,16 +67,16 @@ function unwrapSourceMarker(value: string) {
   const match = /^(?:【(م[1-9]\d*)】|\[(م[1-9]\d*)\]|(م[1-9]\d*))$/.exec(value.trim());
   return match ? (match[1] || match[2] || match[3]) : value;
 }
-export type CasePlanFailureCode = "role" | "facts" | "sources" | "citations" | "relief" | "substance" | "format";
+export type CasePlanFailureCode = "role" | "facts" | "sources" | "citations" | "relief" | "substance" | "coverage" | "format";
 export class CasePlanValidationError extends Error {
   constructor(public code: CasePlanFailureCode) { super(code); this.name = "CasePlanValidationError"; }
 }
 function planFailure(error: unknown): CasePlanFailureCode {
   const message = error instanceof Error ? error.message : "";
-  return message === "unsafe proposed relief" ? "relief" : message === "empty reasoning substance" ? "substance" : message === "client role changed" ? "role" : message === "ungrounded issue" ? "facts" : message === "unknown plan source" ? "sources" : message === "numeric citation in plan" ? "citations" : "format";
+  return message === "unsafe proposed relief" ? "relief" : message === "empty reasoning substance" ? "substance" : message === "insufficient issue coverage" || message === "duplicated issue coverage" ? "coverage" : message === "client role changed" ? "role" : message === "ungrounded issue" ? "facts" : message === "unknown plan source" ? "sources" : message === "numeric citation in plan" ? "citations" : "format";
 }
 export function casePlanFailureMessage(code: CasePlanFailureCode) {
-  const reason = {role:"صفة الموكل",facts:"الاقتباسات من الوقائع المدخلة",sources:"مراجع المصادر المتاحة",citations:"عدم إدخال أرقام قانونية غير متحققة",relief:"اتساق الطلب المقترح مع الطلب المأذون وصفة الموكل",substance:"وجود تطبيق واعتراض ورد وطلب محدد لكل مسألة",format:"اكتمال بنية خطة التحليل"}[code];
+  const reason = {role:"صفة الموكل",facts:"الاقتباسات من الوقائع المدخلة",sources:"مراجع المصادر المتاحة",citations:"عدم إدخال أرقام قانونية غير متحققة",relief:"اتساق الطلب المقترح مع الطلب المأذون وصفة الموكل",substance:"وجود تطبيق واعتراض ورد وطلب محدد لكل مسألة",coverage:"تغطية الوقائع الطويلة بمسائل مستقلة غير مكررة",format:"اكتمال بنية خطة التحليل"}[code];
   return `تعذر اعتماد خطة التحليل بعد محاولة تصحيح داخلية: لم تتحقق مطابقة ${reason}. حُفظت بياناتك في النموذج؛ لم تُنشأ مذكرة غير متحققة.`;
 }
 export function caseFactQuotes(input: PleadingInput): string[] {
@@ -108,7 +108,7 @@ export async function buildCheckedCasePlan(input: PleadingInput, evidence: Legal
     // Generation errors are outside the parser catch: do not relabel provider
     // failures or incomplete model output as an invalid legal defense.
     const raw = await generate({
-      instructions: `${caseReasoningInstructions}\n${sourceLinkRule}\nأعد خطة تحليل لا مذكرة. لكل مصدر judgment تريد بحث الاستناد إليه أعد precedentMatches: sourceMarker وissueIndex للمسألة نفسها، factQuote مطابق حرفياً لواقعتها، treatment يساوي analogous فقط عند اتحاد المسألة القانونية والظروف الجوهرية وشروط المبدأ، وreason يفسر هذا الاتحاد وdifferences يبين الفروق المؤثرة وأقوى اعتراض. اختر distinguished عند اختلاف مؤثر، وinsufficient عند غياب شرط أو واقعة أو عدم وضوح انطباق المبدأ القديم على النص المعمول به. مجرد تشابه الكلمات لا يكفي. لا تضع مصدراً قضائياً غير مراجع أو رقماً من ذاكرة النموذج. عند عدم استعمال مبادئ أعد precedentMatches فارغاً. clientRole يساوي partyRole حرفياً كما في schema. لكل مسألة اختر factQuote ذا صلة من factQuotes المعتمدة في schema حرفياً دون إعادة صياغة أو حذف كلمات أو نقاط اختصار؛ لا تستشهد بكلام المساعد. لا تضع أرقام مواد أو قوانين في الخطة. sourceMarkers أسماء مثل م1 فقط من المصادر المتاحة؛ عند غياب سند مناسب اتركها فارغة وسجل researchGaps. لا توصف المستندات بأنها مقروءة أو مثبتة دون محتواها المعتمد. لا تفترض الخصم أو التضامن أو البراءة. لا تتجاوز 12 مسألة، واكتب حقول كل مسألة بإيجاز. ${failure ? `المحاولة السابقة رُفضت لسبب ${failure}. أعد بناء الخطة من المدخلات الأصلية وصحح هذا السبب. لا تعتمد الاقتباسات أو الصفات أو المراجع من المحاولة المرفوضة.` : ""}`,
+      instructions: `${caseReasoningInstructions}\n${sourceLinkRule}\nأعد خطة تحليل لا مذكرة. استخرج كل مسألة مادية مستقلة من الوقائع الطويلة ولا تدمج وقائع مختلفة في عنوان عام؛ استخدم لكل مسألة factQuote مختلفاً وعنواناً مختلفاً، مع بقاء الحد الأقصى 12 مسألة. لكل مصدر judgment تريد بحث الاستناد إليه أعد precedentMatches: sourceMarker وissueIndex للمسألة نفسها، factQuote مطابق حرفياً لواقعتها، treatment يساوي analogous فقط عند اتحاد المسألة القانونية والظروف الجوهرية وشروط المبدأ، وreason يفسر هذا الاتحاد وdifferences يبين الفروق المؤثرة وأقوى اعتراض. اختر distinguished عند اختلاف مؤثر، وinsufficient عند غياب شرط أو واقعة أو عدم وضوح انطباق المبدأ القديم على النص المعمول به. مجرد تشابه الكلمات لا يكفي. لا تضع مصدراً قضائياً غير مراجع أو رقماً من ذاكرة النموذج. عند عدم استعمال مبادئ أعد precedentMatches فارغاً. clientRole يساوي partyRole حرفياً كما في schema. لكل مسألة اختر factQuote ذا صلة من factQuotes المعتمدة في schema حرفياً دون إعادة صياغة أو حذف كلمات أو نقاط اختصار؛ لا تستشهد بكلام المساعد. لا تضع أرقام مواد أو قوانين في الخطة. sourceMarkers أسماء مثل م1 فقط من المصادر المتاحة؛ عند غياب سند مناسب اتركها فارغة وسجل researchGaps. لا توصف المستندات بأنها مقروءة أو مثبتة دون محتواها المعتمد. لا تفترض الخصم أو التضامن أو البراءة. لا تتجاوز 12 مسألة، واكتب حقول كل مسألة بإيجاز. ${failure ? `المحاولة السابقة رُفضت لسبب ${failure}. أعد بناء الخطة من المدخلات الأصلية وصحح هذا السبب. لا تعتمد الاقتباسات أو الصفات أو المراجع من المحاولة المرفوضة.` : ""}`,
       input: JSON.stringify({approvedFacts:approvedCaseFacts(input),partyRole:input.partyRole,factQuotes,sources,availableSourceMarkers:markers,availableJudgmentMarkers:judgmentMarkers,validationFailure:failure,sourceLinkRule}), schema, maxOutputTokens:8_000,
     });
     try { return parseCasePlan(raw,input,evidence); }
@@ -121,11 +121,18 @@ export function parseCasePlan(raw:string,input:PleadingInput,evidence:LegalEvide
   if(!p || ![p.clientRole,p.opponentRole,p.characterization].every(x=>typeof x==="string") || !Array.isArray(p.issues)||!p.issues.length||p.issues.length>12||![p.missingFacts,p.researchGaps].every(a=>Array.isArray(a)&&a.every(x=>typeof x==="string"))) throw Error("invalid case plan");
   if(normalized(p.clientRole)!==normalized(input.partyRole)) throw Error("client role changed");
   const facts=normalized(approvedCaseFacts(input));
+  const factLength=normalized(input.facts || "").replace(/\s+/gu,"").length;
+  const requiredIssueCount=factLength>=3600?3:factLength>=1600?2:1;
+  if(p.issues.length<requiredIssueCount)throw Error("insufficient issue coverage");
+  const issueNames=new Set<string>(),factAnchors=new Set<string>();
   for(const issue of p.issues) {
     // Remove display wrappers only; spelling, words and numbers stay exact.
     if (issue && typeof issue.factQuote === "string") issue.factQuote = unwrapFactQuote(issue.factQuote);
     if (issue && Array.isArray(issue.sourceMarkers)) issue.sourceMarkers = issue.sourceMarkers.map(unwrapSourceMarker);
     if(!issue || !["issue","factQuote","document","application","counterargument","response","proposedRelief","missing"].every(k=>typeof issue[k as keyof typeof issue]==="string") || normalized(issue.factQuote).length<4 || !facts.includes(normalized(issue.factQuote))) throw Error("ungrounded issue");
+    const issueName=normalized(issue.issue),factAnchor=normalized(issue.factQuote);
+    if(issueNames.has(issueName)||factAnchors.has(factAnchor))throw Error("duplicated issue coverage");
+    issueNames.add(issueName);factAnchors.add(factAnchor);
     for(const field of [issue.application,issue.counterargument,issue.response,issue.proposedRelief]) {
       const value=normalized(field).replace(/[\u064b-\u065f\u0670]/gu,"").replace(/[أإآ]/gu,"ا").replace(/[\[\]().:：]/gu,"").trim();
       if(!value||/^(?:TODO|TBD|يستكمل(?: لاحقا)?|تستكمل(?: لاحقا)?|التطبيق|الاعتراض|الرد|الطلبات)$/iu.test(value))throw Error("empty reasoning substance");

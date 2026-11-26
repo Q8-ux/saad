@@ -122,13 +122,13 @@ def check_result(check, root):
 
 
 def check_plan(profile):
-    def node(name, files):
-        return {"id": name, "command": ["node", "--test", "--test-reporter=tap", *files], "format": "tap"}
+    def node(name, files, timeout=180):
+        return {"id": name, "command": ["node", "--test", "--test-reporter=tap", *files], "format": "tap", "timeout": timeout}
     if profile == "site":
         return [
             node("sources", ["tests/official-errata.test.mjs", "tests/bound-article-reviews.test.mjs", "tests/bound-article-review-source.test.mjs", "tests/bound-legislation.test.mjs", "tests/reviewed-judgments.test.mjs", "tests/legislation-workbench.test.mjs", "tests/legal-source-coverage.test.mjs"]),
-            node("memo", ["tests/model-compatibility.test.mjs", "tests/grounded-audit-excerpts.test.mjs", "tests/indirect-intake.test.mjs", "tests/procedural-position.test.mjs", "tests/memo-journey.test.mjs", "tests/payment-dialog.test.mjs", "tests/agent-pipeline.test.mjs", "tests/reviewed-coverage-expansion.test.mjs", "tests/memo-path-strengthening.test.mjs", "tests/case-reasoning.test.mjs", "tests/defense-strength.test.mjs", "tests/memo-reference-language.test.mjs", "tests/inline-authorities.test.mjs", "tests/article-text-in-memos.test.mjs", "tests/memo-generation-control.test.mjs", "tests/connected-intake.test.mjs", "tests/memo-responsive-generation.test.mjs"]),
-            node("access", ["tests/management.test.mjs", "tests/analytics-consent.test.mjs", "tests/programmer-client.test.mjs"]),
+            node("memo", ["tests/court-request-wording.test.mjs", "tests/memo-email-privacy.test.mjs", "tests/memo-project-archive.test.mjs", "tests/chat-memo-bridge.test.mjs", "tests/memo-request-repair.test.mjs", "tests/openai-primary-policy.test.mjs", "tests/sequential-memo-review.test.mjs", "tests/meta-pipeline-route.test.mjs", "tests/case-classification-audit.test.mjs", "tests/matter-facts.test.mjs", "tests/assistant-classification.test.mjs", "tests/case-context-isolation.test.mjs", "tests/model-compatibility.test.mjs", "tests/text-runtime.test.mjs", "tests/text-providers.test.mjs", "tests/openrouter-errors.test.mjs", "tests/grounded-audit-excerpts.test.mjs", "tests/indirect-intake.test.mjs", "tests/procedural-position.test.mjs", "tests/memo-journey.test.mjs", "tests/payment-dialog.test.mjs", "tests/agent-pipeline.test.mjs", "tests/reviewed-coverage-expansion.test.mjs", "tests/memo-path-strengthening.test.mjs", "tests/case-reasoning.test.mjs", "tests/defense-strength.test.mjs", "tests/memo-reference-language.test.mjs", "tests/inline-authorities.test.mjs", "tests/article-text-in-memos.test.mjs", "tests/memo-generation-control.test.mjs", "tests/connected-intake.test.mjs", "tests/memo-responsive-generation.test.mjs", "tests/memo-submission.test.mjs", "tests/memo-core-preserved.test.mjs", "tests/memo-substance-quality.test.mjs"]),
+            node("access", ["tests/management.test.mjs", "tests/analytics-consent.test.mjs", "tests/programmer-client.test.mjs", "tests/user-email-link.test.mjs", "tests/user-list-live.test.mjs", "tests/memo-ledger-recovery.test.mjs"], timeout=360),
         ]
     if profile == "backend":
         return [node("api-and-sources", ["test/api-policy.test.js", "test/legal-library.test.js"])]

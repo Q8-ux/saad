@@ -87,6 +87,7 @@ function siteRoutes(sqlite, emptyEditor) {
   const dependencies = {
     db: { getD1: () => db },
     'lib/gmail': { sendSavedDraft: async () => {} },
+    'lib/meta-memo-review': { reviewMetaMemo: async input => ({ content: input.openaiDraft, model: 'synthetic-meta' }), MetaMemoReviewError: class extends Error {}, sequentialMemoRevision: 'synthetic-review' },
     'lib/meta-secondary-review': { reviewMissingLegalIssues: async () => null },
     'lib/management-auth': { digest },
     'lib/management-integrations': { SERVICE_ORIGIN: new URL(boltBridge).origin },
@@ -115,10 +116,11 @@ function siteRoutes(sqlite, emptyEditor) {
       module: ModuleKind.CommonJS, target: ScriptTarget.ES2022, esModuleInterop: true,
     } }).outputText, {
       exports, crypto, URL, URLSearchParams, Request, Response, Headers, TextEncoder, TextDecoder, AbortSignal,
-      console: { warn() {}, error() {} },
+      console: { warn() {}, error(...args) { console.error('Fixture route error', ...args); }, info() {} },
       fetch: async (url, init) => url === adminService + 'admin-verify' && JSON.parse(init.body).token === sessionToken
         ? json(verification) : json({}, 401),
       require: specifier => {
+        if (specifier === 'cloudflare:workers') return { env: { OPENAI_API_KEY: 'synthetic' } };
         if (specifier.startsWith('@/')) return load(specifier.slice(2));
         if (specifier.startsWith('./') || specifier.startsWith('../')) return load(new URL(specifier, file).pathname.slice(client.pathname.length));
         throw new Error(`Unexpected fixture dependency ${specifier} in ${path}`);
@@ -198,7 +200,7 @@ export async function startFixture(script, emptyEditor) {
         if (request.url === '/api/legal/memo' && !saved) {
           reply = await routes.generator.POST(new Request(address + request.url, { method: 'POST', headers, body }));
           const result = await reply.clone().json();
-          saved = reply.ok ? result : { status: reply.status, stage: result.stage };
+          saved = reply.ok ? result : { status: reply.status, stage: result.stage, requestId: result.requestId, serviceCode: result.serviceCode };
         } else if (request.url === '/fixture/bridge') {
           reply = await routes.bridge.POST(new Request(boltBridge, { method: 'POST', body, headers: {
             ...headers, Origin: boltOrigin, Authorization: request.headers.authorization || '',
@@ -231,7 +233,7 @@ export async function startFixture(script, emptyEditor) {
   return {
     origin: `http://127.0.0.1:${server.address().port}`,
     saved: () => saved,
-    stored: id => sqlite.prepare('SELECT output_text, status FROM management_memo_requests WHERE id = ?').get(id),
+    stored: id => sqlite.prepare('SELECT output_text, status, error_code FROM management_memo_requests WHERE id = ?').get(id),
     close: () => new Promise(resolve => { server.close(() => { sqlite.close(); resolve(); }); server.closeAllConnections(); }),
   };
 }
