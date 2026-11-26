@@ -326,6 +326,8 @@ jobs:
         run: python asaskout/deployment/publish.py --add-to-build
       - name: Keep Unknown Killer Robots in every Pages release
         run: python unknown-killer-robots/deployment/publish.py --add-to-build
+      - name: Keep Misbar Arabic Security Lab in every Pages release
+        run: python arabic-security-lab/deployment/publish.py --add-to-build
       - name: Archive GitHub Pages artifact
         shell: bash
         run: |

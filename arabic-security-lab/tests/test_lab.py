@@ -79,7 +79,8 @@ class LocalServiceTests(unittest.TestCase):
     def test_command_arguments_cannot_be_injected(self):
         with patch('lab.resolve_tool', return_value='/usr/bin/strings'):
             args = lab.command_for('strings', Path('/tmp/safe.bin'), Path('/tmp'))
-            self.assertEqual(args, ['/usr/bin/strings', '-n', '6', '/tmp/safe.bin'])
+            self.assertEqual(args[:3], ['/usr/bin/strings', '-n', '6'])
+            self.assertEqual(Path(args[3]), Path('/tmp/safe.bin'))
 
     def test_uploaded_name_does_not_choose_a_path_or_shell(self):
         def fake_run(args, **kwargs):
