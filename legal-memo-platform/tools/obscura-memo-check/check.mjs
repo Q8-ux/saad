@@ -103,7 +103,8 @@ try {
       await fixture.close();
     }
   }
-} catch {
+} catch (error) {
+  console.error(error instanceof Error ? `سبب الفشل: ${error.message}` : 'سبب الفشل غير متاح.');
   console.error(`تعذر اجتياز فحص Obscura عند مرحلة ${step}.`);
   process.exitCode = 1;
 }

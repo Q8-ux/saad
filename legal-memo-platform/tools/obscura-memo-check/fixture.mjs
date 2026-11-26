@@ -87,6 +87,7 @@ function siteRoutes(sqlite, emptyEditor) {
   const dependencies = {
     db: { getD1: () => db },
     'lib/gmail': { sendSavedDraft: async () => {} },
+    'lib/meta-memo-review': { reviewMetaMemo: async input => ({ content: input.openaiDraft, model: 'synthetic-meta' }), MetaMemoReviewError: class extends Error {}, sequentialMemoRevision: 'synthetic-review' },
     'lib/meta-secondary-review': { reviewMissingLegalIssues: async () => null },
     'lib/management-auth': { digest },
     'lib/management-integrations': { SERVICE_ORIGIN: new URL(boltBridge).origin },
@@ -119,6 +120,7 @@ function siteRoutes(sqlite, emptyEditor) {
       fetch: async (url, init) => url === adminService + 'admin-verify' && JSON.parse(init.body).token === sessionToken
         ? json(verification) : json({}, 401),
       require: specifier => {
+        if (specifier === 'cloudflare:workers') return { env: { OPENAI_API_KEY: 'synthetic' } };
         if (specifier.startsWith('@/')) return load(specifier.slice(2));
         if (specifier.startsWith('./') || specifier.startsWith('../')) return load(new URL(specifier, file).pathname.slice(client.pathname.length));
         throw new Error(`Unexpected fixture dependency ${specifier} in ${path}`);
