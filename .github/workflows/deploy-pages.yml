@@ -328,6 +328,8 @@ jobs:
         run: python unknown-killer-robots/deployment/publish.py --add-to-build
       - name: Keep Misbar Arabic Security Lab in every Pages release
         run: python arabic-security-lab/deployment/publish.py --add-to-build
+      - name: Keep Mirsad Web in every Pages release
+        run: python mirsad-web/deployment/publish.py --add-to-build
       - name: Archive GitHub Pages artifact
         shell: bash
         run: |
