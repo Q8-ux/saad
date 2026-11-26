@@ -11,10 +11,8 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
 	"sync"
 	"syscall"
-	"time"
 	"unsafe"
 )
 
@@ -70,7 +68,7 @@ func collect(ctx context.Context, id string, active bool) (any, string, error) {
 		if active {
 			return discoverLocal(ctx)
 		}
-		script = `Get-NetNeighbor -AddressFamily IPv4 | Where-Object { $_.IPAddress -notmatch '^(224\.|239\.|255\.|0\.)' -and $_.LinkLayerAddress -and $_.LinkLayerAddress -ne '00-00-00-00-00-00' -and $_.LinkLayerAddress -ne 'FF-FF-FF-FF-FF-FF' } | ForEach-Object {[pscustomobject]@{ip=$_.IPAddress;mac=$_.LinkLayerAddress;state=[string]$_.State;interface=$_.InterfaceAlias;source='جدول الجيران في ويندوز';rtt=$null}}`
+		script = `Get-NetNeighbor -AddressFamily IPv4 | Where-Object { $_.IPAddress -notmatch '^(224\.|239\.|255\.|0\.)' -and $_.LinkLayerAddress -and $_.LinkLayerAddress -ne '00-00-00-00-00-00' -and $_.LinkLayerAddress -ne 'FF-FF-FF-FF-FF-FF' } | ForEach-Object {[pscustomobject]@{ip=$_.IPAddress;mac=$_.LinkLayerAddress;state=[string]$_.State;interface=$_.InterfaceAlias;source='windows-neighbor-cache';rtt=$null}}`
 		msg = "جدول الجيران الذي يحتفظ به ويندوز؛ قد يتضمن سجلات سابقة ولا يمثل حصرًا لجميع الأجهزة."
 	case "ports":
 		script = `$procs=@{}; Get-Process -ErrorAction SilentlyContinue | ForEach-Object {$procs[[int]$_.Id]=$_.ProcessName}; Get-NetTCPConnection -ErrorAction SilentlyContinue | ForEach-Object {[pscustomobject]@{Protocol='TCP';LocalAddress=$_.LocalAddress;LocalPort=$_.LocalPort;RemoteAddress=$_.RemoteAddress;RemotePort=$_.RemotePort;State=[string]$_.State;PID=$_.OwningProcess;Process=$procs[[int]$_.OwningProcess]}}; Get-NetUDPEndpoint -ErrorAction SilentlyContinue | ForEach-Object {[pscustomobject]@{Protocol='UDP';LocalAddress=$_.LocalAddress;LocalPort=$_.LocalPort;RemoteAddress='';RemotePort=$null;State='Listening';PID=$_.OwningProcess;Process=$procs[[int]$_.OwningProcess]}}`
@@ -94,6 +92,11 @@ func collect(ctx context.Context, id string, active bool) (any, string, error) {
 		return nil, "", errors.New("نوع الفحص غير معروف")
 	}
 	rows, e := psJSON(ctx, script)
+	if id == "neighbors" && e == nil {
+		for _, row := range rows {
+			row["source"] = "جدول الجيران في ويندوز"
+		}
+	}
 	return rows, msg, e
 }
 func discoverLocal(ctx context.Context) (any, string, error) {
@@ -239,41 +242,7 @@ func openSettings(page string) error {
 	}
 	return nil
 }
-func installApp() error {
-	dir := installPath()
-	if e := os.MkdirAll(dir, 0700); e != nil {
-		return errors.New("تعذر إنشاء مجلد تثبيت البرنامج")
-	}
-	source, e := os.Executable()
-	if e != nil {
-		return errors.New("تعذر تحديد ملف البرنامج")
-	}
-	target := filepath.Join(dir, "Mirsad.exe")
-	if !strings.EqualFold(filepath.Clean(source), filepath.Clean(target)) {
-		b, e := os.ReadFile(source)
-		if e != nil {
-			return errors.New("تعذر قراءة ملف التثبيت")
-		}
-		temp := target + ".new"
-		if e = os.WriteFile(temp, b, 0700); e != nil {
-			return errors.New("تعذر كتابة ملف البرنامج")
-		}
-		move := syscall.NewLazyDLL("kernel32.dll").NewProc("MoveFileExW")
-		ok, _, _ := move.Call(uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr(temp))), uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr(target))), 9)
-		if ok == 0 {
-			_ = os.Remove(temp)
-			return errors.New("أغلق النسخة المثبتة ثم أعد التثبيت")
-		}
-	}
-	script := `$ErrorActionPreference='Stop'; $p=Join-Path $env:LOCALAPPDATA 'Programs\Mirsad\Mirsad.exe'; $w=New-Object -ComObject WScript.Shell; $desktop=[Environment]::GetFolderPath('DesktopDirectory'); if([string]::IsNullOrWhiteSpace($desktop)){$desktop=Join-Path $env:USERPROFILE 'Desktop'}; $programs=[Environment]::GetFolderPath('Programs'); if([string]::IsNullOrWhiteSpace($programs)){$programs=Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs'}; foreach($folder in @($desktop,$programs)){ if(!(Test-Path -LiteralPath $folder)){New-Item -ItemType Directory -Path $folder -Force|Out-Null}; $s=$w.CreateShortcut((Join-Path $folder 'مرصد الكمبيوتر.lnk')); $s.TargetPath=$p; $s.WorkingDirectory=(Split-Path $p); $s.IconLocation=$p+',0'; $s.Description='فحص الكمبيوتر والشبكات محليًا'; $s.Save() }; $key='HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\MirsadDesktop'; New-Item -Path $key -Force|Out-Null; New-ItemProperty -Path $key -Name DisplayName -Value 'مرصد الكمبيوتر' -PropertyType String -Force|Out-Null; New-ItemProperty -Path $key -Name DisplayVersion -Value '1.0.0' -PropertyType String -Force|Out-Null; New-ItemProperty -Path $key -Name Publisher -Value 'Saad Rawdan' -PropertyType String -Force|Out-Null; New-ItemProperty -Path $key -Name InstallLocation -Value (Split-Path $p) -PropertyType String -Force|Out-Null; New-ItemProperty -Path $key -Name DisplayIcon -Value $p -PropertyType String -Force|Out-Null; New-ItemProperty -Path $key -Name UninstallString -Value ('"'+$p+'" --uninstall') -PropertyType String -Force|Out-Null; New-ItemProperty -Path $key -Name NoModify -Value 1 -PropertyType DWord -Force|Out-Null; New-ItemProperty -Path $key -Name NoRepair -Value 1 -PropertyType DWord -Force|Out-Null`
-	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
-	defer cancel()
-	if output, runErr := windowsCommand(ctx, "powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", script).CombinedOutput(); runErr != nil {
-		_ = os.WriteFile(filepath.Join(applicationDataDir(), "install-diagnostic.txt"), output, 0600)
-		return errors.New("نُسخ البرنامج لكن تعذر إنشاء الاختصارات. شغّل Mirsad.exe من مجلد التثبيت أو أعد المحاولة")
-	}
-	return nil
-}
+
 func uninstallApp() {
 	msg := syscall.NewLazyDLL("user32.dll").NewProc("MessageBoxW")
 	answer, _, _ := msg.Call(0, uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr("هل تريد إزالة مرصد الكمبيوتر؟ تبقى التقارير وبيانات الفحص المحفوظة في مجلد المستخدم."))), uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr("إزالة مرصد الكمبيوتر"))), 4|0x20|0x100000|0x80000)
@@ -281,7 +250,7 @@ func uninstallApp() {
 		return
 	}
 	// A built-in Windows child process waits for this executable to exit before removal.
-	script := `$ErrorActionPreference='Stop'; Start-Sleep -Seconds 2; $p=Join-Path $env:LOCALAPPDATA 'Programs\Mirsad'; $target=Join-Path $p 'Mirsad.exe'; Get-CimInstance Win32_Process -Filter "Name='Mirsad.exe'" | Where-Object {$_.ExecutablePath -eq $target} | ForEach-Object {Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue}; Start-Sleep -Milliseconds 500; $w=New-Object -ComObject WScript.Shell; foreach($f in @($w.SpecialFolders.Item('Desktop'),$w.SpecialFolders.Item('Programs'))){$link=Join-Path $f 'مرصد الكمبيوتر.lnk'; if(Test-Path -LiteralPath $link){Remove-Item -LiteralPath $link -Force}}; if(Test-Path -LiteralPath $p){Remove-Item -LiteralPath $p -Recurse -Force}; Remove-Item -LiteralPath 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\MirsadDesktop' -Recurse -Force -ErrorAction SilentlyContinue`
+	script := `$ErrorActionPreference='Stop'; Start-Sleep -Seconds 2; $p=Join-Path $env:LOCALAPPDATA 'Programs\Mirsad'; $target=Join-Path $p 'Mirsad.exe'; Get-CimInstance Win32_Process -Filter "Name='Mirsad.exe'" | Where-Object {$_.ExecutablePath -eq $target} | ForEach-Object {Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue}; Start-Sleep -Milliseconds 500; $linkName= -join [char[]](1605,1585,1589,1583,32,1575,1604,1603,1605,1576,1610,1608,1578,1585,46,108,110,107); $w=New-Object -ComObject WScript.Shell; foreach($f in @($w.SpecialFolders.Item('Desktop'),$w.SpecialFolders.Item('Programs'))){$link=Join-Path $f $linkName; if(Test-Path -LiteralPath $link){Remove-Item -LiteralPath $link -Force}}; if(Test-Path -LiteralPath $p){Remove-Item -LiteralPath $p -Recurse -Force}; Remove-Item -LiteralPath 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\MirsadDesktop' -Recurse -Force -ErrorAction SilentlyContinue`
 	c := windowsCommand(context.Background(), "powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", script)
 	if e := c.Start(); e != nil {
 		showError("تعذر بدء إزالة البرنامج. أغلق جميع نسخه ثم أعد المحاولة")

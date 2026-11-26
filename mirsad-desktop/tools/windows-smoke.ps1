@@ -45,6 +45,9 @@ try {
   $shortcut = Join-Path $desktopPath ([string]::Concat([char]0x645,[char]0x631,[char]0x635,[char]0x62f,' ',[char]0x627,[char]0x644,[char]0x643,[char]0x645,[char]0x628,[char]0x64a,[char]0x648,[char]0x62a,[char]0x631,'.lnk'))
   if (!(Test-Path -LiteralPath $shortcut)) { throw 'Arabic desktop shortcut is missing' }
   if (!(Test-Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\MirsadDesktop')) { throw 'Windows uninstall registration is missing' }
+  $registration = Get-ItemProperty 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\MirsadDesktop'
+  $expectedTitle = (Split-Path -Leaf $shortcut) -replace '\.lnk$',''
+  if ($registration.DisplayName -ne $expectedTitle) { throw 'Arabic program name was not preserved in Windows registration' }
   foreach ($format in @('html','json','csv')) {
     $path = Join-Path $out ('validation-report.'+$format)
     Invoke-WebRequest -Uri ($origin+'/api/export?format='+$format) -WebSession $session -UseBasicParsing -OutFile $path

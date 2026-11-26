@@ -171,6 +171,7 @@ type bleState struct {
 var bleStatesMu sync.RWMutex
 var bleStates = map[uintptr]*bleState{}
 
+//go:uintptrescapes
 func comCall(obj uintptr, index int, args ...uintptr) uintptr {
 	vt := *(*uintptr)(unsafe.Pointer(obj))
 	fn := *(*uintptr)(unsafe.Pointer(vt + uintptr(index)*unsafe.Sizeof(uintptr(0))))
