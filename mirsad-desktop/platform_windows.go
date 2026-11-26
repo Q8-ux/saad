@@ -64,7 +64,7 @@ func collect(ctx context.Context, id string, active bool) (any, string, error) {
 	case "bluetooth":
 		return scanBluetooth(ctx)
 	case "adapters":
-		script = `Get-NetAdapter -IncludeHidden | Where-Object { $_.HardwareInterface -or $_.Status -eq 'Up' } | ForEach-Object { $a=$_; $cfg=Get-NetIPConfiguration -InterfaceIndex $a.ifIndex -ErrorAction SilentlyContinue; [pscustomobject]@{Name=$a.Name;Description=$a.InterfaceDescription;Status=[string]$a.Status;MAC=$a.MacAddress;LinkSpeed=$a.LinkSpeed;IPv4=@($cfg.IPv4Address | ForEach-Object { [string]$_.IPAddress+'/'+[string]$_.PrefixLength });Gateway=@($cfg.IPv4DefaultGateway.NextHop | Where-Object {$_});DNS=@($cfg.DNSServer.ServerAddresses | Where-Object {$_})} }`
+		script = `Get-NetAdapter -IncludeHidden | Where-Object { $_.HardwareInterface -or $_.Status -eq 'Up' } | ForEach-Object { $a=$_; $ips=@(Get-NetIPAddress -InterfaceIndex $a.ifIndex -AddressFamily IPv4 -ErrorAction SilentlyContinue); $gw=@(Get-NetRoute -InterfaceIndex $a.ifIndex -AddressFamily IPv4 -DestinationPrefix '0.0.0.0/0' -ErrorAction SilentlyContinue); $dns=@(Get-DnsClientServerAddress -InterfaceIndex $a.ifIndex -ErrorAction SilentlyContinue); [pscustomobject]@{Name=$a.Name;Description=$a.InterfaceDescription;Status=[string]$a.Status;MAC=$a.MacAddress;LinkSpeed=$a.LinkSpeed;IPv4=@($ips | ForEach-Object { [string]$_.IPAddress + '/' + [string]$_.PrefixLength });Gateway=@($gw.NextHop | Where-Object {$_} | Select-Object -Unique);DNS=@($dns.ServerAddresses | Where-Object {$_} | Select-Object -Unique)} }`
 		msg = "عناوين المحولات والبوابات وملقمات الأسماء. سرعة الارتباط ليست قياس سرعة الإنترنت."
 	case "neighbors":
 		if active {
