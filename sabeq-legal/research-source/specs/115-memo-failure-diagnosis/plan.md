@@ -1,5 +1,7 @@
 # Plan
 
-Reuse the normalized error_code already returned by the protected memo API. Add an allowlisted presentation helper to the existing administration client and use it in list rows and request details. Preserve authorization and static asset cache conventions. No database, provider key, billing, generation, notification or API contract changes.
+Keep the existing normalized error-code presentation in the protected administration client. Extend the existing public memo API with a read-only GET for one exact request ID, protected by same-origin validation, request rate limiting and user ownership for account-bound requests. Return an allowlisted status plus a draft-presence boolean only; do not return case inputs, draft content, contacts, provider details or internal errors.
 
-Reproduce the missing cause with synthetic view tests, then verify billing, rate-limit and unknown-code rendering and administrator-only remediation links. Publish the matching administration assets after their checks and the required native build.
+In the public memo wizard, recheck only the failed request reference for a bounded period and expose a localized manual refresh action. Reconcile a repaired needs_review request into a review notice without invoking generation, payment, email or archive paths. Preserve the existing POST contract and all legal gates.
+
+Use synthetic interface/API tests for ownership, response minimization, localization and transition from stale failure to review. Run the affected tests, lint/build gates and then publish the matching backend and public mirror. Verify the official-domain page after deployment; do not equate a green build with a live fix.
