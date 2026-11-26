@@ -1,0 +1,95 @@
+{
+  "baseCommit": "b3accd807946fad8d05752a263271be29fe28a26",
+  "scope": "Add a deterministic formal-memorandum substance gate and one bounded correction without changing provider selection, payment, source ownership, or case identity.",
+  "files": {
+    "lib/case-reasoning.ts": [
+      {
+        "before": "export type CasePlanFailureCode = \"role\" | \"facts\" | \"sources\" | \"citations\" | \"relief\" | \"substance\" | \"format\";",
+        "after": "export type CasePlanFailureCode = \"role\" | \"facts\" | \"sources\" | \"citations\" | \"relief\" | \"substance\" | \"coverage\" | \"format\";",
+        "count": 1
+      },
+      {
+        "before": "message === \"empty reasoning substance\" ? \"substance\" : message === \"client role changed\"",
+        "after": "message === \"empty reasoning substance\" ? \"substance\" : message === \"insufficient issue coverage\" || message === \"duplicated issue coverage\" ? \"coverage\" : message === \"client role changed\"",
+        "count": 1
+      },
+      {
+        "before": "substance:\"وجود تطبيق واعتراض ورد وطلب محدد لكل مسألة\",format:",
+        "after": "substance:\"وجود تطبيق واعتراض ورد وطلب محدد لكل مسألة\",coverage:\"تغطية الوقائع الطويلة بمسائل مستقلة غير مكررة\",format:",
+        "count": 1
+      },
+      {
+        "before": "أعد خطة تحليل لا مذكرة. ",
+        "after": "أعد خطة تحليل لا مذكرة. استخرج كل مسألة مادية مستقلة من الوقائع الطويلة ولا تدمج وقائع مختلفة في عنوان عام؛ استخدم لكل مسألة factQuote مختلفاً وعنواناً مختلفاً، مع بقاء الحد الأقصى 12 مسألة. ",
+        "count": 1
+      },
+      {
+        "before": "",
+        "after": "  const factLength=normalized(input.facts || \"\").replace(/\\s+/gu,\"\").length;\n  const requiredIssueCount=factLength>=3600?3:factLength>=1600?2:1;\n  if(p.issues.length<requiredIssueCount)throw Error(\"insufficient issue coverage\");\n  const issueNames=new Set<string>(),factAnchors=new Set<string>();\n",
+        "count": 1
+      },
+      {
+        "before": "",
+        "after": "    const issueName=normalized(issue.issue),factAnchor=normalized(issue.factQuote);\n    if(issueNames.has(issueName)||factAnchors.has(factAnchor))throw Error(\"duplicated issue coverage\");\n    issueNames.add(issueName);factAnchors.add(factAnchor);\n",
+        "count": 1
+      }
+    ],
+    "app/api/legal/memo/route.ts": [
+      {
+        "before": "import { factualRequirements, correctLegalProse, languageReviewInstructions, legalResearchInstructions, removeDelegatedResearch } from \"@/lib/legal-language\";\n",
+        "after": "import { factualRequirements, correctLegalProse, languageReviewInstructions, legalResearchInstructions, removeDelegatedResearch } from \"@/lib/legal-language\";\nimport { reviewMemoSubstance } from \"@/lib/memo-substance-quality\";\n",
+        "count": 1
+      },
+      {
+        "before": "",
+        "after": "      const requiresStatutoryText=checkedPlan.issues.some(issue=>issue.sourceMarkers.some(marker=>{\n        const source=evidence[Number(marker.replace(/^م/,\"\"))-1];\n        return Boolean(source&&!source.judgment&&draftStatutoryText(source));\n      }));\n      const substanceReview=kind===\"memorandum\"?reviewMemoSubstance(memoInput,content,{issueCount:checkedPlan.issues.length,requireStatutoryText:requiresStatutoryText}):null;\n",
+        "count": 1
+      },
+      {
+        "before": "contentReview.ok && routeReview.ok && finalCitations.ok",
+        "after": "contentReview.ok && routeReview.ok && substanceReview?.ok !== false && finalCitations.ok",
+        "count": 1
+      },
+      {
+        "before": "if(!caseAudit.ok || !contentReview.ok || !routeReview.ok)",
+        "after": "if(!caseAudit.ok || !contentReview.ok || !routeReview.ok || substanceReview?.ok === false)",
+        "count": 1
+      },
+      {
+        "before": "اكتمال الوقائع والدفوع والطلبات",
+        "after": "اكتمال الوقائع وعمق الدفوع والطلبات",
+        "count": 1
+      },
+      {
+        "before": "sectionIssues:contentReview.issues,",
+        "after": "sectionIssues:contentReview.issues,substanceIssues:substanceReview?.issues||[],",
+        "count": 1
+      },
+      {
+        "before": "وفحص contentReview وrouteReview",
+        "after": "وفحص contentReview وrouteReview وsubstanceReview",
+        "count": 1
+      },
+      {
+        "before": "",
+        "after": " لا تختصر الوقائع الطويلة إلى ملخص مبتور، ولا تزد كلمات إنشائية لا تعالج مسألة.",
+        "count": 1
+      },
+      {
+        "before": "لكل مسألة: دفع محدد وتطبيق يضم عبارة قصيرة حرفية من factQuote، ثم أقوى اعتراض محتمل والرد المسبب عليه.",
+        "after": "لكل مسألة: عنوان دفع مرقم مستقل، ثم تطبيق مفصل يضم عبارة قصيرة حرفية من factQuote، ثم أقوى اعتراض محتمل والرد المسبب عليه. يجب أن يكون تحليل الدفوع أعمق من سرد الطلبات، وأن يبقى لكل مسألة تطبيق واعتراض ورد متميزون.",
+        "count": 1
+      },
+      {
+        "before": ",legalRoute:legalRouteSummary(legalRoute)",
+        "after": ",substanceReview,legalRoute:legalRouteSummary(legalRoute)",
+        "count": 1
+      },
+      {
+        "before": "const caseQuality=caseQualitySummary(checkedPlan,caseAudit,content,sources.length);",
+        "after": "const caseQuality={...caseQualitySummary(checkedPlan,caseAudit,content,sources.length),substanceReview};",
+        "count": 1
+      }
+    ]
+  }
+}

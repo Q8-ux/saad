@@ -34,16 +34,9 @@ function modules(states = {}, globals = {}) {
     const js = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, jsx: ts.JsxEmit.ReactJSX, esModuleInterop: true } }).outputText;
     vm.runInNewContext(js, { exports, require(name) {
       if (name === 'cloudflare:workers') return { env: { OPENAI_API_KEY: 'synthetic' } };
-      if (name === '@/db') return { getD1(){ throw Error('Unexpected database access in UI rendering test'); }, getDb(){ throw Error('Unexpected database access in UI rendering test'); } };
       if (name.startsWith('@/') || name.startsWith('.')) {
         const path = name.startsWith('@/') ? resolve(root,name.slice(2)) : resolve(dirname(file),name);
-        if (path.endsWith('.json')) {
-          // The public source mirror intentionally excludes the private corpus.
-          // These UI/prompt tests require no legal evidence. Use the same empty
-          // synthetic fixture in private and public checkouts.
-          if (path === resolve(root,'data/legal-sources/reviewed.json')) return {revision:'synthetic-ui-only',checkedAt:'2026-01-01',articles:[]};
-          return JSON.parse(readFileSync(path,'utf8'));
-        }
+        if (path.endsWith('.json')) return JSON.parse(readFileSync(path,'utf8'));
         const target = [path,path+'.ts',path+'.tsx',path+'/index.ts'].find(candidate => existsSync(candidate) && statSync(candidate).isFile());
         if (!target) throw new Error('Missing test module: '+path);
         return load(target);
