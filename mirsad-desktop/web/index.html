@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <title>مرصد الكمبيوتر</title>
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/app.css">
+  <script defer src="/app.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">انتقل إلى المحتوى</a>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="أقسام البرنامج">
+      <a class="brand" href="#overview" aria-label="مرصد — النظرة العامة"><img src="/icon.svg" alt="" width="48" height="48"><span><strong>مرصد</strong><small>مختبر الكمبيوتر</small></span></a>
+      <div class="local-label"><span class="status-dot"></span> يعمل على جهازك محليًا</div>
+      <p class="nav-label">مساحة الفحص</p>
+      <nav id="navigation" aria-label="التنقل الرئيسي"></nav>
+      <div class="sidebar-bottom"><button id="help-button" class="nav-button"><span class="nav-icon" aria-hidden="true">؟</span><span>دليل الاستخدام</span></button><div class="version-label"><span>مرصد الكمبيوتر</span><bdi>١.٠.٠</bdi></div></div>
+    </aside>
+    <div class="workspace">
+      <header class="topbar">
+        <div class="topbar-title"><button id="menu-button" class="icon-button mobile-menu" aria-label="فتح قائمة الأقسام" aria-expanded="false">☰</button><span class="breadcrumb">أدوات جهازك <span>/</span> <strong id="breadcrumb-current">نظرة عامة</strong></span></div>
+        <div class="topbar-status"><span class="status-dot"></span><span id="connection-label">جلسة محلية</span></div>
+      </header>
+      <main id="main" tabindex="-1">
+        <div id="connection-error" class="connection-error" role="alert" hidden></div>
+        <div class="page-heading"><div><p class="eyebrow" id="page-eyebrow">جهازك تحت النظر</p><h1 id="page-title">نظرة عامة</h1><p id="page-description" class="description">ابدأ بالفحص، واطّلع على ما تستطيع أجهزتك قراءته.</p></div><div id="page-actions" class="page-actions"></div></div>
+        <div id="global-progress" class="progress-panel" role="status" hidden><div><span class="spinner" aria-hidden="true"></span><strong id="progress-label">جارٍ الفحص…</strong></div><span id="progress-detail"></span><button id="stop-scans" class="button quiet">إيقاف الفحوص</button></div>
+        <section id="page-content" aria-label="نتائج القسم"></section>
+        <footer class="workspace-footer"><span>قراءات من جهازك. لا خدمات سحابية.</span><span id="last-updated">لم يبدأ الفحص</span></footer>
+      </main>
+    </div>
+  </div>
+  <div id="toast" class="toast" role="status" hidden></div>
+  <dialog id="install-dialog" class="install-dialog" aria-labelledby="install-title">
+    <div class="install-art"><img src="/icon.svg" alt="" width="84" height="84"><span class="pill">برنامج محلي لويندوز</span></div>
+    <h2 id="install-title">أهلًا بك في مرصد</h2><p>نافذتك العربية لفحص الكمبيوتر والشبكات والأجهزة المتصلة.</p>
+    <ul class="install-list"><li>يستخدم أدوات ويندوز وبطاقات جهازك الحالية.</li><li>يحفظ التقارير على الكمبيوتر دون رفعها.</li><li>يتثبت داخل حسابك مع اختصار على سطح المكتب.</li></ul>
+    <div class="path-box"><span>مجلد التثبيت</span><bdi id="install-path"></bdi></div>
+    <p class="small-note">يتطلب ويندوز ١٠ أو ١١ بنواة ٦٤ بت، مع Edge وPowerShell المتوفرين ضمن النظام.</p>
+    <p id="install-error" class="error-text" role="alert" hidden></p>
+    <button id="install-button" class="button primary full-width">تثبيت مرصد الكمبيوتر</button><button id="portable-button" class="button secondary full-width">تشغيل دون تثبيت</button>
+  </dialog>
+  <dialog id="help-dialog" class="help-dialog" aria-labelledby="help-title">
+    <div class="dialog-top"><h2 id="help-title">دليل مرصد</h2><button id="help-close" class="icon-button" aria-label="إغلاق الدليل">×</button></div>
+    <p>يبدأ البرنامج بقراءة بيانات الكمبيوتر عند فتحه. استخدم «فحص شامل» للتحديث، أو اختر قسمًا لفحصه منفردًا.</p>
+    <h3>إذا لم تظهر شبكات الواي فاي</h3><p>تحقق من تشغيل البطاقة وتعريفها. قد يطلب ويندوز تفعيل خدمات الموقع والسماح لتطبيقات سطح المكتب بالوصول إليها.</p>
+    <h3>إذا لم تظهر أجهزة البلوتوث</h3><p>شغّل البلوتوث واجعل الجهاز المقابل قابلًا للاكتشاف أو يبث إعلانًا منخفض الطاقة. لا تظهر كل الأجهزة في كل فحص.</p>
+    <h3>حدود القراءة</h3><p>قوة الإشارة لا تحدد المسافة أو الاتجاه. جدول الجيران لا يحصر جميع أجهزة الشبكة. نتائج القنوات ليست محلل طيف. وظائف الراديو والأشعة تحت الحمراء تحتاج قطعًا مخصصة ودعمًا برمجيًا محددًا.</p>
+    <h3>الخصوصية</h3><p>لا يجمع مرصد كلمات مرور الواي فاي ولا محتوى ملفاتك أو حزم اتصالاتك. التقارير تتضمن أسماء الأجهزة وعناوينها؛ اختر بنفسك مع من تشاركها.</p>
+    <h3>نافذة البرنامج</h3><p>تُعرض الواجهة داخل نافذة Edge محلية. أغلق النافذة لإنهاء الاستخدام؛ تتوقف خدمة البرنامج تلقائيًا بعد فترة قصيرة دون اتصال بالواجهة.</p>
+    <div class="dialog-actions"><button id="quit-button" class="button secondary">إغلاق البرنامج</button><button id="help-done" class="button primary">فهمت</button></div>
+  </dialog>
+</body>
+</html>

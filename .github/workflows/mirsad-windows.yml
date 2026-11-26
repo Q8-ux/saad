@@ -1,0 +1,50 @@
+name: Mirsad Windows executable
+on:
+  push:
+    branches: [codex/mirsad-desktop-20261126]
+    paths: ['mirsad-desktop/**', '.github/workflows/mirsad-windows.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 12
+    defaults:
+      run:
+        working-directory: mirsad-desktop
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: mirsad-desktop
+          persist-credentials: false
+      - uses: actions/setup-go@v7
+        with:
+          go-version: '1.27.4'
+          cache: false
+      - name: Test native ABI, collectors and local server protections
+        env:
+          MIRSAD_WINDOWS_SMOKE: '1'
+        run: go test -buildvcs=false -v ./...
+      - name: Build Windows desktop executable
+        env:
+          CGO_ENABLED: '0'
+          GOARCH: amd64
+        run: |
+          New-Item -ItemType Directory out -Force | Out-Null
+          go build -buildvcs=false -trimpath -ldflags='-s -w -H=windowsgui' -o out/Mirsad-Setup.exe .
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Copy-Item out/Mirsad-Setup.exe out/Mirsad.exe
+      - name: Verify installer, shortcuts, exports and scan archive
+        run: ./tools/windows-smoke.ps1
+      - name: Package verified files
+        run: |
+          Copy-Item README.md out/README.md
+          Get-FileHash out/*.exe -Algorithm SHA256 | ForEach-Object { $_.Hash.ToLower() + '  ' + (Split-Path -Leaf $_.Path) } | Set-Content out/SHA256SUMS.txt -Encoding utf8
+      - uses: actions/upload-artifact@v7
+        with:
+          name: Mirsad-Windows-x64
+          path: mirsad-desktop/out/*
+          if-no-files-found: error
+          retention-days: 30
