@@ -1,0 +1,19 @@
+rules:
+  - id: misbar-python-shell-review
+    patterns:
+      - pattern-either:
+          - pattern: subprocess.run(..., shell=True, ...)
+          - pattern: subprocess.Popen(..., shell=True, ...)
+    message: "راجع مصدر المدخلات قبل تشغيل shell؛ هذه مطابقة تحتاج تحققًا من السياق."
+    severity: WARNING
+    languages: [python]
+  - id: misbar-javascript-eval-review
+    pattern: eval(...)
+    message: "راجع مصدر النص المنفذ ديناميكيًا؛ المطابقة لا تثبت قابلية الاستغلال."
+    severity: WARNING
+    languages: [javascript, typescript]
+  - id: misbar-html-sink-review
+    pattern: $E.innerHTML = $V
+    message: "راجع تعقيم القيمة ومصدرها قبل إدخالها في HTML."
+    severity: WARNING
+    languages: [javascript, typescript]

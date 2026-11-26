@@ -1,0 +1,89 @@
+name: Publish Misbar Arabic Security Lab
+on:
+  push:
+    branches: [main]
+    paths: ['arabic-security-lab/**', '.github/workflows/deploy-arabic-security-lab.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages-v2
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: '${{ github.sha }}', fetch-depth: 1}
+      - uses: actions/setup-node@v4
+        with: {node-version: 22}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Verify analysis, persistence boundary and local service
+        working-directory: arabic-security-lab
+        run: |
+          node --check web/app.mjs
+          node --test tests/analysis.test.mjs
+          python -m unittest discover -s tests -p 'test_*.py' -v
+      - uses: actions/configure-pages@v5
+      - name: Preserve current sites and update Misbar only
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python arabic-security-lab/deployment/publish.py
+      - name: Archive Pages artifact
+        shell: bash
+        run: |
+          tar --dereference --hard-dereference --directory _site \
+            --exclude=.git --exclude=.github -cf "$RUNNER_TEMP/artifact.tar" .
+      - uses: actions/upload-artifact@v4
+        id: pages-artifact
+        with:
+          name: github-pages
+          path: ${{ runner.temp }}/artifact.tar
+          retention-days: 30
+          if-no-files-found: error
+          overwrite: true
+      - name: Deploy
+        id: deploy
+        uses: actions/github-script@v7
+        env:
+          PAGES_ARTIFACT_ID: ${{ steps.pages-artifact.outputs.artifact-id }}
+        with:
+          script: |
+            const deployPages = require('./.github/scripts/pages-deployment.cjs');
+            await deployPages({github,context,core,artifactId:process.env.PAGES_ARTIFACT_ID});
+      - name: Verify live Misbar and exact source revision
+        env:
+          RELEASE_SHA: ${{ github.sha }}
+        run: |
+          python - <<'PY'
+          import os,time,urllib.request,json
+          sha=os.environ['RELEASE_SHA']
+          base='https://q8-ux.github.io/saad/arabic-security-lab/'
+          for attempt in range(10):
+              try:
+                  req=urllib.request.Request(base+'release-version.txt?revision='+sha,headers={'Cache-Control':'no-cache'})
+                  with urllib.request.urlopen(req,timeout=15) as response:
+                      actual=response.read().decode().strip()
+                  if actual==sha:
+                      with urllib.request.urlopen(base,timeout=15) as response:
+                          page=response.read().decode()
+                      with urllib.request.urlopen(base+'catalog.json',timeout=15) as response:
+                          catalog=json.load(response)
+                      assert 'مِسبار' in page and 'dir="rtl"' in page
+                      assert len(catalog['tools'])==52
+                      print('Misbar public page and source revision verified:',sha)
+                      break
+              except Exception as error:
+                  print('Waiting for publication:',error)
+              if attempt==9:
+                  raise SystemExit('Live Misbar does not match source')
+              time.sleep(6)
+          PY

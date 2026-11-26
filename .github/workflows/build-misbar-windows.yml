@@ -1,0 +1,87 @@
+name: Build Misbar Windows Application
+on:
+  push:
+    branches: [main]
+    paths: ['arabic-security-lab/**', '.github/workflows/build-misbar-windows.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: misbar-windows
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    env:
+      PYTHONUTF8: '1'
+    defaults:
+      run:
+        working-directory: arabic-security-lab
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: '${{ github.sha }}', fetch-depth: 1}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - uses: actions/setup-node@v4
+        with: {node-version: 22}
+      - name: Verify source
+        run: |
+          node --check web/app.mjs
+          node --test tests/analysis.test.mjs
+          if ($LASTEXITCODE -ne 0) { throw 'Analysis tests failed' }
+          python -m unittest discover -s tests -p 'test_*.py' -v
+          if ($LASTEXITCODE -ne 0) { throw 'Local service tests failed' }
+      - name: Build standalone Arabic application
+        run: |
+          python -m pip install -r requirements-build.txt
+          if ($LASTEXITCODE -ne 0) { throw 'Build dependencies failed' }
+          python -m PyInstaller --noconfirm --clean --onefile --name Misbar --add-data "web;web" --add-data "rules.yml;." lab.py
+          if ($LASTEXITCODE -ne 0) { throw 'Windows build failed' }
+      - name: Verify packaged EXE and Arabic assets
+        run: |
+          $proc = Start-Process -FilePath '.\dist\Misbar.exe' -ArgumentList '--no-browser','--port','18765' -PassThru
+          try {
+            $ready = $false
+            for ($attempt = 0; $attempt -lt 30; $attempt++) {
+              try {
+                $status = Invoke-RestMethod 'http://127.0.0.1:18765/api/status' -TimeoutSec 2
+                if ($status.application -eq 'misbar-lab') { $ready = $true; break }
+              } catch { Start-Sleep -Seconds 1 }
+            }
+            if (!$ready) { throw 'Packaged executable did not become ready' }
+            $catalog = Invoke-RestMethod 'http://127.0.0.1:18765/catalog.json' -TimeoutSec 3
+            if ($catalog.tools.Count -ne 52) { throw 'Packaged catalog missing' }
+            $page = Invoke-WebRequest 'http://127.0.0.1:18765/' -TimeoutSec 3
+            if (!$page.Content.Contains('dir="rtl"')) { throw 'Arabic interface missing' }
+          } finally { Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue }
+      - name: Package release with checksum
+        run: |
+          Compress-Archive -Path 'dist/Misbar.exe','README.md' -DestinationPath 'Misbar-Windows.zip' -Force
+          $hash = (Get-FileHash 'Misbar-Windows.zip' -Algorithm SHA256).Hash.ToLower()
+          Set-Content -Path 'Misbar-Windows.sha256.txt' -Value "$hash  Misbar-Windows.zip" -Encoding ascii
+          @"
+          مِسبار — مختبر الأمن والتحليل العربي.
+          فك ضغط الملف ثم افتح Misbar.exe. لا تحتاج نسخة EXE إلى Python.
+          الأدوات الخارجية والعتاد تُجهز منفصلة حسب متطلبات كل أداة.
+          تم اختبار تشغيل الملف التنفيذي واستجابة واجهته المحلية تلقائيًا على ويندوز.
+          Source commit: $env:GITHUB_SHA
+          "@ | Set-Content -Path 'release-notes.md' -Encoding utf8
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Misbar-Windows
+          path: |
+            arabic-security-lab/Misbar-Windows.zip
+            arabic-security-lab/Misbar-Windows.sha256.txt
+          retention-days: 30
+      - name: Publish downloadable Windows release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          if gh release view misbar-v1.0.0 --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload misbar-v1.0.0 Misbar-Windows.zip Misbar-Windows.sha256.txt --clobber --repo "$GITHUB_REPOSITORY"
+            gh release edit misbar-v1.0.0 --notes-file release-notes.md --repo "$GITHUB_REPOSITORY"
+          else
+            gh release create misbar-v1.0.0 Misbar-Windows.zip Misbar-Windows.sha256.txt --target "$GITHUB_SHA" --title 'مِسبار 1.0 — نسخة ويندوز العربية' --notes-file release-notes.md --latest=false --repo "$GITHUB_REPOSITORY"
+          fi

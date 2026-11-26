@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#091319">
+  <meta name="description" content="مختبر عربي لتحليل الملفات والأجهزة وأمان التطبيقات، مع أدلة محفوظة ومراجع وأدوات محلية.">
+  <title>مِسبار — مختبر الأمن والتحليل</title>
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="assets/fonts.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a href="#main" class="skip">انتقل إلى المحتوى</a>
+  <aside class="sidebar" id="sidebar" aria-label="القائمة الرئيسية">
+    <a class="brand" href="#dashboard"><img src="icon.svg" width="43" height="43" alt=""><span>مِسبار<small>مختبر الأمن والتحليل</small></span><span class="brand-version">١.٠</span></a>
+    <div class="workspace-label"><i class="status-dot"></i> مساحة العمل المحلية</div>
+    <nav id="navigation"></nav>
+    <div class="sidebar-bottom">
+      <div class="privacy-mark" id="privacy-mark"></div>
+      <p>ملفاتك تُحلّل على جهازك.<br>أنت تتحكم في الأدلة والتصدير.</p>
+      <a href="https://github.com/Q8-ux/saad/tree/main/arabic-security-lab" target="_blank" rel="noopener noreferrer" class="source-link">المشروع على GitHub <span aria-hidden="true">↗</span></a>
+    </div>
+  </aside>
+  <div class="sidebar-overlay" id="sidebar-overlay" hidden></div>
+  <div class="shell">
+    <header class="topbar">
+      <div class="breadcrumb"><button class="icon-button menu-toggle" id="menu-toggle" aria-label="فتح القائمة" aria-expanded="false"></button><span>مساحة العمل</span><span class="slash">/</span><strong id="breadcrumb-title">نظرة عامة</strong></div>
+      <div class="top-actions"><button id="connection-pill" class="connection-pill">نسخة المتصفح</button><button class="avatar" id="backup-top" aria-label="النسخ الاحتياطي">س</button></div>
+    </header>
+    <main id="main" tabindex="-1"><div class="loading-state"><span class="spinner"></span> جارٍ تجهيز المختبر…</div></main>
+    <footer><span>مِسبار · افهم الدليل قبل أن تتخذ القرار</span><span id="save-status" role="status">تحميل البيانات…</span></footer>
+  </div>
+  <dialog id="modal" aria-labelledby="modal-title"><div id="modal-content"></div></dialog>
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+  <script type="module" src="app.mjs"></script>
+</body>
+</html>
