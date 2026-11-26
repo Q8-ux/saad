@@ -42,6 +42,12 @@ func psJSON(ctx context.Context, script string) ([]map[string]any, error) {
 		return nil, errors.New("انتهت مهلة الفحص أو أُوقف")
 	}
 	if e != nil {
+		if os.Getenv("MIRSAD_WINDOWS_SMOKE") == "1" {
+			var failure *exec.ExitError
+			if errors.As(e, &failure) {
+				fmt.Fprintln(os.Stderr, "Windows collector diagnostic:", string(failure.Stderr))
+			}
+		}
 		return nil, errors.New("تعذرت القراءة من أدوات ويندوز. تحقق من توافر PowerShell وأذونات حسابك")
 	}
 	rows := []map[string]any{}
