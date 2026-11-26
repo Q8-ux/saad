@@ -1,0 +1,28 @@
+{
+  "baseCommit": "eec818d72fdcb5fec9a4d15a7e4071315eb75dac",
+  "scope": "Reverse only the documented client response-margin and localized waiting-copy changes; preserve server timeout, provider selection, payment, sources, case identity and baseline hashes.",
+  "files": {
+    "lib/memo-generation.ts": [
+      {
+        "before": "export const MEMO_GENERATION_TIMEOUT_MS = 240_000;",
+        "after": "// The server owns the four-minute generation budget. The client keeps a\n// response margin so it can receive the server's structured result/request id.\nexport const MEMO_GENERATION_TIMEOUT_MS = 270_000;",
+        "count": 1
+      },
+      {
+        "before": "  if (language === \"en\") return { approval: \"I confirm the accuracy of the case and contact information, have reviewed the notice above, and approve generating the draft.\", required: \"Confirm the review below before generating.\", pending: \"Generating and reviewing the draft…\", seconds: \"seconds\", cancel: \"Cancel generation\", cancelled: \"Generation cancelled. Your case information is still here.\", timeout: \"Generation exceeded four minutes. Your information is still here; please try again later.\", limit: \"You can cancel at any time. Waiting is limited to four minutes.\" };",
+        "after": "  if (language === \"en\") return { approval: \"I confirm the accuracy of the case and contact information, have reviewed the notice above, and approve generating the draft.\", required: \"Confirm the review below before generating.\", pending: \"Generating and reviewing the draft…\", seconds: \"seconds\", cancel: \"Cancel generation\", cancelled: \"Generation cancelled. Your case information is still here.\", timeout: \"Waiting for the result exceeded five minutes. Your information is still here; please try again later.\", limit: \"You can cancel at any time. Waiting for the result is limited to five minutes.\" };",
+        "count": 1
+      },
+      {
+        "before": "  if (language === \"ur\") return { approval: \"میں مقدمے اور رابطے کی معلومات کی درستگی کی تصدیق کرتا ہوں، اوپر کا نوٹس پڑھ لیا ہے اور مسودے کی تیاری منظور کرتا ہوں۔\", required: \"تیاری سے پہلے نیچے تصدیق کریں۔\", pending: \"مسودہ تیار اور جانچا جا رہا ہے…\", seconds: \"سیکنڈ\", cancel: \"تیاری منسوخ کریں\", cancelled: \"تیاری منسوخ ہوگئی۔ مقدمے کی معلومات یہاں موجود ہیں۔\", timeout: \"تیاری چار منٹ سے زیادہ ہوگئی۔ معلومات یہاں موجود ہیں؛ بعد میں دوبارہ کوشش کریں۔\", limit: \"کسی بھی وقت منسوخ کر سکتے ہیں۔ انتظار کی حد چار منٹ ہے۔\" };",
+        "after": "  if (language === \"ur\") return { approval: \"میں مقدمے اور رابطے کی معلومات کی درستگی کی تصدیق کرتا ہوں، اوپر کا نوٹس پڑھ لیا ہے اور مسودے کی تیاری منظور کرتا ہوں۔\", required: \"تیاری سے پہلے نیچے تصدیق کریں۔\", pending: \"مسودہ تیار اور جانچا جا رہا ہے…\", seconds: \"سیکنڈ\", cancel: \"تیاری منسوخ کریں\", cancelled: \"تیاری منسوخ ہوگئی۔ مقدمے کی معلومات یہاں موجود ہیں۔\", timeout: \"نتیجے کا انتظار پانچ منٹ سے زیادہ ہوگیا۔ معلومات یہاں موجود ہیں؛ بعد میں دوبارہ کوشش کریں۔\", limit: \"کسی بھی وقت منسوخ کر سکتے ہیں۔ نتیجے کے انتظار کی حد پانچ منٹ ہے۔\" };",
+        "count": 1
+      },
+      {
+        "before": "  return { approval: \"أقر بصحة المعلومات وبيانات التواصل، وراجعت التنبيه أعلاه، وأوافق على توليد المسودة.\", required: \"ضع علامة الموافقة أدناه قبل التوليد.\", pending: \"جارٍ توليد المسودة ومراجعتها…\", seconds: \"ثانية\", cancel: \"إلغاء التوليد\", cancelled: \"أُلغي التوليد. بيانات القضية ما زالت موجودة ويمكنك تعديلها.\", timeout: \"تجاوز التوليد أربع دقائق. بياناتك ما زالت موجودة؛ حاول لاحقاً.\", limit: \"يمكنك الإلغاء في أي وقت. الحد الأقصى للانتظار أربع دقائق.\" };",
+        "after": "  return { approval: \"أقر بصحة المعلومات وبيانات التواصل، وراجعت التنبيه أعلاه، وأوافق على توليد المسودة.\", required: \"ضع علامة الموافقة أدناه قبل التوليد.\", pending: \"جارٍ توليد المسودة ومراجعتها…\", seconds: \"ثانية\", cancel: \"إلغاء التوليد\", cancelled: \"أُلغي التوليد. بيانات القضية ما زالت موجودة ويمكنك تعديلها.\", timeout: \"تجاوز انتظار النتيجة خمس دقائق. بياناتك ما زالت موجودة؛ حاول لاحقاً.\", limit: \"يمكنك الإلغاء في أي وقت. الحد الأقصى لانتظار النتيجة خمس دقائق.\" };",
+        "count": 1
+      }
+    ]
+  }
+}
