@@ -93,7 +93,7 @@
       <section class="view" id="view-activities">
         <div class="page-intro"><span class="pill pill-blue">تعلّم بالقراءة واللعب</span><h2>التعلّم والأنشطة</h2><p>أضف مهمة صغيرة للطفل، واربط الصفحة بموارد صوتية أو فيديو أو QR. يبقى الرابط فارغاً إلى أن تضيف ملفاً تملكه أو رابطاً عاماً.</p></div>
         <div class="activity-grid"><article class="activity-card"><span>✍️</span><h3>تدريب القلم</h3><p>تتبّع مسارات بسيطة، ارسم خطوطاً، ثم انتقل للحروف والأشكال بحسب العمر.</p></article><article class="activity-card"><span>🔤</span><h3>حرف وصوت</h3><p>الحرف الكبير والصغير، طريقة النطق، خطوات الرسم، وكلمة مثال واضحة.</p></article><article class="activity-card"><span>🎨</span><h3>صفحة تلوين</h3><p>مساحات مفتوحة وخطوط واضحة، مع عنصر بصري واحد أو اثنين للطفل الصغير.</p></article><article class="activity-card"><span>🔎</span><h3>لعبة ملاحظة</h3><p>ابحث عن شكل أو لون في الرسم، ثم اطرح سؤالاً يعيد الطفل إلى القصة.</p></article></div>
-        <div class="panel"><div class="panel-title"><div><span class="eyebrow">أنشطة مرتبطة بالصفحات</span><h3>أضف نشاطاً أو درساً</h3></div><button id="addActivity" class="button button-light">＋ نشاط جديد</button></div><div id="activitiesList" class="activity-list"></div><p class="hint">توليد QR غير مفعّل في هذه النسخة؛ أضف رابطاً عاماً آمناً للملف أولاً، ثم جهّز رمزاً من الأداة التي تختارها. لا تضع روابط خاصة أو بيانات الطفل.</p></div>
+        <div class="panel"><div class="panel-title"><div><span class="eyebrow">أنشطة مرتبطة بالصفحات</span><h3>أضف نشاطاً أو درساً</h3></div><button id="addActivity" class="button button-light">＋ نشاط جديد</button></div><div id="activitiesList" class="activity-list"></div><div id="qrOutput" class="qr-output" hidden></div><p class="hint">أنشئ QR محلياً من رابط HTTPS عام. لا تُرسل الروابط أو الملفات إلى خدمة خارجية، ولا تضع رابطاً خاصاً أو بيانات الطفل.</p></div>
       </section>
 
       <section class="view" id="view-publish">
@@ -109,6 +109,7 @@
     </main>
   </div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="qrcode.min.js" defer></script>
   <script src="app.js" defer></script>
 </body>
 </html>
