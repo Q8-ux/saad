@@ -1,7 +1,7 @@
 (() => {
   const KEY = 'hikayaStudio.v1';
   const emptyBook = () => ({
-    id: crypto.randomUUID?.() || String(Date.now()), title: '', age: '3–5 سنوات', format: 'قصة مصوّرة',
+    id: crypto.randomUUID?.() || String(Date.now()), title: '', age: '3–6 سنوات', format: 'كتاب تعليمي تفاعلي',
     goal: '', premise: '', language: 'العربية', trendNote: '', pages: [], characters: [], activities: [],
     checks: {}, print: {trimSize:'8.5x8.5',printColor:'ملون',printDirection:'من اليمين إلى اليسار',printPlatform:'Amazon KDP'},
     updatedAt: new Date().toISOString()
@@ -73,6 +73,12 @@
   function addPage(){book.pages=book.pages||[];book.pages.push({id:crypto.randomUUID?.()||String(Date.now()),text:'',visual:''});persist();renderPages();const all=$$('.page-row textarea');all.at(-2)?.focus();}
   function renderNotes(){const box=$('#trendNotes');if(!state.notes.length){box.innerHTML='';return;}box.innerHTML=state.notes.map(n=>`<article class="note-item"><b>${esc(n.name)} · ${esc(n.market||'سوق غير محدد')}</b><p>${esc(n.evidence||'لا يوجد وصف للدليل بعد')} · ${esc(n.age||'')}</p><small>رُصدت ${esc(n.date)}</small>${n.source?`<br><a href="${esc(n.source)}" target="_blank" rel="noreferrer">المصدر ↗</a>`:''}</article>`).join('');}
   const ideaSeeds={
+    'تعليم مبكر: حروف وأرقام ومهارات':[
+      ['ليلى وحديقة الحروف','تتبع ليلى خمس بطاقات حروف في الحديقة، وتتعرف في كل محطة إلى صوت الحرف وكلمة تبدأ به.','للأعمار 3–4: تسمية الصور؛ 4–5: مطابقة الصورة بالحرف؛ 5–6: تتبع الحرف وذكر صوته.'],
+      ['لولو ترسم طريقها','تساعد لولو سلحفاة صغيرة على الوصول إلى بيتها عبر خطوط ومسارات تتحول تدريجياً إلى أشكال وحروف.','يبدأ الطفل بخطوط عريضة وحركة إصبع، ثم ينتقل إلى مسارات أدق حسب قدرته.'],
+      ['خمسة أشياء في السوق','يرافق طفل جدته ويعد خمسة أشياء مألوفة، ثم يصنفها حسب اللون والحجم.','عدّ ومفردات يومية مع نشاط الإشارة والمطابقة قبل الكتابة.'],
+      ['أنا أتعلم كل يوم','قصة مصورة عن طفل يجرب الحروف والألوان والانتظار وطلب المساعدة في مواقف يومية.','مهارات مبكرة من خلال اللعب والموقف، بلا اختبار أو تصنيف للطفل.']
+    ],
     'أنشطة وتلوين بعيداً عن الشاشة':[
       ['مغامرة الخطوط المتعرجة','دفتر أنشطة يتتبع فيه الطفل طرقاً ورسومات قصيرة حتى يساعد سلحفاة على العودة لبيتها.','تدرج التمارين من خطوط كبيرة إلى مسارات أدق.'],
       ['حديقة الأشكال الملونة','كتاب تلوين وملاحظة يبحث فيه الطفل عن دائرة ومربع ومثلث داخل حديقة مرسومة.','يجمع التلوين ومفردات الأشكال والملاحظة.'],
@@ -105,10 +111,27 @@
     ]
   };
   function generateIdeas(){
-    const age=$('#ideaAge').value, trend=$('#ideaTrend').value, goal=$('#ideaGoal').value.trim()||'الخيال والقراءة';
+    const age=$('#ideaAge').value, trend=$('#ideaTrend').value, goal=$('#ideaGoal').value.trim()||'الحروف والأصوات، الأرقام، ومسك القلم';
     const list=ideaSeeds[trend]||ideaSeeds['فكرة أكتبها بنفسي'];
     $('#ideaResults').innerHTML=list.map((x,i)=>`<article class="idea-card"><span class="idea-title">بذرة ${i+1} · ${esc(trend)}</span><h3>${esc(x[0])}</h3><p>${esc(x[1])}</p><p>${esc(x[2])}</p><span class="idea-meta">${esc(age)} · محور مقترح: ${esc(goal)}</span><br><button class="button button-light choose-idea" data-title="${esc(x[0])}" data-premise="${esc(x[1])}" data-goal="${esc(goal)}" data-trend="${esc(trend)}">حوّلها إلى مشروع كتاب</button></article>`).join('');
-    $$('.choose-idea').forEach(b=>b.onclick=()=>{freshBook();book.title=b.dataset.title;book.premise=b.dataset.premise;book.goal=b.dataset.goal;book.age=age;book.format=trend.includes('أنشطة')?'كتاب تلوين وأنشطة':trend.includes('تفاعلي')?'قصة تفاعلية مع QR':trend.includes('كوميك')?'كوميك مصوّر':'قصة مصوّرة';book.trendNote=`${trend} — بذرة فكرة تحريرية داخل الاستوديو. أضف مصدر رصد موثق قبل وصفها بالرائجة.`;bindBook();persist();toast('تم نقل الفكرة إلى بطاقة الكتاب');});
+    $$('.choose-idea').forEach(b=>b.onclick=()=>{freshBook();book.title=b.dataset.title;book.premise=b.dataset.premise;book.goal=b.dataset.goal;book.age=age;book.language=$('#ideaLanguage').value;book.format=trend.includes('تعليم مبكر')||trend.includes('تفاعلي')?'كتاب تعليمي تفاعلي':trend.includes('أنشطة')?'كتاب تلوين وأنشطة':trend.includes('كوميك')?'كوميك مصوّر':'قصة مصوّرة';book.trendNote=`${trend} — بذرة تعليمية مقترحة لعمر ${age}. يلزم رصد محلي قبل وصفها بالرائجة.`;bindBook();persist();toast('تم نقل الفكرة إلى بطاقة الكتاب');});
+  }
+  function loadEducationalSample(){
+    book={...emptyBook(),title:'ليلى وحديقة الحروف والألوان',age:'3–6 سنوات',format:'كتاب تعليمي تفاعلي',goal:'تمييز أصوات خمسة حروف عربية، العد من 1 إلى 5، وممارسة تتبع الخطوط',premise:'تتبع ليلى خمس بطاقات ضائعة في الحديقة؛ وفي كل محطة تكتشف حرفاً وصورة ولعبة قصيرة.',language:'العربية',trendNote:'مسودة تعليمية بعناصر مطبوعة وأنشطة قصيرة. تتصل بإشارة نمو كتب الأنشطة المطبوعة في تقرير أمريكي؛ لا تعتبر دليلاً على الطلب المحلي قبل اختباره.',characters:[{name:'ليلى',appearance:'طفلة فضولية بعمر يقارب خمس سنوات، ملامح طفولية طبيعية وتعبير واضح',wardrobe:'فستان أزرق بسيط وحقيبة بلون أصفر؛ الألوان ثابتة بكل الصفحات',personality:'تسأل وتلاحظ وتحاول من جديد، من دون مبالغة في ردود الفعل',style:'رسوم مائية مرسومة يدوياً، ألوان دافئة، تفاصيل قليلة وخلفية غير مزدحمة'}],pages:[
+      {id:'sample-cover',text:'الغلاف: ليلى وحديقة الحروف والألوان',visual:'ليلى في حديقة مضيئة، حولها خمس بطاقات حروف عربية كبيرة ورسوم أرنب وبطة وتفاحة وجمل وموزة. اترك مساحة واضحة للعنوان، ولا تكتب حروفاً مولدة داخل الصورة.'},
+      {id:'sample-1',text:'دخلت ليلى الحديقة، فوجدت بطاقات الحروف قد تطايرت. قالت: سأجمعها واحدة واحدة!',visual:'ليلى تمسك حقيبتها قرب بوابة الحديقة، وبطاقة فارغة تتطاير أمامها.'},
+      {id:'sample-2',text:'قفز أرنب أبيض من خلف الشجرة. قالت ليلى: أَرْنَب! أسمع صوت أ في أول الكلمة.',visual:'أرنب لطيف بجوار شجرة؛ بطاقة الحرف أ واضحة كعنصر منفصل يضاف في التصميم.'},
+      {id:'sample-3',text:'سبحت بطة في البركة. ابتسمت ليلى: بَطَّة تبدأ بصوت ب.',visual:'بطة صفراء تسبح قرب البركة، وليلى تشير إليها. بطاقة الحرف ب في مساحة منفصلة.'},
+      {id:'sample-4',text:'وجدت ليلى تفاحة حمراء. قالت ببطء: تُفَّاحَة… ت. ثم تتبعت شكل الحرف بإصبعها.',visual:'تفاحة على غصن منخفض ويد صغيرة تتبع مساراً كبيراً متقطعاً للحرف ت.'},
+      {id:'sample-5',text:'كان جمل صغير ينتظر عند الممر. قالت ليلى: جَمَل! ما الصوت الذي نسمعه أولاً؟',visual:'جمل صغير ودود عند ممر الحديقة؛ فقاعة سؤال فارغة تترك للمصمم إضافة النص.'},
+      {id:'sample-6',text:'على المقعد موزة صفراء. قالت ليلى: مَوْز! وجدت البطاقة الخامسة.',visual:'موزة على مقعد خشبي، والبطاقة م بجانبها. لا تزدحم الخلفية.'},
+      {id:'sample-7',text:'جمعت ليلى البطاقات: أ، ب، ت، ج، م. أعادت كل بطاقة إلى صورتها.',visual:'البطاقات الخمس مرتبة بجانب صورها، مع مساحات فارغة لتمرين المطابقة.'},
+      {id:'sample-8',text:'عدّت ليلى الزهور: واحدة، اثنتان، ثلاث، أربع، خمس. ثم اختارت الزهرة الزرقاء.',visual:'خمس زهور كبيرة واضحة بألوان مختلفة، مع أرقام قابلة للإضافة في مرحلة التصميم.'},
+      {id:'sample-9',text:'رسمت ليلى طريقاً متعرجاً إلى البوابة. قالت: أتدرب بهدوء، وكل مرة أتعلم شيئاً جديداً.',visual:'مسار عريض منقط يبدأ بجانب ليلى وينتهي بالبوابة؛ مناسب للتتبع بالقلم.'},
+      {id:'sample-10',text:'عادت ليلى سعيدة. سألتها أمها: ما الحرف الذي أعجبك؟ اختارت ليلى حرفاً، وبدأت حكاية جديدة.',visual:'ليلى تعرض البطاقات على أمها في الحديقة؛ نهاية دافئة تترك سؤالاً مفتوحاً للطفل.'},
+      {id:'sample-guide',text:'للأهل: لعمر 3–4 سنوات، سمّوا الصور وأشيروا إليها. لعمر 4–5 سنوات، طابقوا الصورة بالحرف. لعمر 5–6 سنوات، اسألوا عن الصوت الأول وتتبعوا الحرف. لا يلزم إكمال الأنشطة كلها في جلسة واحدة.',visual:'صفحة إرشاد بسيطة للأهل مع ثلاث علامات عمرية وأيقونات؛ تفصل بصرياً عن القصة.'}
+    ],activities:[{id:'act-letter',name:'اسمع صوت الحروف الخمسة',type:'حرف وصوت',url:''},{id:'act-trace',name:'تتبع مسار ليلى إلى البوابة',type:'تدريب قلم',url:''},{id:'act-count',name:'عد الزهور من 1 إلى 5',type:'لغز وملاحظة',url:''},{id:'act-color',name:'لوّن البطة والتفاحة',type:'تلوين',url:''}],checks:{},print:{trimSize:'8.5x8.5',printColor:'ملون',printDirection:'من اليمين إلى اليسار',printPlatform:'Amazon KDP'}};
+    bindBook();renderPages();renderActivities();persist('نموذج تعليمي محفوظ');setView('book');toast('جهزت نموذج الكتاب التعليمي لعمر 3–6');
   }
   function renderActivities(){const box=$('#activitiesList');if(!box)return;const rows=book.activities||[];if(!rows.length){box.innerHTML='<div class="empty-state">أضف نشاطاً، تمريناً، أو مورداً رقمياً مرتبطاً بصفحة.</div>';return;}box.innerHTML=rows.map(a=>`<div class="activity-row" data-id="${esc(a.id)}"><input data-a="name" value="${esc(a.name)}" placeholder="اسم النشاط"><select data-a="type"><option ${a.type==='تدريب قلم'?'selected':''}>تدريب قلم</option><option ${a.type==='حرف وصوت'?'selected':''}>حرف وصوت</option><option ${a.type==='تلوين'?'selected':''}>تلوين</option><option ${a.type==='لغز وملاحظة'?'selected':''}>لغز وملاحظة</option><option ${a.type==='صوت / QR'?'selected':''}>صوت / QR</option></select><input data-a="url" value="${esc(a.url)}" placeholder="رابط عام HTTPS اختياري"><button type="button" class="make-qr" aria-label="إنشاء رمز QR">QR</button><button type="button" class="delete-activity" aria-label="حذف النشاط">×</button></div>`).join('');$$('.activity-row',box).forEach(r=>{ $$('[data-a]',r).forEach(e=>e.addEventListener('input',()=>{const a=book.activities.find(x=>x.id===r.dataset.id);if(a){a[e.dataset.a]=e.value;persist();}}));$('.make-qr',r).onclick=()=>makeQr(book.activities.find(x=>x.id===r.dataset.id));$('.delete-activity',r).onclick=()=>{book.activities=book.activities.filter(x=>x.id!==r.dataset.id);persist();renderActivities();};});}
   function makeQr(activity){
@@ -137,6 +160,7 @@
   $$('.nav-item').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view)));
   $$('[data-go]').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.go)));
   ['newBookTop','startBook','startBook2','newBookLibrary'].forEach(id=>{const b=$(`#${id}`);if(b)b.onclick=freshBook;});
+  $('#sampleBook').onclick=loadEducationalSample;
   $('#bookForm').addEventListener('submit',e=>{e.preventDefault();readBookForm();persist('بيانات الكتاب محفوظة');toast('تم حفظ بطاقة الكتاب');});
   ['bookTitle','bookAge','bookFormat','bookGoal','bookPremise','bookLanguage','bookTrendNote'].forEach(id=>{const el=$(`#${id}`);el.addEventListener('input',()=>{readBookForm();persist();});el.addEventListener('change',()=>{readBookForm();persist();});});
   $('#addPage').onclick=addPage;$('#printBook').onclick=()=>window.print();$('#printBook2').onclick=()=>{setView('book');setTimeout(()=>window.print(),250);};$('#printFromPublish').onclick=()=>{setView('book');setTimeout(()=>window.print(),250);};
