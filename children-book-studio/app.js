@@ -27,7 +27,7 @@
     $$('.nav-item').forEach(b=>b.classList.toggle('active',b.dataset.view===name));
     const titles={home:'لوحة الاستوديو',trends:'رادار الاتجاهات',ideas:'بنك الأفكار',book:'بناء الكتاب',illustrations:'الرسوم والشخصيات',activities:'التعلّم والأنشطة',publish:'تجهيز النشر',library:'مكتبتي'};
     $('#pageTitle').textContent=titles[name]||'حكاية';
-    if(name==='book') renderPages(); if(name==='library')renderLibrary(); window.scrollTo({top:0,behavior:'smooth'});
+    if(name==='book') renderPages(); if(name==='illustrations'||name==='publish')bindBook(); if(name==='activities')renderActivities(); if(name==='library')renderLibrary(); window.scrollTo({top:0,behavior:'smooth'});
   }
   function freshBook(){ book=emptyBook(); bindBook(); renderPages(); persist('مشروع جديد جاهز'); setView('book'); $('#bookTitle').focus(); }
   function bindBook(){
