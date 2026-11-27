@@ -41,6 +41,7 @@ on:
       - 'elanak-saleem/**'
       - 'alsaqaf-school/**'
       - 'youtube-studio-ai/**'
+      - 'children-book-studio/**'
       - 'remote-ai-hub/**'
       - 'ai-video-studio/**'
       - 'animation-studio/**'
@@ -222,7 +223,7 @@ jobs:
         run: |
           rm -rf _site && mkdir -p _site
           cp index.html 404.html cyber-archive.css cyber-archive.js cyber-data.js sabeq.html _site/
-          for p in sabeq-legal sabeq-admin-preview sabeq-ahmad sabeq-legal-system sabeq-legal-pro hessa-alobaid shalayhna zad-restaurants tamweenat tamweenat-admin rattil etf-academy kuwait-digital-sales-plan kuwait-fund-modern livestock-vax-kw waqaya-v2 english-kuwait oman-fruits-pos oman-fruits-commerce project-command-center my-sites nlk-multilingual reddit-business-agent grok-trading ant-alshaer ai-chess-kuwait elanak-saleem alsaqaf-school youtube-studio-ai remote-ai-hub noura-alattal ai-video-studio animation-studio muhami-next barcode frame-studio dr-hamad-instagram-demo tiktok-growth longcat-video sinad-kuwait stock-opportunity-radar; do cp -R "$p" "_site/$p"; done
+          for p in sabeq-legal sabeq-admin-preview sabeq-ahmad sabeq-legal-system sabeq-legal-pro hessa-alobaid shalayhna zad-restaurants tamweenat tamweenat-admin rattil etf-academy kuwait-digital-sales-plan kuwait-fund-modern livestock-vax-kw waqaya-v2 english-kuwait oman-fruits-pos oman-fruits-commerce project-command-center my-sites nlk-multilingual reddit-business-agent grok-trading ant-alshaer ai-chess-kuwait elanak-saleem alsaqaf-school youtube-studio-ai children-book-studio remote-ai-hub noura-alattal ai-video-studio animation-studio muhami-next barcode frame-studio dr-hamad-instagram-demo tiktok-growth longcat-video sinad-kuwait stock-opportunity-radar; do cp -R "$p" "_site/$p"; done
           if [ -d dr-hamad ]; then cp -R dr-hamad _site/dr-hamad; fi
           if [ -d voice-cloning-studio ]; then python voice-cloning-studio/deployment/build.py && cp -R voice-cloning-studio/dist _site/voice-cloning-studio; fi
           if [ -d dhikr ]; then python dhikr/deployment/build.py && cp -R dhikr/dist _site/dhikr; fi
@@ -257,6 +258,10 @@ jobs:
           node --check _site/etf-academy/calculations.js
           test -s _site/alsaqaf-school/index.html
           test -s _site/youtube-studio-ai/index.html
+          test -s _site/children-book-studio/index.html
+          test -s _site/children-book-studio/styles.css
+          test -s _site/children-book-studio/qrcode.min.js
+          node --check _site/children-book-studio/app.js
           test -s _site/remote-ai-hub/index.html
           test -s _site/noura-alattal/index.html
           test -s _site/noura-alattal/admin/index.html
