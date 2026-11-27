@@ -56,8 +56,15 @@
 @media(max-width:560px){.stage-heading{display:grid;grid-template-columns:36px 1fr}.stage-heading .stage-number{grid-row:1}.stage-heading>div{grid-column:2}.source-chip{grid-column:2;margin:0;justify-self:start}.engine-actions .button{flex:1}.production-form .full{grid-column:auto}.produced-grid{grid-template-columns:1fr}}
 
 @media print{
-  body.print-produced .produced-head,body.print-produced .produced-copy{display:none!important}
+  body.print-produced .produced-head{display:none!important}
   body.print-produced .produced-grid{display:block!important;margin:0!important;padding:0!important}
-  body.print-produced .produced-sheet{width:8.5in!important;height:8.5in!important;aspect-ratio:1/1!important}
+  body.print-produced .produced-page{display:block!important;position:relative!important}
+  body.print-produced .produced-sheet{display:block!important;width:100%!important;height:100%!important;aspect-ratio:1/1!important;background:#fff!important}
   body.print-produced .produced-sheet svg{width:100%!important;height:100%!important}
+  body.print-produced .produced-copy{display:flex!important;position:absolute!important;inset-inline:.42in!important;bottom:.35in!important;flex-direction:column!important;gap:.06in!important;max-height:2.55in!important;overflow:hidden!important;padding:.18in .24in!important;border:1px solid #e7e0d5!important;border-radius:.12in!important;background:#fffefa!important}
+  body.print-produced .produced-copy>span{font-size:8pt!important}
+  body.print-produced .produced-copy h4{font-size:16pt!important;margin:0!important}
+  body.print-produced .produced-copy p{font-size:12pt!important;line-height:1.55!important;margin:0!important}
+  body.print-produced .produced-copy small{font-size:10pt!important;line-height:1.4!important}
+  body.print-produced .produced-copy .page-download{display:none!important}
 }

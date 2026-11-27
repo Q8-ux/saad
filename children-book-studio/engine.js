@@ -340,38 +340,44 @@
 
   function buildPages({ title, character, goal, mode, age, count, style }) {
     const selected = mode === 'mixed' ? [...lessons.letters.slice(0, 2), ...lessons.numbers.slice(0, 2), lessons.colors[0], lessons.prewriting[0]] : lessons[mode] || lessons.letters;
-    const lessonSlots = Math.max(1, Math.min(selected.length, Math.floor((count - 4) / 2)));
+    const lessonSlots = Math.max(1, Math.floor((count - 4) / 2));
+    const activitySets = {
+      letters: ['أشر إلى الحرف وقل صوته ببطء.', 'صِل الحرف بالصورة التي يبدأ اسمها به.', 'تتبّع الحرف بإصبعك ثم بالقلم.', 'ابحث عن شيء قريب يبدأ بالصوت نفسه.', 'لوّن الصورة وقل اسمها بوضوح.'],
+      numbers: ['المس كل نجمة وعد بصوت مسموع.', 'طابق بطاقة الرقم مع مجموعة النجوم.', 'أخفِ نجمة واحدة: كم بقي؟', 'رتب الأرقام من الأصغر إلى الأكبر.', 'ارسم العدد نفسه من النقاط.'],
+      colors: ['ابحث عن شيء في البيت بهذا اللون.', 'صِل الشكل بنظيره المطابق.', 'لوّن الشكل باللون الصحيح.', 'ابحث عن شكل مشابه في الصفحة.', 'صف شيئاً تراه باللون نفسه.'],
+      prewriting: ['تتبّع المسار بإصبعك أولاً.', 'ابدأ من النقطة وواصل حتى النجمة.', 'ارسم المسار في الهواء بحركة واسعة.', 'تتبّع الخط بالقلم من دون استعجال.', 'اختر لوناً وارسم المسار مرة أخرى.'],
+      mixed: ['أشر إلى الرمز وسمّه.', 'صِل الرمز بالصورة المناسبة.', 'تتبّع المسار بهدوء.', 'ابحث عن مثال مشابه حولك.', 'لوّن العنصر ثم احكِ عنه.']
+    };
     const pages = [
-      { id: uid(), type: 'cover', label: title, text: `${title}\nكتاب تعليمي تفاعلي للأعمار ${age}`, visual: `غلاف أصلي: ${character} وسط عناصر تعليمية واضحة، أسلوب ${style}.` },
-      { id: uid(), type: 'intro', label: 'لنبدأ', text: `مرحباً! أنا ${character}. سنلعب ونتعلّم معاً. هل أنت مستعد؟`, visual: `${character} يفتح حقيبة تعليمية في مساحة هادئة ومضيئة.` }
+      { id: uid(), type: 'cover', label: title, text: `${title}\nحكاية تعليمية تفاعلية للأعمار ${age}`, visual: `غلاف أصلي: ${character} وسط عناصر تعليمية واضحة، أسلوب ${style}.` }
     ];
-    selected.slice(0, lessonSlots).forEach((lesson, index) => {
+    Array.from({ length: lessonSlots }, (_, index) => {
+      const lesson = selected[index % selected.length];
+      const round = Math.floor(index / selected.length);
+      const sequence = index + 1;
+      const task = (activitySets[mode] || activitySets.mixed)[index % (activitySets[mode] || activitySets.mixed).length];
+      const chapterNames = ['عند البوابة', 'قرب الشجرة', 'بجوار البركة', 'في ممر الألوان', 'على التل الصغير', 'عند الجسر', 'في ساحة اللعب', 'قرب المقعد', 'بين الزهور', 'عند صندوق الكنز'];
+      const place = chapterNames[index % chapterNames.length];
+      const storyText = round === 0
+        ? `${sequence === 1 ? `مرحباً! أنا ${character}. ضاعت شارات التعلّم في الحديقة، وسأبحث عنها محطةً محطة. ` : ''}${character} وصل إلى ${place}. وجد ${lesson.word} على بطاقة صغيرة. هيا نلاحظ الرمز ${lesson.symbol} معاً. ${ageInstruction(age, lesson)}`
+        : `${character} عاد إلى ${place} ليتأكد أنه تذكّر ${lesson.word}. هذه المرة، هل تستطيع إيجاد الرمز ${lesson.symbol} من دون مساعدة؟`;
       pages.push({
-        id: uid(), type: 'lesson', label: `${lesson.symbol} · ${lesson.word}`, symbol: lesson.symbol, word: lesson.word,
-        object: lesson.object, count: lesson.count, color: lesson.color, text: lessonText(mode === 'mixed' ? inferMode(lesson) : mode, lesson, character, age),
-        activity: ageInstruction(age, lesson), visual: `${character} مع ${lesson.word}، رمز كبير ومساحة تدريب، ألوان قليلة وخلفية غير مزدحمة.`
+        id: uid(), type: 'lesson', label: `المحطة ${sequence}: ${lesson.symbol} · ${lesson.word}`, symbol: lesson.symbol, word: lesson.word,
+        object: lesson.object, count: lesson.count, color: lesson.color,
+        text: storyText, activity: ageInstruction(age, lesson), visual: `${character} يصل إلى ${place} ويكتشف ${lesson.word} ورمزه ${lesson.symbol}.`
       });
       pages.push({
-        id: uid(), type: 'activity', label: `دوري الآن · ${lesson.symbol}`, symbol: lesson.symbol, word: lesson.word,
-        object: lesson.object, count: lesson.count, color: lesson.color, text: `دورك الآن: ${ageInstruction(age, lesson)}`,
-        activity: index % 2 ? 'لوّن العنصر ثم قل اسمه.' : 'تتبّع المسار بإصبعك أولاً ثم بالقلم.', visual: `صفحة نشاط أصلية كبيرة للرمز ${lesson.symbol}.`
+        id: uid(), type: 'activity', label: `لعبتي في المحطة ${sequence}`, symbol: lesson.symbol, word: lesson.word,
+        object: lesson.object, count: lesson.count, color: lesson.color,
+        text: round === 0 ? `الآن جاء دورك. ${task}` : `تحدي التذكّر: ${task}`,
+        activity: task, visual: `نشاط واضح مرتبط بـ${lesson.word} والرمز ${lesson.symbol}: ${task}`
       });
     });
-
-    const fillers = [
-      { type: 'review', label: 'مراجعة مرحة', text: `ساعد ${character}: أشر إلى ما تعلمته وقل اسمه. لا بأس أن تختار عنصراً واحداً فقط.`, visual: 'بطاقات مصورة من الدروس السابقة في شبكة واسعة.' },
-      { type: 'activity', label: 'ابحث ولَوِّن', text: 'ابحث عن الرمز المختلف، ثم لوّن النجمة الكبيرة.', activity: 'مهمة ملاحظة قصيرة بلا شاشة.', visual: 'ثلاثة رموز كبيرة ونجمة للتلوين.' },
-      { type: 'review', label: 'احكِ ما رأيت', text: `اسأل الطفل: ماذا أحب ${character}؟ وما الشيء الذي أحببته أنت؟`, visual: 'مشهد ختامي يعيد عناصر الدرس الرئيسية.' }
-    ];
-    let fillerIndex = 0;
-    while (pages.length < count - 2) {
-      const template = fillers[fillerIndex % fillers.length];
-      pages.push({ id: uid(), ...template, color: ['#e88d7a', '#77a6c6', '#7eb28f'][fillerIndex % 3] });
-      fillerIndex += 1;
-    }
-    pages.push({ id: uid(), type: 'guide', label: 'دليل الأسرة', text: `الهدف: ${goal}. لعمر 3–4: الإشارة والتسمية. لعمر 4–5: المطابقة والتصنيف. لعمر 5–6: التتبع والاستدعاء. توقفوا عندما يفقد الطفل اهتمامه، ولا تحولوا النشاط إلى اختبار.`, visual: 'إرشادات مختصرة للأهل بثلاث بطاقات عمرية.' });
-    pages.push({ id: uid(), type: 'end', label: 'أحسنت!', text: `أكمل ${character} الرحلة. اختر صفحتك المفضلة وأعد اللعب بها غداً.`, visual: `${character} يلوّح وسط نجوم وشرائط ملونة.` });
-    return pages.slice(0, count);
+    const lastLesson = selected[(lessonSlots - 1) % selected.length];
+    pages.push({ id: uid(), type: 'review', label: 'وصلنا إلى الكنز', symbol: lastLesson.symbol, word: lastLesson.word, object: lastLesson.object, color: lastLesson.color, text: `${character} جمع الشارات كلها! هيا نتذكر: ما الرمز الذي أعجبك؟ وأي نشاط تريد أن تجربه مرة أخرى؟`, activity: 'اختر صفحة مفضلة، ثم اشرح ما تعلمته بكلماتك.', visual: `${character} يفتح صندوقاً صغيراً تظهر حوله رموز الدروس التي مررنا بها.` });
+    pages.push({ id: uid(), type: 'guide', label: 'دليل الأسرة', text: `هدف الكتاب: ${goal}. لعمر 3–4 سنوات: ابدأوا بالإشارة والتسمية واللعب معاً. لعمر 4–5 سنوات: شجعوا المطابقة والتصنيف. لعمر 5–6 سنوات: دعوا الطفل يتتبع الرمز أو يصف ما لاحظه. اختاروا نشاطاً واحداً في كل مرة، وتوقفوا عندما يفقد الطفل اهتمامه.`, activity: 'لا يلزم إكمال الكتاب في جلسة واحدة. امدحوا المحاولة، ولا تحولوا الأنشطة إلى اختبار.', visual: 'ثلاث بطاقات للأعمار 3–4 و4–5 و5–6 مع تلميح قصير للأسرة.' });
+    pages.push({ id: uid(), type: 'end', label: 'نهاية الرحلة وبداية جديدة', text: `أحسنت! ساعدت ${character} في إكمال الرحلة. اختر شيئاً تعلمته اليوم، وشاركه مع شخص تحبه. نلتقي في مغامرة جديدة!`, activity: 'ارسم نجمة بجانب نشاطك المفضل.', visual: `${character} يلوّح عند بوابة الحديقة، وقد عادت الشارات إلى مكانها.` });
+    return pages;
   }
 
   function inferMode(lesson) {
@@ -501,10 +507,10 @@
     const toolbar = $('productionToolbar');
     if (!preview || !generatedBook) return;
     if (toolbar) toolbar.hidden = false;
-    preview.innerHTML = `<div class="produced-head"><div><span>نسخة منتجة فعلياً</span><h3>${esc(generatedBook.title)}</h3><p>${generatedBook.pages.length} صفحة · ${esc(generatedBook.age)} · رسوم SVG أصلية قابلة للطباعة</p></div><b>${generatedBook.pages.length}</b></div>
+    preview.innerHTML = `<div class="produced-head"><div><span>مسودة كتاب كاملة قابلة للمراجعة</span><h3>${esc(generatedBook.title)}</h3><p>${generatedBook.pages.length} صفحة · ${esc(generatedBook.age)} · حكاية متسلسلة ودروس وأنشطة ودليل للأسرة</p></div><b>${generatedBook.pages.length}</b></div>
       <div class="produced-grid">${generatedBook.pages.map((page, index) => `<article class="produced-page" data-produced-page="${index}">
         <div class="produced-sheet">${page.svg}</div>
-        <div class="produced-copy"><span>صفحة ${index + 1}</span><h4>${esc(page.label)}</h4><p>${esc(page.text)}</p>${page.activity ? `<small>النشاط: ${esc(page.activity)}</small>` : ''}
+        <div class="produced-copy"><span>صفحة ${index + 1} من ${generatedBook.pages.length}</span><h4>${esc(page.label)}</h4><p>${esc(page.text)}</p>${page.activity ? `<small><b>نشاط:</b> ${esc(page.activity)}</small>` : ''}
         <button class="text-button download-svg" type="button" data-svg="${index}">تنزيل SVG لهذه الصفحة</button></div>
       </article>`).join('')}</div>`;
     preview.querySelectorAll('[data-svg]').forEach((button) => button.addEventListener('click', () => {
@@ -516,9 +522,9 @@
   }
 
   function standaloneHtml() {
-    const pages = generatedBook.pages.map((page, index) => `<section class="book-page">${page.svg}<div class="page-copy"><b>${esc(page.label)}</b><p>${esc(page.text)}</p>${page.activity ? `<small>${esc(page.activity)}</small>` : ''}</div><i>${index + 1}</i></section>`).join('');
+    const pages = generatedBook.pages.map((page, index) => `<section class="book-page"><div class="book-art">${page.svg}</div><div class="page-copy"><span>صفحة ${index + 1} من ${generatedBook.pages.length}</span><b>${esc(page.label)}</b><p>${esc(page.text)}</p>${page.activity ? `<small><strong>نشاط:</strong> ${esc(page.activity)}</small>` : ''}</div></section>`).join('');
     return `<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(generatedBook.title)}</title><style>
-      *{box-sizing:border-box}body{margin:0;background:#eee;font-family:Arial,sans-serif;color:#293942}.book-page{position:relative;width:min(800px,100%);aspect-ratio:1;margin:24px auto;background:#fff;box-shadow:0 8px 30px #0002;overflow:hidden}.book-page svg{width:100%;height:100%;display:block}.page-copy{display:none}.book-page>i{display:none}@page{size:8.5in 8.5in;margin:0}@media print{body{background:#fff}.book-page{width:8.5in;height:8.5in;margin:0;box-shadow:none;break-after:page;page-break-after:always}}
+      *{box-sizing:border-box}body{margin:0;background:#eee;font-family:Cairo,Arial,sans-serif;color:#293942}.book-page{position:relative;width:min(800px,100vw);aspect-ratio:1;margin:24px auto;background:#fff;box-shadow:0 8px 30px #0002;overflow:hidden}.book-art{position:absolute;inset:0}.book-art svg{width:100%;height:100%;display:block}.page-copy{position:absolute;inset-inline:5%;bottom:4%;display:flex;flex-direction:column;gap:5px;max-height:42%;overflow:hidden;padding:12px 16px;border:1px solid #e7e0d5;border-radius:14px;background:#fffefaed;backdrop-filter:blur(4px)}.page-copy>span{font-size:10px;color:#8b8178}.page-copy>b{font-size:17px}.page-copy p{font-size:13px;line-height:1.7;margin:0}.page-copy small{font-size:11px;line-height:1.6;color:#675f57}@page{size:8.5in 8.5in;margin:0}@media print{body{background:#fff}.book-page{width:8.5in;height:8.5in;margin:0;box-shadow:none;break-after:page;page-break-after:always}.page-copy{inset-inline:.42in;bottom:.35in;max-height:2.55in;padding:.18in .24in;gap:.06in;border-radius:.12in;backdrop-filter:none}.page-copy>b{font-size:16pt}.page-copy p{font-size:11pt;line-height:1.45}.page-copy small{font-size:9pt;line-height:1.35}.page-copy>span{font-size:7.5pt}}
     </style></head><body>${pages}</body></html>`;
   }
 
