@@ -25,7 +25,7 @@
   function setView(name){
     $$('.view').forEach(v=>v.classList.toggle('active',v.id===`view-${name}`));
     $$('.nav-item').forEach(b=>b.classList.toggle('active',b.dataset.view===name));
-    const titles={home:'لوحة الاستوديو',trends:'رادار الاتجاهات',ideas:'بنك الأفكار',book:'بناء الكتاب',illustrations:'الرسوم والشخصيات',activities:'التعلّم والأنشطة',publish:'تجهيز النشر',library:'مكتبتي'};
+    const titles={home:'لوحة الاستوديو',engine:'محرك البحث والإنتاج',trends:'رادار الاتجاهات',ideas:'بنك الأفكار',book:'بناء الكتاب',illustrations:'الرسوم والشخصيات',activities:'التعلّم والأنشطة',publish:'تجهيز النشر',library:'مكتبتي'};
     $('#pageTitle').textContent=titles[name]||'حكاية';
     if(name==='book') renderPages(); if(name==='illustrations'||name==='publish')bindBook(); if(name==='activities')renderActivities(); if(name==='library')renderLibrary(); window.scrollTo({top:0,behavior:'smooth'});
   }
@@ -156,6 +156,35 @@
   function safeName(s){return String(s).normalize('NFKD').replace(/[^\p{L}\p{N}-]+/gu,'-').replace(/^-|-$/g,'').slice(0,60)||'hikaya-book';}
   function exportAll(){const blob=new Blob([JSON.stringify({schema:'hikayaStudio.v1',exportedAt:new Date().toISOString(),state},null,2)],{type:'application/json;charset=utf-8'});download(blob,'hikaya-studio-backup.json');}
   function importBackup(file){const r=new FileReader();r.onload=()=>{try{const data=JSON.parse(r.result);const incoming=Array.isArray(data.books)?data.books:(data.state?.books||[data]);if(!Array.isArray(incoming)||!incoming.length)throw Error();for(const x of incoming){if(!x||typeof x!=='object')continue;if(!x.id)x.id=crypto.randomUUID?.()||String(Date.now());const i=state.books.findIndex(y=>y.id===x.id);if(i<0)state.books.push(x);else state.books[i]=x;}if(Array.isArray(data.notes))state.notes=[...data.notes,...state.notes];else if(Array.isArray(data.state?.notes))state.notes=[...data.state.notes,...state.notes];book=state.books[0]||emptyBook();state.activeId=book.id;persist('تم استيراد النسخة');bindBook();renderPages();renderActivities();renderNotes();toast('تم استيراد نسخة المشروع');}catch{toast('الملف ليس نسخة متوافقة مع حكاية');}};r.readAsText(file);}
+
+  window.addEventListener('hikaya:generated-book',event=>{
+    const source=event.detail?.book||event.detail;
+    if(!source||!Array.isArray(source.pages)||!source.pages.length){toast('لم أجد صفحات منتجة لنقلها');return;}
+    const base=emptyBook();
+    book={
+      ...base,
+      ...source,
+      id:crypto.randomUUID?.()||String(Date.now()),
+      title:String(source.title||'كتاب تعليمي منتج'),
+      age:String(source.age||'3–6 سنوات'),
+      format:String(source.format||'كتاب تعليمي تفاعلي'),
+      goal:String(source.goal||''),
+      premise:String(source.premise||'كتاب تعليمي أصلي أُنتج من محرك حكاية.'),
+      language:String(source.language||'العربية'),
+      pages:source.pages.map((page,index)=>({
+        ...page,
+        id:String(page.id||`generated-${Date.now()}-${index}`),
+        text:String(page.text||page.title||''),
+        visual:String(page.visual||page.visualDescription||'رسم SVG أصلي مرفق في ملف الإنتاج')
+      })),
+      characters:Array.isArray(source.characters)?source.characters:[],
+      activities:Array.isArray(source.activities)?source.activities:[],
+      checks:source.checks||{},
+      print:{...base.print,...(source.print||{})},
+      updatedAt:new Date().toISOString()
+    };
+    bindBook();renderPages();renderActivities();persist('تم حفظ الكتاب المنتج في المكتبة');setView('book');toast('نُقلت الصفحات إلى المحرر وحُفظ الكتاب');
+  });
 
   $$('.nav-item').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view)));
   $$('[data-go]').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.go)));

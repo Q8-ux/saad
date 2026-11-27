@@ -10,6 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="engine.css">
 </head>
 <body>
   <div class="shell">
@@ -18,6 +19,7 @@
       <div class="side-label">مسارات العمل</div>
       <nav class="nav" aria-label="القائمة الرئيسية">
         <button class="nav-item active" data-view="home"><span>⌂</span> لوحة الاستوديو</button>
+        <button class="nav-item" data-view="engine"><span>⚙</span> البحث والإنتاج</button>
         <button class="nav-item" data-view="trends"><span>◉</span> رادار الاتجاهات</button>
         <button class="nav-item" data-view="ideas"><span>✦</span> بنك الأفكار</button>
         <button class="nav-item" data-view="book"><span>▤</span> بناء الكتاب</button>
@@ -38,15 +40,15 @@
 
       <section class="view active" id="view-home">
         <div class="hero">
-          <div class="hero-copy"><span class="pill pill-coral">تعليم مبكر · من 3 إلى 6 سنوات</span><h2>خلّ الفكرة الصغيرة<br><em>تصير حكاية يتعلّم منها الطفل</em></h2><p>أفكار تعليمية وقصص مصوّرة وأنشطة تناسب مراحل الطفولة المبكرة، من الحروف والأرقام إلى مسك القلم والاكتشاف.</p><div class="hero-actions"><button class="button button-primary" id="startBook">ابدأ كتاباً جديداً <span>←</span></button><button class="button button-light" id="sampleBook">افتح نموذجاً تعليمياً جاهزاً</button></div><div class="hero-foot"><span>✿ عربي أولاً</span><span>◌ مناسب للجوال</span><span>▤ يحفظ محلياً</span></div></div>
+          <div class="hero-copy"><span class="pill pill-coral">تعليم مبكر · من 3 إلى 6 سنوات</span><h2>ابحث وحلّل ثم<br><em>أنتج كتاباً كاملاً برسوماته</em></h2><p>بحث حي في فهرس كتب عالمي، تحليل شفاف للنتائج، ثم إنتاج صفحات تعليمية أصلية برسومات SVG قابلة للطباعة والتعديل.</p><div class="hero-actions"><button class="button button-primary" data-go="engine">ابدأ البحث والإنتاج <span>←</span></button><button class="button button-light" id="sampleBook">افتح نموذجاً تعليمياً جاهزاً</button></div><div class="hero-foot"><span>✿ عربي أولاً</span><span>◉ بحث حي</span><span>✎ رسوم فعلية</span></div></div>
           <div class="hero-art" aria-label="رسم توضيحي لطفل يقرأ مع قطة"><div class="sun"></div><div class="cloud cloud-a"></div><div class="cloud cloud-b"></div><div class="book-blob"><div class="book-page"><span>حكاية</span><b>مغامرة<br>تبدأ هنا</b><i>✦</i></div></div><div class="kid"><div class="hair"></div><div class="face"><i class="eye eye-a"></i><i class="eye eye-b"></i><i class="smile"></i></div><div class="body"></div><div class="arm"></div></div><div class="cat">🐈</div><span class="spark spark-one">✦</span><span class="spark spark-two">✳</span><span class="art-caption">كل كتاب يبدأ بسؤال صغير</span></div>
         </div>
 
         <div class="section-heading"><div><span class="eyebrow">المحطة الحالية</span><h2>مساراتك في مكان واحد</h2></div><span class="soft-label">ثماني خطوات قابلة للتحرير</span></div>
         <div class="path-grid">
-          <button class="path-card" data-go="trends"><span class="path-icon peach">◉</span><span class="path-num">01</span><b>رصد الاتجاهات</b><small>إشارات سوق مع مصادر وتاريخ رصد</small></button>
-          <button class="path-card" data-go="ideas"><span class="path-icon yellow">✦</span><span class="path-num">02</span><b>اختيار فكرة مميزة</b><small>الفئة العمرية، الحاجة، والتميّز</small></button>
-          <button class="path-card" data-go="book"><span class="path-icon lilac">▤</span><span class="path-num">03</span><b>تأليف القصة</b><small>صفحات ومشاهد قابلة للتعديل</small></button>
+          <button class="path-card" data-go="engine"><span class="path-icon peach">◉</span><span class="path-num">01</span><b>بحث حي موثّق</b><small>نتائج فعلية من Open Library مع وقت الرصد</small></button>
+          <button class="path-card" data-go="engine"><span class="path-icon yellow">✦</span><span class="path-num">02</span><b>تحليل العينة</b><small>الموضوعات والسنوات واللغات وعدد الطبعات</small></button>
+          <button class="path-card" data-go="engine"><span class="path-icon lilac">▤</span><span class="path-num">03</span><b>إنتاج الكتاب</b><small>نصوص وصفحات ورسوم SVG أصلية</small></button>
           <button class="path-card" data-go="illustrations"><span class="path-icon mint">✎</span><span class="path-num">04</span><b>تصميم الرسومات</b><small>دليل شكل ثابت ومخطط لكل صفحة</small></button>
           <button class="path-card" data-go="activities"><span class="path-icon blue">◇</span><span class="path-num">05</span><b>أنشطة وQR</b><small>تعلم، تلوين، صوت، ورابط لكل صفحة</small></button>
           <button class="path-card" data-go="publish"><span class="path-icon coral">▧</span><span class="path-num">06</span><b>إخراج للطباعة</b><small>مقاس، هوامش، قائمة مراجعة وتصدير</small></button>
@@ -56,6 +58,78 @@
           <section class="panel next-panel"><div class="panel-title"><div><span class="eyebrow">أكمل من حيث توقفت</span><h3>مشروعك الأخير</h3></div><button class="text-button" data-go="library">كل المشاريع ←</button></div><div id="recentProject" class="recent-placeholder"><span class="recent-icon">📚</span><span><b>لا يوجد كتاب محفوظ بعد</b><small>ابدأ مشروعك الأول، وسيظهر هنا تلقائياً.</small></span><button class="button button-light" id="startBook2">إنشاء كتاب</button></div></section>
           <section class="panel insight-panel"><span class="insight-icon">✺</span><div><span class="eyebrow">إشارة تحريرية</span><h3>الفكرة الرائجة تحتاج لمسة منك</h3><p>رصدنا نمواً في كتب الأنشطة المطبوعة؛ التميّز يأتي من مهارة محددة، وشخصية محبوبة، لا من نسخ تصميم الكتب الأكثر مبيعاً.</p><button class="text-button" data-go="trends">راجع مصادر الاتجاهات ←</button></div></section>
         </div>
+      </section>
+
+      <section class="view" id="view-engine">
+        <div class="page-intro engine-intro">
+          <span class="pill pill-coral">محرك يعمل فعلياً · بلا مفتاح API</span>
+          <h2>من البحث إلى كتاب جاهز للمراجعة</h2>
+          <p>ينفّذ المسار ثلاث مراحل مترابطة: يجلب كتباً حقيقية من فهرس Open Library، يحلل العينة بحدودها، ثم ينتج كتاباً تعليمياً أصلياً برسوم متجهة قابلة للطباعة.</p>
+        </div>
+
+        <div class="engine-flow" aria-label="مراحل محرك العمل">
+          <article><span>1</span><div><b>بحث حي</b><small>عناوين وطبعات وموضوعات من المصدر</small></div></article>
+          <i>←</i>
+          <article><span>2</span><div><b>تحليل موثّق</b><small>إشارات فهرسية وليست ادعاء مبيعات</small></div></article>
+          <i>←</i>
+          <article><span>3</span><div><b>إنتاج فعلي</b><small>صفحات ونصوص وأنشطة ورسومات SVG</small></div></article>
+        </div>
+
+        <section class="panel engine-stage" id="researchStage">
+          <div class="stage-heading">
+            <span class="stage-number">01</span>
+            <div><span class="eyebrow">لقطة فهرسية مباشرة</span><h3>ابحث في كتب التعليم المبكر</h3><p>البحث يُنفّذ عند الضغط فقط ويحفظ آخر نتيجة مؤقتاً لتقليل الطلبات.</p></div>
+            <a class="source-chip" href="https://openlibrary.org/dev/docs/api/search" target="_blank" rel="noreferrer">Open Library API ↗</a>
+          </div>
+          <div class="form-grid engine-form">
+            <label>كلمة أو فكرة البحث<input id="researchQuery" value="تعليم الحروف والأرقام للأطفال" placeholder="مثال: الحروف العربية ومسك القلم"></label>
+            <label>الفئة العمرية<select id="researchAge"><option>3–4 سنوات</option><option>4–5 سنوات</option><option>5–6 سنوات</option><option selected>3–6 سنوات</option></select></label>
+            <label>المحور<select id="researchFocus"><option value="letters" selected>الحروف والأصوات</option><option value="numbers">الأرقام والعد</option><option value="prewriting">مسك القلم والتهيئة للكتابة</option><option value="colors">الألوان والأشكال</option><option value="mixed">تعليم مبكر متنوع</option></select></label>
+            <label>السوق المراد فهمه<select id="researchMarket"><option value="global" selected>عالمي — كل اللغات</option><option value="arabic">العربية — تغطية فهرسية محدودة</option><option value="gulf">الخليج — عدسة تحريرية فقط</option></select></label>
+            <label>حجم العينة<select id="researchLimit"><option value="12">12 نتيجة</option><option value="18" selected>18 نتيجة</option><option value="24">24 نتيجة</option></select></label>
+            <div class="engine-actions"><button class="button button-primary" id="runResearch" type="button">◉ نفّذ البحث والتحليل</button><button class="button button-light" id="runFullPipeline" type="button">⚙ نفّذ المسار الكامل</button></div>
+          </div>
+          <div id="researchStatus" class="engine-status" role="status" aria-live="polite">جاهز للبحث. لم يُرسل أي طلب بعد.</div>
+          <div id="researchMetrics" class="research-metrics" hidden></div>
+          <div id="researchResults" class="catalog-grid" aria-live="polite"></div>
+        </section>
+
+        <section class="panel engine-stage analysis-stage" id="analysisStage" hidden>
+          <div class="stage-heading">
+            <span class="stage-number">02</span>
+            <div><span class="eyebrow">قراءة ما جُلب فعلياً</span><h3>التحليل والفرص التحريرية</h3><p>تُحسب النتائج داخل المتصفح من العينة الظاهرة، وتبقى مرتبطة بالمصدر ووقت الرصد.</p></div>
+          </div>
+          <div id="analysisSummary" class="analysis-summary"></div>
+          <div class="analysis-grid">
+            <div><h4>الموضوعات المتكررة في العينة</h4><div id="analysisThemes" class="theme-bars"></div></div>
+            <div><h4>فرص أصلية قابلة للتطوير</h4><div id="analysisOpportunities" class="opportunity-list"></div></div>
+          </div>
+          <div id="evidenceNote" class="evidence-note"></div>
+        </section>
+
+        <section class="panel engine-stage production-stage production-print-stage" id="productionStage">
+          <div class="stage-heading">
+            <span class="stage-number">03</span>
+            <div><span class="eyebrow">إنتاج محلي داخل المتصفح</span><h3>كوّن الكتاب ورسوماته</h3><p>المخرجات أصلية وقابلة للتعديل؛ الرسوم SVG مرسومة برمجياً ولا تنسخ أغلفة أو شخصيات النتائج.</p></div>
+          </div>
+          <div class="form-grid production-form">
+            <label>عنوان الكتاب<input id="productionTitle" value="نورة وحديقة الحروف" placeholder="عنوان أصلي"></label>
+            <label>اسم الشخصية<input id="productionCharacter" value="نورة" placeholder="مثال: نورة"></label>
+            <label class="full">هدف التعلم<input id="productionGoal" value="تمييز خمسة حروف عربية وأصواتها مع أنشطة تتبع قصيرة"></label>
+            <label>نوع المحتوى<select id="productionMode"><option value="letters" selected>حروف وأصوات</option><option value="numbers">أرقام وعد</option><option value="prewriting">تهيئة للكتابة</option><option value="colors">ألوان وأشكال</option><option value="mixed">تعليم متنوع</option></select></label>
+            <label>العمر<select id="productionAge"><option>3–4 سنوات</option><option>4–5 سنوات</option><option>5–6 سنوات</option><option selected>3–6 سنوات</option></select></label>
+            <label>عدد الصفحات<select id="productionPages"><option value="12">12 صفحة</option><option value="16" selected>16 صفحة</option><option value="20">20 صفحة</option><option value="24">24 صفحة</option></select></label>
+            <label>الهوية البصرية<select id="productionStyle"><option value="garden" selected>حديقة دافئة</option><option value="ocean">بحر وسماء</option><option value="desert">صحراء خليجية هادئة</option><option value="paper">قصاصات ورقية مرحة</option></select></label>
+            <div class="engine-actions"><button class="button button-primary" id="produceBook" type="button">✦ أنتج الكتاب الآن</button><button class="button button-light" id="clearProducedBook" type="button">مسح المعاينة</button></div>
+          </div>
+          <div id="productionToolbar" class="production-toolbar" hidden>
+            <button class="button button-primary" id="printProducedBook" type="button">طباعة / حفظ PDF</button>
+            <button class="button button-light" id="downloadProducedHtml" type="button">تنزيل كتاب HTML</button>
+            <button class="button button-light" id="downloadProducedJson" type="button">تنزيل JSON</button>
+            <button class="button button-light" id="openProducedInEditor" type="button">فتح الصفحات في المحرر</button>
+          </div>
+          <div id="productionPreview" class="production-preview" aria-live="polite"><div class="empty-state">اضغط «أنتج الكتاب الآن» لتظهر الصفحات والرسومات هنا.</div></div>
+        </section>
       </section>
 
       <section class="view" id="view-trends">
@@ -111,6 +185,7 @@
   </div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="qrcode.min.js" defer></script>
+  <script src="engine.js" defer></script>
   <script src="app.js" defer></script>
 </body>
 </html>
